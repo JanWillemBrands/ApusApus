@@ -8,12 +8,12 @@ The formal grammar for the sentence `Mary has a little lamb.` can be written as:
 
     sentence = "Mary has a little lamb." 
 
-The recurring spaces between the words can be separated:
+The recurring spaces between the words can be separated
 
     space    = " "
     sentence = "Mary" space "has" space "a" space "little" space "lamb."
 
-But we usualy care more about the words than the spaces between them, so let's make the spaces transparent.
+but we usualy care more about the words than the spaces between them, so let's make the spaces transparent.
 
     space    : " "
     sentence = "Mary" "has" "a" "little" "lamb."
@@ -24,13 +24,13 @@ To capture that Mary's brother John also has a litte lamb, we can write:
     person   = "Mary" | "John"
     sentence =  person "has" "a" "little" "lamb."
 
-In fact, many people have little lambs, and people's names are typically capitalized:
+In fact, many people have little lambs, and people's names are typically capitalized.
 
     space    : " "
     person   = '[A-Z][a-z]*'
     sentence = person "has" "a" "little" "lamb."
 
-We could then generalize this into:
+We could then generalize this into
 
     space    : " "
     person   = '[A-Z][a-z]*'
