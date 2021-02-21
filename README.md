@@ -3,7 +3,7 @@ Grammars for Swift. Written in Swift.
 
 Grammars for Dummies
 
-The formal grammar for the sentence "Mary has a little lamb." can be written as:
+The formal grammar for the sentence `Mary has a little lamb.` can be written as:
 
     sentence = "Mary has a little lamb." 
 
@@ -36,7 +36,7 @@ We could then generalize this into:
     word     = '"[a-z]+"'
     sentence = person { word } "."
 
-but we'd loose a lot of meaning. First of all, nonsense sentences like "rock you wow." are correct in this grammar. And a more subtle effect is that a space before a "." is now also allowed.  So, the price of a more general grammar is that meaning is lost.  To bring it back we can make the grammar more specific and also annotate it with helpful instructions (and comments):
+but we'd loose a lot of meaning. First of all, nonsense sentences like `rock you wow.` are correct in this grammar. And a more subtle effect is that a space before a `.` is now also allowed.  So, the price of a more general grammar is that meaning is lost.  To bring it back we can make the grammar more specific and also annotate it with helpful instructions (and comments):
 
     space     : " "                // TODO: handle tabs and new lines
     person    = '[A-Z][a-z]+'
@@ -48,12 +48,12 @@ but we'd loose a lot of meaning. First of all, nonsense sentences like "rock you
                 noun               @ check that the adjective isn't "red" when the noun is "lamb" @
                 "."                @ check that the preceding character isn't a space @
 
-The sentence "Mary has a little lamb." still matches this latest grammar version. And the grammar rules and annotations can be further enriched to enable automatic generation of a complete parser.
+The sentence `Mary has a little lamb.` still matches this latest grammar version. And the grammar rules and annotations can be further enriched to enable automatic generation of a complete parser.
 
 
 A few Implementation Details
 
-The prime job of a parser is to recognize valid sentences. It does so by matching the input text with items from the grammar, in the correct order. The texts "lamb" and "little" in the grammar will directly match those in "Mary has a little lamb." but for the things between single quotes it's a bit more complicated. However
+The prime job of a parser is to recognize valid sentences. It does so by matching the input text with items from the grammar, in the correct order. The texts `"lamb"` and `"little"` in the grammar will directly match those in `Mary has a little lamb.` but for the things between single quotes it's a bit more complicated. However
 
     number = '\d+'
 
@@ -66,7 +66,7 @@ so the parser fundamentally still matches pieces of the input text to the litera
     literal      " ", "little", "red", "lamb", "car", "."
     general      '[A-Z][a-z]+' , '"[a-z]+"'
 
-A scanner will chop the input text into pieces that match one of the 8 patterns in the list (if multiple pattterns match the longest match is chosen).  The scanner offers these pieces, called tokens, to the parser as a tuple (type: String, image: String). The first element called "type" uniquely identifies each of the 8 patterns, the second element called "image" is the part of the input text that is the match for that token type.  The sentence "Mary has a little lamb." is broken down into the following token list
+A scanner will chop the input text into pieces that match one of the 8 patterns in the list (if multiple pattterns match the longest match is chosen).  The scanner offers these pieces, called tokens, to the parser as a tuple (type: String, image: String). The first element called `type` uniquely identifies each of the 8 patterns, the second element called `image` is the part of the input text that is the match for that token type.  The sentence `Mary has a little lamb.` is broken down into the following token list
 
     type: '[A-Z][a-z]+'     image: "Mary"
     type: " "               image: " "
