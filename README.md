@@ -1,8 +1,8 @@
 # ApusApus
 
-#### Grammars for Swift. Written in Swift.
+Grammars for Swift. Written in Swift.
 
-## Grammars for Dummies
+### Grammars for Dummies
 
 The formal grammar for the sentence `Mary has a little lamb.` can be written as:
 
@@ -52,7 +52,7 @@ but we'd loose a lot of meaning. First of all, nonsense sentences like `rock you
 The sentence `Mary has a little lamb.` still matches this latest grammar version. And the grammar rules and annotations can be further enriched to enable automatic generation of a complete parser.
 
 
-## A few Implementation Details
+### A few Implementation Details
 
 The prime job of a parser is to recognize valid sentences. It does so by matching the input text with items from the grammar, in the correct order. The texts `"lamb"` and `"little"` in the grammar will directly match those in `Mary has a little lamb.` but for the things between single quotes it's a bit more complicated. However
 
@@ -156,10 +156,7 @@ The AST nodes contain first and follow sets.
 
 Most grammars are mostly LL(1). If, however, the current token matches more than one possible path, the parser needs to spawn a copy of itself and persue both options. This can be very inefficient unless case is taken to re-use previusly walked paths and share the stack. GSS
 
-
-
-
-## A Better Way
+### A Better Way
 
 So far so good, but this traditional approach to parsers for real languages will span many pages and the lines used for annotations outnumber the lines for the grammar proper. Those annotations are written in Swift and would benefit from IDE support. So, inspired by SwiftUI, let's flip it around and write the grammar in a DSL defined by Swift itself.
 
