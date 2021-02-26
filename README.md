@@ -1,6 +1,6 @@
 # ApusApus
 
-Grammars for Swift. Written in Swift.
+Swifty grammars.
 
 ### Grammars for Dummies
 
@@ -101,8 +101,9 @@ The grammar will be used to build an Abstract Syntax Tree with nodes that corres
         enum Kind {
             case SEQ(head: Node, tail: Node)
             case ALT(left: Node, right: Node)
-            case GRP(inside: Node, optional: Bool, repetitive: Bool)
-            case REF(name: String)
+            case OPT(inside: Node)
+            case REP(inside: Node)
+            case NTM(name: String, link: Node)
             case TRM(type: String)
         }
         var kind: Kind
@@ -138,14 +139,14 @@ The grammar rules are stored in a dictionary that maps rule names to the corresp
      42 TRM "car"
 
     50 SEQ
-     51 REF person
+     51 NTM person 10
      52 SEQ
       53 GRP true true
-       54 REF word
+       54 NTM word 20
       55 SEQ
-       56 REF adjective
+       56 NTM adjective 30
        57 SEQ
-        58 REF noun
+        58 NTM noun 40
         59 TRM "."
 
 The AST can be used to either parse the input text directly or to generate Swift code that implements a parser program that needs to be compiled.  The parser consumes tokens whenever the token type matches the TRM node type, and reports an error otherwise.
@@ -154,7 +155,9 @@ A naive parser could try all possible paths through the AST to try and match the
 
 The AST nodes contain first and follow sets.
 
-Most grammars are mostly LL(1). If, however, the current token matches more than one possible path, the parser needs to spawn a copy of itself and persue both options. This can be very inefficient unless case is taken to re-use previusly walked paths and share the stack. GSS
+Grammars are often LL(1) but for a few exceptions. If, however, the current token matches more than one possible path, the parser needs to spawn a copy of itself and pursue both options. This can be very inefficient unless case is taken to re-use previusly walked paths and share the stack storage. GSS
+
+If grammars are ambiguous then there is more than one way to parse a valid sentence. For example: the grammar `S = { "." } { "." }` may match the sentence `.....` in six possible ways, depending on how greedy the iterations behave. A GLL parser will store all of these possible matches in a parse forrest, which is an efficient way to store multiple parse trees.
 
 ### A Better Way
 
