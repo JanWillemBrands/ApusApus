@@ -51,6 +51,13 @@ but we'd loose a lot of meaning. First of all, nonsense sentences like `rock you
 
 The sentence `Mary has a little lamb.` still matches this latest grammar version. And the grammar rules and annotations can be further enriched to enable automatic generation of a complete parser.
 
+Of course other languages are supported, e.g. Mary's grammar that matches the sentence `كان ماري قليلا الضأن.` is:
+    space   : '\s+'
+    person  = '\{L}'
+    word    = 'قليلا"
+    noun    = "الضأن"
+    sentence = { word } person noun "."
+
 
 ### A few Implementation Details
 
