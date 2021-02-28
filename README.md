@@ -53,11 +53,11 @@ The sentence `Mary has a little lamb.` still matches this latest grammar version
 
 Of course other languages are supported, e.g. Mary's grammar that matches the sentence `كان ماري قليلا الضأن.` is:
 
-    space   : '\s+'
-    person  = '\{L}'
-    word    = 'قليلا"
-    noun    = "الضأن"
-    sentence = { word } person noun "."
+    علامات ترقيم : '\s+'
+    شخص         = '\{L}'
+    كلمة =       'قليلا"
+    اسم =      "الضأن"
+    جملة =       جملةم "."
 
 
 ### A few Implementation Details
