@@ -4,44 +4,47 @@ Swifty grammars.
 
 ### Grammars for Dummies
 
-The formal grammar for the sentence `Mary has a little lamb.` can be written as:
+The sentence `Mary has a little lamb.` can be espressed in a pattern as:
 
-    sentence = "Mary has a little lamb." 
+    let sentence: Pattern = { "Mary has a little lamb." }
 
-The recurring spaces between the words can be separated
+The recurring spaces between the words can be factored out:
 
-    space    = " "
-    sentence = "Mary" space "has" space "a" space "little" space "lamb."
+    let spaces: Regex = ' +'
+    let sentence: Pattern = { "Mary" spaces "has" spaces "a" spaces "little" spaces "lamb." }
 
 but we usualy care more about the words than the spaces between them, so let's make the spaces transparent.
 
-    space    : " "
-    sentence = "Mary" "has" "a" "little" "lamb."
+    let spaces = ' +'
+    let sentence: Pattern = { "Mary" "has" "a" "little" "lamb." }.skip(spaces)
 
 To capture that Mary's brother John also has a litte lamb, we can write:
 
-    space    : " "
-    person   = "Mary" | "John"
-    sentence =  person "has" "a" "little" "lamb."
+    let spaces = ' +'
+    let person: Pattern = Alternatives { "Mary" "John" }
+    let sentence = { person "has" "a" "little" "lamb." }.skip(spaces)
 
-In fact, many people have little lambs, and people's names are typically capitalized.
+Let's generalize and throw in some nested comments :)
 
-    space    : " "
-    person   = '[A-Z][a-z]*'
-    sentence = person "has" "a" "little" "lamb."
+    let spaces   = ' +'
+    let comment  = { "/*" '.*' OneOrZero { comment } '.*' "*/" }
+    let person   = Alternatives { "Mary" "John" }
+    let word     = '\w+'
+    let sentence = { person
+                     OneOrMore { word }
+                     "." 
+                     }.skip([spaces, comment])
 
-We could then generalize this into
+But now we have a problem because `Mary` is both a person and a word, so we may need a qualifier that shows our preferences for string literals over regex literals like .prefer(.stringLiterals).
 
-    space    : " "
-    person   = '[A-Z][a-z]*'
-    word     = '"[a-z]+"'
-    sentence = person { word } "."
+YACC
+
 
 but we'd loose a lot of meaning. First of all, nonsense sentences like `rock you wow.` are correct in this grammar. And a more subtle effect is that a space before a `.` is now also allowed.  So, the price of a more general grammar is that meaning is lost.  To bring it back we can make the grammar more specific and also annotate it with helpful instructions (and comments):
 
     space     : " "                // TODO: handle tabs and new lines
     person    = '[A-Z][a-z]+'
-    word      = '"[a-z]+"'
+    word      = '[a-zA-Z]+'
     adjective = "little" | "red"
     noun      = "lamb" | "car"
     sentence  = person { word } 
