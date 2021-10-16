@@ -4,7 +4,7 @@ Swifty grammars.
 
 ### Grammars for Dummies
 
-The sentence `Mary has a little lamb.` can be espressed in a pattern as:
+Since we'll have both Pattern and Regex I wonder how they work together:
 
     let sentence: Pattern = { "Mary has a little lamb." }
 
@@ -13,18 +13,18 @@ The recurring spaces between the words can be factored out:
     let spaces: Regex = ' +'
     let sentence: Pattern = { "Mary" spaces "has" spaces "a" spaces "little" spaces "lamb." }
 
-but we usualy care more about the words than the spaces between them, so let's make the spaces transparent.
+but we usually care more about the words than the spaces between them, so let's make the spaces transparent.
 
     let spaces = ' +'
     let sentence: Pattern = { "Mary" "has" "a" "little" "lamb." }.skip(spaces)
 
-To capture that Mary's brother John also has a litte lamb, we can write:
+Mary's brother John also has a litte lamb:
 
     let spaces = ' +'
     let person: Pattern = Alternatives { "Mary" "John" }
     let sentence = { person "has" "a" "little" "lamb." }.skip(spaces)
 
-Let's generalize and throw in some nested comments :)
+10 minutes later:
 
     let spaces   = ' +'
     let comment  = { "/*" '.*' OneOrZero { comment } '.*' "*/" }
@@ -35,7 +35,7 @@ Let's generalize and throw in some nested comments :)
                      "." 
                      }.skip([spaces, comment])
 
-But now we have a problem because `Mary` is both a person and a word, so we may need a qualifier that shows our preferences for string literals over regex literals like .prefer(.stringLiterals).
+But now we have a problem because `Mary` is both a person and a word, so we'll need a way to e.g. set priority of string literals over regex literals like .prefer(.stringLiterals).  I guess I'm asking about composability.
 
 YACC
 
