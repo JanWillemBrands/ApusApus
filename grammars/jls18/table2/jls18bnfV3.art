@@ -1,0 +1,1820 @@
+(*** EAS has changed IdentifierChars to remove _ from Identifier 
+added DUMMYRuleEAS ::= 'goto' | 'const'
+**)
+!start CompilationUnit
+
+(* This is WS discarded, remove commenting out to get WS compressed *)
+(*
+!injectInstance WT
+!injectProductionOff
+!paraterminal WS
+
+WT ::= WS | #
+WS ::= ( `\n | `\r | `\t | ` )( `\n | `\r | `\t | ` )*
+
+!choose lexTWE
+WS>>WS
+
+!choose lexTWEnoDisA
+WS>>WS
+*)
+
+
+!choose lexTWE
+'abstract' > Identifier 
+'continue' > Identifier 
+'for' > Identifier 
+'new' > Identifier 
+'switch' > Identifier 
+'assert' > Identifier 
+'default' > Identifier 
+'if' > Identifier 
+'package' > Identifier 
+'synchronized' > Identifier 
+'boolean' > Identifier 
+'do' > Identifier 
+'goto' > Identifier 
+'private' > Identifier 
+'this' > Identifier 
+'break' > Identifier 
+'double' > Identifier 
+'implements' > Identifier 
+'protected' > Identifier 
+'throw' > Identifier 
+'byte' > Identifier 
+'else' > Identifier 
+'import' > Identifier 
+'public' > Identifier 
+'throws' > Identifier 
+'case' > Identifier 
+'enum' > Identifier 
+'instanceof' > Identifier 
+'return' > Identifier 
+'transient' > Identifier 
+'catch' > Identifier 
+'extends' > Identifier 
+'int' > Identifier 
+'short' > Identifier 
+'try' > Identifier 
+'char' > Identifier 
+'final' > Identifier 
+'interface' > Identifier 
+'static' > Identifier 
+'void' > Identifier 
+'class' > Identifier 
+'finally' > Identifier 
+'long' > Identifier 
+'strictfp' > Identifier 
+'volatile' > Identifier 
+'const' > Identifier 
+'float' > Identifier 
+'native' > Identifier 
+'super' > Identifier 
+'while' > Identifier 
+BooleanLiteral > Identifier
+NullLiteral > Identifier
+
+'abstract' > TypeIdentifier 
+'continue' > TypeIdentifier 
+'for' > TypeIdentifier 
+'new' > TypeIdentifier 
+'switch' > TypeIdentifier 
+'assert' > TypeIdentifier 
+'default' > TypeIdentifier 
+'if' > TypeIdentifier 
+'package' > TypeIdentifier 
+'synchronized' > TypeIdentifier 
+'boolean' > TypeIdentifier 
+'do' > TypeIdentifier 
+'goto' > TypeIdentifier 
+'private' > TypeIdentifier 
+'this' > TypeIdentifier 
+'break' > TypeIdentifier 
+'double' > TypeIdentifier 
+'implements' > TypeIdentifier 
+'protected' > TypeIdentifier 
+'throw' > TypeIdentifier 
+'byte' > TypeIdentifier 
+'else' > TypeIdentifier 
+'import' > TypeIdentifier 
+'public' > TypeIdentifier 
+'throws' > TypeIdentifier 
+'case' > TypeIdentifier 
+'enum' > TypeIdentifier 
+'instanceof' > TypeIdentifier 
+'return' > TypeIdentifier 
+'transient' > TypeIdentifier 
+'catch' > TypeIdentifier 
+'extends' > TypeIdentifier 
+'int' > TypeIdentifier 
+'short' > TypeIdentifier 
+'try' > TypeIdentifier 
+'char' > TypeIdentifier 
+'final' > TypeIdentifier 
+'interface' > TypeIdentifier 
+'static' > TypeIdentifier 
+'void' > TypeIdentifier 
+'class' > TypeIdentifier 
+'finally' > TypeIdentifier 
+'long' > TypeIdentifier 
+'strictfp' > TypeIdentifier 
+'volatile' > TypeIdentifier 
+'const' > TypeIdentifier 
+'float' > TypeIdentifier 
+'native' > TypeIdentifier 
+'super' > TypeIdentifier 
+'while' > TypeIdentifier 
+'permits' > TypeIdentifier 
+'record' > TypeIdentifier 
+'sealed' > TypeIdentifier 
+'var' > TypeIdentifier 
+'yield' > TypeIdentifier 
+BooleanLiteral > TypeIdentifier
+NullLiteral > TypeIdentifier
+
+'abstract' > UnqualifiedMethodIdentifier 
+'continue' > UnqualifiedMethodIdentifier 
+'for' > UnqualifiedMethodIdentifier 
+'new' > UnqualifiedMethodIdentifier 
+'switch' > UnqualifiedMethodIdentifier 
+'assert' > UnqualifiedMethodIdentifier 
+'default' > UnqualifiedMethodIdentifier 
+'if' > UnqualifiedMethodIdentifier 
+'package' > UnqualifiedMethodIdentifier 
+'synchronized' > UnqualifiedMethodIdentifier 
+'boolean' > UnqualifiedMethodIdentifier 
+'do' > UnqualifiedMethodIdentifier 
+'goto' > UnqualifiedMethodIdentifier 
+'private' > UnqualifiedMethodIdentifier 
+'this' > UnqualifiedMethodIdentifier 
+'break' > UnqualifiedMethodIdentifier 
+'double' > UnqualifiedMethodIdentifier 
+'implements' > UnqualifiedMethodIdentifier 
+'protected' > UnqualifiedMethodIdentifier 
+'throw' > UnqualifiedMethodIdentifier 
+'byte' > UnqualifiedMethodIdentifier 
+'else' > UnqualifiedMethodIdentifier 
+'import' > UnqualifiedMethodIdentifier 
+'public' > UnqualifiedMethodIdentifier 
+'throws' > UnqualifiedMethodIdentifier 
+'case' > UnqualifiedMethodIdentifier 
+'enum' > UnqualifiedMethodIdentifier 
+'instanceof' > UnqualifiedMethodIdentifier 
+'return' > UnqualifiedMethodIdentifier 
+'transient' > UnqualifiedMethodIdentifier 
+'catch' > UnqualifiedMethodIdentifier 
+'extends' > UnqualifiedMethodIdentifier 
+'int' > UnqualifiedMethodIdentifier 
+'short' > UnqualifiedMethodIdentifier 
+'try' > UnqualifiedMethodIdentifier 
+'char' > UnqualifiedMethodIdentifier 
+'final' > UnqualifiedMethodIdentifier 
+'interface' > UnqualifiedMethodIdentifier 
+'static' > UnqualifiedMethodIdentifier 
+'void' > UnqualifiedMethodIdentifier 
+'class' > UnqualifiedMethodIdentifier 
+'finally' > UnqualifiedMethodIdentifier 
+'long' > UnqualifiedMethodIdentifier 
+'strictfp' > UnqualifiedMethodIdentifier 
+'volatile' > UnqualifiedMethodIdentifier 
+'const' > UnqualifiedMethodIdentifier 
+'float' > UnqualifiedMethodIdentifier 
+'native' > UnqualifiedMethodIdentifier 
+'super' > UnqualifiedMethodIdentifier 
+'while' > UnqualifiedMethodIdentifier
+'yield' > UnqualifiedMethodIdentifier
+BooleanLiteral > UnqualifiedMethodIdentifier
+NullLiteral > UnqualifiedMethodIdentifier
+
+TypeIdentifier >> TypeIdentifier
+UnqualifiedMethodIdentifier >> UnqualifiedMethodIdentifier
+Identifier >> Identifier
+FloatingPointLiteral >> FloatingPointLiteral
+BooleanLiteral >> BooleanLiteral
+IntegerLiteral >> IntegerLiteral
+
+!choose ParseSPPF
+Identifier >> Identifier
+
+!choose ParseTWE
+Identifier >> Identifier
+
+
+!paraterminal NullLiteral
+!paraterminal CharacterLiteral
+!paraterminal TypeIdentifier
+!paraterminal TextBlock
+!paraterminal FloatingPointLiteral
+!paraterminal IntegerLiteral
+!paraterminal Identifier
+!paraterminal UnqualifiedMethodIdentifier
+!paraterminal StringLiteral
+!paraterminal BooleanLiteral
+
+// Extracted lexer rules
+
+//§3.1. Unicode 
+
+//§3.2. Lexical Translations
+
+//§3.3. Unicode Escapes 
+
+
+UnicodeEscape ::=
+  `\\ UnicodeMarker HexDigit HexDigit HexDigit HexDigit 
+
+UnicodeMarker ::=
+  `u (`u)* 
+
+HexDigit ::=
+  `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 | `a | `b | `c | `d | `e | `f | `A | `B | `C | `D | `E | `F 
+
+//§3.4. Line Terminators
+
+//§3.5. Input Elements and Tokens 
+
+//§3.6. White Space
+
+//§3.7. Comments 
+
+
+Comment ::=
+  TraditionalComment 
+| EndOfLineComment 
+
+TraditionalComment ::=
+  `/ `* CommentTail 
+
+CommentTail ::=
+  `* CommentTailStar 
+| NotStar CommentTail 
+
+CommentTailStar ::=
+  `/ 
+| `* CommentTailStar 
+| NotStarNotSlash CommentTail 
+
+EndOfLineComment ::=
+  `/ `/ (InputCharacter)* 
+
+InputCharacter ::=
+  `  | `! | `" | `# | `$ | `% | `& | `' | `( | `) | `* | `+ | `, | `- | `.  | `/
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9
+| `: | `; | `< | `= | `> | `?  | `@
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z
+| `[ | `\ | `] | `^ | `_ | ``
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z
+| `{ | `| | `} | `~
+
+
+//§3.8. Identifiers 
+
+
+Identifier ::=
+  IdentifierChars // but not a Keyword or BooleanLiteral or NullLiteral
+
+
+IdentifierChars ::=
+  JavaLetterNoUS (JavaLetterOrDigit)* |
+  `_ JavaLetterOrDigit (JavaLetterOrDigit)* 
+
+
+TypeIdentifier ::=
+  IdentifierChars // but not permits, record, sealed, var, or yield
+
+
+UnqualifiedMethodIdentifier ::=
+  IdentifierChars // but not yield
+
+
+//§3.9. Keywords 
+
+Keyword ::=
+  ReservedKeyword 
+| ContextualKeyword 
+
+ReservedKeyword ::=
+  `a`b`s`t`r`a`c`t | `c`o`n`t`i`n`u`e | `f`o`r | `n`e`w | `s`w`i`t`c`h 
+| `a`s`s`e`r`t | `d`e`f`a`u`l`t | `i`f | `p`a`c`k`a`g`e | `s`y`n`c`h`r`o`n`i`z`e`d 
+| `b`o`o`l`e`a`n | `d`o | `g`o`t`o | `p`r`i`v`a`t`e | `t`h`i`s 
+| `b`r`e`a`k | `d`o`u`b`l`e | `i`m`p`l`e`m`e`n`t`s | `p`r`o`t`e`c`t`e`d | `t`h`r`o`w 
+| `b`y`t`e | `e`l`s`e | `i`m`p`o`r`t | `p`u`b`l`i`c | `t`h`r`o`w`s 
+| `c`a`s`e | `e`n`u`m | `i`n`s`t`a`n`c`e`o`f | `r`e`t`u`r`n | `t`r`a`n`s`i`e`n`t 
+| `c`a`t`c`h | `e`x`t`e`n`d`s | `i`n`t | `s`h`o`r`t | `t`r`y 
+| `c`h`a`r | `f`i`n`a`l | `i`n`t`e`r`f`a`c`e | `s`t`a`t`i`c | `v`o`i`d 
+| `c`l`a`s`s | `f`i`n`a`l`l`y | `l`o`n`g | `s`t`r`i`c`t`f`p | `v`o`l`a`t`i`l`e 
+| `c`o`n`s`t | `f`l`o`a`t | `n`a`t`i`v`e | `s`u`p`e`r | `w`h`i`l`e 
+| `_ 
+
+ContextualKeyword ::=
+  `e`x`p`o`r`t`s | `o`p`e`n`s | `r`e`q`u`i`r`e`s | `u`s`e`s 
+| `m`o`d`u`l`e | `p`e`r`m`i`t`s | `s`e`a`l`e`d | `v`a`r 
+| `n`o`n`-`s`e`a`l`e`d | `p`r`o`v`i`d`e`s | `t`o | `w`i`t`h 
+| `o`p`e`n | `r`e`c`o`r`d | `t`r`a`n`s`i`t`i`v`e | `y`i`e`l`d 
+
+//§3.10.1. Integer Literals 
+
+
+IntegerLiteral ::=
+  DecimalIntegerLiteral 
+| HexIntegerLiteral 
+| OctalIntegerLiteral 
+| BinaryIntegerLiteral 
+
+DecimalIntegerLiteral ::=
+  DecimalNumeral (IntegerTypeSuffix)? 
+
+HexIntegerLiteral ::=
+  HexNumeral (IntegerTypeSuffix)? 
+
+OctalIntegerLiteral ::=
+  OctalNumeral (IntegerTypeSuffix)? 
+
+BinaryIntegerLiteral ::=
+  BinaryNumeral (IntegerTypeSuffix)? 
+
+IntegerTypeSuffix ::=
+  `l | `L 
+
+
+DecimalNumeral ::=
+  `0 
+| NonZeroDigit (Digits)? 
+| NonZeroDigit Underscores Digits 
+
+NonZeroDigit ::=
+  `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+
+Digits ::=
+  Digit 
+| Digit (DigitsAndUnderscores)? Digit 
+
+Digit ::=
+  `0 
+| NonZeroDigit 
+
+DigitsAndUnderscores ::=
+  DigitOrUnderscore (DigitOrUnderscore)* 
+
+DigitOrUnderscore ::=
+  Digit 
+| `_ 
+
+Underscores ::=
+  `_ (`_)* 
+
+
+HexNumeral ::=
+  `0 `x HexDigits 
+| `0 `X HexDigits 
+
+HexDigits ::=
+  HexDigit 
+| HexDigit (HexDigitsAndUnderscores)? HexDigit 
+
+HexDigitsAndUnderscores ::=
+  HexDigitOrUnderscore (HexDigitOrUnderscore)* 
+
+HexDigitOrUnderscore ::=
+  HexDigit 
+| `_ 
+
+
+OctalNumeral ::=
+  `0 OctalDigits 
+| `0 Underscores OctalDigits 
+
+OctalDigits ::=
+  OctalDigit 
+| OctalDigit (OctalDigitsAndUnderscores)? OctalDigit 
+
+OctalDigit ::=
+  `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 
+
+OctalDigitsAndUnderscores ::=
+  OctalDigitOrUnderscore (OctalDigitOrUnderscore)* 
+
+OctalDigitOrUnderscore ::=
+  OctalDigit 
+| `_ 
+
+
+BinaryNumeral ::=
+  `0 `b BinaryDigits 
+| `0 `B BinaryDigits 
+
+BinaryDigits ::=
+  BinaryDigit 
+| BinaryDigit (BinaryDigitsAndUnderscores)? BinaryDigit 
+
+BinaryDigit ::=
+  `0 | `1 
+
+BinaryDigitsAndUnderscores ::=
+  BinaryDigitOrUnderscore (BinaryDigitOrUnderscore)* 
+
+BinaryDigitOrUnderscore ::=
+  BinaryDigit 
+| `_ 
+
+//§3.10.2. Floating-Point Literals 
+
+
+FloatingPointLiteral ::=
+  DecimalFloatingPointLiteral 
+| HexadecimalFloatingPointLiteral 
+
+DecimalFloatingPointLiteral ::=
+  Digits `. (Digits)? (ExponentPart)? (FloatTypeSuffix)? 
+| `. Digits (ExponentPart)? (FloatTypeSuffix)? 
+| Digits ExponentPart (FloatTypeSuffix)? 
+| Digits (ExponentPart)? FloatTypeSuffix 
+
+ExponentPart ::=
+  ExponentIndicator SignedInteger 
+
+ExponentIndicator ::=
+  `e | `E 
+
+SignedInteger ::=
+  (Sign)? Digits 
+
+Sign ::=
+  `+ | `- 
+
+FloatTypeSuffix ::=
+  `f | `F | `d | `D 
+
+
+HexadecimalFloatingPointLiteral ::=
+  HexSignificand BinaryExponent (FloatTypeSuffix)? 
+
+HexSignificand ::=
+  HexNumeral (`.)? 
+| `0 `x (HexDigits)? `. HexDigits 
+| `0 `X (HexDigits)? `. HexDigits 
+
+BinaryExponent ::=
+  BinaryExponentIndicator SignedInteger 
+
+BinaryExponentIndicator ::=
+  `p | `P 
+
+//§3.10.3. Boolean Literals 
+
+
+BooleanLiteral ::=
+  `t`r`u`e | `f`a`l`s`e 
+
+//§3.10.4. Character Literals 
+
+
+CharacterLiteral ::=
+  `' SingleCharacter `' 
+| `' EscapeSequence `' 
+
+//§3.10.5. String Literals 
+
+
+StringLiteral ::=
+  `" (StringCharacter)* `" 
+
+//§3.10.6. Text Blocks 
+
+
+TextBlock ::=
+  `" `" `" (TextBlockWhiteSpace)* LineTerminator (TextBlockCharacter)* `" `" `" 
+
+TextBlockWhiteSpace ::=
+  WhiteSpace // but not LineTerminator
+
+
+//§3.10.7. Escape Sequences 
+
+
+EscapeSequence ::=
+  `\\ `b // (backspace BS, Unicode \u0008)
+
+| `\\ `s // (space SP, Unicode \u0020)
+
+| `\\ `t // (horizontal tab HT, Unicode \u0009)
+
+| `\\ `n // (linefeed LF, Unicode \u000a)
+
+| `\\ `f // (form feed FF, Unicode \u000c)
+
+| `\\ `r // (carriage return CR, Unicode \u000d)
+
+| `\\ LineTerminator // (line continuation, no Unicode representation)
+
+| `\\ `" // (double quote ", Unicode \u0022)
+
+| `\\ `' // (single quote ', Unicode \u0027)
+
+| `\\ `\\ // (backslash \, Unicode \u005c)
+
+| OctalEscape // (octal value, Unicode \u0000 to \u00ff)
+
+
+OctalEscape ::=
+  `\\ OctalDigit 
+| `\\ OctalDigit OctalDigit 
+| `\\ ZeroToThree OctalDigit OctalDigit 
+
+ZeroToThree ::=
+  `0 | `1 | `2 | `3 
+
+//§3.10.8. The Null Literal 
+
+
+NullLiteral ::=
+  `n`u`l`l 
+
+
+//§3.11. Separators 
+
+
+Separator ::=
+  `( | `) | `{ | `} | `[ | `] | `; | `, | `. | `.`.`. | `@ | `:`: 
+
+//§3.12. Operators
+
+
+Operator ::=
+  `= | `> | `< | `! | `~ | `? | `: | `-`> 
+| `=`= | `>`= | `<`= | `!`= | `&`& | `|`| | `+`+ | `-`- 
+| `+ | `- | `* | `/ | `& | `| | `^ | `% | `<`< | `>`> | `>`>`> 
+| `+`= | `-`= | `*`= | `/`= | `&`= | `|`= | `^`= | `%`= | `<`<`= | `>`>`= | `>`>`>`= 
+
+
+// Extracted parser rules
+
+//Productions from §3 (Lexical Structure) 
+
+Literal ::=
+  IntegerLiteral 
+| FloatingPointLiteral 
+| BooleanLiteral 
+| CharacterLiteral 
+| StringLiteral 
+| TextBlock 
+| NullLiteral 
+
+//Productions from §4 (Types, Values, and Variables)
+
+DummyRuleEAS ::= 'goto' | 'const'
+
+Type ::=
+  PrimitiveType 
+| ReferenceType 
+
+AnnotationStar ::= Annotation AnnotationStar | #
+
+PrimitiveType ::=
+  AnnotationStar NumericType 
+| AnnotationStar 'boolean' 
+
+NumericType ::=
+  IntegralType 
+| FloatingPointType 
+
+IntegralType ::=
+  'byte' | 'short' | 'int' | 'long' | 'char' 
+
+FloatingPointType ::=
+  'float' | 'double' 
+
+ReferenceType ::=
+  ClassOrInterfaceType 
+| TypeVariable 
+| ArrayType 
+
+ClassOrInterfaceType ::=
+  ClassType 
+| InterfaceType 
+
+TypeArgumentsOpt ::= TypeArguments | #
+
+ClassType ::=
+  AnnotationStar TypeIdentifier TypeArgumentsOpt
+| PackageName '.' AnnotationStar TypeIdentifier TypeArgumentsOpt
+| ClassOrInterfaceType '.' AnnotationStar TypeIdentifier TypeArgumentsOpt
+
+InterfaceType ::=
+  ClassType 
+
+TypeVariable ::=
+  AnnotationStar TypeIdentifier 
+
+ArrayType ::=
+  PrimitiveType Dims 
+| ClassOrInterfaceType Dims 
+| TypeVariable Dims 
+
+AnnotationStarBracketStar ::=
+          AnnotationStar '[' ']' AnnotationStarBracketStar | #
+
+Dims ::=
+  AnnotationStar '[' ']' AnnotationStarBracketStar
+
+TypeParameterModifierStar ::= 
+               TypeParameterModifier TypeParameterModifierStar | #
+TypeBoundOpt ::= TypeBound | #
+
+TypeParameter ::=
+  TypeParameterModifierStar TypeIdentifier TypeBoundOpt
+
+
+TypeParameterModifier ::=
+  Annotation 
+
+AdditionalBoundStar ::= AdditionalBound AdditionalBoundStar | #
+
+TypeBound ::=
+  'extends' TypeVariable 
+| 'extends' ClassOrInterfaceType AdditionalBoundStar
+
+AdditionalBound ::=
+  '&' InterfaceType 
+
+TypeArguments ::=
+  '<' TypeArgumentList '>' 
+
+CommaTypeArgumentStar ::= ',' TypeArgument CommaTypeArgumentStar | #
+
+TypeArgumentList ::=
+    TypeArgument CommaTypeArgumentStar
+
+TypeArgument ::=
+  ReferenceType 
+| Wildcard 
+
+WildcardBoundsOpt ::= WildcardBounds | #
+
+Wildcard ::=
+  AnnotationStar '?' WildcardBoundsOpt 
+
+WildcardBounds ::=
+  'extends' ReferenceType 
+| 'super' ReferenceType 
+
+//Productions from §6 (Names)
+
+ModuleName ::=
+  Identifier 
+| ModuleName '.' Identifier 
+
+PackageName ::=
+  Identifier 
+| PackageName '.' Identifier 
+
+TypeName ::=
+  TypeIdentifier 
+| PackageOrTypeName '.' TypeIdentifier 
+
+ExpressionName ::=
+  Identifier 
+| AmbiguousName '.' Identifier 
+
+MethodName ::=
+  UnqualifiedMethodIdentifier 
+
+PackageOrTypeName ::=
+  Identifier 
+| PackageOrTypeName '.' Identifier 
+
+AmbiguousName ::=
+  Identifier 
+| AmbiguousName '.' Identifier 
+
+//Productions from §7 (Packages and Modules)
+
+CompilationUnit ::=
+  OrdinaryCompilationUnit 
+| ModularCompilationUnit 
+| DummyRuleEAS
+
+PackageDeclarationOpt ::=   PackageDeclaration | #
+ImportDeclarationStar ::= ImportDeclaration ImportDeclarationStar | # 
+TopLevelClassOrInterfaceDeclarationStar ::=
+       TopLevelClassOrInterfaceDeclaration 
+                    TopLevelClassOrInterfaceDeclarationStar | #
+
+OrdinaryCompilationUnit ::= PackageDeclarationOpt ImportDeclarationStar
+               TopLevelClassOrInterfaceDeclarationStar 
+
+ModularCompilationUnit ::=
+  ImportDeclarationStar ModuleDeclaration 
+
+PackageModifierStar ::= PackageModifier PackageModifierStar | #
+DotIdentifierStar ::= '.' Identifier DotIdentifierStar | #
+
+PackageDeclaration ::=  PackageModifierStar
+'package' Identifier DotIdentifierStar ';' 
+
+
+PackageModifier ::=
+  Annotation 
+
+ImportDeclaration ::=
+  SingleTypeImportDeclaration 
+| TypeImportOnDemandDeclaration 
+| SingleStaticImportDeclaration 
+| StaticImportOnDemandDeclaration 
+
+SingleTypeImportDeclaration ::=
+  'import' TypeName ';' 
+
+TypeImportOnDemandDeclaration ::=
+  'import' PackageOrTypeName '.' '*' ';' 
+
+SingleStaticImportDeclaration ::=
+  'import' 'static' TypeName '.' Identifier ';' 
+
+StaticImportOnDemandDeclaration ::=
+  'import' 'static' TypeName '.' '*' ';' 
+
+TopLevelClassOrInterfaceDeclaration ::=
+  ClassDeclaration 
+| InterfaceDeclaration 
+| ';' 
+
+openOpt ::= 'open' | #
+
+ModuleDirectiveStar ::= ModuleDirective ModuleDirectiveStar | #
+
+ModuleDeclaration ::=
+  AnnotationStar openOpt 'module' Identifier DotIdentifierStar '{' ModuleDirectiveStar '}' 
+
+RequiresModifierStar ::= RequiresModifier RequiresModifierStar | #
+CommaModuleNameOpt ::= ',' ModuleName | #  
+ToModuleNameCommaModuleNameOptStar ::=
+   'to' ModuleName CommaModuleNameOpt ToModuleNameCommaModuleNameOptStar | # 
+
+CommaTypeNameStar ::= ',' TypeName CommaTypeNameStar | #
+
+ModuleDirective ::=
+  'requires' RequiresModifierStar ModuleName ';' 
+| 'exports' PackageName ToModuleNameCommaModuleNameOptStar ';' 
+| 'opens' PackageName ToModuleNameCommaModuleNameOptStar ';' 
+| 'uses' TypeName ';' 
+| 'provides' TypeName 'with' TypeName CommaTypeNameStar  ';' 
+
+
+RequiresModifier ::=
+  'transitive' | 'static' 
+
+//Productions from §8 (Classes)
+
+ClassDeclaration ::=
+  NormalClassDeclaration 
+| EnumDeclaration 
+| RecordDeclaration 
+
+ClassModifierStar ::= ClassModifier ClassModifierStar | #
+TypeParametersOpt ::= TypeParameters | #
+ClassExtendsOpt ::= ClassExtends | #
+ClassImplementsOpt ::= ClassImplements | #
+ClassPermitsOpt ::= ClassPermits | #
+
+NormalClassDeclaration ::=
+  ClassModifierStar  'class' TypeIdentifier  TypeParametersOpt ClassExtendsOpt
+           ClassImplementsOpt ClassPermitsOpt ClassBody 
+ClassModifier ::=
+  Annotation | 'public' | 'protected' | 'private' 
+| 'abstract' | 'static' | 'final' | 'sealed' | 'non-sealed' | 'strictfp' 
+
+TypeParameters ::=
+  '<' TypeParameterList '>' 
+
+CommaTypeParameterStar ::= ',' TypeParameter CommaTypeParameterStar | #
+
+TypeParameterList ::=
+  TypeParameter CommaTypeParameterStar
+
+ClassExtends ::=
+  'extends' ClassType 
+
+ClassImplements ::=
+  'implements' InterfaceTypeList 
+
+
+CommaInterfaceTypeStar ::= ',' InterfaceType CommaInterfaceTypeStar | #
+
+InterfaceTypeList ::=
+  InterfaceType CommaInterfaceTypeStar
+
+ClassPermits ::=
+  'permits' TypeName CommaTypeNameStar  
+
+
+ClassBodyDeclarationStar ::= ClassBodyDeclaration ClassBodyDeclarationStar | #
+
+ClassBody ::=
+  '{' ClassBodyDeclarationStar '}' 
+
+ClassBodyDeclaration ::=
+  ClassMemberDeclaration 
+| InstanceInitializer 
+| StaticInitializer 
+| ConstructorDeclaration 
+
+ClassMemberDeclaration ::=
+  FieldDeclaration 
+| MethodDeclaration 
+| ClassDeclaration 
+| InterfaceDeclaration 
+| ';' 
+
+FieldModifierStar ::= FieldModifier FieldModifierStar | #
+
+FieldDeclaration ::=
+  FieldModifierStar UnannType VariableDeclaratorList ';' 
+
+FieldModifier ::=
+  Annotation | 'public' | 'protected' | 'private' 
+| 'static' | 'final' | 'transient' | 'volatile' 
+
+
+CommaVariableDeclaratorStar ::= ',' VariableDeclarator CommaVariableDeclaratorStar | #
+
+VariableDeclaratorList ::=
+  VariableDeclarator CommaVariableDeclaratorStar 
+
+
+EqualVariableInitializerOpt ::= '=' VariableInitializer | #
+
+VariableDeclarator ::=
+  VariableDeclaratorId EqualVariableInitializerOpt 
+
+DimsOpt ::= Dims | #
+
+VariableDeclaratorId ::=
+  Identifier DimsOpt 
+
+VariableInitializer ::=
+  Expression 
+| ArrayInitializer 
+
+UnannType ::=
+  UnannPrimitiveType 
+| UnannReferenceType 
+
+UnannPrimitiveType ::=
+  NumericType 
+| 'boolean' 
+
+UnannReferenceType ::=
+  UnannClassOrInterfaceType 
+| UnannTypeVariable 
+| UnannArrayType 
+
+UnannClassOrInterfaceType ::=
+  UnannClassType 
+| UnannInterfaceType 
+
+UnannClassType ::=
+  TypeIdentifier TypeArgumentsOpt
+| PackageName '.' AnnotationStar TypeIdentifier TypeArgumentsOpt
+| UnannClassOrInterfaceType '.' AnnotationStar TypeIdentifier TypeArgumentsOpt
+
+UnannInterfaceType ::=
+  UnannClassType 
+
+UnannTypeVariable ::=
+  TypeIdentifier 
+
+UnannArrayType ::=
+  UnannPrimitiveType Dims 
+| UnannClassOrInterfaceType Dims 
+| UnannTypeVariable Dims 
+
+MethodModifierStar ::= MethodModifier MethodModifierStar | #
+
+MethodDeclaration ::= MethodModifierStar MethodHeader MethodBody 
+
+MethodModifier ::=
+  Annotation | 'public' | 'protected' | 'private' 
+| 'abstract' | 'static' | 'final' | 'synchronized' | 'native' | 'strictfp' 
+
+ThrowsOpt ::= Throws | #
+
+MethodHeader ::=
+  Result MethodDeclarator ThrowsOpt  
+| TypeParameters AnnotationStar Result MethodDeclarator ThrowsOpt  
+
+Result ::=
+  UnannType 
+| 'void' 
+
+ReceiverParameterCommaOpt ::=  ReceiverParameter ',' | #
+FormalParameterListOpt ::= FormalParameterList | #
+
+MethodDeclarator ::=
+  Identifier '(' ReceiverParameterCommaOpt FormalParameterListOpt ')' DimsOpt 
+
+
+IdentifierDotOpt ::= Identifier '.' | #
+
+ReceiverParameter ::=
+  AnnotationStar UnannType IdentifierDotOpt 'this' 
+
+CommaFormalParameterStar ::= ',' FormalParameter CommaFormalParameterStar | #
+
+FormalParameterList ::=
+  FormalParameter CommaFormalParameterStar
+
+VariableModifierStar ::= VariableModifier VariableModifierStar | #
+
+FormalParameter ::=
+  VariableModifierStar UnannType VariableDeclaratorId 
+| VariableArityParameter 
+
+VariableArityParameter ::=
+  VariableModifierStar  UnannType AnnotationStar '...' Identifier 
+
+VariableModifier ::=
+  Annotation 
+| 'final' 
+
+Throws ::=
+  'throws' ExceptionTypeList 
+
+CommaExceptionTypeStar ::= ',' ExceptionType CommaExceptionTypeStar | # 
+
+ExceptionTypeList ::=
+  ExceptionType CommaExceptionTypeStar
+
+ExceptionType ::=
+  ClassType 
+| TypeVariable 
+
+MethodBody ::=
+  Block 
+| ';' 
+
+InstanceInitializer ::=
+  Block 
+
+StaticInitializer ::=
+  'static' Block 
+
+ConstructorModifierStar ::= ConstructorModifier ConstructorModifierStar | #
+
+ConstructorDeclaration ::= ConstructorModifierStar
+                        ConstructorDeclarator ThrowsOpt ConstructorBody 
+
+ConstructorModifier ::=
+  Annotation | 'public' | 'protected' | 'private' 
+
+ConstructorDeclarator ::=
+  TypeParametersOpt SimpleTypeName '(' ReceiverParameterCommaOpt FormalParameterListOpt ')' 
+
+
+SimpleTypeName ::=
+  TypeIdentifier 
+
+ExplicitConstructorInvocationOpt ::= ExplicitConstructorInvocation | #
+BlockStatementsOpt ::= BlockStatements | #
+
+ConstructorBody ::=
+  '{' ExplicitConstructorInvocationOpt BlockStatementsOpt '}' 
+
+ArgumentListOpt ::= ArgumentList | #
+
+ExplicitConstructorInvocation ::=
+  TypeArgumentsOpt 'this' '(' ArgumentListOpt ')' ';' 
+| TypeArgumentsOpt 'super' '(' ArgumentListOpt ')' ';' 
+| ExpressionName '.' TypeArgumentsOpt 'super' '(' ArgumentListOpt ')' ';' 
+| Primary '.' TypeArgumentsOpt 'super' '(' ArgumentListOpt ')' ';' 
+
+EnumDeclaration ::=
+  ClassModifierStar 'enum' TypeIdentifier ClassImplementsOpt EnumBody 
+
+EnumConstantListOpt ::= EnumConstantList | #
+CommaOpt ::= ',' | #
+EnumBodyDeclarationsOpt ::= EnumBodyDeclarations | #
+
+EnumBody ::=
+  '{' EnumConstantListOpt CommaOpt EnumBodyDeclarationsOpt '}' 
+
+CommaEnumConstantStar ::= ',' EnumConstant CommaEnumConstantStar | #
+
+EnumConstantList ::=
+  EnumConstant CommaEnumConstantStar 
+
+EnumConstantModifierStar ::= EnumConstantModifier 
+                  EnumConstantModifierStar | #
+
+ParanArgumentListOptStar ::= '(' ArgumentListOpt ')' 
+                                  ParanArgumentListOptStar | # 
+ClassBodyOpt ::= ClassBody | #
+
+EnumConstant ::=
+  EnumConstantModifierStar Identifier ParanArgumentListOptStar ClassBodyOpt 
+
+EnumConstantModifier ::=
+  Annotation 
+
+EnumBodyDeclarations ::=
+  ';' ClassBodyDeclarationStar 
+
+RecordDeclaration ::=
+  ClassModifierStar 'record' TypeIdentifier TypeParametersOpt RecordHeader ClassImplementsOpt RecordBody 
+
+RecordComponentListOpt ::= RecordComponentList | #
+
+RecordHeader ::=
+  '(' RecordComponentListOpt ')' 
+
+CommaRecordComponentStar ::= ',' RecordComponent CommaRecordComponentStar | #
+
+RecordComponentList ::=
+  RecordComponent CommaRecordComponentStar 
+
+RecordComponentModifierStar ::= RecordComponentModifier 
+              RecordComponentModifierStar | #
+RecordComponent ::=
+  RecordComponentModifierStar UnannType Identifier 
+| VariableArityRecordComponent 
+
+VariableArityRecordComponent ::=
+  RecordComponentModifierStar UnannType AnnotationStar '...' Identifier 
+
+RecordComponentModifier ::=
+  Annotation 
+
+RecordBodyDeclarationStar ::= RecordBodyDeclaration RecordBodyDeclarationStar | #
+RecordBody ::=
+  '{' RecordBodyDeclarationStar '}' 
+
+RecordBodyDeclaration ::=
+  ClassBodyDeclaration 
+| CompactConstructorDeclaration 
+
+CompactConstructorDeclaration ::=
+  ConstructorModifierStar SimpleTypeName ConstructorBody 
+
+//Productions from §9 (Interfaces)
+
+InterfaceDeclaration ::=
+  NormalInterfaceDeclaration 
+| AnnotationInterfaceDeclaration 
+
+InterfaceModifierStar ::= InterfaceModifier InterfaceModifierStar | #
+InterfaceExtendsOpt ::= InterfaceExtends | #
+InterfacePermitsOpt ::= InterfacePermits | #
+
+NormalInterfaceDeclaration ::=
+  InterfaceModifierStar 'interface' TypeIdentifier TypeParametersOpt InterfaceExtendsOpt InterfacePermitsOpt InterfaceBody 
+
+
+InterfaceModifier ::=
+  Annotation | 'public' | 'protected' | 'private' 
+| 'abstract' | 'static' | 'sealed' | 'non-sealed' | 'strictfp' 
+
+InterfaceExtends ::=
+  'extends' InterfaceTypeList 
+
+InterfacePermits ::=
+  'permits' TypeName CommaTypeNameStar  
+
+InterfaceMemberDeclarationStar ::= InterfaceMemberDeclaration
+            InterfaceMemberDeclarationStar | #
+
+InterfaceBody ::=
+  '{' InterfaceMemberDeclarationStar '}' 
+
+InterfaceMemberDeclaration ::=
+  ConstantDeclaration 
+| InterfaceMethodDeclaration 
+| ClassDeclaration 
+| InterfaceDeclaration 
+| ';' 
+
+ConstantModifierStar ::= ConstantModifier ConstantModifierStar | #
+
+ConstantDeclaration ::=
+  ConstantModifierStar UnannType VariableDeclaratorList ';' 
+
+ConstantModifier ::=
+  Annotation | 'public' 
+| 'static' | 'final' 
+
+InterfaceMethodModifierStar ::= InterfaceMethodModifier
+           InterfaceMethodModifierStar | #
+
+InterfaceMethodDeclaration ::=
+  InterfaceMethodModifierStar MethodHeader MethodBody 
+
+
+InterfaceMethodModifier ::=
+  Annotation | 'public' | 'private' 
+| 'abstract' | 'default' | 'static' | 'strictfp' 
+
+AnnotationInterfaceDeclaration ::=
+  InterfaceModifierStar '@' 'interface' TypeIdentifier AnnotationInterfaceBody 
+
+
+AnnotationInterfaceMemberDeclarationStar ::= AnnotationInterfaceMemberDeclaration AnnotationInterfaceMemberDeclarationStar | #
+
+AnnotationInterfaceBody ::=
+  '{' AnnotationInterfaceMemberDeclarationStar '}' 
+
+AnnotationInterfaceMemberDeclaration ::=
+  AnnotationInterfaceElementDeclaration 
+| ConstantDeclaration 
+| ClassDeclaration 
+| InterfaceDeclaration 
+| ';' 
+
+AnnotationInterfaceElementModifierStar ::= AnnotationInterfaceElementModifier AnnotationInterfaceElementModifierStar | #
+
+DefaultValueOpt ::= DefaultValue | #
+
+AnnotationInterfaceElementDeclaration ::=  AnnotationInterfaceElementModifierStar UnannType Identifier '(' ')' DimsOpt DefaultValueOpt ';' 
+
+AnnotationInterfaceElementModifier ::=
+  Annotation | 'public' 
+| 'abstract' 
+
+DefaultValue ::=
+  'default' ElementValue 
+
+Annotation ::=
+  NormalAnnotation 
+| MarkerAnnotation 
+| SingleElementAnnotation 
+
+ElementValuePairListOpt ::= ElementValuePairList | #
+
+NormalAnnotation ::=
+  '@' TypeName '(' ElementValuePairListOpt ')' 
+
+CommaElementValuePairStar ::= ',' ElementValuePair CommaElementValuePairStar | #
+
+ElementValuePairList ::=
+  ElementValuePair CommaElementValuePairStar
+
+ElementValuePair ::=
+  Identifier '=' ElementValue 
+
+ElementValue ::=
+  ConditionalExpression 
+| ElementValueArrayInitializer 
+| Annotation 
+
+ElementValueListOpt ::= ElementValueList | #
+
+ElementValueArrayInitializer ::=
+  '{' ElementValueListOpt CommaOpt '}' 
+
+CommaElementValueStar ::= ',' ElementValue CommaElementValueStar | #
+
+ElementValueList ::=
+  ElementValue CommaElementValueStar
+
+MarkerAnnotation ::=
+  '@' TypeName 
+
+SingleElementAnnotation ::=
+  '@' TypeName '(' ElementValue ')' 
+
+//Productions from §10 (Arrays)
+
+VariableInitializerListOpt ::= VariableInitializerList | #
+
+ArrayInitializer ::=
+  '{' VariableInitializerListOpt CommaOpt '}' 
+
+CommaVariableInitializerStar ::= ',' VariableInitializer CommaVariableInitializerStar | #
+
+VariableInitializerList ::=
+  VariableInitializer CommaVariableInitializerStar
+
+//Productions from §14 (Blocks, Statements, and Patterns)
+
+Block ::=
+  '{' BlockStatementsOpt '}' 
+
+BlockStatementStar ::= BlockStatement BlockStatementStar | #
+
+BlockStatements ::=
+  BlockStatement BlockStatementStar 
+
+BlockStatement ::=
+  LocalClassOrInterfaceDeclaration 
+| LocalVariableDeclarationStatement 
+| Statement 
+
+LocalClassOrInterfaceDeclaration ::=
+  ClassDeclaration 
+| NormalInterfaceDeclaration 
+
+LocalVariableDeclarationStatement ::=
+  LocalVariableDeclaration ';' 
+
+LocalVariableDeclaration ::=
+  VariableModifierStar  LocalVariableType VariableDeclaratorList 
+
+LocalVariableType ::=
+  UnannType 
+| 'var' 
+
+Statement ::=
+  StatementWithoutTrailingSubstatement 
+| LabeledStatement 
+| IfThenStatement 
+| IfThenElseStatement 
+| WhileStatement 
+| ForStatement 
+
+StatementNoShortIf ::=
+  StatementWithoutTrailingSubstatement 
+| LabeledStatementNoShortIf 
+| IfThenElseStatementNoShortIf 
+| WhileStatementNoShortIf 
+| ForStatementNoShortIf 
+
+StatementWithoutTrailingSubstatement ::=
+  Block 
+| EmptyStatement 
+| ExpressionStatement 
+| AssertStatement 
+| SwitchStatement 
+| DoStatement 
+| BreakStatement 
+| ContinueStatement 
+| ReturnStatement 
+| SynchronizedStatement 
+| ThrowStatement 
+| TryStatement 
+| YieldStatement 
+
+EmptyStatement ::=
+  ';' 
+
+LabeledStatement ::=
+  Identifier ':' Statement 
+
+LabeledStatementNoShortIf ::=
+  Identifier ':' StatementNoShortIf 
+
+ExpressionStatement ::=
+  StatementExpression ';' 
+
+StatementExpression ::=
+  Assignment 
+| PreIncrementExpression 
+| PreDecrementExpression 
+| PostIncrementExpression 
+| PostDecrementExpression 
+| MethodInvocation 
+| ClassInstanceCreationExpression 
+
+IfThenStatement ::=
+  'if' '(' Expression ')' Statement 
+
+IfThenElseStatement ::=
+  'if' '(' Expression ')' StatementNoShortIf 'else' Statement 
+
+IfThenElseStatementNoShortIf ::=
+  'if' '(' Expression ')' StatementNoShortIf 'else' StatementNoShortIf 
+
+AssertStatement ::=
+  'assert' Expression ';' 
+| 'assert' Expression ':' Expression ';' 
+
+SwitchStatement ::=
+  'switch' '(' Expression ')' SwitchBlock 
+
+SwitchRuleStar ::= SwitchRule SwitchRuleStar | #
+SwitchBlockStatementGroupStar ::= SwitchBlockStatementGroup SwitchBlockStatementGroupStar | #
+SwitchLabelColonStar ::= SwitchLabel ':' SwitchLabelColonStar | #
+
+SwitchBlock ::=
+  '{' SwitchRule SwitchRuleStar '}' 
+| '{' SwitchBlockStatementGroupStar SwitchLabelColonStar '}' 
+
+SwitchRule ::=
+  SwitchLabel '->' Expression ';' 
+| SwitchLabel '->' Block 
+| SwitchLabel '->' ThrowStatement 
+
+SwitchBlockStatementGroup ::=
+  SwitchLabel ':' SwitchLabelColonStar BlockStatements 
+
+CommaCaseConstantStar ::= ',' CaseConstant CommaCaseConstantStar | #
+
+SwitchLabel ::=
+  'case' CaseConstant CommaCaseConstantStar 
+| 'default' 
+
+CaseConstant ::=
+  ConditionalExpression 
+
+WhileStatement ::=
+  'while' '(' Expression ')' Statement 
+
+WhileStatementNoShortIf ::=
+  'while' '(' Expression ')' StatementNoShortIf 
+
+DoStatement ::=
+  'do' Statement 'while' '(' Expression ')' ';' 
+
+ForStatement ::=
+  BasicForStatement 
+| EnhancedForStatement 
+
+ForStatementNoShortIf ::=
+  BasicForStatementNoShortIf 
+| EnhancedForStatementNoShortIf 
+
+ForInitOpt ::= ForInit | #
+ExpressionOpt ::= Expression | #
+ForUpdateOpt ::= ForUpdate | #
+
+BasicForStatement ::=
+  'for' '(' ForInitOpt ';' ExpressionOpt ';' ForUpdateOpt ')' Statement 
+
+BasicForStatementNoShortIf ::=
+  'for' '(' ForInitOpt ';' ExpressionOpt ';' ForUpdateOpt ')' StatementNoShortIf 
+
+ForInit ::=
+  StatementExpressionList 
+| LocalVariableDeclaration 
+
+ForUpdate ::=
+  StatementExpressionList 
+
+CommaStatementExpressionStar ::= ',' StatementExpression CommaStatementExpressionStar | #
+
+StatementExpressionList ::=
+  StatementExpression CommaStatementExpressionStar 
+
+EnhancedForStatement ::=
+  'for' '(' LocalVariableDeclaration ':' Expression ')' Statement 
+
+EnhancedForStatementNoShortIf ::=
+  'for' '(' LocalVariableDeclaration ':' Expression ')' StatementNoShortIf 
+
+IdentifierOpt ::= Identifier | #
+
+BreakStatement ::=
+  'break' IdentifierOpt ';' 
+
+YieldStatement ::=
+  'yield' Expression ';' 
+
+ContinueStatement ::=
+  'continue' IdentifierOpt ';' 
+
+ReturnStatement ::=
+  'return' ExpressionOpt ';' 
+
+ThrowStatement ::=
+  'throw' Expression ';' 
+
+SynchronizedStatement ::=
+  'synchronized' '(' Expression ')' Block 
+
+CatchesOpt ::= Catches | #
+
+TryStatement ::=
+  'try' Block Catches 
+| 'try' Block CatchesOpt Finally 
+| TryWithResourcesStatement 
+
+CatchClauseStar ::= CatchClause CatchClauseStar | #
+
+Catches ::=
+  CatchClause CatchClauseStar 
+
+CatchClause ::=
+  'catch' '(' CatchFormalParameter ')' Block 
+
+CatchFormalParameter ::=
+  VariableModifierStar  CatchType VariableDeclaratorId 
+
+BarClassTypeStar ::= '|' ClassType BarClassTypeStar | #
+
+CatchType ::=
+  UnannClassType BarClassTypeStar 
+
+Finally ::=
+  'finally' Block 
+
+FinallyOpt ::= Finally | #
+
+TryWithResourcesStatement ::=
+  'try' ResourceSpecification Block CatchesOpt FinallyOpt 
+
+SemicolonOpt ::= ';' | # 
+
+ResourceSpecification ::=
+  '(' ResourceList SemicolonOpt ')' 
+
+SemicolonResourceStar ::= ';' Resource SemicolonResourceStar | #
+ 
+ResourceList ::=
+  Resource SemicolonResourceStar 
+
+Resource ::=
+  LocalVariableDeclaration 
+| 'VariableAccess' 
+
+Pattern ::=
+  TypePattern 
+
+TypePattern ::=
+  LocalVariableDeclaration 
+
+//Productions from §15 (Expressions)
+
+Primary ::=
+  PrimaryNoNewArray 
+| ArrayCreationExpression 
+
+PrimaryNoNewArray ::=
+  Literal 
+| ClassLiteral 
+| 'this' 
+| TypeName '.' 'this' 
+| '(' Expression ')' 
+| ClassInstanceCreationExpression 
+| FieldAccess 
+| ArrayAccess 
+| MethodInvocation 
+| MethodReference 
+
+BracketsStar ::= '[' ']' BracketsStar | #
+
+ClassLiteral ::=
+  TypeName BracketsStar '.' 'class' 
+| NumericType BracketsStar '.' 'class' 
+| 'boolean' BracketsStar '.' 'class' 
+| 'void' '.' 'class' 
+
+ClassInstanceCreationExpression ::=
+  UnqualifiedClassInstanceCreationExpression 
+| ExpressionName '.' UnqualifiedClassInstanceCreationExpression 
+| Primary '.' UnqualifiedClassInstanceCreationExpression 
+
+UnqualifiedClassInstanceCreationExpression ::=
+  'new' TypeArgumentsOpt ClassOrInterfaceTypeToInstantiate '(' ArgumentListOpt ')' ClassBodyOpt 
+
+
+DotAnnotationStarIdentifierStar ::= '.' AnnotationStar Identifier
+       DotAnnotationStarIdentifierStar | #  
+
+TypeArgumentsOrDiamondOpt ::= TypeArgumentsOrDiamond | #
+
+ClassOrInterfaceTypeToInstantiate ::=
+  AnnotationStar Identifier DotAnnotationStarIdentifierStar TypeArgumentsOrDiamondOpt 
+
+TypeArgumentsOrDiamond ::=
+  TypeArguments 
+| '<>' 
+
+ArrayCreationExpression ::=
+  ArrayCreationExpressionWithoutInitializer 
+| ArrayCreationExpressionWithInitializer 
+
+ArrayCreationExpressionWithoutInitializer ::=
+  'new' PrimitiveType DimExprs DimsOpt 
+| 'new' ClassOrInterfaceType DimExprs DimsOpt 
+
+ArrayCreationExpressionWithInitializer ::=
+  'new' PrimitiveType Dims ArrayInitializer 
+| 'new' ClassOrInterfaceType Dims ArrayInitializer 
+
+DimExprStar ::= DimExpr DimExprStar | #
+
+DimExprs ::=
+  DimExpr DimExprStar 
+
+DimExpr ::=
+  AnnotationStar '[' Expression ']' 
+
+ArrayAccess ::=
+  ExpressionName '[' Expression ']' 
+| PrimaryNoNewArray '[' Expression ']' 
+| ArrayCreationExpressionWithInitializer '[' Expression ']' 
+
+FieldAccess ::=
+  Primary '.' Identifier 
+| 'super' '.' Identifier 
+| TypeName '.' 'super' '.' Identifier 
+
+MethodInvocation ::=
+  MethodName '(' ArgumentListOpt ')' 
+| TypeName '.' TypeArgumentsOpt Identifier '(' ArgumentListOpt ')' 
+| ExpressionName '.' TypeArgumentsOpt Identifier '(' ArgumentListOpt ')' 
+| Primary '.' TypeArgumentsOpt Identifier '(' ArgumentListOpt ')' 
+| 'super' '.' TypeArgumentsOpt Identifier '(' ArgumentListOpt ')' 
+| TypeName '.' 'super' '.' TypeArgumentsOpt Identifier '(' ArgumentListOpt ')' 
+
+
+CommaExpressionStar ::= ',' Expression CommaExpressionStar | #
+
+ArgumentList ::=
+  Expression CommaExpressionStar 
+
+MethodReference ::=
+  ExpressionName '::' TypeArgumentsOpt Identifier 
+| Primary '::' TypeArgumentsOpt Identifier 
+| ReferenceType '::' TypeArgumentsOpt Identifier 
+| 'super' '::' TypeArgumentsOpt Identifier 
+| TypeName '.' 'super' '::' TypeArgumentsOpt Identifier 
+| ClassType '::' TypeArgumentsOpt 'new' 
+| ArrayType '::' 'new' 
+
+Expression ::=
+  LambdaExpression 
+| AssignmentExpression 
+
+LambdaExpression ::=
+  LambdaParameters '->' LambdaBody 
+
+LambdaParameterListOpt ::= LambdaParameterList | #
+
+LambdaParameters ::=
+  '(' LambdaParameterListOpt ')' 
+| Identifier 
+
+CommaLambdaParameterStar ::= ',' LambdaParameter CommaLambdaParameterStar | #
+CommaIdentifierStar ::= ',' Identifier CommaIdentifierStar | #
+
+LambdaParameterList ::=
+  LambdaParameter CommaLambdaParameterStar 
+| Identifier CommaIdentifierStar 
+
+LambdaParameter ::=
+  VariableModifierStar LambdaParameterType VariableDeclaratorId 
+| VariableArityParameter 
+
+LambdaParameterType ::=
+  UnannType 
+| 'var' 
+
+LambdaBody ::=
+  Expression 
+| Block 
+
+AssignmentExpression ::=
+  ConditionalExpression 
+| Assignment 
+
+Assignment ::=
+  LeftHandSide AssignmentOperator Expression 
+
+LeftHandSide ::=
+  ExpressionName 
+| FieldAccess 
+| ArrayAccess 
+
+AssignmentOperator ::=
+  
+'=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '>>>=' | '&=' | '^=' | '|=' 
+
+
+ConditionalExpression ::=
+  ConditionalOrExpression 
+| ConditionalOrExpression '?' Expression ':' ConditionalExpression 
+| ConditionalOrExpression '?' Expression ':' LambdaExpression 
+
+ConditionalOrExpression ::=
+  ConditionalAndExpression 
+| ConditionalOrExpression '||' ConditionalAndExpression 
+
+ConditionalAndExpression ::=
+  InclusiveOrExpression 
+| ConditionalAndExpression '&&' InclusiveOrExpression 
+
+InclusiveOrExpression ::=
+  ExclusiveOrExpression 
+| InclusiveOrExpression '|' ExclusiveOrExpression 
+
+ExclusiveOrExpression ::=
+  AndExpression 
+| ExclusiveOrExpression '^' AndExpression 
+
+AndExpression ::=
+  EqualityExpression 
+| AndExpression '&' EqualityExpression 
+
+EqualityExpression ::=
+  RelationalExpression 
+| EqualityExpression '==' RelationalExpression 
+| EqualityExpression '!=' RelationalExpression 
+
+RelationalExpression ::=
+  ShiftExpression 
+| RelationalExpression '<' ShiftExpression 
+| RelationalExpression '>' ShiftExpression 
+| RelationalExpression '<=' ShiftExpression 
+| RelationalExpression '>=' ShiftExpression 
+| InstanceofExpression 
+
+InstanceofExpression ::=
+  RelationalExpression 'instanceof' ReferenceType 
+| RelationalExpression 'instanceof' Pattern 
+
+ShiftExpression ::=
+  AdditiveExpression 
+| ShiftExpression '<<' AdditiveExpression 
+| ShiftExpression '>>' AdditiveExpression 
+| ShiftExpression '>>>' AdditiveExpression 
+
+AdditiveExpression ::=
+  MultiplicativeExpression 
+| AdditiveExpression '+' MultiplicativeExpression 
+| AdditiveExpression '-' MultiplicativeExpression 
+
+MultiplicativeExpression ::=
+  UnaryExpression 
+| MultiplicativeExpression '*' UnaryExpression 
+| MultiplicativeExpression '/' UnaryExpression 
+| MultiplicativeExpression '%' UnaryExpression 
+
+UnaryExpression ::=
+  PreIncrementExpression 
+| PreDecrementExpression 
+| '+' UnaryExpression 
+| '-' UnaryExpression 
+| UnaryExpressionNotPlusMinus 
+
+PreIncrementExpression ::=
+  '++' UnaryExpression 
+
+PreDecrementExpression ::=
+  '--' UnaryExpression 
+
+UnaryExpressionNotPlusMinus ::=
+  PostfixExpression 
+| '~' UnaryExpression 
+| '!' UnaryExpression 
+| CastExpression 
+| SwitchExpression 
+
+PostfixExpression ::=
+  Primary 
+| ExpressionName 
+| PostIncrementExpression 
+| PostDecrementExpression 
+
+PostIncrementExpression ::=
+  PostfixExpression '++' 
+
+PostDecrementExpression ::=
+  PostfixExpression '--' 
+
+CastExpression ::=
+  '(' PrimitiveType ')' UnaryExpression 
+| '(' ReferenceType AdditionalBoundStar ')' UnaryExpressionNotPlusMinus 
+| '(' ReferenceType AdditionalBoundStar ')' LambdaExpression 
+
+SwitchExpression ::=
+  'switch' '(' Expression ')' SwitchBlock 
+
+ConstantExpression ::=
+  Expression 
+
+
+// End of extracted rules
+(* Java Language Specification character level rules manually constructed by Adrian Johnstone from English Language descriptions in the JLS18 document https://docs.oracle.com/javase/specs/jls/se18/jls18.pdf 
+
+   V01.10 25 July 2022
+
+   Overview
+
+   In sections 3.1 to 3.3, the JLS describes in detail the front end management of general Unicode characters in which a program containing non-ASCII Unicode characters 
+   may be rewritten into a so-called Transformed Version that is ASCII only.
+
+   The main part of the JLS rules work with within ASCII character set, using escape sequences to denote general Unicode characters.
+   
+   We follow the same approach here, which allows the various character sets to be specified using compact enumeration, since there are only 95 printing ASCII characters. 
+
+   We also need denotations for newline (\n) and line end (otherwise known as carriage return) (\r).
+
+   Following https://en.wikipedia.org/wiki/ASCII, here is a (commented out) ART rule which enumerates all printing ASCII characters in code order using the 1967 glyphs
+
+ART_ASCIIPrintableCharacter ::=
+  `  | `! | `" | `# | `$ | `% | `& | `' | `( | `) | `* | `+ | `, | `- | `.  | `/ 
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `: | `; | `< | `= | `> | `?  | `@ 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `[ | `\ | `] | `^ | `_ | `` 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+| `{ | `| | `} | `~
+
+   We use this rule as a base for the JLS character rules, deleting elements and adding alternates as indicated by the informal rules in section 3 of the document.
+
+   These informal rules are presented as // xyz style line comments against each entry.
+
+   Other comments by Adrian are inserted using the (* xyz *) block comment
+
+   SPECIAL NOTE - the JLS expects unicode escapes to be rewritten to Unicode characters anywhere they appear, including in source code (i.e. not just in character, string and textblock literals. our grammar does NOT
+   support that interpretation but instead adds the production | UnicodeEscape to SingleCharacter, StringCharacter and TextBlockCharacter.
+
+*)
+
+(* JLS18 character rules start *)
+
+// Section 3.4 
+
+LineTerminator ::=
+  `\n     (* Un*x and its relations *)
+| `\r     (* Many home computers, including pre-Un*x Mac OS *)
+| `\r `\n (* MS-DOS and Windows *)
+
+// Section 3.6
+
+WhiteSpace ::=
+  `  // the ASCII SP character, also known as "space"
+| `\t // the ASCII HT character, also known as "horizontal tab"
+| `f // the ASCII FF character, also known as "form feed"
+| LineTerminator
+
+NotStar ::= // (InputCharacter but not *) | LineTerminator
+  `  | `! | `" | `# | `$ | `% | `& | `' | `( | `)      | `+ | `, | `- | `.  | `/ 
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `: | `; | `< | `= | `> | `?  | `@ 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `[ | `\ | `] | `^ | `_ | `` 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+| `{ | `| | `} | `~
+| LineTerminator
+
+NotStarNotSlash ::= // (InputCharacter but not * or /) | LineTerminator
+  `  | `! | `" | `# | `$ | `% | `& | `' | `( | `)      | `+ | `, | `- | `.  
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `: | `; | `< | `= | `> | `?  | `@ 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `[ | `\ | `] | `^ | `_ | `` 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+| `{ | `| | `} | `~
+| LineTerminator
+
+
+// Section 3.8 
+
+JavaLetter ::= // any Unicode character that is a "Java letter"
+  `$   
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `_ 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+
+JavaLetterNoUS ::= // any Unicode character that is a "Java letter"
+  `$   
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+
+JavaLetterOrDigit ::= // any Unicode character that is a "Java letter-or-digit"
+  `$   
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `_ 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+
+// Section 3.10.4
+
+SingleCharacter ::= // InputCharacter but not ' or \
+  ` | `!  | `" | `# | `$ | `% | `&      | `( | `) | `* | `+ | `, | `- | `. | `/ 
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `: | `; | `< | `= | `> | `?  | `@ 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `[      | `] | `^ | `_ | `` 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+| `{ | `| | `} | `~
+| EscapeSequence
+| UnicodeEscape
+
+// Section 3.10.5
+
+StringCharacter ::= // InputCharacter but not " or \
+  `  | `!      | `# | `$ | `% | `& | `' | `( | `) | `* | `+ | `, | `- | `.  | `/ 
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `: | `; | `< | `= | `> | `?  | `@ 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `[ |      `] | `^ | `_ | `` 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+| `{ | `| | `} | `~
+| EscapeSequence
+| UnicodeEscape
+
+// Section 3.10.6
+
+TextBlockCharacter ::= //InputCharacter but not \ 
+  `  | `! | `" | `# | `$ | `% | `& | `' | `( | `) | `* | `+ | `, | `- | `.  | `/ 
+| `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9 
+| `: | `; | `< | `= | `> | `?  | `@ 
+| `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z 
+| `[      | `] | `^ | `_ | `` 
+| `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z 
+| `{ | `| | `} | `~
+| EscapeSequence
+| LineTerminator
+| UnicodeEscape
+
+(* JLS18 character rules *)

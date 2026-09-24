@@ -1,0 +1,287 @@
+                                                    '
+                                                    var g = Grammar()
+                                                    var skip = false
+                                                    var terminalAlias: String?
+                                                    '
+
+whitespace  : /\s+/ .
+linecomment : /\/\/.*/ .
+blockcomment: /\/\*(?s).*?\*\// .
+
+action      : /'(?:[^'\\]|\\.)+'/ .
+
+identifier  - /\p{XID_Start}\p{XID_Continue}*/ .
+literal     - /\"(?:[^\"\\]|\\.)*\"/ .
+epsilon     - /[εϵԐԑ𝛆𝛜𝜀𝜖𝜺𝝐𝝴𝞊𝞮𝟄]/ .
+regex       - /\/(?:[^\/\\]|\\.)+\// .
+message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
+
+grammar     = < production >
+              {                                     'let m ='
+                message                             'g.messages.append(m.stripped)'
+              } .
+
+production  =                                       'let id ='
+              identifier                            'let nonTerminalName = String(id.image)'
+              ( ":"                                 'let rx_tok ='
+                regex                               '
+                                                    skip = true
+                                                    terminalAlias = nonTerminalName
+                                                    let name = terminalAlias!
+                                                    let rx = try Regex<Substring>(String(rx_tok.stripped))
+                                                    g.terminals[name] = (String(rx_tok.image), rx, false, skip)
+                                                    g.registerTerminal(name)
+                                                    '
+              | "-"                                 'let rx_tok ='
+                regex                               '
+                                                    terminalAlias = nonTerminalName
+                                                    let name = terminalAlias!
+                                                    let rx = try Regex<Substring>(String(rx_tok.stripped))
+                                                    g.terminals[name] = (String(rx_tok.image), rx, false, skip)
+                                                    g.registerTerminal(name)
+                                                    '
+              | "="                                 'let node ='
+                selection                           '
+                                                    if g.startSymbol == "" { g.startSymbol = nonTerminalName }
+                                                    if let existing = g.nonTerminals[nonTerminalName] {
+                                                        var endOfList = existing
+                                                        while let next = endOfList.alt { endOfList = next }
+                                                        endOfList.alt = node
+                                                    } else {
+                                                        g.nonTerminals[nonTerminalName] = GrammarNode(kind: .N, name: nonTerminalName, alt: node)
+                                                    }
+                                                    '
+              )                                     'terminalAlias = nil'
+                                                    'skip = false'
+              "."
+            .
+
+selection                                           'throws -> GrammarNode'
+            =                                       'let listOfAlternates ='
+              sequence                              'var tail = listOfAlternates'
+              { "|"                                 'tail.alt ='
+                 sequence                           'tail = tail.alt!'
+              }                                     'return listOfAlternates'
+            .
+
+sequence                                            'throws -> GrammarNode'
+            =                                       'let startOfSequence = GrammarNode(kind: .ALT, name: "")'
+                                                    'var factorNode = startOfSequence'
+              <                                     'factorNode.seq ='
+                factor                              '// if postfix, wrap the factor in a bracket'
+                [ "?"                               '
+                                                    let bracketSeq = GrammarNode(kind: .ALT, name: "")
+                                                    bracketSeq.seq = factorNode.seq
+                                                    bracketSeq.seq?.seq = GrammarNode(kind: .END, name: "")
+                                                    factorNode.seq = GrammarNode(kind: .OPT, name: "", alt: bracketSeq)
+                                                    factorNode.seq?.alt = bracketSeq
+                                                    '
+                | "*"                               '
+                                                    let bracketSeq = GrammarNode(kind: .ALT, name: "")
+                                                    bracketSeq.seq = factorNode.seq
+                                                    bracketSeq.seq?.seq = GrammarNode(kind: .END, name: "")
+                                                    factorNode.seq = GrammarNode(kind: .KLN, name: "", alt: bracketSeq)
+                                                    factorNode.seq?.alt = bracketSeq
+                                                    '
+                | "+"                               '
+                                                    let bracketSeq = GrammarNode(kind: .ALT, name: "")
+                                                    bracketSeq.seq = factorNode.seq
+                                                    bracketSeq.seq?.seq = GrammarNode(kind: .END, name: "")
+                                                    factorNode.seq = GrammarNode(kind: .POS, name: "", alt: bracketSeq)
+                                                    factorNode.seq?.alt = bracketSeq
+                                                    '
+                ]                                   'factorNode = factorNode.seq!'
+              >                                     '
+                                                    factorNode.seq = GrammarNode(kind: .END, name: "")
+                                                    return startOfSequence
+                                                    '
+            .
+
+factor                                              'throws -> GrammarNode'
+            =                                       'let t ='
+            terminal                                'return t'
+            | "["                                   'let s ='
+              selection "]"                         'return GrammarNode(kind: .OPT, name: "", alt: s)'
+            | "{"                                   'let s ='
+              selection "}"                         'return GrammarNode(kind: .KLN, name: "", alt: s)'
+            | "<"                                   'let s ='
+              selection ">"                         'return GrammarNode(kind: .POS, name: "", alt: s)'
+            | "("                                   'let s ='
+              selection ")"                         'return s'
+            .
+
+terminal                                            'throws -> GrammarNode'
+            =                                       'let id ='
+              identifier                            '
+                                                    if g.terminals[String(id.stripped)] != nil {
+                                                        return GrammarNode(kind: .T, name: id.stripped)
+                                                    } else {
+                                                        return GrammarNode(kind: .N, name: String(id.stripped))
+                                                    }
+                                                    '
+            |                                       'let lit ='
+              literal                               '
+                                                    if lit.stripped == "" {
+                                                        return GrammarNode(kind: .EPS, name: "ε")
+                                                    } else {
+                                                        let name = terminalAlias ?? lit.stripped
+                                                        let rx = Regex { lit.stripped }
+                                                        g.terminals[name] = (String(lit.image), rx, true, skip)
+                                                        g.registerTerminal(name)
+                                                        return GrammarNode(kind: .T, name: name)
+                                                    }
+                                                    '
+            |                                       'let rx_tok ='
+              regex                                 '
+                                                    let name = terminalAlias ?? rx_tok.image.base.linePosition(of: rx_tok.image.startIndex)
+                                                    let rx = try Regex<Substring>(String(rx_tok.stripped))
+                                                    g.terminals[name] = (String(rx_tok.image), rx, false, skip)
+                                                    g.registerTerminal(name)
+                                                    return GrammarNode(kind: .T, name: name)
+                                                    '
+            | epsilon                               'return GrammarNode(kind: .EPS, name: "ε")'
+            .
+^^^
+                                                    '
+                                                    var g = Grammar()
+                                                    var skip = false
+                                                    var terminalAlias: String?
+                                                    '
+
+whitespace  : /\s+/ .
+linecomment : /\/\/.*/ .
+blockcomment: /\/\*(?s).*?\*\// .
+
+action      : /'(?:[^'\\]|\\.)+'/ .
+
+identifier  - /\p{XID_Start}\p{XID_Continue}*/ .
+literal     - /\"(?:[^\"\\]|\\.)*\"/ .
+epsilon     - /[εϵԐԑ𝛆𝛜𝜀𝜖𝜺𝝐𝝴𝞊𝞮𝟄]/ .
+regex       - /\/(?:[^\/\\]|\\.)+\// .
+message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
+
+grammar     = < production >
+              {                                     'let m ='
+                message                             'g.messages.append(m.stripped)'
+              } .
+
+production  =                                       'let id ='
+              identifier                            'let nonTerminalName = String(id.image)'
+              ( ":"                                 'let rx_tok ='
+                regex                               '
+                                                    skip = true
+                                                    terminalAlias = nonTerminalName
+                                                    let name = terminalAlias!
+                                                    let rx = try Regex<Substring>(String(rx_tok.stripped))
+                                                    g.terminals[name] = (String(rx_tok.image), rx, false, skip)
+                                                    g.registerTerminal(name)
+                                                    '
+              | "-"                                 'let rx_tok ='
+                regex                               '
+                                                    terminalAlias = nonTerminalName
+                                                    let name = terminalAlias!
+                                                    let rx = try Regex<Substring>(String(rx_tok.stripped))
+                                                    g.terminals[name] = (String(rx_tok.image), rx, false, skip)
+                                                    g.registerTerminal(name)
+                                                    '
+              | "="                                 'let node ='
+                selection                           '
+                                                    if g.startSymbol == "" { g.startSymbol = nonTerminalName }
+                                                    if let existing = g.nonTerminals[nonTerminalName] {
+                                                        var endOfList = existing
+                                                        while let next = endOfList.alt { endOfList = next }
+                                                        endOfList.alt = node
+                                                    } else {
+                                                        g.nonTerminals[nonTerminalName] = GrammarNode(kind: .N, name: nonTerminalName, alt: node)
+                                                    }
+                                                    '
+              )                                     'terminalAlias = nil'
+                                                    'skip = false'
+              "."
+            .
+
+selection                                           'throws -> GrammarNode'
+            =                                       'let listOfAlternates ='
+              sequence                              'var tail = listOfAlternates'
+              { "|"                                 'tail.alt ='
+                 sequence                           'tail = tail.alt!'
+              }                                     'return listOfAlternates'
+            .
+
+sequence                                            'throws -> GrammarNode'
+            =                                       'let startOfSequence = GrammarNode(kind: .ALT, name: "")'
+                                                    'var factorNode = startOfSequence'
+              <                                     'factorNode.seq ='
+                factor                              '// if postfix, wrap the factor in a bracket'
+                [ "?"                               '
+                                                    let bracketSeq = GrammarNode(kind: .ALT, name: "")
+                                                    bracketSeq.seq = factorNode.seq
+                                                    bracketSeq.seq?.seq = GrammarNode(kind: .END, name: "")
+                                                    factorNode.seq = GrammarNode(kind: .OPT, name: "", alt: bracketSeq)
+                                                    factorNode.seq?.alt = bracketSeq
+                                                    '
+                | "*"                               '
+                                                    let bracketSeq = GrammarNode(kind: .ALT, name: "")
+                                                    bracketSeq.seq = factorNode.seq
+                                                    bracketSeq.seq?.seq = GrammarNode(kind: .END, name: "")
+                                                    factorNode.seq = GrammarNode(kind: .KLN, name: "", alt: bracketSeq)
+                                                    factorNode.seq?.alt = bracketSeq
+                                                    '
+                | "+"                               '
+                                                    let bracketSeq = GrammarNode(kind: .ALT, name: "")
+                                                    bracketSeq.seq = factorNode.seq
+                                                    bracketSeq.seq?.seq = GrammarNode(kind: .END, name: "")
+                                                    factorNode.seq = GrammarNode(kind: .POS, name: "", alt: bracketSeq)
+                                                    factorNode.seq?.alt = bracketSeq
+                                                    '
+                ]                                   'factorNode = factorNode.seq!'
+              >                                     '
+                                                    factorNode.seq = GrammarNode(kind: .END, name: "")
+                                                    return startOfSequence
+                                                    '
+            .
+
+factor                                              'throws -> GrammarNode'
+            =                                       'let t ='
+            terminal                                'return t'
+            | "["                                   'let s ='
+              selection "]"                         'return GrammarNode(kind: .OPT, name: "", alt: s)'
+            | "{"                                   'let s ='
+              selection "}"                         'return GrammarNode(kind: .KLN, name: "", alt: s)'
+            | "<"                                   'let s ='
+              selection ">"                         'return GrammarNode(kind: .POS, name: "", alt: s)'
+            | "("                                   'let s ='
+              selection ")"                         'return s'
+            .
+
+terminal                                            'throws -> GrammarNode'
+            =                                       'let id ='
+              identifier                            '
+                                                    if g.terminals[String(id.stripped)] != nil {
+                                                        return GrammarNode(kind: .T, name: id.stripped)
+                                                    } else {
+                                                        return GrammarNode(kind: .N, name: String(id.stripped))
+                                                    }
+                                                    '
+            |                                       'let lit ='
+              literal                               '
+                                                    if lit.stripped == "" {
+                                                        return GrammarNode(kind: .EPS, name: "ε")
+                                                    } else {
+                                                        let name = terminalAlias ?? lit.stripped
+                                                        let rx = Regex { lit.stripped }
+                                                        g.terminals[name] = (String(lit.image), rx, true, skip)
+                                                        g.registerTerminal(name)
+                                                        return GrammarNode(kind: .T, name: name)
+                                                    }
+                                                    '
+            |                                       'let rx_tok ='
+              regex                                 '
+                                                    let name = terminalAlias ?? rx_tok.image.base.linePosition(of: rx_tok.image.startIndex)
+                                                    let rx = try Regex<Substring>(String(rx_tok.stripped))
+                                                    g.terminals[name] = (String(rx_tok.image), rx, false, skip)
+                                                    g.registerTerminal(name)
+                                                    return GrammarNode(kind: .T, name: name)
+                                                    '
+            | epsilon                               'return GrammarNode(kind: .EPS, name: "ε")'
+            .

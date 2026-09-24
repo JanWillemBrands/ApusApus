@@ -1,0 +1,27 @@
+// layout is a simple grammar to test the layout annotations in apus
+// layout parses an article into its constituent parts based on layout information alone
+
+whitespace  : /\s+/ .
+word        - /\w+/ .
+
+article     = title >>| < section > |<< .       // the sections are indented from the article title
+
+section     = title >>| < paragraph > |<< .     // the paragraphs are indented from the section title
+
+@longest
+paragraph   = < sentence > <n> .                // additional paragraphs must start on a new line
+
+sentence    = < word > "." <s> .                // there must be whitespace after a period
+
+title       = word { >n< word } .               // the whole title must be on a single line
+
+^^^
+Cinderella
+    Once upon a time
+        Something   . Another thing.
+        Sleep.
+
+        this is another paragraph.
+    The Prince kisses her
+        Wake up.
+

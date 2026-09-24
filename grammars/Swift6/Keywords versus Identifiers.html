@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swift Keyword Categories</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+ :root {
+   --bg: #1a1a2e;
+   --surface: #16213e;
+   --surface2: #0f3460;
+   --text: #e0e0e0;
+   --text-dim: #8899aa;
+   --red: #ff4d6a;
+   --blue: #4d9fff;
+   --green: #4ddb7a;
+   --comment: #6a7a8a;
+   --string: #f0a050;
+   --number: #d0a0ff;
+   --border: #2a3a5e;
+ }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+padding: 2rem;
+min-height: 100vh;
+}
+
+h1 {
+font-size: 1.8rem;
+font-weight: 700;
+margin-bottom: 0.5rem;
+letter-spacing: -0.02em;
+}
+
+.subtitle {
+color: var(–text-dim);
+font-size: 0.95rem;
+margin-bottom: 2rem;
+line-height: 1.5;
+}
+
+.legend {
+display: flex;
+flex-wrap: wrap;
+gap: 1.2rem;
+margin-bottom: 2rem;
+padding: 1rem 1.2rem;
+background: var(–surface);
+border-radius: 10px;
+border: 1px solid var(–border);
+}
+
+.legend-item {
+display: flex;
+align-items: center;
+gap: 0.5rem;
+font-size: 0.85rem;
+}
+
+.legend-swatch {
+width: 12px;
+height: 12px;
+border-radius: 3px;
+}
+
+.category {
+margin-bottom: 2rem;
+}
+
+.category-header {
+display: flex;
+align-items: center;
+gap: 0.7rem;
+margin-bottom: 0.3rem;
+}
+
+.category-header h2 {
+font-size: 1.1rem;
+font-weight: 700;
+}
+
+.category-tag {
+font-size: 0.7rem;
+padding: 0.2rem 0.6rem;
+border-radius: 20px;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.05em;
+}
+
+.category-desc {
+color: var(–text-dim);
+font-size: 0.85rem;
+margin-bottom: 1rem;
+line-height: 1.5;
+}
+
+.examples {
+display: flex;
+flex-direction: column;
+gap: 1rem;
+}
+
+.example {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+overflow: hidden;
+}
+
+.example-label {
+padding: 0.6rem 1rem;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.06em;
+border-bottom: 1px solid var(–border);
+background: rgba(255,255,255,0.02);
+}
+
+.code {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.82rem;
+line-height: 1.7;
+padding: 1rem 1.2rem;
+overflow-x: auto;
+white-space: pre;
+}
+
+/* Keyword styles — all bold */
+.kw-red    { color: var(–red);   font-weight: 700; }
+.kw-blue   { color: var(–blue);  font-weight: 700; }
+.kw-green  { color: var(–green); font-weight: 700; }
+
+/* When acting as identifier, show with dotted underline */
+.as-id-blue  { color: var(–blue);  font-weight: 700; text-decoration: underline dotted; text-underline-offset: 3px; }
+.as-id-green { color: var(–green); font-weight: 700; text-decoration: underline dotted; text-underline-offset: 3px; }
+
+.comment { color: var(–comment); font-style: italic; }
+.string  { color: var(–string); }
+.number  { color: var(–number); }
+.plain   { color: var(–text); }
+.type    { color: #e0e0e0; }
+.punct   { color: #8899aa; }
+
+.note {
+margin-top: 0.5rem;
+padding: 0.6rem 1rem;
+font-size: 0.78rem;
+color: var(–text-dim);
+background: rgba(255,255,255,0.03);
+border-left: 3px solid;
+border-radius: 0 6px 6px 0;
+line-height: 1.5;
+}
+
+.note-red   { border-color: var(–red); }
+.note-blue  { border-color: var(–blue); }
+.note-green { border-color: var(–green); }
+
+@media (max-width: 600px) {
+body { padding: 1rem; }
+h1 { font-size: 1.4rem; }
+.legend { flex-direction: column; gap: 0.6rem; }
+.code { font-size: 0.75rem; padding: 0.8rem; }
+}
+</style>
+
+</head>
+<body>
+
+<h1>Swift Keyword Categories</h1>
+<p class="subtitle">
+ Swift keywords fall into three categories based on when they can act as identifiers.
+ Each category shown with two examples: one as keyword, one as identifier (where allowed).
+</p>
+
+<div class="legend">
+ <div class="legend-item">
+   <div class="legend-swatch" style="background:var(--red)"></div>
+   <span><b>Hard reserved</b> — always keywords, never identifiers</span>
+ </div>
+ <div class="legend-item">
+   <div class="legend-swatch" style="background:var(--blue)"></div>
+   <span><b>Reserved</b> — keywords, but identifiers in parameter labels &amp; dot access</span>
+ </div>
+ <div class="legend-item">
+   <div class="legend-swatch" style="background:var(--green)"></div>
+   <span><b>Context-specific</b> — identifiers everywhere except their grammar context</span>
+ </div>
+ <div class="legend-item">
+   <div class="legend-swatch" style="background:var(--text-dim); opacity:0.5"></div>
+   <span><b style="text-decoration:underline dotted;text-underline-offset:3px">Dotted underline</b> — keyword acting as identifier</span>
+ </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- CATEGORY 1: HARD RESERVED                  -->
+
+<!-- ═══════════════════════════════════════════ -->
+
+<div class="category">
+ <div class="category-header">
+   <h2 style="color:var(--red)">Category 1 — Hard Reserved</h2>
+   <span class="category-tag" style="background:rgba(255,77,106,0.15);color:var(--red)">var · let · inout</span>
+ </div>
+ <p class="category-desc">
+   Always keywords. Cannot be used as identifiers — not even as parameter labels — unless escaped with backticks.
+ </p>
+ <div class="examples">
+   <div class="example">
+     <div class="example-label" style="color:var(--red)">Example 1 — as keywords (normal use)</div>
+     <div class="code"><span class="kw-red">let</span> <span class="plain">name</span> <span class="punct">=</span> <span class="string">"Swift"</span>
+<span class="kw-red">var</span> <span class="plain">count</span> <span class="punct">=</span> <span class="number">0</span>
+
+<span class="kw-blue">func</span> <span class="plain">increment</span><span class="punct">(</span><span class="plain">_</span> <span class="plain">value</span><span class="punct">:</span> <span class="kw-red">inout</span> <span class="type">Int</span><span class="punct">)</span> <span class="punct">{</span>
+<span class="plain">value</span> <span class="punct">+=</span> <span class="number">1</span>
+<span class="punct">}</span></div>
+</div>
+<div class="example">
+<div class="example-label" style="color:var(--red)">Example 2 — as identifiers (requires backticks!)</div>
+<div class="code"><span class="comment">// Without backticks → compile error</span>
+<span class="comment">// func configure(var: String) { }        ✗ error</span>
+<span class="comment">// func configure(let: String) { }        ✗ error</span>
+
+<span class="comment">// Backticks required:</span>
+<span class="kw-blue">func</span> <span class="plain">configure</span><span class="punct">(</span><span class="plain">`var`</span><span class="punct">:</span> <span class="type">String</span><span class="punct">,</span> <span class="plain">`let`</span><span class="punct">:</span> <span class="type">Int</span><span class="punct">)</span> <span class="punct">{</span>
+<span class="plain">print</span><span class="punct">(</span><span class="plain">`var`</span><span class="punct">,</span> <span class="plain">`let`</span><span class="punct">)</span>
+<span class="punct">}</span></div>
+</div>
+
+ </div>
+ <div class="note note-red">
+   Only 3 keywords in this category. They modify parameter bindings, so allowing
+   them as parameter labels would create genuine syntactic ambiguity.
+ </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- CATEGORY 2: RESERVED                       -->
+
+<!-- ═══════════════════════════════════════════ -->
+
+<div class="category">
+ <div class="category-header">
+   <h2 style="color:var(--blue)">Category 2 — Reserved Keywords</h2>
+   <span class="category-tag" style="background:rgba(77,159,255,0.15);color:var(--blue)">func · class · return · if · …</span>
+ </div>
+ <p class="category-desc">
+   Reserved as keywords in general, but can be used as identifiers in two cases without backticks:
+   as parameter labels in function declarations/calls, and when accessed via dot notation as member names.
+ </p>
+ <div class="examples">
+   <div class="example">
+     <div class="example-label" style="color:var(--blue)">Example 1 — as keywords (normal use)</div>
+     <div class="code"><span class="kw-blue">class</span> <span class="type">Parser</span> <span class="punct">{</span>
+   <span class="kw-blue">func</span> <span class="plain">parse</span><span class="punct">()</span> <span class="kw-blue">throws</span> <span class="punct">-></span> <span class="type">Node</span> <span class="punct">{</span>
+       <span class="kw-blue">guard</span> <span class="kw-red">let</span> <span class="plain">token</span> <span class="punct">=</span> <span class="plain">nextToken</span><span class="punct">()</span> <span class="kw-blue">else</span> <span class="punct">{</span>
+           <span class="kw-blue">throw</span> <span class="type">ParseError</span><span class="punct">.</span><span class="plain">unexpected</span>
+       <span class="punct">}</span>
+       <span class="kw-blue">switch</span> <span class="plain">token</span> <span class="punct">{</span>
+       <span class="kw-blue">case</span> <span class="punct">.</span><span class="plain">eof</span><span class="punct">:</span> <span class="kw-blue">return</span> <span class="type">Node</span><span class="punct">.</span><span class="plain">empty</span>
+       <span class="kw-blue">default</span><span class="punct">:</span>  <span class="kw-blue">return</span> <span class="kw-blue">try</span> <span class="plain">parseExpression</span><span class="punct">(</span><span class="plain">token</span><span class="punct">)</span>
+       <span class="punct">}</span>
+   <span class="punct">}</span>
+<span class="punct">}</span></div>
+   </div>
+   <div class="example">
+     <div class="example-label" style="color:var(--blue)">Example 2 — as identifiers (parameter labels &amp; dot access)</div>
+     <div class="code"><span class="comment">// Reserved keywords as parameter labels — no backticks needed!</span>
+<span class="kw-blue">func</span> <span class="plain">move</span><span class="punct">(</span><span class="as-id-blue">from</span><span class="punct">:</span> <span class="type">Point</span><span class="punct">,</span> <span class="as-id-blue">to</span><span class="punct">:</span> <span class="type">Point</span><span class="punct">)</span> <span class="punct">{</span> <span class="punct">}</span>
+
+<span class="kw-blue">func</span> <span class="plain">fetch</span><span class="punct">(</span><span class="as-id-blue">if</span><span class="punct">:</span> <span class="type">Bool</span><span class="punct">,</span> <span class="as-id-blue">return</span><span class="punct">:</span> <span class="type">String</span><span class="punct">,</span> <span class="as-id-blue">default</span><span class="punct">:</span> <span class="type">Int</span><span class="punct">)</span> <span class="punct">{</span>
+<span class="plain">print</span><span class="punct">(</span><span class="as-id-blue">`return`</span><span class="punct">)</span>  <span class="comment">// inside body, backtick needed to refer to parameter</span>
+<span class="punct">}</span>
+
+<span class="comment">// As member name via dot notation — no backticks needed</span>
+<span class="kw-red">let</span> <span class="plain">center</span> <span class="punct">=</span> <span class="type">NotificationCenter</span><span class="punct">.</span><span class="as-id-blue">default</span></div>
+</div>
+
+ </div>
+ <div class="note note-blue">
+   This is the largest category. The parameter label exception exists because SE-0001
+   found ~200 imported APIs conflicted with keywords used as argument labels.
+ </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- CATEGORY 3: CONTEXT-SPECIFIC               -->
+
+<!-- ═══════════════════════════════════════════ -->
+
+<div class="category">
+ <div class="category-header">
+   <h2 style="color:var(--green)">Category 3 — Context-Specific Keywords</h2>
+   <span class="category-tag" style="background:rgba(77,219,122,0.15);color:var(--green)">mutating · lazy · get · set · …</span>
+ </div>
+ <p class="category-desc">
+   Only keywords in the specific grammar context where they appear.
+   Everywhere else, they are ordinary identifiers — no backticks needed.
+ </p>
+ <div class="examples">
+   <div class="example">
+     <div class="example-label" style="color:var(--green)">Example 1 — as keywords (in their grammar context)</div>
+     <div class="code"><span class="kw-blue">struct</span> <span class="type">Counter</span> <span class="punct">{</span>
+   <span class="kw-green">lazy</span> <span class="kw-red">var</span> <span class="plain">formatter</span> <span class="punct">=</span> <span class="type">NumberFormatter</span><span class="punct">()</span>
+
+```
+<span class="kw-red">var</span> <span class="plain">value</span><span class="punct">:</span> <span class="type">Int</span> <span class="punct">=</span> <span class="number">0</span> <span class="punct">{</span>
+   <span class="kw-green">willSet</span> <span class="punct">{</span> <span class="plain">print</span><span class="punct">(</span><span class="string">"will change"</span><span class="punct">)</span> <span class="punct">}</span>
+   <span class="kw-green">didSet</span>  <span class="punct">{</span> <span class="plain">print</span><span class="punct">(</span><span class="string">"did change"</span><span class="punct">)</span> <span class="punct">}</span>
+<span class="punct">}</span>
+
+<span class="kw-green">mutating</span> <span class="kw-blue">func</span> <span class="plain">increment</span><span class="punct">()</span> <span class="punct">{</span> <span class="plain">value</span> <span class="punct">+=</span> <span class="number">1</span> <span class="punct">}</span>
+```
+
+<span class="punct">}</span>
+
+<span class="kw-blue">protocol</span> <span class="type">Configurable</span> <span class="punct">{</span>
+<span class="kw-green">associativity</span>                       <span class="comment">// keyword in precedencegroup</span>
+<span class="kw-green">optional</span> <span class="kw-blue">func</span> <span class="plain">reset</span><span class="punct">()</span>             <span class="comment">// keyword in @objc protocol</span>
+<span class="punct">}</span></div>
+</div>
+<div class="example">
+<div class="example-label" style="color:var(--green)">Example 2 — as identifiers (outside their grammar context)</div>
+<div class="code"><span class="comment">// Perfectly valid — these are just identifiers here</span>
+<span class="kw-red">let</span> <span class="as-id-green">mutating</span> <span class="punct">=</span> <span class="kw-blue">true</span>
+<span class="kw-red">let</span> <span class="as-id-green">lazy</span> <span class="punct">=</span> <span class="string">“not really”</span>
+<span class="kw-red">let</span> <span class="as-id-green">weak</span> <span class="punct">=</span> <span class="number">42</span>
+<span class="kw-red">var</span> <span class="as-id-green">override</span> <span class="punct">=</span> <span class="kw-blue">false</span>
+<span class="kw-red">var</span> <span class="as-id-green">convenience</span> <span class="punct">=</span> <span class="string">“store”</span>
+
+<span class="comment">// Using context-specific keywords as function and parameter names</span>
+<span class="kw-blue">func</span> <span class="as-id-green">set</span><span class="punct">(</span><span class="as-id-green">dynamic</span><span class="punct">:</span> <span class="type">Bool</span><span class="punct">,</span> <span class="as-id-green">final</span><span class="punct">:</span> <span class="type">Int</span><span class="punct">)</span> <span class="punct">{</span>
+<span class="plain">print</span><span class="punct">(</span><span class="as-id-green">dynamic</span><span class="punct">,</span> <span class="as-id-green">final</span><span class="punct">)</span>
+<span class="punct">}</span>
+
+<span class="comment">// Even as a type name</span>
+<span class="kw-blue">struct</span> <span class="as-id-green">lazy</span> <span class="punct">{</span>
+<span class="kw-red">var</span> <span class="as-id-green">none</span><span class="punct">:</span> <span class="type">String</span> <span class="punct">=</span> <span class="string">“something”</span>
+<span class="punct">}</span></div>
+</div>
+
+ </div>
+ <div class="note note-green">
+   This list keeps growing: newer additions include <b>actor</b>, <b>async</b>, <b>await</b>,
+   <b>borrowing</b>, <b>consuming</b>, <b>sending</b>, <b>nonisolated</b>, <b>isolated</b>,
+   <b>some</b>, <b>any</b>, <b>macro</b>, and <b>package</b>.
+ </div>
+</div>
+
+</body>
+</html>

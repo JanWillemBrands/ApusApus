@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summary of the Grammar</title>
+<style>
+:root {
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --keyword: #ad3da4;
+  --regex: #0f68a0;
+  --rule: #333336;
+  --note-bg: #f5f5f7;
+  --note-border: #d2d2d7;
+  --annot: #b25e00;   /* shared by @pragmas and ---/lookaround annotations */
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  padding: 2.5rem 1.5rem 6rem;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+.apus-title {
+  max-width: 820px;
+  margin: 0 auto 0.5rem;
+  font-size: 2.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.apus-legend {
+  max-width: 820px;
+  margin: 0 auto 2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.apus-legend b { color: var(--rule); font-weight: 600; }
+h2.apus-section {
+  max-width: 820px;
+  margin: 2.6rem auto 1rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+aside.note {
+  max-width: 820px;
+  margin: 0 auto 0.5rem;
+  background: var(--note-bg);
+  border: 1px solid var(--note-border);
+  border-left: 3px solid #b0b0b8;
+  border-radius: 6px;
+  padding: 0.6rem 1rem 0.7rem;
+}
+aside.note .label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+aside.note .rule {
+  margin: 0;
+  color: var(--rule);
+  line-height: 1.65;
+  font-size: 1.02rem;
+}
+/* nonterminals & lexical categories */
+.rule em {
+  font-style: italic;
+  color: var(--rule);
+}
+.rule em.apus-eps { color: var(--muted); font-weight: 600; }
+/* keywords / literal terminals */
+.rule strong code,
+code {
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+}
+.rule strong code {
+  font-weight: 600;
+  color: var(--keyword);
+}
+/* monospace reads larger than the proportional body text at the same em,
+   so nudge the regex down to match the surrounding production visually */
+code.apus-regex { color: var(--regex); font-size: 0.82em; }
+.apus-arrow { color: var(--muted); }
+.apus-bar { color: var(--muted); font-weight: 600; padding: 0 0.15em; }
+/* EBNF delimiters ( ) [ ] { } < > — same treatment as the | bar */
+.apus-bracket { color: var(--muted); font-weight: 600; }
+.apus-rep { color: var(--muted); font-style: normal; }
+sup.apus-rep { font-size: 0.75em; }
+/* invented-notation annotations — coloured text only, no fill */
+/* monospace, same size and colour as an @pragma */
+.apus-annot {
+  color: var(--annot);
+  font-size: 0.78em;
+  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+}
+/* the lookaround triangle is a thin math glyph — enlarge & embolden it so it
+   reads as the focal point of the annotation (operand list stays small) */
+.apus-tri {
+  font-size: 1.45em;
+  font-weight: 700;
+  line-height: 0;
+  vertical-align: -0.12em;
+}
+.apus-layout {
+  font-size: 0.74em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #2f7d32;
+}
+.apus-constraint {
+  font-size: 0.78em;
+  color: #5a4b8a;
+/*          color: #5a4b8a; */
+color: #6a5b9a;
+}
+.apus-action {
+  font-size: 0.82em;
+  color: var(--muted);
+  font-style: italic;
+}
+.apus-pragma {
+  font-size: 0.78em;
+  color: var(--annot);
+  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #f5f5f7; --muted: #a1a1a6; --rule: #e3e3e6;
+    --note-bg: #1c1c1e; --note-border: #3a3a3c;
+    --keyword: #ff7ab2; --regex: #6bb8e6; --annot: #e0955a;
+  }
+  body { background: #000000; }
+  aside.note { border-left-color: #5a5a60; }
+}
+</style>
+</head>
+<body>
+<h1 class="apus-title">Tokens</h1>
+<p class="apus-legend"><b>→</b> production &nbsp;·&nbsp; <b>↦</b> token terminal &nbsp;·&nbsp; <b>⇢</b> discarded terminal &nbsp;·&nbsp; <b>↝</b> trivia &nbsp;·&nbsp; <b>↠</b> lexical token</p>
+<aside class="note">
+  <p class="label">Grammar of trivia</p>
+  <p class="rule"><em>whitespace</em> <span class="apus-arrow">⇢</span> <code class="apus-regex">/\s+/</code><br>
+<em>comment</em> <span class="apus-arrow">⇢</span> <code class="apus-regex">/\/\/.*/</code></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of terminals</p>
+  <p class="rule"><em>identifier</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/[_\p{XID_Start}][-\p{XID_Continue}]*/</code><br>
+<em>literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\"(?:[^\"\\]|\\.)+\"/</code><br>
+<em>regex</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\/(?!\*)(?:[^\/\\]|\\.)+\//</code></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of attributes</p>
+  <p class="rule"><em>action</em> <span class="apus-arrow">⇢</span> <code class="apus-regex">/'(?:[^'\\]|\\.)*'/</code><br>
+<em>pragma</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/@\p{XID_Start}\p{XID_Continue}*/</code><br>
+<em>message</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\^\^\^(?:(?s).*?)(?=\^\^\^|$)/</code></p>
+</aside>
+<h2 class="apus-section">Productions</h2>
+<aside class="note">
+  <p class="rule"><em>grammar</em> <span class="apus-arrow">→</span> <span class="apus-bracket"><</span> <em>production</em> <span class="apus-bracket">></span> <span class="apus-bracket">{</span> <em>message</em> <span class="apus-bracket">}</span><br>
+<em>production</em> <span class="apus-arrow">→</span> <span class="apus-bracket">[</span> <em>pragma</em> <span class="apus-bracket">]</span> <em>identifier</em> <span class="apus-bracket">(</span> <strong><code>:</code></strong> <span class="apus-bracket">(</span> <em>regex</em> <span class="apus-bar">|</span> <em>literal</em> <span class="apus-bracket">)</span> <strong><code>.</code></strong> <span class="apus-bracket">[</span> <em>follow</em> <span class="apus-bracket">]</span> <span class="apus-bar">|</span> <strong><code>-</code></strong> <span class="apus-bracket">(</span> <em>regex</em> <span class="apus-bar">|</span> <em>literal</em> <span class="apus-bracket">)</span> <strong><code>.</code></strong> <span class="apus-bracket">[</span> <em>follow</em> <span class="apus-bracket">]</span> <span class="apus-bar">|</span> <strong><code>-:</code></strong> <em>selection</em> <strong><code>.</code></strong> <span class="apus-bar">|</span> <strong><code>=</code></strong> <em>selection</em> <strong><code>.</code></strong> <span class="apus-bracket">)</span><br>
+<em>selection</em> <span class="apus-arrow">→</span> <em>sequence</em> <span class="apus-bracket">{</span> <strong><code>|</code></strong> <em>sequence</em> <span class="apus-bracket">}</span><br>
+<em>sequence</em> <span class="apus-arrow">→</span> <span class="apus-bracket"><</span> <em>factor</em> <span class="apus-bracket">[</span> <strong><code>?</code></strong> <span class="apus-bar">|</span> <strong><code>*</code></strong> <span class="apus-bar">|</span> <strong><code>+</code></strong> <span class="apus-bracket">]</span> <span class="apus-bar">|</span> <em>layout</em> <span class="apus-bracket">></span><br>
+<em>factor</em> <span class="apus-arrow">→</span> <em>terminal</em> <span class="apus-bar">|</span> <strong><code>[</code></strong> <em>selection</em> <strong><code>]</code></strong> <span class="apus-bar">|</span> <strong><code>{</code></strong> <em>selection</em> <strong><code>}</code></strong> <span class="apus-bar">|</span> <strong><code>&lt;</code></strong> <em>selection</em> <strong><code>&gt;</code></strong> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>selection</em> <strong><code>)</code></strong><br>
+<em>terminal</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-bracket">[</span> <em>exclusion</em> <span class="apus-bracket">]</span> <span class="apus-bar">|</span> <em>literal</em> <span class="apus-bar">|</span> <em>regex</em> <span class="apus-bar">|</span> <em>epsilon</em> <span class="apus-bar">|</span> <em>empty</em><br>
+<em>epsilon</em> <span class="apus-arrow">→</span> <strong><code>ε</code></strong><br>
+<em>empty</em> <span class="apus-arrow">→</span> <strong><code>""</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of annotations</p>
+  <p class="rule"><em>exclusion</em> <span class="apus-arrow">→</span> <strong><code>---</code></strong> <strong><code>(</code></strong> <span class="apus-bracket"><</span> <em>literal</em> <span class="apus-bracket">></span> <strong><code>)</code></strong><br>
+<em>layout</em> <span class="apus-arrow">→</span> <strong><code>&gt;&gt;|</code></strong> <span class="apus-bar">|</span> <strong><code>|&lt;&lt;</code></strong> <span class="apus-bar">|</span> <strong><code>&lt;n&gt;</code></strong> <span class="apus-bar">|</span> <strong><code>&lt;s&gt;</code></strong> <span class="apus-bar">|</span> <strong><code>&gt;n&lt;</code></strong> <span class="apus-bar">|</span> <strong><code>&gt;s&lt;</code></strong><br>
+<em>follow</em> <span class="apus-arrow">→</span> <span class="apus-bracket">(</span> <strong><code>&lt;+&lt;</code></strong> <span class="apus-bar">|</span> <strong><code>&lt;-&lt;</code></strong> <span class="apus-bar">|</span> <strong><code>&gt;+&gt;</code></strong> <span class="apus-bar">|</span> <strong><code>&gt;-&gt;</code></strong> <span class="apus-bracket">)</span> <strong><code>(</code></strong> <span class="apus-bracket"><</span> <em>literal</em> <span class="apus-bracket">></span> <strong><code>)</code></strong></p>
+</aside>
+</body>
+</html>

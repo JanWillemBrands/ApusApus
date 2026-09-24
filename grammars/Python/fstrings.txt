@@ -1,0 +1,55 @@
+f"{value:{width}.{prec​}f}"
+
+Use modes:
+• f​Expr for expression part
+• f​Spec for format-spec part
+
+Token annotations (conceptual):
+
+1. Field open
+"{"  >>> "f​Expr"
+
+2. Colon in expression switches to format-spec
+":"  === "f​Expr"  !!! "f​Spec"
+
+3. Nested replacement field inside spec
+"{"  === "f​Spec"  >>> "f​Expr"
+
+4. Close expression returns to previous mode
+"}"  === "f​Expr"  <<< "f​Expr"
+
+5. Close spec field
+"}"  === "f​Spec"  <<< "f​Spec"
+
+Why !!! here: : changes phase from f​Expr to f​Spec at same nesting depth; it is not delimiter nesting. <<< >>> can emulate, but !!! is the direct transition.
+
+
+
+
+fstring = "f\"{" value ":" "{" width "}" "." "{" prec​ "}" "f}\"" .
+
+value = expression .
+width = expression .
+prec = string .
+
+
+fstringHead = "f\"{" 		>>> "fExpr" .
+
+fColon      = ":"		<<< "fExpr"   >>> "fSpec" .
+
+fBraceOpen  = "{"		=== "fSpec"   >>> "fExpr" .
+
+fBraceClose = "}"		<<< "fExpr" .
+
+fBraceClose = "}"		<<< "fSpec" .
+
+fstringTail = "f}\""		<<< "fExpr" .
+
+
+
+fstringHead  - "f\"{"    >>> "fExpr" .
+fColon       - ":"       === "fExpr" !!! "fSpec" .   // or <<< "fExpr" >>> "fSpec"
+fBraceOpen   - "{"       === "fSpec" >>> "fExpr" .
+fBraceClose  - "}"       === "fExpr" <<< "fExpr" .
+fBraceClose  - "}"       === "fSpec" <<< "fSpec" .
+fstringTail  - "\"" .    // ends outer string tokenization context

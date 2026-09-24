@@ -1,0 +1,231 @@
+// GRAMMAR OF APUS
+
+// Grammar of trivia
+whitespace  : /\s+/ .
+comment     : /\/\/.*/ .
+action      : /'(?:[^'\\]|\\.)*'/ .
+
+// Grammar of terminals
+identifier  - /[_\p{XID_Start}][-\p{XID_Continue}]*/ .
+literal     - /\"(?:[^\"\\]|\\.)+\"/ .
+regex       - /\/(?!\*)(?:[^\/\\]|\\.)+\// .
+
+// Grammar of pragmas
+pragma      - /@\p{XID_Start}\p{XID_Continue}*/ .
+
+// Grammar of test messages
+message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
+
+// Grammar of production rules
+grammar     = < production > { message } .
+              
+production  = { pragma } identifier ( ":" | "-" | "=" ) alternates "." .
+
+alternates  = "|"? sequence { "|" sequence } .
+// this allows:
+// factor =
+//     | terminal
+//     | "[" alternates "]"
+//     | "{" alternates "}"
+//     | "<" alternates ">"
+//     | "(" alternates ")"
+//     .
+
+sequence    = < factor [ "?" | "*" | "+" ]
+              | spacing
+              | pragma
+              | lookaround
+              > .
+
+factor      = terminal
+            | "[" alternates "]"
+            | "{" alternates "}"
+            | "<" alternates ">"
+            | "(" alternates ")"
+            .
+
+terminal    = identifier [ exclusion ]
+            | literal
+            | regex
+            | "ε" | "\"\""
+            .
+
+// Grammar of annotations
+
+exclusion   = "---" "(" < literal > ")" .
+
+spacing     = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
+
+lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EOF" > ")" .
+
+// Grammar of pragma placement — SUBSTITUTE PRODUCTIONS, COMMENTED OUT
+//
+// The live `production` / `sequence` / `factor` above are deliberately loose about
+// pragmas: `sequence` admits a bare `pragma` anywhere. That types `@x` as a token and
+// leaves placement to ApusParser. The productions below spell out what ApusParser
+// actually accepts, with each pragma written as an explicit literal. Substituting them
+// for the live `production`, `sequence` and `factor` would tighten this grammar to the
+// parser's real contract; they stay commented out because the scanner returns kind
+// `pragma` for every `@name`, so a literal `"@prefer"` could never match as written.
+//
+// There are exactly FOUR pragma positions, and every pragma belongs to just one.
+//
+// 1. PRODUCTION START, before the LHS name. Parsed as four sequential `if`s, so each
+//    appears at most once and THE ORDER IS FIXED — `@sameLine @longest X = …` does not
+//    parse.
+//
+//    production   = extent? "@sameLine"? identifier "=" alternates "." .
+//    production   = extent? "@sameLine"? "@literalMunch"? preempt?
+//                   identifier ( "-" | ":" ) terminalBody "." .
+//
+//    extent       = "@longest" | "@shortest" | "@left" | "@right" .
+//    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
+//
+//    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
+//    production start but only ever applies them to `grammar.terminals[LHS]`, so on an
+//    `=` production they are accepted and inert.
+//
+// 2. TERMINAL BODY, after `-` or `:`. The only legal position for `@builder`.
+//
+//    terminalBody = regex | literal | builder | alternates .
+//    builder      = "@builder" [ "(" identifier ")" ] .
+//
+// 3. ALTERNATE START, after `=`, `|`, or an opening bracket, before the first factor.
+//    Parsed as a `while`, so any number in any order — and nowhere else. Mid-body,
+//    `"(" "@cannotParse" "(" … ")" expression ")"` is a load error: the Oracle anchors
+//    these predicates on the alternate's first body symbol, relying on
+//    yield-start == alternate-start, and mid-body there is no anchor.
+//
+//    sequence     = { altPragma } < factor [ "?" | "*" | "+" ]
+//                                 | spacing
+//                                 | lookaround
+//                                 > .
+//
+//    altPragma    = "@prefer" | "@avoid"
+//                 | ( "@confinedTo" | "@excludedFrom" ) "(" identifier ")"
+//                 | ( "@cannotParse" | "@canParse" ) "(" < identifier > ")" .
+//
+// 4. GROUP PREFIX, immediately before a bracket — `extent` again, and only there.
+//    This is why extent is barred from position 3: an extent pragma at an alternate
+//    start drops out of the `while` in (3), is re-read here, and then demands a
+//    bracket.
+//
+//    factor       = terminal
+//                 | extent? "[" alternates "]"
+//                 | extent? "{" alternates "}"
+//                 | extent? "<" alternates ">"
+//                 | extent? "(" alternates ")"
+//                 .
+
+
+^^^
+// GRAMMAR OF APUS
+
+// Grammar of trivia
+whitespace  : /\s+/ .
+comment     : /\/\/.*/ .
+action      : /'(?:[^'\\]|\\.)*'/ .
+
+// Grammar of terminals
+identifier  - /[_\p{XID_Start}][-\p{XID_Continue}]*/ .
+literal     - /\"(?:[^\"\\]|\\.)+\"/ .
+regex       - /\/(?!\*)(?:[^\/\\]|\\.)+\// .
+
+// Grammar of pragmas
+pragma      - /@\p{XID_Start}\p{XID_Continue}*/ .
+
+// Grammar of test messages
+message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
+
+// Grammar of production rules
+grammar     = < production > { message } .
+              
+production  = { pragma } identifier ( ":" | "-" | "=" ) alternates "." .
+
+alternates  = sequence { "|" sequence } .
+
+sequence    = < factor [ "?" | "*" | "+" ]
+              | spacing
+              | pragma
+              | lookaround
+              > .
+
+factor      = terminal
+            | "[" alternates "]"
+            | "{" alternates "}"
+            | "<" alternates ">"
+            | "(" alternates ")"
+            .
+
+terminal    = identifier [ exclusion ]
+            | literal
+            | regex
+            | "ε" | "\"\""
+            .
+
+// Grammar of annotations
+
+exclusion   = "---" "(" < literal > ")" .
+
+spacing     = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
+
+lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EOF" > ")" .
+
+// Grammar of pragma placement — SUBSTITUTE PRODUCTIONS, COMMENTED OUT
+//
+// The live `production` / `sequence` / `factor` above are deliberately loose about
+// pragmas: `sequence` admits a bare `pragma` anywhere. That types `@x` as a token and
+// leaves placement to ApusParser. The productions below spell out what ApusParser
+// actually accepts, with each pragma written as an explicit literal. Substituting them
+// for the live `production`, `sequence` and `factor` would tighten this grammar to the
+// parser's real contract; they stay commented out because the scanner returns kind
+// `pragma` for every `@name`, so a literal `"@prefer"` could never match as written.
+//
+// There are exactly FOUR pragma positions, and every pragma belongs to just one.
+//
+// 1. PRODUCTION START, before the LHS name. Parsed as four sequential `if`s, so each
+//    appears at most once and THE ORDER IS FIXED — `@sameLine @longest X = …` does not
+//    parse.
+//
+//    production   = extent? "@sameLine"? identifier "=" alternates "." .
+//    production   = extent? "@sameLine"? "@literalMunch"? preempt?
+//                   identifier ( "-" | ":" ) terminalBody "." .
+//
+//    extent       = "@longest" | "@shortest" | "@left" | "@right" .
+//    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
+//
+//    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
+//    production start but only ever applies them to `grammar.terminals[LHS]`, so on an
+//    `=` production they are accepted and inert.
+//
+// 2. TERMINAL BODY, after `-` or `:`. The only legal position for `@builder`.
+//
+//    terminalBody = regex | literal | builder | alternates .
+//    builder      = "@builder" [ "(" identifier ")" ] .
+//
+// 3. ALTERNATE START, after `=`, `|`, or an opening bracket, before the first factor.
+//    Parsed as a `while`, so any number in any order — and nowhere else. Mid-body,
+//    `"(" "@cannotParse" "(" … ")" expression ")"` is a load error: the Oracle anchors
+//    these predicates on the alternate's first body symbol, relying on
+//    yield-start == alternate-start, and mid-body there is no anchor.
+//
+//    sequence     = { altPragma } < factor [ "?" | "*" | "+" ]
+//                                 | spacing
+//                                 | lookaround
+//                                 > .
+//
+//    altPragma    = "@prefer" | "@avoid"
+//                 | ( "@confinedTo" | "@excludedFrom" ) "(" identifier ")"
+//                 | ( "@cannotParse" | "@canParse" ) "(" < identifier > ")" .
+//
+// 4. GROUP PREFIX, immediately before a bracket — `extent` again, and only there.
+//    This is why extent is barred from position 3: an extent pragma at an alternate
+//    start drops out of the `while` in (3), is re-read here, and then demands a
+//    bracket.
+//
+//    factor       = terminal
+//                 | extent? "[" alternates "]"
+//                 | extent? "{" alternates "}"
+//                 | extent? "<" alternates ">"
+//                 | extent? "(" alternates ")"
+//                 .

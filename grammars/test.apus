@@ -1,0 +1,227 @@
+whitespace : /\s+/.
+blockcomment: /\/\*(?s).*?\*\// .
+
+//comment    : /\/\/.*/.
+
+//S = X X X.                    // PASS
+//X = "x".
+
+//S = X "x" | X "x".            // PASS
+//X = "x".
+
+//S = "x" X | "x" X.            // PASS
+//X = "x".
+
+//S = X | X.
+//X = "x".                      // PASS
+
+//S = X | X.                    // PASS
+//X = ["x"].
+
+//S = "x" | "x".                // PASS
+
+//S = "x" X "x" | "x" X "x".    // PASS
+//X = "x".
+
+//S = ( ["x"] | ["x"] ) "x".    // PASS
+
+//S = "x".                      // PASS
+//S = "x" "x".                  // PASS
+//S = "a" "b".                  // PASS
+//S = "a" "".                   // PASS
+
+//S = "a" /u+/ "b".             // PASS auuub
+//S = /u+/ "b".                 // FAIL uuub (first regex in production means "named regex"")
+
+//S = ["x"].                    // PASS
+//S = "x" | "".                 // PASS
+//S = ["x"] "a".                // PASS
+//S = "x" ["x"].                // PASS
+//S = ["x"] "x".                // PASS
+
+//S = {"x"}.                    // PASS
+//S = "x" {"x"}.                // PASS
+//S = {"x"} "x".                // PASS
+
+//S = "x" [S].                  // PASS
+
+//S = "x" | "x" S.                      // PASS
+//S = "x" S | "x".                      // PASS
+
+//S = "x" | S "x".                      // PASS
+//S = S "x" | "x".                      // PASS
+
+//S = S "x" | "".                       // PASS
+//S = "x" S | "".                       // PASS
+
+//S = A B. A = "a". B = "b".            // PASS
+//S = X X X. X = "x".                   // PASS
+
+//S = "a" {"x"} "c".                    // PASS
+
+//S = {{"x"}}.                          // PASS
+//S = {{"x"}} "a".                      // PASS
+//S = {"x"} {"x"}.                      // PASS but all combination sets are reached
+
+//S = <"x">.                            // PASS
+//S = < "x" | "x" >.                    // PASS
+//S = <"x"> <"x">.                      // PASS but all combination sets are reached
+
+//S = "x".                              // PASS
+
+//S = "a" | "b" .                       // PASS
+//S = "x" | "x" .                       // PASS
+//S = "x" ( "x" | "x" ) "x".            // PASS
+//S = ( "x" | "x" ) "x".                // PASS
+//S = "x" ( "x" | "x" ).                // PASS
+
+//S = "b" S | A S "d" | "". A = "a".    // PASS on "aadd" Cappers thesis Γ3
+
+//S = "a" S | "a" S "d" | "".           // PASS on "aad" Cappers thesis Γ5
+
+//S = "a" S "b" | "a" S "c" | "a".      // PASS on "aac" "Alfroozeh Γ0
+
+//S = ( "a" "b" | "a" "b" ) "c".        // PASS on "abc"
+
+//S = "a" A B | "a" A "b".              // PASS on "aab" Binsbergen Γ1 (2 matches, need to check for derivation equivalence)
+//A = "a" | "c" | "".
+//B = "b" | B "c" | "".
+
+//S = A C "a" B | A B "a" "a".          // PASS on "aabbaa" Binsbergen Γ2 (1 match, need to check derivation efficiency)
+//A = "a" A | "a".
+//B = "b" B | "b".
+//C = "b" C | "c".
+
+//S = ( ("a" | "a" ) | "a" ) | "a".     // PASS on "a"
+//S = ( ( ( "a" ) "a" ) "a" ) "a".      // PASS on "aaaa"
+
+//S = "a" B "c" | "a" B "c". B = "b".   // PASS on "abc"
+
+//S = "x" | S S | S S S.                // PASS on "xxx" Binsbergen Γ3  matched: _2_!!!   failed: 5   gss size: 16   descriptors: 118
+//S = "x" | S S.                        // PASS on "xxx" Binsbergen Γ3  matched: _2_!!!   failed: 5   gss size: 16   descriptors: 118
+//S = "x" | S S S.                      // PASS on "xxx"
+
+//S = "x" | {"x" "x"} | {"x" "x" "x"}.  //PASS but all combination sets are reached
+
+//S = A "b" | A "c". A = ["a"].         //PASS
+
+//S = "a" [ "b" | "c" ] "d" .            //PASS
+//S = "k" [ "l" | "m" ] "n".
+
+//S = A "b" | A "c". A = "a" | "".      // PASS
+//S = A "b" | A "c".  A = "a".          // PASS
+//S = ["a"] ["b"] ["c"].                // PASS
+//S = A B. A = ["a"]. B = ["b"].        // PASS
+//S = "" "" "a".                        // PASS
+//S = ((("a"))).                        // PASS
+//S = { "a" } "b".                      // PASS
+//S = "a" | "c" "d".                    // PASS
+//S = ("a" | "b") | "c".                // PASS
+//S = {"a"} "x" {"b" | "c"}.            // PASS
+//S = "" | "b".                         // PASS
+//S = S "a" | S "b" | "".               // PASS
+
+//S = X X. X = "x".                     // PASS
+//S = X. X = "x".                       // PASS
+
+//S = "x". S = "xx". S = "xxx".         // PASS
+
+//S = { "a" {"b"} "c" }.                // PASS
+//S = { "a" B "c" }. B = { "b" }.       // PASS
+//S = { "x" X "x" }. X = { "x" }.       // PASS
+
+//S = "a"("a""b"|"a")("b""c"|"c").      // PASS Scott & Johnstone EBNF two derivations of aabc
+
+//something  = /[a-z]+/ .
+//S = something something.              // PASS
+
+//S = A "b" | A "c". A = ["a"].         // PASS
+
+//S = ["a"] | ["b"] | ["c"].            // PASS
+//S = "bla" ("hup" "lala") * "!" .      // PASS bla hup lala hup lala !
+
+//S = @a@ { @b@ "x" @c@ } @d@ .         // PASS
+//S = @a@ "x" @b@ | @c@ "y" @d@ .       // PASS
+//@bla@ S @bla@ = "x" .                 // FAIL need to think about actions surrounding lhs nonterminals
+
+//S = @a@ @aa@ "x" @b@ @bb@ ( @c@ @cc@ "y" @d@ @dd@ "z" @e@ @ee@ ) @f@ @ff@ * @g@ @gg@ "w" @h@ @hh@ .  // PASS xyzyzyzw
+//S = "x" * * .
+
+//S = "b" | S S .                       // PASS half of the ART torture test
+
+//S = "b" | { "b" S | S "b" } .
+
+//S = { "b" } { "b" } .
+
+//S = [ "a" | "b" ] [ "c" ].
+
+//S = "a" ( "b" ) "c".                  // PASS first & follow test for EBNF brackets
+//S = "a" [ "b" ] "c".                  // PASS first & follow test for EBNF brackets
+//S = "a" { "b" } "c".                  // PASS first & follow test for EBNF brackets
+//S = "a" < "b" > "c".                  // PASS first & follow test for EBNF brackets
+
+//S = { T ["a"] } . T = "t".            // PASS first & follow test for nullable tails
+
+//S = T "t". T = "a" | "b" | "c".         // PASS
+
+//S = X "a" | X "b". X = "x".     // PASS fifo nonterminal instance has different follow
+//S = "a" "b".                    // PASS fifo
+//S = [ "a" "b" ].                // PASS fifo
+//S = { "a" "b" }.                // PASS fifo
+//S = < "a" "b" >.                // PASS fifo
+//S = [ "a" ].                    // PASS fifo
+//S = { "a" }.                    // PASS fifo
+//S = < "a" >.                    // PASS fifo
+//S = { "a" ["b"] }.              // PASS fifo
+
+//S = ("a") ("b") ("c").                // PASS first & follow test for nullable sequence
+//S = ["a"] ["b"] ["c"].                // PASS first & follow test for nullable sequence
+//S = {"a"} {"b"} {"c"}.                // PASS first & follow test for nullable sequence
+//S = <"a"> <"b"> <"c">.                // PASS first & follow test for nullable sequence
+
+//S = A B C. A = "a" | "". B = "b" | "". C = "c" | "".
+
+//S = "" "" "x" .
+
+//S = T "a" T "b". T = [ "t" ].         // PASS follow of lhs nonterminal gathers follow of lhs instances
+
+//tr = /testRegex/.                     // FAIL tr shows up as "tr" in syntax diagrams
+
+//S = A. A = "a" | "b" | "c".
+//S = A. A = "a" .        // FAIL
+
+//S = "a" | S "b" | S ["b"] C . C = "c" . // PASS Afroozeh hunt
+
+//S = { "a" | "b" }.              // FAIL with testRepeat
+//S = [ [ "a" ] ].                  // PASS
+//S = "a" A B | "a" A "b".  A = "a". B = "b". // FAIL not sharing "a" A prefix
+//S = "a" "b".    // PASS
+
+// S = A A c. A = B. B = "".   // forces contingent pops "Structuring the..."
+
+//S = "a" | "" .      // PASS on empty string
+//S = "a" | # .       // FAIL on empty string
+//S = "a" | ε .       // PASS on empty string
+
+//S = "a" B. B = "b".
+//S = {"a"} {"a"}.
+
+//S = { "x" | "" } .      // nullable closure
+//S = ["a"] "b".         // nullable positive closure
+
+//S = { "x" } { "x" } { "x" } .
+
+//S = "x" | "<" Y | "$" .
+//S = "x" | "<" Y .     // << x >>
+//Y = S ">" .
+//B - ">>" .
+
+S = { E } .
+E = "=" <n>.
+
+^^^
+
+ =
+ 
+ 
+ =

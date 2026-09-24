@@ -1,0 +1,847 @@
+(*The choices and nonterminals can only be used to specify longestWithin
+and priority between keywords and things like ID
+If we want longestAcross we will need nonterminals for ++, --, +, -, +=, etc
+*)
+
+!paraterminal
+trueEAS ,
+falseEAS,
+nullEAS ,
+booleanEAS ,
+byteEAS ,
+shortEAS ,
+intEAS ,
+longEAS,
+charEAS,
+floatEAS,
+doubleEAS,
+packageEAS,
+importEAS ,
+publicEAS ,
+protectedEAS ,
+privateEAS,
+nativeEAS ,
+staticEAS ,
+abstractEAS ,
+finalEAS ,
+naiveEAS ,
+synchronizedEAS ,
+transientEAS ,
+volatileEAS ,
+classEAS ,
+extendsEAS ,
+implementsEAS ,
+voidEAS ,
+throwsKEAS ,
+throwEAS ,
+thisEAS ,
+superKEAS ,
+interfaceEAS ,
+ifEAS ,
+elseEAS,
+whileEAS,
+caseEAS ,
+defaultEAS ,
+switchEAS ,
+doEAS ,
+forEAS ,
+breakEAS ,
+continueEAS,
+returnEAS ,
+catchEAS ,
+tryEAS ,
+finallyEAS ,
+newEAS ,
+instanceofEAS ,
+ID,
+INTEGER,
+REAL,
+STRING_DQ,
+STRING_SQ
+
+!choose LexTWE
+ID >> ID
+INTEGER >> INTEGER
+REAL >> REAL
+trueEAS > ID 
+falseEAS > ID 
+nullEAS > ID 
+booleanEAS > ID 
+byteEAS > ID 
+shortEAS > ID 
+intEAS > ID 
+longEAS > ID 
+charEAS > ID 
+floatEAS > ID 
+doubleEAS > ID 
+packageEAS > ID 
+importEAS  > ID 
+publicEAS > ID 
+protectedEAS > ID 
+privateEAS > ID 
+nativeEAS > ID 
+staticEAS > ID 
+abstractEAS > ID 
+finalEAS > ID 
+naiveEAS > ID 
+synchronizedEAS > ID  
+transientEAS > ID 
+volatileEAS > ID 
+classEAS > ID 
+extendsEAS > ID 
+implementsEAS > ID 
+voidEAS > ID 
+throwsKEAS > ID 
+throwEAS > ID 
+thisEAS > ID 
+superKEAS > ID 
+interfaceEAS > ID 
+ifEAS > ID 
+elseEAS > ID 
+whileEAS > ID 
+caseEAS > ID 
+defaultEAS > ID 
+switchEAS > ID 
+doEAS > ID 
+forEAS > ID 
+breakEAS > ID 
+continueEAS > ID 
+returnEAS > ID 
+catchEAS > ID 
+tryEAS > ID 
+finallyEAS > ID 
+newEAS > ID 
+instanceofEAS > ID 
+
+(*These are the syntax level choosers*)
+
+(*
+!choose ParseSPPF
+PostfixExpression::=  Primary >  Name 
+
+!choose ParseSPPF
+MethodHeader ::= modsEAS voidEAS whiteEAS MethodDeclarator throwsEAS  >
+                 modsEAS Type MethodDeclarator throwsEAS 
+
+(* also a syntax level ambiguity *)
+!choose ParseSPPF 
+BlockStatement::= Statement  > LocalVariableDeclarationStatement 
+
+!choose ParseSPPF
+ArrayCreationExpression::=
+  newEAS whiteEAS PrimitiveType DimExprs dEAS >
+  newEAS whiteEAS ClassOrInterfaceType DimExprs dEAS
+
+!choose ParseSPPF
+MethodInvocation::=
+  superKEAS whiteEAS `. whiteEAS ID whiteEAS `( whiteEAS argListEAS `) whiteEAS  >  Name `( whiteEAS argListEAS `) whiteEAS 
+
+!choose ParseSPPF
+MethodInvocation::=
+  Primary `. whiteEAS ID whiteEAS `( whiteEAS argListEAS `) whiteEAS  >  Name `( whiteEAS argListEAS `) whiteEAS 
+
+!choose ParseSPPF
+LeftHandSide::=  FieldAccess > Name
+
+!choose ParseSPPF 
+Type::=  PrimitiveType > ReferenceType  
+
+!choose ParseSPPF
+ClassBodyDeclaration::= ConstructorDeclaration >  ClassMemberDeclaration
+
+!choose ParseSPPF
+ArrayType::=
+  PrimitiveType `[ whiteEAS `] whiteEAS >
+  Name `[ whiteEAS `] whiteEAS 
+
+(*
+!choose longest
+SwitchBlockStatementGroups::=
+  SwitchBlockStatementGroups SwitchBlockStatementGroup  
+*)
+
+!choose ParseSPPF
+LocalVariableDeclaration::=
+  Type VariableDeclarators  >> Type VariableDeclarators
+
+
+(*
+choose longest
+MethodHeader ::= modsEAS Type MethodDeclarator throwsEAS
+
+choose longest
+ConstructorBody::=
+  `{ whiteEAS expConInvEAS blockStatementsEAS `} whiteEAS
+*)
+*)
+!start Goal
+
+whiteEAS ::= &SIMPLE_WHITESPACE | # 
+
+(*whiteEAS ::= ( ` | `\t | `\n | `\r )*
+this doesn't work at the moment because the art lexer is doing
+&SIMPLE_WHITESPACE anyway AJ will fix this in later versions *)
+
+trueEAS ::= `t`r`u`e
+falseEAS ::= `f`a`l`s`e
+nullEAS ::= `n`u`l`l
+booleanEAS ::= `b`o`o`l`e`a`n
+byteEAS ::=  `b`y`t`e
+shortEAS ::= `s`h`o`r`t 
+intEAS ::= `i`n`t 
+longEAS ::=  `l`o`n`g 
+charEAS ::=  `c`h`a`r   
+floatEAS ::=  `f`l`o`a`t 
+doubleEAS ::= `d`o`u`b`l`e
+packageEAS ::=  `p`a`c`k`a`g`e 
+importEAS ::=   `i`m`p`o`r`t 
+publicEAS ::=  `p`u`b`l`i`c 
+protectedEAS ::= `p`r`o`t`e`c`t`e`d 
+privateEAS ::=  `p`r`i`v`a`t`e 
+nativeEAS ::= `n`a`t`i`v`e
+staticEAS ::=  `s`t`a`t`i`c 
+abstractEAS ::=  `a`b`s`t`r`a`c`t 
+finalEAS ::= `f`i`n`a`l 
+naiveEAS ::= `n`a`t`i`v`e 
+synchronizedEAS ::= `s`y`n`c`h`r`o`n`i`z`e`d 
+transientEAS ::= `t`r`a`n`s`i`e`n`t 
+volatileEAS ::= `v`o`l`a`t`i`l`e 
+classEAS ::= `c`l`a`s`s
+extendsEAS ::= `e`x`t`e`n`d`s
+implementsEAS ::= `i`m`p`l`e`m`e`n`t`s 
+voidEAS ::= `v`o`i`d 
+throwsKEAS ::= `t`h`r`o`w`s
+throwEAS ::= `t`h`r`o`w
+thisEAS ::= `t`h`i`s
+superKEAS ::= `s`u`p`e`r
+interfaceEAS ::= `i`n`t`e`r`f`a`c`e 
+ifEAS ::= `i`f
+elseEAS ::= `e`l`s`e
+whileEAS ::= `w`h`i`l`e
+caseEAS ::=  `c`a`s`e 
+defaultEAS ::=  `d`e`f`a`u`l`t
+switchEAS ::= `s`w`i`t`c`h 
+doEAS ::= `d`o
+forEAS ::= `f`o`r
+breakEAS ::= `b`r`e`a`k
+continueEAS ::= `c`o`n`t`i`n`u`e
+returnEAS ::= `r`e`t`u`r`n
+catchEAS ::= `c`a`t`c`h
+tryEAS ::= `t`r`y
+finallyEAS ::= `f`i`n`a`l`l`y
+newEAS ::= `n`e`w
+instanceofEAS ::= `i`n`s`t`a`n`c`e`o`f 
+
+packDecEAS ::=  PackageDeclaration | #
+importDecEAS ::= ImportDeclarations | #
+typeDecEAS ::= TypeDeclarations | #
+
+modsEAS ::=  Modifiers | #
+superEAS ::= Super | #
+interfacesEAS ::= Interfaces | #
+extInterEAS ::= ExtendsInterfaces | #
+cBodyDecEAS ::= ClassBodyDeclarations | #
+throwsEAS ::= Throws | #
+formParListEAS ::= FormalParameterList | #
+expConInvEAS ::= ExplicitConstructorInvocation | #
+blockStatementsEAS ::= BlockStatements | #
+argListEAS ::= ArgumentList | #
+intFMDEAS ::= InterfaceMemberDeclarations | #
+varInEAS ::= VariableInitializers | #
+blkStmEAS ::= BlockStatements | #
+EAS1 ::= `, whiteEAS | #
+sBSGpEAS ::= SwitchBlockStatementGroups | #
+swLabEAS ::= SwitchLabels | #
+
+fIEAS ::= ForInit| #
+expEAS ::= Expression | #
+fUEAS ::= ForUpdate | #
+idEAS ::= ID whiteEAS | #
+catEAS ::= Catches | #
+dEAS ::= Dims | #
+
+
+Goal::= CompilationUnit  
+
+// Generated by gramex V1.2 from 'java_language_specification_1.raw' on Sep  1 2006 at 10:38:05
+// CONVERTED TO ART FORMAT AUGUST 2012 by EAS
+// Converted to character level by EAS July 2019
+
+
+ALPHA ::= `a | `b | `c | `d | `e | `f | `g | `h | `i | `j | `k | `l | `m | 
+          `n | `o | `p | `q | `r | `s | `t | `u | `v | `w | `x | `y | `z | 
+          `A | `B | `C | `D | `E | `F | `G | `H | `I | `J | `K | `L | `M | 
+          `N | `O | `P | `Q | `R | `S | `T | `U | `V | `W | `X | `Y | `Z
+
+DIGIT ::= `0 | `1 | `2 | `3 | `4 | `5 | `6 | `7 | `8 | `9
+
+DIGITS ::= DIGIT | DIGITS DIGIT
+
+INTEGER ::= DIGITS
+
+REAL ::=  DIGITS `. DIGITS
+
+ID ::= ALPHA EAS2 
+
+EAS2 ::= EAS2 ALPHA | EAS2 DIGIT | EAS2 `_  | # 
+
+
+(* this cannot include spaces in strings, there is a conflict with
+&SIMPLE_WHITESPACE
+*)
+
+StringBody ::= ALPHA | `_  | DIGIT | `\\ | `=
+           | `> | `? | `^ | `! | `& | `% | `- | `< | `( | `) |
+           `* | `. | `[ | `] | `{ | `} | `: | `+ | `; | `@ | `/ | `, |
+           `| | `$ | `# 
+
+StringBs ::= StringBs StringBody | StringBs `' | StringBs `\\`" | # 
+
+StringBd ::= StringBd StringBody | StringBd `" | StringBd `\\`' | # 
+
+STRING_SQ ::= `' StringBd `'
+
+STRING_DQ ::= `" StringBs `"
+
+
+Literal::=
+  INTEGER whiteEAS |
+  REAL whiteEAS |
+  STRING_SQ whiteEAS |
+  STRING_DQ whiteEAS |
+  trueEAS whiteEAS | 
+  falseEAS whiteEAS |
+  nullEAS whiteEAS 
+
+Type::=
+  PrimitiveType |
+  ReferenceType  
+
+PrimitiveType::=
+  NumericType |
+  booleanEAS whiteEAS  
+
+NumericType::=
+  IntegralType |
+  FloatingPointType  
+
+IntegralType::=
+  byteEAS whiteEAS | shortEAS whiteEAS  | intEAS whiteEAS | longEAS whiteEAS | charEAS whiteEAS  
+
+FloatingPointType::=
+  floatEAS whiteEAS | doubleEAS whiteEAS  
+
+ReferenceType::=
+  ClassOrInterfaceType |
+  ArrayType  
+
+ClassOrInterfaceType::=
+  Name  
+
+ClassType::=
+  ClassOrInterfaceType  
+
+InterfaceType::=
+  ClassOrInterfaceType  
+
+ArrayType::=
+  PrimitiveType `[ whiteEAS `] whiteEAS |
+  Name `[ whiteEAS `] whiteEAS |
+  ArrayType `[ whiteEAS `] whiteEAS
+
+
+Name::=
+  SimpleName |
+  QualifiedName  
+
+SimpleName::=
+  ID whiteEAS  
+
+QualifiedName::=
+  Name `. whiteEAS ID whiteEAS  
+
+CompilationUnit::=
+  packDecEAS importDecEAS typeDecEAS
+
+ImportDeclarations::=
+  ImportDeclaration |
+  ImportDeclarations ImportDeclaration  
+
+TypeDeclarations::=
+  TypeDeclaration |
+  TypeDeclarations TypeDeclaration  
+
+PackageDeclaration::=
+  packageEAS whiteEAS Name `; whiteEAS  
+
+ImportDeclaration::=
+  SingleTypeImportDeclaration |
+  TypeImportOnDemandDeclaration  
+
+SingleTypeImportDeclaration::=
+  importEAS whiteEAS Name `; whiteEAS  
+
+TypeImportOnDemandDeclaration::=
+  importEAS whiteEAS Name `. whiteEAS `* whiteEAS `; whiteEAS  
+
+TypeDeclaration::=
+  ClassDeclaration |
+  InterfaceDeclaration |
+  `; whiteEAS  
+
+
+Modifiers::=
+  Modifier |
+  Modifiers Modifier  
+
+Modifier::=
+  publicEAS whiteEAS | protectedEAS whiteEAS | privateEAS whiteEAS |
+  staticEAS whiteEAS |
+  abstractEAS whiteEAS | finalEAS whiteEAS | nativeEAS whiteEAS | synchronizedEAS whiteEAS | transientEAS whiteEAS | volatileEAS whiteEAS  
+
+
+ClassDeclaration::=
+  modsEAS classEAS whiteEAS ID whiteEAS superEAS interfacesEAS  ClassBody  
+
+Super::=
+  extendsEAS whiteEAS ClassType  
+
+Interfaces::=
+  implementsEAS whiteEAS InterfaceTypeList  
+
+InterfaceTypeList::=
+  InterfaceType |
+  InterfaceTypeList `, whiteEAS InterfaceType  
+
+ClassBody::=
+  `{ whiteEAS cBodyDecEAS `} whiteEAS  
+
+ClassBodyDeclarations::=
+  ClassBodyDeclaration |
+  ClassBodyDeclarations ClassBodyDeclaration  
+
+ClassBodyDeclaration::=
+  ClassMemberDeclaration |
+  StaticInitializer |
+  ConstructorDeclaration  
+
+ClassMemberDeclaration::=
+  FieldDeclaration |
+  MethodDeclaration  
+
+FieldDeclaration::=
+  modsEAS Type VariableDeclarators `; whiteEAS  
+
+VariableDeclarators::=
+  VariableDeclarator |
+  VariableDeclarators `, whiteEAS VariableDeclarator  
+
+VariableDeclarator::=
+  VariableDeclaratorId |
+  VariableDeclaratorId `= whiteEAS VariableInitializer  
+
+VariableDeclaratorId::=
+  ID whiteEAS |
+  VariableDeclaratorId `[ whiteEAS `] whiteEAS  
+
+VariableInitializer::=
+  Expression |
+  ArrayInitializer  
+
+MethodDeclaration::=
+  MethodHeader MethodBody  
+
+MethodHeader::=
+  modsEAS Type MethodDeclarator throwsEAS |
+  modsEAS voidEAS whiteEAS MethodDeclarator throwsEAS  
+
+MethodDeclarator::=
+  ID whiteEAS `( whiteEAS formParListEAS `) whiteEAS |
+  MethodDeclarator `[ whiteEAS `] whiteEAS  
+
+FormalParameterList::=
+  FormalParameter |
+  FormalParameterList `, whiteEAS FormalParameter  
+
+FormalParameter::=
+  Type VariableDeclaratorId  
+
+Throws::=
+  throwsKEAS whiteEAS ClassTypeList  
+
+ClassTypeList::=
+  ClassType |
+  ClassTypeList `, whiteEAS ClassType  
+
+MethodBody::=
+  Block |
+  `; whiteEAS  
+
+StaticInitializer::=
+  staticEAS whiteEAS Block  
+
+
+ConstructorDeclaration::=
+  modsEAS ConstructorDeclarator throwsEAS ConstructorBody  
+
+ConstructorDeclarator::=
+  SimpleName `( whiteEAS formParListEAS `) whiteEAS  
+
+ConstructorBody::=
+  `{ whiteEAS expConInvEAS blockStatementsEAS `} whiteEAS  
+
+ExplicitConstructorInvocation::=
+  thisEAS whiteEAS `( whiteEAS argListEAS `) whiteEAS `; whiteEAS |
+  superKEAS whiteEAS `( whiteEAS argListEAS `) whiteEAS `; whiteEAS  
+
+
+InterfaceDeclaration::=
+  modsEAS interfaceEAS whiteEAS ID whiteEAS extInterEAS InterfaceBody  
+
+ExtendsInterfaces::=
+  extendsEAS whiteEAS InterfaceType |
+  ExtendsInterfaces `, whiteEAS InterfaceType  
+
+InterfaceBody::=
+  `{ whiteEAS intFMDEAS `} whiteEAS  
+
+InterfaceMemberDeclarations::=
+  InterfaceMemberDeclaration |
+  InterfaceMemberDeclarations InterfaceMemberDeclaration  
+
+InterfaceMemberDeclaration::=
+  ConstantDeclaration |
+  AbstractMethodDeclaration  
+
+ConstantDeclaration::=
+  FieldDeclaration  
+
+AbstractMethodDeclaration::=
+  MethodHeader `; whiteEAS  
+
+
+ArrayInitializer::=
+  `{ whiteEAS varInEAS EAS1 `} whiteEAS  
+
+VariableInitializers::=
+  VariableInitializer |
+  VariableInitializers `, whiteEAS VariableInitializer  
+
+
+Block::=
+  `{ whiteEAS blkStmEAS `} whiteEAS  
+
+BlockStatements::=
+  BlockStatement |
+  BlockStatements BlockStatement  
+
+BlockStatement::=
+  LocalVariableDeclarationStatement |
+  Statement  
+
+LocalVariableDeclarationStatement::=
+  LocalVariableDeclaration `; whiteEAS  
+
+LocalVariableDeclaration::=
+  Type VariableDeclarators  
+
+Statement::=
+  StatementWithoutTrailingSubstatement |
+  LabeledStatement |
+  IfThenStatement |
+  IfThenElseStatement |
+  WhileStatement |
+  ForStatement  
+
+StatementNoShortIf::=
+  StatementWithoutTrailingSubstatement |
+  LabeledStatementNoShortIf |
+  IfThenElseStatementNoShortIf |
+  WhileStatementNoShortIf |
+  ForStatementNoShortIf  
+
+StatementWithoutTrailingSubstatement::=
+  Block |
+  EmptyStatement |
+  ExpressionStatement |
+  SwitchStatement |
+  DoStatement |
+  BreakStatement |
+  ContinueStatement |
+  ReturnStatement |
+  SynchronizedStatement |
+  ThrowStatement |
+  TryStatement  
+
+EmptyStatement::=
+  `; whiteEAS  
+
+LabeledStatement::=
+  ID whiteEAS `: whiteEAS Statement  
+
+LabeledStatementNoShortIf::=
+  ID whiteEAS `: whiteEAS StatementNoShortIf  
+
+ExpressionStatement::=
+  StatementExpression `; whiteEAS  
+
+StatementExpression::=
+  Assignment |
+  PreIncrementExpression |
+  PreDecrementExpression |
+  PostIncrementExpression |
+  PostDecrementExpression |
+  MethodInvocation |
+  ClassInstanceCreationExpression  
+
+IfThenStatement::=
+  ifEAS whiteEAS `( whiteEAS Expression `) whiteEAS Statement  
+
+IfThenElseStatement::=
+  ifEAS whiteEAS `( whiteEAS Expression `) whiteEAS StatementNoShortIf elseEAS whiteEAS Statement  
+
+IfThenElseStatementNoShortIf::=
+  ifEAS whiteEAS `( whiteEAS Expression `) whiteEAS StatementNoShortIf elseEAS whiteEAS StatementNoShortIf  
+
+SwitchStatement::=
+  switchEAS whiteEAS `( whiteEAS Expression `) whiteEAS SwitchBlock  
+
+SwitchBlock::=
+  `{ whiteEAS sBSGpEAS swLabEAS `} whiteEAS  
+
+SwitchBlockStatementGroups::=
+  SwitchBlockStatementGroup |
+  SwitchBlockStatementGroups SwitchBlockStatementGroup  
+
+SwitchBlockStatementGroup::=
+  SwitchLabels BlockStatements  
+
+SwitchLabels::=
+  SwitchLabel |
+  SwitchLabels SwitchLabel  
+
+SwitchLabel::=
+  caseEAS whiteEAS ConstantExpression `: whiteEAS |
+  defaultEAS whiteEAS `: whiteEAS  
+
+WhileStatement::=
+  whileEAS whiteEAS `( whiteEAS Expression `) whiteEAS Statement  
+
+WhileStatementNoShortIf::=
+  whileEAS whiteEAS `( whiteEAS Expression `) whiteEAS StatementNoShortIf  
+
+DoStatement::=
+  doEAS whiteEAS Statement whileEAS whiteEAS `( whiteEAS Expression `) whiteEAS `; whiteEAS  
+
+ForStatement::=
+  forEAS whiteEAS `( whiteEAS fIEAS `; whiteEAS expEAS `; whiteEAS fUEAS `) whiteEAS 
+  Statement  
+
+ForStatementNoShortIf::=
+  forEAS whiteEAS `( whiteEAS fIEAS `; whiteEAS expEAS `; whiteEAS fUEAS `) whiteEAS 
+  StatementNoShortIf  
+
+ForInit::=
+  StatementExpressionList |
+  LocalVariableDeclaration  
+
+ForUpdate::=
+  StatementExpressionList  
+
+StatementExpressionList::=
+  StatementExpression |
+  StatementExpressionList `, whiteEAS StatementExpression  
+
+BreakStatement::=
+  breakEAS whiteEAS idEAS `; whiteEAS  
+
+ContinueStatement::=
+  continueEAS whiteEAS idEAS `; whiteEAS  
+
+ReturnStatement::=
+  returnEAS whiteEAS expEAS `; whiteEAS  
+
+ThrowStatement::=
+  throwEAS whiteEAS Expression `; whiteEAS  
+
+SynchronizedStatement::=
+  synchronizedEAS whiteEAS `( whiteEAS Expression `) whiteEAS Block  
+
+TryStatement::=
+  tryEAS whiteEAS Block Catches |
+  tryEAS whiteEAS Block catEAS Finally  
+
+Catches::=
+  CatchClause |
+  Catches CatchClause  
+
+CatchClause::=
+  catchEAS whiteEAS `( whiteEAS FormalParameter `) whiteEAS Block  
+
+Finally::=
+  finallyEAS whiteEAS Block  
+
+
+Primary::=
+  PrimaryNoNewArray |
+  ArrayCreationExpression  
+
+PrimaryNoNewArray::=
+  Literal |
+  thisEAS whiteEAS |
+  `( whiteEAS Expression `) whiteEAS |
+  ClassInstanceCreationExpression |
+  FieldAccess |
+  MethodInvocation |
+  ArrayAccess  
+
+ClassInstanceCreationExpression::=
+  newEAS whiteEAS ClassType `( whiteEAS argListEAS `) whiteEAS  
+
+ArgumentList::=
+  Expression |
+  ArgumentList `, whiteEAS Expression  
+
+ArrayCreationExpression::=
+  newEAS whiteEAS PrimitiveType DimExprs dEAS |
+  newEAS whiteEAS ClassOrInterfaceType DimExprs dEAS
+
+DimExprs::=
+  DimExpr |
+  DimExprs DimExpr  
+
+DimExpr::=
+  `[ whiteEAS Expression `] whiteEAS  
+
+Dims::=
+  `[ whiteEAS `] whiteEAS |
+  Dims `[ whiteEAS `] whiteEAS  
+
+FieldAccess::=
+  Primary `. whiteEAS ID whiteEAS |
+  superKEAS whiteEAS `. whiteEAS ID whiteEAS  
+
+MethodInvocation::=
+  Name `( whiteEAS argListEAS `) whiteEAS |
+  Primary `. whiteEAS ID whiteEAS `( whiteEAS argListEAS `) whiteEAS |
+  superKEAS whiteEAS `. whiteEAS ID whiteEAS `( whiteEAS argListEAS `) whiteEAS  
+
+ArrayAccess::=
+  Name `[ whiteEAS Expression `] whiteEAS |
+  PrimaryNoNewArray `[ whiteEAS Expression `] whiteEAS  
+
+PostfixExpression::=
+  Primary |
+  Name |
+  PostIncrementExpression |
+  PostDecrementExpression  
+
+PostIncrementExpression::=
+  PostfixExpression `+`+ whiteEAS  
+
+PostDecrementExpression::=
+  PostfixExpression `-`- whiteEAS  
+
+UnaryExpression::=
+  PreIncrementExpression |
+  PreDecrementExpression |
+  `+ whiteEAS UnaryExpression |
+  `- whiteEAS UnaryExpression |
+  UnaryExpressionNotPlusMinus  
+
+PreIncrementExpression::=
+  `+`+ whiteEAS UnaryExpression  
+
+PreDecrementExpression::=
+  `-`- whiteEAS UnaryExpression  
+
+UnaryExpressionNotPlusMinus::=
+  PostfixExpression |
+  `~ whiteEAS UnaryExpression |
+  `! whiteEAS UnaryExpression |
+  CastExpression  
+
+CastExpression::=
+  `( whiteEAS PrimitiveType dEAS `) whiteEAS UnaryExpression |
+  `( whiteEAS Expression `) whiteEAS UnaryExpressionNotPlusMinus |
+  `( whiteEAS Name Dims `) whiteEAS UnaryExpressionNotPlusMinus  
+
+MultiplicativeExpression::=
+  UnaryExpression |
+  MultiplicativeExpression `* whiteEAS UnaryExpression |
+  MultiplicativeExpression `/ whiteEAS UnaryExpression |
+  MultiplicativeExpression `% whiteEAS UnaryExpression  
+
+AdditiveExpression::=
+  MultiplicativeExpression |
+  AdditiveExpression `+ whiteEAS MultiplicativeExpression |
+  AdditiveExpression `- whiteEAS MultiplicativeExpression  
+
+ShiftExpression::=
+  AdditiveExpression |
+  ShiftExpression `<`< whiteEAS AdditiveExpression |
+  ShiftExpression `>`> whiteEAS AdditiveExpression |
+  ShiftExpression `>`>`> whiteEAS AdditiveExpression  
+
+RelationalExpression::=
+  ShiftExpression |
+  RelationalExpression `< whiteEAS ShiftExpression |
+  RelationalExpression `> whiteEAS ShiftExpression |
+  RelationalExpression `<`= whiteEAS ShiftExpression |
+  RelationalExpression `>`= whiteEAS ShiftExpression |
+  RelationalExpression instanceofEAS whiteEAS ReferenceType  
+
+EqualityExpression::=
+  RelationalExpression |
+  EqualityExpression `=`= whiteEAS RelationalExpression |
+  EqualityExpression `!`= whiteEAS RelationalExpression  
+
+AndExpression::=
+  EqualityExpression |
+  AndExpression `& whiteEAS EqualityExpression  
+
+ExclusiveOrExpression::=
+  AndExpression |
+  ExclusiveOrExpression `^ whiteEAS AndExpression  
+
+InclusiveOrExpression::=
+  ExclusiveOrExpression |
+  InclusiveOrExpression `| whiteEAS ExclusiveOrExpression  
+
+ConditionalAndExpression::=
+  InclusiveOrExpression |
+  ConditionalAndExpression `&`& whiteEAS InclusiveOrExpression  
+
+ConditionalOrExpression::=
+  ConditionalAndExpression |
+  ConditionalOrExpression `|`| whiteEAS ConditionalAndExpression  
+
+ConditionalExpression::=
+  ConditionalOrExpression |
+  ConditionalOrExpression `? whiteEAS Expression `: whiteEAS ConditionalExpression  
+
+AssignmentExpression::=
+  ConditionalExpression |
+  Assignment  
+
+Assignment::=
+  LeftHandSide AssignmentOperator AssignmentExpression  
+
+LeftHandSide::=
+  Name |
+  FieldAccess |
+  ArrayAccess  
+
+AssignmentOperator::=
+  `= whiteEAS | `*`= whiteEAS | `/`= whiteEAS | `%`= whiteEAS | `+`= whiteEAS | `-`= whiteEAS | `<`<`= whiteEAS | `>`>`= whiteEAS | `>`>`>`= whiteEAS | `&`= whiteEAS | `^`= whiteEAS | `|`= whiteEAS  
+
+Expression::=
+  AssignmentExpression  
+
+ConstantExpression::=
+  Expression  
+
+
+// Copyright © 1996 Sun Microsystems, Inc. All rights reserved
+
+ 

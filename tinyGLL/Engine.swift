@@ -96,7 +96,8 @@ nonisolated struct BinarySpan: Hashable {
     let j: Int
 }
 
-// Paper: crfNode (L, i) — a grammar slot paired with an input position.
+// Paper: crfNode (L, i) — a grammar slot paired with an input position
+// "At this slot in the grammar and at this index in the input".
 // Used in two roles, and 'index' means something different in each:
 //   as a cluster key   (slot: the LHS nonterminal, index: cI) — where the cluster starts
 //   as a return edge   (slot: the RHS nonterminal, index: cU) — where the caller started
@@ -287,7 +288,7 @@ nonisolated final class Parser {
     //   edge.slot.seq!   is the paper's L      (paper: dscAdd(L, ...))
     // Storing the paper's L instead would require a backward link to recover the nonterminal
     // for the yield. node ↔ node.seq is a bijection, so this is a relabeling, not a difference.
-    func call() {
+    func enter() {
         // Create the return edge: (L=cL, i=cU), cL is the RHS nonterminal node
         let returnEdge = ParsePosition(slot: cL, index: cU)
 
@@ -310,9 +311,9 @@ nonisolated final class Parser {
         }
     }
 
-    // Paper: rtn(X, k, j) — return from a nonterminal.
+    // Paper: rtn(X, k, j) — leave a nonterminal.
     // Only X is passed; the paper's k and j are read from the registers cU and cI.
-    func rtn(X: GrammarNode) {
+    func leave(X: GrammarNode) {
         let clusterKey = ParsePosition(slot: X, index: cU)
         guard let cluster = crf[clusterKey] else { return }
 
@@ -350,7 +351,7 @@ nonisolated final class Parser {
                         continue nextDescriptor
                     }
                 case .N:
-                    call()
+                    enter()
                     continue nextDescriptor
                 case .EPS:
                     addYield(L: cL, i: cU, k: cI, j: cI)
@@ -360,7 +361,7 @@ nonisolated final class Parser {
                 case .END:
                     let nt = cL.seq! // the seq link of an END node points back to the nonTerminal node
                     addYield(L: nt, i: cU, k: cU, j: cI)
-                    rtn(X: nt)
+                    leave(X: nt)
                     continue nextDescriptor
                 }
             }

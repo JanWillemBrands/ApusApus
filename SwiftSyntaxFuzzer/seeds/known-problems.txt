@@ -1,0 +1,293 @@
+### generic-angle-expression
+let fuzzValue = a < b > (c)
+
+### nested-generic-type
+let fuzzValue: Array<Dictionary<String, Foo.Bar?>> = placeholder()
+
+### optional-cast-coalesce
+let fuzzValue = value as? Foo ?? fallback
+
+### tightly-spaced-cast
+let fuzzValue = value as?~Copyable
+
+### try-postfix-call
+let fuzzValue = try(f())?.member
+
+### try-operator-lookalike
+let fuzzValue = try!-f()
+
+### regex-division-boundary
+let fuzzValue = x ? /abc/.wholeMatch(in: s) : value / value
+
+### raw-regex-interpolation
+let fuzzValue = "prefix \(/abc/) middle \(#/abc/#) suffix"
+
+### keypath-optional-force
+let fuzzValue = \Foo.Bar.default?.name
+
+### keypath-subscript
+let fuzzValue = value[keyPath: \.foo!.bar]
+
+### trailing-closure-labeled
+let fuzzValue = f(value) { value } default: { result }
+
+### closure-followed-by-member
+let fuzzValue = f { value }
+.member
+
+### condition-cast-binding
+if let x = value as? T ?? nil { _ = x }
+
+### condition-case-optional
+if case let .some(value)? = Optional(Optional(value)) { _ = value }
+
+### switch-keyword-cases
+enum Token { case `import`(Int, String); case `default`; case `operator` }
+switch Token.import(1, "x") {
+case .import(_, let s): _ = s
+case .default: break
+case .operator: break
+}
+
+### attribute-on-case-member
+enum Fuzz {
+@available(*, deprecated)
+case value
+}
+
+### attribute-in-ifconfig
+#if os(macOS)
+@MainActor
+func fuzz() {}
+#endif
+
+### availability-message-comma
+@available(macOS, introduced: 10.15, deprecated: 14.0, message: "use fuzz")
+func fuzz() {}
+
+### generic-where-newline
+struct Fuzz<T>
+where T.Element == Foo.Bar, T: Sequence {
+let value: T
+}
+
+### generic-where-pack
+func fuzz<each T, U>(_: repeat each T) where repeat each T: P {}
+
+### pack-for-repeat
+func fuzz<each T>(_ value: repeat each T) {
+for item in repeat each value { _ = item }
+}
+
+### ownership-consuming-param
+func fuzz<T: ~Copyable>(_ value: consuming T) {}
+
+### ownership-expression
+let fuzzValue = consume value
+
+### effectful-accessor
+struct Fuzz {
+var value: Int {
+get async throws { 1 }
+}
+}
+
+### read-modify-accessor
+struct Fuzz {
+var value: Int {
+_read { yield 1 }
+_modify { var x = 1; yield &x }
+}
+}
+
+### effectful-function-type
+let fuzzValue: @Sendable () async throws(FuzzError) -> Int = placeholder()
+
+### sending-closure-type
+let fuzzValue: sending @escaping () -> Void = placeholder()
+
+### declaration-modifier-stack
+public private(set) var value: Int = 1
+
+### nonisolated-unsafe-property
+nonisolated(unsafe) var value: Int { 1 }
+
+### preconcurrency-import
+@preconcurrency import Foundation
+
+### source-location-directive
+#sourceLocation(file: "fuzz.swift", line: 10)
+let fuzzValue = #fileID
+#sourceLocation()
+
+### warning-directive
+#warning("fuzz")
+let fuzzValue = 1
+
+### predicate-macro
+let fuzzValue = #Predicate<Foo> { $0.bar == 1 }
+
+### observable-attribute
+@Observable
+class Fuzz { var value = 1 }
+
+### collection-literal-type
+let fuzzValue: [(label: Int, value: Foo.Bar)] = []
+
+### dictionary-array-type
+let fuzzValue: [String: [Foo.Bar?]] = [:]
+
+### extension-optional-type
+extension UInt8? {
+func fuzz() {}
+}
+
+### delimiter-missing-generic
+struct Fuzz<T where T: P { let value: T }
+
+### delimiter-missing-call
+let fuzzValue = f(value, { value }
+
+### delimiter-ifconfig-eof
+#if FOO
+let fuzzValue = 1
+
+### member-list-semicolon-attribution
+struct Fuzz {
+var a = 1;
+@available(*, deprecated)
+var b = 2
+#if os(macOS)
+var c = 3
+#endif
+}
+
+### protocol-pack-requirement
+protocol Fuzz<each T> {
+associatedtype Value
+func call(_: repeat each T) async throws -> Value
+}
+
+### operator-question-assignment
+infix operator ?=: AssignmentPrecedence
+func ?=<T>(lhs: inout T, rhs: T?) { if let rhs { lhs = rhs } }
+
+### nested-ifconfig-source-location
+#if compiler(>=6.0)
+#if canImport(Foundation)
+#sourceLocation(file: "nested.swift", line: 2)
+let fuzzValue = #line
+#sourceLocation()
+#endif
+#endif
+
+### regex-tab-body
+let s = "abc"
+let r = /a	b/.wholeMatch(in: s)
+
+### cast-try-operator-cluster
+let fuzzValue = try? f(a as? A<B>??x) ?? fallback
+
+### pattern-optional-double
+switch value {
+case let .some(x)??: _ = x
+case .none: break
+default: break
+}
+
+### init-async-throws
+struct Fuzz {
+let value: Int
+init?(_ value: Int) async throws { self.value = value }
+}
+
+### subscript-effectful-dynamic-member
+struct Fuzz {
+subscript(dynamicMember member: String) -> Int {
+_read { yield 1 }
+_modify { var x = 1; yield &x }
+}
+}
+
+### ifconfig-leading-dot-expression
+let base = Foo()
+let fuzzValue = base
+#if FOO
+.methodOne() + 12
+#else
+.methodTwo() + 14
+#endif
+
+### ifconfig-standalone-leading-dot
+#if FOO
+.member
+#endif
+
+### ifconfig-member-list-attribute
+struct Fuzz {
+#if os(macOS)
+@available(*, deprecated)
+var value: Int = 1
+#else
+subscript(index: Int) -> Int { index }
+#endif
+}
+
+### keypath-optional-subscript-force
+let fuzzValue = \Foo.foo?[0]!.bar
+
+### keypath-dynamic-member-component
+let fuzzValue = \Foo.[dynamicMember: \.bar]
+
+### regex-leading-trailing-space
+let s = "abc"
+let trailing = /a /
+let leading = / a/
+
+### regex-escaped-slash-and-space
+let s = "abc"
+let r = /a\/ b/.wholeMatch(in: s)
+
+### regex-ternary-division-boundary
+let x = true
+let value = 1
+let s = "abc"
+let fuzzValue = x ? /a b/.wholeMatch(in: s) : value / value
+
+### member-list-ifconfig-semicolon
+struct Fuzz {
+var value = 0;
+#if compiler(>=6.0)
+func call() async throws -> Int { 1 }
+#else
+var fallback = 1
+#endif
+subscript(index: Int) -> Int { index }
+}
+
+### contextual-await-member
+let await = 1
+let fuzzValue = await.await
+
+### import-operator-declaration
+import operator Swift.+
+
+### macro-source-location-attribute
+#sourceLocation(file: "generated.swift", line: 42)
+@available(*, deprecated)
+func fuzz() {}
+#sourceLocation()
+
+### closure-ifconfig-result
+let fuzzValue = items.map { item in
+#if FOO
+item
+#else
+item
+#endif
+}
+
+### for-try-await-statement
+for try await item in stream {
+_ = item
+}

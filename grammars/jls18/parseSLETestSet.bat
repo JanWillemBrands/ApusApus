@@ -1,0 +1,9 @@
+echo %time% %date%
+call %arthome%\artV3TestGenerated SLETestSet\cs1801trimmed.java
+call %arthome%\artV3TestGenerated SLETestSet\cs1801trimStrFix.java
+call %arthome%\artV3TestGenerated SLETestSet\Ex2.java
+call %arthome%\artV3TestGenerated SLETestSet\Life.java
+call %arthome%\artV3TestGenerated SLETestSet\LifeStrFix.java
+call %arthome%\artV3TestGenerated SLETestSet\LindenMayer.java
+call %arthome%\artV3TestGenerated SLETestSet\Sandbox.java
+echo %time% %date%

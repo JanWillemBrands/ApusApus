@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summary of the Grammar</title>
+<style>
+:root {
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --keyword: #ad3da4;
+  --regex: #0f68a0;
+  --rule: #333336;
+  --note-bg: #f5f5f7;
+  --note-border: #d2d2d7;
+  --annot: #b25e00;   /* shared by @pragmas and ---/lookaround annotations */
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  padding: 2.5rem 1.5rem 6rem;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+.apus-title {
+  max-width: 820px;
+  margin: 0 auto 0.5rem;
+  font-size: 2.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.apus-legend {
+  max-width: 820px;
+  margin: 0 auto 2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.apus-legend b { color: var(--rule); font-weight: 600; }
+h2.apus-section {
+  max-width: 820px;
+  margin: 2.6rem auto 1rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+aside.note {
+  max-width: 820px;
+  margin: 0 auto 0.5rem;
+  background: var(--note-bg);
+  border: 1px solid var(--note-border);
+  border-left: 3px solid #b0b0b8;
+  border-radius: 6px;
+  padding: 0.6rem 1rem 0.7rem;
+}
+aside.note .label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+aside.note .rule {
+  margin: 0;
+  color: var(--rule);
+  line-height: 1.65;
+  font-size: 1.02rem;
+}
+/* nonterminals & lexical categories */
+.rule em {
+  font-style: italic;
+  color: var(--rule);
+}
+.rule em.apus-eps { color: var(--muted); font-weight: 600; }
+/* keywords / literal terminals */
+.rule strong code,
+code {
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+}
+.rule strong code {
+  font-weight: 600;
+  color: var(--keyword);
+}
+/* monospace reads larger than the proportional body text at the same em,
+   so nudge the regex down to match the surrounding production visually */
+code.apus-regex { color: var(--regex); font-size: 0.82em; }
+.apus-arrow { color: var(--muted); }
+.apus-bar { color: var(--muted); font-weight: 600; padding: 0 0.15em; }
+/* EBNF delimiters ( ) [ ] { } < > — same treatment as the | bar */
+.apus-bracket { color: var(--muted); font-weight: 600; }
+.apus-rep { color: var(--muted); font-style: normal; }
+sup.apus-rep { font-size: 0.75em; }
+/* invented-notation annotations — coloured text only, no fill */
+/* monospace, same size and colour as an @pragma */
+.apus-annot {
+  color: var(--annot);
+  font-size: 0.78em;
+  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+}
+/* the lookaround triangle is a thin math glyph — enlarge & embolden it so it
+   reads as the focal point of the annotation (operand list stays small) */
+.apus-tri {
+  font-size: 1.45em;
+  font-weight: 700;
+  line-height: 0;
+  vertical-align: -0.12em;
+}
+.apus-layout {
+  font-size: 0.74em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #2f7d32;
+}
+.apus-constraint {
+  font-size: 0.78em;
+  color: #5a4b8a;
+/*          color: #5a4b8a; */
+color: #6a5b9a;
+}
+.apus-action {
+  font-size: 0.82em;
+  color: var(--muted);
+  font-style: italic;
+}
+.apus-pragma {
+  font-size: 0.78em;
+  color: var(--annot);
+  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #f5f5f7; --muted: #a1a1a6; --rule: #e3e3e6;
+    --note-bg: #1c1c1e; --note-border: #3a3a3c;
+    --keyword: #ff7ab2; --regex: #6bb8e6; --annot: #e0955a;
+  }
+  body { background: #000000; }
+  aside.note { border-left-color: #5a5a60; }
+}
+</style>
+</head>
+<body>
+<h1 class="apus-title">Swift 6.3 Grammar</h1>
+<p class="apus-legend"><b>→</b> production &nbsp;·&nbsp; <b>↦</b> token terminal &nbsp;·&nbsp; <b>⇢</b> discarded terminal &nbsp;·&nbsp; <b>↝</b> trivia &nbsp;·&nbsp; <b>↠</b> lexical token</p>
+<aside class="note">
+  <p class="label">Grammar of a top-level declaration</p>
+  <p class="rule"><em>shebang</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/#!.*/</code><br>
+<em>top-level-declaration</em> <span class="apus-arrow">→</span> <em>shebang</em><span class="apus-rep">?</span> <em>statements</em><span class="apus-rep">?</span></p>
+</aside>
+<h2 class="apus-section">Whitespace and Comment</h2>
+<aside class="note">
+  <p class="label">Grammar of whitespace</p>
+  <p class="rule"><em>whitespace</em> <span class="apus-arrow">⇢</span> <code class="apus-regex">/[\u{0000}\u{0009}\u{000A}\u{000B}\u{000C}\u{000D}\u{0020}\u{00A0}\u{FEFF}]+/</code><br>
+<em>comment</em> <span class="apus-arrow">⇢</span> <code class="apus-regex">/\/\/.*\r?\n?/</code><br>
+<em>multiline-comment</em> <span class="apus-arrow">↝</span> <strong><code>/*</code></strong> <span class="apus-bracket">{</span> <code class="apus-regex">/(?s)(?:[^*\/]|\*(?!\/)|\/(?!\*))+/</code> <span class="apus-bar">|</span> <em>multiline-comment</em> <span class="apus-bracket">}</span> <strong><code>*/</code></strong></p>
+</aside>
+<h2 class="apus-section">Identifiers</h2>
+<aside class="note">
+  <p class="label">Grammar of an identifier</p>
+  <p class="rule"><span class="apus-pragma">@literalMunch</span> <em>identifier</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<em>escaped-identifier</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<em>implicit-parameter-name</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\$[0-9]+/</code><br>
+<em>property-wrapper-projection</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<em>hard-identifier</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_ Any as associatedtype await break case catch class continue default defer deinit do else enum extension fallthrough false fileprivate for func guard if import in init inout internal is let nil open operator precedencegroup private protocol public repeat rethrows return self Self static struct subscript super switch throw throws true try typealias var where while)</span> <span class="apus-bar">|</span> <em>escaped-identifier</em> <span class="apus-bar">|</span> <em>property-wrapper-projection</em><br>
+<em>soft-identifier</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_ let var inout)</span> <span class="apus-bar">|</span> <em>escaped-identifier</em> <span class="apus-bar">|</span> <em>property-wrapper-projection</em><br>
+<em>identifier-list</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <em>hard-identifier</em> <strong><code>,</code></strong> <em>identifier-list</em><br>
+<em>module-selector</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <strong><code>::</code></strong></p>
+</aside>
+<h2 class="apus-section">Regular Expressions</h2>
+<aside class="note">
+  <p class="label">Grammar of a regular expression literal</p>
+  <p class="rule"><em>regex-escape</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\\[^\r\n]/</code><br>
+<em>regex-non-operator-atom</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/[^\/\\\[\]\(\)\r\n\+\-\*%&amp;\|\^~&lt;&gt;=!\?\.#;:,]/</code><br>
+<em>regex-class-atom</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/[^\\\]\r\n]/</code><br>
+<em>regex-operator-char</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/[-+*%|^~&lt;&gt;=!?&amp;.]/</code><br>
+<em>regex-open-slash</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\//</code> <span class="apus-annot" title="only when NOT preceded by"><span class="apus-tri"><-<</span> (true false nil self Self super Any func operator identifier escapedIdentifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral regexCloseSlash extendedRegularExpressionLiteral ) ] } &gt; ! -&gt; ... . @)</span><br>
+<em>regex-close-slash</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\//</code><br>
+<em>regex-open-slash-nl</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\//</code><br>
+<em>plain-regular-expression-literal</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>regex-open-slash</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>regex-body</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>regex-close-slash</em><br>
+<em>plain-regular-expression-literal</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be on different lines">new-line</span> <em>regex-open-slash-nl</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>regex-body</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>regex-close-slash</em><br>
+<em>regex-body</em> <span class="apus-arrow">→</span> <em>regex-item</em> <span class="apus-bar">|</span> <em>regex-item</em> <em>regex-body</em><br>
+<em>regex-item</em> <span class="apus-arrow">→</span> <em>regex-escape</em> <span class="apus-bar">|</span> <em>regex-character-class</em> <span class="apus-bar">|</span> <em>regex-group</em> <span class="apus-bar">|</span> <em>regex-atom</em><br>
+<em>regex-group</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>regex-body</em> <strong><code>)</code></strong><br>
+<em>regex-character-class</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>regex-class-body</em> <strong><code>]</code></strong><br>
+<em>regex-class-body</em> <span class="apus-arrow">→</span> <em>regex-class-item</em> <span class="apus-bar">|</span> <em>regex-class-item</em> <em>regex-class-body</em><br>
+<em>regex-class-item</em> <span class="apus-arrow">→</span> <em>regex-escape</em> <span class="apus-bar">|</span> <em>regex-class-atom</em><br>
+<em>regex-atom</em> <span class="apus-arrow">→</span> <em>regex-non-operator-atom</em> <span class="apus-bar">|</span> <em>regex-operator-char</em> <span class="apus-bar">|</span> <strong><code>#</code></strong> <span class="apus-bar">|</span> <strong><code>:</code></strong> <span class="apus-bar">|</span> <strong><code>;</code></strong> <span class="apus-bar">|</span> <strong><code>,</code></strong><br>
+<em>extended-regular-expression-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/(#+)\/(?:[^\/]|\/(?!\1))*?\/\1/</code> <span class="apus-annot" title="only when NOT preceded by"><span class="apus-tri"><-<</span> (true false nil self Self super Any func operator identifier escapedIdentifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral plainRegularExpressionLiteral extendedRegularExpressionLiteral ) ] } &gt; ! -&gt; ... . @)</span><br>
+<em>regular-expression-literal</em> <span class="apus-arrow">→</span> <em>plain-regular-expression-literal</em> <span class="apus-bar">|</span> <em>extended-regular-expression-literal</em></p>
+</aside>
+<h2 class="apus-section">Strings</h2>
+<aside class="note">
+  <p class="label">Grammar of a string literal</p>
+  <p class="rule"><em>string-literal</em> <span class="apus-arrow">→</span> <em>static-string-literal</em> <span class="apus-bar">|</span> <em>interpolated-string-literal</em><br>
+<em>single-line-string-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/"(?:[^"\\\n\r]|\\u\{[0-9a-fA-F]+\}|\\[0\\tnr"']|\\(?!\().)*?"/</code><br>
+<em>extended-singleline-string-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/(#+)"(?:[^"\n\r]|"(?!\1))*?"\1/</code><br>
+<em>multiline-string-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/"""(?![\s\S]*\\\()(?:[^"\\]|\\[\s\S]|"(?!""))*"""/</code><br>
+<em>extended-multiline-string-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/(#+)"""[ \t]*\r?\n(?s:.)*?"""\1/</code><br>
+<em>static-string-literal</em> <span class="apus-arrow">→</span> <em>single-line-string-literal</em> <span class="apus-bar">|</span> <em>extended-singleline-string-literal</em> <span class="apus-bar">|</span> <em>multiline-string-literal</em> <span class="apus-bar">|</span> <em>extended-multiline-string-literal</em><br>
+<em>interpolated-string-literal-head</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/"(?:[^"\\\n\r]|\\u\{[0-9a-fA-F]+\}|\\[0\\tnr"']|\\.)*?\\\(/</code><br>
+<em>interpolated-string-literal-part</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\)(?:[^"\\\n\r]|\\u\{[0-9a-fA-F]+\}|\\[0\\tnr"']|\\.)*?\\\(/</code><br>
+<em>interpolated-string-literal-tail</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\)(?:[^"\\\n\r]|\\u\{[0-9a-fA-F]+\}|\\[0\\tnr"']|\\(?!\().)*?"/</code><br>
+<em>multiline-interpolated-string-literal-head</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/"""(?:[^"\\]|\\u\{[0-9a-fA-F]+\}|\\[0\\tnr"']|\\[\s\S]|"(?!""))*?\\\(/</code><br>
+<em>multiline-interpolated-string-literal-part</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\)(?:[^"\\]|\\u\{[0-9a-fA-F]+\}|\\[0\\tnr"']|\\[\s\S]|"(?!""))*?\\\(/</code><br>
+<em>multiline-interpolated-string-literal-tail</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\)(?:[^"\\]|\\u\{[0-9a-fA-F]+\}|\\(?!\()[\s\S]|"(?!""))*?"""/</code><br>
+<em>interpolated-string-literal</em> <span class="apus-arrow">→</span> <em>interpolated-string-literal-head</em> <em>function-call-argument-list</em> <span class="apus-bracket">{</span> <em>interpolated-string-literal-part</em> <em>function-call-argument-list</em> <span class="apus-bracket">}</span> <em>interpolated-string-literal-tail</em><br>
+<em>interpolated-string-literal</em> <span class="apus-arrow">→</span> <em>multiline-interpolated-string-literal-head</em> <em>function-call-argument-list</em> <span class="apus-bracket">{</span> <em>multiline-interpolated-string-literal-part</em> <em>function-call-argument-list</em> <span class="apus-bracket">}</span> <em>multiline-interpolated-string-literal-tail</em></p>
+</aside>
+<h2 class="apus-section">Literals</h2>
+<aside class="note">
+  <p class="label">Grammar of a literal</p>
+  <p class="rule"><em>binary-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/0b[0-1][0-1_]*/</code><br>
+<em>octal-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/0o[0-7][0-7_]*/</code><br>
+<em>decimal-literal</em> <span class="apus-arrow">→</span> <code class="apus-regex">/[0-9][0-9_]*/</code><br>
+<em>decimal-digits</em> <span class="apus-arrow">→</span> <code class="apus-regex">/[0-9]+/</code><br>
+<em>hexadecimal-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/0x[0-9a-fA-F][0-9a-fA-F_]*/</code></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a floating-point literal</p>
+  <p class="rule"><em>decimal-floating-point-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/[0-9][0-9_]*(?:\.[0-9][0-9_]*(?:[eE][+-]?[0-9][0-9_]*)?|[eE][+-]?[0-9][0-9_]*)/</code><br>
+<em>hexadecimal-floating-point-literal</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/0x[0-9a-fA-F][0-9a-fA-F_]*(?:\.[0-9a-fA-F][0-9a-fA-F_]*)?(?:[pP][+-]?[0-9][0-9_]*)/</code><br>
+<em>signed-floating-point-literal</em> <span class="apus-arrow">→</span> <strong><code>-</code></strong><span class="apus-rep">?</span> <em>floating-point-literal</em><br>
+<em>floating-point-literal</em> <span class="apus-arrow">→</span> <em>decimal-floating-point-literal</em> <span class="apus-bar">|</span> <em>hexadecimal-floating-point-literal</em><br>
+<em>literal</em> <span class="apus-arrow">→</span> <em>numeric-literal</em> <span class="apus-bar">|</span> <em>string-literal</em> <span class="apus-bar">|</span> <em>regular-expression-literal</em> <span class="apus-bar">|</span> <em>boolean-literal</em> <span class="apus-bar">|</span> <em>nil-literal</em><br>
+<span class="apus-pragma">@longest</span> <em>numeric-literal</em> <span class="apus-arrow">→</span> <em>signed-integer-literal</em> <span class="apus-bar">|</span> <em>signed-floating-point-literal</em><br>
+<em>boolean-literal</em> <span class="apus-arrow">→</span> <strong><code>true</code></strong> <span class="apus-bar">|</span> <strong><code>false</code></strong><br>
+<em>nil-literal</em> <span class="apus-arrow">→</span> <strong><code>nil</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an integer literal</p>
+  <p class="rule"><em>signed-integer-literal</em> <span class="apus-arrow">→</span> <strong><code>-</code></strong><span class="apus-rep">?</span> <em>integer-literal</em><br>
+<em>integer-literal</em> <span class="apus-arrow">→</span> <em>binary-literal</em><br>
+<em>integer-literal</em> <span class="apus-arrow">→</span> <em>octal-literal</em><br>
+<em>integer-literal</em> <span class="apus-arrow">→</span> <em>decimal-literal</em><br>
+<em>integer-literal</em> <span class="apus-arrow">→</span> <em>hexadecimal-literal</em></p>
+</aside>
+<h2 class="apus-section">Operators</h2>
+<aside class="note">
+  <p class="label">Grammar of operators</p>
+  <p class="rule"><span class="apus-pragma">@literalMunch</span> <span class="apus-pragma">@splitBefore</span> <em>operator-token</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code> <span class="apus-annot" title="only when NOT preceded by"><span class="apus-tri"><-<</span> (true false nil self Self super Any identifier escapedIdentifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral regexCloseSlash extendedRegularExpressionLiteral _ ) ] } &gt; !)</span><br>
+<span class="apus-pragma">@literalMunch</span> <em>dot-operator</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<em>operator</em> <span class="apus-arrow">→</span> <em>operator-token</em><br>
+<em>operator</em> <span class="apus-arrow">→</span> <em>dot-operator</em><br>
+<em>postfix-operator-token</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<span class="apus-pragma">@splitBefore</span> <em>operator-name</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<em>open-angle</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/&lt;/</code><br>
+<em>close-angle</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/&gt;/</code><br>
+<em>optional-mark</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/\?/</code><br>
+<em>force-mark</em> <span class="apus-arrow">↦</span> <code class="apus-regex">/!/</code><br>
+<em>infix-operator</em> <span class="apus-arrow">→</span> <em>operator</em><br>
+<em>infix-operator</em> <span class="apus-arrow">→</span> <strong><code>&amp;</code></strong><br>
+<em>prefix-operator</em> <span class="apus-arrow">→</span> <em>operator</em><br>
+<em>postfix-operator</em> <span class="apus-arrow">→</span> <em>postfix-operator-token</em><br>
+<em>postfix-operator</em> <span class="apus-arrow">→</span> <em>dot-operator</em></p>
+</aside>
+<h2 class="apus-section">Types</h2>
+<aside class="note">
+  <p class="label">Grammar of a type</p>
+  <p class="rule"><em>type</em> <span class="apus-arrow">→</span> <em>function-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>array-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>inline-array-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>dictionary-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>type-identifier</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>tuple-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>optional-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>implicitly-unwrapped-optional-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>protocol-composition-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>opaque-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>boxed-protocol-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>metatype-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>any-type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>tuple-type-element</em> <strong><code>)</code></strong><br>
+<em>type</em> <span class="apus-arrow">→</span> <strong><code>~</code></strong> <em>type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>parameter-modifier</em> <em>type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <em>attribute</em> <em>type</em><br>
+<em>type</em> <span class="apus-arrow">→</span> <strong><code>nonisolated</code></strong> <em>function-type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a type annotation</p>
+  <p class="rule"><em>type-annotation</em> <span class="apus-arrow">→</span> <strong><code>:</code></strong> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a type identifier</p>
+  <p class="rule"><em>type-identifier</em> <span class="apus-arrow">→</span> <em>type-name</em> <em>type-generic-argument-clause</em><span class="apus-rep">?</span> <span class="apus-bar">|</span> <em>type-name</em> <em>type-generic-argument-clause</em><span class="apus-rep">?</span> <strong><code>.</code></strong> <em>type-identifier</em><br>
+<em>type-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>type-name</em> <span class="apus-arrow">→</span> <em>self-type</em><br>
+<em>type-name</em> <span class="apus-arrow">→</span> <em>module-selector</em> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_)</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a tuple type</p>
+  <p class="rule"><em>tuple-type</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>tuple-type-element</em> <strong><code>,</code></strong> <em>tuple-type-element-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>tuple-type-element-list</em> <span class="apus-arrow">→</span> <em>tuple-type-element</em> <span class="apus-bar">|</span> <em>tuple-type-element</em> <strong><code>,</code></strong> <em>tuple-type-element-list</em><br>
+<em>tuple-type-element</em> <span class="apus-arrow">→</span> <em>element-name</em> <em>type-annotation</em> <span class="apus-bar">|</span> <em>type</em><br>
+<em>element-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a function type</p>
+  <p class="rule"><em>function-type</em> <span class="apus-arrow">→</span> <em>function-type-argument-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <em>throws-clause</em><span class="apus-rep">?</span> <strong><code>-&gt;</code></strong> <em>type</em><br>
+<em>function-type-argument-clause</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <strong><code>)</code></strong><br>
+<em>function-type-argument-clause</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>function-type-argument-list</em> <strong><code>...</code></strong><span class="apus-rep">?</span> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>function-type-argument-list</em> <span class="apus-arrow">→</span> <em>function-type-argument</em> <span class="apus-bar">|</span> <em>function-type-argument</em> <strong><code>,</code></strong> <em>function-type-argument-list</em><br>
+<em>function-type-argument</em> <span class="apus-arrow">→</span> <em>type</em> <span class="apus-bar">|</span> <em>external-argument-label</em><span class="apus-rep">?</span> <em>local-argument-label</em> <em>type-annotation</em><br>
+<em>external-argument-label</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>local-argument-label</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>throws-clause</em> <span class="apus-arrow">→</span> <strong><code>throws</code></strong> <span class="apus-bar">|</span> <strong><code>throws</code></strong> <strong><code>(</code></strong> <em>type</em> <strong><code>)</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an array type</p>
+  <p class="rule"><em>array-type</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>type</em> <strong><code>]</code></strong><br>
+<em>inline-array-type</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>generic-argument</em> <strong><code>of</code></strong> <em>generic-argument</em> <strong><code>]</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a dictionary type</p>
+  <p class="rule"><em>dictionary-type</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>type</em> <strong><code>:</code></strong> <em>type</em> <strong><code>]</code></strong><br>
+<em>simple-type</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <span class="apus-bar">|</span> <em>tuple-type</em> <span class="apus-bar">|</span> <em>array-type</em> <span class="apus-bar">|</span> <em>inline-array-type</em> <span class="apus-bar">|</span> <em>dictionary-type</em> <span class="apus-bar">|</span> <em>optional-type</em> <span class="apus-bar">|</span> <em>implicitly-unwrapped-optional-type</em> <span class="apus-bar">|</span> <em>metatype-type</em> <span class="apus-bar">|</span> <em>any-type</em> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>tuple-type-element</em> <strong><code>)</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an optional type</p>
+  <p class="rule"><em>optional-type</em> <span class="apus-arrow">→</span> <em>simple-type</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>optional-mark</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an implicitly unwrapped optional type</p>
+  <p class="rule"><em>implicitly-unwrapped-optional-type</em> <span class="apus-arrow">→</span> <em>simple-type</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>force-mark</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a protocol composition type</p>
+  <p class="rule"><em>protocol-composition-type</em> <span class="apus-arrow">→</span> <em>protocol-composition-element</em> <strong><code>&amp;</code></strong> <em>protocol-composition-continuation</em><br>
+<em>protocol-composition-continuation</em> <span class="apus-arrow">→</span> <em>protocol-composition-element</em> <span class="apus-bar">|</span> <em>protocol-composition-type</em><br>
+<em>protocol-composition-element</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <span class="apus-bar">|</span> <em>any-type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an opaque type</p>
+  <p class="rule"><em>opaque-type</em> <span class="apus-arrow">→</span> <strong><code>some</code></strong> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a boxed protocol type</p>
+  <p class="rule"><em>boxed-protocol-type</em> <span class="apus-arrow">→</span> <strong><code>any</code></strong> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a metatype type</p>
+  <p class="rule"><em>metatype-type</em> <span class="apus-arrow">→</span> <em>simple-type</em> <strong><code>.</code></strong> <strong><code>Type</code></strong> <span class="apus-bar">|</span> <em>simple-type</em> <strong><code>.</code></strong> <strong><code>Protocol</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an Any type</p>
+  <p class="rule"><em>any-type</em> <span class="apus-arrow">→</span> <strong><code>Any</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a Self type</p>
+  <p class="rule"><em>self-type</em> <span class="apus-arrow">→</span> <strong><code>Self</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a type inheritance clause</p>
+  <p class="rule"><em>type-inheritance-clause</em> <span class="apus-arrow">→</span> <strong><code>:</code></strong> <em>type-inheritance-list</em><br>
+<em>type-inheritance-list</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>~</code></strong><span class="apus-rep">?</span> <strong><code>nonisolated</code></strong><span class="apus-rep">?</span> <em>type-identifier</em> <span class="apus-bar">|</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>~</code></strong><span class="apus-rep">?</span> <strong><code>nonisolated</code></strong><span class="apus-rep">?</span> <em>type-identifier</em> <strong><code>,</code></strong> <em>type-inheritance-list</em></p>
+</aside>
+<h2 class="apus-section">Expressions</h2>
+<aside class="note">
+  <p class="label">Grammar of an expression</p>
+  <p class="rule"><em>expression</em> <span class="apus-arrow">→</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>conditional-expression</em> <em>coercing-operator</em><span class="apus-rep">?</span><br>
+<em>expression</em> <span class="apus-arrow">→</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>prefix-expression</em> <em>infix-expressions</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a prefix expression</p>
+  <p class="rule"><span class="apus-pragma">@longest</span> <em>prefix-expression</em> <span class="apus-arrow">→</span> <span class="apus-bracket">[</span> <span class="apus-pragma">@avoid</span> <em>prefix-operator</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <span class="apus-bracket">]</span> <em>postfix-expression</em><br>
+<em>prefix-expression</em> <span class="apus-arrow">→</span> <strong><code>!</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>postfix-expression</em><br>
+<em>prefix-expression</em> <span class="apus-arrow">→</span> <em>in-out-expression</em><br>
+<em>prefix-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <strong><code>consume</code></strong> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>prefix-expression</em><br>
+<em>prefix-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <strong><code>borrow</code></strong> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>prefix-expression</em><br>
+<em>prefix-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <strong><code>copy</code></strong> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>prefix-expression</em><br>
+<em>prefix-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <strong><code>unsafe</code></strong> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>prefix-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an in-out expression</p>
+  <p class="rule"><em>in-out-expression</em> <span class="apus-arrow">→</span> <strong><code>&amp;</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>postfix-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a try expression</p>
+  <p class="rule"><em>try-operator</em> <span class="apus-arrow">→</span> <strong><code>try</code></strong> <span class="apus-bar">|</span> <strong><code>try</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>?</code></strong> <span class="apus-bar">|</span> <strong><code>try</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>!</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an await expression</p>
+  <p class="rule"><em>await-operator</em> <span class="apus-arrow">→</span> <strong><code>await</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an infix expression</p>
+  <p class="rule"><span class="apus-pragma">@longest</span> <em>infix-expression</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>infix-operator</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>prefix-expression</em><br>
+<em>infix-expression</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <em>infix-operator</em> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>prefix-expression</em><br>
+<em>infix-expression</em> <span class="apus-arrow">→</span> <em>assignment-operator</em> <em>expression</em><br>
+<em>infix-expression</em> <span class="apus-arrow">→</span> <em>conditional-operator</em> <em>expression</em><br>
+<em>infix-expression</em> <span class="apus-arrow">→</span> <em>type-casting-operator</em><br>
+<em>infix-expressions</em> <span class="apus-arrow">→</span> <em>infix-expression</em> <em>infix-expressions</em><span class="apus-rep">?</span><br>
+<span class="apus-pragma">@longest</span> <em>condition-infix-expression</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>infix-operator</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>prefix-expression</em><br>
+<em>condition-infix-expression</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <em>infix-operator</em> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>prefix-expression</em><br>
+<em>condition-infix-expression</em> <span class="apus-arrow">→</span> <em>conditional-operator</em> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>expression</em><br>
+<em>condition-infix-expression</em> <span class="apus-arrow">→</span> <em>type-casting-operator</em><br>
+<em>condition-infix-expressions</em> <span class="apus-arrow">→</span> <em>condition-infix-expression</em> <em>condition-infix-expressions</em><span class="apus-rep">?</span><br>
+<em>condition-expression</em> <span class="apus-arrow">→</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>conditional-expression</em> <em>coercing-operator</em><span class="apus-rep">?</span><br>
+<em>condition-expression</em> <span class="apus-arrow">→</span> <em>try-operator</em><span class="apus-rep">?</span> <em>await-operator</em><span class="apus-rep">?</span> <em>prefix-expression</em> <em>condition-infix-expressions</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an assignment operator</p>
+  <p class="rule"><em>assignment-operator</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <strong><code>=</code></strong> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-bar">|</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>=</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a conditional operator</p>
+  <p class="rule"><em>conditional-operator</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <strong><code>?</code></strong> <em>expression</em> <strong><code>:</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a type-casting operator</p>
+  <p class="rule"><em>type-casting-operator</em> <span class="apus-arrow">→</span> <strong><code>is</code></strong> <em>type</em><br>
+<em>type-casting-operator</em> <span class="apus-arrow">→</span> <strong><code>as</code></strong> <em>type</em><br>
+<em>type-casting-operator</em> <span class="apus-arrow">→</span> <strong><code>as</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>?</code></strong> <em>type</em><br>
+<em>type-casting-operator</em> <span class="apus-arrow">→</span> <strong><code>as</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>!</code></strong> <em>type</em><br>
+<em>coercing-operator</em> <span class="apus-arrow">→</span> <strong><code>as</code></strong> <em>type</em><br>
+<em>coercing-operator</em> <span class="apus-arrow">→</span> <strong><code>as</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>?</code></strong> <em>type</em><br>
+<em>coercing-operator</em> <span class="apus-arrow">→</span> <strong><code>as</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>!</code></strong> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a primary expression</p>
+  <p class="rule"><em>primary-expression</em> <span class="apus-arrow">→</span> <em>generic-identifier</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>module-generic-identifier</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>module-selector</em> <em>property-wrapper-projection</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <strong><code>(</code></strong> <em>argument-names</em> <strong><code>)</code></strong><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>implicit-parameter-name</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>literal-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>self-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>superclass-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>closure-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>parenthesized-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>tuple-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>implicit-member-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>wildcard-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>macro-expansion-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>key-path-expression</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>self-type</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>any-type</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>operator</em> <strong><code>)</code></strong><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>attribute</em> <em>type</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <em>boxed-protocol-type</em><br>
+<em>primary-expression</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>function-type</em> <strong><code>)</code></strong><br>
+<span class="apus-pragma">@longest</span> <em>generic-identifier</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <em>hard-identifier</em> <em>generic-argument-clause</em><br>
+<span class="apus-pragma">@longest</span> <em>module-generic-identifier</em> <span class="apus-arrow">→</span> <em>module-selector</em> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_)</span> <span class="apus-bar">|</span> <em>module-selector</em> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_)</span> <em>generic-argument-clause</em><br>
+<em>non-literal-primary</em> <span class="apus-arrow">→</span> <em>generic-identifier</em> <span class="apus-bar">|</span> <em>module-generic-identifier</em> <span class="apus-bar">|</span> <em>module-selector</em> <em>property-wrapper-projection</em> <span class="apus-bar">|</span> <em>hard-identifier</em> <strong><code>(</code></strong> <em>argument-names</em> <strong><code>)</code></strong> <span class="apus-bar">|</span> <em>implicit-parameter-name</em> <span class="apus-bar">|</span> <em>self-expression</em> <span class="apus-bar">|</span> <em>superclass-expression</em> <span class="apus-bar">|</span> <em>closure-expression</em> <span class="apus-bar">|</span> <span class="apus-pragma">@prefer</span> <em>parenthesized-expression</em> <span class="apus-bar">|</span> <em>tuple-expression</em> <span class="apus-bar">|</span> <em>implicit-member-expression</em> <span class="apus-bar">|</span> <em>wildcard-expression</em> <span class="apus-bar">|</span> <em>macro-expansion-expression</em> <span class="apus-bar">|</span> <em>key-path-expression</em> <span class="apus-bar">|</span> <em>self-type</em> <span class="apus-bar">|</span> <em>any-type</em> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>operator</em> <strong><code>)</code></strong> <span class="apus-bar">|</span> <em>attribute</em> <em>type</em> <span class="apus-bar">|</span> <em>boxed-protocol-type</em> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>function-type</em> <strong><code>)</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a literal expression</p>
+  <p class="rule"><em>literal-expression</em> <span class="apus-arrow">→</span> <em>literal</em> <span class="apus-bar">|</span> <em>array-literal</em> <span class="apus-bar">|</span> <em>dictionary-literal</em><br>
+<em>array-literal</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>array-literal-items</em><span class="apus-rep">?</span> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>array-literal-items</em> <span class="apus-arrow">→</span> <em>array-literal-item</em> <span class="apus-bar">|</span> <em>array-literal-item</em> <strong><code>,</code></strong> <em>array-literal-items</em><br>
+<em>array-literal-item</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>expression</em><br>
+<em>array-literal-item</em> <span class="apus-arrow">→</span> <em>type-expression</em><br>
+<em>type-expression</em> <span class="apus-arrow">→</span> <em>type</em><br>
+<em>dictionary-literal</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>dictionary-literal-items</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>]</code></strong> <span class="apus-bar">|</span> <strong><code>[</code></strong> <strong><code>:</code></strong> <strong><code>]</code></strong><br>
+<em>dictionary-literal-items</em> <span class="apus-arrow">→</span> <em>dictionary-literal-item</em> <span class="apus-bar">|</span> <em>dictionary-literal-item</em> <strong><code>,</code></strong> <em>dictionary-literal-items</em><br>
+<em>dictionary-literal-item</em> <span class="apus-arrow">→</span> <em>dictionary-literal-element</em> <strong><code>:</code></strong> <em>dictionary-literal-element</em><br>
+<em>dictionary-literal-element</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>expression</em><br>
+<em>dictionary-literal-element</em> <span class="apus-arrow">→</span> <em>type-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a self expression</p>
+  <p class="rule"><em>self-expression</em> <span class="apus-arrow">→</span> <strong><code>self</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a superclass expression</p>
+  <p class="rule"><em>superclass-expression</em> <span class="apus-arrow">→</span> <strong><code>super</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a conditional expression</p>
+  <p class="rule"><em>conditional-expression</em> <span class="apus-arrow">→</span> <em>if-expression</em> <span class="apus-bar">|</span> <em>switch-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an if expression</p>
+  <p class="rule"><em>if-expression</em> <span class="apus-arrow">→</span> <strong><code>if</code></strong> <em>condition-list</em> <em>code-block</em> <em>else-clause</em><span class="apus-rep">?</span><br>
+<em>else-clause</em> <span class="apus-arrow">→</span> <strong><code>else</code></strong> <em>code-block</em> <span class="apus-bar">|</span> <strong><code>else</code></strong> <em>if-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a switch expression</p>
+  <p class="rule"><em>switch-expression</em> <span class="apus-arrow">→</span> <strong><code>switch</code></strong> <em>expression</em> <strong><code>{</code></strong> <em>switch-cases</em><span class="apus-rep">?</span> <strong><code>}</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a closure expression</p>
+  <p class="rule"><em>closure-expression</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>closure-signature</em><span class="apus-rep">?</span> <em>statements</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>closure-signature</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>capture-list</em><span class="apus-rep">?</span> <em>closure-parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <em>throws-clause</em><span class="apus-rep">?</span> <em>function-result</em><span class="apus-rep">?</span> <strong><code>in</code></strong><br>
+<em>closure-signature</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>capture-list</em> <strong><code>in</code></strong><br>
+<em>closure-signature</em> <span class="apus-arrow">→</span> <em>attributes</em> <strong><code>in</code></strong><br>
+<em>closure-parameter-clause</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>closure-parameter-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>)</code></strong> <span class="apus-bar">|</span> <em>identifier-list</em><br>
+<em>closure-parameter-list</em> <span class="apus-arrow">→</span> <em>closure-parameter</em> <span class="apus-bar">|</span> <em>closure-parameter</em> <strong><code>,</code></strong> <em>closure-parameter-list</em><br>
+<em>closure-parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <span class="apus-bracket">[</span> <span class="apus-pragma">@avoid</span> <em>parameter-declaration-modifiers</em> <span class="apus-bracket">]</span> <em>closure-parameter-names</em> <em>type-annotation</em><span class="apus-rep">?</span><br>
+<em>closure-parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <span class="apus-bracket">[</span> <span class="apus-pragma">@avoid</span> <em>parameter-declaration-modifiers</em> <span class="apus-bracket">]</span> <em>closure-parameter-names</em> <em>type-annotation</em> <strong><code>...</code></strong><br>
+<em>closure-parameter-names</em> <span class="apus-arrow">→</span> <em>external-parameter-name</em> <em>closure-parameter-name</em> <span class="apus-bar">|</span> <em>closure-parameter-name</em><br>
+<em>closure-parameter-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>capture-list</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <strong><code>]</code></strong><br>
+<em>capture-list</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>capture-list-items</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>capture-list-items</em> <span class="apus-arrow">→</span> <em>capture-list-item</em> <span class="apus-bar">|</span> <em>capture-list-item</em> <strong><code>,</code></strong> <em>capture-list-items</em><br>
+<em>capture-list-item</em> <span class="apus-arrow">→</span> <em>capture-specifier</em><span class="apus-rep">?</span> <em>hard-identifier</em><br>
+<em>capture-list-item</em> <span class="apus-arrow">→</span> <em>capture-specifier</em><span class="apus-rep">?</span> <em>hard-identifier</em> <em>assignment-operator</em> <em>expression</em><br>
+<em>capture-list-item</em> <span class="apus-arrow">→</span> <em>capture-specifier</em><span class="apus-rep">?</span> <em>self-expression</em><br>
+<em>capture-specifier</em> <span class="apus-arrow">→</span> <strong><code>weak</code></strong> <span class="apus-bar">|</span> <strong><code>unowned</code></strong> <span class="apus-bar">|</span> <strong><code>unowned</code></strong> <strong><code>(</code></strong> <strong><code>safe</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>unowned</code></strong> <strong><code>(</code></strong> <strong><code>unsafe</code></strong> <strong><code>)</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an implicit member expression</p>
+  <p class="rule"><em>implicit-member-expression</em> <span class="apus-arrow">→</span> <strong><code>.</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em><br>
+<em>implicit-member-expression</em> <span class="apus-arrow">→</span> <strong><code>.</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em> <strong><code>.</code></strong> <em>postfix-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a parenthesized expression</p>
+  <p class="rule"><em>parenthesized-expression</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>expression</em> <strong><code>)</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a tuple expression</p>
+  <p class="rule"><em>tuple-expression</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>tuple-element</em> <strong><code>,</code></strong> <em>tuple-element-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>tuple-element-list</em> <span class="apus-arrow">→</span> <em>tuple-element</em> <span class="apus-bar">|</span> <em>tuple-element</em> <strong><code>,</code></strong> <em>tuple-element-list</em><br>
+<em>tuple-element</em> <span class="apus-arrow">→</span> <em>expression</em> <span class="apus-bar">|</span> <em>soft-identifier</em> <strong><code>:</code></strong> <em>expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a wildcard expression</p>
+  <p class="rule"><em>wildcard-expression</em> <span class="apus-arrow">→</span> <strong><code>_</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a macro-expansion expression</p>
+  <p class="rule"><span class="apus-pragma">@longest</span> <em>macro-expansion-expression</em> <span class="apus-arrow">→</span> <em>macro-head</em> <em>generic-argument-clause</em><span class="apus-rep">?</span> <em>function-call-argument-clause</em><span class="apus-rep">?</span> <em>trailing-closures</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a key-path expression</p>
+  <p class="rule"><span class="apus-pragma">@longest</span> <em>key-path-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <strong><code>\</code></strong> <em>key-path-root-type</em> <em>key-path-components</em><br>
+<span class="apus-pragma">@longest</span> <em>key-path-expression</em> <span class="apus-arrow">→</span> <strong><code>\</code></strong> <em>key-path-components</em><br>
+<em>key-path-root-type</em> <span class="apus-arrow">→</span> <em>type-name</em> <em>type-generic-argument-clause</em><span class="apus-rep">?</span> <span class="apus-bar">|</span> <em>tuple-type</em> <span class="apus-bar">|</span> <em>array-type</em> <span class="apus-bar">|</span> <em>inline-array-type</em> <span class="apus-bar">|</span> <em>dictionary-type</em> <span class="apus-bar">|</span> <em>any-type</em> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>tuple-type-element</em> <strong><code>)</code></strong><br>
+<em>key-path-components</em> <span class="apus-arrow">→</span> <em>key-path-property</em> <em>key-path-components</em><span class="apus-rep">?</span><br>
+<em>key-path-components</em> <span class="apus-arrow">→</span> <em>key-path-pivot</em> <em>key-path-bare-tail</em><span class="apus-rep">?</span><br>
+<em>key-path-property</em> <span class="apus-arrow">→</span> <strong><code>.</code></strong> <em>key-path-member-name</em><br>
+<em>key-path-pivot</em> <span class="apus-arrow">→</span> <strong><code>.</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>optional-mark</em><br>
+<em>key-path-pivot</em> <span class="apus-arrow">→</span> <strong><code>.</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>force-mark</em><br>
+<em>key-path-pivot</em> <span class="apus-arrow">→</span> <strong><code>.</code></strong> <strong><code>[</code></strong> <em>function-call-argument-list</em><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>key-path-pivot</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>optional-mark</em><br>
+<em>key-path-pivot</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>force-mark</em><br>
+<em>key-path-pivot</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>function-call-argument-list</em><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>key-path-bare-tail</em> <span class="apus-arrow">→</span> <em>key-path-bare-component</em> <em>key-path-bare-tail</em><span class="apus-rep">?</span><br>
+<em>key-path-bare-component</em> <span class="apus-arrow">→</span> <em>key-path-property</em><br>
+<em>key-path-bare-component</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>optional-mark</em><br>
+<em>key-path-bare-component</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>force-mark</em><br>
+<em>key-path-bare-component</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>function-call-argument-list</em><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>key-path-member-name</em> <span class="apus-arrow">→</span> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em><br>
+<em>key-path-member-name</em> <span class="apus-arrow">→</span> <em>decimal-digits</em><br>
+<em>key-path-member-name</em> <span class="apus-arrow">→</span> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em> <strong><code>(</code></strong> <em>key-path-argument-labels</em> <strong><code>)</code></strong><br>
+<em>key-path-argument-labels</em> <span class="apus-arrow">→</span> <em>key-path-argument-label</em> <em>key-path-argument-labels</em><span class="apus-rep">?</span><br>
+<em>key-path-argument-label</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(inout _)</span> <strong><code>:</code></strong><br>
+<em>key-path-argument-label</em> <span class="apus-arrow">→</span> <strong><code>_</code></strong> <strong><code>:</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a postfix expression</p>
+  <p class="rule"><em>postfix-expression</em> <span class="apus-arrow">→</span> <em>primary-expression</em><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>postfix-operator</em> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-bar">|</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>postfix-operator-token</em> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (. ) ] } , ; :)</span> <span class="apus-bar">|</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>dot-operator</em> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (. ) ] } , ; :)</span><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <em>function-call-expression</em><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <em>initializer-expression</em><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <em>explicit-member-expression</em><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <em>subscript-expression</em><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <em>forced-value-expression</em><br>
+<em>postfix-expression</em> <span class="apus-arrow">→</span> <em>optional-chaining-expression</em><br>
+<em>non-literal-postfix</em> <span class="apus-arrow">→</span> <em>non-literal-primary</em> <span class="apus-bar">|</span> <span class="apus-pragma">@prefer</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>postfix-operator</em> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-bar">|</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>postfix-operator-token</em> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (. ) ] } , ; :)</span> <span class="apus-bar">|</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>dot-operator</em> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (. ) ] } , ; :)</span> <span class="apus-bar">|</span> <em>function-call-expression</em> <span class="apus-bar">|</span> <em>initializer-expression</em> <span class="apus-bar">|</span> <em>explicit-member-expression</em> <span class="apus-bar">|</span> <em>subscript-expression</em> <span class="apus-bar">|</span> <em>forced-value-expression</em> <span class="apus-bar">|</span> <em>optional-chaining-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a function call expression</p>
+  <p class="rule"><em>function-call-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>function-call-argument-clause</em><br>
+<em>function-call-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>postfix-expression</em> <em>function-call-argument-clause</em> <em>trailing-closures</em> <span class="apus-bar">|</span> <em>non-literal-postfix</em> <em>trailing-closures</em><br>
+<em>function-call-argument-clause</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>function-call-argument-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>function-call-argument-list</em> <span class="apus-arrow">→</span> <em>function-call-argument</em> <span class="apus-bar">|</span> <em>function-call-argument</em> <strong><code>,</code></strong> <em>function-call-argument-list</em><br>
+<span class="apus-pragma">@longest</span> <em>function-call-argument</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>expression</em> <span class="apus-bar">|</span> <span class="apus-pragma">@prefer</span> <em>argument-label</em> <strong><code>:</code></strong> <em>expression</em><br>
+<em>function-call-argument</em> <span class="apus-arrow">→</span> <em>operator</em> <span class="apus-bar">|</span> <em>argument-label</em> <strong><code>:</code></strong> <em>operator</em><br>
+<em>function-call-argument</em> <span class="apus-arrow">→</span> <em>module-selector</em> <em>operator</em> <span class="apus-bar">|</span> <em>argument-label</em> <strong><code>:</code></strong> <em>module-selector</em> <em>operator</em><br>
+<em>argument-label</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>trailing-closures</em> <span class="apus-arrow">→</span> <em>closure-expression</em> <em>labeled-trailing-closures</em><span class="apus-rep">?</span><br>
+<em>labeled-trailing-closures</em> <span class="apus-arrow">→</span> <em>labeled-trailing-closure</em> <em>labeled-trailing-closures</em><span class="apus-rep">?</span><br>
+<em>labeled-trailing-closure</em> <span class="apus-arrow">→</span> <em>trailing-closure-label</em> <strong><code>:</code></strong> <em>closure-expression</em><br>
+<em>trailing-closure-label</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_ let var inout default)</span> <span class="apus-bar">|</span> <strong><code>_</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an initializer expression</p>
+  <p class="rule"><em>initializer-expression</em> <span class="apus-arrow">→</span> <strong><code>init</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an explicit member expression</p>
+  <p class="rule"><em>explicit-member-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <strong><code>.</code></strong> <em>decimal-digits</em><br>
+<em>explicit-member-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <strong><code>.</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em><br>
+<em>explicit-member-expression</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>postfix-expression</em> <strong><code>.</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em> <em>generic-argument-clause</em><br>
+<em>explicit-member-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <strong><code>.</code></strong> <em>module-selector</em><span class="apus-rep">?</span> <em>soft-identifier</em> <strong><code>(</code></strong> <em>argument-names</em> <strong><code>)</code></strong><br>
+<em>explicit-member-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <em>conditional-compilation-block</em><br>
+<em>argument-names</em> <span class="apus-arrow">→</span> <em>argument-name</em> <em>argument-names</em><span class="apus-rep">?</span><br>
+<em>argument-name</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <strong><code>:</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a subscript expression</p>
+  <p class="rule"><em>subscript-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <strong><code>[</code></strong> <em>function-call-argument-list</em><span class="apus-rep">?</span> <strong><code>]</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a forced-value expression</p>
+  <p class="rule"><em>forced-value-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>force-mark</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an optional-chaining expression</p>
+  <p class="rule"><em>optional-chaining-expression</em> <span class="apus-arrow">→</span> <em>postfix-expression</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>optional-mark</em></p>
+</aside>
+<h2 class="apus-section">Statements</h2>
+<aside class="note">
+  <p class="label">Grammar of a statement</p>
+  <p class="rule"><em>statement</em> <span class="apus-arrow">→</span> <em>expression</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>declaration</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>loop-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>branch-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>labeled-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>control-transfer-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>defer-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>do-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>compiler-control-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>yield-statement</em><br>
+<em>statement</em> <span class="apus-arrow">→</span> <em>discard-statement</em><br>
+<em>yield-statement</em> <span class="apus-arrow">→</span> <strong><code>yield</code></strong> <span class="apus-annot" title="only when NOT followed by"><span class="apus-tri">>-></span> (( [ .)</span> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>expression</em><br>
+<em>discard-statement</em> <span class="apus-arrow">→</span> <strong><code>discard</code></strong> <span class="apus-annot" title="only when NOT followed by"><span class="apus-tri">>-></span> (( [ .)</span> <span class="apus-constraint" title="tokens must not be adjacent — space required">space</span> <span class="apus-constraint" title="tokens must be on the same line">same-line</span> <em>expression</em><br>
+<em>statements</em> <span class="apus-arrow">→</span> <em>statement</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>statements</em> <span class="apus-arrow">→</span> <em>statement</em> <em>statement-separator</em> <em>statements</em><br>
+<em>statement-separator</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be on different lines">new-line</span> <span class="apus-bar">|</span> <strong><code>;</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a loop statement</p>
+  <p class="rule"><em>loop-statement</em> <span class="apus-arrow">→</span> <em>for-in-statement</em><br>
+<em>loop-statement</em> <span class="apus-arrow">→</span> <em>while-statement</em><br>
+<em>loop-statement</em> <span class="apus-arrow">→</span> <em>repeat-while-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a for-in statement</p>
+  <p class="rule"><em>for-in-statement</em> <span class="apus-arrow">→</span> <strong><code>for</code></strong> <strong><code>try</code></strong><span class="apus-rep">?</span> <strong><code>await</code></strong><span class="apus-rep">?</span> <strong><code>unsafe</code></strong><span class="apus-rep">?</span> <strong><code>case</code></strong> <em>match-pattern</em> <strong><code>in</code></strong> <em>expression</em> <em>where-clause</em><span class="apus-rep">?</span> <em>code-block</em><br>
+<em>for-in-statement</em> <span class="apus-arrow">→</span> <strong><code>for</code></strong> <strong><code>try</code></strong><span class="apus-rep">?</span> <strong><code>await</code></strong><span class="apus-rep">?</span> <strong><code>unsafe</code></strong><span class="apus-rep">?</span> <em>binding-pattern</em> <strong><code>in</code></strong> <em>expression</em> <em>where-clause</em><span class="apus-rep">?</span> <em>code-block</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a while statement</p>
+  <p class="rule"><em>while-statement</em> <span class="apus-arrow">→</span> <strong><code>while</code></strong> <em>condition-list</em> <em>code-block</em><br>
+<em>condition-list</em> <span class="apus-arrow">→</span> <em>condition</em> <span class="apus-bar">|</span> <em>condition</em> <strong><code>,</code></strong> <em>condition-list</em><br>
+<em>condition</em> <span class="apus-arrow">→</span> <em>condition-expression</em> <span class="apus-bar">|</span> <em>availability-condition</em> <span class="apus-bar">|</span> <em>case-condition</em> <span class="apus-bar">|</span> <em>optional-binding-condition</em><br>
+<em>case-condition</em> <span class="apus-arrow">→</span> <strong><code>case</code></strong> <em>match-pattern</em> <em>initializer</em><br>
+<em>optional-binding-condition</em> <span class="apus-arrow">→</span> <strong><code>let</code></strong> <em>binding-pattern</em> <em>initializer</em><span class="apus-rep">?</span> <span class="apus-bar">|</span> <strong><code>var</code></strong> <em>binding-pattern</em> <em>initializer</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a repeat-while statement</p>
+  <p class="rule"><em>repeat-while-statement</em> <span class="apus-arrow">→</span> <strong><code>repeat</code></strong> <em>code-block</em> <strong><code>while</code></strong> <em>condition-expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a branch statement</p>
+  <p class="rule"><em>branch-statement</em> <span class="apus-arrow">→</span> <em>guard-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a guard statement</p>
+  <p class="rule"><em>guard-statement</em> <span class="apus-arrow">→</span> <strong><code>guard</code></strong> <em>condition-list</em> <strong><code>else</code></strong> <em>code-block</em><br>
+<em>switch-cases</em> <span class="apus-arrow">→</span> <em>switch-case</em> <em>switch-cases</em><span class="apus-rep">?</span><br>
+<em>switch-case</em> <span class="apus-arrow">→</span> <em>case-label</em> <em>statements</em><br>
+<em>switch-case</em> <span class="apus-arrow">→</span> <em>default-label</em> <em>statements</em><br>
+<em>switch-case</em> <span class="apus-arrow">→</span> <em>conditional-switch-case</em><br>
+<em>case-label</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>case</code></strong> <em>case-item-list</em> <strong><code>:</code></strong><br>
+<em>case-item-list</em> <span class="apus-arrow">→</span> <em>match-pattern</em> <em>where-clause</em><span class="apus-rep">?</span> <span class="apus-bar">|</span> <em>match-pattern</em> <em>where-clause</em><span class="apus-rep">?</span> <strong><code>,</code></strong> <em>case-item-list</em><br>
+<em>default-label</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>default</code></strong> <strong><code>:</code></strong><br>
+<em>where-clause</em> <span class="apus-arrow">→</span> <strong><code>where</code></strong> <em>where-expression</em><br>
+<em>where-expression</em> <span class="apus-arrow">→</span> <em>condition-expression</em><br>
+<em>conditional-switch-case</em> <span class="apus-arrow">→</span> <em>switch-if-directive-clause</em> <em>switch-elseif-directive-clauses</em><span class="apus-rep">?</span> <em>switch-else-directive-clause</em><span class="apus-rep">?</span> <em>endif-directive</em><br>
+<em>switch-if-directive-clause</em> <span class="apus-arrow">→</span> <em>if-directive</em> <em>compilation-condition</em> <em>switch-cases</em><span class="apus-rep">?</span><br>
+<em>switch-elseif-directive-clauses</em> <span class="apus-arrow">→</span> <em>switch-elseif-directive-clause</em> <em>switch-elseif-directive-clauses</em><span class="apus-rep">?</span><br>
+<em>switch-elseif-directive-clause</em> <span class="apus-arrow">→</span> <em>elseif-directive</em> <em>compilation-condition</em> <em>switch-cases</em><span class="apus-rep">?</span><br>
+<em>switch-else-directive-clause</em> <span class="apus-arrow">→</span> <em>else-directive</em> <em>switch-cases</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a labeled statement</p>
+  <p class="rule"><em>labeled-statement</em> <span class="apus-arrow">→</span> <em>statement-label</em> <em>loop-statement</em><br>
+<em>labeled-statement</em> <span class="apus-arrow">→</span> <em>statement-label</em> <em>conditional-expression</em><br>
+<em>labeled-statement</em> <span class="apus-arrow">→</span> <em>statement-label</em> <em>do-statement</em><br>
+<em>statement-label</em> <span class="apus-arrow">→</span> <em>label-name</em> <strong><code>:</code></strong><br>
+<em>label-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a control transfer statement</p>
+  <p class="rule"><em>control-transfer-statement</em> <span class="apus-arrow">→</span> <em>break-statement</em><br>
+<em>control-transfer-statement</em> <span class="apus-arrow">→</span> <em>continue-statement</em><br>
+<em>control-transfer-statement</em> <span class="apus-arrow">→</span> <em>fallthrough-statement</em><br>
+<em>control-transfer-statement</em> <span class="apus-arrow">→</span> <em>return-statement</em><br>
+<em>control-transfer-statement</em> <span class="apus-arrow">→</span> <em>throw-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a break statement</p>
+  <p class="rule"><em>break-statement</em> <span class="apus-arrow">→</span> <strong><code>break</code></strong> <em>label-name</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a continue statement</p>
+  <p class="rule"><em>continue-statement</em> <span class="apus-arrow">→</span> <strong><code>continue</code></strong> <em>label-name</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a fallthrough statement</p>
+  <p class="rule"><em>fallthrough-statement</em> <span class="apus-arrow">→</span> <strong><code>fallthrough</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a return statement</p>
+  <p class="rule"><em>return-statement</em> <span class="apus-arrow">→</span> <strong><code>return</code></strong> <em>expression</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a throw statement</p>
+  <p class="rule"><em>throw-statement</em> <span class="apus-arrow">→</span> <strong><code>throw</code></strong> <em>expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a defer statement</p>
+  <p class="rule"><em>defer-statement</em> <span class="apus-arrow">→</span> <strong><code>defer</code></strong> <em>code-block</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a do statement</p>
+  <p class="rule"><em>do-statement</em> <span class="apus-arrow">→</span> <strong><code>do</code></strong> <em>throws-clause</em><span class="apus-rep">?</span> <em>code-block</em> <em>catch-clauses</em><span class="apus-rep">?</span><br>
+<em>catch-clauses</em> <span class="apus-arrow">→</span> <em>catch-clause</em> <em>catch-clauses</em><span class="apus-rep">?</span><br>
+<em>catch-clause</em> <span class="apus-arrow">→</span> <strong><code>catch</code></strong> <em>catch-pattern-list</em><span class="apus-rep">?</span> <em>code-block</em><br>
+<em>catch-pattern-list</em> <span class="apus-arrow">→</span> <em>catch-pattern</em> <span class="apus-bar">|</span> <em>catch-pattern</em> <strong><code>,</code></strong> <em>catch-pattern-list</em><br>
+<em>catch-pattern</em> <span class="apus-arrow">→</span> <em>match-pattern</em> <em>where-clause</em><span class="apus-rep">?</span><br>
+<em>catch-pattern</em> <span class="apus-arrow">→</span> <em>where-clause</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a compiler control statement</p>
+  <p class="rule"><em>compiler-control-statement</em> <span class="apus-arrow">→</span> <em>conditional-compilation-block</em><br>
+<em>compiler-control-statement</em> <span class="apus-arrow">→</span> <em>line-control-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a conditional compilation block</p>
+  <p class="rule"><em>conditional-compilation-block</em> <span class="apus-arrow">→</span> <em>if-directive-clause</em> <em>elseif-directive-clauses</em><span class="apus-rep">?</span> <em>else-directive-clause</em><span class="apus-rep">?</span> <em>endif-directive</em><br>
+<em>if-directive-clause</em> <span class="apus-arrow">→</span> <em>if-directive</em> <em>compilation-condition</em> <span class="apus-constraint" title="tokens must be on different lines">new-line</span> <em>statements</em><span class="apus-rep">?</span><br>
+<em>elseif-directive-clauses</em> <span class="apus-arrow">→</span> <em>elseif-directive-clause</em> <em>elseif-directive-clauses</em><span class="apus-rep">?</span><br>
+<em>elseif-directive-clause</em> <span class="apus-arrow">→</span> <em>elseif-directive</em> <em>compilation-condition</em> <span class="apus-constraint" title="tokens must be on different lines">new-line</span> <em>statements</em><span class="apus-rep">?</span><br>
+<em>else-directive-clause</em> <span class="apus-arrow">→</span> <em>else-directive</em> <em>statements</em><span class="apus-rep">?</span><br>
+<em>if-directive</em> <span class="apus-arrow">→</span> <strong><code>#if</code></strong><br>
+<em>elseif-directive</em> <span class="apus-arrow">→</span> <strong><code>#elseif</code></strong><br>
+<em>else-directive</em> <span class="apus-arrow">→</span> <strong><code>#else</code></strong> <span class="apus-constraint" title="tokens must be on different lines">new-line</span><br>
+<em>endif-directive</em> <span class="apus-arrow">→</span> <strong><code>#endif</code></strong> <span class="apus-constraint" title="tokens must be on different lines">new-line</span><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <em>boolean-literal</em><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>compilation-condition</em> <strong><code>)</code></strong><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <strong><code>!</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>compilation-condition</em><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <em>compilation-condition</em> <strong><code>&amp;&amp;</code></strong> <em>compilation-condition</em><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <em>compilation-condition</em> <strong><code>||</code></strong> <em>compilation-condition</em><br>
+<em>compilation-condition</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <em>function-call-argument-clause</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a line control statement</p>
+  <p class="rule"><em>line-control-statement</em> <span class="apus-arrow">→</span> <strong><code>#sourceLocation</code></strong> <strong><code>(</code></strong> <strong><code>file</code></strong> <strong><code>:</code></strong> <em>file-path</em> <strong><code>,</code></strong> <strong><code>line</code></strong> <strong><code>:</code></strong> <em>line-number</em> <strong><code>)</code></strong><br>
+<em>line-control-statement</em> <span class="apus-arrow">→</span> <strong><code>#sourceLocation</code></strong> <strong><code>(</code></strong> <strong><code>)</code></strong><br>
+<em>line-number</em> <span class="apus-arrow">→</span> <code class="apus-regex">/0*[1-9][0-9]*/</code><br>
+<em>file-path</em> <span class="apus-arrow">→</span> <em>static-string-literal</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an availability condition</p>
+  <p class="rule"><em>availability-condition</em> <span class="apus-arrow">→</span> <strong><code>#available</code></strong> <strong><code>(</code></strong> <em>availability-arguments</em> <strong><code>)</code></strong><br>
+<em>availability-condition</em> <span class="apus-arrow">→</span> <strong><code>#unavailable</code></strong> <strong><code>(</code></strong> <em>availability-arguments</em> <strong><code>)</code></strong><br>
+<em>availability-arguments</em> <span class="apus-arrow">→</span> <em>availability-argument</em> <span class="apus-bar">|</span> <em>availability-argument</em> <strong><code>,</code></strong> <em>availability-arguments</em><br>
+<em>availability-argument</em> <span class="apus-arrow">→</span> <em>platform-name</em> <em>platform-version</em><span class="apus-rep">?</span><br>
+<em>availability-argument</em> <span class="apus-arrow">→</span> <strong><code>*</code></strong><br>
+<em>platform-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>platform-version</em> <span class="apus-arrow">→</span> <em>decimal-digits</em><br>
+<em>platform-version</em> <span class="apus-arrow">→</span> <em>decimal-digits</em> <strong><code>.</code></strong> <em>decimal-digits</em><br>
+<em>platform-version</em> <span class="apus-arrow">→</span> <em>decimal-digits</em> <strong><code>.</code></strong> <em>decimal-digits</em> <strong><code>.</code></strong> <em>decimal-digits</em></p>
+</aside>
+<h2 class="apus-section">Declarations</h2>
+<aside class="note">
+  <p class="label">Grammar of a declaration</p>
+  <p class="rule"><em>declaration</em> <span class="apus-arrow">→</span> <em>import-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>constant-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>typealias-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>function-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>enum-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>struct-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>class-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>actor-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>protocol-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>initializer-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>deinitializer-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>extension-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>subscript-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>macro-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>operator-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>precedence-group-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>associated-type-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>enum-case-declaration</em><br>
+<em>declaration</em> <span class="apus-arrow">→</span> <em>macro-expansion-declaration</em><br>
+<em>member-declaration</em> <span class="apus-arrow">→</span> <em>declaration</em> <span class="apus-bar">|</span> <em>freestanding-macro-expansion-declaration</em> <span class="apus-bar">|</span> <em>bodyless-initializer-declaration</em><br>
+<em>macro-expansion-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em> <em>declaration-modifiers</em><span class="apus-rep">?</span> <em>macro-head</em> <em>generic-argument-clause</em><span class="apus-rep">?</span> <em>function-call-argument-clause</em><span class="apus-rep">?</span> <em>trailing-closures</em><span class="apus-rep">?</span><br>
+<em>macro-expansion-declaration</em> <span class="apus-arrow">→</span> <em>declaration-modifiers</em> <em>macro-head</em> <em>generic-argument-clause</em><span class="apus-rep">?</span> <em>function-call-argument-clause</em><span class="apus-rep">?</span> <em>trailing-closures</em><span class="apus-rep">?</span><br>
+<em>freestanding-macro-expansion-declaration</em> <span class="apus-arrow">→</span> <em>macro-head</em> <em>generic-argument-clause</em><span class="apus-rep">?</span> <em>function-call-argument-clause</em><span class="apus-rep">?</span> <em>trailing-closures</em><span class="apus-rep">?</span><br>
+<em>pound-name</em> <span class="apus-arrow">↦</span> <code class="apus-regex" title="regex from the RegexBuilder library">@builder</code><br>
+<em>macro-head</em> <span class="apus-arrow">→</span> <em>pound-name</em> <span class="apus-annot" title="these keywords are suppressed here">---(#_ #available #unavailable #if #elseif #else #endif #sourceLocation)</span><br>
+<em>macro-head</em> <span class="apus-arrow">→</span> <strong><code>#</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>module-selector</em> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_)</span><br>
+<em>macro-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>macro</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a code block</p>
+  <p class="rule"><em>code-block</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>statements</em><span class="apus-rep">?</span> <strong><code>}</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an import declaration</p>
+  <p class="rule"><em>import-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>import</code></strong> <em>import-kind</em><span class="apus-rep">?</span> <em>import-path</em><br>
+<em>import-kind</em> <span class="apus-arrow">→</span> <strong><code>typealias</code></strong> <span class="apus-bar">|</span> <strong><code>struct</code></strong> <span class="apus-bar">|</span> <strong><code>class</code></strong> <span class="apus-bar">|</span> <strong><code>enum</code></strong> <span class="apus-bar">|</span> <strong><code>protocol</code></strong> <span class="apus-bar">|</span> <strong><code>let</code></strong> <span class="apus-bar">|</span> <strong><code>var</code></strong> <span class="apus-bar">|</span> <strong><code>func</code></strong><br>
+<em>import-path</em> <span class="apus-arrow">→</span> <em>module-selector</em><span class="apus-rep">?</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <em>module-selector</em><span class="apus-rep">?</span> <em>hard-identifier</em> <strong><code>.</code></strong> <em>import-path</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a constant declaration</p>
+  <p class="rule"><em>constant-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>let</code></strong> <em>pattern-initializer-list</em><br>
+<em>pattern-initializer-list</em> <span class="apus-arrow">→</span> <em>pattern-initializer</em> <span class="apus-bar">|</span> <em>pattern-initializer</em> <strong><code>,</code></strong> <em>pattern-initializer-list</em><br>
+<em>pattern-initializer</em> <span class="apus-arrow">→</span> <em>binding-pattern</em> <em>initializer</em><span class="apus-rep">?</span><br>
+<em>initializer</em> <span class="apus-arrow">→</span> <em>assignment-operator</em> <em>expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a variable declaration</p>
+  <p class="rule"><em>variable-declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration-head</em> <em>pattern-initializer-list</em><br>
+<em>variable-declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration-head</em> <em>variable-name</em> <em>type-annotation</em> <em>getter-setter-block</em><br>
+<em>variable-declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration-head</em> <em>variable-name</em> <em>initializer</em> <em>will-set-did-set-block</em><br>
+<em>variable-declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration-head</em> <em>variable-name</em> <em>type-annotation</em> <em>initializer</em><span class="apus-rep">?</span> <em>will-set-did-set-block</em><br>
+<em>variable-declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration-head</em> <em>variable-name</em> <em>type-annotation</em> <em>initializer</em> <em>getter-setter-block</em><br>
+<em>variable-declaration-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>var</code></strong><br>
+<em>variable-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>getter-setter-block</em> <span class="apus-arrow">→</span> <em>code-block</em><br>
+<em>getter-setter-block</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <strong><code>{</code></strong> <em>accessor-clause-list</em> <strong><code>}</code></strong><br>
+<em>getter-clause</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>accessor-modifier</em><span class="apus-rep">?</span> <strong><code>get</code></strong> <em>accessor-effects</em><span class="apus-rep">?</span> <em>code-block</em><span class="apus-rep">?</span><br>
+<em>setter-clause</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>accessor-modifier</em><span class="apus-rep">?</span> <strong><code>set</code></strong> <em>setter-name</em><span class="apus-rep">?</span> <em>accessor-effects</em><span class="apus-rep">?</span> <em>code-block</em><span class="apus-rep">?</span><br>
+<em>setter-name</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>hard-identifier</em> <strong><code>)</code></strong><br>
+<em>accessor-clause-list</em> <span class="apus-arrow">→</span> <em>accessor-clause-entry</em> <em>accessor-clause-list</em><span class="apus-rep">?</span><br>
+<em>accessor-clause-entry</em> <span class="apus-arrow">→</span> <em>getter-clause</em> <span class="apus-bar">|</span> <em>setter-clause</em> <span class="apus-bar">|</span> <em>init-accessor-clause</em> <span class="apus-bar">|</span> <em>coroutine-accessor-clause</em><br>
+<em>init-accessor-clause</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>init</code></strong> <em>setter-name</em><span class="apus-rep">?</span> <em>accessor-effects</em><span class="apus-rep">?</span> <em>code-block</em><br>
+<em>coroutine-accessor-clause</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>accessor-modifier</em><span class="apus-rep">?</span> <em>coroutine-specifier</em> <em>accessor-effects</em><span class="apus-rep">?</span> <em>code-block</em><br>
+<em>coroutine-specifier</em> <span class="apus-arrow">→</span> <strong><code>_read</code></strong> <span class="apus-bar">|</span> <strong><code>read</code></strong> <span class="apus-bar">|</span> <strong><code>_modify</code></strong> <span class="apus-bar">|</span> <strong><code>modify</code></strong> <span class="apus-bar">|</span> <strong><code>borrow</code></strong> <span class="apus-bar">|</span> <strong><code>mutate</code></strong><br>
+<em>accessor-modifier</em> <span class="apus-arrow">→</span> <strong><code>mutating</code></strong> <span class="apus-bar">|</span> <strong><code>nonmutating</code></strong> <span class="apus-bar">|</span> <strong><code>borrowing</code></strong> <span class="apus-bar">|</span> <strong><code>consuming</code></strong> <span class="apus-bar">|</span> <strong><code>__consuming</code></strong><br>
+<em>will-set-did-set-block</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>will-set-clause</em> <em>did-set-clause</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>will-set-did-set-block</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>did-set-clause</em> <em>will-set-clause</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>will-set-clause</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>willSet</code></strong> <em>setter-name</em><span class="apus-rep">?</span> <em>accessor-effects</em><span class="apus-rep">?</span> <em>code-block</em><br>
+<em>did-set-clause</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>didSet</code></strong> <em>setter-name</em><span class="apus-rep">?</span> <em>accessor-effects</em><span class="apus-rep">?</span> <em>code-block</em><br>
+<em>accessor-effects</em> <span class="apus-arrow">→</span> <strong><code>throws</code></strong><br>
+<em>accessor-effects</em> <span class="apus-arrow">→</span> <strong><code>async</code></strong> <strong><code>throws</code></strong><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a type alias declaration</p>
+  <p class="rule"><em>typealias-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>typealias</code></strong> <em>typealias-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>typealias-assignment</em><br>
+<em>typealias-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>typealias-assignment</em> <span class="apus-arrow">→</span> <em>assignment-operator</em> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a function declaration</p>
+  <p class="rule"><span class="apus-pragma">@longest</span> <em>function-declaration</em> <span class="apus-arrow">→</span> <em>function-head</em> <em>function-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>function-signature</em> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>function-body</em><span class="apus-rep">?</span><br>
+<em>function-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>func</code></strong><br>
+<em>function-name</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <span class="apus-bar">|</span> <em>operator-name</em><br>
+<em>function-signature</em> <span class="apus-arrow">→</span> <em>parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <em>throws-clause</em><span class="apus-rep">?</span> <em>function-result</em><span class="apus-rep">?</span><br>
+<em>function-signature</em> <span class="apus-arrow">→</span> <em>parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <strong><code>rethrows</code></strong> <em>function-result</em><span class="apus-rep">?</span><br>
+<em>function-result</em> <span class="apus-arrow">→</span> <strong><code>-&gt;</code></strong> <em>type</em><br>
+<em>function-body</em> <span class="apus-arrow">→</span> <em>code-block</em><br>
+<em>parameter-clause</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>(</code></strong> <em>parameter-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>parameter-list</em> <span class="apus-arrow">→</span> <em>parameter</em> <span class="apus-bar">|</span> <em>parameter</em> <strong><code>,</code></strong> <em>parameter-list</em><br>
+<em>parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <span class="apus-bracket">[</span> <span class="apus-pragma">@avoid</span> <em>parameter-declaration-modifiers</em> <span class="apus-bracket">]</span> <em>parameter-names</em> <em>type-annotation</em> <em>default-argument-clause</em><span class="apus-rep">?</span><br>
+<em>parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <span class="apus-bracket">[</span> <span class="apus-pragma">@avoid</span> <em>parameter-declaration-modifiers</em> <span class="apus-bracket">]</span> <em>parameter-names</em> <em>type-annotation</em> <strong><code>...</code></strong><br>
+<em>parameter-names</em> <span class="apus-arrow">→</span> <em>external-parameter-name</em> <em>local-parameter-name</em> <span class="apus-bar">|</span> <em>local-parameter-name</em><br>
+<em>external-parameter-name</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>local-parameter-name</em> <span class="apus-arrow">→</span> <em>soft-identifier</em> <span class="apus-bar">|</span> <strong><code>_</code></strong><br>
+<em>parameter-modifiers</em> <span class="apus-arrow">→</span> <em>parameter-modifier</em> <em>parameter-modifiers</em><span class="apus-rep">?</span><br>
+<em>parameter-modifier</em> <span class="apus-arrow">→</span> <strong><code>inout</code></strong> <span class="apus-bar">|</span> <strong><code>borrowing</code></strong> <span class="apus-bar">|</span> <strong><code>consuming</code></strong> <span class="apus-bar">|</span> <strong><code>isolated</code></strong> <span class="apus-bar">|</span> <strong><code>_const</code></strong> <span class="apus-bar">|</span> <strong><code>sending</code></strong> <span class="apus-bar">|</span> <strong><code>__shared</code></strong> <span class="apus-bar">|</span> <strong><code>__owned</code></strong><br>
+<em>parameter-modifier</em> <span class="apus-arrow">→</span> <strong><code>nonisolated</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>(</code></strong> <strong><code>nonsending</code></strong> <strong><code>)</code></strong><br>
+<em>parameter-modifier</em> <span class="apus-arrow">→</span> <strong><code>dependsOn</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>(</code></strong> <strong><code>scoped</code></strong><span class="apus-rep">?</span> <em>identifier-list</em> <strong><code>)</code></strong><br>
+<em>parameter-declaration-modifiers</em> <span class="apus-arrow">→</span> <em>parameter-declaration-modifier</em> <em>parameter-declaration-modifiers</em><span class="apus-rep">?</span><br>
+<em>parameter-declaration-modifier</em> <span class="apus-arrow">→</span> <strong><code>_const</code></strong> <span class="apus-bar">|</span> <strong><code>isolated</code></strong><br>
+<em>default-argument-clause</em> <span class="apus-arrow">→</span> <em>assignment-operator</em> <em>expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an enumeration declaration</p>
+  <p class="rule"><em>enum-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>indirect</code></strong><span class="apus-rep">?</span> <strong><code>enum</code></strong> <em>enum-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <strong><code>{</code></strong> <em>enum-members</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>enum-members</em> <span class="apus-arrow">→</span> <em>enum-member</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>enum-members</em> <span class="apus-arrow">→</span> <em>enum-member</em> <em>statement-separator</em> <em>enum-members</em><br>
+<em>enum-member</em> <span class="apus-arrow">→</span> <em>member-declaration</em> <span class="apus-bar">|</span> <em>compiler-control-statement</em><br>
+<em>associated-values</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>enum-case-parameter-list</em> <strong><code>)</code></strong><br>
+<em>enum-case-parameter-list</em> <span class="apus-arrow">→</span> <em>enum-case-parameter</em> <span class="apus-bar">|</span> <em>enum-case-parameter</em> <strong><code>,</code></strong> <em>enum-case-parameter-list</em><br>
+<em>enum-case-parameter</em> <span class="apus-arrow">→</span> <em>type</em> <em>default-argument-clause</em><span class="apus-rep">?</span><br>
+<em>enum-case-parameter</em> <span class="apus-arrow">→</span> <em>parameter-modifiers</em><span class="apus-rep">?</span> <em>external-argument-label</em><span class="apus-rep">?</span> <em>local-argument-label</em> <em>type-annotation</em> <em>default-argument-clause</em><span class="apus-rep">?</span><br>
+<em>enum-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>enum-case-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>enum-case-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>indirect</code></strong><span class="apus-rep">?</span> <strong><code>case</code></strong> <em>enum-case-element-list</em><br>
+<em>enum-case-element-list</em> <span class="apus-arrow">→</span> <em>enum-case-element</em> <span class="apus-bar">|</span> <em>enum-case-element</em> <strong><code>,</code></strong> <em>enum-case-element-list</em><br>
+<em>enum-case-element</em> <span class="apus-arrow">→</span> <em>enum-case-name</em> <em>associated-values</em><span class="apus-rep">?</span> <em>enum-case-raw-value-initializer</em><span class="apus-rep">?</span><br>
+<em>enum-case-raw-value-initializer</em> <span class="apus-arrow">→</span> <em>assignment-operator</em> <em>expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a structure declaration</p>
+  <p class="rule"><em>struct-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>struct</code></strong> <em>struct-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>struct-body</em><br>
+<em>struct-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>struct-body</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>struct-members</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>struct-members</em> <span class="apus-arrow">→</span> <em>struct-member</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>struct-members</em> <span class="apus-arrow">→</span> <em>struct-member</em> <em>statement-separator</em> <em>struct-members</em><br>
+<em>struct-member</em> <span class="apus-arrow">→</span> <em>member-declaration</em> <span class="apus-bar">|</span> <em>compiler-control-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a class declaration</p>
+  <p class="rule"><em>class-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>final</code></strong><span class="apus-rep">?</span> <strong><code>class</code></strong> <em>class-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>class-body</em><br>
+<em>class-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>final</code></strong> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>class</code></strong> <em>class-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>class-body</em><br>
+<em>class-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>class-body</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>class-members</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>class-members</em> <span class="apus-arrow">→</span> <em>class-member</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>class-members</em> <span class="apus-arrow">→</span> <em>class-member</em> <em>statement-separator</em> <em>class-members</em><br>
+<em>class-member</em> <span class="apus-arrow">→</span> <em>member-declaration</em> <span class="apus-bar">|</span> <em>compiler-control-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an actor declaration</p>
+  <p class="rule"><em>actor-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>actor</code></strong> <em>actor-name</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>actor-body</em><br>
+<em>actor-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>actor-body</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>actor-members</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>actor-members</em> <span class="apus-arrow">→</span> <em>actor-member</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>actor-members</em> <span class="apus-arrow">→</span> <em>actor-member</em> <em>statement-separator</em> <em>actor-members</em><br>
+<em>actor-member</em> <span class="apus-arrow">→</span> <em>member-declaration</em> <span class="apus-bar">|</span> <em>compiler-control-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a protocol declaration</p>
+  <p class="rule"><em>protocol-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>protocol</code></strong> <em>protocol-name</em> <em>primary-associated-type-clause</em><span class="apus-rep">?</span> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>protocol-body</em><br>
+<em>protocol-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em><br>
+<em>primary-associated-type-clause</em> <span class="apus-arrow">→</span> <em>open-angle</em> <em>primary-associated-type-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <em>close-angle</em><br>
+<em>primary-associated-type-list</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <em>hard-identifier</em> <strong><code>,</code></strong> <em>primary-associated-type-list</em><br>
+<em>protocol-body</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>protocol-members</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>protocol-members</em> <span class="apus-arrow">→</span> <em>protocol-member</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>protocol-members</em> <span class="apus-arrow">→</span> <em>protocol-member</em> <em>statement-separator</em> <em>protocol-members</em><br>
+<em>protocol-member</em> <span class="apus-arrow">→</span> <em>member-declaration</em> <span class="apus-bar">|</span> <em>compiler-control-statement</em><br>
+<em>associated-type-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>associatedtype</code></strong> <em>typealias-name</em> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>typealias-assignment</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an initializer declaration</p>
+  <p class="rule"><em>initializer-declaration</em> <span class="apus-arrow">→</span> <em>initializer-head</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <em>throws-clause</em><span class="apus-rep">?</span> <em>function-result</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>initializer-body</em><br>
+<em>initializer-declaration</em> <span class="apus-arrow">→</span> <em>initializer-head</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <strong><code>rethrows</code></strong> <em>function-result</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>initializer-body</em><br>
+<em>bodyless-initializer-declaration</em> <span class="apus-arrow">→</span> <em>initializer-head</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <em>throws-clause</em><span class="apus-rep">?</span> <em>function-result</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span><br>
+<em>bodyless-initializer-declaration</em> <span class="apus-arrow">→</span> <em>initializer-head</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>parameter-clause</em> <strong><code>async</code></strong><span class="apus-rep">?</span> <strong><code>rethrows</code></strong> <em>function-result</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span><br>
+<em>initializer-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>init</code></strong><br>
+<em>initializer-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>init</code></strong> <strong><code>?</code></strong><br>
+<em>initializer-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>init</code></strong> <strong><code>!</code></strong><br>
+<em>initializer-body</em> <span class="apus-arrow">→</span> <em>code-block</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a deinitializer declaration</p>
+  <p class="rule"><em>deinitializer-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>deinit</code></strong> <strong><code>async</code></strong><span class="apus-rep">?</span> <em>code-block</em><span class="apus-rep">?</span><br>
+<em>abi-declaration</em> <span class="apus-arrow">→</span> <em>associated-type-declaration</em> <span class="apus-bar">|</span> <em>deinitializer-declaration</em> <span class="apus-bar">|</span> <em>enum-case-declaration</em> <span class="apus-bar">|</span> <em>function-declaration</em> <span class="apus-bar">|</span> <em>initializer-declaration</em> <span class="apus-bar">|</span> <em>bodyless-initializer-declaration</em> <span class="apus-bar">|</span> <em>subscript-declaration</em> <span class="apus-bar">|</span> <em>abi-subscript-declaration</em> <span class="apus-bar">|</span> <em>typealias-declaration</em> <span class="apus-bar">|</span> <em>variable-declaration</em> <span class="apus-bar">|</span> <em>constant-declaration</em> <span class="apus-bar">|</span> <em>abi-variable-declaration</em><br>
+<em>abi-subscript-declaration</em> <span class="apus-arrow">→</span> <em>subscript-head</em> <em>subscript-result</em> <em>generic-where-clause</em><span class="apus-rep">?</span><br>
+<em>abi-variable-declaration</em> <span class="apus-arrow">→</span> <em>variable-declaration-head</em> <em>variable-name</em> <em>getter-setter-block</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an extension declaration</p>
+  <p class="rule"><em>extension-declaration</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>access-level-modifier</em><span class="apus-rep">?</span> <strong><code>extension</code></strong> <em>type-identifier</em> <em>type-inheritance-clause</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>extension-body</em><br>
+<em>extension-body</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>extension-members</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>extension-members</em> <span class="apus-arrow">→</span> <em>extension-member</em> <strong><code>;</code></strong><span class="apus-rep">?</span><br>
+<em>extension-members</em> <span class="apus-arrow">→</span> <em>extension-member</em> <em>statement-separator</em> <em>extension-members</em><br>
+<em>extension-member</em> <span class="apus-arrow">→</span> <em>member-declaration</em> <span class="apus-bar">|</span> <em>compiler-control-statement</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a subscript declaration</p>
+  <p class="rule"><em>subscript-declaration</em> <span class="apus-arrow">→</span> <em>subscript-head</em> <em>subscript-result</em> <em>generic-where-clause</em><span class="apus-rep">?</span> <em>getter-setter-block</em><br>
+<em>subscript-head</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>declaration-modifiers</em><span class="apus-rep">?</span> <strong><code>subscript</code></strong> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>parameter-clause</em><br>
+<em>subscript-result</em> <span class="apus-arrow">→</span> <strong><code>-&gt;</code></strong> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a macro declaration</p>
+  <p class="rule"><em>macro-declaration</em> <span class="apus-arrow">→</span> <em>macro-head</em> <em>hard-identifier</em> <em>generic-parameter-clause</em><span class="apus-rep">?</span> <em>macro-signature</em> <em>macro-definition</em><span class="apus-rep">?</span> <em>generic-where-clause</em><span class="apus-rep">?</span><br>
+<em>macro-signature</em> <span class="apus-arrow">→</span> <em>parameter-clause</em> <em>macro-function-signature-result</em><span class="apus-rep">?</span><br>
+<em>macro-function-signature-result</em> <span class="apus-arrow">→</span> <strong><code>-&gt;</code></strong> <em>type</em><br>
+<em>macro-definition</em> <span class="apus-arrow">→</span> <em>assignment-operator</em> <em>expression</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an operator declaration</p>
+  <p class="rule"><em>operator-declaration</em> <span class="apus-arrow">→</span> <em>prefix-operator-declaration</em> <span class="apus-bar">|</span> <em>postfix-operator-declaration</em> <span class="apus-bar">|</span> <em>infix-operator-declaration</em><br>
+<em>prefix-operator-declaration</em> <span class="apus-arrow">→</span> <strong><code>prefix</code></strong> <strong><code>operator</code></strong> <em>operator</em> <em>infix-operator-group</em><span class="apus-rep">?</span><br>
+<em>postfix-operator-declaration</em> <span class="apus-arrow">→</span> <strong><code>postfix</code></strong> <strong><code>operator</code></strong> <em>operator</em> <em>infix-operator-group</em><span class="apus-rep">?</span><br>
+<em>infix-operator-declaration</em> <span class="apus-arrow">→</span> <strong><code>infix</code></strong> <strong><code>operator</code></strong> <em>operator</em> <em>infix-operator-group</em><span class="apus-rep">?</span><br>
+<em>infix-operator-group</em> <span class="apus-arrow">→</span> <strong><code>:</code></strong> <em>precedence-group-name</em> <em>designated-types</em><span class="apus-rep">?</span><br>
+<em>designated-types</em> <span class="apus-arrow">→</span> <strong><code>,</code></strong> <span class="apus-bar">|</span> <strong><code>,</code></strong> <em>designated-type</em> <em>designated-types</em><span class="apus-rep">?</span><br>
+<em>designated-type</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-bar">|</span> <em>escaped-identifier</em> <span class="apus-bar">|</span> <em>non-word-token</em> <span class="apus-bar">|</span> <em>literal</em> <span class="apus-bar">|</span> <em>operator</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a precedence group declaration</p>
+  <p class="rule"><em>precedence-group-declaration</em> <span class="apus-arrow">→</span> <strong><code>precedencegroup</code></strong> <em>precedence-group-name</em> <strong><code>{</code></strong> <em>precedence-group-attributes</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>precedence-group-attributes</em> <span class="apus-arrow">→</span> <em>precedence-group-attribute</em> <em>precedence-group-attributes</em><span class="apus-rep">?</span><br>
+<em>precedence-group-attribute</em> <span class="apus-arrow">→</span> <em>precedence-group-relation</em><br>
+<em>precedence-group-attribute</em> <span class="apus-arrow">→</span> <em>precedence-group-assignment</em><br>
+<em>precedence-group-attribute</em> <span class="apus-arrow">→</span> <em>precedence-group-associativity</em><br>
+<em>precedence-group-relation</em> <span class="apus-arrow">→</span> <strong><code>higherThan</code></strong> <strong><code>:</code></strong> <em>precedence-group-names</em><br>
+<em>precedence-group-relation</em> <span class="apus-arrow">→</span> <strong><code>lowerThan</code></strong> <strong><code>:</code></strong> <em>precedence-group-names</em><br>
+<em>precedence-group-assignment</em> <span class="apus-arrow">→</span> <strong><code>assignment</code></strong> <strong><code>:</code></strong> <em>boolean-literal</em><br>
+<em>precedence-group-associativity</em> <span class="apus-arrow">→</span> <strong><code>associativity</code></strong> <strong><code>:</code></strong> <strong><code>left</code></strong><br>
+<em>precedence-group-associativity</em> <span class="apus-arrow">→</span> <strong><code>associativity</code></strong> <strong><code>:</code></strong> <strong><code>right</code></strong><br>
+<em>precedence-group-associativity</em> <span class="apus-arrow">→</span> <strong><code>associativity</code></strong> <strong><code>:</code></strong> <strong><code>none</code></strong><br>
+<em>precedence-group-names</em> <span class="apus-arrow">→</span> <em>precedence-group-name</em> <span class="apus-bar">|</span> <em>precedence-group-name</em> <strong><code>,</code></strong> <em>precedence-group-names</em><br>
+<em>precedence-group-name</em> <span class="apus-arrow">→</span> <em>hard-identifier</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a declaration modifier</p>
+  <p class="rule"><em>declaration-modifier</em> <span class="apus-arrow">→</span> <strong><code>class</code></strong> <span class="apus-bar">|</span> <strong><code>convenience</code></strong> <span class="apus-bar">|</span> <strong><code>dynamic</code></strong> <span class="apus-bar">|</span> <strong><code>final</code></strong> <span class="apus-bar">|</span> <strong><code>infix</code></strong> <span class="apus-bar">|</span> <strong><code>lazy</code></strong> <span class="apus-bar">|</span> <strong><code>optional</code></strong> <span class="apus-bar">|</span> <strong><code>override</code></strong> <span class="apus-bar">|</span> <strong><code>postfix</code></strong> <span class="apus-bar">|</span> <strong><code>prefix</code></strong> <span class="apus-bar">|</span> <strong><code>required</code></strong> <span class="apus-bar">|</span> <strong><code>static</code></strong> <span class="apus-bar">|</span> <strong><code>unowned</code></strong> <span class="apus-bar">|</span> <strong><code>unowned</code></strong> <strong><code>(</code></strong> <strong><code>safe</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>unowned</code></strong> <strong><code>(</code></strong> <strong><code>unsafe</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>weak</code></strong><br>
+<em>declaration-modifier</em> <span class="apus-arrow">→</span> <strong><code>async</code></strong> <span class="apus-bar">|</span> <strong><code>borrowing</code></strong> <span class="apus-bar">|</span> <strong><code>consuming</code></strong> <span class="apus-bar">|</span> <strong><code>sending</code></strong> <span class="apus-bar">|</span> <strong><code>distributed</code></strong> <span class="apus-bar">|</span> <strong><code>reasync</code></strong> <span class="apus-bar">|</span> <strong><code>indirect</code></strong> <span class="apus-bar">|</span> <strong><code>isolated</code></strong><br>
+<em>declaration-modifier</em> <span class="apus-arrow">→</span> <strong><code>_const</code></strong> <span class="apus-bar">|</span> <strong><code>_local</code></strong> <span class="apus-bar">|</span> <strong><code>__consuming</code></strong> <span class="apus-bar">|</span> <strong><code>__setter_access</code></strong><br>
+<em>declaration-modifier</em> <span class="apus-arrow">→</span> <em>access-level-modifier</em><br>
+<em>declaration-modifier</em> <span class="apus-arrow">→</span> <em>mutation-modifier</em><br>
+<em>declaration-modifier</em> <span class="apus-arrow">→</span> <em>actor-isolation-modifier</em><br>
+<em>declaration-modifiers</em> <span class="apus-arrow">→</span> <em>declaration-modifier</em> <em>declaration-modifiers</em><span class="apus-rep">?</span><br>
+<em>access-level-modifier</em> <span class="apus-arrow">→</span> <strong><code>private</code></strong> <span class="apus-bar">|</span> <strong><code>private</code></strong> <strong><code>(</code></strong> <strong><code>set</code></strong> <strong><code>)</code></strong><br>
+<em>access-level-modifier</em> <span class="apus-arrow">→</span> <strong><code>fileprivate</code></strong> <span class="apus-bar">|</span> <strong><code>fileprivate</code></strong> <strong><code>(</code></strong> <strong><code>set</code></strong> <strong><code>)</code></strong><br>
+<em>access-level-modifier</em> <span class="apus-arrow">→</span> <strong><code>internal</code></strong> <span class="apus-bar">|</span> <strong><code>internal</code></strong> <strong><code>(</code></strong> <strong><code>set</code></strong> <strong><code>)</code></strong><br>
+<em>access-level-modifier</em> <span class="apus-arrow">→</span> <strong><code>package</code></strong> <span class="apus-bar">|</span> <strong><code>package</code></strong> <strong><code>(</code></strong> <strong><code>set</code></strong> <strong><code>)</code></strong><br>
+<em>access-level-modifier</em> <span class="apus-arrow">→</span> <strong><code>public</code></strong> <span class="apus-bar">|</span> <strong><code>public</code></strong> <strong><code>(</code></strong> <strong><code>set</code></strong> <strong><code>)</code></strong><br>
+<em>access-level-modifier</em> <span class="apus-arrow">→</span> <strong><code>open</code></strong> <span class="apus-bar">|</span> <strong><code>open</code></strong> <strong><code>(</code></strong> <strong><code>set</code></strong> <strong><code>)</code></strong><br>
+<em>mutation-modifier</em> <span class="apus-arrow">→</span> <strong><code>mutating</code></strong> <span class="apus-bar">|</span> <strong><code>nonmutating</code></strong><br>
+<em>actor-isolation-modifier</em> <span class="apus-arrow">→</span> <strong><code>nonisolated</code></strong> <span class="apus-bar">|</span> <strong><code>nonisolated</code></strong> <strong><code>(</code></strong> <strong><code>unsafe</code></strong> <strong><code>)</code></strong> <span class="apus-bar">|</span> <strong><code>nonisolated</code></strong> <strong><code>(</code></strong> <strong><code>nonsending</code></strong> <strong><code>)</code></strong></p>
+</aside>
+<h2 class="apus-section">Attributes</h2>
+<aside class="note">
+  <p class="label">Grammar of an attribute</p>
+  <p class="rule"><em>attribute</em> <span class="apus-arrow">→</span> <strong><code>@</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>abi</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>(</code></strong> <em>abi-declaration</em> <strong><code>)</code></strong><br>
+<span class="apus-pragma">@longest</span> <em>attribute</em> <span class="apus-arrow">→</span> <strong><code>@</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>attached</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>(</code></strong> <em>macro-role-arguments</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<span class="apus-pragma">@longest</span> <em>attribute</em> <span class="apus-arrow">→</span> <strong><code>@</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>freestanding</code></strong> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>(</code></strong> <em>macro-role-arguments</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<span class="apus-pragma">@longest</span> <em>attribute</em> <span class="apus-arrow">→</span> <strong><code>@</code></strong> <span class="apus-annot" title="only when NOT followed by"><span class="apus-tri">>-></span> (abi attached freestanding)</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>attribute-name</em> <em>attribute-argument-clause</em><span class="apus-rep">?</span><br>
+<em>macro-role-arguments</em> <span class="apus-arrow">→</span> <em>macro-role-token</em> <em>macro-role-arguments</em><span class="apus-rep">?</span><br>
+<em>macro-role-token</em> <span class="apus-arrow">→</span> <em>identifier</em> <span class="apus-annot" title="these keywords are suppressed here">---(_ Any as associatedtype await break case catch class continue default defer do else enum fallthrough false fileprivate for func guard if import in inout internal is let nil open operator precedencegroup private protocol public repeat rethrows return static struct super switch throw throws true try typealias var where while)</span> <span class="apus-bar">|</span> <em>escaped-identifier</em> <span class="apus-bar">|</span> <em>non-word-token</em> <span class="apus-bar">|</span> <em>operator</em><br>
+<em>macro-role-token</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>macro-role-arguments</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>macro-role-token</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>macro-role-arguments</em><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>macro-role-token</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>macro-role-arguments</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>attribute-name</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <span class="apus-bar">|</span> <strong><code>rethrows</code></strong><br>
+<em>attribute-argument-clause</em> <span class="apus-arrow">→</span> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <strong><code>(</code></strong> <em>balanced-tokens</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>attributes</em> <span class="apus-arrow">→</span> <em>attribute</em> <em>attributes</em><span class="apus-rep">?</span><br>
+<em>attributes</em> <span class="apus-arrow">→</span> <em>conditional-compilation-attributes</em> <em>attributes</em><span class="apus-rep">?</span><br>
+<em>conditional-compilation-attributes</em> <span class="apus-arrow">→</span> <em>if-directive-attributes</em> <em>elseif-directive-attributes</em><span class="apus-rep">?</span> <em>else-directive-attributes</em><span class="apus-rep">?</span> <em>endif-directive</em><br>
+<em>if-directive-attributes</em> <span class="apus-arrow">→</span> <em>if-directive</em> <em>compilation-condition</em> <em>attributes</em><span class="apus-rep">?</span><br>
+<em>elseif-directive-attributes</em> <span class="apus-arrow">→</span> <em>elseif-directive-attributes</em> <em>elseif-directive-attributes</em><span class="apus-rep">?</span><br>
+<em>elseif-directive-attributes</em> <span class="apus-arrow">→</span> <em>elseif-directive</em> <em>compilation-condition</em> <em>attributes</em><span class="apus-rep">?</span><br>
+<em>else-directive-attributes</em> <span class="apus-arrow">→</span> <em>else-directive</em> <em>attributes</em><span class="apus-rep">?</span><br>
+<em>non-word-token</em> <span class="apus-arrow">→</span> <strong><code>#available</code></strong> <span class="apus-bar">|</span> <strong><code>#colorLiteral</code></strong> <span class="apus-bar">|</span> <strong><code>#elseif</code></strong> <span class="apus-bar">|</span> <strong><code>#else</code></strong> <span class="apus-bar">|</span> <strong><code>#endif</code></strong> <span class="apus-bar">|</span> <strong><code>#error</code></strong> <span class="apus-bar">|</span> <strong><code>#fileLiteral</code></strong> <span class="apus-bar">|</span> <strong><code>#if</code></strong> <span class="apus-bar">|</span> <strong><code>#imageLiteral</code></strong> <span class="apus-bar">|</span> <strong><code>#keyPath</code></strong> <span class="apus-bar">|</span> <strong><code>#selector</code></strong> <span class="apus-bar">|</span> <strong><code>#sourceLocation</code></strong> <span class="apus-bar">|</span> <strong><code>#unavailable</code></strong> <span class="apus-bar">|</span> <strong><code>#warning</code></strong> <span class="apus-bar">|</span> <strong><code>.</code></strong> <span class="apus-bar">|</span> <strong><code>,</code></strong> <span class="apus-bar">|</span> <strong><code>:</code></strong> <span class="apus-bar">|</span> <strong><code>;</code></strong> <span class="apus-bar">|</span> <strong><code>=</code></strong> <span class="apus-bar">|</span> <strong><code>#</code></strong> <span class="apus-bar">|</span> <strong><code>&amp;</code></strong> <span class="apus-bar">|</span> <strong><code>?</code></strong> <span class="apus-bar">|</span> <strong><code>!</code></strong> <span class="apus-bar">|</span> <strong><code>_</code></strong> <span class="apus-bar">|</span> <strong><code>@</code></strong><br>
+<em>balanced-token</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>identifier</em> <span class="apus-bar">|</span> <em>escaped-identifier</em> <span class="apus-bar">|</span> <em>non-word-token</em> <span class="apus-bar">|</span> <em>literal</em> <span class="apus-bar">|</span> <em>operator</em><br>
+<em>balanced-token</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>balanced-tokens</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>balanced-token</em> <span class="apus-arrow">→</span> <strong><code>[</code></strong> <em>balanced-tokens</em><span class="apus-rep">?</span> <strong><code>]</code></strong><br>
+<em>balanced-token</em> <span class="apus-arrow">→</span> <strong><code>{</code></strong> <em>balanced-tokens</em><span class="apus-rep">?</span> <strong><code>}</code></strong><br>
+<em>balanced-tokens</em> <span class="apus-arrow">→</span> <em>balanced-token</em> <em>balanced-tokens</em><span class="apus-rep">?</span></p>
+</aside>
+<h2 class="apus-section">Patterns</h2>
+<aside class="note">
+  <p class="label">Grammar of a pattern</p>
+  <p class="rule"><em>binding-pattern</em> <span class="apus-arrow">→</span> <em>wildcard-pattern</em> <em>type-annotation</em><span class="apus-rep">?</span><br>
+<em>binding-pattern</em> <span class="apus-arrow">→</span> <em>identifier-pattern</em> <em>type-annotation</em><span class="apus-rep">?</span><br>
+<em>binding-pattern</em> <span class="apus-arrow">→</span> <em>tuple-binding-pattern</em> <em>type-annotation</em><span class="apus-rep">?</span><br>
+<em>tuple-binding-pattern</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>tuple-binding-element-list</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>tuple-binding-element-list</em> <span class="apus-arrow">→</span> <em>tuple-binding-element</em> <span class="apus-bar">|</span> <em>tuple-binding-element</em> <strong><code>,</code></strong> <em>tuple-binding-element-list</em><br>
+<em>tuple-binding-element</em> <span class="apus-arrow">→</span> <em>binding-subpattern</em> <span class="apus-bar">|</span> <em>soft-identifier</em> <strong><code>:</code></strong> <em>binding-subpattern</em><br>
+<em>binding-subpattern</em> <span class="apus-arrow">→</span> <em>wildcard-pattern</em> <span class="apus-bar">|</span> <em>identifier-pattern</em> <span class="apus-bar">|</span> <em>tuple-binding-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>wildcard-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>identifier-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>value-binding-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>tuple-match-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>enum-case-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>optional-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <em>type-casting-pattern</em><br>
+<em>match-pattern</em> <span class="apus-arrow">→</span> <span class="apus-pragma">@prefer</span> <em>expression-pattern</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a tuple pattern</p>
+  <p class="rule"><em>tuple-match-pattern</em> <span class="apus-arrow">→</span> <strong><code>(</code></strong> <em>tuple-match-element-list</em><span class="apus-rep">?</span> <strong><code>)</code></strong><br>
+<em>tuple-match-element-list</em> <span class="apus-arrow">→</span> <em>tuple-match-element</em> <span class="apus-bar">|</span> <em>tuple-match-element</em> <strong><code>,</code></strong> <em>tuple-match-element-list</em><br>
+<em>tuple-match-element</em> <span class="apus-arrow">→</span> <em>match-pattern</em> <span class="apus-bar">|</span> <em>soft-identifier</em> <strong><code>:</code></strong> <em>match-pattern</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a wildcard pattern</p>
+  <p class="rule"><em>wildcard-pattern</em> <span class="apus-arrow">→</span> <strong><code>_</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an identifier pattern</p>
+  <p class="rule"><em>identifier-pattern</em> <span class="apus-arrow">→</span> <em>hard-identifier</em> <span class="apus-bar">|</span> <strong><code>self</code></strong></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an optional pattern</p>
+  <p class="rule"><em>optional-pattern</em> <span class="apus-arrow">→</span> <em>identifier-pattern</em> <span class="apus-constraint" title="tokens must be adjacent — no space">joined</span> <em>optional-mark</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a value-binding pattern</p>
+  <p class="rule"><em>value-binding-pattern</em> <span class="apus-arrow">→</span> <strong><code>var</code></strong> <em>match-pattern</em> <span class="apus-bar">|</span> <strong><code>let</code></strong> <em>match-pattern</em> <span class="apus-bar">|</span> <strong><code>inout</code></strong> <em>match-pattern</em> <span class="apus-bar">|</span> <strong><code>borrowing</code></strong> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (identifier _)</span> <em>match-pattern</em><br>
+<em>value-binding-pattern</em> <span class="apus-arrow">→</span> <strong><code>_borrowing</code></strong> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (identifier _)</span> <em>match-pattern</em> <span class="apus-bar">|</span> <strong><code>_consuming</code></strong> <em>match-pattern</em> <span class="apus-bar">|</span> <strong><code>_mutating</code></strong> <em>match-pattern</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an enumeration case pattern</p>
+  <p class="rule"><em>enum-case-pattern</em> <span class="apus-arrow">→</span> <em>type-identifier</em><span class="apus-rep">?</span> <strong><code>.</code></strong> <em>enum-case-name</em> <em>tuple-match-pattern</em><span class="apus-rep">?</span><br>
+<em>enum-case-pattern</em> <span class="apus-arrow">→</span> <em>enum-case-name</em> <em>tuple-match-pattern</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a type casting pattern</p>
+  <p class="rule"><em>type-casting-pattern</em> <span class="apus-arrow">→</span> <em>is-pattern</em><br>
+<em>is-pattern</em> <span class="apus-arrow">→</span> <strong><code>is</code></strong> <em>type</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of an expression pattern</p>
+  <p class="rule"><em>expression-pattern</em> <span class="apus-arrow">→</span> <em>expression</em></p>
+</aside>
+<h2 class="apus-section">Generic Parameters and Arguments</h2>
+<aside class="note">
+  <p class="label">Grammar of a generic parameter clause</p>
+  <p class="rule"><em>generic-parameter-clause</em> <span class="apus-arrow">→</span> <em>open-angle</em> <em>generic-parameter-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <em>close-angle</em><br>
+<em>generic-parameter-list</em> <span class="apus-arrow">→</span> <em>generic-parameter</em> <span class="apus-bar">|</span> <em>generic-parameter</em> <strong><code>,</code></strong> <em>generic-parameter-list</em><br>
+<em>generic-parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>type-name</em><br>
+<em>generic-parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>type-name</em> <strong><code>:</code></strong> <strong><code>~</code></strong><span class="apus-rep">?</span> <em>type-identifier</em><br>
+<em>generic-parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <em>type-name</em> <strong><code>:</code></strong> <strong><code>~</code></strong><span class="apus-rep">?</span> <em>protocol-composition-type</em><br>
+<em>generic-parameter</em> <span class="apus-arrow">→</span> <em>attributes</em><span class="apus-rep">?</span> <strong><code>let</code></strong> <em>type-name</em> <strong><code>:</code></strong> <em>type</em><br>
+<em>generic-where-clause</em> <span class="apus-arrow">→</span> <strong><code>where</code></strong> <em>requirement-list</em><br>
+<em>requirement-list</em> <span class="apus-arrow">→</span> <em>requirement</em> <span class="apus-bar">|</span> <em>requirement</em> <strong><code>,</code></strong> <em>requirement-list</em><br>
+<em>requirement</em> <span class="apus-arrow">→</span> <em>conformance-requirement</em> <span class="apus-bar">|</span> <em>same-type-requirement</em><br>
+<em>conformance-requirement</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <strong><code>:</code></strong> <strong><code>~</code></strong><span class="apus-rep">?</span> <em>type-identifier</em><br>
+<em>conformance-requirement</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <strong><code>:</code></strong> <strong><code>~</code></strong><span class="apus-rep">?</span> <em>protocol-composition-type</em><br>
+<em>same-type-requirement</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <strong><code>==</code></strong> <em>type</em><br>
+<em>same-type-requirement</em> <span class="apus-arrow">→</span> <em>type-identifier</em> <strong><code>==</code></strong> <em>signed-integer-literal</em></p>
+</aside>
+<aside class="note">
+  <p class="label">Grammar of a generic argument clause</p>
+  <p class="rule"><em>generic-argument-clause</em> <span class="apus-arrow">→</span> <em>open-angle</em> <em>generic-argument-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <em>close-angle</em> <span class="apus-annot" title="only when followed by"><span class="apus-tri">>+></span> (( ) [ ] { } , ; : . ? ! &gt;)</span><br>
+<em>type-generic-argument-clause</em> <span class="apus-arrow">→</span> <em>open-angle</em> <em>generic-argument-list</em> <strong><code>,</code></strong><span class="apus-rep">?</span> <em>close-angle</em><br>
+<em>generic-argument-list</em> <span class="apus-arrow">→</span> <em>generic-argument</em> <span class="apus-bar">|</span> <em>generic-argument</em> <strong><code>,</code></strong> <em>generic-argument-list</em><br>
+<em>generic-argument</em> <span class="apus-arrow">→</span> <em>type</em> <span class="apus-bar">|</span> <em>signed-integer-literal</em></p>
+</aside>
+</body>
+</html>
