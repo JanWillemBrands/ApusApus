@@ -134,7 +134,7 @@ grammar     = < production > { message } .
               
 production  = { pragma } identifier ( ":" | "-" | "=" ) alternates "." .
 
-alternates  = sequence { "|" sequence } .
+alternates  = "|"? sequence { "|" sequence } .
 
 sequence    = < factor [ "?" | "*" | "+" ]
               | spacing
@@ -221,3 +221,5 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //                 | extent? "<" alternates ">"
 //                 | extent? "(" alternates ")"
 //                 .
+
+
