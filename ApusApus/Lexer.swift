@@ -10,7 +10,7 @@ import BitCollections
 
 // MARK: - LCNP source-position model
 //
-// Per "Multi-Lex Adoption Design 2.md". Positions everywhere (BSR/CRF/
+// See `Ambiguity.md` §3. Positions everywhere (BSR/CRF/
 // Descriptor/Oracle) are `String.Index` into the parser's input. Lex queries
 // are answered on-demand by `OnDemandLiteralLexer`.
 
