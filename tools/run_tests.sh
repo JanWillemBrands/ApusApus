@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# run_tests.sh — the authoritative, reproducible test run for Advent.
+# run_tests.sh — the authoritative, reproducible test run for ApusApus.
 #
 # Replaces the manual xcodebuild incantation and works around every MCP-runner
 # pitfall in one place, so callers never have to remember them:
@@ -31,9 +31,17 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCHEME="Advent"
+SCHEME="ApusApusTests"
+# Advent's scheme ran its tests in Release; the ApusApusTests scheme defaults to Debug. Release
+# keeps the timings documented in TESTING.md. Override with CONFIGURATION=Debug for -Onone.
+CONFIGURATION="${CONFIGURATION:-Release}"
 DEST="platform=macOS,arch=arm64"
-LOG="$(mktemp -t advent-test.XXXXXX.log)"
+OUT="$(mktemp -d -t apusapus-test)"
+LOG="$OUT/xcodebuild.log"
+# Current xcodebuild output carries only per-case passed/failed lines, not Swift Testing issue
+# text, so the category counts below are read from the result bundle instead.
+RESULT="$OUT/run.xcresult"
+MSGS="$OUT/failure-messages.txt"
 
 # All parametrized SwiftSyntax suites (the ones that carry the correctness signal).
 ALL_SUITES=(
@@ -71,29 +79,48 @@ if [ "${#suites[@]}" -eq 0 ]; then
 fi
 
 only_testing=()
-for s in "${suites[@]}"; do only_testing+=("-only-testing:AdventTests/$s"); done
+for s in "${suites[@]}"; do only_testing+=("-only-testing:ApusApusTests/$s"); done
 
 echo "▶ Suites: ${suites[*]}"
 echo "▶ Log:    $LOG"
+echo "▶ Result: $RESULT"
 echo "▶ Building + running (non-deterministic hashing — order-dependence is a fuzzer)…"
 
 # `caffeinate -i`: a laptop that SLEEPS mid-run makes the suite look hung. The tests take ~70s;
 # a sleep inserts minutes of wall clock between two adjacent test cases, so an outer timeout
 # fires and the run looks like a regression it is not. See TESTING.md "Sleep, not flakiness".
 caffeinate -i xcodebuild test \
-  -scheme "$SCHEME" -destination "$DEST" \
+  -scheme "$SCHEME" -configuration "$CONFIGURATION" -destination "$DEST" \
   "${only_testing[@]}" \
-  -project "$ROOT/Advent.xcodeproj" \
+  -project "$ROOT/ApusApus.xcodeproj" \
+  -resultBundlePath "$RESULT" \
   > "$LOG" 2>&1
 xcode_rc=$?
 
+# One line per failure message (multi-line messages flattened), so `grep -c` counts issues.
+xcrun xcresulttool get test-results tests --path "$RESULT" 2>/dev/null | python3 -c '
+import json, sys
+try:
+    data = json.load(sys.stdin)
+except ValueError:
+    sys.exit(0)
+def walk(node):
+    for child in node.get("children", []):
+        if child.get("nodeType") == "Failure Message":
+            print(" ".join(child.get("name", "").split()))
+        walk(child)
+for top in data.get("testNodes", []):
+    walk(top)
+' > "$MSGS"
+
 # ── Parse the log by the exact messages the suites emit ──────────────────────
-count() { grep -c -- "$1" "$LOG" 2>/dev/null || true; }
+count() { cat "$LOG" "$MSGS" 2>/dev/null | grep -c -- "$1" || true; }
 
 crashes=$(count "Crash: xctest at <deduplicated_symbol>")
 rej_fail=$(count "Advent wrongly accepted invalid input")   # reject suite: accepted invalid
 acc_fail=$(count "Advent failed to parse:")                 # accept suites: rejected valid
 ambig=$(count "Residual ambiguity in")                      # post-Oracle ambiguity
+invariant=$(count "Invariant violated at")                   # always-on checks (Loggers.swift)
 trees=$(count "Trees differ for")                           # frontier — informational only
 ref_accept_fail=$(count "SwiftSyntax parse error for:")      # reference accepted corpus drift
 ref_reject_fail=$(count "Expected swift-syntax to flag an error:")
@@ -107,11 +134,12 @@ fi
 echo "  reject failures:      $rej_fail   (wrongly accepted invalid input)"
 echo "  accept failures:      $acc_fail   (wrongly rejected valid input)"
 echo "  residual ambiguity:   $ambig"
+echo "  invariant violations: $invariant   (always-on checks, see Loggers.swift)"
 echo "  reference failures:   $(( ref_accept_fail + ref_reject_fail ))   (SwiftSyntax corpus drift)"
 echo "  trees differ:         $trees   (frontier — not counted as failure)"
 echo "─────────────────────────────────────"
 
-correctness=$(( rej_fail + acc_fail + ambig + ref_accept_fail + ref_reject_fail ))
+correctness=$(( rej_fail + acc_fail + ambig + invariant + ref_accept_fail + ref_reject_fail ))
 if [ "$crashes" -gt 0 ] || [ "$correctness" -gt 0 ]; then
   echo "FAIL — see $LOG"
   exit 1

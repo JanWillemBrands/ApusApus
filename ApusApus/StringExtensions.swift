@@ -113,7 +113,7 @@ extension String {
                             .replacingOccurrences(of: "-", with: "")
                         valid.append(cleaned)
                     } else {
-                        assertionFailure("String \(self) contains Unicode scalar \\u{\(String(s.value, radix: 16, uppercase: true))} with no name or alias")
+                        reportInvariantViolation("String \(self) contains Unicode scalar \\u{\(String(s.value, radix: 16, uppercase: true))} with no name or alias")
                         valid.append("U\(String(s.value, radix: 16, uppercase: true))")
                     }
                 }
@@ -126,7 +126,7 @@ extension String {
                 valid = first.lowercased() + valid.dropFirst()
             }
         } else {
-            assertionFailure("Empty string cannot be converted to a Swift identifier")
+            reportInvariantViolation("Empty string cannot be converted to a Swift identifier")
             valid = "_empty"
         }
         return valid

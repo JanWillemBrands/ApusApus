@@ -17,10 +17,10 @@ struct RunnerOptions {
     var iterations = 1_000
     var timeoutSeconds = 10.0
     var seed: UInt64 = 0xA0C2021
-    var probePath = "AdventFuzzer/.build/advent-fuzz-probe"
-    var grammarPath = "apus grammars/Swift.apus"
-    var outputRoot = "AdventFuzzer/runs"
-    var seedCorpusPath = "AdventFuzzer/seeds/known-problems.txt"
+    var probePath = "SwiftSyntaxFuzzer/.build/advent-fuzz-probe"
+    var grammarPath = "grammars/Swift.apus"
+    var outputRoot = "SwiftSyntaxFuzzer/runs"
+    var seedCorpusPath = "SwiftSyntaxFuzzer/seeds/known-problems.txt"
     var includePassingEvents = true
     var heartbeatEvery = 25
     var maxArtifacts = 10_000
@@ -168,6 +168,16 @@ struct Event: Codable {
     let signalSummary: String?
     let artifact: String?
     let note: String?
+}
+
+/// One line of `telemetry.jsonl`: the source of a status-filtered event, without probe output.
+struct TelemetryRecord: Codable {
+    let index: Int
+    let status: String
+    let generator: String
+    let signalHash: String?
+    let sourceHash: String
+    let source: String
 }
 
 struct Artifact: Codable {
@@ -472,9 +482,18 @@ struct AdventFuzzRunner {
         let eventsHandle = try FileHandle(forWritingTo: eventsURL)
         defer { try? eventsHandle.close() }
 
+        // Sources of events whose full artifact the status filter skips (compiler-wins telemetry by
+        // default), one compact line per distinct signal, so they can be replayed after grammar
+        // changes with `tools/replay_fuzz_sources.py`.
+        let telemetryURL = runURL.appendingPathComponent("telemetry.jsonl")
+        fileManager.createFile(atPath: telemetryURL.path, contents: nil)
+        let telemetryHandle = try FileHandle(forWritingTo: telemetryURL)
+        defer { try? telemetryHandle.close() }
+        var seenTelemetry = Set<String>()
+
         let probeURL = URL(fileURLWithPath: options.probePath)
         guard fileManager.isExecutableFile(atPath: probeURL.path) else {
-            throw RunnerError("probe is not executable: \(probeURL.path). Run AdventFuzzer/bin/build.sh first.")
+            throw RunnerError("probe is not executable: \(probeURL.path). Run SwiftSyntaxFuzzer/bin/build.sh first.")
         }
 
         let grammarURL = URL(fileURLWithPath: options.grammarPath)
@@ -623,6 +642,20 @@ struct AdventFuzzRunner {
 
             if options.includePassingEvents || shouldPersist {
                 try? appendJSONLine(event, to: eventsHandle)
+            }
+
+            if note == "artifact-status-filter" {
+                let telemetryKey = "\(status):\(failureSignal?.hash ?? sourceHash)"
+                if seenTelemetry.insert(telemetryKey).inserted {
+                    try? appendJSONLine(TelemetryRecord(
+                        index: index,
+                        status: status,
+                        generator: generated.label,
+                        signalHash: failureSignal?.hash,
+                        sourceHash: sourceHash,
+                        source: generated.source
+                    ), to: telemetryHandle)
+                }
             }
 
             if let artifactName {
@@ -1881,10 +1914,10 @@ func printHelp() {
       --iterations N       Number of generated inputs to probe (default: 1000)
       --timeout SECONDS    Per-input probe timeout (default: 10)
       --seed N             Deterministic fuzzer seed, decimal or 0x... (default: 0xA0C2021)
-      --probe PATH         Probe executable (default: AdventFuzzer/.build/advent-fuzz-probe)
-      --grammar PATH       Swift.apus path (default: apus grammars/Swift.apus)
-      --output PATH        Run output directory (default: AdventFuzzer/runs)
-      --seed-corpus PATH   Labeled seed corpus (default: AdventFuzzer/seeds/known-problems.txt)
+      --probe PATH         Probe executable (default: SwiftSyntaxFuzzer/.build/advent-fuzz-probe)
+      --grammar PATH       Swift.apus path (default: grammars/Swift.apus)
+      --output PATH        Run output directory (default: SwiftSyntaxFuzzer/runs)
+      --seed-corpus PATH   Labeled seed corpus (default: SwiftSyntaxFuzzer/seeds/known-problems.txt)
       --heartbeat-every N  Write heartbeat/state every N inputs (default: 25)
       --max-artifacts N    Stop writing new artifact files after N unique artifacts (default: 10000)
       --max-artifact-mb N  Stop writing new artifact files after N MB (default: 1024)

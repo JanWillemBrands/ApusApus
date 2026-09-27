@@ -544,10 +544,11 @@ func adventTreeForFile(_ text: String) -> SourceFileSyntax? {
 // default suite stays at ~50s.
 //
 //   APUS_SOURCE_FILE_SUITES=1                     enable both
-//   APUS_SWIFTSYNTAX_SOURCES=/path/to/checkout    where to find swift-syntax's Sources/
+//   APUS_SWIFTSYNTAX_SOURCES=/path/to/checkout    optional override for swift-syntax's Sources/
 //
-// swift-syntax lives in an SPM checkout whose path contains a DerivedData hash, so it is supplied
-// explicitly rather than guessed — a test should not go rummaging through the user's home.
+// Without the override, swift-syntax's sources are found in the SPM checkout that belongs to the
+// running test bundle's DerivedData folder (see `swiftSyntaxSourcesURL`). Pass the override to
+// narrow the corpus, e.g. to `…/Sources/SwiftParser`.
 //
 // ACCEPTANCE ONLY. Each file is first required to be valid by swift-syntax's own reckoning
 // (`hasError == false`); a file it rejects is a bad fixture, not an Advent defect. Tree comparison
@@ -561,23 +562,39 @@ struct SourceFile: CustomTestStringConvertible, Sendable {
 enum SourceFileCorpus {
     static let enabled = ProcessInfo.processInfo.environment["APUS_SOURCE_FILE_SUITES"] == "1"
 
-    /// Advent's own sources: the `.swift` files at the repository root. Deliberately not recursive —
-    /// that would pull in `AdventTests` (fixture arrays, megabytes of string literals),
-    /// `GeneratedParser` and `TestOutput`, none of which are hand-written project sources.
+    /// The app's own sources: the `.swift` files directly in `<repo>/ApusApus`. Deliberately not
+    /// recursive — that would pull in subfolders such as `SwiftSyntaxFuzzer` or `tinyGLL-generated`,
+    /// which are not hand-written parser sources.
     static let adventFiles: [SourceFile] = {
         guard enabled else { return [] }
-        let root = testProjectDirectory()
+        let root = testSourceDirectory()
         let all = (try? FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)) ?? []
         return all.filter { $0.pathExtension == "swift" }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
             .map(SourceFile.init)
     }()
 
+    /// `APUS_SWIFTSYNTAX_SOURCES` wins when set. Otherwise use the swift-syntax checkout that this
+    /// very build resolved: walk up from the test bundle (`<DerivedData>/<proj>/Build/Products/…`)
+    /// to the directory holding `SourcePackages/checkouts/swift-syntax/Sources`. That is derived
+    /// from the build, not guessed from the user's home, and it is the version the tests link.
+    static let swiftSyntaxSourcesURL: URL? = {
+        if let path = ProcessInfo.processInfo.environment["APUS_SWIFTSYNTAX_SOURCES"] {
+            return URL(fileURLWithPath: path)
+        }
+        guard let bundle = Bundle.allBundles.first(where: { $0.bundleURL.pathExtension == "xctest" })
+        else { return nil }
+        var dir = bundle.bundleURL.deletingLastPathComponent()
+        while dir.pathComponents.count > 1 {
+            let candidate = dir.appendingPathComponent("SourcePackages/checkouts/swift-syntax/Sources")
+            if FileManager.default.fileExists(atPath: candidate.path) { return candidate }
+            dir = dir.deletingLastPathComponent()
+        }
+        return nil
+    }()
+
     static let swiftSyntaxFiles: [SourceFile] = {
-        guard enabled,
-              let path = ProcessInfo.processInfo.environment["APUS_SWIFTSYNTAX_SOURCES"]
-        else { return [] }
-        let base = URL(fileURLWithPath: path)
+        guard enabled, let base = swiftSyntaxSourcesURL else { return [] }
         guard let walker = FileManager.default.enumerator(at: base, includingPropertiesForKeys: nil)
         else { return [] }
         var out: [SourceFile] = []
@@ -600,8 +617,16 @@ func adventAcceptsFile(_ text: String) -> Bool {
     }
 }
 
-@Suite("SwiftSyntax - Advent source files")
+@Suite("SwiftSyntax - Advent source files", .enabled(if: SourceFileCorpus.enabled, "opt-in and slow: set APUS_SOURCE_FILE_SUITES=1 (scheme Test > Arguments > Environment Variables)"))
 struct AdventSourceFileTests {
+    /// Without this, an empty corpus shows up only as "No test cases found" on the parametrized
+    /// tests, which reads like a skip rather than a broken path.
+    @Test("corpus is discoverable")
+    func corpusIsDiscoverable() {
+        #expect(!SourceFileCorpus.adventFiles.isEmpty,
+                "no .swift files found in \(testSourceDirectory().path)")
+    }
+
     @Test("Advent accepts", arguments: SourceFileCorpus.adventFiles)
     func accepts(_ file: SourceFile) throws {
         let text = try String(contentsOf: file.url, encoding: .utf8)
@@ -617,8 +642,15 @@ struct AdventSourceFileTests {
     }
 }
 
-@Suite("SwiftSyntax - SwiftSyntax source files")
+@Suite("SwiftSyntax - SwiftSyntax source files", .enabled(if: SourceFileCorpus.enabled, "opt-in and slow: set APUS_SOURCE_FILE_SUITES=1 (optionally APUS_SWIFTSYNTAX_SOURCES=<path>)"))
 struct SwiftSyntaxSourceFileTests {
+    @Test("corpus is discoverable")
+    func corpusIsDiscoverable() {
+        let searched = SourceFileCorpus.swiftSyntaxSourcesURL?.path
+            ?? "nowhere: APUS_SWIFTSYNTAX_SOURCES is unset and no SourcePackages/checkouts/swift-syntax/Sources lies above the test bundle"
+        #expect(!SourceFileCorpus.swiftSyntaxFiles.isEmpty, "no .swift files found in \(searched)")
+    }
+
     @Test("Advent accepts", arguments: SourceFileCorpus.swiftSyntaxFiles)
     func accepts(_ file: SourceFile) throws {
         let text = try String(contentsOf: file.url, encoding: .utf8)
@@ -631,6 +663,113 @@ struct SwiftSyntaxSourceFileTests {
     @Test("trees match", arguments: SourceFileCorpus.swiftSyntaxFiles)
     func treesMatch(_ file: SourceFile) throws {
         try expectFileTreeMatches(file)
+    }
+}
+
+/// NAME POSITIONS vs swift-syntax (TODO.md / Audit identifier nonterminal usage against swift-syntax).
+///
+/// Every swift-syntax `Keyword` (all 206, enumerated from the enum itself so a swift-syntax bump
+/// adds new ones automatically), plus `_`, an escaped name and a plain word, placed in every
+/// position where the grammar accepts a NAME. Advent must agree with swift-syntax — accept exactly
+/// where `Parser.parse(source:).hasError` is false — in every cell. No allowance list.
+///
+/// Reference for the categories (swift-syntax sources):
+///   * `SwiftParser/generated/IsLexerClassified.swift` — the 53 words the LEXER makes keyword
+///     tokens. Every other keyword (`init`, `await`, `get`, …) reaches the parser as an identifier.
+///   * `SwiftParser/Names.swift` — `parseDeclReferenceBase` (identifier / `init` / `self` / `Self`,
+///     plus lexer keywords only under `.keywords`) and `Lexer.Lexeme.isArgumentLabel` (identifier,
+///     `_`, or any lexer keyword except `inout`).
+struct NamePosition: CustomTestStringConvertible, Sendable {
+    let name: String
+    /// swift-syntax experimental features the position needs (e.g. `using` is
+    /// `defaultIsolationPerFile`); empty for ordinary Swift.
+    var features: Parser.ExperimentalFeatures = []
+    let make: @Sendable (String) -> String
+    var testDescription: String { name }
+
+    func swiftSyntaxAccepts(_ source: String) -> Bool {
+        guard !features.isEmpty else { return !Parser.parse(source: source).hasError }
+        var text = source
+        text.makeContiguousUTF8()
+        return !text.withUTF8 { Parser.parse(source: $0, experimentalFeatures: features) }.hasError
+    }
+}
+
+enum NamePositionCorpus {
+    /// All swift-syntax keywords by their source text, from the enum's raw values.
+    static let keywords: [String] = (0...255).compactMap { raw -> String? in
+        guard let keyword = Keyword(rawValue: UInt8(raw)) else { return nil }
+        return TokenSyntax.keyword(keyword).text   // `defaultText` is @_spi; the token's text is public
+    }
+    static let words: [String] = keywords + ["_", "`class`", "plainName"]
+
+    static let positions: [NamePosition] = [
+        NamePosition(name: "let-name")        { "let \($0) = 1" },
+        NamePosition(name: "var-name")        { "var \($0) = 1" },
+        NamePosition(name: "func-name")       { "func \($0)() {}" },
+        NamePosition(name: "struct-name")     { "struct \($0) {}" },
+        NamePosition(name: "typealias-name")  { "typealias \($0) = Int" },
+        NamePosition(name: "associatedtype")  { "protocol P { associatedtype \($0) }" },
+        NamePosition(name: "enum-case-name")  { "enum E { case \($0) }" },
+        NamePosition(name: "param-single")    { "func f(\($0): Int) {}" },
+        NamePosition(name: "param-external")  { "func f(\($0) a: Int) {}" },
+        NamePosition(name: "param-internal")  { "func f(a \($0): Int) {}" },
+        NamePosition(name: "generic-param")   { "struct S<\($0)> {}" },
+        NamePosition(name: "call-label")      { "f(\($0): 1)" },
+        NamePosition(name: "tuple-label")     { "let t = (\($0): 1, b: 2)" },
+        NamePosition(name: "trailing-label")  { "f {} \($0): {}" },
+        NamePosition(name: "member")          { "let v = x.\($0)" },
+        NamePosition(name: "implicit-member") { "let v: E = .\($0)" },
+        NamePosition(name: "keypath-member")  { "let k = \\A.\($0)" },
+        NamePosition(name: "operand")         { "let v = \($0)" },
+        NamePosition(name: "type-name")       { "let v: \($0) = x" },
+        NamePosition(name: "constraint")      { "struct S<T: \($0)> {}" },
+        NamePosition(name: "statement-label") { "\($0): while true {}" },
+        NamePosition(name: "closure-param")   { "let c = { \($0) in 1 }" },
+        NamePosition(name: "for-in-pattern")  { "for \($0) in xs {}" },
+        NamePosition(name: "case-let-binding") { "if case let \($0) = x {}" },
+        NamePosition(name: "import-path")     { "import \($0)" },
+        // Added 2026-09-26 for the remaining `softIdentifier` / `macroRoleDeclName` sites.
+        NamePosition(name: "fntype-label-single")   { "let f: (\($0): Int) -> Void" },
+        NamePosition(name: "fntype-label-external") { "let f: (\($0) a: Int) -> Void" },
+        NamePosition(name: "fntype-label-internal") { "let f: (a \($0): Int) -> Void" },
+        NamePosition(name: "enum-param-single")     { "enum E { case c(\($0): Int) }" },
+        NamePosition(name: "enum-param-external")   { "enum E { case c(\($0) a: Int) }" },
+        NamePosition(name: "compound-arg")          { "let v = f(\($0):)" },
+        NamePosition(name: "compound-member-arg")   { "let v = x.f(\($0):)" },
+        NamePosition(name: "compound-base")         { "let v = \($0)(a:)" },
+        NamePosition(name: "using-decl", features: [.defaultIsolationPerFile]) { "using \($0)" },
+        NamePosition(name: "tuple-binding-label")   { "let (\($0): a, b: c) = t" },
+        NamePosition(name: "tuple-match-label")     { "if case (\($0): let a, b: let c) = t {}" },
+        NamePosition(name: "macro-role-name")       { "@attached(peer, names: named(\($0))) macro m()" },
+        NamePosition(name: "macro-role-compound")   { "@attached(peer, names: named(f(\($0):))) macro m()" },
+        NamePosition(name: "keypath-compound-arg")  { "let k = \\A.f(\($0):)" },
+        NamePosition(name: "macro-role")            { "@attached(\($0)) macro m()" },
+    ]
+}
+
+@Suite("SwiftSyntax - name positions")
+struct NamePositionTests {
+    @Test("Advent agrees with swift-syntax for every keyword", arguments: NamePositionCorpus.positions)
+    func agreesWithSwiftSyntax(_ position: NamePosition) {
+        var over: [String] = [], under: [String] = []
+        for word in NamePositionCorpus.words {
+            let src = position.make(word)
+            let swiftOK = position.swiftSyntaxAccepts(src)
+            let adventOK = adventTreeForFile(src) != nil
+            if swiftOK != adventOK { (adventOK ? { over.append(word) } : { under.append(word) })() }
+        }
+        // `print` does not reach xcodebuild's log; the full matrix can also be appended to a file.
+        if let path = ProcessInfo.processInfo.environment["APUS_NAME_POSITION_REPORT"],
+           let data = "\(position.name)\tOVER\t\(over.joined(separator: " "))\n\(position.name)\tUNDER\t\(under.joined(separator: " "))\n".data(using: .utf8) {
+            if let handle = FileHandle(forWritingAtPath: path) {
+                handle.seekToEndOfFile(); handle.write(data); handle.closeFile()
+            } else {
+                FileManager.default.createFile(atPath: path, contents: data)
+            }
+        }
+        #expect(over.isEmpty, "\(position.name): Advent accepts where swift-syntax rejects: \(over.joined(separator: " "))")
+        #expect(under.isEmpty, "\(position.name): Advent rejects where swift-syntax accepts: \(under.joined(separator: " "))")
     }
 }
 
@@ -658,8 +797,8 @@ struct KeyPathGrammarTests {
     /// Deliberately NOT reintroducing an allowance list: it masked a third class once already —
     /// `hasSuffix(".?")` was written for `\\Foo + x.?` and silently swallowed `\\Foo.p<T>.?`.
 
-    static func sweep(items: [String], length: Int) -> (over: [String], under: [String], total: Int, pruned: Int) {
-        var over: [String] = [], under: [String] = [], total = 0, pruned = 0
+    static func sweep(items: [String], length: Int) -> (over: [String], under: [String], total: Int, pruned: [String]) {
+        var over: [String] = [], under: [String] = [], total = 0, pruned: [String] = []
         func rec(_ root: String, _ acc: [String]) {
             if acc.count == length {
                 total += 1
@@ -670,7 +809,7 @@ struct KeyPathGrammarTests {
                 if model != tree {
                     if tree { over.append(src) } else { under.append(src) }
                 }
-                if !model, !tree, adventAcceptsFile(src) { pruned += 1 }
+                if !model, !tree, adventAcceptsFile(src) { pruned.append(src) }
                 return
             }
             for it in items { rec(root, acc + [it]) }
@@ -681,10 +820,22 @@ struct KeyPathGrammarTests {
 
     static func check(_ label: String, items: [String], length: Int) {
         let r = sweep(items: items, length: length)
-        print("KP \(label) len=\(length) total=\(r.total) over=\(r.over.count) under=\(r.under.count) oraclePruned=\(r.pruned)")
-        for o in r.over.prefix(40) { print("KP   over  : \(o)") }
-        for u in r.under.prefix(40) { print("KP   under : \(u)") }
+        var lines = ["KP \(label) len=\(length) total=\(r.total) over=\(r.over.count) under=\(r.under.count) oraclePruned=\(r.pruned.count)"]
+        lines += r.over.prefix(40).map { "KP   over  : \($0)" }
+        lines += r.under.prefix(40).map { "KP   under : \($0)" }
+        lines += r.pruned.map { "KP   pruned: \($0)" }
+        for line in lines { print(line) }
         fflush(stdout)
+        // `print` output does not reach xcodebuild's log, so the sweep can also append its report to
+        // a file: `TEST_RUNNER_APUS_KEYPATH_REPORT=/tmp/kp-report.txt`.
+        if let path = ProcessInfo.processInfo.environment["APUS_KEYPATH_REPORT"],
+           let data = (lines.joined(separator: "\n") + "\n").data(using: .utf8) {
+            if let handle = FileHandle(forWritingAtPath: path) {
+                handle.seekToEndOfFile(); handle.write(data); handle.closeFile()
+            } else {
+                FileManager.default.createFile(atPath: path, contents: data)
+            }
+        }
         #expect(r.over.isEmpty, "\(r.over.count) over-acceptances at \(label) len \(length), e.g. \(r.over.prefix(5))")
         #expect(r.under.isEmpty, "\(r.under.count) under-acceptances at \(label) len \(length), e.g. \(r.under.prefix(5))")
     }
@@ -893,7 +1044,7 @@ struct KeyPathGrammarTests {
     /// TODO #8 — the identifier audit, done by enumeration rather than by reading the grammar.
     ///
     /// `Swift.apus` splits identifier positions TWO ways (`softIdentifier` = any keyword is a name,
-    /// `hardIdentifier` = reserved words excluded). The suspicion under test is that two categories
+    /// `identifierToken` = reserved words excluded). The suspicion under test is that two categories
     /// are too coarse, because swift distinguishes FOUR positions independently. For each candidate
     /// word this prints whether Advent and swift-syntax agree in each position, so the categories
     /// can be defined from data.
@@ -1787,7 +1938,139 @@ let phase3EnumCaseSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "case-raw-list",   source: "enum E: Int { case a = 1, b = 2 }",   origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-assoc-optional", source: "enum E { case a(Int?) }",         origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-mixed-body", source: "enum E { case a\nfunc f() {} }",      origin: "Phase3", syntaxVersion: "603.0.1"),
+    // Cases inside `#if` in an enum body (fuzzer bucket `ifconfig-member-context-boundary`,
+    // 2026-09-25): the clause body parses as `statements`, so the case's containment must be the
+    // member list, not `memberDeclaration`.
+    SwiftSnippet(label: "case-ifconfig",   source: "enum E {\n#if FOO\ncase a\n#endif\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-ifconfig-else", source: "enum E {\n#if FOO\ncase value(Int)\n#else\ncase other\n#endif\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-ifconfig-elseif", source: "enum E {\ncase x\n#if FOO\ncase a\n#elseif BAR\ncase b\n#else\ncase c\n#endif\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-ifconfig-nested", source: "enum E {\n#if A\n#if B\ncase a\n#endif\n#endif\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
 ]
+
+/// Enum cases OUTSIDE any member list: swift-syntax rejects all of these, and the widened
+/// `@confinedTo` on `enumCaseDeclaration` must not let them through.
+let phase3EnumCaseOutsideMembersSnippets: [SwiftSnippet] = [
+    SwiftSnippet(label: "case-top-level",        source: "case a",                                origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-top-level-ifconfig", source: "#if FOO\ncase a\n#endif",           origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-function-ifconfig", source: "func f() {\n#if FOO\ncase a\n#endif\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
+]
+
+/// Plain `/…/` regex whitespace (TODO.md / Fix the regex-literal accept/reject failures): spaces are
+/// body content, a literal tab is not — as a body item, inside a group, inside a class, or escaped.
+/// The tab rejection is the `>-> ( tabbedPlainRegularExpressionLiteral )` token gate; the 2026-09-23
+/// attempt flattened the body to one token and broke paren/bracket balance instead.
+let regexWhitespaceAcceptSnippets: [SwiftSnippet] = [
+    SwiftSnippet(label: "regex-space",        source: "_ = /a b/",   origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-spaces",       source: "_ = /a  b/",  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-group-space",  source: "_ = /(a b)/", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-class-space",  source: "_ = /[ a]/",  origin: "Phase4", syntaxVersion: "603.0.1"),
+]
+let regexWhitespaceRejectSnippets: [SwiftSnippet] = [
+    SwiftSnippet(label: "regex-tab",          source: "_ = /a\tb/",   origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-group-tab",    source: "_ = /(a\tb)/", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-class-tab",    source: "_ = /[a\tb]/", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-escaped-tab",  source: "_ = /a\\\tb/", origin: "Phase4", syntaxVersion: "603.0.1"),
+]
+
+@Suite("SwiftSyntax - Plain regex whitespace")
+struct RegexWhitespaceTests {
+    @Test("Advent accepts", arguments: regexWhitespaceAcceptSnippets)
+    func adventAccepts(_ snippet: SwiftSnippet) throws {
+        #expect(!Parser.parse(source: snippet.source).hasError, "premise failed — swift-syntax rejects '\(snippet.source)'")
+        #expect(try adventParse(snippet.source) != nil, "Advent failed to parse: \(snippet.source)")
+    }
+
+    @Test("Advent rejects too", arguments: regexWhitespaceRejectSnippets)
+    func adventRejects(_ snippet: SwiftSnippet) throws {
+        #expect(Parser.parse(source: snippet.source).hasError, "premise failed — swift-syntax accepts '\(snippet.source)'")
+        #expect(try adventParse(snippet.source) == nil, "regex with a literal tab accepted: \(snippet.source)")
+    }
+}
+
+/// Fixes from the 2026-09-23/25 fuzz harvests (TODO.md / Fuzzer telemetry and harvest triage).
+/// Each was a tree difference, ambiguity or underacceptance against swift-syntax.
+let fuzzHarvestSnippets: [SwiftSnippet] = [
+    // `some`/`any` + trailing `?`/`!`: the sugar wraps the SomeOrAnyType (`(any P)?`).
+    SwiftSnippet(label: "any-optional",          source: "let v: any P? = x",                   origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "some-optional-iuo",     source: "let v: some P?! = x",                 origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "is-any-iuo",            source: "let v = value is any P!",             origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "any-metatype-optional", source: "let v: any P.Type? = x",              origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `(…)` generic argument: a type unless `.literalExpressions` is on.
+    SwiftSnippet(label: "paren-generic-arg",     source: "let v: Array<(repeat each T)> = x",   origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Postfix `#if` only when the first body starts with `.`.
+    SwiftSnippet(label: "ifconfig-not-postfix",  source: "f {\n1\n#if FOO\n2\n#endif\n}",       origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-empty-first",  source: "let v = x\n#if FOO\n#else\n.b\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-postfix",      source: "let v = x\n#if FOO\n.a\n#else\n.b\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Newline after an unglued `.`.
+    SwiftSnippet(label: "dot-own-line",          source: "let v = f { value }\n.\nmember",      origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-dot-own-line",     source: "if case .\nsome(let x) = value {}",   origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "member-compound-name",  source: "let v = x.y(a:b:)",                   origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Generic constraints and requirements are any type.
+    SwiftSnippet(label: "constraint-any",        source: "struct S<T: any P> {}",               origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-iuo",        source: "struct S<T: UInt8!> {}",              origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-suppressed", source: "struct S<T: ~Copyable & P> {}",       origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "requirement-suppressed", source: "func f<T>(_ x: T) where T: ~Copyable & P {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "requirement-self-member", source: "struct S<T> where T: Sequence.self {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "requirement-layout",    source: "extension S where T: _Class {}",      origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "suppressed-composition", source: "let v: ~Copyable & P = x",           origin: "Fuzz", syntaxVersion: "603.0.1"),
+]
+let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
+    SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-self",       source: "struct S<T: Self> {}",                origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-wildcard",   source: "struct S<T: _> {}",                   origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-tuple",      source: "struct S<T: (A)> {}",                 origin: "Fuzz", syntaxVersion: "603.0.1"),
+]
+
+@Suite("SwiftSyntax - fuzz harvest fixes")
+struct FuzzHarvestTests {
+    @Test("trees match", arguments: fuzzHarvestSnippets)
+    func treesMatch(_ snippet: SwiftSnippet) throws {
+        #expect(!Parser.parse(source: snippet.source).hasError, "premise failed — swift-syntax rejects '\(snippet.source)'")
+        let refDump = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: snippet.source)), indent: 0)
+        guard let adventTree = try adventSwiftSyntaxTree(snippet) else {
+            Issue.record("Advent produced no SwiftSyntax tree for: \(snippet.source)")
+            return
+        }
+        let adventDump = dumpSwiftSyntaxNode(Syntax(adventTree), indent: 0)
+        #expect(refDump == adventDump, """
+            Trees differ for '\(snippet.diagnosticID)' — \(snippet.source)
+            --- swift-syntax ---
+            \(refDump)
+            --- advent ---
+            \(adventDump)
+            """)
+    }
+
+    @Test("converter reports no fallbacks", arguments: fuzzHarvestSnippets)
+    func noConverterFallbacks(_ snippet: SwiftSnippet) throws {
+        let diagnostics = adventGeneratorDiagnostics(snippet)
+        #expect(diagnostics.isEmpty, """
+            Converter fell back on '\(snippet.diagnosticID)' — \(snippet.source)
+            \(diagnostics.map(\.description).joined(separator: "\n"))
+            """)
+    }
+
+    @Test("Advent rejects too", arguments: fuzzHarvestRejectSnippets)
+    func adventRejects(_ snippet: SwiftSnippet) throws {
+        #expect(Parser.parse(source: snippet.source).hasError, "premise failed — swift-syntax accepts '\(snippet.source)'")
+        #expect(try adventParse(snippet.source) == nil, "accepted: \(snippet.source)")
+    }
+}
+
+@Suite("SwiftSyntax - Phase 3 enum cases outside member lists")
+struct Phase3EnumCaseOutsideMembersTests {
+    @Test("swift-syntax verdict is the premise", .tags(.swiftSyntaxReference), arguments: phase3EnumCaseOutsideMembersSnippets)
+    func swiftSyntaxRejects(_ snippet: SwiftSnippet) throws {
+        #expect(Parser.parse(source: snippet.source).hasError,
+                "premise failed — swift-syntax accepts '\(snippet.source)'")
+    }
+
+    @Test("Advent rejects too", arguments: phase3EnumCaseOutsideMembersSnippets)
+    func adventRejects(_ snippet: SwiftSnippet) throws {
+        #expect(try adventParse(snippet.source) == nil,
+                "enum case outside a member list accepted: \(snippet.source)")
+    }
+}
 
 @Suite("SwiftSyntax - Phase 3 enum case declarations")
 struct Phase3EnumCaseTests {
@@ -2292,6 +2575,16 @@ struct Phase4CoroutineTests {
 
 /// Phase 4, fourteenth slice: enum-case patterns, tuple match patterns, suppressed conformances.
 let phase4PatternSnippets: [SwiftSnippet] = [
+    // Optional pattern over an enum case WITH a payload (found 2026-09-26: this project's own
+    // `GenerateSwiftSyntaxAST.swift` failed to parse on `if case .statements(let items)? = …`).
+    SwiftSnippet(label: "case-enum-assoc-optional",  source: "func f() { switch x { case .a(let y)?: g(y)\ndefault: h() } }", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "if-case-enum-assoc-optional", source: "func f() { if case .a(let y)? = x { g(y) } }",                 origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "if-case-qualified-assoc-optional", source: "func f() { if case E.a(let y)? = x { g(y) } }",        origin: "Phase4", syntaxVersion: "603.0.1"),
+    // `let x?`: the name directly under the `?` binds (`OptionalChainingExpr(PatternExpr(...))`),
+    // it is not a reference to an existing `x`.
+    SwiftSnippet(label: "if-case-let-optional",      source: "func f() { if case let y? = x { g(y) } }",                     origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-let-optional",         source: "func f() { switch x { case let y?: g(y)\ndefault: h() } }",   origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "for-case-let-optional",     source: "func f() { for case let y? in xs { g(y) } }",                  origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-enum",        source: "func f() { switch x { case .a: g()\ndefault: h() } }",            origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-enum-assoc",  source: "func f() { switch x { case .a(let y): g(y)\ndefault: h() } }",    origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-enum-qualified", source: "func f() { switch x { case E.a: g()\ndefault: h() } }",        origin: "Phase4", syntaxVersion: "603.0.1"),
@@ -2491,6 +2784,21 @@ let phase4KeyPathSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "kp-generic-root", source: "let a = \\Array<Int>.count",  origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "kp-mixed",        source: "let a = \\Foo.bar?.baz",      origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "kp-tuple-index",  source: "let a = \\Foo.0",             origin: "Phase4", syntaxVersion: "603.0.1"),
+    // A mark followed by trivia (fuzzer bucket, TODO "key-path optional/force component tree
+    // differences"): the pivot's span ends after the space, and the converter used to drop the mark.
+    SwiftSnippet(label: "kp-force-spaced-dot",    source: "let a = \\Foo.foo! .bar",           origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-optional-spaced-dot", source: "let a = \\Foo.Bar.default? .name",  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-rootless-spaced-dot", source: "let a = (\\.type.defaultInitialization? .name)", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-mark-run-spaced-dot", source: "let a = \\Foo.foo?? .bar",          origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-subscript-arg-spaced", source: "let a = value[keyPath: \\Foo.foo! .bar]", origin: "Phase4", syntaxVersion: "603.0.1"),
+    // Root = base + any mix of tight marks and `.Type`/`.Protocol` (swift `parseSimpleType`, no
+    // member types). Each of the first four built a wrong root before the `keyPathRootSuffix` rework.
+    SwiftSnippet(label: "kp-root-meta-opt",       source: "let a = \\Foo.Type?.p",             origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-root-member-not-meta", source: "let a = \\Foo.bar.Type",           origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-root-meta-force",     source: "let a = \\Foo.Type!.p",             origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-root-meta-meta",      source: "let a = \\Foo.Type.Protocol.p",     origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-root-opt-meta",       source: "let a = \\Foo?.Type.p",             origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "kp-root-meta-opt-meta",  source: "let a = \\Foo.Type?.Type.p",        origin: "Phase4", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - Phase 4 key paths")

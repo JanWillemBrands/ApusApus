@@ -111,6 +111,11 @@ you never have to reconstruct them by hand. It:
 - exits non-zero only on crashes or correctness failures — `Trees differ` (the
   frontier, §2) is reported but never fails the run.
 
+It runs the `ApusApusTests` scheme in **Release** by default, as Advent's scheme did
+(`CONFIGURATION=Debug tools/run_tests.sh …` for `-Onone`). xcodebuild's own output no longer
+carries Swift Testing issue text, so the script writes a result bundle and counts the failure
+messages extracted from it; the output directory is printed at the start of the run.
+
 The counts it prints map to these messages, if you ever need to grep a log yourself:
 
 | Category | Message grepped | Actionable? |
@@ -118,6 +123,7 @@ The counts it prints map to these messages, if you ever need to grep a log yours
 | reject failure | `Advent wrongly accepted invalid input` | yes — accepted invalid input |
 | accept failure | `Advent failed to parse:` | yes — rejected valid input |
 | residual ambiguity | `Residual ambiguity in` | yes |
+| invariant violation | `Invariant violated at` (always-on checks, `Loggers.swift`) | yes |
 | trees differ | `Trees differ for` | no — frontier |
 
 ### Iterating on the grammar — use the probe

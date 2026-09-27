@@ -483,7 +483,7 @@ enum KeyPathModel {
                 default: return false
                 }
                 // `keyPathMemberName = moduleSelector? softIdentifier` with
-                // `moduleSelector = hardIdentifier "::"` (SE-0491): what we just consumed may have
+                // `moduleSelector = identifierToken "::"` (SE-0491): what we just consumed may have
                 // been the MODULE, with the real member name after `::`.
                 if tokens.first == .moduleSeparator {
                     tokens.removeFirst()

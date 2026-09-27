@@ -567,7 +567,7 @@ class MessageParser {
                         // END.seq is the *start* of the production, so a .N here is always
                         // the LHS nonterminal — never a RHS reference. `resolveGrammarNodeLinks`
                         // only passes a .N as `parent` when it is not isRHS, and isLHS ⟺ seq == nil.
-                        assert(bracket.isLHS, "END.seq resolved to a RHS nonterminal: \(bracket)")
+                        checkInvariant(bracket.isLHS, "END.seq resolved to a RHS nonterminal: \(bracket)")
                         // No pop-time follow gate. Removed 2026-09-19 after the LCNP papers and
                         // measurement agreed:
                         //

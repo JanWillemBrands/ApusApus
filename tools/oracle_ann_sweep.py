@@ -12,8 +12,8 @@ Logs are kept only for iterations that FAIL (tools/sweep_logs/NNN.log).
 """
 import os, re, subprocess, sys, time
 
-ROOT = "/Users/janwillem/Developer/Xcode/AoC2021"
-GRAMMAR = os.path.join(ROOT, "apus grammars/Swift.apus")
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+GRAMMAR = os.path.join(ROOT, "grammars/Swift.apus")
 ORIG = "/tmp/sweep_orig.apus"
 RESULTS = os.path.join(ROOT, "tools/sweep_results.tsv")
 LOGDIR = os.path.join(ROOT, "tools/sweep_logs")
@@ -102,7 +102,8 @@ def main():
             try:
                 p = subprocess.run(
                     ["caffeinate", "-i", "xcodebuild", "test-without-building",
-                     "-scheme", "Advent", "-destination", "platform=macOS",
+                     "-project", "ApusApus.xcodeproj", "-scheme", "ApusApusTests",
+                     "-configuration", "Release", "-destination", "platform=macOS",
                      "-parallel-testing-enabled", "NO"],
                     cwd=ROOT, capture_output=True, text=True, timeout=TIMEOUT)
                 log = p.stdout + p.stderr

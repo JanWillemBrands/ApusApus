@@ -16,6 +16,7 @@ enum ApusParserError: Error {
     case scanningFailed(error: Error)
     case undefinedNonTerminal(name: String, definedAsTerminal: Bool)
     case startSymbolNotFound(name: String)
+    case invalidExclusionSet(name: String, reason: String)
 }
 
 class ApusParser {
@@ -79,6 +80,7 @@ class ApusParser {
         
         grammar.startSymbol = explicitStartSymbol
         try parseApusGrammar()
+        try expandExclusionSetReferences()
         
         let DUMP = false
         if DUMP {
@@ -451,10 +453,15 @@ class ApusParser {
                 let negated = token.stripped == "excludedFrom"
                 cI += 1
                 try expect(["("]); cI += 1
-                try expect(["identifier"])
-                if negated { startOfSequence.excludedFromContainers.append(String(token.image)) }
-                else       { startOfSequence.confinedToContainers.append(String(token.image)) }
-                cI += 1
+                // One annotation lists a GROUP of containers, matched as "any of these".
+                var group: [String] = []
+                repeat {
+                    try expect(["identifier"])
+                    group.append(String(token.image))
+                    cI += 1
+                } while token.kind == "identifier"
+                if negated { startOfSequence.excludedFromContainers.append(group) }
+                else       { startOfSequence.confinedToContainers.append(group) }
                 try expect([")"]); cI += 1
             case "cannotParse", "canParse":
                 let negated = token.stripped == "cannotParse"
@@ -702,8 +709,10 @@ class ApusParser {
         switch token.kind {
         case "identifier":
             let name = token.stripped
-            if grammar.terminals[name] != nil {
-                if grammar.nonTerminals[name] != nil {
+            if let terminal = grammar.terminals[name] {
+                // A structured lexical token (`name - body .`) is DELIBERATELY both: its body is a
+                // nonterminal for the recogniser sub-parse, references resolve to the terminal.
+                if grammar.nonTerminals[name] != nil, !terminal.isLexicalToken {
                     Logger.parse.error("grammar parse error: \(self.token.image) is both a terminal and a nonTerminal")
                 }
                 node = GrammarNode(kind: .T, name: name)
@@ -757,7 +766,16 @@ class ApusParser {
             cI += 1
             try expect(["("])
             cI += 1
-            while token.kind == "literal" {
+            while token.kind == "literal" || token.kind == "identifier" {
+                if token.kind == "identifier" {
+                    // A NAMED exclusion set: a nonterminal whose alternatives are all literals,
+                    // expanded after the whole grammar is read (`expandExclusionSetReferences`).
+                    // Lets one keyword list (e.g. swift-syntax's lexer-classified keywords) be
+                    // defined once and shared by every name category.
+                    node.excludeSetReferences.append(String(token.image))
+                    cI += 1
+                    continue
+                }
                 // Exclusion entries must match Token.kind values in the symbol table.
                 // User-grammar literal terminals are now keyed by their full quoted form
                 // (see literal()), so we record the same form here.
@@ -774,6 +792,33 @@ class ApusParser {
         return node
     }
     
+    /// Resolve `---( someSet )` references: `someSet` must be a nonterminal whose every alternate is
+    /// exactly one literal (`someSet = "a" | "b" | … .`). Its literals are added to the referencing
+    /// node's `exclude` set, in the same quoted form `---( "a" )` records.
+    private func expandExclusionSetReferences() throws {
+        var seen = Set<ObjectIdentifier>()
+        func visit(_ node: GrammarNode?) throws {
+            guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
+            for name in node.excludeSetReferences {
+                guard let set = grammar.nonTerminals[name] else {
+                    throw ApusParserError.invalidExclusionSet(name: name, reason: "no nonterminal of that name")
+                }
+                var alt = set.alt
+                while let a = alt {
+                    let body = a.bodySymbols
+                    guard body.count == 1, body[0].kind == .T || body[0].kind == .TI else {
+                        throw ApusParserError.invalidExclusionSet(name: name, reason: "every alternate must be a single literal")
+                    }
+                    node.exclude.insert(body[0].name)
+                    alt = a.alt
+                }
+            }
+            if node.kind != .END { try visit(node.seq) }
+            try visit(node.alt)
+        }
+        for nt in grammar.nonTerminals.values { try visit(nt) }
+    }
+
     func expect(_ expectedTokens : Set<String>) throws {
         var error = "expect \"\(token.kind)\" to be in \(expectedTokens)\n"
         if !expectedTokens.contains(token.kind) {

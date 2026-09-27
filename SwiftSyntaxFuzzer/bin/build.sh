@@ -2,20 +2,25 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-FUZZER="$ROOT/AdventFuzzer"
+FUZZER="$ROOT/SwiftSyntaxFuzzer"
 BUILD="$FUZZER/.build"
-XCODE_DERIVED_DATA="${ADVENT_FUZZER_DERIVED_DATA:-$BUILD/DerivedData}"
-XCODE_SOURCE_PACKAGES="${ADVENT_FUZZER_SOURCE_PACKAGES:-$BUILD/SourcePackages}"
+# Xcode's DerivedData and package checkouts live OUTSIDE the repository. In ApusApus the
+# SwiftSyntaxFuzzer folder is part of the Xcode project, so checkouts under `$BUILD` would be seen
+# as project folders too ("already open as a Folder", duplicate nested packages) and package
+# resolution fails.
+XCODE_CACHE="${HOME}/Library/Caches/ApusApusFuzzer"
+XCODE_DERIVED_DATA="${ADVENT_FUZZER_DERIVED_DATA:-$XCODE_CACHE/DerivedData}"
+XCODE_SOURCE_PACKAGES="${ADVENT_FUZZER_SOURCE_PACKAGES:-$XCODE_CACHE/SourcePackages}"
 XCODE_LOG="${ADVENT_FUZZER_XCODE_LOG:-/tmp/advent-fuzzer-xcodebuild.log}"
 
 mkdir -p "$BUILD"
 mkdir -p "$BUILD/module-cache"
 
 if [[ "${ADVENT_FUZZER_SKIP_XCODEBUILD:-0}" != "1" ]]; then
-  echo "Building Advent dependencies with Xcode..."
+  echo "Building ApusApus dependencies with Xcode..."
   xcodebuild \
-    -project "$ROOT/Advent.xcodeproj" \
-    -scheme Advent \
+    -project "$ROOT/ApusApus.xcodeproj" \
+    -scheme ApusApus \
     -configuration Release \
     -destination 'platform=macOS,arch=arm64' \
     -derivedDataPath "$XCODE_DERIVED_DATA" \
@@ -25,13 +30,12 @@ else
   echo "Skipping Xcode build because ADVENT_FUZZER_SKIP_XCODEBUILD=1"
 fi
 
+# Only what the probe and the ApusApus sources import (SwiftParser, SwiftSyntax and its
+# versioned modules, BitCollections), which is what the ApusApus app target links.
 required_object_names=(
   BitCollections.o
   InternalCollectionsUtilities.o
-  SwiftBasicFormat.o
-  SwiftDiagnostics.o
   SwiftParser.o
-  SwiftParserDiagnostics.o
   SwiftSyntax.o
   SwiftSyntax509.o
   SwiftSyntax510.o
@@ -40,7 +44,6 @@ required_object_names=(
   SwiftSyntax602.o
   SwiftSyntax603.o
   SwiftSyntax604.o
-  SwiftSyntaxBuilder.o
   _SwiftSyntaxCShims.o
 )
 
@@ -93,11 +96,11 @@ discover_products_dir() {
 PRODUCTS="$(discover_products_dir || true)"
 if [[ -z "$PRODUCTS" ]]; then
   cat >&2 <<EOF
-Could not find Advent Release build products with the SwiftSyntax object files.
+Could not find ApusApus Release build products with the SwiftSyntax object files.
 
 Try one of these:
-  1. Run AdventFuzzer/bin/build.sh without ADVENT_FUZZER_SKIP_XCODEBUILD=1.
-  2. Build the Advent scheme in Xcode, then rerun with ADVENT_FUZZER_SKIP_XCODEBUILD=1.
+  1. Run SwiftSyntaxFuzzer/bin/build.sh without ADVENT_FUZZER_SKIP_XCODEBUILD=1.
+  2. Build the ApusApus scheme in Xcode, then rerun with ADVENT_FUZZER_SKIP_XCODEBUILD=1.
   3. Set ADVENT_FUZZER_PRODUCTS=/path/to/Build/Products/Release.
 
 Xcode build log, if attempted: $XCODE_LOG
@@ -106,7 +109,15 @@ EOF
 fi
 
 DERIVED_DATA_ROOT="$(derived_data_root_for_products "$PRODUCTS")"
-SWIFT_SYNTAX_SHIMS="${ADVENT_FUZZER_SWIFT_SYNTAX_SHIMS:-$DERIVED_DATA_ROOT/SourcePackages/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include}"
+SHIMS_SUBPATH="checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include"
+# Checkouts made by this script live in $XCODE_SOURCE_PACKAGES; products found elsewhere (plain
+# Xcode DerivedData) keep theirs next to the products.
+if [[ -d "$XCODE_SOURCE_PACKAGES/$SHIMS_SUBPATH" ]]; then
+  DEFAULT_SHIMS="$XCODE_SOURCE_PACKAGES/$SHIMS_SUBPATH"
+else
+  DEFAULT_SHIMS="$DERIVED_DATA_ROOT/SourcePackages/$SHIMS_SUBPATH"
+fi
+SWIFT_SYNTAX_SHIMS="${ADVENT_FUZZER_SWIFT_SYNTAX_SHIMS:-$DEFAULT_SHIMS}"
 
 if [[ ! -d "$SWIFT_SYNTAX_SHIMS" ]]; then
   cat >&2 <<EOF
@@ -125,7 +136,7 @@ ADVENT_SOURCES=()
 while IFS= read -r source; do
   ADVENT_SOURCES+=("$source")
 done < <(
-  find "$ROOT" -maxdepth 1 -name '*.swift' \
+  find "$ROOT/ApusApus" -maxdepth 1 -name '*.swift' \
     ! -name 'main.swift' \
     ! -name 'bench_identifier.swift' \
     | sort

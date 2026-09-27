@@ -134,6 +134,9 @@ final class GrammarNode {
     /// parser suppresses that candidate.
     /// Populated by `---("if" "let" ...)` annotations in APUS grammar rules.
     var exclude:    Set<String> = []
+    /// Named exclusion sets from `---( setName )`, expanded into `exclude` right after the grammar
+    /// text is parsed (`ApusParser.expandExclusionSetReferences`).
+    var excludeSetReferences: [String] = []
 
     /// BitSet mirrors of first/follow/etc, populated by `Grammar.populateBitSets()`.
     /// Used by `testSelect()` and the follow check on the hot path for O(1) membership tests.
@@ -185,11 +188,14 @@ final class GrammarNode {
     /// span is CONTAINED in a yield of EACH named container `N` (BSR containment = the GLL
     /// substitute for an inherited context/flavor), pruning otherwise. The declarative
     /// replacement for the procedural `@within` filter. See `Grammar Predicate Lookahead Design.md`.
-    /// `@confinedTo(N…)` — positive containment: keep this alternate only where its span is
-    /// contained in a yield of EACH `N`. `@excludedFrom(N…)` — negative: prune where contained.
-    /// Both stack (conjunction over the containers). See `Grammar Predicate Lookahead Design.md`.
-    var confinedToContainers: [String] = []
-    var excludedFromContainers: [String] = []
+    /// `@confinedTo(A B …)` — positive containment: keep this alternate only where its span is
+    /// contained in a yield of ANY of the listed nonterminals. `@excludedFrom(A B …)` — negative:
+    /// prune where contained in ANY of them. One annotation = one group (disjunction inside);
+    /// several annotations of one kind must all hold together (conjunction across groups), so
+    /// `@excludedFrom(A) @excludedFrom(B)` prunes only where inside both. See
+    /// `Grammar Predicate Lookahead Design.md`.
+    var confinedToContainers: [[String]] = []
+    var excludedFromContainers: [[String]] = []
 
     /// `@sameLine` — this nonterminal's span may not cross a newline consumed as trivia.
     /// Newlines inside a committed token (nested multiline string, block comment) are permitted.

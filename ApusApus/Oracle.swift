@@ -198,24 +198,29 @@ struct LookaheadPredicateRule: DisambiguationRule {
 
 /// Containment predicate `@within(N…)` on an alternate (see `Grammar Predicate Lookahead
 /// Design.md`). Anchored on the alternate's first body symbol: keep a yield `[i,j]` only where
-/// it is CONTAINED in a yield of EACH container `N` (`∃` an N-yield `[a,b]` with `a ≤ i` and
-/// `j ≤ b`); prune otherwise. Conjunction over multiple containers. If a container has no yields
+/// it is CONTAINED in a yield of ANY container `N` of the annotation (`∃` an N-yield `[a,b]` with
+/// `a ≤ i` and `j ≤ b`); prune otherwise. Several annotations of one kind must all hold together. If a container has no yields
 /// at all, nothing is contained in it → the alternate is pruned everywhere (positive semantics —
 /// the reading is valid ONLY inside `N`). This is the declarative form of the retired procedural
 /// `@within` filter (`WithinRule`): the context is read off the BSR, not a hand-rolled scan.
-/// Containment predicate. `negated == false` = `@confinedTo` (keep only where contained in ALL
-/// containers → prune where not); `negated == true` = `@excludedFrom` (prune where contained in
-/// ALL). Both stack as a conjunction over `containers`. See `Grammar Predicate Lookahead Design.md`.
+/// Containment predicate. `negated == false` = `@confinedTo` (keep only where contained → prune
+/// where not); `negated == true` = `@excludedFrom` (prune where contained). "Contained" means: in
+/// EVERY group (annotation), inside at least ONE of that group's containers. With one container per
+/// annotation this is exactly the original all-containers conjunction. See `Grammar Predicate Lookahead Design.md`.
 struct ContainmentRule: DisambiguationRule {
     var isHardConstraint: Bool { true }
-    let containers: [() -> Set<BinarySpan>]
+    /// One entry per annotation; the containers inside an entry are alternatives.
+    let groups: [[() -> Set<BinarySpan>]]
     let negated: Bool
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        let cys = containers.map { $0() }
+        let gys = groups.map { $0.map { $0() } }
         var pruned = 0
         for span in yields {
-            let containedInAll = cys.allSatisfy { cy in cy.contains { $0.i <= span.i && span.j <= $0.j } }
-            if containedInAll == negated { yields.remove(span); pruned += 1 }   // confinedTo prunes ¬contained; excludedFrom prunes contained
+            // Every group must contain the span in at least one of its containers.
+            let contained = gys.allSatisfy { group in
+                group.contains { cy in cy.contains { $0.i <= span.i && span.j <= $0.j } }
+            }
+            if contained == negated { yields.remove(span); pruned += 1 }   // confinedTo prunes ¬contained; excludedFrom prunes contained
         }
         return pruned
     }
@@ -319,28 +324,22 @@ class Oracle {
         }
     }
 
-    /// The invariant EVERY pruning pass must preserve: a parse that existed when the Oracle
-    /// started must still exist when it finishes. Disambiguation may reduce the NUMBER of
-    /// derivations — never to zero. `disambiguate()` returns early unless the root's full-span
-    /// yield is present, so past that guard "rawMatch" holds by construction and this is simply
-    /// "postMatch must still hold", checked at every step.
+    /// Per-phase checkpoint: is the root's full-span yield still present?
     ///
-    /// Asserted PER PHASE rather than once at the end, so a violation names the pass responsible
-    /// instead of just the fact. Both ε defects fixed on 2026-09-03 (TODO 23) would have tripped
-    /// this the moment they landed; instead they surfaced as a silently missing tree, and the
-    /// design doc recorded the case as settled while it was broken.
+    /// This used to be asserted as an invariant ("pruning may reduce the number of derivations,
+    /// never to zero"). That premise is false for this grammar: rejecting invalid input by removing
+    /// its LAST reading is a deliberate mechanism — hard constraints (`@cannotParse`, `@confinedTo`,
+    /// `@sameLine`, …) and preferences such as literal munch do exactly that for every reject
+    /// fixture. Once the assert ran in every configuration (2026-09-25) it fired on ~60 correct
+    /// rejections per run. It is now a TRACE only: with `APUS_TRACE_ORACLE=1` the phase that
+    /// removed the root is printed, which is what localises a genuine over-prune on VALID input
+    /// (those still surface as `Advent failed to parse` in the accept suites).
     private func logRootStatus(_ phase: String) {
+        guard traceRulePrunes else { return }
         let alive = parser.yield(of: grammar.root).contains {
             $0.i == input.startIndex && $0.j == input.endIndex
         }
-        if traceRulePrunes {
-            print("oracle-trace: after \(phase): root full-span yield \(alive ? "ALIVE" : "*** GONE ***")")
-        }
-        assert(alive, """
-            Oracle over-pruned: the root's full-span yield existed before disambiguation and was \
-            removed by '\(phase)'. Pruning may reduce the number of derivations, never to zero. \
-            Re-run with APUS_TRACE_ORACLE=1 to see which pass or rule removed it.
-            """)
+        print("oracle-trace: after \(phase): root full-span yield \(alive ? "ALIVE" : "*** GONE ***")")
     }
 
     /// `@sameLine` — anchored on the LHS, whose completion yields have `i == k` and `j` =
@@ -348,12 +347,13 @@ class Oracle {
     /// `(i = production start, k = symbol start, j = SYMBOL end)`, so the first symbol gives too
     /// little and the last gives an extent that measured wrong in practice (6 valid inputs pruned).
     ///
-    /// Because the prune removes LHS yields, the annotated nonterminal must have exactly ONE
-    /// alternate — otherwise it would take its siblings' yields too. That is why the grammar splits
-    /// `interpolatedStringLiteral` into a single-line and a multiline nonterminal.
+    /// The prune removes LHS yields, so it applies to EVERY alternate of the annotated nonterminal.
+    /// Put `@sameLine` only on a nonterminal whose alternates all need the rule. That is why the
+    /// grammar splits `interpolatedStringLiteral` into a single-line and a multiline nonterminal;
+    /// the single-line one has two alternates (plain and extended/raw), and both are single-line.
+    /// (An earlier "exactly one alternate" assertion was a proxy for this and is gone.)
     private func registerSameLine(nonTerminal nt: GrammarNode) {
         guard nt.requiresSameLine else { return }
-        assert(nt.alt?.alt == nil, "@sameLine needs a single-alternate nonterminal (it prunes LHS yields)")
         let newlines = input.indices.filter { input[$0] == "\n" || input[$0] == "\r" }
         // Only tokens that actually contain a newline can excuse one, so pre-filter to those.
         let bearing = parser.commits.compactMap { c -> (CharPosition, CharPosition)? in
@@ -425,24 +425,29 @@ class Oracle {
                     rules.append((anchor, LookaheadPredicateRule(negated: predicate.negated,
                                                                  targetStarts: targetStarts)))
                 } else {
-                    assertionFailure("lookahead predicate: unresolved target '\(predicate.targetName)' or empty alternate")
+                    reportInvariantViolation("lookahead predicate: unresolved target '\(predicate.targetName)' or empty alternate", once: true)
                 }
             }
             // Leading containment predicate(s) on an ALT node — `@confinedTo(N…)` (keep only where
             // contained) / `@excludedFrom(N…)` (prune where contained). Anchor on the first body symbol.
-            for (names, negated) in [(node.confinedToContainers, false), (node.excludedFromContainers, true)]
-            where !names.isEmpty {
+            // Containment: ONE rule per kind. Each annotation is a GROUP matched as "inside any of
+            // these"; the groups of one kind must all match together (`@excludedFrom(A)
+            // @excludedFrom(B)` prunes only where inside BOTH, as it always has).
+            for (groups, negated) in [(node.confinedToContainers, false), (node.excludedFromContainers, true)]
+            where !groups.isEmpty {
                 let p = parser
                 if let anchor = node.bodySymbols.first {
-                    let containers = names.compactMap { name -> (() -> Set<BinarySpan>)? in
-                        guard let c = grammar.nonTerminals[name] else {
-                            assertionFailure("containment: unknown container nonterminal '\(name)'"); return nil
+                    let resolved = groups.map { names in
+                        names.compactMap { name -> (() -> Set<BinarySpan>)? in
+                            guard let c = grammar.nonTerminals[name] else {
+                                reportInvariantViolation("containment: unknown container nonterminal '\(name)'", once: true); return nil
+                            }
+                            return { p.yield(of: c) }
                         }
-                        return { p.yield(of: c) }
                     }
-                    rules.append((anchor, ContainmentRule(containers: containers, negated: negated)))
+                    rules.append((anchor, ContainmentRule(groups: resolved, negated: negated)))
                 } else {
-                    assertionFailure("containment predicate on an empty alternate")
+                    reportInvariantViolation("containment predicate on an empty alternate", once: true)
                 }
             }
             // `@sameLine` is registered per nonterminal, not here — it must
@@ -616,7 +621,7 @@ class Oracle {
         if total > 0, parseReports {
             print("oracle: removed \(deadYields)+\(secondDead) dead + \(disambiguated) disambiguated yields")
         }
-        assert(isUnambiguous(endPosition: n), "Oracle postcondition violated: residual ambiguity remains")
+        checkInvariant(isUnambiguous(endPosition: n), "Oracle postcondition violated: residual ambiguity remains")
         return total
     }
 
@@ -775,6 +780,33 @@ private struct IJPair: Hashable {
         var endCache = [NodePos: Set<CharPosition>]()
         var endGuard = Set<NodePos>()
 
+        // Per-node index over the yields, built lazily ONCE per call. The walk below asks two
+        // questions millions of times — "ends of this symbol's yields that start at p" and "does a
+        // yield span exactly [p, q]" — and answering them by scanning `parser.yield(of:)` made the
+        // walk O(yields × queries), i.e. quadratic in input size: 54 KB took ~1 s, a 524 KB file
+        // 20+ minutes (measured 2026-09-26 with `sample`: ~87% of Oracle time in these scans).
+        // The walk is read-only (the sweep at the end mutates yields AFTER it), so the index is
+        // valid for the whole walk.
+        struct YieldIndex {
+            var endsByI: [CharPosition: Set<CharPosition>] = [:]   // i → { j }
+            var endsByK: [CharPosition: Set<CharPosition>] = [:]   // k → { j }
+            var spansIJ: Set<IJPair> = []
+            var spansKJ: Set<IJPair> = []
+        }
+        var yieldIndex = [Int: YieldIndex]()
+        func index(_ sym: GrammarNode) -> YieldIndex {
+            if let cached = yieldIndex[sym.number] { return cached }
+            var x = YieldIndex()
+            for y in parser.yield(of: sym) {
+                x.endsByI[y.i, default: []].insert(y.j)
+                x.endsByK[y.k, default: []].insert(y.j)
+                x.spansIJ.insert(IJPair(i: y.i, j: y.j))
+                x.spansKJ.insert(IJPair(i: y.k, j: y.j))
+            }
+            yieldIndex[sym.number] = x
+            return x
+        }
+
         // End positions reachable from `sym` starting at `from`.
         // Mirrors DerivationBuilder.endPositions — read-only query on yields.
         func endPositions(_ sym: GrammarNode, from: CharPosition) -> Set<CharPosition> {
@@ -786,15 +818,15 @@ private struct IJPair: Hashable {
             let result: Set<CharPosition>
             switch sym.kind {
             case .T, .TI, .C, .B:
-                result = Set(parser.yield(of: sym).lazy.filter { $0.k == from }.map(\.j))
+                result = index(sym).endsByK[from] ?? []
             case .N:
                 if sym.isRHS {
                     guard let lhs = sym.alt else { return [] }
-                    let occurrenceEnds = Set(parser.yield(of: sym).lazy.filter { $0.k == from }.map(\.j))
-                    let lhsEnds = Set(parser.yield(of: lhs).lazy.filter { $0.i == from }.map(\.j))
+                    let occurrenceEnds = index(sym).endsByK[from] ?? []
+                    let lhsEnds = index(lhs).endsByI[from] ?? []
                     result = occurrenceEnds.intersection(lhsEnds)
                 } else {
-                    result = Set(parser.yield(of: sym).lazy.filter { $0.i == from }.map(\.j))
+                    result = index(sym).endsByI[from] ?? []
                 }
             case .DO, .OPT, .KLN, .POS:
                 if sym.disambiguation != nil {
@@ -803,7 +835,7 @@ private struct IJPair: Hashable {
                     // occurrence — yields are `(alternate-start, k = bracket-start, j)`,
                     // filtered by `k == from` like a terminal; a closure's shared cluster
                     // accumulates its transitive ends the same way.
-                    result = Set(parser.yield(of: sym).lazy.filter { $0.k == from }.map(\.j))
+                    result = index(sym).endsByK[from] ?? []
                 } else {
                     // UNANNOTATED bracket: original body-recompute path, untouched — so the
                     // global operator/regex machinery keeps its exact phase-1 reachability.
@@ -863,7 +895,7 @@ private struct IJPair: Hashable {
             guard expanding.insert(key).inserted else { return false }
             defer { expanding.remove(key) }
 
-            guard parser.yield(of: node).contains(where: { $0.i == from && $0.j == to }) else { return false }
+            guard index(node).spansIJ.contains(IJPair(i: from, j: to)) else { return false }
 
             if visitAlternates(node, from: from, to: to) {
                 reachable.insert(key)
@@ -1004,7 +1036,8 @@ private struct IJPair: Hashable {
         }
 
         func visitSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition) {
-            if parser.yield(of: sym).contains(where: { ($0.i == from && $0.j == to) || ($0.k == from && $0.j == to) }) {
+            let ix = index(sym)
+            if ix.spansIJ.contains(IJPair(i: from, j: to)) || ix.spansKJ.contains(IJPair(i: from, j: to)) {
                 reachable.insert(NodeSpan(id: ObjectIdentifier(sym), from: from, to: to))
             }
 

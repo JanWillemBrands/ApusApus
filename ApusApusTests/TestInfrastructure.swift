@@ -10,8 +10,21 @@ import Foundation
 
 private let parserIsolationLock = NSRecursiveLock()
 
+/// Routes the parser's always-on invariant reports (`reportInvariantViolation`, Loggers.swift) into
+/// Swift Testing, so the test whose parse tripped an invariant is marked failed instead of the
+/// report only reaching stderr. The parse runs synchronously inside the test, so `Issue.record`
+/// attributes the issue to that test. A global `let` initialises exactly once, thread-safely.
+/// Installed from `withParserIsolation`, which every grammar-loading helper goes through,
+/// `cachedSwiftGrammar` included.
+private let invariantReportingInstalled: Void = {
+    invariantViolationHandler = { message, file, line in
+        Issue.record("Invariant violated at \(file):\(line): \(message)")
+    }
+}()
+
 @discardableResult
 func withParserIsolation<T>(_ work: () throws -> T) rethrows -> T {
+    _ = invariantReportingInstalled
     parserIsolationLock.lock()
     defer { parserIsolationLock.unlock() }
     return try work()
@@ -56,13 +69,18 @@ struct TestCase: CustomTestStringConvertible {
     }
 }
 
+/// The repository root. `grammars/`, `TestOutput/` and `baseline-phase0.csv` live here; the
+/// app's Swift sources live one level down, in `testSourceDirectory()`.
 func testProjectDirectory() -> URL {
     let sourceFileURL = URL(fileURLWithPath: #filePath)
     return sourceFileURL
         .deletingLastPathComponent()
         .deletingLastPathComponent()
-        .appendingPathComponent("ApusApus")
+}
 
+/// The app target's hand-written Swift sources (`<repo>/ApusApus`).
+func testSourceDirectory() -> URL {
+    testProjectDirectory().appendingPathComponent("ApusApus")
 }
 
 func resolveGrammarFileURL(named name: String) throws -> URL {

@@ -46,7 +46,13 @@ extension MessageParser {
 
     // Paper: ntAdd(X, j) — add descriptors for all alternates of a bracket/nonterminal
     func addDescriptorsForAlternates(X: GrammarNode, k: CharPosition, i: CharPosition) {
-        assert([.N, .DO, .OPT, .ALT, .KLN, .POS].contains(X.kind), "Called \(#function) on a GrammarNode \(X) which is not a bracket")
+        // Hot path: a `switch`, not `[…].contains`, so the always-on check allocates nothing.
+        let isBracket: Bool
+        switch X.kind {
+        case .N, .DO, .OPT, .ALT, .KLN, .POS: isBracket = true
+        default: isBracket = false
+        }
+        checkInvariant(isBracket, "Called \(#function) on a GrammarNode \(X) which is not a bracket")
         var selectedAlternate = false
         var current = X.alt
         while let alt = current {

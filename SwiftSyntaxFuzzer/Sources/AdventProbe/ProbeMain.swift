@@ -132,8 +132,6 @@ struct AdventProbe {
     }
 
     private static func run(source: String, grammar: Grammar, includeDumps: Bool) throws -> ProbeOutput {
-        trace = false
-        traceIndent = 0
         parseReports = false
 
         let reference = Parser.parse(source: source)

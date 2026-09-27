@@ -33,11 +33,11 @@ _multiline-comment-text-item → comment-text-item_
 _multiline-comment-text-item → **Any** Unicode scalar value except **/\*** or **\*/**_
 
 ```apus
-whitespace          : /[\u{0000}\u{0009}\u{000A}\u{000B}\u{000C}\u{000D}\u{0020}\u{00A0}\u{FEFF}]+/ .
+whitespace : /[\u{0000}\u{0009}\u{000A}\u{000B}\u{000C}\u{000D}\u{0020}\u{00A0}\u{FEFF}]+/ .
 
-comment             : /\/\/.*\r?\n?/ .
+comment : /\/\/.*\r?\n?/ .
 
-multilineComment    : "/*" { /(?s)(?:[^*\/]|\*(?!\/)|\/(?!\*))+/ | multilineComment } "*/" .
+multilineComment : "/*" { /(?s)(?:[^*\/]|\*(?!\/)|\/(?!\*))+/ | multilineComment } "*/" .
 ```
 
 
@@ -82,40 +82,32 @@ implicitParameterName       - /\$[0-9]+/ .
 
 propertyWrapperProjection   - @builder .
 
+lexerClassifiedKeyword = "Any" | "as" | "associatedtype" | "break" | "case" | "catch" | "class"
+                       | "continue" | "default" | "defer" | "deinit" | "do" | "else" | "enum"
+                       | "extension" | "fallthrough" | "false" | "fileprivate" | "for" | "func"
+                       | "guard" | "if" | "import" | "in" | "init" | "inout" | "internal" | "is" | "let"
+                       | "nil" | "operator" | "precedencegroup" | "private" | "protocol" | "public"
+                       | "repeat" | "rethrows" | "return" | "self" | "Self" | "static" | "struct"
+                       | "subscript" | "super" | "switch" | "throw" | "throws" | "true" | "try"
+                       | "typealias" | "var" | "where" | "while" .
+identifierToken =
+    | identifier ---( "_" lexerClassifiedKeyword )
+    | escapedIdentifier
+    | propertyWrapperProjection
+    .
+argumentLabel =
+    | identifier ---( "_" "inout" )
+    | escapedIdentifier
+    | propertyWrapperProjection
+    | "_"
+    .
 memberName =
     | identifier ---( "_" )
     | escapedIdentifier
     | propertyWrapperProjection
     .
-softIdentifier =
-    | identifier ---( "_" "let" "var" "inout" )
-    | escapedIdentifier
-    | propertyWrapperProjection
-    .
-hardIdentifier =
-    | identifier ---( "_" "Any" "as" "associatedtype" "break" "case" "catch" "class" "continue" "default" "defer" "deinit" "do"
-                      "else" "enum" "extension" "fallthrough" "false" "fileprivate" "for" "func" "guard" "if" "import" "in" "init"
-                      "inout" "internal" "is" "let" "nil" "operator" "precedencegroup" "private" "protocol" "public" "repeat"
-                      "rethrows" "return" "self" "Self" "static" "struct" "subscript" "super" "switch" "throw" "throws" "true"
-                      "try" "typealias" "var" "where" "while" )
-    | escapedIdentifier
-    | propertyWrapperProjection
-    .
-expressionIdentifier =
-    | identifier ---( "_" "Any" "as" "associatedtype" "break" "case" "catch" "class" "continue" "default" "defer" "deinit" "do"
-                      "else" "enum" "extension" "fallthrough" "false" "fileprivate" "for" "func" "guard" "if" "import" "in" "init"
-                      "inout" "internal" "is" "let" "nil" "operator" "precedencegroup" "private" "protocol" "public" "repeat"
-                      "rethrows" "return" "self" "Self" "static" "struct" "subscript" "super" "switch" "throw" "throws" "true"
-                      "try" "typealias" "var" "where" "while" "await" )
-    | escapedIdentifier
-    | propertyWrapperProjection
-    .
-argumentLabelName =
-    | identifier ---( "_" "inout" )
-    | escapedIdentifier
-    | propertyWrapperProjection
-    .
-identifierList = hardIdentifier { "," hardIdentifier } .
+
+identifierList = identifierToken { "," identifierToken } .
 ```
 
 
@@ -169,18 +161,18 @@ binaryLiteral                   - /0b[0-1][0-1_]*/ .
 octalLiteral                    - /0o[0-7][0-7_]*/ .
 decimalLiteral                  - /[0-9][0-9_]*/ .
 hexadecimalLiteral              - /0x[0-9a-fA-F][0-9a-fA-F_]*/ .
+
 integerLiteral =
     | binaryLiteral
     | octalLiteral
     | decimalLiteral
     | hexadecimalLiteral
     .
-signedIntegerLiteral            = [ "-" >s< ] integerLiteral .
-```
+signedIntegerLiteral = [ "-" >s< ] integerLiteral .
 
-```apus
 decimalFloatingPointLiteral     - /[0-9][0-9_]*(?:\.[0-9][0-9_]*(?:[eE][+-]?[0-9][0-9_]*)?|[eE][+-]?[0-9][0-9_]*)/ .
 hexadecimalFloatingPointLiteral - /0x[0-9a-fA-F][0-9a-fA-F_]*(?:\.[0-9a-fA-F][0-9a-fA-F_]*)?(?:[pP][+-]?[0-9][0-9_]*)/ .
+
 floatingPointLiteral =
     | decimalFloatingPointLiteral
     | hexadecimalFloatingPointLiteral
@@ -294,11 +286,10 @@ _extended-regular-expression-literal-delimiter → **#** extended-regular-expres
 ```apus
 regexSlash           - /\// .
 
-regexEscape          - /\\[^\r\n]/ .
+regexEscape          - /\\[^\r\n\u{09}]/ .
 regexNonOperatorAtom - /[^\/\\\[\]\(\)\r\n\u{20}\u{09}\+\-\*%&\|\^~<>=!\?\.#;:,]/ .
-tabbedPlainRegularExpressionLiteral - /\/(?:\\[^\r\n]|[^\/\\\r\n])*\u{09}(?:\\[^\r\n]|[^\/\\\r\n])*\// .
-regexBodyNoTab       - /(?:(?:\\[^\r\n]|[^\/\\\r\n\u{09}\u{20}])(?:\\[^\r\n]|[^\/\\\r\n\u{09}])*(?:\\[^\r\n]|[^\/\\\r\n\u{09}\u{20}])|(?:\\[^\r\n]|[^\/\\\r\n\u{09}\u{20}]))/ .
 
+tabbedPlainRegularExpressionLiteral - /\/(?:\\[^\r\n]|[^\/\\\r\n])*\u{09}(?:\\[^\r\n]|[^\/\\\r\n])*\// .
 regexSpaceAtom       - /[\u{20}]/ .
 regexClassAtom       - /[^\\\]\r\n\u{09}]/ .
 
@@ -307,17 +298,16 @@ regexOperatorChar    - /[-+*%|^~<>=!?&.]/ .
 extendedRegularExpressionLiteral - @builder .
 
 plainRegularExpressionLiteral =
-    | @cannotParse(tabbedPlainRegularExpressionLiteral)
-          >n< <-< ( "true" "false" "nil" "self" "Self" "super" "Any" "func" "operator"
+    | >n< <-< ( "true" "false" "nil" "self" "Self" "super" "Any" "func" "operator"
                 identifier escapedIdentifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral
                 decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral
                 regexSlash extendedRegularExpressionLiteral
                 "_" ")" "]" "}" ">" closeAngle forceMark optionalMark "->" "..." "." "@" )
-          regexSlash >s< regexBody >s< regexSlash
-    | <n> regexSlash >s< regexBody >s< regexSlash
+          >-> ( tabbedPlainRegularExpressionLiteral ) regexSlash >s< regexBody >s< regexSlash
+    | <n> >-> ( tabbedPlainRegularExpressionLiteral ) regexSlash >s< regexBody >s< regexSlash
     .
 
-regexBody           = regexBodyNoTab .
+regexBody           = regexItem { >n< regexSpaceAtom? >n< regexItem } .
 regexItem           = regexEscape
                     | regexCharacterClass
                     | regexGroup
@@ -331,8 +321,7 @@ regexCharacterClass = "[" >n< ( regexEscape | regexClassAtom ) { >n< ( regexEsca
 
 regexScannerAtom    - /[^\/\\\r\n\u{20}\u{09}\(\)]/ .
 
-tryScanOperatorAsRegexLiteral = @cannotParse(tabbedPlainRegularExpressionLiteral)
-                               >n< <-< ( "true" "false" "nil" "self" "Self" "super" "Any"
+tryScanOperatorAsRegexLiteral = >n< <-< ( "true" "false" "nil" "self" "Self" "super" "Any"
                                           "func" "operator"
                                           identifier escapedIdentifier implicitParameterName propertyWrapperProjection
                                           binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral
@@ -343,7 +332,7 @@ tryScanOperatorAsRegexLiteral = @cannotParse(tabbedPlainRegularExpressionLiteral
                                           forceMark
                                           optionalMark
                                           "->" "..." "." "@" )
-                               regexSlash >s< tryScanOperatorAsRegexLiteralBody >s< regexSlash .
+                               >-> ( tabbedPlainRegularExpressionLiteral ) regexSlash >s< tryScanOperatorAsRegexLiteralBody >s< regexSlash .
 tryScanOperatorAsRegexLiteralBody   = tryScanOperatorAsRegexLiteralItem { >n< regexSpaceAtom? >n< tryScanOperatorAsRegexLiteralItem } .
 tryScanOperatorAsRegexLiteralItem   = regexEscape | tryScanOperatorAsRegexLiteralGroup | "(" | regexScannerAtom .
 tryScanOperatorAsRegexLiteralGroup  = "(" { >n< ( regexSpaceAtom | tryScanOperatorAsRegexLiteralItem ) } >n< ")" .
@@ -403,9 +392,7 @@ nonArrowOperatorToken   - @builder .
 
 @literalMunch
 dotOperator             - @builder .
-```
 
-```apus
 operator                = @cannotParse( regularExpressionLiteral ) nonArrowOperatorToken .
 operator                = dotOperator .
 
@@ -421,18 +408,11 @@ closeAngle      - />/ .
 optionalMark    - /\?/ .
 forceMark       - /!/ .
 
-keyPathDot      - /\./ .
-keyPathMarkRunStart - /[?!](?=[?!])/ .
-keyPathMarkRunOptional - /\?(?=[?!])/ .
-keyPathMarkRunForce    - /!(?=[?!])/ .
-keyPathDotSubscriptStart - /\.(?=\[)/ .
-
 infixOperator   = operator | "&" .
 
 prefixOperator  = operator .
 
-postfixOperator = postfixOperatorToken
-                | dotOperator .
+postfixOperator = postfixOperatorToken | dotOperator .
 ```
 
 
@@ -490,8 +470,7 @@ _type-annotation → **:** attributes? type_
 
 ```apus
 typeAnnotation = ":" resultType .
-resultType = type .
-resultType = namedOpaqueReturnType .
+resultType = type | namedOpaqueReturnType .
 namedOpaqueReturnType = genericParameterClause type .
 ```
 
@@ -504,17 +483,17 @@ _type-name → identifier_
 placeholderType = "_" .
 
 typeIdentifier  =
-    | typeName typeGenericArgumentClause?
+    | >-> ( "any" "some" "each" ) typeName typeGenericArgumentClause?
     | typeIdentifier "." >n< >-> ( "Type" "Protocol" ) typeName typeGenericArgumentClause?
     .
 
 typeName =
-    | hardIdentifier
+    | identifierToken
     | selfType
     | moduleSelector identifier ---( "_" )
     .
 
-moduleSelector = @excludedFrom(valueBindingPattern) hardIdentifier "::" >n< .
+moduleSelector = @excludedFrom(valueBindingPattern) identifierToken "::" >n< .
 ```
 
 
@@ -529,8 +508,8 @@ tupleType               = "(" ")"
                         | "(" tupleTypeElement "," tupleTypeElementList ","? ")" .
 tupleTypeElementList    = tupleTypeElement { "," tupleTypeElement } .
 
-tupleTypeElement        = elementName typeAnnotation | type .
 elementName             = identifier ---( "_" ) | escapedIdentifier | "_" .
+tupleTypeElement        = elementName typeAnnotation | type .
 ```
 
 
@@ -550,11 +529,14 @@ functionTypeArgumentClause  = "(" ")" | "(" functionTypeArgumentList "..."? ","?
 
 functionTypeArgumentList    = functionTypeArgument { "," functionTypeArgument } .
 
-functionTypeArgument        = type | externalArgumentLabel? localArgumentLabel typeAnnotation .
+functionTypeArgument        = type
+                            | ( >-> ( "__owned" "__shared" "_const" "borrowing" "consuming" "isolated" "sending" ) externalArgumentLabel )?
+                              localArgumentLabel typeAnnotation .
+externalArgumentLabel       = argumentLabel .
+localArgumentLabel          = argumentLabel .
+```
 
-externalArgumentLabel       = softIdentifier | "_" .
-localArgumentLabel          = softIdentifier | "_" .
-
+```apus
 throwsClause                = "throws" [ "(" type ")" ] .
 
 declarationThrowsClause     = throwsClause | "rethrows" .
@@ -833,14 +815,19 @@ _primary-expression → key-path-string-expression_
 
 ```apus
 primaryExpression = genericIdentifier .
-genericIdentifier = expressionIdentifier | expressionIdentifier genericArgumentClause .
+expressionIdentifier =
+    | identifier ---( "_" "await" lexerClassifiedKeyword )
+    | escapedIdentifier
+    | propertyWrapperProjection
+    .
+genericIdentifier = expressionIdentifier genericArgumentClause? .
 
 primaryExpression = moduleGenericIdentifier .
 
-moduleGenericIdentifier = moduleSelector identifier ---( "_" )
-                        | moduleSelector identifier ---( "_" ) genericArgumentClause .
+moduleGenericIdentifier = moduleSelector identifier ---( "_" ) genericArgumentClause? .
 primaryExpression = moduleSelector propertyWrapperProjection .
-primaryExpression = hardIdentifier "(" argumentNames ")" .
+compoundNameBase = expressionIdentifier | "init" | "self" | "Self" .
+primaryExpression = compoundNameBase "(" argumentNames ")" .
 primaryExpression = implicitParameterName .
 primaryExpression = literalExpression .
 primaryExpression = selfExpression .
@@ -863,7 +850,7 @@ primaryExpression = parenthesisedSpecifierType .
 parenthesisedSpecifierType = "(" parenthesisedTypeSpecifier type ")" .
 
 nonLiteralPrimary = genericIdentifier | moduleGenericIdentifier | moduleSelector propertyWrapperProjection
-                  | hardIdentifier "(" argumentNames ")" | implicitParameterName
+                  | compoundNameBase "(" argumentNames ")" | implicitParameterName
                   | selfExpression | superclassExpression | closureExpression
                   | parenthesizedExpression | tupleExpression | implicitMemberExpression
                   | wildcardExpression | macroExpansionExpression
@@ -1007,13 +994,13 @@ closureParameterList        = closureParameter { "," closureParameter } .
 closureParameter            = attributes? @shortest [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation? .
 closureParameter            = attributes? [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation "..." .
 closureParameterNames       = externalParameterName closureParameterName | closureParameterName .
-closureParameterName        = hardIdentifier | "_" .
+closureParameterName        = identifierToken | "_" .
 
 captureList         = "[" "]"
                     | "[" captureListItems ","? "]" .
 captureListItems    = captureListItem { "," captureListItem } .
-captureListItem     = captureSpecifier? hardIdentifier
-                    | captureSpecifier? hardIdentifier assignmentOperator expression
+captureListItem     = captureSpecifier? identifierToken
+                    | captureSpecifier? identifierToken assignmentOperator expression
                     | captureSpecifier? selfExpression .
 captureSpecifier    = "weak" | "unowned" | "unowned" "(" "safe" ")" | "unowned" "(" "unsafe" ")" .
 ```
@@ -1044,10 +1031,10 @@ _tuple-element → expression | identifier **:** expression_
 
 ```apus
 tupleExpression     = "(" ")"
-                    | "(" softIdentifier ":" expression ","? ")"
+                    | "(" argumentLabel ":" expression ","? ")"
                     | "(" tupleElement "," tupleElementList ","? ")" .
 tupleElementList    = tupleElement { "," tupleElement } .
-tupleElement        = expression | softIdentifier ":" expression .
+tupleElement        = expression | argumentLabel ":" expression .
 ```
 
 
@@ -1076,34 +1063,56 @@ _key-path-postfixes → key-path-postfix key-path-postfixes?_
 _key-path-postfix → **?** | **!** | **self** | **[** function-call-argument-list **]**_
 
 ```apus
-keyPathExpression = @prefer "\\" keyPathRootType keyPathComponents .
-keyPathExpression = @prefer "\\" keyPathRootType keyPathExpressionStop .
-keyPathExpression =         "\\" >+> ( keyPathDot ) keyPathComponents .
+keyPathDot                  - /\./ .
+keyPathMarkRunStart         - /[?!](?=[?!])/ .
+keyPathMarkRunOptional      - /\?(?=[?!])/ .
+keyPathMarkRunForce         - /!(?=[?!])/ .
+keyPathDotSubscriptStart    - /\.(?=\[)/ .
+keyPathMetatypeStart        - /\.(?=[ \t]*(?:Type|Protocol)(?!\w))/ .
+
+keyPathExpression =
+    | @prefer "\\" keyPathRootType keyPathComponents
+    | @prefer "\\" keyPathRootType keyPathExpressionStop
+    |         "\\" >+> ( keyPathDot ) keyPathComponents
+    .
 
 @longest
-keyPathRootType = keyPathRootBase keyPathRootOptionals? .
-keyPathRootBase = metatypeType
-                | typeName typeGenericArgumentClause
-                | typeName >-> ( openAngle )
-                | tupleType
-                | arrayType
-                | inlineArrayType
-                | dictionaryType
-                | anyType
-                | keyPathRootSuppressed
-                | "(" tupleTypeElement ")" .
-keyPathRootSuppressed = "~" keyPathRootBase .
-keyPathRootOptionals = keyPathRootOptional { keyPathRootOptional } .
-keyPathRootOptional = >s< optionalMark .
-keyPathRootOptional = >s< forceMark .
+keyPathRootType = keyPathRootBase keyPathRootSuffixes? >-> ( keyPathMetatypeStart ) .
+keyPathRootSuffixes = keyPathRootSuffix keyPathRootSuffixes? .
+keyPathRootSuffix =
+    | >s< optionalMark
+    | >s< forceMark
+    | "." >n< ( "Type" | "Protocol" )
+    .
 
-keyPathComponents = keyPathProperty { keyPathProperty } keyPathExpressionStop .
-keyPathComponents = keyPathProperty { keyPathProperty } keyPathPivot keyPathBareTail? keyPathBareStop .
-keyPathComponents = keyPathPivotFirst keyPathBareTail? keyPathBareStop .
+keyPathRootBase =
+    | typeName typeGenericArgumentClause
+    | typeName >-> ( openAngle )
+    | tupleType
+    | arrayType
+    | inlineArrayType
+    | dictionaryType
+    | anyType
+    | keyPathRootSuppressed
+    | "(" tupleTypeElement ")"
+    .
+keyPathRootSuppressed = "~" keyPathRootBase .
+
+keyPathComponents =
+    | keyPathProperty { keyPathProperty } keyPathExpressionStop
+    | keyPathProperty { keyPathProperty } keyPathPivot keyPathBareTail? keyPathBareStop
+    | keyPathPivotFirst keyPathBareTail? keyPathBareStop
+    .
 
 keyPathExpressionStop = >-> ( keyPathMarkRunStart keyPathDot ) .
 keyPathBareStop = >-> ( keyPathMarkRunStart keyPathDotSubscriptStart ) .
 
+keyPathMemberName = moduleSelector? memberName .
+keyPathMemberName = decimalDigits .
+keyPathMemberName = moduleSelector? memberName genericArgumentClause .
+keyPathMemberName = moduleSelector? memberName "(" keyPathArgumentLabels ")" .
+keyPathArgumentLabels = keyPathArgumentLabel { keyPathArgumentLabel } .
+keyPathArgumentLabel = argumentLabel ":" .
 keyPathProperty = "." >n< keyPathMemberName .
 
 keyPathPivotFirst = keyPathDot >s< optionalMark .
@@ -1126,14 +1135,6 @@ keyPathBareComponent = keyPathMarkRunOperator .
 keyPathBareComponent = >s< forceMark .
 keyPathBareComponent = <s> forceMark .
 keyPathBareComponent = "[" functionCallArgumentList? "]" .
-
-keyPathMemberName = moduleSelector? softIdentifier .
-keyPathMemberName = decimalDigits .
-keyPathMemberName = moduleSelector? softIdentifier genericArgumentClause .
-keyPathMemberName = moduleSelector? softIdentifier "(" keyPathArgumentLabels ")" .
-keyPathArgumentLabels = keyPathArgumentLabel { keyPathArgumentLabel } .
-keyPathArgumentLabel = identifier ---( "inout" "_" ) ":" .
-keyPathArgumentLabel = "_" ":" .
 ```
 
 
@@ -1158,18 +1159,18 @@ _postfix-expression → forced-value-expression_
 _postfix-expression → optional-chaining-expression_
 
 ```apus
-postfixExpression = primaryExpression .
-
-postfixExpression = @prefer postfixExpression >s< postfixOperator <s>
-                  | postfixExpression >s< postfixOperatorToken
-                    >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-                  | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF ) .
-postfixExpression = functionCallExpression .
-postfixExpression = initializerExpression .
-postfixExpression = explicitMemberExpression .
-postfixExpression = subscriptExpression .
-postfixExpression = forcedValueExpression .
-postfixExpression = optionalChainingExpression .
+postfixExpression =
+    | primaryExpression
+    | @prefer postfixExpression >s< postfixOperator <s>
+    | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | functionCallExpression
+    | initializerExpression
+    | explicitMemberExpression
+    | subscriptExpression
+    | forcedValueExpression
+    | optionalChainingExpression
+    .
 
 nonLiteralPostfix = nonLiteralPrimary
                   | postfixExpression >s< postfixOperator <s>
@@ -1207,15 +1208,14 @@ functionCallArgument = operator
                      | argumentLabel ":" operator .
 functionCallArgument = moduleSelector operator
                      | argumentLabel ":" moduleSelector operator .
+```
 
-argumentLabel = argumentLabelName | "_" .
-
+```apus
 trailingClosures = @cannotParse(willSetDidSetBlock accessorBlockBrace) closureExpression labeledTrailingClosures
                  | @cannotParse(willSetDidSetBlock accessorBlockBrace) closureExpression >-> ( "else" ) .
 labeledTrailingClosures = labeledTrailingClosure labeledTrailingClosures? .
+trailingClosureLabel = identifier ---( "_" "inout" "default" ) | escapedIdentifier | "_" .
 labeledTrailingClosure = trailingClosureLabel ":" closureExpression .
-
-trailingClosureLabel = identifier ---( "_" "let" "var" "inout" "default" ) | "_" .
 ```
 
 
@@ -1237,14 +1237,14 @@ _argument-names → argument-name argument-names?_
 _argument-name → identifier **:**_
 
 ```apus
-explicitMemberExpression = postfixExpression "." >n< decimalDigits .
-explicitMemberExpression = postfixExpression "." >n< moduleSelector? memberName .
-explicitMemberExpression = postfixExpression "." >n< moduleSelector? memberName genericArgumentClause .
-explicitMemberExpression = postfixExpression "." >n< moduleSelector? memberName "(" argumentNames ")" .
+explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) decimalDigits .
+explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName .
+explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName genericArgumentClause .
+explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName "(" argumentNames ")" .
 explicitMemberExpression = postfixExpression postfixConditionalCompilationBlock .
 
 argumentNames = argumentName argumentNames? .
-argumentName = ( softIdentifier | "_" ) ":" .
+argumentName = argumentLabel ":" .
 ```
 
 
@@ -1331,7 +1331,7 @@ _for-in-statement → **for** **case**? pattern **in** expression where-clause? 
 
 ```apus
 forInStatement = "for" "try"? "await"? "unsafe"? "case" matchPattern "in" expression whereClause? codeBlock .
-forInStatement = "for" "try"? "await"? "unsafe"? bindingPattern "in" expression whereClause? codeBlock .
+forInStatement = "for" "try"? "await"? "unsafe"? >-> ( "await" ) bindingPattern "in" expression whereClause? codeBlock .
 forInStatement = "for" "try"? "await"? "unsafe"? ( "var" | "let" ) bindingPattern "in" expression whereClause? codeBlock .
 ```
 
@@ -1423,7 +1423,7 @@ labeledStatement = statementLabel conditionalExpression .
 labeledStatement = statementLabel doStatement .
 
 statementLabel = labelName ":" .
-labelName = hardIdentifier .
+labelName = identifier ---( "_" "_borrowing" lexerClassifiedKeyword ) | escapedIdentifier .
 ```
 
 
@@ -1554,7 +1554,7 @@ _environment → simulator | macCatalyst_
 conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
 
 postfixConditionalCompilationBlock = postfixIfDirectiveClause postfixElseifDirectiveClauses? postfixElseDirectiveClause? endifDirective .
-postfixIfDirectiveClause = ifDirective compilationCondition <n> postfixIfBody? .
+postfixIfDirectiveClause = ifDirective compilationCondition >+>( "." "#if" ) <n> postfixIfBody .
 postfixElseifDirectiveClauses = postfixElseifDirectiveClause postfixElseifDirectiveClauses? .
 postfixElseifDirectiveClause = elseifDirective compilationCondition <n> postfixIfBody? .
 postfixElseDirectiveClause = elseDirective postfixIfBody? .
@@ -1565,23 +1565,21 @@ postfixNestedBlocks = postfixConditionalCompilationBlock postfixNestedBlocks? .
 ifDirectiveClause = ifDirective compilationCondition >->( "." ) <n> statements? .
 ifDirectiveClause = <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark ) ifDirective compilationCondition >+>( "." ) <n> statements? .
 elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
-elseifDirectiveClause = elseifDirective compilationCondition >->( "." ) <n> statements? .
-elseifDirectiveClause = <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark ) elseifDirective compilationCondition >+>( "." ) <n> statements? .
-elseDirectiveClause = elseDirective >->( "." ) statements? .
-elseDirectiveClause = <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark ) elseDirective >+>( "." ) statements? .
+elseifDirectiveClause = elseifDirective compilationCondition <n> statements? .
+elseDirectiveClause = elseDirective statements? .
 ifDirective = "#if" .
 elseifDirective = "#elseif" .
 elseDirective = "#else" <n> .
 endifDirective = "#endif" <n> .
 
-compilationCondition = hardIdentifier .
+compilationCondition = identifierToken .
 compilationCondition = booleanLiteral .
 compilationCondition = "(" compilationCondition ")" .
 compilationCondition = forceMark >s< >-> ( forceMark ) compilationCondition .
 compilationCondition = prefixOperator >s< compilationCondition .
 compilationCondition = compilationCondition "&&" compilationCondition .
 compilationCondition = compilationCondition "||" compilationCondition .
-compilationCondition = hardIdentifier functionCallArgumentClause .
+compilationCondition = identifierToken functionCallArgumentClause .
 ```
 
 
@@ -1624,7 +1622,7 @@ availabilityArguments = availabilityArgument { "," availabilityArgument } .
 availabilityArgument = platformName platformVersion? .
 availabilityArgument = "*" .
 
-platformName = hardIdentifier .
+platformName = identifierToken .
 platformVersion = decimalDigits .
 platformVersion = decimalDigits "." >n< decimalDigits .
 platformVersion = decimalDigits "." >n< decimalDigits "." >n< decimalDigits .
@@ -1674,7 +1672,7 @@ declaration = precedenceGroupDeclaration .
 declaration = associatedTypeDeclaration .
 declaration = usingDeclaration .
 memberDeclaration = declaration | freestandingMacroExpansionDeclaration .
-declaration = @confinedTo(memberDeclaration) enumCaseDeclaration .
+declaration = @confinedTo(enumMember structMember classMember actorMember protocolMember extensionMember) enumCaseDeclaration .
 declaration = macroExpansionDeclaration .
 
 macroExpansionDeclaration = attributes declarationModifiers? macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures? .
@@ -1685,7 +1683,8 @@ macroHead = poundName ---( "#_" "#available" "#unavailable" "#if" "#elseif" "#el
 macroHead = "#" >s< propertyWrapperProjection .
 macroHead = "#" >s< moduleSelector identifier ---( "_" ) .
 
-usingDeclaration = "using" >n< ( attribute | softIdentifier ) .
+usingModifier = identifier ---( "_" lexerClassifiedKeyword ) | escapedIdentifier .
+usingDeclaration = "using" >n< ( attribute | usingModifier ) .
 ```
 
 
@@ -1704,10 +1703,10 @@ _import-path → identifier | identifier **.** import-path_
 
 ```apus
 importDeclaration = attributes? declarationModifiers? "import" importKind? importPath .
-importDeclaration = attributes? "import" importKind moduleSelector ( hardIdentifier | operatorName ) .
+importDeclaration = attributes? "import" importKind moduleSelector ( identifierToken | operatorName ) .
 
 importKind = "typealias" | "struct" | "class" | "enum" | "protocol" | "let" | "var" | "func" .
-importPath = hardIdentifier { "." hardIdentifier } .
+importPath = identifierToken { "." identifierToken } .
 ```
 
 
@@ -1758,7 +1757,7 @@ variableDeclaration = variableDeclarationHead variableName initializer willSetDi
 variableDeclaration = variableDeclarationHead variableName typeAnnotation initializer? willSetDidSetBlock .
 
 variableDeclarationHead = attributes? declarationModifiers? "var" .
-variableName = hardIdentifier | "_" .
+variableName = identifierToken | "_" .
 
 getterSetterBlock = codeBlock .
 accessorBlockBrace = "{" accessorClauseList "}" .
@@ -1775,7 +1774,7 @@ accessorClauseEntryNoInit = getterClause | setterClause | coroutineAccessorClaus
 
 getterClause = attributes? accessorModifiers? "get" accessorEffects? codeBlock? .
 setterClause = attributes? accessorModifiers? "set" setterName? accessorEffects? codeBlock? .
-setterName = "(" hardIdentifier ")" .
+setterName = "(" identifierToken ")" .
 
 accessorClauseList = accessorClauseEntry accessorClauseList? .
 accessorClauseEntry = getterClause | setterClause | initAccessorClause | coroutineAccessorClause .
@@ -1803,7 +1802,7 @@ _typealias-assignment → **=** type_
 
 ```apus
 typealiasDeclaration = attributes? declarationModifiers? "typealias" typealiasName genericParameterClause? typealiasAssignment .
-typealiasName = hardIdentifier .
+typealiasName = identifierToken .
 typealiasAssignment = assignmentOperator type .
 ```
 
@@ -1831,7 +1830,7 @@ _parameter-modifier → **inout** | **borrowing** | **consuming** default-argume
 functionDeclaration = functionHead functionName genericParameterClause? functionSignature genericWhereClause? functionBody? .
 
 functionHead = attributes? declarationModifiers? "func" .
-functionName = hardIdentifier | functionNameOperator | "&" .
+functionName = identifierToken | functionNameOperator | "&" .
 
 functionSignature = parameterClause functionAsyncSpecifier? declarationThrowsClause? functionResult? .
 functionAsyncSpecifier = "async" | "reasync" .
@@ -1845,8 +1844,8 @@ parameter = attributes? @shortest [ parameterDeclarationModifiers ] parameterNam
 parameter = attributes? [ parameterDeclarationModifiers ] parameterNames typeAnnotation "..." .
 
 parameterNames = externalParameterName localParameterName | localParameterName .
-externalParameterName = softIdentifier | "_" .
-localParameterName = softIdentifier | "_" .
+externalParameterName = argumentLabel .
+localParameterName = argumentLabel .
 ```
 
 ```apus
@@ -1860,7 +1859,7 @@ parenthesisedTypeSpecifier = "nonisolated" >s< "(" "nonsending" ")" .
 
 ```apus
 parenthesisedTypeSpecifier = "dependsOn" >s< "(" "scoped"? lifetimeSpecifierArgument { "," lifetimeSpecifierArgument } ")" .
-lifetimeSpecifierArgument = hardIdentifier | "self" | integerLiteral .
+lifetimeSpecifierArgument = identifierToken | "self" | integerLiteral .
 
 parameterDeclarationModifiers = parameterDeclarationModifier parameterDeclarationModifiers? .
 
@@ -1901,10 +1900,10 @@ associatedValues = "(" enumCaseParameterList? ")" .
 enumCaseParameterList = enumCaseParameter { "," enumCaseParameter } .
 
 enumCaseParameter = type defaultArgumentClause? .
-enumCaseParameter = parameterModifiers? externalArgumentLabel? localArgumentLabel typeAnnotation defaultArgumentClause? .
+enumCaseParameter = >-> ( "inout" ) parameterModifiers? externalArgumentLabel? localArgumentLabel typeAnnotation defaultArgumentClause? .
 
-enumName = hardIdentifier .
-enumCaseName = hardIdentifier .
+enumName = identifierToken .
+enumCaseName = identifierToken .
 
 enumCaseDeclaration = attributes? "indirect"? "case" enumCaseElementList .
 
@@ -1924,7 +1923,7 @@ _struct-member → declaration | compiler-control-statement_
 
 ```apus
 structDeclaration = attributes? declarationModifiers? "struct" structName genericParameterClause? typeInheritanceClause? genericWhereClause? structBody .
-structName = hardIdentifier .
+structName = identifierToken .
 structBody = "{" structMembers? "}" .
 
 structMembers = structMember ";"? .
@@ -1943,7 +1942,7 @@ _class-member → declaration | compiler-control-statement_
 
 ```apus
 classDeclaration = attributes? declarationModifiers? "class" className genericParameterClause? typeInheritanceClause? genericWhereClause? classBody .
-className = hardIdentifier .
+className = identifierToken .
 classBody = "{" classMembers? "}" .
 
 classMembers = classMember ";"? .
@@ -1961,7 +1960,7 @@ _actor-member → declaration | compiler-control-statement_
 
 ```apus
 actorDeclaration = attributes? declarationModifiers? "actor" actorName genericParameterClause? typeInheritanceClause? genericWhereClause? actorBody .
-actorName = hardIdentifier .
+actorName = identifierToken .
 actorBody = "{" actorMembers? "}" .
 
 actorMembers = actorMember ";"? .
@@ -2002,11 +2001,11 @@ _protocol-associated-type-declaration → attributes? access-level-modifier? **a
 
 ```apus
 protocolDeclaration = attributes? declarationModifiers? "protocol" protocolName primaryAssociatedTypeClause? typeInheritanceClause? genericWhereClause? protocolBody .
-protocolName = hardIdentifier .
+protocolName = identifierToken .
 
 primaryAssociatedTypeClause = openAngle primaryAssociatedTypeList ","? closeAngle .
 
-primaryAssociatedTypeList = hardIdentifier { "," hardIdentifier } .
+primaryAssociatedTypeList = identifierToken { "," identifierToken } .
 
 protocolBody = "{" protocolMembers? "}" .
 
@@ -2014,7 +2013,7 @@ protocolMembers = protocolMember ";"? .
 protocolMembers = protocolMember statementSeparator protocolMembers .
 protocolMember = memberDeclaration | compilerControlStatement .
 
-associatedTypeDeclaration = attributes? declarationModifiers? "associatedtype" typealiasName typeInheritanceClause? typealiasAssignment? genericWhereClause? .
+associatedTypeDeclaration = attributes? declarationModifiers? "associatedtype" >-> ( "each" ) typealiasName typeInheritanceClause? typealiasAssignment? genericWhereClause? .
 ```
 
 
@@ -2082,7 +2081,7 @@ _macro-function-signature-result → **->** type_
 _macro-definition → **=** expression_
 
 ```apus
-macroDeclaration = macroDeclarationHead hardIdentifier genericParameterClause? macroSignature macroDefinition? genericWhereClause? .
+macroDeclaration = macroDeclarationHead identifierToken genericParameterClause? macroSignature macroDefinition? genericWhereClause? .
 macroDeclarationHead = attributes? declarationModifiers? "macro" .
 macroSignature = parameterClause macroFunctionSignatureResult? .
 macroFunctionSignatureResult = "->" type .
@@ -2141,7 +2140,7 @@ precedenceGroupAssignment = "assignment" ":" booleanLiteral .
 precedenceGroupAssociativity = "associativity" ":" ( "left" | "right" | "none" ) .
 
 precedenceGroupNames = precedenceGroupName { "," precedenceGroupName } .
-precedenceGroupName = hardIdentifier .
+precedenceGroupName = identifierToken .
 ```
 
 
@@ -2223,13 +2222,13 @@ availabilityAttributeArguments = availabilityAttributeArgument { "," availabilit
 availabilityAttributeArgument = "*" .
 availabilityAttributeArgument = platformName platformVersion? .
 availabilityAttributeArgument = availabilityLabel ":" availabilityValue .
-availabilityLabel = hardIdentifier .
-availabilityValue = platformVersion | availabilityStringLiteral | hardIdentifier .
+availabilityLabel = identifierToken .
+availabilityValue = platformVersion | availabilityStringLiteral | identifierToken .
 availabilityStringLiteral = singleLineStringLiteral | multilineStringLiteral .
 attribute = "@" >s< "convention" >s< "(" conventionArguments ")" .
 conventionArguments = conventionArgument { "," conventionArgument } .
-conventionArgument = hardIdentifier | hardIdentifier ":" conventionValue .
-conventionValue = hardIdentifier | staticStringLiteral .
+conventionArgument = identifierToken | identifierToken ":" conventionValue .
+conventionValue = identifierToken | staticStringLiteral .
 
 attribute = "@" >s< "objc" >s< "(" objcSelector ")" .
 attribute = "@" >s< "objc" .
@@ -2247,17 +2246,17 @@ derivativeName      = derivativeNameChain | derivativeNameChain >s< "(" argument
 derivativeNameChain = derivativeNameAtom
                     | derivativeNameChain "." >n< derivativeNameAtom
                     | derivativeNameChain >s< dotOperator .
-derivativeNameAtom  = moduleSelector? hardIdentifier | moduleSelector? selfType | operator .
+derivativeNameAtom  = moduleSelector? identifierToken | moduleSelector? selfType | operator .
 ```
 
 ```apus
 attribute = "@" >s< "lifetime" >s< "(" lifetimeArguments ")" .
 lifetimeArguments = lifetimeArgument { "," lifetimeArgument } .
-lifetimeArgument  = lifetimeTarget | hardIdentifier ":" lifetimeTarget .
-lifetimeTarget    = hardIdentifier
-                  | "borrow" hardIdentifier
-                  | "copy" hardIdentifier
-                  | "&" >s< hardIdentifier .
+lifetimeArgument  = lifetimeTarget | identifierToken ":" lifetimeTarget .
+lifetimeTarget    = identifierToken
+                  | "borrow" identifierToken
+                  | "copy" identifierToken
+                  | "&" >s< identifierToken .
 ```
 
 ```apus
@@ -2278,11 +2277,11 @@ attribute = "@" >s< "_implements" >s< "(" type "," attributeDeclName ")" .
 
 attributeDeclName = moduleSelector? attributeDeclBase
                   | moduleSelector? attributeDeclBase >s< "(" argumentNames? ")" .
-attributeDeclBase = hardIdentifier | escapedIdentifier | operator
+attributeDeclBase = identifierToken | escapedIdentifier | operator
                   | "init" | "deinit" | "subscript" | "self" | "Self" .
 documentationArguments = documentationArgument { "," documentationArgument } .
 documentationArgument  = "visibility" ":" documentationVisibility
-                       | "metadata" ":" hardIdentifier
+                       | "metadata" ":" identifierToken
                        | "metadata" ":" staticStringLiteral .
 documentationVisibility = "private" | "fileprivate" | "internal" | "package" | "public" | "open" .
 originallyDefinedInPlatforms = originallyDefinedInPlatform { "," originallyDefinedInPlatform } .
@@ -2298,13 +2297,13 @@ differentiableArguments = differentiableKind
                         | differentiableKind genericWhereClause
                         | differentiableKind "," differentiableWrt genericWhereClause
                         | differentiableWrt genericWhereClause .
-differentiableKind = hardIdentifier .
+differentiableKind = identifierToken .
 differentiableWrt  = "wrt" ":" differentiabilityArgument
                    | "wrt" ":" "(" differentiabilityArgumentList ")" .
 
 differentiabilityArgumentList = differentiabilityArgument { "," differentiabilityArgument } .
 
-differentiabilityArgument = hardIdentifier | "self" | selfType | decimalDigits .
+differentiabilityArgument = identifierToken | "self" | selfType | decimalDigits .
 ```
 
 ```apus
@@ -2315,7 +2314,7 @@ specializeArguments = < specializeArgument > .
 specializeArgument  = "target" ":" attributeDeclName ","?
                     | "availability" ":" availabilityAttributeArguments ";"
                     | "exported" ":" booleanLiteral ","?
-                    | "kind" ":" hardIdentifier ","?
+                    | "kind" ":" identifierToken ","?
                     | "spi" ":" effectsToken ","?
                     | "spiModule" ":" effectsToken ","? .
 
@@ -2330,20 +2329,23 @@ attribute = "@"
 attributeArgumentExprClause = >s< "(" functionCallArgumentList? ")" .
 
 macroRoleArguments = macroRoleArgument { "," macroRoleArgument } .
-macroRoleArgument  = macroRoleName | hardIdentifier ":" macroRoleName .
+macroRole          = identifierToken | "extension" .
+macroRoleArgument  = macroRole | identifierToken ":" macroRoleName .
 
+macroRoleDeclName  = identifier ---( "_" "await" lexerClassifiedKeyword )
+                   | escapedIdentifier
+                   | "init" | "deinit" | "subscript" | "self" | "Self"
+                   | "Any" | "true" | "false" | "nil" | "super" | "_" .
 macroRoleName      = moduleSelector? macroRoleDeclName
                    | moduleSelector? macroRoleDeclName >s< "(" macroRoleName ")"
                    | moduleSelector? macroRoleDeclName >s< "(" argumentNames ")" .
+```
 
-macroRoleDeclName  = identifier
-                     ---( "_" "Any" "as" "associatedtype" "await" "break" "case" "catch" "class" "continue" "default" "defer" "do" "else" "enum" "fallthrough" "false" "fileprivate" "for" "func" "guard" "if" "import" "in" "inout" "internal" "is" "let" "nil" "open" "operator" "precedencegroup" "private" "protocol" "public" "repeat" "rethrows" "return" "static" "struct" "super" "switch" "throw" "throws" "true" "try" "typealias" "var" "where" "while" )
-                   | escapedIdentifier .
-
+```apus
 attributeName = attributeHeadName typeGenericArgumentClause?
               | attributeHeadName typeGenericArgumentClause? "." >n< typeIdentifier
               | "rethrows" .
-attributeHeadName = hardIdentifier | selfType .
+attributeHeadName = identifierToken | selfType .
 
 attributes = attribute attributes? .
 attributes = conditionalCompilationAttributes attributes? .
@@ -2379,14 +2381,19 @@ tupleBindingPattern = "(" tupleBindingElementList? ")" .
 
 tupleBindingElementList = tupleBindingElement { "," tupleBindingElement } .
 
-tupleBindingElement = bindingSubpattern | softIdentifier ":" bindingSubpattern .
+tupleBindingLabel = identifierToken .
+tupleBindingElement = bindingSubpattern | tupleBindingLabel ":" bindingSubpattern .
 bindingSubpattern = wildcardPattern | identifierPattern | tupleBindingPattern .
 bindingSubpattern = ( "var" | "let" ) ( wildcardPattern | identifierPattern | tupleBindingPattern ) .
 ```
 
 ```apus
+matchIdentifierPattern = identifier ---( "_" "await" lexerClassifiedKeyword )
+                       | "deinit" | "subscript"
+                       | escapedIdentifier
+                       | propertyWrapperProjection .
 matchPattern = wildcardPattern
-             | identifierPattern
+             | matchIdentifierPattern
              | valueBindingPattern
              | tupleMatchPattern
              | enumCasePattern
@@ -2408,7 +2415,7 @@ wildcardPattern = "_" .
 _identifier-pattern → identifier_
 
 ```apus
-identifierPattern = hardIdentifier .
+identifierPattern = identifierToken .
 identifierPattern = @confinedTo(optionalBindingCondition) "self" .
 ```
 
@@ -2438,7 +2445,8 @@ tupleMatchPattern = "(" tupleMatchElementList? ")" .
 
 tupleMatchElementList = tupleMatchElement { "," tupleMatchElement } .
 
-tupleMatchElement = matchPattern | softIdentifier ":" matchPattern .
+tupleMatchLabel = argumentLabel .
+tupleMatchElement = matchPattern | tupleMatchLabel ":" matchPattern .
 ```
 
 
@@ -2455,7 +2463,9 @@ enumCasePattern = typeIdentifier? "." >n< memberName tupleMatchPattern? .
 _optional-pattern → identifier-pattern **?**_
 
 ```apus
-optionalPattern = ( identifierPattern | tupleMatchPattern ) >s< optionalMark .
+optionalPattern = ( identifierPattern | tupleMatchPattern | enumCasePayloadPattern ) >s< optionalMark .
+enumCasePayloadPattern = typeIdentifier? "." >n< memberName tupleMatchPattern
+                       | enumCaseName tupleMatchPattern .
 ```
 
 
@@ -2502,10 +2512,10 @@ genericParameterList = genericParameter { "," genericParameter } .
 ```
 
 ```apus
-genericParameter = attributes? "each"? typeName .
-genericParameter = attributes? "each"? typeName ":" "~"? >-> ( "Self" ) typeIdentifier .
-genericParameter = attributes? "each"? typeName ":" "~"? protocolCompositionType .
-genericParameter = attributes? "let" typeName ":" type .
+genericParameterName = typeName | "self" .
+genericParameter = attributes? "each"? >-> ( "each" ) genericParameterName .
+genericParameter = attributes? "each"? >-> ( "each" ) genericParameterName ":" >+> ( identifier "Any" "protocol" "~" ) >-> ( "Self" ) type .
+genericParameter = attributes? "let" genericParameterName ":" type .
 
 genericWhereClause = "where" requirementList .
 requirementList = requirement { "," requirement } .
@@ -2539,7 +2549,7 @@ typeGenericArgumentClause = openAngle genericArgumentList ","? closeAngle .
 
 genericArgumentList = genericArgument { "," genericArgument } .
 genericArgument =
-    | type
+    | @prefer type
     | signedIntegerLiteral
     | parenthesizedExpression
     .
