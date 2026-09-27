@@ -33,6 +33,7 @@ private final class ApusMarkdownConverter {
     private var isInBlockComment = false
     private var hasEmittedTitle = false
     private var emptyLineRun = 0
+    private var lastGrammarRuleIndex: Int?
     private var literalTokens: Set<String> = []
     private var literalTokensByLength: [String] = []
 
@@ -216,7 +217,13 @@ private final class ApusMarkdownConverter {
             output.append("")
             output.append("### \(trimmed)")
         } else {
+            // Consecutive rules form one CommonMark paragraph; a trailing backslash
+            // forces a hard line break so strict renderers keep one rule per line.
+            if let previous = lastGrammarRuleIndex, previous == output.count - 1 {
+                output[previous] += "\\"
+            }
             output.append("_\(formatGrammarText(trimmed))_")
+            lastGrammarRuleIndex = output.count - 1
         }
     }
 
