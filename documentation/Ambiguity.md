@@ -38,8 +38,21 @@ Obey these rules:
 
 ## 3. Lexer tools
 
-The lexer is parser-driven. The parser asks for a match of one terminal at one position. The
-lexer gives the longest match of that terminal. The tools in this section change that answer.
+The lexer is parser-driven. APUS uses the LCNP model from Scott & Johnstone, *Multiple
+Lexicalisation — A Java Based Study* (SLE 2019, in `articles/raw/`):
+
+- The parser does not read a token stream. At each slot, it calls `lex(position, terminal)` for
+  each terminal that the slot can start with.
+- `lex` gives the matches of that one terminal at that position. Each terminal gives its longest
+  match in its own language. `@preempt` can add shorter matches.
+- For each distinct end position, the parser makes one descriptor.
+- All positions are character positions in the source text. BSR spans use these positions.
+- The lexer keeps the result of each `(position, terminal)` query in a cache.
+- A keyword and an identifier with the same text do not conflict in the lexer. The slot selects
+  the terminal that it needs.
+
+Thus two tokenisations of the same text can both reach the parser. The GLL structures share the
+common parts. The tools in this section change the answer of `lex`.
 
 ### 3.1 `@literalMunch`
 
@@ -431,7 +444,117 @@ all accept and reject results and add an ambiguity. Only the ambiguity test find
 that position. For example, `<s> forceMark` is on `keyPathPivotFirst`, not on `keyPathPivot`. A
 test that enumerates inputs finds this problem. A review of the grammar does not.
 
-## 11. Code
+## 11. Example: Swift slash regex literals
+
+The character `/` starts a regex literal and is also an operator character. swift-syntax
+decides in its lexer (`RegexLiteralLexer.swift`, `Cursor.swift`). It uses four checks in this
+sequence. If a check rejects the regex, the lexer does not do the next checks.
+
+| swift-syntax check | Rule | APUS equivalent |
+|---|---|---|
+| left-bound | No regex if `/` touches the previous character, except after whitespace, `(` `[` `{` `,` `;` `:` or `*/`. | No separate check. The previous-token gate covers it. |
+| `func` / `operator` | No regex after `func` or `operator`. | `"func"` and `"operator"` are in the previous-token gate. |
+| `try?` / `try!` | Regex after `try?` and `try!`. | The gate lists `forceMark` and `optionalMark`, not the literals `"!"` and `"?"` that `tryOperator` uses. |
+| previous token (`isInRegexLiteralPosition`) | No regex after a token that ends an operand. | `<-<( … )` on `plainRegularExpressionLiteral`. |
+
+Tokens that end an operand: identifiers, numeric literals, `true` `false` `nil` `self` `Self`
+`super` `Any`, a regex literal, `_`, `)` `]` `}` `>`, a postfix `!` or `?`, `->`, `...`, `.` and
+`@`.
+
+The APUS design:
+
+- **`/…/` is a nonterminal, not a terminal.** `plainRegularExpressionLiteral` is a CFG. The CFG
+  balances `( )` and `[ ]` in the body. Thus a malformed span such as `/E.e).foo(/` in
+  `(/E.e).foo(/0)` is not a regex. A single regex terminal cannot do this balance.
+- **One delimiter terminal.** `regexSlash - /\// .` is the opening and the closing `/`. It is
+  munch-exempt. Thus an operator token cannot take it.
+- **Operator characters in the body are regex terminals.** `regexOperatorChar` matches them. A
+  shared operator literal is not used, because operator maximal munch can then take body text.
+- **The opening gate.** On the same line, the previous-token gate applies. After a newline, the
+  regex is at the start of an expression, and no gate applies.
+- **Single line.** Each junction in the body has `>n<`. A plain regex cannot cross a newline.
+- **No literal tab.** A lookahead gate (`>-> ( tabbedPlainRegularExpressionLiteral )`) rejects a
+  body with a literal tab.
+- **`#/…/#` is one token.** The number of `#` characters fixes the closing delimiter. Thus the
+  extended form is not ambiguous and does not need a CFG.
+- **A regex after a prefix operator.** `@preempt(regexSlash, tryScanOperatorAsRegexLiteral)` on
+  `nonArrowOperatorToken` splits `^^/regex/` into `^^` and `/regex/` (section 3.3).
+
+Rule: use a CFG for an ambiguous delimiter (`/`). Use a terminal for a delimiter that is not
+ambiguous (`#/…/#`). If the "after a regex" position is in a gate list, name the closing
+terminal `regexSlash`, because the regex is a nonterminal.
+
+## 12. Background: predicates in swift-syntax and in other parsers
+
+### 12.1 The swift-syntax `Lookahead` module
+
+swift-syntax is a recursive-descent parser. At many decisions it calls a predicate. The
+predicate copies the parser state, parses ahead on the copy, returns a `Bool` and discards the
+copy (`SwiftParser/Lookahead.swift`). Some predicates call other predicates.
+
+| File | Predicates |
+|---|---|
+| `Attributes.swift` | `canParseCustomAttribute` |
+| `Declarations.swift` | `atStartOfFreestandingMacroExpansion`, `atStartOfDeclaration`, `atStartOfActor`, `atStartOfUsing` |
+| `Expressions.swift` | `atStartOfExpression`, `canParseNonisolatedAsSpecifierInExpressionContext`, `atStartOfLabelledTrailingClosure`, `canParseClosureSignature`, `atStartOfPostfixExprSuffix` |
+| `Lookahead.swift` | `atStartOfGetSetAccessor` |
+| `Patterns.swift` | `canParsePattern`, `canParsePatternTuple` |
+| `Statements.swift` | `isStartOfReturnExpr`, `atStartOfStatement`, `atStartOfSwitchCase`, `atStartOfConditionalSwitchCases`, `atStartOfConditionalStatementBody` |
+| `Types.swift` | `canParseType`, `canParseTypeAttributeList`, `canParseTypeScalar`, `canParseSimpleOrCompositionType`, `canParseSimpleType`, `canParseStartOfInlineArrayTypeBody`, `canParseInlineArrayTypeBody`, `canParseCollectionTypeBody`, `canParseTupleBodyType`, `canParseFunctionTypeArrow`, `canParseTypeIdentifier`, `canParseAsGenericArgumentList`, `canParseIntegerLiteral`, `canParseGenericArgument` |
+
+In APUS, the equivalent of such a predicate is a structural grammar rule, a parser gate, or an
+Oracle constraint (section 7).
+
+Most `atStartOfX` predicates route to the richer reading when it is possible. In APUS, put the
+annotation on the fallback reading, for example `statement = @cannotParse(declaration
+attributes) expression .`
+
+### 12.2 Example: `Array<Array<Int>>`
+
+As a CFG, the TSPL grammar gives four derivations for `Array<Array<Int>>`:
+
+1. `Array` with the generic argument clause `<Array<Int>>`.
+2. `Array < (Array<Int>) >`: infix `<`, then postfix `>`.
+3. `Array < Array < Int >>`: infix `<`, infix `<`, then postfix `>>`.
+4. `Array < (Array < Int >) >`: infix `<`, infix `<`, postfix `>`, postfix `>`.
+
+swift-syntax selects derivation 1 with `canParseAsGenericArgumentList`:
+
+```swift
+mutating func canParseAsGenericArgumentList() -> Bool {
+  guard self.at(prefix: "<"), !self.at(prefix: "<>") else { return false }
+  var lookahead = self.lookahead()
+  guard lookahead.consumeGenericArguments() else { return false }
+  return lookahead.currentToken.isGenericTypeDisambiguatingToken
+}
+```
+
+The predicate does two checks:
+
+1. It parses `<…>` as a generic argument list on a copy. If this fails, the result is false.
+2. The token after the closing `>` must be in a follow set: `)` `]` `{` `}` `.` `,` `;` `:` `!`,
+   a postfix `?`, `&`, the end of the input, or `(` or `[` that is not at the start of a line.
+
+In APUS, `closeAngle` is munch-exempt, so `>>` can close two clauses (section 3.2). The follow
+set is the `>+>` gate on `genericArgumentClause` (section 4.2).
+
+### 12.3 Predicates in other parsers
+
+- **PEG** (Ford, POPL 2004). `&E` is true if `E` matches here. `!E` is true if `E` does not match
+  here. Neither consumes input. Ordered choice makes a PEG parser deterministic.
+- **ANTLR** (Parr & Quong 1995; Parr, PLDI 2011). A syntactic predicate `(α)=>β` parses `β` only
+  if `α` matches here. A semantic predicate `{p}?` is a Boolean test on the parser state.
+- **GLL.** The GLL papers (Scott & Johnstone 2010, 2016, 2019) do not define syntactic predicates.
+  Afroozeh (*Practical General Top-Down Parsers*, 2018, §1.4) uses `List<List<T>>` as an example
+  and applies declarative filters after the parse. The APUS Oracle uses the same approach.
+- **Other general parsers.** Elkhound (McPeak 2002) is a GLR parser with user disambiguation
+  functions. DParser (Plum 2005) is a scannerless GLR parser with `&` and `!` lookahead. Marpa
+  (Kegler) is an Earley parser with events.
+
+In a parser that keeps all derivations, the answer to "can `N` parse here?" is often already in
+the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (section 5.3).
+
+## 13. Code
 
 | File | Contents |
 |---|---|

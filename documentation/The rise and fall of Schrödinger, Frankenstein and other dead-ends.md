@@ -132,7 +132,7 @@ stays.
 | Idea | What it was | Why it died / replacement |
 |------|-------------|---------------------------|
 | **Distance-2 lookahead** `>>2` `++2` `--2` | two-token lookahead/behind | nothing used it; scheme is distance-1 only |
-| **Old spellings** `>>1`, `++1`/`--1` | pre-unification lookahead/behind | → `>+> >-> <+< <-<` (see `Structured Lookahead Design.md`) |
+| **Old spellings** `>>1`, `++1`/`--1` | pre-unification lookahead/behind | → `>+> >-> <+< <-<` (see `Ambiguity.md` §4.2) |
 | **Start-keyed `@prefer`** | prune any loser sharing start `i` (extent-blind) | broke `a?.b`, multi-arg subscripts → narrowed to strictly same-span; prefer-longer → `@longest` |
 | **`@greedy(class)` / `<suffix>`** | opt-in maximal munch | dropped for always-on default munch via `@literalMunch` |
 | **Probe-alphabet / `regexExtenders`** | space-boundary munch heuristic | replaced by running the faithful `@literalMunch` regex directly |
@@ -142,5 +142,4 @@ stays.
 
 ---
 
-*See `Structured Lookahead Design.md` for the surviving lookahead scheme, `Ambiguity.md`
-for the surviving disambiguation annotations, and `TODO.md` #0 for maximal munch.*
+*See `Ambiguity.md` for the surviving lookahead scheme and disambiguation annotations, and `TODO.md` #0 for maximal munch.*
