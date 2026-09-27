@@ -176,7 +176,7 @@ final class GrammarNode {
     /// The Oracle prunes the alternate's reading at its start position `i` when `N` does
     /// derive (`@cannotParse`, negated) or does not derive (`@canParse`, positive) at `i` —
     /// a Way-1 BSR query.
-    /// See `Grammar Predicate Lookahead Design.md`. (Postfix `>->`/`>+>` with a TERMINAL
+    /// See `Ambiguity.md`. (Postfix `>->`/`>+>` with a TERMINAL
     /// operand remains the parse-time token gate in `factor()`.)
     /// REPEATABLE, and they compose as a CONJUNCTION — every predicate must hold, exactly like the
     /// containment predicates below. One gate per alternate could not express "not a declaration AND
@@ -187,13 +187,13 @@ final class GrammarNode {
     /// Captured on the `.ALT` node. The Oracle keeps the alternate's reading only where its
     /// span is CONTAINED in a yield of EACH named container `N` (BSR containment = the GLL
     /// substitute for an inherited context/flavor), pruning otherwise. The declarative
-    /// replacement for the procedural `@within` filter. See `Grammar Predicate Lookahead Design.md`.
+    /// replacement for the procedural `@within` filter. See `Ambiguity.md`.
     /// `@confinedTo(A B …)` — positive containment: keep this alternate only where its span is
     /// contained in a yield of ANY of the listed nonterminals. `@excludedFrom(A B …)` — negative:
     /// prune where contained in ANY of them. One annotation = one group (disjunction inside);
     /// several annotations of one kind must all hold together (conjunction across groups), so
     /// `@excludedFrom(A) @excludedFrom(B)` prunes only where inside both. See
-    /// `Grammar Predicate Lookahead Design.md`.
+    /// `Ambiguity.md`.
     var confinedToContainers: [[String]] = []
     var excludedFromContainers: [[String]] = []
 

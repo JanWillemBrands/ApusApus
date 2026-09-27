@@ -144,7 +144,7 @@ enum ApusRegexLibrary {
 
     /// Dot-operator continuation = TSPL `dot-operator-character` (`. | operator-character`),
     /// which includes `!`/`?`. See Swift.apus operator dev 3 for why `?`/`!` are admitted and
-    /// keypath dev 6 / `Lexical Disambiguation Tools.md` for the keyPathDot coexistence.
+    /// keypath dev 6 / `Ambiguity.md` §3.2 for the keyPathDot coexistence.
     static let dotOperatorCharacter = CharacterClass(operatorCharacter, .anyOf("."))
 
     // ── Raw-identifier scalar classes (mirrors swift-syntax UnicodeScalarExtensions) ──

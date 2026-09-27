@@ -2105,7 +2105,7 @@ declaration = initializerDeclaration .
 // `@cannotParse(declaration)` still sees the declaration, still suppresses the expression, and
 // nothing is left. Restricting a `@cannotParse` target with an Oracle rule is always a net loss.
 // The working fix ADDS a reading instead: see the `@prefer @confinedTo(initializerBody)
-// >+> ( "init" ) expression` alternate at `statement`, and the `@cannotParse` note in `Grammar Predicate Lookahead Design.md`.
+// >+> ( "init" ) expression` alternate at `statement`, and the `@cannotParse` note in `Ambiguity.md`.
 declaration = bodylessInitializerDeclaration .
 declaration = deinitializerDeclaration .
 declaration = extensionDeclaration .
@@ -2256,8 +2256,8 @@ initializedAccessorBlock = @prefer "{" initAccessorClause accessorClauseList? "}
 // REACHABILITY RECOGNIZER — contributes no parse, exists only so the predicate above has an
 // answer. `@cannotParse(accessorBlockBrace)` is a query over the RAW forest, so it is meaningful
 // only where `accessorBlockBrace` is actually PREDICTED: a target the grammar never attempts at
-// the anchor yields nothing and the guard then passes for free. `Grammar Predicate Lookahead
-// Design.md:85` calls that a specification error, not a silent false, and requires the target to be
+// the anchor yields nothing and the guard then passes for free. `Ambiguity.md` §5.3
+// calls that a specification error, not a false result, and requires the target to be
 // reachable or seeded — the seeded sub-parse is NOT implemented (see TODO.md item 14).
 //
 // `accessorBlockBrace` is otherwise referenced only by `getterSetterBlock`, which only

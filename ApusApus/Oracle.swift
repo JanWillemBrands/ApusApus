@@ -171,7 +171,7 @@ private struct SpanKey: Hashable {
 }
 
 /// Parse predicate `@cannotParse(N)` / `@canParse(N)` with a nonterminal operand (see
-/// `Grammar Predicate Lookahead Design.md`). Anchored on the alternate's FIRST body symbol,
+/// `Ambiguity.md`). Anchored on the alternate's FIRST body symbol,
 /// whose yield start `i` is the alternate start. For each such yield, ask the Way-1 BSR
 /// question "does `N` derive at `i`?" (`∃` a target yield with `.i == i`) and prune when the
 /// predicate fails: negative (`@cannotParse`) fails where `N` DOES derive here; positive
@@ -196,8 +196,7 @@ struct LookaheadPredicateRule: DisambiguationRule {
     }
 }
 
-/// Containment predicate `@within(N…)` on an alternate (see `Grammar Predicate Lookahead
-/// Design.md`). Anchored on the alternate's first body symbol: keep a yield `[i,j]` only where
+/// Containment predicate `@within(N…)` on an alternate (see `Ambiguity.md`). Anchored on the alternate's first body symbol: keep a yield `[i,j]` only where
 /// it is CONTAINED in a yield of ANY container `N` of the annotation (`∃` an N-yield `[a,b]` with
 /// `a ≤ i` and `j ≤ b`); prune otherwise. Several annotations of one kind must all hold together. If a container has no yields
 /// at all, nothing is contained in it → the alternate is pruned everywhere (positive semantics —
@@ -206,7 +205,7 @@ struct LookaheadPredicateRule: DisambiguationRule {
 /// Containment predicate. `negated == false` = `@confinedTo` (keep only where contained → prune
 /// where not); `negated == true` = `@excludedFrom` (prune where contained). "Contained" means: in
 /// EVERY group (annotation), inside at least ONE of that group's containers. With one container per
-/// annotation this is exactly the original all-containers conjunction. See `Grammar Predicate Lookahead Design.md`.
+/// annotation this is exactly the original all-containers conjunction. See `Ambiguity.md`.
 struct ContainmentRule: DisambiguationRule {
     var isHardConstraint: Bool { true }
     /// One entry per annotation; the containers inside an entry are alternatives.

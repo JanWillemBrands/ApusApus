@@ -357,7 +357,7 @@ condition path or it breaks accept-side statement closures):
    requiring `!lookahead.atStartOfLine`) → closure refused → reject.
 
 **Resolution (2026-08-23) — all three discriminators, fully declarative** (no procedural filter,
-no Oracle input re-read; see `Grammar Predicate Lookahead Design.md`):
+no Oracle input re-read; see `Ambiguity.md`):
 
 - **disc-1 — newline after `{`.** Folded the layout into a real nonterminal
   `newlineOpenedClosure = "{" <n> closureSignature? statements? "}" .` (the `<n>` fires at parse
@@ -1050,8 +1050,7 @@ Also removed: the `<n> regexOpenSlashNL` shape alternate, provably dead because 
 viability at a split point strictly inside an operator token, so a newline can never immediately precede.
 
 This is one instance of a general problem — see
-**`Grammar Predicate Lookahead Design.md` § "Mimicking a deterministic parser: cuts with local
-viability tests"**, which reframes C1, C3 and the B2 family as a single phenomenon (swift's language is
+**`Ambiguity.md` § 5.5 "The limit of the Oracle"**, which reframes C1, C3 and the B2 family as a single phenomenon (swift's language is
 defined by an algorithm, not a grammar) and records why every survivor-filtering annotation we have is
 structurally unable to express it.
 
@@ -1513,7 +1512,7 @@ spelling it out again makes `.unknownMethod1() #if … #endif` derivable two way
 **Resolved (2026-08-23 sweep):**
 - `testEnum11#1` — a top-level `case` is not a declaration; fixed by
   `declaration = @confinedTo(memberDeclaration) enumCaseDeclaration .` (see
-  `Grammar Predicate Lookahead Design.md`). ✓
+  `Ambiguity.md`). ✓
 - `testInvalid17#1`, `testInvalid21#1` — confirmed rejecting. ✓
 
 ---
@@ -1554,7 +1553,7 @@ at the four CRF continuation sites, alongside `continuationViable`. So the propo
 trailingClosures = closureExpression >-> ("else") labeledTrailingClosures? .
 ```
 This honours the invariant *the Oracle never re-reads input* — a token-set lookahead is a
-scanner query and stays at parse time. See `Grammar Predicate Lookahead Design.md` and the
+scanner query and stays at parse time. See `Ambiguity.md` and the
 `@within`/`WithinRule` retirement note in `The rise and fall of … dead-ends.md`.
 
 **Reuse:** Any grammar with context-sensitive continuation requirements after a sub-parse —

@@ -609,7 +609,7 @@ struct CoreGrammarTests {
     //
     // Moved to `OracleDisambiguationTests.swift` (suite `Oracle Disambiguation`),
     // where the top-level pragma tests are extracted alongside the new
-    // nested-cluster tests. See `Oracle Disambiguation Unification.md`.
+    // nested-cluster tests. See `Ambiguity.md`.
 
     // MARK: - Self-parsing (APUS grammar)
 
