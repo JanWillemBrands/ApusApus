@@ -71,8 +71,7 @@ after-`{`, disc-3 `}`→`else`).
 invariant *the Oracle never re-reads input*. It was also a bespoke second mechanism for containment
 that overlapped the declarative predicate family.
 
-**What replaced it.** The **grammar-predicate lookahead** family (`Grammar Predicate Lookahead
-Design.md`): `@confinedTo(N)` / `@excludedFrom(N)` containment (a `ContainmentRule` BSR query) plus
+**What replaced it.** The **grammar-predicate lookahead** family (`Ambiguity.md`): `@confinedTo(N)` / `@excludedFrom(N)` containment (a `ContainmentRule` BSR query) plus
 the token-set `>->`/`>+>` forward gate — which now fires at **nonterminal completion** too
 (`MessageParser.forwardGateAllows`, wired at the CRF continuation sites), not just after a terminal.
 B2 became two disjoint partitioned alternates + `@excludedFrom`; both discriminators are now fully
@@ -143,5 +142,5 @@ stays.
 
 ---
 
-*See `Structured Lookahead Design.md` for the surviving lookahead scheme, `Oracle.md`
+*See `Structured Lookahead Design.md` for the surviving lookahead scheme, `Ambiguity.md`
 for the surviving disambiguation annotations, and `TODO.md` #0 for maximal munch.*

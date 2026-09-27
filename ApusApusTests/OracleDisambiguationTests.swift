@@ -12,7 +12,7 @@
 //  2. `NestedCluster` — the NEW capability being built on this branch: the same
 //     pragmas working when attached inside an inline alternate cluster
 //     `( a | b )` / `[ … ]` / `{ … }` / `< … >`, not just at the top level of a
-//     nonterminal. See `Oracle Disambiguation Unification.md`.
+//     nonterminal. See `Ambiguity.md`.
 //
 //     All pragmas attach to an ALT node (an alternate) as a prefix — `@prefer`
 //     via `isPreferred`, the others via `alt.disambiguation`, both parsed in

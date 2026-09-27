@@ -185,8 +185,8 @@ extension Grammar {
     /// answer is ambiguous — `N` was attempted and failed (a real **false**), or `N` was never
     /// attempted (the query is **blind**) — and blind resolves to the PERMISSIVE verdict: a negated
     /// predicate with no target yields prunes nothing, so `@cannotParse(N)` silently becomes `true`.
-    /// `Grammar Predicate Lookahead Design.md` calls that "a specification error, not a silent
-    /// false"; this is that error being raised.
+    /// `Ambiguity.md` §5.3 calls that "a specification error, not a false result"; this is that
+    /// error being raised.
     ///
     /// SCOPE — this catches the UNCONDITIONALLY blind cases only: a target that no production body
     /// mentions, or that nothing reachable from the root mentions. It cannot catch a target that is

@@ -786,7 +786,7 @@ Six defects, three of them UNDER-acceptances no fuzzer run had reported:
 | `\Foo !` rejected | spaced lone `!` is a component, spaced lone `?` is not — `lexNormalQuestionOrExclamation` gives a not-left-bound `?` its own `infixQuestionMark` kind (the ternary), which branch 2 rejects |
 
 Plus the largest single fix, the STRUCTURAL postfix island (see
-`Lexical Disambiguation Tools.md`, "Oracle annotations affect trees, not yields"), which killed `\Foo.m()` and the whole
+`Ambiguity.md` §10, "Oracle annotations change trees, not yields"), which killed `\Foo.m()` and the whole
 `\Foo?.?.[0]` family at once.
 
 ### Honest accounting on size

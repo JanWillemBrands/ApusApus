@@ -34,7 +34,7 @@
 > The "≈32 `canParseAsXxx` predicates" goal (Pillar 2 in `SwiftSyntax Mapping.md`)
 > remains — met with the directional lookahead above, the **grammar-predicate lookahead**
 > family (`>->(N)` derivation predicate + `@confinedTo`/`@excludedFrom` containment, see
-> `Grammar Predicate Lookahead Design.md`), and structural grammar fixes — NOT with `@unless`.
+> `Ambiguity.md`), and structural grammar fixes — NOT with `@unless`.
 
 ## Problem
 
@@ -170,7 +170,7 @@ References:
 
 The published GLL literature (Scott & Johnstone 2010, 2016, 2019; Afroozeh 2018) does not include syntactic predicates as a standard feature. Two adjacent strands are relevant:
 
-1. **Disambiguation via Oracles / post-parse pruning.** Afroozeh, *Practical General Top-Down Parsers* (PhD, 2018, in-tree at `articles/raw/Practical general top-down parsers.txt`), §1.4, discusses `List<List<T>>` as the motivating Java ambiguity and proposes declarative *disambiguation filters* applied after parsing. APUS's `Oracle` (Oracle.md) is in that tradition.
+1. **Disambiguation via Oracles / post-parse pruning.** Afroozeh, *Practical General Top-Down Parsers* (PhD, 2018, in-tree at `articles/raw/Practical general top-down parsers.txt`), §1.4, discusses `List<List<T>>` as the motivating Java ambiguity and proposes declarative *disambiguation filters* applied after parsing. APUS's `Oracle` (`Ambiguity.md`) is in that tradition.
 
 2. **Lookahead via lexer interaction.** Scott & Johnstone, *Multiple Lexicalisation — A Java Based Study* (SLE 2019, in-tree), §3.1: the parser can consult the lexer with the current grammar's local follow set, so the lexer returns only those lexicalisations consistent with the parser's state. This is upstream of our problem — it constrains *tokenisation*, not *parsing*.
 
@@ -212,7 +212,7 @@ The annotation lives on the *fallback* alternate. The richer alternate that uses
 
 ### Semantics
 
-The Oracle runs in phases (existing Oracle.md):
+The Oracle runs in phases (see `Ambiguity.md`):
 
 1. **Phase 1 — dead-wood pruning**: walk BSR top-down from root; remove yields not on any complete derivation.
 2. **Phase 2 — predicates** (NEW): for each grammar slot tagged with `@unless(X)`, find each surviving yield of that slot starting at position `i`. If `X` has any yield starting at the same position `i`, prune the slot's yield.
