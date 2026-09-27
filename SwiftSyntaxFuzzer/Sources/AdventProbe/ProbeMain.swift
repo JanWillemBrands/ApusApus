@@ -38,6 +38,9 @@ struct ProbeOutput: Codable {
 private struct ProbeRequest: Codable {
     let source: String
     let includeDumps: Bool?
+    /// Reducer requests: classify swift-syntax-accepts/Advent-rejects as `advent-underaccept`
+    /// without running `swiftc` (hundreds of reduction steps would each pay for two compiles).
+    let skipCompiler: Bool?
 }
 
 @main
@@ -117,7 +120,8 @@ struct AdventProbe {
                 let output = try run(
                     source: request.source,
                     grammar: grammar,
-                    includeDumps: request.includeDumps ?? arguments.includeDumps
+                    includeDumps: request.includeDumps ?? arguments.includeDumps,
+                    skipCompiler: request.skipCompiler ?? false
                 )
                 try write(output)
             } catch {
@@ -131,7 +135,7 @@ struct AdventProbe {
         return try grammarParser.parse(explicitStartSymbol: "")
     }
 
-    private static func run(source: String, grammar: Grammar, includeDumps: Bool) throws -> ProbeOutput {
+    private static func run(source: String, grammar: Grammar, includeDumps: Bool, skipCompiler: Bool = false) throws -> ProbeOutput {
         parseReports = false
 
         let reference = Parser.parse(source: source)
@@ -183,7 +187,10 @@ struct AdventProbe {
         let compilerResult: CompilerResult?
         var compilerTypecheckResult: CompilerResult? = nil
         let status: String
-        if !referenceHasError && !adventAccepted && ambiguityDiagnostics.isEmpty {
+        if !referenceHasError && !adventAccepted && ambiguityDiagnostics.isEmpty && skipCompiler {
+            compilerResult = nil
+            status = "advent-underaccept"
+        } else if !referenceHasError && !adventAccepted && ambiguityDiagnostics.isEmpty {
             compilerResult = runCompilerParse(source: source)
             if compilerResult?.accepted == false {
                 status = "compiler-rejects-swiftsyntax-accepts"

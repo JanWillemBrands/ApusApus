@@ -199,6 +199,7 @@ struct ProcessResult {
 struct ProbeRequest: Codable {
     let source: String
     let includeDumps: Bool?
+    var skipCompiler: Bool? = nil
 }
 
 struct FailureSignal {
@@ -401,13 +402,13 @@ final class PersistentProbe {
         stderrBuffer = LineBuffer(handle: stderrPipe.fileHandleForReading)
     }
 
-    func run(source: String, timeoutSeconds: Double) throws -> ProcessResult {
+    func run(source: String, timeoutSeconds: Double, skipCompiler: Bool = false) throws -> ProcessResult {
         guard process.isRunning else {
             throw RunnerError("persistent probe is not running")
         }
 
         let start = Date()
-        let request = ProbeRequest(source: source, includeDumps: nil)
+        let request = ProbeRequest(source: source, includeDumps: nil, skipCompiler: skipCompiler ? true : nil)
         var data = try encoder.encode(request)
         data.append(0x0A)
         stdinHandle.write(data)
