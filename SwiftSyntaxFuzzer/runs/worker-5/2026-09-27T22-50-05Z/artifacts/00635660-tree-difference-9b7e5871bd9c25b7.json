@@ -1,0 +1,64 @@
+{
+  "event" : {
+    "artifact" : "00635660-tree-difference-9b7e5871bd9c25b7.json",
+    "durationSeconds" : 0.037824034690856934,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+keyword+block-comment:translated:testCanImportFuncCall#1",
+    "index" : 635660,
+    "seed" : 13064011101222712141,
+    "signalHash" : "b6c4a5ad73bfc275",
+    "signalSummary" : "tree-difference|line=11|ref=FunctionCallExpr|advent=TypeExpr",
+    "sourceHash" : "9b7e5871bd9c25b7",
+    "sourceLength" : 31,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nany(\/*c*\/a\/*c*\/, b, c)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TypeExpr\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.any) \"any\"\n                TupleType\n                  leftParen \"(\"\n                  TupleTypeElementList\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 84,
+      "descriptorCount" : 232,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 131,
+      "parseSeconds" : 0.0061119794845581055,
+      "sourceLength" : 11,
+      "suppressedDescriptorCount" : 26,
+      "tokenCount" : 5,
+      "yieldCount" : 187
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"any\") \"any\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 25,
+  "source" : " {\nany( )\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TypeExpr\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                TupleType\\n                  leftParen \\\"(\\\"\\n                  TupleTypeElementList\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":84,\"descriptorCount\":232,\"duplicateDescriptorCount\":0,\"oraclePruned\":131,\"parseSeconds\":0.0061119794845581055,\"sourceLength\":11,\"suppressedDescriptorCount\":26,\"tokenCount\":5,\"yieldCount\":187},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"any\\\") \\\"any\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00167545-advent-overaccept-b948514b0887b930.json",
+    "durationSeconds" : 0.03741908073425293,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment+line-comment+glue:phase4-type:func-type-async+reject:testCoroutineAccessors#1",
+    "index" : 167545,
+    "seed" : 13064011101222712141,
+    "signalHash" : "dfb6dc1bc75719fa",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/VariableD",
+    "sourceHash" : "b948514b0887b930",
+    "sourceLength" : 118,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nlet a \/\/ c\n: () async -> \/\/ c\n Int = f\nvar i_rm: Int {\n  _read {\n    yield _i\n  }\n  modify {\n    yield &_i}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.var) \"var\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"i_rm\") \"i_rm\"\n                    AccessorBlock\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          DeclReferenceExpr\n                            identifier(\"_read\") \"_read\"\n                        CodeBlockItem\n                          FunctionCallExpr\n                            DeclReferenceExpr\n                              identifier(\"modify\") \"modify\"\n                            LabeledExprList\n                            ClosureExpr\n                              leftBrace \"{\"\n                              CodeBlockItemList\n                                CodeBlockItem\n                                  DeclReferenceExpr\n                                    identifier(\"_i\") \"_i\"\n                              rightBrace \"}\"\n                            MultipleTrailingClosureElementList\n                      rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "statementSeparator\t[<n>]",
+      "statements\t[statement statementSeparator statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 197,
+      "descriptorCount" : 522,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 210,
+      "parseSeconds" : 0.008438944816589355,
+      "sourceLength" : 48,
+      "suppressedDescriptorCount" : 65,
+      "tokenCount" : 12,
+      "yieldCount" : 376
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.var) \"var\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"i_rm\") \"i_rm\"\n                    AccessorBlock\n                      leftBrace \"{\"\n                      AccessorDeclList\n                        AccessorDecl\n                          AttributeList\n                          DeclModifierList\n                          keyword(SwiftSyntax.Keyword._read) \"_read\"\n                      UnexpectedNodes\n                        identifier(\"modify\") \"modify\"\n                        leftBrace \"{\"\n                        identifier(\"_i\") \"_i\"\n                        rightBrace \"}\"\n                      rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "fuzz {\nvar i_rm {\n  _read\n  modify {\n    _i}\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"i_rm\\\") \\\"i_rm\\\"\\n                    AccessorBlock\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          DeclReferenceExpr\\n                            identifier(\\\"_read\\\") \\\"_read\\\"\\n                        CodeBlockItem\\n                          FunctionCallExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"modify\\\") \\\"modify\\\"\\n                            LabeledExprList\\n                            ClosureExpr\\n                              leftBrace \\\"{\\\"\\n                              CodeBlockItemList\\n                                CodeBlockItem\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"_i\\\") \\\"_i\\\"\\n                              rightBrace \\\"}\\\"\\n                            MultipleTrailingClosureElementList\\n                      rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"statementSeparator\\t[<n>]\",\"statements\\t[statement statementSeparator statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":197,\"descriptorCount\":522,\"duplicateDescriptorCount\":0,\"oraclePruned\":210,\"parseSeconds\":0.008438944816589355,\"sourceLength\":48,\"suppressedDescriptorCount\":65,\"tokenCount\":12,\"yieldCount\":376},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"i_rm\\\") \\\"i_rm\\\"\\n                    AccessorBlock\\n                      leftBrace \\\"{\\\"\\n                      AccessorDeclList\\n                        AccessorDecl\\n                          AttributeList\\n                          DeclModifierList\\n                          keyword(SwiftSyntax.Keyword._read) \\\"_read\\\"\\n                      UnexpectedNodes\\n                        identifier(\\\"modify\\\") \\\"modify\\\"\\n                        leftBrace \\\"{\\\"\\n                        identifier(\\\"_i\\\") \\\"_i\\\"\\n                        rightBrace \\\"}\\\"\\n                      rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

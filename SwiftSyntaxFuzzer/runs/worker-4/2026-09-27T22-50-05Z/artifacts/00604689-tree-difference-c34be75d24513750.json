@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00604689-tree-difference-c34be75d24513750.json",
+    "durationSeconds" : 0.043711066246032715,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:newline:expression:testTrailingClosures#1",
+    "index" : 604689,
+    "seed" : 1663246799498458970,
+    "signalHash" : "282e2fca2a4f9f0b",
+    "signalSummary" : "tree-difference|line=43|ref=ClosureExpr|advent=MultipleTrailingClosureElementList",
+    "sourceHash" : "c34be75d24513750",
+    "sourceLength" : 85,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "struct Fuzz {\nvar button =  View.Button[5, 4, 3\n]\n{\n  \/\/ comment #0\n  Text(\"ABC\")\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.var) \"var\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"button\") \"button\"\n                    InitializerClause\n                      equal \"=\"\n                      SubscriptCallExpr\n                        DeclReferenceExpr\n                          identifier(\"Button\") \"Button\"\n                        leftSquare \"[\"\n                        LabeledExprList\n                        rightSquare \"]\"\n                        MultipleTrailingClosureElementList\n                    AccessorBlock\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "subscriptExpression\t[postfixExpression >n< \"[\"  \"]\"]",
+      "postfixExpression\t[subscriptExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      ".OPT\t[initializer]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "structMember\t[memberDeclaration]",
+      "structMembers\t[structMember ]",
+      ".OPT\t[structMembers]",
+      "structBody\t[\"{\"  \"}\"]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 95,
+      "descriptorCount" : 242,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 119,
+      "parseSeconds" : 0.0070389509201049805,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 26,
+      "tokenCount" : 12,
+      "yieldCount" : 217
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.var) \"var\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"button\") \"button\"\n                    InitializerClause\n                      equal \"=\"\n                      SubscriptCallExpr\n                        DeclReferenceExpr\n                          identifier(\"Button\") \"Button\"\n                        leftSquare \"[\"\n                        LabeledExprList\n                        rightSquare \"]\"\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                        MultipleTrailingClosureElementList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "struct Fuzz {\nvar button =  Button[\n]\n{\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"button\\\") \\\"button\\\"\\n                    InitializerClause\\n                      equal \\\"=\\\"\\n                      SubscriptCallExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"Button\\\") \\\"Button\\\"\\n                        leftSquare \\\"[\\\"\\n                        LabeledExprList\\n                        rightSquare \\\"]\\\"\\n                        MultipleTrailingClosureElementList\\n                    AccessorBlock\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"subscriptExpression\\t[postfixExpression >n< \\\"[\\\"  \\\"]\\\"]\",\"postfixExpression\\t[subscriptExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\".OPT\\t[initializer]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"memberDeclaration\\t[declaration]\",\"structMember\\t[memberDeclaration]\",\"structMembers\\t[structMember ]\",\".OPT\\t[structMembers]\",\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":95,\"descriptorCount\":242,\"duplicateDescriptorCount\":0,\"oraclePruned\":119,\"parseSeconds\":0.0070389509201049805,\"sourceLength\":43,\"suppressedDescriptorCount\":26,\"tokenCount\":12,\"yieldCount\":217},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"button\\\") \\\"button\\\"\\n                    InitializerClause\\n                      equal \\\"=\\\"\\n                      SubscriptCallExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"Button\\\") \\\"Button\\\"\\n                        leftSquare \\\"[\\\"\\n                        LabeledExprList\\n                        rightSquare \\\"]\\\"\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                        MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

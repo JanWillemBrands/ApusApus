@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00659793-tree-difference-25e52d2c8458c7e9.json",
+    "durationSeconds" : 0.048858046531677246,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:keyword:declaration:testAttributeInPoundIf#1",
+    "index" : 659793,
+    "seed" : 8709271582791740263,
+    "signalHash" : "d078008041eaf1ae",
+    "signalSummary" : "tree-difference|line=23|ref=AwaitExpr|advent=FunctionCallExpr",
+    "sourceHash" : "25e52d2c8458c7e9",
+    "sourceLength" : 61,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n#if await(foo)\n@foo\n#endif\nstruct MyStruct {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      identifier(\"await\") \"await\"\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n                    MultipleTrailingClosureElementList\n                  CodeBlockItemList\n                    CodeBlockItem\n                      DeclReferenceExpr\n                        identifier(\"foo\") \"foo\"\n              poundEndif \"#endif\"\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"MyStruct\") \"MyStruct\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "structBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "compilationCondition\t[identifierToken >n< functionCallArgumentClause]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 192,
+      "descriptorCount" : 429,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 95,
+      "parseSeconds" : 0.012925028800964355,
+      "sourceLength" : 46,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 13,
+      "yieldCount" : 209
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  AwaitExpr\n                    keyword(SwiftSyntax.Keyword.await) \"await\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      DeclReferenceExpr\n                        identifier(\"foo\") \"foo\"\n              poundEndif \"#endif\"\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"MyStruct\") \"MyStruct\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 49,
+  "source" : " {\n#if await()\nfoo\n#endif\nstruct MyStruct {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"await\\\") \\\"await\\\"\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n                    MultipleTrailingClosureElementList\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      DeclReferenceExpr\\n                        identifier(\\\"foo\\\") \\\"foo\\\"\\n              poundEndif \\\"#endif\\\"\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"compilationCondition\\t[identifierToken >n< functionCallArgumentClause]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":192,\"descriptorCount\":429,\"duplicateDescriptorCount\":0,\"oraclePruned\":95,\"parseSeconds\":0.012925028800964355,\"sourceLength\":46,\"suppressedDescriptorCount\":27,\"tokenCount\":13,\"yieldCount\":209},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  AwaitExpr\\n                    keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      DeclReferenceExpr\\n                        identifier(\\\"foo\\\") \\\"foo\\\"\\n              poundEndif \\\"#endif\\\"\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

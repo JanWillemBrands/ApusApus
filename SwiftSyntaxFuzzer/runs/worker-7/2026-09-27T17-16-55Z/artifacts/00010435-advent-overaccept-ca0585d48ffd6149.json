@@ -1,0 +1,48 @@
+{
+  "event" : {
+    "artifact" : "00010435-advent-overaccept-ca0585d48ffd6149.json",
+    "durationSeconds" : 0.037976980209350586,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:line-comment+line-comment+newline:fuzz-harvest:ifconfig-postfix",
+    "index" : 10435,
+    "seed" : 17418700094904321967,
+    "signalHash" : "571646547c260bd9",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/Vari",
+    "sourceHash" : "ca0585d48ffd6149",
+    "sourceLength" : 64,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "struct Fuzz {\nlet\nv = x\n#if \/\/ c\n FOO \/\/ c\n\n.a\n#else\n.b\n#endif\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  DeclReferenceExpr\n                    identifier(\"FOO\") \"FOO\"\n                  CodeBlockItemList\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 133,
+      "descriptorCount" : 298,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 82,
+      "parseSeconds" : 0.007718920707702637,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 34,
+      "tokenCount" : 6,
+      "yieldCount" : 139
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  MissingExpr\n                  CodeBlockItemList\n                    CodeBlockItem\n                      DeclReferenceExpr\n                        identifier(\"FOO\") \"FOO\"\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 49,
+  "source" : " {\n#if\nFOO\n#endif\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                  CodeBlockItemList\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"metrics\":{\"crfCount\":133,\"descriptorCount\":298,\"duplicateDescriptorCount\":0,\"oraclePruned\":82,\"parseSeconds\":0.007718920707702637,\"sourceLength\":19,\"suppressedDescriptorCount\":34,\"tokenCount\":6,\"yieldCount\":139},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  MissingExpr\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      DeclReferenceExpr\\n                        identifier(\\\"FOO\\\") \\\"FOO\\\"\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

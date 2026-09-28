@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00202006-advent-overaccept-04512767fcf81a75.json",
+    "durationSeconds" : 0.03539001941680908,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:swap+space:attribute:testLexicalLifetimes#1+real:SyntaxExpressibleByStringInterpolationConformances:241",
+    "index" : 202006,
+    "seed" : 13064011101222712141,
+    "signalHash" : "b9ab499e4e76c772",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "04512767fcf81a75",
+    "sourceLength" : 125,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n@_lexicalLifetimes\n func lexy(_ c: C) }{\nextension AccessorDeclListSyntax: Swift.ExpressibleByStringInterpolation {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        FunctionCallExpr\n          DeclReferenceExpr\n            identifier(\"fuzz\") \"fuzz\"\n          LabeledExprList\n          ClosureExpr\n            leftBrace \"{\"\n            CodeBlockItemList\n              CodeBlockItem\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      identifier(\"c\") \"c\"\n                      colon \":\"\n                      DeclReferenceExpr\n                        identifier(\"C\") \"C\"\n                  rightParen \")\"\n            rightBrace \"}\"\n          MultipleTrailingClosureElementList\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "argumentLabel\t[identifier]",
+      "tupleExpression\t[\"(\" argumentLabel \":\" expression  \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "nonLiteralPostfix\t[functionCallExpression]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 165,
+      "descriptorCount" : 447,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 263,
+      "parseSeconds" : 0.0049250125885009766,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 63,
+      "tokenCount" : 10,
+      "yieldCount" : 367
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    identifier(\"c\") \"c\"\n                    colon \":\"\n                    DeclReferenceExpr\n                      identifier(\"C\") \"C\"\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "fuzz { ( c: C) }{\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        FunctionCallExpr\\n          DeclReferenceExpr\\n            identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n          LabeledExprList\\n          ClosureExpr\\n            leftBrace \\\"{\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      identifier(\\\"c\\\") \\\"c\\\"\\n                      colon \\\":\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"C\\\") \\\"C\\\"\\n                  rightParen \\\")\\\"\\n            rightBrace \\\"}\\\"\\n          MultipleTrailingClosureElementList\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"argumentLabel\\t[identifier]\",\"tupleExpression\\t[\\\"(\\\" argumentLabel \\\":\\\" expression  \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"nonLiteralPostfix\\t[functionCallExpression]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":165,\"descriptorCount\":447,\"duplicateDescriptorCount\":0,\"oraclePruned\":263,\"parseSeconds\":0.0049250125885009766,\"sourceLength\":19,\"suppressedDescriptorCount\":63,\"tokenCount\":10,\"yieldCount\":367},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    identifier(\\\"c\\\") \\\"c\\\"\\n                    colon \\\":\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"C\\\") \\\"C\\\"\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

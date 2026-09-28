@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00084992-advent-overaccept-19cd34a9f83cf1fd.json",
+    "durationSeconds" : 0.03230297565460205,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+line-comment+newline:translated:testBorrowingContextualParsing#5",
+    "index" : 84992,
+    "seed" : 8709271582791740263,
+    "signalHash" : "9f472da857e93d9a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/Expressio",
+    "sourceHash" : "19cd34a9f83cf1fd",
+    "sourceLength" : 143,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nswitch bar {case borrowing \/\/ c\n x.member: \/\/ parses as var introducer surrounding postfix expression (which never is valid)\n  break\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              SwitchExpr\n                keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                DeclReferenceExpr\n                  identifier(\"bar\") \"bar\"\n                leftBrace \"{\"\n                SwitchCaseList\n                  SwitchCase\n                    SwitchCaseLabel\n                      keyword(SwiftSyntax.Keyword.case) \"case\"\n                      SwitchCaseItemList\n                        SwitchCaseItem\n                          ValueBindingPattern\n                            keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n                            ExpressionPattern\n                              MemberAccessExpr\n                                DeclReferenceExpr\n                                  identifier(\"x\") \"x\"\n                                period \".\"\n                                DeclReferenceExpr\n                                  identifier(\"member\") \"member\"\n                      colon \":\"\n                    CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "valueBindingPattern\t[\"borrowing\" >+>(\"_\" identifier) matchPattern]",
+      "matchPattern\t[valueBindingPattern]",
+      "caseItemList\t[matchPattern  ]",
+      "caseLabel\t[ \"case\" caseItemList \":\"]",
+      "switchCase\t[caseLabel ]",
+      "switchCases\t[switchCase ]",
+      ".OPT\t[switchCases]",
+      "switchExpression\t[\"switch\" >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 202,
+      "descriptorCount" : 537,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 261,
+      "parseSeconds" : 0.005365967750549316,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 59,
+      "tokenCount" : 12,
+      "yieldCount" : 382
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              SwitchExpr\n                keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                DeclReferenceExpr\n                  identifier(\"bar\") \"bar\"\n                leftBrace \"{\"\n                SwitchCaseList\n                  SwitchCase\n                    SwitchCaseLabel\n                      keyword(SwiftSyntax.Keyword.case) \"case\"\n                      SwitchCaseItemList\n                        SwitchCaseItem\n                          ExpressionPattern\n                            DeclReferenceExpr\n                              identifier(\"borrowing\") \"borrowing\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        MemberAccessExpr\n                          DeclReferenceExpr\n                            identifier(\"x\") \"x\"\n                          period \".\"\n                          DeclReferenceExpr\n                            identifier(\"member\") \"member\"\n                      CodeBlockItem\n                        UnexpectedCodeDecl\n                          UnexpectedNodes\n                            colon \":\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 49,
+  "source" : " {\nswitch bar {case borrowing\nx.member:\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              SwitchExpr\\n                keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"bar\\\") \\\"bar\\\"\\n                leftBrace \\\"{\\\"\\n                SwitchCaseList\\n                  SwitchCase\\n                    SwitchCaseLabel\\n                      keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                      SwitchCaseItemList\\n                        SwitchCaseItem\\n                          ValueBindingPattern\\n                            keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n                            ExpressionPattern\\n                              MemberAccessExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"x\\\") \\\"x\\\"\\n                                period \\\".\\\"\\n                                DeclReferenceExpr\\n                                  identifier(\\\"member\\\") \\\"member\\\"\\n                      colon \\\":\\\"\\n                    CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"valueBindingPattern\\t[\\\"borrowing\\\" >+>(\\\"_\\\" identifier) matchPattern]\",\"matchPattern\\t[valueBindingPattern]\",\"caseItemList\\t[matchPattern  ]\",\"caseLabel\\t[ \\\"case\\\" caseItemList \\\":\\\"]\",\"switchCase\\t[caseLabel ]\",\"switchCases\\t[switchCase ]\",\".OPT\\t[switchCases]\",\"switchExpression\\t[\\\"switch\\\" >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":202,\"descriptorCount\":537,\"duplicateDescriptorCount\":0,\"oraclePruned\":261,\"parseSeconds\":0.005365967750549316,\"sourceLength\":43,\"suppressedDescriptorCount\":59,\"tokenCount\":12,\"yieldCount\":382},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              SwitchExpr\\n                keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"bar\\\") \\\"bar\\\"\\n                leftBrace \\\"{\\\"\\n                SwitchCaseList\\n                  SwitchCase\\n                    SwitchCaseLabel\\n                      keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                      SwitchCaseItemList\\n                        SwitchCaseItem\\n                          ExpressionPattern\\n                            DeclReferenceExpr\\n                              identifier(\\\"borrowing\\\") \\\"borrowing\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        MemberAccessExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"x\\\") \\\"x\\\"\\n                          period \\\".\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"member\\\") \\\"member\\\"\\n                      CodeBlockItem\\n                        UnexpectedCodeDecl\\n                          UnexpectedNodes\\n                            colon \\\":\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

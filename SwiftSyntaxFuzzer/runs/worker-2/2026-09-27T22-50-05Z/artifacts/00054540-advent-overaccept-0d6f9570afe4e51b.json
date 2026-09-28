@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00054540-advent-overaccept-0d6f9570afe4e51b.json",
+    "durationSeconds" : 0.03750300407409668,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:raw:translated:testIfCaseMatchMutating#1",
+    "index" : 54540,
+    "seed" : 15755288686696214284,
+    "signalHash" : "e898ec2a12a63109",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/Expressio",
+    "sourceHash" : "0d6f9570afe4e51b",
+    "sourceLength" : 70,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nif case _mutating x = y {}\nguard case _mutating z = y else {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            GuardStmt\n              keyword(SwiftSyntax.Keyword.guard) \"guard\"\n              ConditionElementList\n                ConditionElement\n                  MatchingPatternCondition\n                    keyword(SwiftSyntax.Keyword.case) \"case\"\n                    ValueBindingPattern\n                      keyword(SwiftSyntax.Keyword.let) \"let\"\n                      IdentifierPattern\n                        identifier(\"z\") \"z\"\n                    InitializerClause\n                      equal \"=\"\n                      DeclReferenceExpr\n                        identifier(\"y\") \"y\"\n              keyword(SwiftSyntax.Keyword.else) \"else\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertMatchPattern(_:from:to:binding:): value-binding specifier not constructible: _mutatingz — «_mutating z »"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "valueBindingPattern\t[\"_mutating\" matchPattern]",
+      "matchPattern\t[valueBindingPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "condition\t[caseCondition]",
+      "conditionList\t[condition ]",
+      "guardStatement\t[\"guard\" >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 172,
+      "descriptorCount" : 465,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 175,
+      "parseSeconds" : 0.005465984344482422,
+      "sourceLength" : 39,
+      "suppressedDescriptorCount" : 51,
+      "tokenCount" : 11,
+      "yieldCount" : 281
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            GuardStmt\n              keyword(SwiftSyntax.Keyword.guard) \"guard\"\n              ConditionElementList\n                ConditionElement\n                  MatchingPatternCondition\n                    keyword(SwiftSyntax.Keyword.case) \"case\"\n                    ExpressionPattern\n                      DeclReferenceExpr\n                        identifier(\"_mutating\") \"_mutating\"\n                    InitializerClause\n                      MissingExpr\n              UnexpectedNodes\n                identifier(\"z\") \"z\"\n                equal \"=\"\n                identifier(\"y\") \"y\"\n              keyword(SwiftSyntax.Keyword.else) \"else\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : " {\nguard case _mutating z = y else {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            GuardStmt\\n              keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n              ConditionElementList\\n                ConditionElement\\n                  MatchingPatternCondition\\n                    keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                    ValueBindingPattern\\n                      keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                      IdentifierPattern\\n                        identifier(\\\"z\\\") \\\"z\\\"\\n                    InitializerClause\\n                      equal \\\"=\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"y\\\") \\\"y\\\"\\n              keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertMatchPattern(_:from:to:binding:): value-binding specifier not constructible: _mutatingz — «_mutating z »\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"valueBindingPattern\\t[\\\"_mutating\\\" matchPattern]\",\"matchPattern\\t[valueBindingPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"condition\\t[caseCondition]\",\"conditionList\\t[condition ]\",\"guardStatement\\t[\\\"guard\\\" >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":172,\"descriptorCount\":465,\"duplicateDescriptorCount\":0,\"oraclePruned\":175,\"parseSeconds\":0.005465984344482422,\"sourceLength\":39,\"suppressedDescriptorCount\":51,\"tokenCount\":11,\"yieldCount\":281},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            GuardStmt\\n              keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n              ConditionElementList\\n                ConditionElement\\n                  MatchingPatternCondition\\n                    keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                    ExpressionPattern\\n                      DeclReferenceExpr\\n                        identifier(\\\"_mutating\\\") \\\"_mutating\\\"\\n                    InitializerClause\\n                      MissingExpr\\n              UnexpectedNodes\\n                identifier(\\\"z\\\") \\\"z\\\"\\n                equal \\\"=\\\"\\n                identifier(\\\"y\\\") \\\"y\\\"\\n              keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

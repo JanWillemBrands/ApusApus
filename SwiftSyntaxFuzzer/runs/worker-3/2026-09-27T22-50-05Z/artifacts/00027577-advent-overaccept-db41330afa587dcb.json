@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00027577-advent-overaccept-db41330afa587dcb.json",
+    "durationSeconds" : 0.026960015296936035,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:raw:attribute:testABIAttribute#6",
+    "index" : 27577,
+    "seed" : 8709271582791740263,
+    "signalHash" : "3c93e6e6bcc79f48",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/DeclReferenceExpr\/identifier()\/CodeBlockItem\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/InitializerDecl\/AttributeLis",
+    "sourceHash" : "db41330afa587dcb",
+    "sourceLength" : 31,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n@abi(init())\ninit() {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              InitializerDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.init) \"init\"\n                FunctionSignature\n                  FunctionParameterClause\n                    leftParen \"(\"\n                    FunctionParameterList\n                    rightParen \")\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializerBody\t[codeBlock]",
+      "parameterClause\t[\"(\" \")\"]",
+      "initializerHead\t[  \"init\"]",
+      "initializerDeclaration\t[initializerHead  parameterClause     initializerBody]",
+      "declaration\t[initializerDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 107,
+      "descriptorCount" : 292,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 210,
+      "parseSeconds" : 0.0034880638122558594,
+      "sourceLength" : 18,
+      "suppressedDescriptorCount" : 39,
+      "tokenCount" : 8,
+      "yieldCount" : 283
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"fuzz\") \"fuzz\"\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            InitializerDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.init) \"init\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 24,
+  "source" : "fuzz {\ninit() {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              InitializerDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                FunctionSignature\\n                  FunctionParameterClause\\n                    leftParen \\\"(\\\"\\n                    FunctionParameterList\\n                    rightParen \\\")\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializerBody\\t[codeBlock]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"initializerHead\\t[  \\\"init\\\"]\",\"initializerDeclaration\\t[initializerHead  parameterClause     initializerBody]\",\"declaration\\t[initializerDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":107,\"descriptorCount\":292,\"duplicateDescriptorCount\":0,\"oraclePruned\":210,\"parseSeconds\":0.0034880638122558594,\"sourceLength\":18,\"suppressedDescriptorCount\":39,\"tokenCount\":8,\"yieldCount\":283},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            InitializerDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

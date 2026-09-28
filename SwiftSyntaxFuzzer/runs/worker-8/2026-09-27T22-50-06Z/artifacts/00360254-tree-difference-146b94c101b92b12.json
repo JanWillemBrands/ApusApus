@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00360254-tree-difference-146b94c101b92b12.json",
+    "durationSeconds" : 0.03383290767669678,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+space+glue:attribute:testEffects#2+real:SyntaxExpressibleByStringInterpolationConformances:184",
+    "index" : 360254,
+    "seed" : 10372684106311075726,
+    "signalHash" : "8ab1774dd8ff3501",
+    "signalSummary" : "tree-difference|line=23|ref=prefixOperator()|advent=postfixOperator()",
+    "sourceHash" : "146b94c101b92b12",
+    "sourceLength" : 161,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n@_effects(escaping self.value\/*\n*\/**.class*.value** => return.value**)\nfunc foo() {}\nextension PatternSyntax : SyntaxExpressibleByStringInterpolation {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExtensionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"_effects\") \"_effects\"\n                  leftParen \"(\"\n                  EffectsAttributeArgumentList\n                    postfixOperator(\"**\") \"**\"\n                    period \".\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.extension) \"extension\"\n              IdentifierType\n                identifier(\"PatternSyntax\") \"PatternSyntax\"\n              InheritanceClause\n                colon \":\"\n                InheritedTypeList\n                  InheritedType\n                    IdentifierType\n                      identifier(\"SyntaxExpressibleByStringInterpolation\") \"SyntaxExpressibleByStringInterpolation\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "extensionBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "typeInheritance\t[   typeIdentifier]",
+      "typeInheritanceClause\t[\":\" typeInheritance ]",
+      ".OPT\t[typeInheritanceClause]",
+      ".DO\t[typeIdentifier]",
+      "nonWordToken\t[\".\"]",
+      "effectsToken\t[nonWordToken]",
+      ".POS\t[effectsToken]",
+      "operator\t[nonArrowOperatorToken]",
+      "effectsToken\t[operator]",
+      "attribute\t[\"@\" >s< \"_effects\" >s< \"(\"  \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 139,
+      "descriptorCount" : 333,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 111,
+      "parseSeconds" : 0.010493993759155273,
+      "sourceLength" : 92,
+      "suppressedDescriptorCount" : 40,
+      "tokenCount" : 14,
+      "yieldCount" : 209
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExtensionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"_effects\") \"_effects\"\n                  leftParen \"(\"\n                  EffectsAttributeArgumentList\n                    prefixOperator(\"**\") \"**\"\n                    period \".\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.extension) \"extension\"\n              IdentifierType\n                identifier(\"PatternSyntax\") \"PatternSyntax\"\n              InheritanceClause\n                colon \":\"\n                InheritedTypeList\n                  InheritedType\n                    IdentifierType\n                      identifier(\"SyntaxExpressibleByStringInterpolation\") \"SyntaxExpressibleByStringInterpolation\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n@_effects(\/*\n*\/**.)\nextension PatternSyntax : SyntaxExpressibleByStringInterpolation {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExtensionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                  leftParen \\\"(\\\"\\n                  EffectsAttributeArgumentList\\n                    postfixOperator(\\\"**\\\") \\\"**\\\"\\n                    period \\\".\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n              IdentifierType\\n                identifier(\\\"PatternSyntax\\\") \\\"PatternSyntax\\\"\\n              InheritanceClause\\n                colon \\\":\\\"\\n                InheritedTypeList\\n                  InheritedType\\n                    IdentifierType\\n                      identifier(\\\"SyntaxExpressibleByStringInterpolation\\\") \\\"SyntaxExpressibleByStringInterpolation\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"typeInheritance\\t[   typeIdentifier]\",\"typeInheritanceClause\\t[\\\":\\\" typeInheritance ]\",\".OPT\\t[typeInheritanceClause]\",\".DO\\t[typeIdentifier]\",\"nonWordToken\\t[\\\".\\\"]\",\"effectsToken\\t[nonWordToken]\",\".POS\\t[effectsToken]\",\"operator\\t[nonArrowOperatorToken]\",\"effectsToken\\t[operator]\",\"attribute\\t[\\\"@\\\" >s< \\\"_effects\\\" >s< \\\"(\\\"  \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":139,\"descriptorCount\":333,\"duplicateDescriptorCount\":0,\"oraclePruned\":111,\"parseSeconds\":0.010493993759155273,\"sourceLength\":92,\"suppressedDescriptorCount\":40,\"tokenCount\":14,\"yieldCount\":209},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExtensionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                  leftParen \\\"(\\\"\\n                  EffectsAttributeArgumentList\\n                    prefixOperator(\\\"**\\\") \\\"**\\\"\\n                    period \\\".\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n              IdentifierType\\n                identifier(\\\"PatternSyntax\\\") \\\"PatternSyntax\\\"\\n              InheritanceClause\\n                colon \\\":\\\"\\n                InheritedTypeList\\n                  InheritedType\\n                    IdentifierType\\n                      identifier(\\\"SyntaxExpressibleByStringInterpolation\\\") \\\"SyntaxExpressibleByStringInterpolation\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

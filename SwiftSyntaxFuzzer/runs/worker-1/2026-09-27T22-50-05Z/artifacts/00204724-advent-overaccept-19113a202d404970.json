@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00204724-advent-overaccept-19113a202d404970.json",
+    "durationSeconds" : 0.03612709045410156,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+line-comment+duplicate:translated:testDeprecatedWhere9#1",
+    "index" : 204724,
+    "seed" : 4354586988532835097,
+    "signalHash" : "87bb02a12fc25fa6",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/StructDec",
+    "sourceHash" : "19113a202d404970",
+    "sourceLength" : 233,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n\/\/ NominalTypeDecl: Choose 2\n\/\/ 1,2\nstruct S12 \/\/ c\n<T:: Mashable where T: Womparable> {}\n\/\/ 1,3\nstruct S13<\/*\n*\/T: Mashable> where T: Equatable {} \/\/ no-warning\n\/\/ 2,3\nstruct S23<T where T: Womparable> where T: Equatable {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"S12\") \"S12\"\n              GenericParameterClause\n                leftAngle \"<\"\n                GenericParameterList\n                  GenericParameter\n                    AttributeList\n                    identifier(\"T::Womparable\") \"T::Womparable\"\n                rightAngle \">\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "structBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector identifier]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[  >->(\"each\") genericParameterName]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 72,
+      "descriptorCount" : 163,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 46,
+      "parseSeconds" : 0.006219029426574707,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 11,
+      "yieldCount" : 126
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"S12\") \"S12\"\n              GenericParameterClause\n                leftAngle \"<\"\n                GenericParameterList\n                  GenericParameter\n                    AttributeList\n                    identifier(\"T\") \"T\"\n              MemberBlock\n                UnexpectedNodes\n                  colonColon \"::\"\n                  identifier(\"Womparable\") \"Womparable\"\n                  postfixOperator(\">\") \">\"\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nstruct S12 \/\/ c\n<T:: Womparable> {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"S12\\\") \\\"S12\\\"\\n              GenericParameterClause\\n                leftAngle \\\"<\\\"\\n                GenericParameterList\\n                  GenericParameter\\n                    AttributeList\\n                    identifier(\\\"T::Womparable\\\") \\\"T::Womparable\\\"\\n                rightAngle \\\">\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector identifier]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[  >->(\\\"each\\\") genericParameterName]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":72,\"descriptorCount\":163,\"duplicateDescriptorCount\":0,\"oraclePruned\":46,\"parseSeconds\":0.006219029426574707,\"sourceLength\":40,\"suppressedDescriptorCount\":10,\"tokenCount\":11,\"yieldCount\":126},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"S12\\\") \\\"S12\\\"\\n              GenericParameterClause\\n                leftAngle \\\"<\\\"\\n                GenericParameterList\\n                  GenericParameter\\n                    AttributeList\\n                    identifier(\\\"T\\\") \\\"T\\\"\\n              MemberBlock\\n                UnexpectedNodes\\n                  colonColon \\\"::\\\"\\n                  identifier(\\\"Womparable\\\") \\\"Womparable\\\"\\n                  postfixOperator(\\\">\\\") \\\">\\\"\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

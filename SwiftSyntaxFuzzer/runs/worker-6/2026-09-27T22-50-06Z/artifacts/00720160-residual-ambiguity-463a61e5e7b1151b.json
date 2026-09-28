@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00720160-residual-ambiguity-463a61e5e7b1151b.json",
+    "durationSeconds" : 0.026008009910583496,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:splice+newline+line-comment:attribute:testEffects#2",
+    "index" : 720160,
+    "seed" : 6018003910102630304,
+    "signalHash" : "83b8f10ace85816c",
+    "signalSummary" : "residual-ambiguity|effectsToken\tambiguous alternate\t[identifier] | [nonWordToken]",
+    "sourceHash" : "463a61e5e7b1151b",
+    "sourceLength" : 96,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "#if FOO\n@_effects(escaping self \/\/ c\n.value\n**.class*.value** => _.value**)\nfunc foo() {}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                FunctionDecl\n                  AttributeList\n                    Attribute\n                      atSign \"@\"\n                      IdentifierType\n                        identifier(\"_effects\") \"_effects\"\n                      leftParen \"(\"\n                      EffectsAttributeArgumentList\n                        identifier(\"_\") \"_\"\n                      rightParen \")\"\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.func) \"func\"\n                  identifier(\"foo\") \"foo\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      leftParen \"(\"\n                      FunctionParameterList\n                      rightParen \")\"\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "nonWordToken\t[\"_\"]",
+      "effectsToken\t[identifier]",
+      ".POS\t[effectsToken]",
+      "attribute\t[\"@\" >s< \"_effects\" >s< \"(\"  \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 198,
+      "descriptorCount" : 428,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 123,
+      "parseSeconds" : 0.012459993362426758,
+      "sourceLength" : 42,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 15,
+      "yieldCount" : 212
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                FunctionDecl\n                  AttributeList\n                    Attribute\n                      atSign \"@\"\n                      IdentifierType\n                        identifier(\"_effects\") \"_effects\"\n                      leftParen \"(\"\n                      EffectsAttributeArgumentList\n                        wildcard \"_\"\n                      rightParen \")\"\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.func) \"func\"\n                  identifier(\"foo\") \"foo\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      leftParen \"(\"\n                      FunctionParameterList\n                      rightParen \")\"\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+      "effectsToken\tambiguous alternate\t[identifier] | [nonWordToken]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "#if FOO\n@_effects( _)\nfunc foo() {}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                FunctionDecl\\n                  AttributeList\\n                    Attribute\\n                      atSign \\\"@\\\"\\n                      IdentifierType\\n                        identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                      leftParen \\\"(\\\"\\n                      EffectsAttributeArgumentList\\n                        identifier(\\\"_\\\") \\\"_\\\"\\n                      rightParen \\\")\\\"\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                  identifier(\\\"foo\\\") \\\"foo\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      leftParen \\\"(\\\"\\n                      FunctionParameterList\\n                      rightParen \\\")\\\"\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"nonWordToken\\t[\\\"_\\\"]\",\"effectsToken\\t[identifier]\",\".POS\\t[effectsToken]\",\"attribute\\t[\\\"@\\\" >s< \\\"_effects\\\" >s< \\\"(\\\"  \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":198,\"descriptorCount\":428,\"duplicateDescriptorCount\":0,\"oraclePruned\":123,\"parseSeconds\":0.012459993362426758,\"sourceLength\":42,\"suppressedDescriptorCount\":27,\"tokenCount\":15,\"yieldCount\":212},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                FunctionDecl\\n                  AttributeList\\n                    Attribute\\n                      atSign \\\"@\\\"\\n                      IdentifierType\\n                        identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                      leftParen \\\"(\\\"\\n                      EffectsAttributeArgumentList\\n                        wildcard \\\"_\\\"\\n                      rightParen \\\")\\\"\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                  identifier(\\\"foo\\\") \\\"foo\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      leftParen \\\"(\\\"\\n                      FunctionParameterList\\n                      rightParen \\\")\\\"\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[\"effectsToken\\tambiguous alternate\\t[identifier] | [nonWordToken]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00303503-tree-difference-bb69c9ed4848fe6f.json",
+    "durationSeconds" : 0.028324007987976074,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:newline+swap+space:translated:testRecovery12#1",
+    "index" : 303503,
+    "seed" : 4354586988532835097,
+    "signalHash" : "e1adefaaf2201ec2",
+    "signalSummary" : "tree-difference|line=31|ref=FunctionCallExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "bb69c9ed4848fe6f",
+    "sourceLength" : 76,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "extension Fuzz {\nfunc braceStmt3() {\n   {\n    undefinedIdentifier\n{}\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          DeclReferenceExpr\n                            identifier(\"undefinedIdentifier\") \"undefinedIdentifier\"\n                        CodeBlockItem\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                            rightBrace \"}\"\n                      rightBrace \"}\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 154,
+      "descriptorCount" : 426,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 151,
+      "parseSeconds" : 0.006116032600402832,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 49,
+      "tokenCount" : 11,
+      "yieldCount" : 295
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          FunctionCallExpr\n                            DeclReferenceExpr\n                              identifier(\"undefinedIdentifier\") \"undefinedIdentifier\"\n                            LabeledExprList\n                            ClosureExpr\n                              leftBrace \"{\"\n                              CodeBlockItemList\n                              rightBrace \"}\"\n                            MultipleTrailingClosureElementList\n                      rightBrace \"}\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { () {\n{\nundefinedIdentifier\n{}\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          DeclReferenceExpr\\n                            identifier(\\\"undefinedIdentifier\\\") \\\"undefinedIdentifier\\\"\\n                        CodeBlockItem\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                            rightBrace \\\"}\\\"\\n                      rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":154,\"descriptorCount\":426,\"duplicateDescriptorCount\":0,\"oraclePruned\":151,\"parseSeconds\":0.006116032600402832,\"sourceLength\":40,\"suppressedDescriptorCount\":49,\"tokenCount\":11,\"yieldCount\":295},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          FunctionCallExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"undefinedIdentifier\\\") \\\"undefinedIdentifier\\\"\\n                            LabeledExprList\\n                            ClosureExpr\\n                              leftBrace \\\"{\\\"\\n                              CodeBlockItemList\\n                              rightBrace \\\"}\\\"\\n                            MultipleTrailingClosureElementList\\n                      rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

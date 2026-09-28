@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00002286-tree-difference-1d64bd888a8e98b0.json",
+    "durationSeconds" : 0.017972946166992188,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue+splice+line-comment:fuzz-harvest:constraint-suppressed",
+    "index" : 2286,
+    "seed" : 8709271582791740263,
+    "signalHash" : "38ea285abf7a0ea4",
+    "signalSummary" : "tree-difference|line=30|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "1d64bd888a8e98b0",
+    "sourceLength" : 49,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nstruct S<T: ~Copyable& B> \/\/ c\n {}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                StructDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                  identifier(\"S\") \"S\"\n                  GenericParameterClause\n                    leftAngle \"<\"\n                    GenericParameterList\n                      GenericParameter\n                        AttributeList\n                        identifier(\"T\") \"T\"\n                        colon \":\"\n                        CompositionType\n                          CompositionTypeElementList\n                            CompositionTypeElement\n                              IdentifierType\n                                identifier(\"Copyable\") \"Copyable\"\n                              binaryOperator(\"&\") \"&\"\n                            CompositionTypeElement\n                              IdentifierType\n                                identifier(\"B\") \"B\"\n                    rightAngle \">\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "structBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "protocolCompositionElement\t[ typeIdentifier]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[  >->(\"each\") genericParameterName \":\" >+>(\"Any\" \"protocol\" \"~\" escapedIdentifier identifier) >->(\"Self\" \"_\" \"repeat\") type]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 168,
+      "descriptorCount" : 342,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 58,
+      "parseSeconds" : 0.005462050437927246,
+      "sourceLength" : 42,
+      "suppressedDescriptorCount" : 20,
+      "tokenCount" : 15,
+      "yieldCount" : 171
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                StructDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                  identifier(\"S\") \"S\"\n                  GenericParameterClause\n                    leftAngle \"<\"\n                    GenericParameterList\n                      GenericParameter\n                        AttributeList\n                        identifier(\"T\") \"T\"\n                        colon \":\"\n                        CompositionType\n                          CompositionTypeElementList\n                            CompositionTypeElement\n                              IdentifierType\n                                identifier(\"Copyable\") \"Copyable\"\n                              postfixOperator(\"&\") \"&\"\n                            CompositionTypeElement\n                              IdentifierType\n                                identifier(\"B\") \"B\"\n                    rightAngle \">\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 45,
+  "source" : "#if FOO\nstruct S<T: Copyable& B>\n{}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                StructDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                  identifier(\\\"S\\\") \\\"S\\\"\\n                  GenericParameterClause\\n                    leftAngle \\\"<\\\"\\n                    GenericParameterList\\n                      GenericParameter\\n                        AttributeList\\n                        identifier(\\\"T\\\") \\\"T\\\"\\n                        colon \\\":\\\"\\n                        CompositionType\\n                          CompositionTypeElementList\\n                            CompositionTypeElement\\n                              IdentifierType\\n                                identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                              binaryOperator(\\\"&\\\") \\\"&\\\"\\n                            CompositionTypeElement\\n                              IdentifierType\\n                                identifier(\\\"B\\\") \\\"B\\\"\\n                    rightAngle \\\">\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"protocolCompositionElement\\t[ typeIdentifier]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[  >->(\\\"each\\\") genericParameterName \\\":\\\" >+>(\\\"Any\\\" \\\"protocol\\\" \\\"~\\\" escapedIdentifier identifier) >->(\\\"Self\\\" \\\"_\\\" \\\"repeat\\\") type]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":168,\"descriptorCount\":342,\"duplicateDescriptorCount\":0,\"oraclePruned\":58,\"parseSeconds\":0.005462050437927246,\"sourceLength\":42,\"suppressedDescriptorCount\":20,\"tokenCount\":15,\"yieldCount\":171},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                StructDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                  identifier(\\\"S\\\") \\\"S\\\"\\n                  GenericParameterClause\\n                    leftAngle \\\"<\\\"\\n                    GenericParameterList\\n                      GenericParameter\\n                        AttributeList\\n                        identifier(\\\"T\\\") \\\"T\\\"\\n                        colon \\\":\\\"\\n                        CompositionType\\n                          CompositionTypeElementList\\n                            CompositionTypeElement\\n                              IdentifierType\\n                                identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                              postfixOperator(\\\"&\\\") \\\"&\\\"\\n                            CompositionTypeElement\\n                              IdentifierType\\n                                identifier(\\\"B\\\") \\\"B\\\"\\n                    rightAngle \\\">\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

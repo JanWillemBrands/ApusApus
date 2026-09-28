@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00013154-advent-overaccept-2719f8485250dba8.json",
+    "durationSeconds" : 0.021851062774658203,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+space+space:expression:testKeyPathMethodAndInitializers#18",
+    "index" : 13154,
+    "seed" : 15755288686696214284,
+    "signalHash" : "033ad1dda4ddb22c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "2719f8485250dba8",
+    "sourceLength" : 50,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nlet _ = \\K .Type. init\n(val: 2025)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  AssignmentExpr\n                    equal \"=\"\n                  KeyPathExpr\n                    backslash \"\\\"\n                    KeyPathComponentList\n                      KeyPathComponent\n                        period \".\"\n                        KeyPathPropertyComponent\n                          DeclReferenceExpr\n                            keyword(SwiftSyntax.Keyword.init) \"init\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "keyPathExpressionStop\t[>->(keyPathDot keyPathMarkRunStart)]",
+      "regexForcingLexerKeyword\t[\"init\"]",
+      "memberName\t[regexForcingLexerKeyword >->(regexSlash)]",
+      "keyPathMemberName\t[ memberName]",
+      "keyPathProperty\t[\".\" >n< keyPathMemberName]",
+      "keyPathComponents\t[keyPathProperty  keyPathExpressionStop]",
+      "keyPathExpression\t[\"\\\\\" >+>(keyPathDot) keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 95,
+      "descriptorCount" : 235,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 108,
+      "parseSeconds" : 0.008537054061889648,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 9,
+      "yieldCount" : 209
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  AssignmentExpr\n                    equal \"=\"\n                  KeyPathExpr\n                    backslash \"\\\"\n                    KeyPathComponentList\n                      KeyPathComponent\n                        UnexpectedNodes\n                          period \".\"\n                        KeyPathPropertyComponent\n                          DeclReferenceExpr\n                            keyword(SwiftSyntax.Keyword.init) \"init\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : " () { _ = \\. init\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  KeyPathExpr\\n                    backslash \\\"\\\\\\\"\\n                    KeyPathComponentList\\n                      KeyPathComponent\\n                        period \\\".\\\"\\n                        KeyPathPropertyComponent\\n                          DeclReferenceExpr\\n                            keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"keyPathExpressionStop\\t[>->(keyPathDot keyPathMarkRunStart)]\",\"regexForcingLexerKeyword\\t[\\\"init\\\"]\",\"memberName\\t[regexForcingLexerKeyword >->(regexSlash)]\",\"keyPathMemberName\\t[ memberName]\",\"keyPathProperty\\t[\\\".\\\" >n< keyPathMemberName]\",\"keyPathComponents\\t[keyPathProperty  keyPathExpressionStop]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" >+>(keyPathDot) keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":95,\"descriptorCount\":235,\"duplicateDescriptorCount\":0,\"oraclePruned\":108,\"parseSeconds\":0.008537054061889648,\"sourceLength\":19,\"suppressedDescriptorCount\":27,\"tokenCount\":9,\"yieldCount\":209},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  KeyPathExpr\\n                    backslash \\\"\\\\\\\"\\n                    KeyPathComponentList\\n                      KeyPathComponent\\n                        UnexpectedNodes\\n                          period \\\".\\\"\\n                        KeyPathPropertyComponent\\n                          DeclReferenceExpr\\n                            keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

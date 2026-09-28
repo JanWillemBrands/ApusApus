@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00131372-advent-overaccept-012c3e6abcd5088f.json",
+    "durationSeconds" : 0.02160799503326416,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword+newline+block-comment:translated:testTupleTypeExpr#5",
+    "index" : 131372,
+    "seed" : 15755288686696214284,
+    "signalHash" : "42a09588705281ac",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/MemberAcc",
+    "sourceHash" : "012c3e6abcd5088f",
+    "sourceLength" : 34,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n(A.B, C\n.defer).\/*\n*\/self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            PostfixOperatorExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    MemberAccessExpr\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"defer\") \"defer\"\n                rightParen \")\"\n              postfixOperator(\".\/*\") \".\/*\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "postfixOperator\t[dotOperator]",
+      "regexForcingLexerKeyword\t[\"defer\"]",
+      "memberName\t[regexForcingLexerKeyword >->(regexSlash)]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperator <s>]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 93,
+      "descriptorCount" : 249,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 129,
+      "parseSeconds" : 0.005797982215881348,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 29,
+      "tokenCount" : 7,
+      "yieldCount" : 208
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    MemberAccessExpr\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"defer\") \"defer\"\n                rightParen \")\"\n              UnexpectedNodes\n                period \".\"\n              DeclReferenceExpr\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n(\n.defer).\/*\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            PostfixOperatorExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    MemberAccessExpr\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"defer\\\") \\\"defer\\\"\\n                rightParen \\\")\\\"\\n              postfixOperator(\\\".\\\/*\\\") \\\".\\\/*\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"postfixOperator\\t[dotOperator]\",\"regexForcingLexerKeyword\\t[\\\"defer\\\"]\",\"memberName\\t[regexForcingLexerKeyword >->(regexSlash)]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperator <s>]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":93,\"descriptorCount\":249,\"duplicateDescriptorCount\":0,\"oraclePruned\":129,\"parseSeconds\":0.005797982215881348,\"sourceLength\":17,\"suppressedDescriptorCount\":29,\"tokenCount\":7,\"yieldCount\":208},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    MemberAccessExpr\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"defer\\\") \\\"defer\\\"\\n                rightParen \\\")\\\"\\n              UnexpectedNodes\\n                period \\\".\\\"\\n              DeclReferenceExpr\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

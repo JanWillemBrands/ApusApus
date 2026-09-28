@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00088224-advent-overaccept-d44dd35b5a59b51d.json",
+    "durationSeconds" : 0.07387197017669678,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:raw:type:testNonisolatedSpecifier#8+reject:testConflictMarkers15#1",
+    "index" : 88224,
+    "seed" : 15755288686696214284,
+    "signalHash" : "a0b185c3266cfb08",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/FunctionC",
+    "sourceHash" : "d44dd35b5a59b51d",
+    "sourceLength" : 164,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\ntest(S<nonisolated(nonsending) () async -> Void>(), type(of: concurrentTest))\n>>>> ORIGINAL\n==== THEIRS\n==== YOURS\nvar d : String = \"D\"\n<<<<\nprint(d)\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    FunctionCallExpr\n                      DeclReferenceExpr\n                        identifier(\"test\") \"test\"\n                      leftParen \"(\"\n                      LabeledExprList\n                        LabeledExpr\n                          FunctionCallExpr\n                            FunctionCallExpr\n                              DeclReferenceExpr\n                                identifier(\"nonisolated\") \"nonisolated\"\n                              leftParen \"(\"\n                              LabeledExprList\n                                LabeledExpr\n                                  DeclReferenceExpr\n                                    identifier(\"nonsending\") \"nonsending\"\n                              rightParen \")\"\n                              MultipleTrailingClosureElementList\n                            leftParen \"(\"\n                            LabeledExprList\n                              LabeledExpr\n                                DeclReferenceExpr\n                                  identifier(\"of\") \"of\"\n                            rightParen \")\"\n                            MultipleTrailingClosureElementList\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                    BinaryOperatorExpr\n                      binaryOperator(\">>>>\") \">>>>\"\n                    DeclReferenceExpr\n                      identifier(\"ORIGINAL\") \"ORIGINAL\"\n                    BinaryOperatorExpr\n                      binaryOperator(\"<<<<\") \"<<<<\"\n                    FunctionCallExpr\n                      DeclReferenceExpr\n                        identifier(\"print\") \"print\"\n                      leftParen \"(\"\n                      LabeledExprList\n                        LabeledExpr\n                          DeclReferenceExpr\n                            identifier(\"d\") \"d\"\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "functionCallArgument\t[expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 352,
+      "descriptorCount" : 937,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 431,
+      "parseSeconds" : 0.011175990104675293,
+      "sourceLength" : 77,
+      "suppressedDescriptorCount" : 105,
+      "tokenCount" : 21,
+      "yieldCount" : 673
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"test\") \"test\"\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      TypeExpr\n                        AttributedType\n                          TypeSpecifierList\n                            NonisolatedTypeSpecifier\n                              keyword(SwiftSyntax.Keyword.nonisolated) \"nonisolated\"\n                              NonisolatedSpecifierArgument\n                                leftParen \"(\"\n                                keyword(SwiftSyntax.Keyword.nonsending) \"nonsending\"\n                                rightParen \")\"\n                          AttributeList\n                          TypeSpecifierList\n                          TupleType\n                            leftParen \"(\"\n                            TupleTypeElementList\n                              TupleTypeElement\n                                IdentifierType\n                                  identifier(\"of\") \"of\"\n                            rightParen \")\"\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "#if FOO\ntest(nonisolated(nonsending) (of))\n>>>> ORIGINAL\n<<<<\nprint(d)\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    FunctionCallExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"test\\\") \\\"test\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                        LabeledExpr\\n                          FunctionCallExpr\\n                            FunctionCallExpr\\n                              DeclReferenceExpr\\n                                identifier(\\\"nonisolated\\\") \\\"nonisolated\\\"\\n                              leftParen \\\"(\\\"\\n                              LabeledExprList\\n                                LabeledExpr\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"nonsending\\\") \\\"nonsending\\\"\\n                              rightParen \\\")\\\"\\n                              MultipleTrailingClosureElementList\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                              LabeledExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"of\\\") \\\"of\\\"\\n                            rightParen \\\")\\\"\\n                            MultipleTrailingClosureElementList\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\">>>>\\\") \\\">>>>\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"ORIGINAL\\\") \\\"ORIGINAL\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\"<<<<\\\") \\\"<<<<\\\"\\n                    FunctionCallExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"print\\\") \\\"print\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                        LabeledExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"d\\\") \\\"d\\\"\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"functionCallArgument\\t[expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":352,\"descriptorCount\":937,\"duplicateDescriptorCount\":0,\"oraclePruned\":431,\"parseSeconds\":0.011175990104675293,\"sourceLength\":77,\"suppressedDescriptorCount\":105,\"tokenCount\":21,\"yieldCount\":673},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"test\\\") \\\"test\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      TypeExpr\\n                        AttributedType\\n                          TypeSpecifierList\\n                            NonisolatedTypeSpecifier\\n                              keyword(SwiftSyntax.Keyword.nonisolated) \\\"nonisolated\\\"\\n                              NonisolatedSpecifierArgument\\n                                leftParen \\\"(\\\"\\n                                keyword(SwiftSyntax.Keyword.nonsending) \\\"nonsending\\\"\\n                                rightParen \\\")\\\"\\n                          AttributeList\\n                          TypeSpecifierList\\n                          TupleType\\n                            leftParen \\\"(\\\"\\n                            TupleTypeElementList\\n                              TupleTypeElement\\n                                IdentifierType\\n                                  identifier(\\\"of\\\") \\\"of\\\"\\n                            rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

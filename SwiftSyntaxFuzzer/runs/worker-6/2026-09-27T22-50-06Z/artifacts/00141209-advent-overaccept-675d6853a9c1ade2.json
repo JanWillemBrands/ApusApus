@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00141209-advent-overaccept-675d6853a9c1ade2.json",
+    "durationSeconds" : 0.04120802879333496,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline+glue+keyword:attribute:testDifferentiableAttribute#1",
+    "index" : 141209,
+    "seed" : 6018003910102630304,
+    "signalHash" : "b78dee2aa114d52b",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "675d6853a9c1ade2",
+    "sourceLength" : 131,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\nfunc f(in: @differentiable(reverse) (Int) -> Int) { }\nfunc f\n(in: @differentiable(override, wrt: a) (Int) -> Int) {}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      identifier(\"in\") \"in\"\n                      colon \":\"\n                      TypeExpr\n                        AttributedType\n                          TypeSpecifierList\n                          AttributeList\n                            Attribute\n                              atSign \"@\"\n                              IdentifierType\n                                identifier(\"differentiable\") \"differentiable\"\n                              leftParen \"(\"\n                              DifferentiableAttributeArguments\n                                identifier(\"override\") \"override\"\n                                comma \",\"\n                                DifferentiabilityWithRespectToArgument\n                                  keyword(SwiftSyntax.Keyword.wrt) \"wrt\"\n                                  colon \":\"\n                                  DifferentiabilityArgument\n                                    identifier(\"a\") \"a\"\n                              rightParen \")\"\n                          TypeSpecifierList\n                          FunctionType\n                            leftParen \"(\"\n                            TupleTypeElementList\n                            rightParen \")\"\n                            ReturnClause\n                              arrow \"->\"\n                              IdentifierType\n                                identifier(\"Int\") \"Int\"\n                  rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "functionTypeArgumentClause\t[\"(\" \")\"]",
+      "functionType\t[functionTypeArgumentClause   \"->\" type]",
+      "type\t[functionType]",
+      "differentiabilityArgument\t[identifierToken]",
+      "differentiableWrt\t[\"wrt\" \":\" differentiabilityArgument]",
+      "differentiableKind\t[identifierToken]",
+      "differentiableArguments\t[differentiableKind \",\" differentiableWrt]",
+      "attribute\t[\"@\" >s< \"differentiable\" >s< \"(\" differentiableArguments \")\"]",
+      "primaryExpression\t[attribute type]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "argumentLabel\t[identifier]",
+      "tupleExpression\t[\"(\" argumentLabel \":\" expression  \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 223,
+      "descriptorCount" : 574,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 247,
+      "parseSeconds" : 0.04721701145172119,
+      "sourceLength" : 64,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 21,
+      "yieldCount" : 365
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      identifier(\"in\") \"in\"\n                      colon \":\"\n                      TypeExpr\n                        AttributedType\n                          TypeSpecifierList\n                          AttributeList\n                            Attribute\n                              atSign \"@\"\n                              IdentifierType\n                                identifier(\"differentiable\") \"differentiable\"\n                              leftParen \"(\"\n                              DifferentiableAttributeArguments\n                              UnexpectedNodes\n                                identifier(\"override\") \"override\"\n                                comma \",\"\n                                identifier(\"wrt\") \"wrt\"\n                                colon \":\"\n                                identifier(\"a\") \"a\"\n                              rightParen \")\"\n                          TypeSpecifierList\n                          FunctionType\n                            leftParen \"(\"\n                            TupleTypeElementList\n                            rightParen \")\"\n                            ReturnClause\n                              arrow \"->\"\n                              IdentifierType\n                                identifier(\"Int\") \"Int\"\n                  rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "#if FOO\n(in: @differentiable(override, wrt: a) () -> Int)\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      identifier(\\\"in\\\") \\\"in\\\"\\n                      colon \\\":\\\"\\n                      TypeExpr\\n                        AttributedType\\n                          TypeSpecifierList\\n                          AttributeList\\n                            Attribute\\n                              atSign \\\"@\\\"\\n                              IdentifierType\\n                                identifier(\\\"differentiable\\\") \\\"differentiable\\\"\\n                              leftParen \\\"(\\\"\\n                              DifferentiableAttributeArguments\\n                                identifier(\\\"override\\\") \\\"override\\\"\\n                                comma \\\",\\\"\\n                                DifferentiabilityWithRespectToArgument\\n                                  keyword(SwiftSyntax.Keyword.wrt) \\\"wrt\\\"\\n                                  colon \\\":\\\"\\n                                  DifferentiabilityArgument\\n                                    identifier(\\\"a\\\") \\\"a\\\"\\n                              rightParen \\\")\\\"\\n                          TypeSpecifierList\\n                          FunctionType\\n                            leftParen \\\"(\\\"\\n                            TupleTypeElementList\\n                            rightParen \\\")\\\"\\n                            ReturnClause\\n                              arrow \\\"->\\\"\\n                              IdentifierType\\n                                identifier(\\\"Int\\\") \\\"Int\\\"\\n                  rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"functionTypeArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionType\\t[functionTypeArgumentClause   \\\"->\\\" type]\",\"type\\t[functionType]\",\"differentiabilityArgument\\t[identifierToken]\",\"differentiableWrt\\t[\\\"wrt\\\" \\\":\\\" differentiabilityArgument]\",\"differentiableKind\\t[identifierToken]\",\"differentiableArguments\\t[differentiableKind \\\",\\\" differentiableWrt]\",\"attribute\\t[\\\"@\\\" >s< \\\"differentiable\\\" >s< \\\"(\\\" differentiableArguments \\\")\\\"]\",\"primaryExpression\\t[attribute type]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"argumentLabel\\t[identifier]\",\"tupleExpression\\t[\\\"(\\\" argumentLabel \\\":\\\" expression  \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":223,\"descriptorCount\":574,\"duplicateDescriptorCount\":1,\"oraclePruned\":247,\"parseSeconds\":0.04721701145172119,\"sourceLength\":64,\"suppressedDescriptorCount\":47,\"tokenCount\":21,\"yieldCount\":365},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      identifier(\\\"in\\\") \\\"in\\\"\\n                      colon \\\":\\\"\\n                      TypeExpr\\n                        AttributedType\\n                          TypeSpecifierList\\n                          AttributeList\\n                            Attribute\\n                              atSign \\\"@\\\"\\n                              IdentifierType\\n                                identifier(\\\"differentiable\\\") \\\"differentiable\\\"\\n                              leftParen \\\"(\\\"\\n                              DifferentiableAttributeArguments\\n                              UnexpectedNodes\\n                                identifier(\\\"override\\\") \\\"override\\\"\\n                                comma \\\",\\\"\\n                                identifier(\\\"wrt\\\") \\\"wrt\\\"\\n                                colon \\\":\\\"\\n                                identifier(\\\"a\\\") \\\"a\\\"\\n                              rightParen \\\")\\\"\\n                          TypeSpecifierList\\n                          FunctionType\\n                            leftParen \\\"(\\\"\\n                            TupleTypeElementList\\n                            rightParen \\\")\\\"\\n                            ReturnClause\\n                              arrow \\\"->\\\"\\n                              IdentifierType\\n                                identifier(\\\"Int\\\") \\\"Int\\\"\\n                  rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

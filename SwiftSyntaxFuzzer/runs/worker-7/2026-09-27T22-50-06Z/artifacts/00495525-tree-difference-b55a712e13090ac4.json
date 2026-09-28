@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00495525-tree-difference-b55a712e13090ac4.json",
+    "durationSeconds" : 0.10923600196838379,
+    "exitCode" : 1,
+    "generator" : "wide:top:block-comment+newline:translated:testStillAbleToCallFunctionCalledCopy#1+expression:testTypedThrowsDisambiguation#3",
+    "index" : 495525,
+    "seed" : 17418700093595237275,
+    "signalHash" : "435920891a823bd6",
+    "signalSummary" : "tree-difference|line=244|ref=SequenceExpr|advent=GenericSpecializationExpr",
+    "sourceHash" : "b55a712e13090ac4",
+    "sourceLength" : 540,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func copy() {}\nfunc copy(_: String) {}\nfunc copy(_: String, _: Int) {}\nfunc copy(x: String, y: Int) {}\n\nfunc useCopyFunc() {\n    var s = String()\n    var i = global\n\n    copy \/* c *\/ ()\n    copy(s)\n    copy(i) \/\/ expected-error{{cannot convert value of type 'Int' to expected argument type 'String'}}\n    copy(s, i)\n    copy(i, s) \/\/ expected-error{{unnamed argument #2 must precede unnamed argument #1}}\n    copy(x: s, y: i)\n    copy(y: i, x: s) \/\/ expected-error{{argument 'x' must precede argument 'y'}}\n}\nX<() throws(MyError) -> Int>\n()",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GenericSpecializationExpr\n        DeclReferenceExpr\n          identifier(\"X\") \"X\"\n        GenericArgumentClause\n          leftAngle \"<\"\n          GenericArgumentList\n            GenericArgument\n              FunctionType\n                leftParen \"(\"\n                TupleTypeElementList\n                rightParen \")\"\n                TypeEffectSpecifiers\n                  ThrowsClause\n                    keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                    leftParen \"(\"\n                    IdentifierType\n                      identifier(\"MyError\") \"MyError\"\n                    rightParen \")\"\n                ReturnClause\n                  arrow \"->\"\n                  IdentifierType\n                    identifier(\"Int\") \"Int\"\n          rightAngle \">\"\n    CodeBlockItem\n      TupleExpr\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "functionTypeArgumentClause\t[\"(\" \")\"]",
+      "functionType\t[functionTypeArgumentClause   \"->\" type]",
+      "type\t[functionType]",
+      "genericArgument\t[type]",
+      "genericArgumentList\t[genericArgument ]",
+      "genericArgumentClause\t[openAngle genericArgumentList  closeAngle >+>(\"!\" \"&\" \"(\" \")\" \",\" \".\" \":\" \";\" \"?\" \"[\" \"]\" \"{\" \"}\" keyPathDot ○)]",
+      ".OPT\t[genericArgumentClause]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 182,
+      "descriptorCount" : 519,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 336,
+      "parseSeconds" : 0.012195944786071777,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 60,
+      "tokenCount" : 13,
+      "yieldCount" : 435
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SequenceExpr\n        ExprList\n          DeclReferenceExpr\n            identifier(\"X\") \"X\"\n          BinaryOperatorExpr\n            binaryOperator(\"<\") \"<\"\n          TupleExpr\n            leftParen \"(\"\n            LabeledExprList\n            rightParen \")\"\n          ArrowExpr\n            TypeEffectSpecifiers\n              ThrowsClause\n                keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                leftParen \"(\"\n                IdentifierType\n                  identifier(\"MyError\") \"MyError\"\n                rightParen \")\"\n            arrow \"->\"\n          PostfixOperatorExpr\n            DeclReferenceExpr\n              identifier(\"Int\") \"Int\"\n            postfixOperator(\">\") \">\"\n    CodeBlockItem\n      TupleExpr\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "\nX<() throws(MyError) -> Int>\n()",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GenericSpecializationExpr\\n        DeclReferenceExpr\\n          identifier(\\\"X\\\") \\\"X\\\"\\n        GenericArgumentClause\\n          leftAngle \\\"<\\\"\\n          GenericArgumentList\\n            GenericArgument\\n              FunctionType\\n                leftParen \\\"(\\\"\\n                TupleTypeElementList\\n                rightParen \\\")\\\"\\n                TypeEffectSpecifiers\\n                  ThrowsClause\\n                    keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                    leftParen \\\"(\\\"\\n                    IdentifierType\\n                      identifier(\\\"MyError\\\") \\\"MyError\\\"\\n                    rightParen \\\")\\\"\\n                ReturnClause\\n                  arrow \\\"->\\\"\\n                  IdentifierType\\n                    identifier(\\\"Int\\\") \\\"Int\\\"\\n          rightAngle \\\">\\\"\\n    CodeBlockItem\\n      TupleExpr\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"functionTypeArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionType\\t[functionTypeArgumentClause   \\\"->\\\" type]\",\"type\\t[functionType]\",\"genericArgument\\t[type]\",\"genericArgumentList\\t[genericArgument ]\",\"genericArgumentClause\\t[openAngle genericArgumentList  closeAngle >+>(\\\"!\\\" \\\"&\\\" \\\"(\\\" \\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"?\\\" \\\"[\\\" \\\"]\\\" \\\"{\\\" \\\"}\\\" keyPathDot ○)]\",\".OPT\\t[genericArgumentClause]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":182,\"descriptorCount\":519,\"duplicateDescriptorCount\":1,\"oraclePruned\":336,\"parseSeconds\":0.012195944786071777,\"sourceLength\":32,\"suppressedDescriptorCount\":60,\"tokenCount\":13,\"yieldCount\":435},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SequenceExpr\\n        ExprList\\n          DeclReferenceExpr\\n            identifier(\\\"X\\\") \\\"X\\\"\\n          BinaryOperatorExpr\\n            binaryOperator(\\\"<\\\") \\\"<\\\"\\n          TupleExpr\\n            leftParen \\\"(\\\"\\n            LabeledExprList\\n            rightParen \\\")\\\"\\n          ArrowExpr\\n            TypeEffectSpecifiers\\n              ThrowsClause\\n                keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                leftParen \\\"(\\\"\\n                IdentifierType\\n                  identifier(\\\"MyError\\\") \\\"MyError\\\"\\n                rightParen \\\")\\\"\\n            arrow \\\"->\\\"\\n          PostfixOperatorExpr\\n            DeclReferenceExpr\\n              identifier(\\\"Int\\\") \\\"Int\\\"\\n            postfixOperator(\\\">\\\") \\\">\\\"\\n    CodeBlockItem\\n      TupleExpr\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

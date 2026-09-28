@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00293878-tree-difference-86af825f90719259.json",
+    "durationSeconds" : 0.10284900665283203,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:raw:translated:testOptionalChainLvalues1#1+declaration:testBorrowAndMutateAccessors#1",
+    "index" : 293878,
+    "seed" : 17418700093595237275,
+    "signalHash" : "fcf151e4aefbaafe",
+    "signalSummary" : "tree-difference|line=142|ref=AccessorDecl|advent=rightBrace",
+    "sourceHash" : "86af825f90719259",
+    "sourceLength" : 380,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "struct S {\n  var x: Int = 0\n  let y: Int = 0  \/\/ expected-note 3 {{change 'let' to 'var' to make it mutable}} {{3-6=var}} {{3-6=var}} {{3-6=var}}\n  mutating func mutateS() {}\n  init() {}\n}\npublic class Klass {}\n\npublic struct Wrapper {\n  var _otherK: Klass\n\n  var k1: Klass {\n    borrow {\n      return _otherK\n    }\n    mutate {\n      return &_otherK\n    }\n  }\n}\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"Klass\") \"Klass\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    AccessorDeclList\n                      AccessorDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.borrow) \"borrow\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in appendAccessorEntry(_:into:): experimental coroutine accessor 'mutate' not converted — «mutate {\n    }\n  »"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "coroutineSpecifier\t[\"mutate\"]",
+      "coroutineAccessorClause\t[  coroutineSpecifier  codeBlock]",
+      "accessorClauseEntryNoInit\t[coroutineAccessorClause]",
+      "accessorClauseListNoInit\t[accessorClauseEntryNoInit ]",
+      ".OPT\t[accessorClauseListNoInit]",
+      "coroutineSpecifier\t[\"borrow\"]",
+      "initializedAccessorBlock\t[\"{\" accessorClauseListNoInit \"}\"]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 186,
+      "descriptorCount" : 506,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 293,
+      "parseSeconds" : 0.006193041801452637,
+      "sourceLength" : 60,
+      "suppressedDescriptorCount" : 57,
+      "tokenCount" : 12,
+      "yieldCount" : 390
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"Klass\") \"Klass\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    AccessorDeclList\n                      AccessorDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.borrow) \"borrow\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                      AccessorDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.mutate) \"mutate\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n  var Klass {\n    borrow {\n    }\n    mutate {\n    }\n  }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"Klass\\\") \\\"Klass\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    AccessorDeclList\\n                      AccessorDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.borrow) \\\"borrow\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in appendAccessorEntry(_:into:): experimental coroutine accessor 'mutate' not converted — «mutate {\\n    }\\n  »\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"coroutineSpecifier\\t[\\\"mutate\\\"]\",\"coroutineAccessorClause\\t[  coroutineSpecifier  codeBlock]\",\"accessorClauseEntryNoInit\\t[coroutineAccessorClause]\",\"accessorClauseListNoInit\\t[accessorClauseEntryNoInit ]\",\".OPT\\t[accessorClauseListNoInit]\",\"coroutineSpecifier\\t[\\\"borrow\\\"]\",\"initializedAccessorBlock\\t[\\\"{\\\" accessorClauseListNoInit \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":186,\"descriptorCount\":506,\"duplicateDescriptorCount\":0,\"oraclePruned\":293,\"parseSeconds\":0.006193041801452637,\"sourceLength\":60,\"suppressedDescriptorCount\":57,\"tokenCount\":12,\"yieldCount\":390},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"Klass\\\") \\\"Klass\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    AccessorDeclList\\n                      AccessorDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.borrow) \\\"borrow\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                      AccessorDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.mutate) \\\"mutate\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00437062-tree-difference-3bfafd651ff0f7c4.json",
+    "durationSeconds" : 0.049745917320251465,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:delete+glue+splice:expression:testTryIf2#1",
+    "index" : 437062,
+    "seed" : 13064011101222712141,
+    "signalHash" : "57e363219a99c26b",
+    "signalSummary" : "tree-difference|line=40|ref=FunctionCallExpr|advent=MemberAccessExpr",
+    "sourceHash" : "3bfafd651ff0f7c4",
+    "sourceLength" : 77,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "extension Fuzz {\nfunc foo() -> OSX {\n  return try if.random() { 0 } { 1 }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"foo\") \"foo\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n                ArrowExpr\n                  arrow \"->\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      ExpressionStmt\n                        IfExpr\n                          keyword(SwiftSyntax.Keyword.if) \"if\"\n                          ConditionElementList\n                            ConditionElement\n                              FunctionCallExpr\n                                MemberAccessExpr\n                                  period \".\"\n                                  DeclReferenceExpr\n                                    identifier(\"random\") \"random\"\n                                leftParen \"(\"\n                                LabeledExprList\n                                rightParen \")\"\n                                ClosureExpr\n                                  leftBrace \"{\"\n                                  CodeBlockItemList\n                                  rightBrace \"}\"\n                                MultipleTrailingClosureElementList\n                          CodeBlock\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                            rightBrace \"}\"\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "conditionExpression\t[  prefixExpression ]",
+      "condition\t[conditionExpression]",
+      "conditionList\t[condition ]",
+      "ifExpression\t[\"if\" >->(\"{\") conditionList codeBlock ]",
+      "conditionalExpression\t[ifExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "expression\t[  prefixExpression ]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 178,
+      "descriptorCount" : 497,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 280,
+      "parseSeconds" : 0.00677490234375,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 61,
+      "tokenCount" : 17,
+      "yieldCount" : 436
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"foo\") \"foo\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n                ArrowExpr\n                  arrow \"->\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      ExpressionStmt\n                        IfExpr\n                          keyword(SwiftSyntax.Keyword.if) \"if\"\n                          ConditionElementList\n                            ConditionElement\n                              FunctionCallExpr\n                                FunctionCallExpr\n                                  MemberAccessExpr\n                                    period \".\"\n                                    DeclReferenceExpr\n                                      identifier(\"random\") \"random\"\n                                  leftParen \"(\"\n                                  LabeledExprList\n                                  rightParen \")\"\n                                  MultipleTrailingClosureElementList\n                                LabeledExprList\n                                ClosureExpr\n                                  leftBrace \"{\"\n                                  CodeBlockItemList\n                                  rightBrace \"}\"\n                                MultipleTrailingClosureElementList\n                          CodeBlock\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                            rightBrace \"}\"\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { foo() -> { if.random() { } { }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"foo\\\") \\\"foo\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      ExpressionStmt\\n                        IfExpr\\n                          keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                          ConditionElementList\\n                            ConditionElement\\n                              FunctionCallExpr\\n                                MemberAccessExpr\\n                                  period \\\".\\\"\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"random\\\") \\\"random\\\"\\n                                leftParen \\\"(\\\"\\n                                LabeledExprList\\n                                rightParen \\\")\\\"\\n                                ClosureExpr\\n                                  leftBrace \\\"{\\\"\\n                                  CodeBlockItemList\\n                                  rightBrace \\\"}\\\"\\n                                MultipleTrailingClosureElementList\\n                          CodeBlock\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                            rightBrace \\\"}\\\"\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"conditionExpression\\t[  prefixExpression ]\",\"condition\\t[conditionExpression]\",\"conditionList\\t[condition ]\",\"ifExpression\\t[\\\"if\\\" >->(\\\"{\\\") conditionList codeBlock ]\",\"conditionalExpression\\t[ifExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"expression\\t[  prefixExpression ]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":178,\"descriptorCount\":497,\"duplicateDescriptorCount\":0,\"oraclePruned\":280,\"parseSeconds\":0.00677490234375,\"sourceLength\":37,\"suppressedDescriptorCount\":61,\"tokenCount\":17,\"yieldCount\":436},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"foo\\\") \\\"foo\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      ExpressionStmt\\n                        IfExpr\\n                          keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                          ConditionElementList\\n                            ConditionElement\\n                              FunctionCallExpr\\n                                FunctionCallExpr\\n                                  MemberAccessExpr\\n                                    period \\\".\\\"\\n                                    DeclReferenceExpr\\n                                      identifier(\\\"random\\\") \\\"random\\\"\\n                                  leftParen \\\"(\\\"\\n                                  LabeledExprList\\n                                  rightParen \\\")\\\"\\n                                  MultipleTrailingClosureElementList\\n                                LabeledExprList\\n                                ClosureExpr\\n                                  leftBrace \\\"{\\\"\\n                                  CodeBlockItemList\\n                                  rightBrace \\\"}\\\"\\n                                MultipleTrailingClosureElementList\\n                          CodeBlock\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                            rightBrace \\\"}\\\"\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

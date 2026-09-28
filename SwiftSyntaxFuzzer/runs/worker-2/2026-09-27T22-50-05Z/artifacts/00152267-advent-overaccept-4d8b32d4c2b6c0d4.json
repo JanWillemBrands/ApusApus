@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00152267-advent-overaccept-4d8b32d4c2b6c0d4.json",
+    "durationSeconds" : 0.03203105926513672,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:line-comment+line-comment+line-comment:phase4-ifconfig:if-member-list",
+    "index" : 152267,
+    "seed" : 15755288686696214284,
+    "signalHash" : "bdc241835bc10c8f",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/StructDec",
+    "sourceHash" : "4d8b32d4c2b6c0d4",
+    "sourceLength" : 102,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n \/\/ c\nstruct Fuzz {\nlet a = 1\n#if \/\/ c\n DEBUG\nlet b = 2\n#endif\n#warning(\"seed\") \/\/ c\n\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                StructDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                  identifier(\"Fuzz\") \"Fuzz\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                      MemberBlockItem\n                        IfConfigDecl\n                          IfConfigClauseList\n                            IfConfigClause\n                              poundIf \"#if\"\n                              DeclReferenceExpr\n                                identifier(\"DEBUG\") \"DEBUG\"\n                              MemberBlockItemList\n                          poundEndif \"#endif\"\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "memberIfDirectiveClause\t[ifDirective compilationCondition <n> ]",
+      "memberConditionalCompilationBlock\t[memberIfDirectiveClause   endifDirective]",
+      "memberCompilerControlStatement\t[memberConditionalCompilationBlock]",
+      "structMember\t[memberCompilerControlStatement]",
+      "structMembers\t[structMember ]",
+      ".OPT\t[structMembers]",
+      "structBody\t[\"{\"  \"}\"]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 207,
+      "descriptorCount" : 402,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 78,
+      "parseSeconds" : 0.005920052528381348,
+      "sourceLength" : 47,
+      "suppressedDescriptorCount" : 31,
+      "tokenCount" : 12,
+      "yieldCount" : 163
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                StructDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                  identifier(\"Fuzz\") \"Fuzz\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                      MemberBlockItem\n                        IfConfigDecl\n                          IfConfigClauseList\n                            IfConfigClause\n                              poundIf \"#if\"\n                              MissingExpr\n                              MemberBlockItemList\n                                MemberBlockItem\n                                  UnexpectedCodeDecl\n                                    UnexpectedNodes\n                                      identifier(\"DEBUG\") \"DEBUG\"\n                          poundEndif \"#endif\"\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : "#if FOO\nstruct Fuzz {\n#if\nDEBUG\n#endif\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                StructDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                  identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                      MemberBlockItem\\n                        IfConfigDecl\\n                          IfConfigClauseList\\n                            IfConfigClause\\n                              poundIf \\\"#if\\\"\\n                              DeclReferenceExpr\\n                                identifier(\\\"DEBUG\\\") \\\"DEBUG\\\"\\n                              MemberBlockItemList\\n                          poundEndif \\\"#endif\\\"\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"memberIfDirectiveClause\\t[ifDirective compilationCondition <n> ]\",\"memberConditionalCompilationBlock\\t[memberIfDirectiveClause   endifDirective]\",\"memberCompilerControlStatement\\t[memberConditionalCompilationBlock]\",\"structMember\\t[memberCompilerControlStatement]\",\"structMembers\\t[structMember ]\",\".OPT\\t[structMembers]\",\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":207,\"descriptorCount\":402,\"duplicateDescriptorCount\":0,\"oraclePruned\":78,\"parseSeconds\":0.005920052528381348,\"sourceLength\":47,\"suppressedDescriptorCount\":31,\"tokenCount\":12,\"yieldCount\":163},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                StructDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                  identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                      MemberBlockItem\\n                        IfConfigDecl\\n                          IfConfigClauseList\\n                            IfConfigClause\\n                              poundIf \\\"#if\\\"\\n                              MissingExpr\\n                              MemberBlockItemList\\n                                MemberBlockItem\\n                                  UnexpectedCodeDecl\\n                                    UnexpectedNodes\\n                                      identifier(\\\"DEBUG\\\") \\\"DEBUG\\\"\\n                          poundEndif \\\"#endif\\\"\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

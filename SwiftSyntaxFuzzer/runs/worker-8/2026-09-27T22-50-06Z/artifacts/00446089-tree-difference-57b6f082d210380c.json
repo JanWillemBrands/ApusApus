@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00446089-tree-difference-57b6f082d210380c.json",
+    "durationSeconds" : 0.04506397247314453,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:keyword:declaration:testAccessorBlockAfterPatternBindingDeclWithAttribute#1",
+    "index" : 446089,
+    "seed" : 10372684106311075726,
+    "signalHash" : "c3f0ebf891ac0052",
+    "signalSummary" : "tree-difference|line=48|ref=PlatformVersion|advent=identifier()",
+    "sourceHash" : "57b6f082d210380c",
+    "sourceLength" : 71,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "struct Fuzz {\nvar x: Int = foo()\n{\n  @available(*, set)\n  didSet {}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"x\") \"x\"\n                  TypeAnnotation\n                    colon \":\"\n                    TupleType\n                      leftParen \"(\"\n                      TupleTypeElementList\n                      rightParen \")\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    AccessorDeclList\n                      AccessorDecl\n                        AttributeList\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"available\") \"available\"\n                            leftParen \"(\"\n                            AvailabilityArgumentList\n                              AvailabilityArgument\n                                binaryOperator(\"*\") \"*\"\n                                comma \",\"\n                              AvailabilityArgument\n                                identifier(\"set\") \"set\"\n                            rightParen \")\"\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.didSet) \"didSet\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "platformName\t[identifierToken]",
+      "availabilityAttributeArgument\t[platformName ]",
+      ".KLN\t[\",\" availabilityAttributeArgument]",
+      "availabilityAttributeArgument\t[\"*\"]",
+      "availabilityAttributeArguments\t[availabilityAttributeArgument ]",
+      "availableAttribute\t[\"@\" >s< \"available\" >s< \"(\" availabilityAttributeArguments \")\"]",
+      "attribute\t[availableAttribute]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "didSetClause\t[ \"didSet\"   codeBlock]",
+      "willSetDidSetBlock\t[\"{\" didSetClause  \"}\"]",
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      "variableName\t[identifierToken]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead variableName typeAnnotation  willSetDidSetBlock]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 233,
+      "descriptorCount" : 603,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 333,
+      "parseSeconds" : 0.012958049774169922,
+      "sourceLength" : 51,
+      "suppressedDescriptorCount" : 76,
+      "tokenCount" : 19,
+      "yieldCount" : 437
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"x\") \"x\"\n                  TypeAnnotation\n                    colon \":\"\n                    TupleType\n                      leftParen \"(\"\n                      TupleTypeElementList\n                      rightParen \")\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    AccessorDeclList\n                      AccessorDecl\n                        AttributeList\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"available\") \"available\"\n                            leftParen \"(\"\n                            AvailabilityArgumentList\n                              AvailabilityArgument\n                                binaryOperator(\"*\") \"*\"\n                                comma \",\"\n                              AvailabilityArgument\n                                PlatformVersion\n                                  identifier(\"set\") \"set\"\n                            rightParen \")\"\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.didSet) \"didSet\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nvar x: ()\n{\n  @available(*, set)\n  didSet {}\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    TupleType\\n                      leftParen \\\"(\\\"\\n                      TupleTypeElementList\\n                      rightParen \\\")\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    AccessorDeclList\\n                      AccessorDecl\\n                        AttributeList\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"available\\\") \\\"available\\\"\\n                            leftParen \\\"(\\\"\\n                            AvailabilityArgumentList\\n                              AvailabilityArgument\\n                                binaryOperator(\\\"*\\\") \\\"*\\\"\\n                                comma \\\",\\\"\\n                              AvailabilityArgument\\n                                identifier(\\\"set\\\") \\\"set\\\"\\n                            rightParen \\\")\\\"\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.didSet) \\\"didSet\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"platformName\\t[identifierToken]\",\"availabilityAttributeArgument\\t[platformName ]\",\".KLN\\t[\\\",\\\" availabilityAttributeArgument]\",\"availabilityAttributeArgument\\t[\\\"*\\\"]\",\"availabilityAttributeArguments\\t[availabilityAttributeArgument ]\",\"availableAttribute\\t[\\\"@\\\" >s< \\\"available\\\" >s< \\\"(\\\" availabilityAttributeArguments \\\")\\\"]\",\"attribute\\t[availableAttribute]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"didSetClause\\t[ \\\"didSet\\\"   codeBlock]\",\"willSetDidSetBlock\\t[\\\"{\\\" didSetClause  \\\"}\\\"]\",\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\"variableName\\t[identifierToken]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead variableName typeAnnotation  willSetDidSetBlock]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":233,\"descriptorCount\":603,\"duplicateDescriptorCount\":0,\"oraclePruned\":333,\"parseSeconds\":0.012958049774169922,\"sourceLength\":51,\"suppressedDescriptorCount\":76,\"tokenCount\":19,\"yieldCount\":437},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    TupleType\\n                      leftParen \\\"(\\\"\\n                      TupleTypeElementList\\n                      rightParen \\\")\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    AccessorDeclList\\n                      AccessorDecl\\n                        AttributeList\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"available\\\") \\\"available\\\"\\n                            leftParen \\\"(\\\"\\n                            AvailabilityArgumentList\\n                              AvailabilityArgument\\n                                binaryOperator(\\\"*\\\") \\\"*\\\"\\n                                comma \\\",\\\"\\n                              AvailabilityArgument\\n                                PlatformVersion\\n                                  identifier(\\\"set\\\") \\\"set\\\"\\n                            rightParen \\\")\\\"\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.didSet) \\\"didSet\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

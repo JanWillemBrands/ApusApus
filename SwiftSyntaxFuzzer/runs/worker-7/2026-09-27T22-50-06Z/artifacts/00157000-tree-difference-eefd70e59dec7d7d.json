@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00157000-tree-difference-eefd70e59dec7d7d.json",
+    "durationSeconds" : 0.03274202346801758,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:keyword:type:testInverseTypes#8",
+    "index" : 157000,
+    "seed" : 17418700093595237275,
+    "signalHash" : "0ea55a86e8931560",
+    "signalSummary" : "tree-difference|line=11|ref=FunctionCallExpr|advent=SequenceExpr",
+    "sourceHash" : "eefd70e59dec7d7d",
+    "sourceLength" : 37,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nX<any _ & ~Copyable>()\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    DeclReferenceExpr\n                      identifier(\"X\") \"X\"\n                    BinaryOperatorExpr\n                      binaryOperator(\"<\") \"<\"\n                    TypeExpr\n                      SomeOrAnyType\n                        keyword(SwiftSyntax.Keyword.any) \"any\"\n                        IdentifierType\n                          wildcard \"_\"\n                    BinaryOperatorExpr\n                      binaryOperator(\"&\") \"&\"\n                    DeclReferenceExpr\n                      identifier(\"Copyable\") \"Copyable\"\n                    BinaryOperatorExpr\n                      binaryOperator(\">\") \">\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "infixOperator\t[\"&\"]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "placeholderType\t[\"_\"]",
+      "type\t[placeholderType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 252,
+      "descriptorCount" : 637,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 259,
+      "parseSeconds" : 0.008244037628173828,
+      "sourceLength" : 36,
+      "suppressedDescriptorCount" : 51,
+      "tokenCount" : 13,
+      "yieldCount" : 391
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                FunctionCallExpr\n                  GenericSpecializationExpr\n                    DeclReferenceExpr\n                      identifier(\"X\") \"X\"\n                    GenericArgumentClause\n                      leftAngle \"<\"\n                      GenericArgumentList\n                        GenericArgument\n                          SomeOrAnyType\n                            keyword(SwiftSyntax.Keyword.any) \"any\"\n                            CompositionType\n                              CompositionTypeElementList\n                                CompositionTypeElement\n                                  IdentifierType\n                                    wildcard \"_\"\n                                  binaryOperator(\"&\") \"&\"\n                                CompositionTypeElement\n                                  IdentifierType\n                                    identifier(\"Copyable\") \"Copyable\"\n                      rightAngle \">\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 37,
+  "source" : "#if FOO\nX<any _ & Copyable>()\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    DeclReferenceExpr\\n                      identifier(\\\"X\\\") \\\"X\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\"<\\\") \\\"<\\\"\\n                    TypeExpr\\n                      SomeOrAnyType\\n                        keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                        IdentifierType\\n                          wildcard \\\"_\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\"&\\\") \\\"&\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\">\\\") \\\">\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"infixOperator\\t[\\\"&\\\"]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"placeholderType\\t[\\\"_\\\"]\",\"type\\t[placeholderType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":252,\"descriptorCount\":637,\"duplicateDescriptorCount\":0,\"oraclePruned\":259,\"parseSeconds\":0.008244037628173828,\"sourceLength\":36,\"suppressedDescriptorCount\":51,\"tokenCount\":13,\"yieldCount\":391},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                FunctionCallExpr\\n                  GenericSpecializationExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"X\\\") \\\"X\\\"\\n                    GenericArgumentClause\\n                      leftAngle \\\"<\\\"\\n                      GenericArgumentList\\n                        GenericArgument\\n                          SomeOrAnyType\\n                            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                            CompositionType\\n                              CompositionTypeElementList\\n                                CompositionTypeElement\\n                                  IdentifierType\\n                                    wildcard \\\"_\\\"\\n                                  binaryOperator(\\\"&\\\") \\\"&\\\"\\n                                CompositionTypeElement\\n                                  IdentifierType\\n                                    identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                      rightAngle \\\">\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

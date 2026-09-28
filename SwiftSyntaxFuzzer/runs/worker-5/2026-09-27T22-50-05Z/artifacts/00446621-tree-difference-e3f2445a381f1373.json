@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00446621-tree-difference-e3f2445a381f1373.json",
+    "durationSeconds" : 0.039572954177856445,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue+newline+glue:translated:testOperatorDeclDesignatedTypes18#1",
+    "index" : 446621,
+    "seed" : 13064011101222712141,
+    "signalHash" : "812a22d81338eaec",
+    "signalSummary" : "tree-difference|line=41|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "e3f2445a381f1373",
+    "sourceLength" : 276,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\ninfix operator ^%*%^ :\nMediumPrecedence, Struct, Class\ninfix operator ^%*%% : Struct, Class\nprefix operator%^*^^ : Struct, Class\npostfix operator ^^*^% : Struct, Class\nprefix operator %%*^^ : LowPrecedence, Class\npostfix operator ^^*%% : MediumPrecedence, Class\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"^%*%^\") \"^%*%^\"\n                  OperatorPrecedenceAndTypes\n                    colon \":\"\n                    identifier(\"Class\") \"Class\"\n                    DesignatedTypeList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"%^*^^\") \"%^*^^\"\n                  OperatorPrecedenceAndTypes\n                    colon \":\"\n                    identifier(\"Struct\") \"Struct\"\n                    DesignatedTypeList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"prefix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      "statementSeparator\t[<n>]",
+      ".DO\t[\"infix\"]",
+      "ifConfigStatements\t[ifConfigStatement statementSeparator ifConfigStatements]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 307,
+      "descriptorCount" : 638,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 252,
+      "parseSeconds" : 0.00789797306060791,
+      "sourceLength" : 73,
+      "suppressedDescriptorCount" : 69,
+      "tokenCount" : 14,
+      "yieldCount" : 339
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"^%*%^\") \"^%*%^\"\n                  OperatorPrecedenceAndTypes\n                    colon \":\"\n                    identifier(\"Class\") \"Class\"\n                    DesignatedTypeList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  postfixOperator(\"%^*^^\") \"%^*^^\"\n                  OperatorPrecedenceAndTypes\n                    colon \":\"\n                    identifier(\"Struct\") \"Struct\"\n                    DesignatedTypeList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "#if FOO\ninfix operator ^%*%^ : Class\nprefix operator%^*^^ : Struct\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"^%*%^\\\") \\\"^%*%^\\\"\\n                  OperatorPrecedenceAndTypes\\n                    colon \\\":\\\"\\n                    identifier(\\\"Class\\\") \\\"Class\\\"\\n                    DesignatedTypeList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"%^*^^\\\") \\\"%^*^^\\\"\\n                  OperatorPrecedenceAndTypes\\n                    colon \\\":\\\"\\n                    identifier(\\\"Struct\\\") \\\"Struct\\\"\\n                    DesignatedTypeList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"prefix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\"statementSeparator\\t[<n>]\",\".DO\\t[\\\"infix\\\"]\",\"ifConfigStatements\\t[ifConfigStatement statementSeparator ifConfigStatements]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":307,\"descriptorCount\":638,\"duplicateDescriptorCount\":0,\"oraclePruned\":252,\"parseSeconds\":0.00789797306060791,\"sourceLength\":73,\"suppressedDescriptorCount\":69,\"tokenCount\":14,\"yieldCount\":339},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"^%*%^\\\") \\\"^%*%^\\\"\\n                  OperatorPrecedenceAndTypes\\n                    colon \\\":\\\"\\n                    identifier(\\\"Class\\\") \\\"Class\\\"\\n                    DesignatedTypeList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  postfixOperator(\\\"%^*^^\\\") \\\"%^*^^\\\"\\n                  OperatorPrecedenceAndTypes\\n                    colon \\\":\\\"\\n                    identifier(\\\"Struct\\\") \\\"Struct\\\"\\n                    DesignatedTypeList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

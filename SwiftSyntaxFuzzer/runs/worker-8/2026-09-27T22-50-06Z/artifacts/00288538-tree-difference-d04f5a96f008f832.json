@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00288538-tree-difference-d04f5a96f008f832.json",
+    "durationSeconds" : 0.09961402416229248,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:delete:translated:testTypeExpr8#1+declaration:testWhereClauseWithFunctionType#1",
+    "index" : 288538,
+    "seed" : 10372684106311075726,
+    "signalHash" : "74c7585c7e57c93f",
+    "signalSummary" : "tree-difference|line=170|ref=FunctionCallExpr|advent=MissingExpr",
+    "sourceHash" : "d04f5a96f008f832",
+    "sourceLength" : 349,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\nfunc qualifiedType() {\n  _ = Foo.Bar.self\n  let _ : Foo.Bar.Type = Foo.Bar.self\n  let _ : Foo.Protocol = Foo.self\n  _ = Foo.Bar()\n  _ = Foo.Bar.prop\n  _ = Foo.Bar.meth\n  let _ : () = .Bar.meth()\n  _ = Foo.Bar.instMeth\n  _ = Foo.Bar\n  _ = Foo.Bar.dynamicType\n}\nfunc badTypeConformance3<T>(_: T) where (T) -> () : EqualComparable { }",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                AssignmentExpr\n                  equal \"=\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.Bar.meth()\n»"
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 130,
+      "descriptorCount" : 407,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 277,
+      "parseSeconds" : 0.005468010902404785,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 11,
+      "yieldCount" : 378
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  MemberAccessExpr\n                    MemberAccessExpr\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"Bar\") \"Bar\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"meth\") \"meth\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { () = .Bar.meth()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.Bar.meth()\\n»\"],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":130,\"descriptorCount\":407,\"duplicateDescriptorCount\":0,\"oraclePruned\":277,\"parseSeconds\":0.005468010902404785,\"sourceLength\":21,\"suppressedDescriptorCount\":47,\"tokenCount\":11,\"yieldCount\":378},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  MemberAccessExpr\\n                    MemberAccessExpr\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"Bar\\\") \\\"Bar\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"meth\\\") \\\"meth\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00093138-tree-difference-d07a27b16a3c8385.json",
+    "durationSeconds" : 0.04950106143951416,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:newline+newline+newline:real:ApusTerminals:101",
+    "index" : 93138,
+    "seed" : 1663246799498458970,
+    "signalHash" : "a3e2df67c5cbab20",
+    "signalSummary" : "tree-difference|line=46|ref=FunctionCallExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "d07a27b16a3c8385",
+    "sourceLength" : 388,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "extension Fuzz {\n\nlet regexRegex = Regex {\n    \"\/\"\n    ZeroOrMore {\n        ChoiceOf\n{\n            \/\/ any character that is not a forward slash '\/' or a backward slash '\\'\n            CharacterClass(.anyOf(\"\/\\\\\").inverted)\n            \/\/ a backward slash '\\' followed by single character, to escape '\/' or '\\', but catches more than legal escapes\n            \/\\\\.\/\n        }\n    }\n\"\/\"\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.let) \"let\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"Regex\") \"Regex\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        FunctionCallExpr\n                          DeclReferenceExpr\n                            identifier(\"ZeroOrMore\") \"ZeroOrMore\"\n                          LabeledExprList\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                DeclReferenceExpr\n                                  identifier(\"ChoiceOf\") \"ChoiceOf\"\n                              CodeBlockItem\n                                ClosureExpr\n                                  leftBrace \"{\"\n                                  CodeBlockItemList\n                                  rightBrace \"}\"\n                            rightBrace \"}\"\n                          MultipleTrailingClosureElementList\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 166,
+      "descriptorCount" : 443,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 150,
+      "parseSeconds" : 0.005690932273864746,
+      "sourceLength" : 70,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 12,
+      "yieldCount" : 303
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.let) \"let\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"Regex\") \"Regex\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        FunctionCallExpr\n                          DeclReferenceExpr\n                            identifier(\"ZeroOrMore\") \"ZeroOrMore\"\n                          LabeledExprList\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                FunctionCallExpr\n                                  DeclReferenceExpr\n                                    identifier(\"ChoiceOf\") \"ChoiceOf\"\n                                  LabeledExprList\n                                  ClosureExpr\n                                    leftBrace \"{\"\n                                    CodeBlockItemList\n                                    rightBrace \"}\"\n                                  MultipleTrailingClosureElementList\n                            rightBrace \"}\"\n                          MultipleTrailingClosureElementList\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nlet Regex {\n    ZeroOrMore {\n        ChoiceOf\n{\n        }\n    }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"Regex\\\") \\\"Regex\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        FunctionCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"ZeroOrMore\\\") \\\"ZeroOrMore\\\"\\n                          LabeledExprList\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                DeclReferenceExpr\\n                                  identifier(\\\"ChoiceOf\\\") \\\"ChoiceOf\\\"\\n                              CodeBlockItem\\n                                ClosureExpr\\n                                  leftBrace \\\"{\\\"\\n                                  CodeBlockItemList\\n                                  rightBrace \\\"}\\\"\\n                            rightBrace \\\"}\\\"\\n                          MultipleTrailingClosureElementList\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":166,\"descriptorCount\":443,\"duplicateDescriptorCount\":0,\"oraclePruned\":150,\"parseSeconds\":0.005690932273864746,\"sourceLength\":70,\"suppressedDescriptorCount\":47,\"tokenCount\":12,\"yieldCount\":303},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"Regex\\\") \\\"Regex\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        FunctionCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"ZeroOrMore\\\") \\\"ZeroOrMore\\\"\\n                          LabeledExprList\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                FunctionCallExpr\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"ChoiceOf\\\") \\\"ChoiceOf\\\"\\n                                  LabeledExprList\\n                                  ClosureExpr\\n                                    leftBrace \\\"{\\\"\\n                                    CodeBlockItemList\\n                                    rightBrace \\\"}\\\"\\n                                  MultipleTrailingClosureElementList\\n                            rightBrace \\\"}\\\"\\n                          MultipleTrailingClosureElementList\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

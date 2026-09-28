@@ -270,13 +270,16 @@ struct SwiftSyntaxGenerator {
         return tileBody(symbols, index: 0, from: from, to: to, into: &spans) ? spans : nil
     }
 
+    /// Order-INDEPENDENT by construction: split points are tried in ascending order, never in `Set`
+    /// order, so when more than one tiling survives the result does not depend on the hash seed
+    /// (TESTING.md recorded trees flapping between parallel runs).
     private mutating func tileBody(_ symbols: [GrammarNode], index: Int, from: CharPosition, to: CharPosition, into spans: inout [(GrammarNode, CharPosition, CharPosition)]) -> Bool {
         guard index < symbols.count else { return from == to }
         let symbol = symbols[index]
         if symbol.kind == .EPS {
             return tileBody(symbols, index: index + 1, from: from, to: to, into: &spans)
         }
-        for mid in endPositions(symbol, from: from) where mid <= to {
+        for mid in endPositions(symbol, from: from).sorted() where mid <= to {
             let restoreCount = spans.count
             spans.append((symbol, from, mid))
             if tileBody(symbols, index: index + 1, from: mid, to: to, into: &spans) {
@@ -683,13 +686,19 @@ struct SwiftSyntaxGenerator {
         // `collectMembers`. Blind to the recursion-vs-closure spelling either way.
         var items: [CodeBlockItemSyntax] = []
         for hop in listHops(of: ["statements"], nt, from: from, to: to) {
-            guard let stmtNT = find("statement", in: hop),
-                  let item = convertStatement(stmtNT.nt, from: stmtNT.from, to: stmtNT.to)
-            else { continue }
-            items.append(CodeBlockItemSyntax(
-                item: item,
-                semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-            ))
+            if let stmtNT = find("statement", in: hop),
+               let item = convertStatement(stmtNT.nt, from: stmtNT.from, to: stmtNT.to) {
+                items.append(CodeBlockItemSyntax(
+                    item: item,
+                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                ))
+            } else if let ccNT = find("compilerControlStatement", in: hop),
+                      let decl = convertCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
+                items.append(CodeBlockItemSyntax(
+                    item: .decl(decl),
+                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                ))
+            }
         }
         return items
     }
@@ -754,7 +763,7 @@ struct SwiftSyntaxGenerator {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return nil
         }
-        if let blockNT = find("conditionalCompilationBlock", in: spans) {
+        if let blockNT = find("memberConditionalCompilationBlock", in: spans) {
             return DeclSyntax(convertMemberConditionalCompilationBlock(blockNT.nt, from: blockNT.from, to: blockNT.to))
         }
         return convertCompilerControlDeclaration(nt, from: from, to: to)
@@ -1428,7 +1437,7 @@ struct SwiftSyntaxGenerator {
         types.append(InheritedTypeSyntax(type: type))
     }
 
-    /// memberDeclaration = declaration | freestandingMacroExpansionDeclaration | bodylessInitializerDeclaration .
+    /// memberDeclaration = declaration | enumCaseDeclaration | freestandingMacroExpansionDeclaration .
     ///
     /// The two non-`declaration` alternates are MEMBER-ONLY, so `convertDeclaration` never sees
     /// them and they were reported as "no converter" even though both map cleanly.
@@ -1453,11 +1462,8 @@ struct SwiftSyntaxGenerator {
                 additionalTrailingClosures: parts.additional
             ))
         }
-        // bodylessInitializerDeclaration = initializerHead … (no body) — `init()` in a protocol.
-        // Its children are named exactly as the full form's, so the same converter applies and
-        // simply finds no body.
-        if let biNT = find("bodylessInitializerDeclaration", in: spans) {
-            return DeclSyntax(convertInitializerDeclaration(biNT.nt, from: biNT.from, to: biNT.to))
+        if let caseNT = find("enumCaseDeclaration", in: spans) {
+            return DeclSyntax(convertEnumCaseDeclaration(caseNT.nt, from: caseNT.from, to: caseNT.to))
         }
         return nil
     }
@@ -1492,7 +1498,7 @@ struct SwiftSyntaxGenerator {
                 } else {
                     record(.unhandled, "member declaration has no converter", from: memberNT.from, to: memberNT.to)
                 }
-            } else if let ccNT = find("compilerControlStatement", in: memberSpans),
+            } else if let ccNT = find("memberCompilerControlStatement", in: memberSpans),
                       let decl = convertMemberCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
                 items.append(MemberBlockItemSyntax(
                     decl: decl,
@@ -2729,12 +2735,7 @@ struct SwiftSyntaxGenerator {
                 }
                 var effects: AccessorEffectSpecifiersSyntax? = nil
                 if let effNT = find("accessorEffects", in: cSpans) {
-                    let text = collectTerminalText(effNT.nt, from: effNT.from, to: effNT.to)
-                    effects = AccessorEffectSpecifiersSyntax(
-                        asyncSpecifier: text.contains("async") ? .keyword(.async) : nil,
-                        throwsClause: text.contains("throws")
-                            ? ThrowsClauseSyntax(throwsSpecifier: .keyword(.throws)) : nil
-                    )
+                    effects = accessorEffectSpecifiers(effNT.nt, from: effNT.from, to: effNT.to)
                 }
                 var body: CodeBlockSyntax? = nil
                 if let cbNT = find("codeBlock", in: cSpans) {
@@ -2760,12 +2761,7 @@ struct SwiftSyntaxGenerator {
                 let modifiers = convertAccessorModifiers(in: cSpans)
                 var effects: AccessorEffectSpecifiersSyntax? = nil
                 if let effNT = find("accessorEffects", in: cSpans) {
-                    let text = collectTerminalText(effNT.nt, from: effNT.from, to: effNT.to)
-                    effects = AccessorEffectSpecifiersSyntax(
-                        asyncSpecifier: text.contains("async") ? .keyword(.async) : nil,
-                        throwsClause: text.contains("throws")
-                            ? ThrowsClauseSyntax(throwsSpecifier: .keyword(.throws)) : nil
-                    )
+                    effects = accessorEffectSpecifiers(effNT.nt, from: effNT.from, to: effNT.to)
                 }
                 var body: CodeBlockSyntax? = nil
                 if let cbNT = find("codeBlock", in: cSpans) {
@@ -3408,10 +3404,10 @@ struct SwiftSyntaxGenerator {
         record(.lookupFailed, "objcSelector with neither an identifier nor pieces", from: from, to: to)
     }
 
-    /// conditionalCompilationAttributes = ifDirectiveAttributes elseifDirectiveAttributes? elseDirectiveAttributes? endifDirective .
-    /// ifDirectiveAttributes     = ifDirective compilationCondition attributes? .
-    /// elseifDirectiveAttributes = elseifDirective compilationCondition attributes? .
-    /// elseDirectiveAttributes   = elseDirective attributes? .
+    /// conditionalCompilationAttributes = ifDirectiveAttributes elseifDirectiveAttributeClauses? elseDirectiveAttributes? endifDirective .
+    /// ifDirectiveAttributes            = ifDirective compilationCondition attributes? .
+    /// elseifDirectiveAttributeClause   = elseifDirective compilationCondition attributes? .
+    /// elseDirectiveAttributes          = elseDirective attributes? .
     private mutating func convertConditionalCompilationAttributes(
         _ nt: GrammarNode, from: CharPosition, to: CharPosition
     ) -> IfConfigDeclSyntax? {
@@ -3425,8 +3421,8 @@ struct SwiftSyntaxGenerator {
         } else {
             record(.lookupFailed, "no ifDirectiveAttributes child", from: from, to: to)
         }
-        if let elseifNT = find("elseifDirectiveAttributes", in: spans) {
-            appendAttributeIfConfigClause(elseifNT, keyword: .poundElseifToken(), withCondition: true, into: &clauses)
+        if let elseifNT = find("elseifDirectiveAttributeClauses", in: spans) {
+            collectAttributeElseifClauses(elseifNT.nt, from: elseifNT.from, to: elseifNT.to, into: &clauses)
         }
         if let elseNT = find("elseDirectiveAttributes", in: spans) {
             appendAttributeIfConfigClause(elseNT, keyword: .poundElseToken(), withCondition: false, into: &clauses)
@@ -3435,6 +3431,14 @@ struct SwiftSyntaxGenerator {
             clauses: IfConfigClauseListSyntax(clauses),
             poundEndif: .poundEndifToken()
         )
+    }
+
+    private mutating func collectAttributeElseifClauses(
+        _ nt: GrammarNode, from: CharPosition, to: CharPosition, into clauses: inout [IfConfigClauseSyntax]
+    ) {
+        for cNT in listElements("elseifDirectiveAttributeClause", of: "elseifDirectiveAttributeClauses", nt, from: from, to: to) {
+            appendAttributeIfConfigClause(cNT, keyword: .poundElseifToken(), withCondition: true, into: &clauses)
+        }
     }
 
     private mutating func appendAttributeIfConfigClause(
@@ -6002,9 +6006,10 @@ struct SwiftSyntaxGenerator {
     // MARK: - Conditional compilation
 
     /// conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
-    /// ifDirectiveClause     = "#if" compilationCondition >->( "." ) <n> statements? .
-    /// elseifDirectiveClause = "#elseif" compilationCondition >->( "." ) <n> statements? .
-    /// elseDirectiveClause   = "#else" >->( "." ) statements? .
+    /// ifDirectiveClause     = "#if" compilationCondition <n> ifConfigStatements? .
+    /// elseifDirectiveClause = "#elseif" compilationCondition <n> ifConfigStatements? .
+    /// elseDirectiveClause   = "#else" ifConfigStatements? .
+    /// ifConfigBodyConditionalCompilationBlock = ifConfigBodyIfDirectiveClause ... .
     ///
     /// swift-syntax models this as a DECL (`IfConfigDecl`) even in statement position, with one
     /// `IfConfigClause` per directive.
@@ -6190,7 +6195,7 @@ struct SwiftSyntaxGenerator {
             return IfConfigDeclSyntax(clauses: [])
         }
         var clauses: [IfConfigClauseSyntax] = []
-        if let ifNT = find("ifDirectiveClause", in: spans) {
+        if let ifNT = find("ifDirectiveClause", in: spans) ?? find("ifConfigBodyIfDirectiveClause", in: spans) {
             appendIfConfigClause(ifNT, keyword: .poundIfToken(), withCondition: true, into: &clauses)
         } else {
             record(.lookupFailed, "no ifDirectiveClause child", from: from, to: to)
@@ -6213,15 +6218,15 @@ struct SwiftSyntaxGenerator {
             return IfConfigDeclSyntax(clauses: [])
         }
         var clauses: [IfConfigClauseSyntax] = []
-        if let ifNT = find("ifDirectiveClause", in: spans) {
+        if let ifNT = find("memberIfDirectiveClause", in: spans) {
             appendMemberIfConfigClause(ifNT, keyword: .poundIfToken(), withCondition: true, into: &clauses)
         } else {
             record(.lookupFailed, "no ifDirectiveClause child", from: from, to: to)
         }
-        if let elseifNT = find("elseifDirectiveClauses", in: spans) {
+        if let elseifNT = find("memberElseifDirectiveClauses", in: spans) {
             collectMemberElseifClauses(elseifNT.nt, from: elseifNT.from, to: elseifNT.to, into: &clauses)
         }
-        if let elseNT = find("elseDirectiveClause", in: spans) {
+        if let elseNT = find("memberElseDirectiveClause", in: spans) {
             appendMemberIfConfigClause(elseNT, keyword: .poundElseToken(), withCondition: false, into: &clauses)
         }
         return IfConfigDeclSyntax(
@@ -6237,7 +6242,7 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func collectMemberElseifClauses(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into clauses: inout [IfConfigClauseSyntax]) {
-        for cNT in listElements("elseifDirectiveClause", of: "elseifDirectiveClauses", nt, from: from, to: to) {
+        for cNT in listElements("memberElseifDirectiveClause", of: "memberElseifDirectiveClauses", nt, from: from, to: to) {
             appendMemberIfConfigClause(cNT, keyword: .poundElseifToken(), withCondition: true, into: &clauses)
         }
     }
@@ -6260,14 +6265,41 @@ struct SwiftSyntaxGenerator {
             }
         }
         var items: [CodeBlockItemSyntax] = []
-        if let stmtsNT = find("statements", in: spans) {
-            items = convertStatements(stmtsNT.nt, from: stmtsNT.from, to: stmtsNT.to)
+        if let stmtsNT = find("ifConfigStatements", in: spans) {
+            items = convertIfConfigStatements(stmtsNT.nt, from: stmtsNT.from, to: stmtsNT.to)
         }
         clauses.append(IfConfigClauseSyntax(
             poundKeyword: keyword,
             condition: condition,
             elements: .statements(CodeBlockItemListSyntax(items))
         ))
+    }
+
+    private mutating func convertIfConfigStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
+        var items: [CodeBlockItemSyntax] = []
+        for hop in listHops(of: ["ifConfigStatements"], nt, from: from, to: to) {
+            guard let itemNT = find("ifConfigStatement", in: hop),
+                  let (_, itemSpans) = tileAlternate(itemNT.nt, from: itemNT.from, to: itemNT.to) else {
+                record(.lookupFailed, "ifConfigStatements hop without ifConfigStatement", from: from, to: to)
+                continue
+            }
+            if let stmtNT = find("statement", in: itemSpans),
+               let item = convertStatement(stmtNT.nt, from: stmtNT.from, to: stmtNT.to) {
+                items.append(CodeBlockItemSyntax(
+                    item: item,
+                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                ))
+            } else if let blockNT = find("ifConfigBodyConditionalCompilationBlock", in: itemSpans) {
+                items.append(CodeBlockItemSyntax(
+                    item: .decl(DeclSyntax(convertConditionalCompilationBlock(blockNT.nt, from: blockNT.from, to: blockNT.to))),
+                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                ))
+            } else {
+                record(.unhandled, "ifConfigStatement has no converter: \(alternateKind(itemSpans))",
+                       from: itemNT.from, to: itemNT.to)
+            }
+        }
+        return items
     }
 
     private mutating func appendMemberIfConfigClause(_ span: NTSpan, keyword: TokenSyntax, withCondition: Bool, into clauses: inout [IfConfigClauseSyntax]) {
@@ -6290,6 +6322,8 @@ struct SwiftSyntaxGenerator {
         var items: [MemberBlockItemSyntax] = []
         if let stmtsNT = find("statements", in: spans) {
             items = convertMemberItemsFromStatements(stmtsNT.nt, from: stmtsNT.from, to: stmtsNT.to)
+        } else if let bodyNT = find("memberIfBody", in: spans) {
+            items = convertMemberIfBody(bodyNT.nt, from: bodyNT.from, to: bodyNT.to)
         }
         clauses.append(IfConfigClauseSyntax(
             poundKeyword: keyword,
@@ -6313,6 +6347,42 @@ struct SwiftSyntaxGenerator {
                 return nil
             }
         }
+    }
+
+    private mutating func convertMemberIfBody(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [MemberBlockItemSyntax] {
+        var items: [MemberBlockItemSyntax] = []
+        for hop in listHops(of: ["memberIfBody"], nt, from: from, to: to) {
+            guard let itemNT = find("memberIfItem", in: hop),
+                  let (_, itemSpans) = tileAlternate(itemNT.nt, from: itemNT.from, to: itemNT.to)
+            else { continue }
+
+            if let mdNT = find("memberDeclaration", in: itemSpans),
+               let (_, mdSpans) = tileAlternate(mdNT.nt, from: mdNT.from, to: mdNT.to) {
+                if let declNT = find("declaration", in: mdSpans),
+                   let decl = convertDeclaration(declNT.nt, from: declNT.from, to: declNT.to) {
+                    items.append(MemberBlockItemSyntax(
+                        decl: decl,
+                        semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                    ))
+                } else if let decl = memberOnlyDeclaration(mdSpans, from: mdNT.from, to: mdNT.to) {
+                    items.append(MemberBlockItemSyntax(
+                        decl: decl,
+                        semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                    ))
+                } else {
+                    record(.unhandled, "member #if item declaration has no converter", from: itemNT.from, to: itemNT.to)
+                }
+            } else if let ccNT = find("memberCompilerControlStatement", in: itemSpans),
+                      let decl = convertMemberCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
+                items.append(MemberBlockItemSyntax(
+                    decl: decl,
+                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
+                ))
+            } else {
+                record(.unhandled, "member #if item has no converter", from: itemNT.from, to: itemNT.to)
+            }
+        }
+        return items
     }
 
     /// Re-express a statement-form `IfConfigDecl` in member form: every clause's code-block items
@@ -7199,6 +7269,20 @@ struct SwiftSyntaxGenerator {
         return ModuleSelectorSyntax(
             moduleName: .identifier(collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to)),
             colonColon: .colonColonToken()
+        )
+    }
+
+    /// accessorEffects = throwsClause | "async" throwsClause? .
+    /// Structured, not a text search: the thrown type of `get throws(E)` must survive, and a text
+    /// search would also match `async`/`throws` inside that type's name.
+    private mutating func accessorEffectSpecifiers(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> AccessorEffectSpecifiersSyntax {
+        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
+            record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
+            return AccessorEffectSpecifiersSyntax()
+        }
+        return AccessorEffectSpecifiersSyntax(
+            asyncSpecifier: spansContainKeyword(spans, "async") ? .keyword(.async) : nil,
+            throwsClause: throwsClauseSyntax(in: spans)
         )
     }
 

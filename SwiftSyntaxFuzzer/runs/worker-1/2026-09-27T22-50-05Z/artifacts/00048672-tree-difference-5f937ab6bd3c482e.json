@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00048672-tree-difference-5f937ab6bd3c482e.json",
+    "durationSeconds" : 0.04398190975189209,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline:phase4-keypath:kp-bare-subscript+declaration:testAttributedMacroExpansionDeclaration#3",
+    "index" : 48672,
+    "seed" : 4354586988532835097,
+    "signalHash" : "0dd9d979494da400",
+    "signalSummary" : "tree-difference|line=32|ref=CodeBlockItem|advent=KeyPathComponent",
+    "sourceHash" : "5f937ab6bd3c482e",
+    "sourceLength" : 46,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nlet a = \\Foo\n[0]\n#topLevelBare\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"a\") \"a\"\n                  AssignmentExpr\n                    equal \"=\"\n                  KeyPathExpr\n                    backslash \"\\\"\n                    IdentifierType\n                      identifier(\"Foo\") \"Foo\"\n                    KeyPathComponentList\n                      KeyPathComponent\n                        KeyPathSubscriptComponent\n                          leftSquare \"[\"\n                          LabeledExprList\n                          rightSquare \"]\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "keyPathPivotFirst\t[\"[\"  \"]\"]",
+      "keyPathComponents\t[keyPathPivotFirst  keyPathBareStop]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "keyPathRootBase\t[typeName >->(openAngle)]",
+      "keyPathRootType\t[keyPathRootBase  >->(keyPathMetatypeStart)]",
+      "keyPathExpression\t[\"\\\\\" keyPathRootType keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 132,
+      "descriptorCount" : 343,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 177,
+      "parseSeconds" : 0.004562020301818848,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 38,
+      "tokenCount" : 10,
+      "yieldCount" : 284
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"a\") \"a\"\n                  AssignmentExpr\n                    equal \"=\"\n                  KeyPathExpr\n                    backslash \"\\\"\n                    IdentifierType\n                      identifier(\"Foo\") \"Foo\"\n                    KeyPathComponentList\n            CodeBlockItem\n              ArrayExpr\n                leftSquare \"[\"\n                ArrayElementList\n                rightSquare \"]\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 44,
+  "source" : " () { a = \\Foo\n[]\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"a\\\") \\\"a\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  KeyPathExpr\\n                    backslash \\\"\\\\\\\"\\n                    IdentifierType\\n                      identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                    KeyPathComponentList\\n                      KeyPathComponent\\n                        KeyPathSubscriptComponent\\n                          leftSquare \\\"[\\\"\\n                          LabeledExprList\\n                          rightSquare \\\"]\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"keyPathPivotFirst\\t[\\\"[\\\"  \\\"]\\\"]\",\"keyPathComponents\\t[keyPathPivotFirst  keyPathBareStop]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"keyPathRootBase\\t[typeName >->(openAngle)]\",\"keyPathRootType\\t[keyPathRootBase  >->(keyPathMetatypeStart)]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" keyPathRootType keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":132,\"descriptorCount\":343,\"duplicateDescriptorCount\":0,\"oraclePruned\":177,\"parseSeconds\":0.004562020301818848,\"sourceLength\":19,\"suppressedDescriptorCount\":38,\"tokenCount\":10,\"yieldCount\":284},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"a\\\") \\\"a\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  KeyPathExpr\\n                    backslash \\\"\\\\\\\"\\n                    IdentifierType\\n                      identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                    KeyPathComponentList\\n            CodeBlockItem\\n              ArrayExpr\\n                leftSquare \\\"[\\\"\\n                ArrayElementList\\n                rightSquare \\\"]\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

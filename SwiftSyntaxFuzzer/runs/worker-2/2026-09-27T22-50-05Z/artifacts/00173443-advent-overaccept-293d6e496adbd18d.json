@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00173443-advent-overaccept-293d6e496adbd18d.json",
+    "durationSeconds" : 0.033856987953186035,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue+newline+block-comment:translated:testUnknownPlatform3#1",
+    "index" : 173443,
+    "seed" : 15755288686696214284,
+    "signalHash" : "09cb986e60f20001",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/IfConfigD",
+    "sourceHash" : "293d6e496adbd18d",
+    "sourceLength" : 117,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n\/\/ Current compiler, short-circuit right-hand side\n#if\ncompiler(<10.0) || hasGreeble(\/*\n*\/blah)\n#endif\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                IfConfigDecl\n                  IfConfigClauseList\n                    IfConfigClause\n                      poundIf \"#if\"\n                      SequenceExpr\n                        ExprList\n                          FunctionCallExpr\n                            DeclReferenceExpr\n                              identifier(\"compiler\") \"compiler\"\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                            MultipleTrailingClosureElementList\n                          BinaryOperatorExpr\n                            binaryOperator(\"||\") \"||\"\n                          PrefixOperatorExpr\n                            prefixOperator(\"(\/*\\n*\/\") \"(\/*\n*\/\"\n                            DeclReferenceExpr\n                              identifier(\"blah\") \"blah\"\n                      CodeBlockItemList\n                  poundEndif \"#endif\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "compilationCondition\t[identifierToken >n< functionCallArgumentClause]",
+      "compilationCondition\t[compilationCondition \"||\" compilationCondition]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 218,
+      "descriptorCount" : 473,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 130,
+      "parseSeconds" : 0.010278940200805664,
+      "sourceLength" : 51,
+      "suppressedDescriptorCount" : 57,
+      "tokenCount" : 14,
+      "yieldCount" : 208
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                IfConfigDecl\n                  IfConfigClauseList\n                    IfConfigClause\n                      poundIf \"#if\"\n                      MissingExpr\n                      CodeBlockItemList\n                        CodeBlockItem\n                          SequenceExpr\n                            ExprList\n                              FunctionCallExpr\n                                DeclReferenceExpr\n                                  identifier(\"compiler\") \"compiler\"\n                                leftParen \"(\"\n                                LabeledExprList\n                                rightParen \")\"\n                                MultipleTrailingClosureElementList\n                              BinaryOperatorExpr\n                                binaryOperator(\"||\") \"||\"\n                              TupleExpr\n                                leftParen \"(\"\n                                LabeledExprList\n                                  LabeledExpr\n                                    DeclReferenceExpr\n                                      identifier(\"blah\") \"blah\"\n                                rightParen \")\"\n                  poundEndif \"#endif\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "#if FOO\n#if\ncompiler() || (\/*\n*\/blah)\n#endif\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                IfConfigDecl\\n                  IfConfigClauseList\\n                    IfConfigClause\\n                      poundIf \\\"#if\\\"\\n                      SequenceExpr\\n                        ExprList\\n                          FunctionCallExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"compiler\\\") \\\"compiler\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                            MultipleTrailingClosureElementList\\n                          BinaryOperatorExpr\\n                            binaryOperator(\\\"||\\\") \\\"||\\\"\\n                          PrefixOperatorExpr\\n                            prefixOperator(\\\"(\\\/*\\\\n*\\\/\\\") \\\"(\\\/*\\n*\\\/\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"blah\\\") \\\"blah\\\"\\n                      CodeBlockItemList\\n                  poundEndif \\\"#endif\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"compilationCondition\\t[identifierToken >n< functionCallArgumentClause]\",\"compilationCondition\\t[compilationCondition \\\"||\\\" compilationCondition]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":218,\"descriptorCount\":473,\"duplicateDescriptorCount\":0,\"oraclePruned\":130,\"parseSeconds\":0.010278940200805664,\"sourceLength\":51,\"suppressedDescriptorCount\":57,\"tokenCount\":14,\"yieldCount\":208},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                IfConfigDecl\\n                  IfConfigClauseList\\n                    IfConfigClause\\n                      poundIf \\\"#if\\\"\\n                      MissingExpr\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          SequenceExpr\\n                            ExprList\\n                              FunctionCallExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"compiler\\\") \\\"compiler\\\"\\n                                leftParen \\\"(\\\"\\n                                LabeledExprList\\n                                rightParen \\\")\\\"\\n                                MultipleTrailingClosureElementList\\n                              BinaryOperatorExpr\\n                                binaryOperator(\\\"||\\\") \\\"||\\\"\\n                              TupleExpr\\n                                leftParen \\\"(\\\"\\n                                LabeledExprList\\n                                  LabeledExpr\\n                                    DeclReferenceExpr\\n                                      identifier(\\\"blah\\\") \\\"blah\\\"\\n                                rightParen \\\")\\\"\\n                  poundEndif \\\"#endif\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

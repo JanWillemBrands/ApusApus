@@ -1,0 +1,66 @@
+{
+  "event" : {
+    "artifact" : "00722812-tree-difference-e323bfba7527ca28.json",
+    "durationSeconds" : 0.01864004135131836,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:line-comment+delete+newline:translated:testGuardTopLevel2#1",
+    "index" : 722812,
+    "seed" : 6018003910102630304,
+    "signalHash" : "8a1e4ef0d371396b",
+    "signalSummary" : "tree-difference|line=20|ref=FunctionCallExpr|advent=TupleExpr",
+    "sourceHash" : "e323bfba7527ca28",
+    "sourceLength" : 69,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n foo\n() \/\/ c\n {} \/\/ to interrupt the TopLevelCodeDecl\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 86,
+      "descriptorCount" : 228,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 78,
+      "parseSeconds" : 0.003358006477355957,
+      "sourceLength" : 10,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 6,
+      "yieldCount" : 156
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 28,
+  "source" : " {\n()\n{}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":86,\"descriptorCount\":228,\"duplicateDescriptorCount\":0,\"oraclePruned\":78,\"parseSeconds\":0.003358006477355957,\"sourceLength\":10,\"suppressedDescriptorCount\":22,\"tokenCount\":6,\"yieldCount\":156},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

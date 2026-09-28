@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00006900-advent-overaccept-d9df3ac4ef689c72.json",
+    "durationSeconds" : 0.02497696876525879,
+    "exitCode" : 1,
+    "generator" : "wide:closure:space+newline:expression:testKeyPathFollowedByOperator#1",
+    "index" : 6900,
+    "seed" : 3326659872777667553,
+    "signalHash" : "c3bca19b5439ec95",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "d9df3ac4ef689c72",
+    "sourceLength" : 42,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n\\Foo?.?. bar\n.?.blah\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              OptionalType\n                IdentifierType\n                  identifier(\"Foo\") \"Foo\"\n                postfixQuestionMark \"?\"\n              KeyPathComponentList\n                KeyPathComponent\n                  period \".\"\n                  KeyPathOptionalComponent\n                    postfixQuestionMark \"?\"\n                KeyPathComponent\n                  period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      identifier(\"bar\") \"bar\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "memberName\t[identifier]",
+      "keyPathMemberName\t[ memberName]",
+      "keyPathProperty\t[\".\" >n< keyPathMemberName]",
+      "keyPathBareComponent\t[keyPathProperty]",
+      "keyPathBareTail\t[keyPathBareComponent ]",
+      ".OPT\t[keyPathBareTail]",
+      "keyPathPivotFirst\t[keyPathDot >s< optionalMark]",
+      "keyPathComponents\t[keyPathPivotFirst  keyPathBareStop]",
+      "keyPathRootSuffix\t[>s< optionalMark]",
+      "keyPathRootSuffixes\t[keyPathRootSuffix ]",
+      ".OPT\t[keyPathRootSuffixes]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "keyPathRootBase\t[typeName >->(openAngle)]",
+      "keyPathRootType\t[keyPathRootBase  >->(keyPathMetatypeStart)]",
+      "keyPathExpression\t[\"\\\\\" keyPathRootType keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 73,
+      "descriptorCount" : 171,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 76,
+      "parseSeconds" : 0.004707932472229004,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 17,
+      "tokenCount" : 9,
+      "yieldCount" : 165
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              OptionalType\n                IdentifierType\n                  identifier(\"Foo\") \"Foo\"\n                postfixQuestionMark \"?\"\n              KeyPathComponentList\n                KeyPathComponent\n                  period \".\"\n                  KeyPathOptionalComponent\n                    postfixQuestionMark \"?\"\n                KeyPathComponent\n                  UnexpectedNodes\n                    period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      identifier(\"bar\") \"bar\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 40,
+  "source" : " {\n\\Foo?.?. bar\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              OptionalType\\n                IdentifierType\\n                  identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                postfixQuestionMark \\\"?\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathOptionalComponent\\n                    postfixQuestionMark \\\"?\\\"\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      identifier(\\\"bar\\\") \\\"bar\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"memberName\\t[identifier]\",\"keyPathMemberName\\t[ memberName]\",\"keyPathProperty\\t[\\\".\\\" >n< keyPathMemberName]\",\"keyPathBareComponent\\t[keyPathProperty]\",\"keyPathBareTail\\t[keyPathBareComponent ]\",\".OPT\\t[keyPathBareTail]\",\"keyPathPivotFirst\\t[keyPathDot >s< optionalMark]\",\"keyPathComponents\\t[keyPathPivotFirst  keyPathBareStop]\",\"keyPathRootSuffix\\t[>s< optionalMark]\",\"keyPathRootSuffixes\\t[keyPathRootSuffix ]\",\".OPT\\t[keyPathRootSuffixes]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"keyPathRootBase\\t[typeName >->(openAngle)]\",\"keyPathRootType\\t[keyPathRootBase  >->(keyPathMetatypeStart)]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" keyPathRootType keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":73,\"descriptorCount\":171,\"duplicateDescriptorCount\":0,\"oraclePruned\":76,\"parseSeconds\":0.004707932472229004,\"sourceLength\":17,\"suppressedDescriptorCount\":17,\"tokenCount\":9,\"yieldCount\":165},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              OptionalType\\n                IdentifierType\\n                  identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                postfixQuestionMark \\\"?\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathOptionalComponent\\n                    postfixQuestionMark \\\"?\\\"\\n                KeyPathComponent\\n                  UnexpectedNodes\\n                    period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      identifier(\\\"bar\\\") \\\"bar\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

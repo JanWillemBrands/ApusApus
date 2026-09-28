@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00000782-residual-ambiguity-48c663bf2a85ce36.json",
+    "durationSeconds" : 0.030170917510986328,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+space+space:declaration:testDeinitializers#1",
+    "index" : 782,
+    "seed" : 10372684106311075726,
+    "signalHash" : "0a60c78e0c877b60",
+    "signalSummary" : "residual-ambiguity|statements\tambiguous alternate\t[statement ] | [statement statementSeparator statements]",
+    "sourceHash" : "48c663bf2a85ce36",
+    "sourceLength" : 27,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "func fuzz() {\n deinit\n {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeinitializerDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      ".OPT\t[codeBlock]",
+      "deinitializerDeclaration\t[  \"deinit\"  ]",
+      "declaration\t[deinitializerDeclaration]",
+      "statement\t[declaration]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 78,
+      "descriptorCount" : 207,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 52,
+      "parseSeconds" : 0.003498077392578125,
+      "sourceLength" : 14,
+      "suppressedDescriptorCount" : 16,
+      "tokenCount" : 5,
+      "yieldCount" : 136
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeinitializerDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "statements\tambiguous alternate\t[statement ] | [statement statementSeparator statements]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 20,
+  "source" : " {\ndeinit\n{}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeinitializerDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\".OPT\\t[codeBlock]\",\"deinitializerDeclaration\\t[  \\\"deinit\\\"  ]\",\"declaration\\t[deinitializerDeclaration]\",\"statement\\t[declaration]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":78,\"descriptorCount\":207,\"duplicateDescriptorCount\":0,\"oraclePruned\":52,\"parseSeconds\":0.003498077392578125,\"sourceLength\":14,\"suppressedDescriptorCount\":16,\"tokenCount\":5,\"yieldCount\":136},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeinitializerDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"statements\\tambiguous alternate\\t[statement ] | [statement statementSeparator statements]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00472054-tree-difference-830ef760f368d2d8.json",
+    "durationSeconds" : 0.025490999221801758,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:block-comment+delete:expression:testNestedTypeSpecialization#1",
+    "index" : 472054,
+    "seed" : 10372684106311075726,
+    "signalHash" : "579a50a758e6165a",
+    "signalSummary" : "tree-difference|line=17|ref=FunctionCallExpr|advent=SequenceExpr",
+    "sourceHash" : "830ef760f368d2d8",
+    "sourceLength" : 48,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nSwift.Array<Array \/* c *\/ < >>()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  MemberAccessExpr\n                    DeclReferenceExpr\n                      identifier(\"Swift\") \"Swift\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"Array\") \"Array\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"<\") \"<\"\n                  DeclReferenceExpr\n                    identifier(\"Array\") \"Array\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"<\") \"<\"\n                  PrefixOperatorExpr\n                    prefixOperator(\">>\") \">>\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 175,
+      "descriptorCount" : 464,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 244,
+      "parseSeconds" : 0.011368989944458008,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 49,
+      "tokenCount" : 13,
+      "yieldCount" : 376
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                GenericSpecializationExpr\n                  MemberAccessExpr\n                    DeclReferenceExpr\n                      identifier(\"Swift\") \"Swift\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"Array\") \"Array\"\n                  GenericArgumentClause\n                    leftAngle \"<\"\n                    GenericArgumentList\n                      GenericArgument\n                        IdentifierType\n                          identifier(\"Array\") \"Array\"\n                          GenericArgumentClause\n                            leftAngle \"<\"\n                            GenericArgumentList\n                            rightAngle \">\"\n                    rightAngle \">\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 41,
+  "source" : " () {\nSwift.Array<Array < >>()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  MemberAccessExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Swift\\\") \\\"Swift\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"Array\\\") \\\"Array\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"<\\\") \\\"<\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"Array\\\") \\\"Array\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"<\\\") \\\"<\\\"\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\">>\\\") \\\">>\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":175,\"descriptorCount\":464,\"duplicateDescriptorCount\":0,\"oraclePruned\":244,\"parseSeconds\":0.011368989944458008,\"sourceLength\":32,\"suppressedDescriptorCount\":49,\"tokenCount\":13,\"yieldCount\":376},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                GenericSpecializationExpr\\n                  MemberAccessExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Swift\\\") \\\"Swift\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"Array\\\") \\\"Array\\\"\\n                  GenericArgumentClause\\n                    leftAngle \\\"<\\\"\\n                    GenericArgumentList\\n                      GenericArgument\\n                        IdentifierType\\n                          identifier(\\\"Array\\\") \\\"Array\\\"\\n                          GenericArgumentClause\\n                            leftAngle \\\"<\\\"\\n                            GenericArgumentList\\n                            rightAngle \\\">\\\"\\n                    rightAngle \\\">\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

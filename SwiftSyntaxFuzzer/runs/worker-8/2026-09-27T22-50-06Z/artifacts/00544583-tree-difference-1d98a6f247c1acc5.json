@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00544583-tree-difference-1d98a6f247c1acc5.json",
+    "durationSeconds" : 0.0726768970489502,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:newline+newline+keyword:translated:testDollarIdentifier4#1",
+    "index" : 544583,
+    "seed" : 10372684106311075726,
+    "signalHash" : "79d471ceab0623ea",
+    "signalSummary" : "tree-difference|line=52|ref=FunctionCallExpr|advent=TypeExpr",
+    "sourceHash" : "1d98a6f247c1acc5",
+    "sourceLength" : 338,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "struct Fuzz {\nfunc escapedDollarVar() {\n  var `$` : Int\n= 42 \/\/ no error\n  `$` += 1\n  any(`$`)\n}\nfunc escapedDollarLet() {\n  let `$` = 42 \/\/ no error\n  print(`$`)\n}\nfunc escapedDollarClass() {\n  class `$` {\n} \/\/ no error\n}\nfunc escapedDollarEnum() {\n  enum `$` {} \/\/ no error\n}\nfunc escapedDollarStruct() {\n  struct `$` {} \/\/ no error\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"escapedDollarVar\") \"escapedDollarVar\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    TypeExpr\n                      SomeOrAnyType\n                        keyword(SwiftSyntax.Keyword.any) \"any\"\n                        TupleType\n                          leftParen \"(\"\n                          TupleTypeElementList\n                            TupleTypeElement\n                              IdentifierType\n                                identifier(\"`$`\") \"`$`\"\n                          rightParen \")\"\n                rightBrace \"}\"\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"escapedDollarStruct\") \"escapedDollarStruct\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[escapedIdentifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "tupleTypeElement\t[type]",
+      "type\t[\"(\" tupleTypeElement \")\"]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      ".OPT\t[statements]",
+      "statements\t[statement statementSeparator statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 204,
+      "descriptorCount" : 521,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 241,
+      "parseSeconds" : 0.013933062553405762,
+      "sourceLength" : 74,
+      "suppressedDescriptorCount" : 52,
+      "tokenCount" : 18,
+      "yieldCount" : 386
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"escapedDollarVar\") \"escapedDollarVar\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    FunctionCallExpr\n                      DeclReferenceExpr\n                        identifier(\"any\") \"any\"\n                      leftParen \"(\"\n                      LabeledExprList\n                        LabeledExpr\n                          DeclReferenceExpr\n                            identifier(\"`$`\") \"`$`\"\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                rightBrace \"}\"\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"escapedDollarStruct\") \"escapedDollarStruct\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nfunc escapedDollarVar() {\n  any(`$`)\n}\nfunc escapedDollarStruct() {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"escapedDollarVar\\\") \\\"escapedDollarVar\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    TypeExpr\\n                      SomeOrAnyType\\n                        keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                        TupleType\\n                          leftParen \\\"(\\\"\\n                          TupleTypeElementList\\n                            TupleTypeElement\\n                              IdentifierType\\n                                identifier(\\\"`$`\\\") \\\"`$`\\\"\\n                          rightParen \\\")\\\"\\n                rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"escapedDollarStruct\\\") \\\"escapedDollarStruct\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[escapedIdentifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"tupleTypeElement\\t[type]\",\"type\\t[\\\"(\\\" tupleTypeElement \\\")\\\"]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\".OPT\\t[statements]\",\"statements\\t[statement statementSeparator statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":204,\"descriptorCount\":521,\"duplicateDescriptorCount\":0,\"oraclePruned\":241,\"parseSeconds\":0.013933062553405762,\"sourceLength\":74,\"suppressedDescriptorCount\":52,\"tokenCount\":18,\"yieldCount\":386},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"escapedDollarVar\\\") \\\"escapedDollarVar\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    FunctionCallExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"any\\\") \\\"any\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                        LabeledExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"`$`\\\") \\\"`$`\\\"\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"escapedDollarStruct\\\") \\\"escapedDollarStruct\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

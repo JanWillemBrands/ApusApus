@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00173328-residual-ambiguity-41a819c4a2f3d1dd.json",
+    "durationSeconds" : 0.035791993141174316,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:block-comment+keyword+glue:reject:testNominalDeclarationRecovery#1",
+    "index" : 173328,
+    "seed" : 13064011101222712141,
+    "signalHash" : "3fc8f49b3977a1c9",
+    "signalSummary" : "residual-ambiguity|statement\tambiguous alternate\t[expression] | [yieldStatement]",
+    "sourceHash" : "41a819c4a2f3d1dd",
+    "sourceLength" : 33,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "func fuzz() {\nyield  \/* c *\/ {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"yield\") \"yield\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "yieldStatement\t[\"yield\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 89,
+      "descriptorCount" : 260,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 101,
+      "parseSeconds" : 0.010811090469360352,
+      "sourceLength" : 13,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 5,
+      "yieldCount" : 189
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"yield\") \"yield\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "statement\tambiguous alternate\t[expression] | [yieldStatement]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 16,
+  "source" : " {\nyield {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"yield\\\") \\\"yield\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"yieldStatement\\t[\\\"yield\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":89,\"descriptorCount\":260,\"duplicateDescriptorCount\":0,\"oraclePruned\":101,\"parseSeconds\":0.010811090469360352,\"sourceLength\":13,\"suppressedDescriptorCount\":33,\"tokenCount\":5,\"yieldCount\":189},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"yield\\\") \\\"yield\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"statement\\tambiguous alternate\\t[expression] | [yieldStatement]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

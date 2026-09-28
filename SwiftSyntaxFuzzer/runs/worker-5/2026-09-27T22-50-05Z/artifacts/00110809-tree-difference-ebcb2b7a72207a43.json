@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00110809-tree-difference-ebcb2b7a72207a43.json",
+    "durationSeconds" : 0.030582904815673828,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:keyword:real:IdentifiableSyntax:52",
+    "index" : 110809,
+    "seed" : 13064011101222712141,
+    "signalHash" : "bf3ed54981798d88",
+    "signalSummary" : "tree-difference|line=47|ref=AccessorDeclList|advent=CodeBlockItemList",
+    "sourceHash" : "ebcb2b7a72207a43",
+    "sourceLength" : 120,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nextension GenericParameterSyntax: IdentifiableSyntax {\n  var identifier: TokenSyntax {\n    _modify\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"identifier\") \"identifier\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              DeclReferenceExpr\n                                identifier(\"_modify\") \"_modify\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 128,
+      "descriptorCount" : 328,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 97,
+      "parseSeconds" : 0.008249044418334961,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 9,
+      "yieldCount" : 210
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"identifier\") \"identifier\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          AccessorDeclList\n                            AccessorDecl\n                              AttributeList\n                              DeclModifierList\n                              keyword(SwiftSyntax.Keyword._modify) \"_modify\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 50,
+  "source" : " { {\nvar identifier {\n_modify\n}\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"identifier\\\") \\\"identifier\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              DeclReferenceExpr\\n                                identifier(\\\"_modify\\\") \\\"_modify\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":128,\"descriptorCount\":328,\"duplicateDescriptorCount\":0,\"oraclePruned\":97,\"parseSeconds\":0.008249044418334961,\"sourceLength\":35,\"suppressedDescriptorCount\":30,\"tokenCount\":9,\"yieldCount\":210},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"identifier\\\") \\\"identifier\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          AccessorDeclList\\n                            AccessorDecl\\n                              AttributeList\\n                              DeclModifierList\\n                              keyword(SwiftSyntax.Keyword._modify) \\\"_modify\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

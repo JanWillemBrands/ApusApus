@@ -1,0 +1,48 @@
+{
+  "event" : {
+    "artifact" : "00006926-advent-overaccept-0d9c1cb7ee49e277.json",
+    "durationSeconds" : 0.14455795288085938,
+    "exitCode" : 1,
+    "generator" : "wide:closure:space:real:IfConfigEvaluation:548",
+    "index" : 6926,
+    "seed" : 17418700094904321967,
+    "signalHash" : "8f1d469942cacf74",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "0d9c1cb7ee49e277",
+    "sourceLength" : 678,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nprivate func extractImportPath(_ expression: some ExprSyntaxProtocol) throws -> [(TokenSyntax, String)] {\n  \/\/ Member access.\n  if let memberAccess = expression.as(MemberAccessExprSyntax.self),\n    let base = memberAccess.base,\n    let memberName = memberAccess.declName.simpleIdentifier?.name\n  {\n    return try extractImportPath(base) + [(memberAccess.declName.baseName, memberName)]\n  }\n\n  \/\/ Declaration reference.\n  if let declRef = expression.as(DeclReferenceExprSyntax.self),\n    let name = declRef. simpleIdentifier?.name\n  {\n    return [(declRef.baseName, name)]\n  }\n\n  throw IfConfigDiagnostic.expectedModuleName(syntax: ExprSyntax(expression))\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SubscriptCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    identifier(\"expression\") \"expression\"\n                    colon \":\"\n                    DeclReferenceExpr\n                      identifier(\"ExprSyntaxProtocol\") \"ExprSyntaxProtocol\"\n                rightParen \")\"\n              leftSquare \"[\"\n              LabeledExprList\n                LabeledExpr\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n              rightSquare \"]\"\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          identifier(\"name\") \"name\"\n                        AssignmentExpr\n                          equal \"=\"\n                        MemberAccessExpr\n                          DeclReferenceExpr\n                            identifier(\"declRef\") \"declRef\"\n                          period \".\"\n                          DeclReferenceExpr\n                            identifier(\"simpleIdentifier\") \"simpleIdentifier\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 266,
+      "descriptorCount" : 724,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 389,
+      "parseSeconds" : 0.015629887580871582,
+      "sourceLength" : 81,
+      "suppressedDescriptorCount" : 94,
+      "tokenCount" : 18,
+      "yieldCount" : 579
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SubscriptCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    identifier(\"expression\") \"expression\"\n                    colon \":\"\n                    DeclReferenceExpr\n                      identifier(\"ExprSyntaxProtocol\") \"ExprSyntaxProtocol\"\n                rightParen \")\"\n              leftSquare \"[\"\n              LabeledExprList\n                LabeledExpr\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n              rightSquare \"]\"\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          identifier(\"name\") \"name\"\n                        AssignmentExpr\n                          equal \"=\"\n                        MemberAccessExpr\n                          DeclReferenceExpr\n                            identifier(\"declRef\") \"declRef\"\n                          UnexpectedNodes\n                            period \".\"\n                          DeclReferenceExpr\n                            identifier(\"simpleIdentifier\") \"simpleIdentifier\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 157,
+  "source" : " { ( expression: ExprSyntaxProtocol) [( )] { name = declRef. simpleIdentifier\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SubscriptCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    identifier(\\\"expression\\\") \\\"expression\\\"\\n                    colon \\\":\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"ExprSyntaxProtocol\\\") \\\"ExprSyntaxProtocol\\\"\\n                rightParen \\\")\\\"\\n              leftSquare \\\"[\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n              rightSquare \\\"]\\\"\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          identifier(\\\"name\\\") \\\"name\\\"\\n                        AssignmentExpr\\n                          equal \\\"=\\\"\\n                        MemberAccessExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"declRef\\\") \\\"declRef\\\"\\n                          period \\\".\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"simpleIdentifier\\\") \\\"simpleIdentifier\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"metrics\":{\"crfCount\":266,\"descriptorCount\":724,\"duplicateDescriptorCount\":0,\"oraclePruned\":389,\"parseSeconds\":0.015629887580871582,\"sourceLength\":81,\"suppressedDescriptorCount\":94,\"tokenCount\":18,\"yieldCount\":579},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SubscriptCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    identifier(\\\"expression\\\") \\\"expression\\\"\\n                    colon \\\":\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"ExprSyntaxProtocol\\\") \\\"ExprSyntaxProtocol\\\"\\n                rightParen \\\")\\\"\\n              leftSquare \\\"[\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n              rightSquare \\\"]\\\"\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          identifier(\\\"name\\\") \\\"name\\\"\\n                        AssignmentExpr\\n                          equal \\\"=\\\"\\n                        MemberAccessExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"declRef\\\") \\\"declRef\\\"\\n                          UnexpectedNodes\\n                            period \\\".\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"simpleIdentifier\\\") \\\"simpleIdentifier\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

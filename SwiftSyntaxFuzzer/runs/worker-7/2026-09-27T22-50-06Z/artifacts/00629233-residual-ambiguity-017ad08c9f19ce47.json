@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00629233-residual-ambiguity-017ad08c9f19ce47.json",
+    "durationSeconds" : 0.028561949729919434,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline:translated:testInitDeinit12#1",
+    "index" : 629233,
+    "seed" : 17418700093595237275,
+    "signalHash" : "922221063e4b2318",
+    "signalSummary" : "residual-ambiguity|ifConfigStatement\tambiguous pivot\tbody=[ifConfigStatement statementSeparator ifConfigStatements]",
+    "sourceHash" : "017ad08c9f19ce47",
+    "sourceLength" : 41,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "#if FOO\ndeinit\n{}\ndeinit\ndeinit {}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                DeinitializerDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n              CodeBlockItem\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n              CodeBlockItem\n                DeinitializerDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "deinitializerDeclaration\t[  \"deinit\"  ]",
+      "declaration\t[deinitializerDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      "statementSeparator\t[<n>]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatements\t[ifConfigStatement statementSeparator ifConfigStatements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      ".OPT\t[codeBlock]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 178,
+      "descriptorCount" : 397,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 70,
+      "parseSeconds" : 0.005544066429138184,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 14,
+      "tokenCount" : 8,
+      "yieldCount" : 181
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                DeinitializerDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n              CodeBlockItem\n                DeinitializerDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+      "ifConfigStatement\tambiguous pivot\tbody=[ifConfigStatement statementSeparator ifConfigStatements]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 29,
+  "source" : "#if FOO\ndeinit\n{}\ndeinit\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                DeinitializerDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n              CodeBlockItem\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n              CodeBlockItem\\n                DeinitializerDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"deinitializerDeclaration\\t[  \\\"deinit\\\"  ]\",\"declaration\\t[deinitializerDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\"statementSeparator\\t[<n>]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatements\\t[ifConfigStatement statementSeparator ifConfigStatements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\".OPT\\t[codeBlock]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":178,\"descriptorCount\":397,\"duplicateDescriptorCount\":1,\"oraclePruned\":70,\"parseSeconds\":0.005544066429138184,\"sourceLength\":31,\"suppressedDescriptorCount\":14,\"tokenCount\":8,\"yieldCount\":181},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                DeinitializerDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n              CodeBlockItem\\n                DeinitializerDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[\"ifConfigStatement\\tambiguous pivot\\tbody=[ifConfigStatement statementSeparator ifConfigStatements]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00427205-residual-ambiguity-5dfe63249b2b5a5b.json",
+    "durationSeconds" : 0.042016029357910156,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:splice+keyword:expression:testBasicLiterals#1",
+    "index" : 427205,
+    "seed" : 1663246799498458970,
+    "signalHash" : "922221063e4b2318",
+    "signalSummary" : "residual-ambiguity|ifConfigStatement\tambiguous pivot\tbody=[ifConfigStatement statementSeparator ifConfigStatements]",
+    "sourceHash" : "5dfe63249b2b5a5b",
+    "sourceLength" : 149,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "#if FOO\n#file\n#fileID\n(#line)\n#column\n#function\n#dsohandle\nreturn\n__LINE__\n__COLUMN__\n__FUNCTION__\n__DSO_HANDLE__\n\nfunc f() {\n  return false\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ReturnStmt\n                  keyword(SwiftSyntax.Keyword.return) \"return\"\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"__FUNCTION__\") \"__FUNCTION__\"\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"__DSO_HANDLE__\") \"__DSO_HANDLE__\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      "statementSeparator\t[<n>]",
+      "ifConfigStatements\t[ifConfigStatement statementSeparator ifConfigStatements]",
+      "returnStatement\t[\"return\" ]",
+      "controlTransferStatement\t[returnStatement]",
+      "statement\t[controlTransferStatement]",
+      ".OPT\t[expression]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 183,
+      "descriptorCount" : 439,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 93,
+      "parseSeconds" : 0.008572101593017578,
+      "sourceLength" : 49,
+      "suppressedDescriptorCount" : 28,
+      "tokenCount" : 7,
+      "yieldCount" : 203
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ReturnStmt\n                  keyword(SwiftSyntax.Keyword.return) \"return\"\n                  DeclReferenceExpr\n                    identifier(\"__FUNCTION__\") \"__FUNCTION__\"\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"__DSO_HANDLE__\") \"__DSO_HANDLE__\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+      "ifConfigStatement\tambiguous pivot\tbody=[ifConfigStatement statementSeparator ifConfigStatements]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 36,
+  "source" : "#if FOO\nreturn\n__FUNCTION__\n__DSO_HANDLE__\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ReturnStmt\\n                  keyword(SwiftSyntax.Keyword.return) \\\"return\\\"\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"__FUNCTION__\\\") \\\"__FUNCTION__\\\"\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"__DSO_HANDLE__\\\") \\\"__DSO_HANDLE__\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\"statementSeparator\\t[<n>]\",\"ifConfigStatements\\t[ifConfigStatement statementSeparator ifConfigStatements]\",\"returnStatement\\t[\\\"return\\\" ]\",\"controlTransferStatement\\t[returnStatement]\",\"statement\\t[controlTransferStatement]\",\".OPT\\t[expression]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":183,\"descriptorCount\":439,\"duplicateDescriptorCount\":1,\"oraclePruned\":93,\"parseSeconds\":0.008572101593017578,\"sourceLength\":49,\"suppressedDescriptorCount\":28,\"tokenCount\":7,\"yieldCount\":203},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ReturnStmt\\n                  keyword(SwiftSyntax.Keyword.return) \\\"return\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"__FUNCTION__\\\") \\\"__FUNCTION__\\\"\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"__DSO_HANDLE__\\\") \\\"__DSO_HANDLE__\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[\"ifConfigStatement\\tambiguous pivot\\tbody=[ifConfigStatement statementSeparator ifConfigStatements]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

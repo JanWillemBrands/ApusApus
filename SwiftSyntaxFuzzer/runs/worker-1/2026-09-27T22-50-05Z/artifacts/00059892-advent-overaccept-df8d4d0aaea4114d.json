@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00059892-advent-overaccept-df8d4d0aaea4114d.json",
+    "durationSeconds" : 0.01851201057434082,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:newline:phase4-keypath:kp-subscript",
+    "index" : 59892,
+    "seed" : 4354586988532835097,
+    "signalHash" : "ce528c8d097d4e6c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/ExtensionDecl\/AttributeList\/DeclModifierList\/keyword()\/IdentifierType\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/Me",
+    "sourceHash" : "df8d4d0aaea4114d",
+    "sourceLength" : 39,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "extension Fuzz {\nlet a = \\Foo.bar\n[0]\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExtensionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.extension) \"extension\"\n        IdentifierType\n          identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.let) \"let\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"a\") \"a\"\n                    InitializerClause\n                      equal \"=\"\n                      KeyPathExpr\n                        backslash \"\\\"\n                        IdentifierType\n                          identifier(\"bar\") \"bar\"\n                        KeyPathComponentList\n                          KeyPathComponent\n                            KeyPathSubscriptComponent\n                              leftSquare \"[\"\n                              LabeledExprList\n                              rightSquare \"]\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "keyPathPivotFirst\t[\"[\"  \"]\"]",
+      "keyPathComponents\t[keyPathPivotFirst  keyPathBareStop]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "keyPathRootBase\t[typeName >->(openAngle)]",
+      "keyPathRootType\t[keyPathRootBase  >->(keyPathMetatypeStart)]",
+      "keyPathExpression\t[\"\\\\\" keyPathRootType keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      ".OPT\t[initializer]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "extensionMember\t[memberDeclaration]",
+      "extensionMembers\t[extensionMember ]",
+      ".OPT\t[extensionMembers]",
+      "extensionBody\t[\"{\"  \"}\"]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".DO\t[typeIdentifier]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 80,
+      "descriptorCount" : 183,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 62,
+      "parseSeconds" : 0.003216981887817383,
+      "sourceLength" : 34,
+      "suppressedDescriptorCount" : 16,
+      "tokenCount" : 11,
+      "yieldCount" : 162
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExtensionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.extension) \"extension\"\n        IdentifierType\n          identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.let) \"let\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"a\") \"a\"\n                    InitializerClause\n                      equal \"=\"\n                      KeyPathExpr\n                        backslash \"\\\"\n                        IdentifierType\n                          identifier(\"bar\") \"bar\"\n                        KeyPathComponentList\n            MemberBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  leftSquare \"[\"\n                  rightSquare \"]\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : "extension Fuzz {\nlet a = \\bar\n[]\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExtensionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n        IdentifierType\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"a\\\") \\\"a\\\"\\n                    InitializerClause\\n                      equal \\\"=\\\"\\n                      KeyPathExpr\\n                        backslash \\\"\\\\\\\"\\n                        IdentifierType\\n                          identifier(\\\"bar\\\") \\\"bar\\\"\\n                        KeyPathComponentList\\n                          KeyPathComponent\\n                            KeyPathSubscriptComponent\\n                              leftSquare \\\"[\\\"\\n                              LabeledExprList\\n                              rightSquare \\\"]\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"keyPathPivotFirst\\t[\\\"[\\\"  \\\"]\\\"]\",\"keyPathComponents\\t[keyPathPivotFirst  keyPathBareStop]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"keyPathRootBase\\t[typeName >->(openAngle)]\",\"keyPathRootType\\t[keyPathRootBase  >->(keyPathMetatypeStart)]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" keyPathRootType keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\".OPT\\t[initializer]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"memberDeclaration\\t[declaration]\",\"extensionMember\\t[memberDeclaration]\",\"extensionMembers\\t[extensionMember ]\",\".OPT\\t[extensionMembers]\",\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".DO\\t[typeIdentifier]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":80,\"descriptorCount\":183,\"duplicateDescriptorCount\":0,\"oraclePruned\":62,\"parseSeconds\":0.003216981887817383,\"sourceLength\":34,\"suppressedDescriptorCount\":16,\"tokenCount\":11,\"yieldCount\":162},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExtensionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n        IdentifierType\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"a\\\") \\\"a\\\"\\n                    InitializerClause\\n                      equal \\\"=\\\"\\n                      KeyPathExpr\\n                        backslash \\\"\\\\\\\"\\n                        IdentifierType\\n                          identifier(\\\"bar\\\") \\\"bar\\\"\\n                        KeyPathComponentList\\n            MemberBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  leftSquare \\\"[\\\"\\n                  rightSquare \\\"]\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

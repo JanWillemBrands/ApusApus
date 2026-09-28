@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00623927-tree-difference-1ff6d751dabc5ceb.json",
+    "durationSeconds" : 0.02314901351928711,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:glue+glue+newline:translated:testForwardSlashRegex1#1",
+    "index" : 623927,
+    "seed" : 17418700093595237275,
+    "signalHash" : "2060f7300affb932",
+    "signalSummary" : "tree-difference|line=25|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "1ff6d751dabc5ceb",
+    "sourceLength" : 71,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nprefix operator \/\nprefix operator^\/\nprefix operator\n\/^\/\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"^\/\") \"^\/\"\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"\/^\/\") \"\/^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"prefix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 244,
+      "descriptorCount" : 522,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 254,
+      "parseSeconds" : 0.014464974403381348,
+      "sourceLength" : 45,
+      "suppressedDescriptorCount" : 75,
+      "tokenCount" : 10,
+      "yieldCount" : 329
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                postfixOperator(\"^\/\") \"^\/\"\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"\/^\/\") \"\/^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 42,
+  "source" : " () {\nprefix operator^\/\nprefix operator\n\/^\/\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"^\\\/\\\") \\\"^\\\/\\\"\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"\\\/^\\\/\\\") \\\"\\\/^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"prefix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":244,\"descriptorCount\":522,\"duplicateDescriptorCount\":0,\"oraclePruned\":254,\"parseSeconds\":0.014464974403381348,\"sourceLength\":45,\"suppressedDescriptorCount\":75,\"tokenCount\":10,\"yieldCount\":329},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                postfixOperator(\\\"^\\\/\\\") \\\"^\\\/\\\"\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"\\\/^\\\/\\\") \\\"\\\/^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

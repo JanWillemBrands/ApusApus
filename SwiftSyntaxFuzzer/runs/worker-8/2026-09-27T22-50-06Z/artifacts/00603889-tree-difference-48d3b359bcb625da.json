@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00603889-tree-difference-48d3b359bcb625da.json",
+    "durationSeconds" : 0.0393139123916626,
+    "exitCode" : 1,
+    "generator" : "wide:closure:newline:phase4-closure:trailing-with-args",
+    "index" : 603889,
+    "seed" : 10372684106311075726,
+    "signalHash" : "d145e9a6d43c0fed",
+    "signalSummary" : "tree-difference|line=27|ref=DeclReferenceExpr|advent=FunctionCallExpr",
+    "sourceHash" : "48d3b359bcb625da",
+    "sourceLength" : 41,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\nlet a = f\n(1) { 2 }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"f\") \"f\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 136,
+      "descriptorCount" : 396,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 209,
+      "parseSeconds" : 0.0091630220413208,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 49,
+      "tokenCount" : 9,
+      "yieldCount" : 310
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                DeclReferenceExpr\n                  identifier(\"f\") \"f\"\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 36,
+  "source" : " { a = f\n() { }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"f\\\") \\\"f\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":136,\"descriptorCount\":396,\"duplicateDescriptorCount\":0,\"oraclePruned\":209,\"parseSeconds\":0.0091630220413208,\"sourceLength\":17,\"suppressedDescriptorCount\":49,\"tokenCount\":9,\"yieldCount\":310},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"f\\\") \\\"f\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

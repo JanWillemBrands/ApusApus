@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00102285-advent-overaccept-57b5cb6a39b91cd3.json",
+    "durationSeconds" : 0.10797607898712158,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space:translated:testSuper2e#1",
+    "index" : 102285,
+    "seed" : 1663246799498458970,
+    "signalHash" : "22d13582f08075b1",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/ClassDecl",
+    "sourceHash" : "57b5cb6a39b91cd3",
+    "sourceLength" : 200,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nclass D : B {\n  func super_calls() {\n    super.foo\n    super.foo.bar\n    super. bar\n    super.bar()\n    super.init\n    super.init()\n    super.init(0)\n    super[0]\n    super\n      .bar()\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"super_calls\") \"super_calls\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n                    CodeBlock\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          MemberAccessExpr\n                            SuperExpr\n                              keyword(SwiftSyntax.Keyword.super) \"super\"\n                            period \".\"\n                            DeclReferenceExpr\n                              identifier(\"bar\") \"bar\"\n                      rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "superclassExpression\t[\"super\"]",
+      "primaryExpression\t[superclassExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 125,
+      "descriptorCount" : 335,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 130,
+      "parseSeconds" : 0.0073250532150268555,
+      "sourceLength" : 50,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 13,
+      "yieldCount" : 255
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"super_calls\") \"super_calls\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n                    CodeBlock\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          MemberAccessExpr\n                            SuperExpr\n                              keyword(SwiftSyntax.Keyword.super) \"super\"\n                            UnexpectedNodes\n                              period \".\"\n                            DeclReferenceExpr\n                              identifier(\"bar\") \"bar\"\n                      rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  func super_calls() {\n    super. bar\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"super_calls\\\") \\\"super_calls\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n                    CodeBlock\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          MemberAccessExpr\\n                            SuperExpr\\n                              keyword(SwiftSyntax.Keyword.super) \\\"super\\\"\\n                            period \\\".\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"bar\\\") \\\"bar\\\"\\n                      rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"superclassExpression\\t[\\\"super\\\"]\",\"primaryExpression\\t[superclassExpression]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":125,\"descriptorCount\":335,\"duplicateDescriptorCount\":0,\"oraclePruned\":130,\"parseSeconds\":0.0073250532150268555,\"sourceLength\":50,\"suppressedDescriptorCount\":30,\"tokenCount\":13,\"yieldCount\":255},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"super_calls\\\") \\\"super_calls\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n                    CodeBlock\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          MemberAccessExpr\\n                            SuperExpr\\n                              keyword(SwiftSyntax.Keyword.super) \\\"super\\\"\\n                            UnexpectedNodes\\n                              period \\\".\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"bar\\\") \\\"bar\\\"\\n                      rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

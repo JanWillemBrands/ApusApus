@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00125557-advent-overaccept-69e79efcaf56af69.json",
+    "durationSeconds" : 0.02831101417541504,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+splice+line-comment:phase4-ifconfig:if-member-list",
+    "index" : 125557,
+    "seed" : 10372684106311075726,
+    "signalHash" : "e0641d8d2bfc144a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/StructDec",
+    "sourceHash" : "69e79efcaf56af69",
+    "sourceLength" : 87,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nstruct Fuzz{\nlet a = 1\n#if \/\/ c\n DEBUG\nlet b = 10.51\n#endif\n#warning(\"seed\")\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  IfConfigDecl\n                    IfConfigClauseList\n                      IfConfigClause\n                        poundIf \"#if\"\n                        DeclReferenceExpr\n                          identifier(\"DEBUG\") \"DEBUG\"\n                        CodeBlockItemList\n                    poundEndif \"#endif\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 156,
+      "descriptorCount" : 368,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 98,
+      "parseSeconds" : 0.009863972663879395,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 41,
+      "tokenCount" : 8,
+      "yieldCount" : 181
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  IfConfigDecl\n                    IfConfigClauseList\n                      IfConfigClause\n                        poundIf \"#if\"\n                        MissingExpr\n                        CodeBlockItemList\n                          CodeBlockItem\n                            DeclReferenceExpr\n                              identifier(\"DEBUG\") \"DEBUG\"\n                    poundEndif \"#endif\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 48,
+  "source" : " {\n{\n#if\nDEBUG\n#endif\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  IfConfigDecl\\n                    IfConfigClauseList\\n                      IfConfigClause\\n                        poundIf \\\"#if\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"DEBUG\\\") \\\"DEBUG\\\"\\n                        CodeBlockItemList\\n                    poundEndif \\\"#endif\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":156,\"descriptorCount\":368,\"duplicateDescriptorCount\":0,\"oraclePruned\":98,\"parseSeconds\":0.009863972663879395,\"sourceLength\":25,\"suppressedDescriptorCount\":41,\"tokenCount\":8,\"yieldCount\":181},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  IfConfigDecl\\n                    IfConfigClauseList\\n                      IfConfigClause\\n                        poundIf \\\"#if\\\"\\n                        MissingExpr\\n                        CodeBlockItemList\\n                          CodeBlockItem\\n                            DeclReferenceExpr\\n                              identifier(\\\"DEBUG\\\") \\\"DEBUG\\\"\\n                    poundEndif \\\"#endif\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00631151-tree-difference-751170f1abab9774.json",
+    "durationSeconds" : 0.028671979904174805,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:delete+newline+space:translated:testDiagnoseAvailabilityWindows7#1",
+    "index" : 631151,
+    "seed" : 1663246799498458970,
+    "signalHash" : "e8cf47d06e612f59",
+    "signalSummary" : "tree-difference|line=23|ref=ClosureExpr|advent=MultipleTrailingClosureElementList",
+    "sourceHash" : "751170f1abab9774",
+    "sourceLength" : 84,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n conditional_compilation()\n{\n  if #available(Windows 10,  *) {\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"conditional_compilation\") \"conditional_compilation\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  ExpressionStmt\n                    IfExpr\n                      keyword(SwiftSyntax.Keyword.if) \"if\"\n                      ConditionElementList\n                        ConditionElement\n                          AvailabilityCondition\n                            poundAvailable \"#available\"\n                            leftParen \"(\"\n                            AvailabilityArgumentList\n                              AvailabilityArgument\n                                PlatformVersion\n                                  identifier(\"Windows\") \"Windows\"\n                            rightParen \")\"\n                      CodeBlock\n                        leftBrace \"{\"\n                        CodeBlockItemList\n                        rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "platformName\t[identifierToken]",
+      "availabilityArgument\t[platformName ]",
+      "availabilityArguments\t[availabilityArgument ]",
+      "availabilityCondition\t[\"#available\" \"(\" availabilityArguments \")\"]",
+      "condition\t[availabilityCondition]",
+      "conditionList\t[condition ]",
+      "ifExpression\t[\"if\" >->(\"{\") conditionList codeBlock ]",
+      "conditionalExpression\t[ifExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statementSeparator\t[<n>]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "statements\t[statement statementSeparator statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 149,
+      "descriptorCount" : 385,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 132,
+      "parseSeconds" : 0.013712048530578613,
+      "sourceLength" : 67,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 15,
+      "yieldCount" : 264
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"conditional_compilation\") \"conditional_compilation\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    ExpressionStmt\n                      IfExpr\n                        keyword(SwiftSyntax.Keyword.if) \"if\"\n                        ConditionElementList\n                          ConditionElement\n                            AvailabilityCondition\n                              poundAvailable \"#available\"\n                              leftParen \"(\"\n                              AvailabilityArgumentList\n                                AvailabilityArgument\n                                  PlatformVersion\n                                    identifier(\"Windows\") \"Windows\"\n                              rightParen \")\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n conditional_compilation()\n{\n  if #available(Windows ) {\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"conditional_compilation\\\") \\\"conditional_compilation\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  ExpressionStmt\\n                    IfExpr\\n                      keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                      ConditionElementList\\n                        ConditionElement\\n                          AvailabilityCondition\\n                            poundAvailable \\\"#available\\\"\\n                            leftParen \\\"(\\\"\\n                            AvailabilityArgumentList\\n                              AvailabilityArgument\\n                                PlatformVersion\\n                                  identifier(\\\"Windows\\\") \\\"Windows\\\"\\n                            rightParen \\\")\\\"\\n                      CodeBlock\\n                        leftBrace \\\"{\\\"\\n                        CodeBlockItemList\\n                        rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"platformName\\t[identifierToken]\",\"availabilityArgument\\t[platformName ]\",\"availabilityArguments\\t[availabilityArgument ]\",\"availabilityCondition\\t[\\\"#available\\\" \\\"(\\\" availabilityArguments \\\")\\\"]\",\"condition\\t[availabilityCondition]\",\"conditionList\\t[condition ]\",\"ifExpression\\t[\\\"if\\\" >->(\\\"{\\\") conditionList codeBlock ]\",\"conditionalExpression\\t[ifExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statementSeparator\\t[<n>]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"statements\\t[statement statementSeparator statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":149,\"descriptorCount\":385,\"duplicateDescriptorCount\":0,\"oraclePruned\":132,\"parseSeconds\":0.013712048530578613,\"sourceLength\":67,\"suppressedDescriptorCount\":32,\"tokenCount\":15,\"yieldCount\":264},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"conditional_compilation\\\") \\\"conditional_compilation\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    ExpressionStmt\\n                      IfExpr\\n                        keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                        ConditionElementList\\n                          ConditionElement\\n                            AvailabilityCondition\\n                              poundAvailable \\\"#available\\\"\\n                              leftParen \\\"(\\\"\\n                              AvailabilityArgumentList\\n                                AvailabilityArgument\\n                                  PlatformVersion\\n                                    identifier(\\\"Windows\\\") \\\"Windows\\\"\\n                              rightParen \\\")\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

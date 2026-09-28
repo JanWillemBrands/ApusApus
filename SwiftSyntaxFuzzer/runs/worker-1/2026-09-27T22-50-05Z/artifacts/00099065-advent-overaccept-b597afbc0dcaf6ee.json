@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00099065-advent-overaccept-b597afbc0dcaf6ee.json",
+    "durationSeconds" : 0.02532494068145752,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:newline+block-comment:phase4-ifconfig:if-else",
+    "index" : 99065,
+    "seed" : 4354586988532835097,
+    "signalHash" : "910dab8b71a02b4a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/IfCo",
+    "sourceHash" : "b597afbc0dcaf6ee",
+    "sourceLength" : 63,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "struct Fuzz {\n#if \/*\n*\/DEBUG\nlet a =\n1\n#else\nlet a = 2\n#endif\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  DeclReferenceExpr\n                    identifier(\"DEBUG\") \"DEBUG\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      VariableDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.let) \"let\"\n                        PatternBindingList\n                          PatternBinding\n                            IdentifierPattern\n                              identifier(\"a\") \"a\"\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 161,
+      "descriptorCount" : 339,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 62,
+      "parseSeconds" : 0.008180975914001465,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 14,
+      "tokenCount" : 8,
+      "yieldCount" : 147
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  MissingExpr\n                  CodeBlockItemList\n                    CodeBlockItem\n                      DeclReferenceExpr\n                        identifier(\"DEBUG\") \"DEBUG\"\n                    CodeBlockItem\n                      VariableDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.let) \"let\"\n                        PatternBindingList\n                          PatternBinding\n                            IdentifierPattern\n                              identifier(\"a\") \"a\"\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n#if\nDEBUG\nlet a\n#endif\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"DEBUG\\\") \\\"DEBUG\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      VariableDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                        PatternBindingList\\n                          PatternBinding\\n                            IdentifierPattern\\n                              identifier(\\\"a\\\") \\\"a\\\"\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":161,\"descriptorCount\":339,\"duplicateDescriptorCount\":0,\"oraclePruned\":62,\"parseSeconds\":0.008180975914001465,\"sourceLength\":27,\"suppressedDescriptorCount\":14,\"tokenCount\":8,\"yieldCount\":147},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  MissingExpr\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      DeclReferenceExpr\\n                        identifier(\\\"DEBUG\\\") \\\"DEBUG\\\"\\n                    CodeBlockItem\\n                      VariableDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                        PatternBindingList\\n                          PatternBinding\\n                            IdentifierPattern\\n                              identifier(\\\"a\\\") \\\"a\\\"\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

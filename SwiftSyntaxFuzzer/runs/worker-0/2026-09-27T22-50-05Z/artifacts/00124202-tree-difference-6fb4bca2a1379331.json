@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00124202-tree-difference-6fb4bca2a1379331.json",
+    "durationSeconds" : 0.027406930923461914,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment+block-comment:translated:testCompositionTypeExpr#3",
+    "index" : 124202,
+    "seed" : 11400601876238378790,
+    "signalHash" : "50c4982e82a2903c",
+    "signalSummary" : "tree-difference|line=11|ref=DeclReferenceExpr|advent=TypeExpr",
+    "sourceHash" : "6fb4bca2a1379331",
+    "sourceLength" : 33,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nany \/\/ c\n P  \/* c *\/ & Q\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TypeExpr\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.any) \"any\"\n                CompositionType\n                  CompositionTypeElementList\n                    CompositionTypeElement\n                      IdentifierType\n                        identifier(\"P\") \"P\"\n                      binaryOperator(\"&\") \"&\"\n                    CompositionTypeElement\n                      IdentifierType\n                        identifier(\"Q\") \"Q\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "protocolCompositionElement\t[ typeIdentifier]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 140,
+      "descriptorCount" : 437,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 239,
+      "parseSeconds" : 0.004128098487854004,
+      "sourceLength" : 14,
+      "suppressedDescriptorCount" : 62,
+      "tokenCount" : 6,
+      "yieldCount" : 320
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"any\") \"any\"\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"P\") \"P\"\n                BinaryOperatorExpr\n                  binaryOperator(\"&\") \"&\"\n                DeclReferenceExpr\n                  identifier(\"Q\") \"Q\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 25,
+  "source" : " {\nany\nP & Q\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TypeExpr\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                CompositionType\\n                  CompositionTypeElementList\\n                    CompositionTypeElement\\n                      IdentifierType\\n                        identifier(\\\"P\\\") \\\"P\\\"\\n                      binaryOperator(\\\"&\\\") \\\"&\\\"\\n                    CompositionTypeElement\\n                      IdentifierType\\n                        identifier(\\\"Q\\\") \\\"Q\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"protocolCompositionElement\\t[ typeIdentifier]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":140,\"descriptorCount\":437,\"duplicateDescriptorCount\":1,\"oraclePruned\":239,\"parseSeconds\":0.004128098487854004,\"sourceLength\":14,\"suppressedDescriptorCount\":62,\"tokenCount\":6,\"yieldCount\":320},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"any\\\") \\\"any\\\"\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"P\\\") \\\"P\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"&\\\") \\\"&\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Q\\\") \\\"Q\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

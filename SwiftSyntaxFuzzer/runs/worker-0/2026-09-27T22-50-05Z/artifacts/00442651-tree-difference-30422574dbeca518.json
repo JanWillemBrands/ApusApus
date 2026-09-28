@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00442651-tree-difference-30422574dbeca518.json",
+    "durationSeconds" : 0.03429901599884033,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+line-comment+swap:real:ApusTerminals:75",
+    "index" : 442651,
+    "seed" : 11400601876238378790,
+    "signalHash" : "1fa487f39e7b299e",
+    "signalSummary" : "tree-difference|line=29|ref=StringLiteralExpr|advent=FunctionCallExpr",
+    "sourceHash" : "30422574dbeca518",
+    "sourceLength" : 115,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nlet blockcommentRegex = Regex {\n    \"\/*\"\n    ( \/\/ c\nZeroOrMore.reluctant) {\n        . any\n    }\n    \"*\/\"\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    StringLiteralExpr\n                      stringQuote \"\"\"\n                      StringLiteralSegmentList\n                        StringSegment\n                          stringSegment(\"\/*\") \"\/*\"\n                      stringQuote \"\"\"\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "staticStringLiteral\t[singleLineStringLiteral]",
+      "stringLiteral\t[staticStringLiteral]",
+      "literal\t[stringLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 114,
+      "descriptorCount" : 345,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 163,
+      "parseSeconds" : 0.0068759918212890625,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 9,
+      "yieldCount" : 265
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  StringLiteralExpr\n                    stringQuote \"\"\"\n                    StringLiteralSegmentList\n                      StringSegment\n                        stringSegment(\"\/*\") \"\/*\"\n                    stringQuote \"\"\"\n                CodeBlockItem\n                  FunctionCallExpr\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n    \"\/*\"\n    ( \/\/ c\n) {\n    }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    StringLiteralExpr\\n                      stringQuote \\\"\\\"\\\"\\n                      StringLiteralSegmentList\\n                        StringSegment\\n                          stringSegment(\\\"\\\/*\\\") \\\"\\\/*\\\"\\n                      stringQuote \\\"\\\"\\\"\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"staticStringLiteral\\t[singleLineStringLiteral]\",\"stringLiteral\\t[staticStringLiteral]\",\"literal\\t[stringLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":114,\"descriptorCount\":345,\"duplicateDescriptorCount\":0,\"oraclePruned\":163,\"parseSeconds\":0.0068759918212890625,\"sourceLength\":38,\"suppressedDescriptorCount\":42,\"tokenCount\":9,\"yieldCount\":265},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  StringLiteralExpr\\n                    stringQuote \\\"\\\"\\\"\\n                    StringLiteralSegmentList\\n                      StringSegment\\n                        stringSegment(\\\"\\\/*\\\") \\\"\\\/*\\\"\\n                    stringQuote \\\"\\\"\\\"\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

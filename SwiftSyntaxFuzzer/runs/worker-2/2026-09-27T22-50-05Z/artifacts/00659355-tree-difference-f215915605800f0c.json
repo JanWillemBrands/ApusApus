@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00659355-tree-difference-f215915605800f0c.json",
+    "durationSeconds" : 0.020742058753967285,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:keyword:phase4-attr:attr-extension",
+    "index" : 659355,
+    "seed" : 15755288686696214284,
+    "signalHash" : "00250734baad6cac",
+    "signalSummary" : "tree-difference|line=24|ref=keyword()|advent=DeclModifier",
+    "sourceHash" : "f215915605800f0c",
+    "sourceLength" : 43,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n@objc extension indirect {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ExtensionDecl\n                AttributeList\n                  Attribute\n                    atSign \"@\"\n                    IdentifierType\n                      identifier(\"objc\") \"objc\"\n                DeclModifierList\n                  DeclModifier\n                    keyword(SwiftSyntax.Keyword.indirect) \"indirect\"\n                keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                IdentifierType\n                  identifier(\"indirect\") \"indirect\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "extensionBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".DO\t[typeIdentifier]",
+      "attribute\t[\"@\" >s< \"objc\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 139,
+      "descriptorCount" : 341,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 147,
+      "parseSeconds" : 0.010366082191467285,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 10,
+      "yieldCount" : 225
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ExtensionDecl\n                AttributeList\n                  Attribute\n                    atSign \"@\"\n                    IdentifierType\n                      identifier(\"objc\") \"objc\"\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                IdentifierType\n                  identifier(\"indirect\") \"indirect\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 32,
+  "source" : " () {\n@objc extension indirect {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ExtensionDecl\\n                AttributeList\\n                  Attribute\\n                    atSign \\\"@\\\"\\n                    IdentifierType\\n                      identifier(\\\"objc\\\") \\\"objc\\\"\\n                DeclModifierList\\n                  DeclModifier\\n                    keyword(SwiftSyntax.Keyword.indirect) \\\"indirect\\\"\\n                keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                IdentifierType\\n                  identifier(\\\"indirect\\\") \\\"indirect\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".DO\\t[typeIdentifier]\",\"attribute\\t[\\\"@\\\" >s< \\\"objc\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":139,\"descriptorCount\":341,\"duplicateDescriptorCount\":0,\"oraclePruned\":147,\"parseSeconds\":0.010366082191467285,\"sourceLength\":35,\"suppressedDescriptorCount\":42,\"tokenCount\":10,\"yieldCount\":225},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ExtensionDecl\\n                AttributeList\\n                  Attribute\\n                    atSign \\\"@\\\"\\n                    IdentifierType\\n                      identifier(\\\"objc\\\") \\\"objc\\\"\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                IdentifierType\\n                  identifier(\\\"indirect\\\") \\\"indirect\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

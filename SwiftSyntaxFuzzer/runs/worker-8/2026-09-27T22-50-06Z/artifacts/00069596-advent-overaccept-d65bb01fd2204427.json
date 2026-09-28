@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00069596-advent-overaccept-d65bb01fd2204427.json",
+    "durationSeconds" : 0.07697093486785889,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+newline:expression:testCollectionLiterals#10",
+    "index" : 69596,
+    "seed" : 10372684106311075726,
+    "signalHash" : "e9b8d007e8854a57",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/SequenceE",
+    "sourceHash" : "d65bb01fd2204427",
+    "sourceLength" : 55,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n#fancyMacro<Arg1, Arg2>\n(hello \/* c *\/ : \"me\")\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MacroExpansionExpr\n              pound \"#\"\n              identifier(\"fancyMacro\") \"fancyMacro\"\n              GenericArgumentClause\n                leftAngle \"<\"\n                GenericArgumentList\n                  GenericArgument\n                    IdentifierType\n                      identifier(\"Arg1\") \"Arg1\"\n                    comma \",\"\n                rightAngle \">\"\n              LabeledExprList\n              MultipleTrailingClosureElementList\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      ".OPT\t[\",\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "genericArgument\t[type]",
+      "genericArgumentList\t[genericArgument ]",
+      "genericArgumentClause\t[openAngle genericArgumentList  closeAngle >+>(\"!\" \"&\" \"(\" \")\" \",\" \".\" \":\" \";\" \"?\" \"[\" \"]\" \"{\" \"}\" keyPathDot ○)]",
+      ".OPT\t[genericArgumentClause]",
+      "macroHead\t[poundName]",
+      "macroExpansionExpression\t[macroHead   ]",
+      "primaryExpression\t[macroExpansionExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 138,
+      "descriptorCount" : 384,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 207,
+      "parseSeconds" : 0.0051680803298950195,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 10,
+      "yieldCount" : 307
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                MacroExpansionExpr\n                  pound \"#\"\n                  identifier(\"fancyMacro\") \"fancyMacro\"\n                  LabeledExprList\n                  MultipleTrailingClosureElementList\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                DeclReferenceExpr\n                  identifier(\"Arg1\") \"Arg1\"\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                comma \",\"\n                binaryOperator(\">\") \">\"\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 34,
+  "source" : " {\n#fancyMacro<Arg1, >\n()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MacroExpansionExpr\\n              pound \\\"#\\\"\\n              identifier(\\\"fancyMacro\\\") \\\"fancyMacro\\\"\\n              GenericArgumentClause\\n                leftAngle \\\"<\\\"\\n                GenericArgumentList\\n                  GenericArgument\\n                    IdentifierType\\n                      identifier(\\\"Arg1\\\") \\\"Arg1\\\"\\n                    comma \\\",\\\"\\n                rightAngle \\\">\\\"\\n              LabeledExprList\\n              MultipleTrailingClosureElementList\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\".OPT\\t[\\\",\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"genericArgument\\t[type]\",\"genericArgumentList\\t[genericArgument ]\",\"genericArgumentClause\\t[openAngle genericArgumentList  closeAngle >+>(\\\"!\\\" \\\"&\\\" \\\"(\\\" \\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"?\\\" \\\"[\\\" \\\"]\\\" \\\"{\\\" \\\"}\\\" keyPathDot ○)]\",\".OPT\\t[genericArgumentClause]\",\"macroHead\\t[poundName]\",\"macroExpansionExpression\\t[macroHead   ]\",\"primaryExpression\\t[macroExpansionExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":138,\"descriptorCount\":384,\"duplicateDescriptorCount\":0,\"oraclePruned\":207,\"parseSeconds\":0.0051680803298950195,\"sourceLength\":27,\"suppressedDescriptorCount\":45,\"tokenCount\":10,\"yieldCount\":307},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                MacroExpansionExpr\\n                  pound \\\"#\\\"\\n                  identifier(\\\"fancyMacro\\\") \\\"fancyMacro\\\"\\n                  LabeledExprList\\n                  MultipleTrailingClosureElementList\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Arg1\\\") \\\"Arg1\\\"\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                comma \\\",\\\"\\n                binaryOperator(\\\">\\\") \\\">\\\"\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

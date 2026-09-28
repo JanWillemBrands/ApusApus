@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00661640-tree-difference-114422005184752d.json",
+    "durationSeconds" : 0.026129961013793945,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue+block-comment+splice:translated:testEnum5#1",
+    "index" : 661640,
+    "seed" : 15755288686696214284,
+    "signalHash" : "13cdfb92150dabd2",
+    "signalSummary" : "tree-difference|line=34|ref=MemberAccessExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "114422005184752d",
+    "sourceLength" : 54,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nvar b = Boolish.falsy\nb = .\/*c*\/unknown\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    DeclReferenceExpr\n                      identifier(\"b\") \"b\"\n                    AssignmentExpr\n                      equal \"=\"\n                    PrefixOperatorExpr\n                      prefixOperator(\".\/*\") \".\/*\"\n                      DeclReferenceExpr\n                        identifier(\"c\") \"c\"\n                    BinaryOperatorExpr\n                      binaryOperator(\"*\/\") \"*\/\"\n                    DeclReferenceExpr\n                      identifier(\"unknown\") \"unknown\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "operator\t[dotOperator]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 191,
+      "descriptorCount" : 470,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 146,
+      "parseSeconds" : 0.0116119384765625,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 37,
+      "tokenCount" : 10,
+      "yieldCount" : 261
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    DeclReferenceExpr\n                      identifier(\"b\") \"b\"\n                    AssignmentExpr\n                      equal \"=\"\n                    MemberAccessExpr\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"unknown\") \"unknown\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 27,
+  "source" : "#if FOO\nb = .\/*c*\/unknown\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    DeclReferenceExpr\\n                      identifier(\\\"b\\\") \\\"b\\\"\\n                    AssignmentExpr\\n                      equal \\\"=\\\"\\n                    PrefixOperatorExpr\\n                      prefixOperator(\\\".\\\/*\\\") \\\".\\\/*\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"c\\\") \\\"c\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"unknown\\\") \\\"unknown\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"operator\\t[dotOperator]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":191,\"descriptorCount\":470,\"duplicateDescriptorCount\":1,\"oraclePruned\":146,\"parseSeconds\":0.0116119384765625,\"sourceLength\":32,\"suppressedDescriptorCount\":37,\"tokenCount\":10,\"yieldCount\":261},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    DeclReferenceExpr\\n                      identifier(\\\"b\\\") \\\"b\\\"\\n                    AssignmentExpr\\n                      equal \\\"=\\\"\\n                    MemberAccessExpr\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"unknown\\\") \\\"unknown\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

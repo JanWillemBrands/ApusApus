@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00540343-tree-difference-63dc6366cc1cc7d8.json",
+    "durationSeconds" : 0.044541001319885254,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue:real:RefactoringProvider:50",
+    "index" : 540343,
+    "seed" : 4354586988532835097,
+    "signalHash" : "0eb97140f2bd50fc",
+    "signalSummary" : "tree-difference|line=24|ref=prefixOperator()|advent=binaryOperator()",
+    "sourceHash" : "63dc6366cc1cc7d8",
+    "sourceLength" : 572,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nextension EditRefactoringProvider where Context ==Void {\n  \/\/\/ See `textRefactor(syntax:in:)`. This method provides a convenient way to\n  \/\/\/ invoke a refactoring action that requires no context.\n  \/\/\/\n  \/\/\/ - Parameters:\n  \/\/\/   - syntax: The syntax to transform.\n  \/\/\/ - Throws: Throws an error if the refactoring action fails or is not applicable.\n  \/\/\/ - Returns: Textual edits describing the refactoring to perform.\n  public static func textRefactor(syntax: Input) throws -> [SourceEdit] {\n    return try self.textRefactor(syntax: syntax, in: ())\n  }\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ExtensionDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                  IdentifierType\n                    identifier(\"EditRefactoringProvider\") \"EditRefactoringProvider\"\n                  GenericWhereClause\n                    keyword(SwiftSyntax.Keyword.where) \"where\"\n                    GenericRequirementList\n                      GenericRequirement\n                        SameTypeRequirement\n                          IdentifierType\n                            identifier(\"Context\") \"Context\"\n                          binaryOperator(\"==\") \"==\"\n                          IdentifierType\n                            identifier(\"Void\") \"Void\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "extensionBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      ".DO\t[type]",
+      "sameTypeRequirement\t[type \"==\" ]",
+      "requirement\t[sameTypeRequirement]",
+      "requirementList\t[requirement ]",
+      "genericWhereClause\t[\"where\" requirementList]",
+      ".OPT\t[genericWhereClause]",
+      ".DO\t[typeIdentifier]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 172,
+      "descriptorCount" : 365,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 56,
+      "parseSeconds" : 0.012673020362854004,
+      "sourceLength" : 73,
+      "suppressedDescriptorCount" : 28,
+      "tokenCount" : 12,
+      "yieldCount" : 152
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ExtensionDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                  IdentifierType\n                    identifier(\"EditRefactoringProvider\") \"EditRefactoringProvider\"\n                  GenericWhereClause\n                    keyword(SwiftSyntax.Keyword.where) \"where\"\n                    GenericRequirementList\n                      GenericRequirement\n                        SameTypeRequirement\n                          IdentifierType\n                            identifier(\"Context\") \"Context\"\n                          prefixOperator(\"==\") \"==\"\n                          IdentifierType\n                            identifier(\"Void\") \"Void\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 37,
+  "source" : "#if FOO\nextension EditRefactoringProvider where Context ==Void {\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ExtensionDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                  IdentifierType\\n                    identifier(\\\"EditRefactoringProvider\\\") \\\"EditRefactoringProvider\\\"\\n                  GenericWhereClause\\n                    keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                    GenericRequirementList\\n                      GenericRequirement\\n                        SameTypeRequirement\\n                          IdentifierType\\n                            identifier(\\\"Context\\\") \\\"Context\\\"\\n                          binaryOperator(\\\"==\\\") \\\"==\\\"\\n                          IdentifierType\\n                            identifier(\\\"Void\\\") \\\"Void\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\".DO\\t[type]\",\"sameTypeRequirement\\t[type \\\"==\\\" ]\",\"requirement\\t[sameTypeRequirement]\",\"requirementList\\t[requirement ]\",\"genericWhereClause\\t[\\\"where\\\" requirementList]\",\".OPT\\t[genericWhereClause]\",\".DO\\t[typeIdentifier]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":172,\"descriptorCount\":365,\"duplicateDescriptorCount\":0,\"oraclePruned\":56,\"parseSeconds\":0.012673020362854004,\"sourceLength\":73,\"suppressedDescriptorCount\":28,\"tokenCount\":12,\"yieldCount\":152},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ExtensionDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                  IdentifierType\\n                    identifier(\\\"EditRefactoringProvider\\\") \\\"EditRefactoringProvider\\\"\\n                  GenericWhereClause\\n                    keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                    GenericRequirementList\\n                      GenericRequirement\\n                        SameTypeRequirement\\n                          IdentifierType\\n                            identifier(\\\"Context\\\") \\\"Context\\\"\\n                          prefixOperator(\\\"==\\\") \\\"==\\\"\\n                          IdentifierType\\n                            identifier(\\\"Void\\\") \\\"Void\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

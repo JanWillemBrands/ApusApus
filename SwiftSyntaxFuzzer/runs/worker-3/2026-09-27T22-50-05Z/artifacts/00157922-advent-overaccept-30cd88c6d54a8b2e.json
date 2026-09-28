@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00157922-advent-overaccept-30cd88c6d54a8b2e.json",
+    "durationSeconds" : 0.19575798511505127,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+keyword:translated:testForwardSlashRegexSkippingAllowed11#1+translated:testCompositionTypeExpr#13",
+    "index" : 157922,
+    "seed" : 8709271582791740263,
+    "signalHash" : "2df1bf7c9539c31a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "30cd88c6d54a8b2e",
+    "sourceLength" : 220,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nfunc f() {\n  _ = \/E.e\n  (\/E.e).foo(\/0)\n  func foo<T, U>(_ x: T, _ y: U) {}\n  foo(\/E.e, \/E.e)\n  init((\/E.e), \/E.e)\n  foo((\/)(E.e), \/E.e)\n  func bar<T>(_ x: T) -> Int { 0 }\n  _ = bar(\/E.e) \/ 2\n}\n(A?.B & C?.D).self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      keyword(SwiftSyntax.Keyword.init) \"init\"\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                          rightParen \")\"\n                    rightParen \")\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "functionCallArgument\t[expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 125,
+      "descriptorCount" : 333,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 154,
+      "parseSeconds" : 0.009482026100158691,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 9,
+      "yieldCount" : 259
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                          FunctionParameter\n                            AttributeList\n                            DeclModifierList\n                            TupleType\n                              leftParen \"(\"\n                              TupleTypeElementList\n                              rightParen \")\"\n                        rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  init(())\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                          rightParen \\\")\\\"\\n                    rightParen \\\")\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"functionCallArgument\\t[expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":125,\"descriptorCount\":333,\"duplicateDescriptorCount\":0,\"oraclePruned\":154,\"parseSeconds\":0.009482026100158691,\"sourceLength\":19,\"suppressedDescriptorCount\":33,\"tokenCount\":9,\"yieldCount\":259},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                          FunctionParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            TupleType\\n                              leftParen \\\"(\\\"\\n                              TupleTypeElementList\\n                              rightParen \\\")\\\"\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

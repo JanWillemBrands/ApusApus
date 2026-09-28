@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00500743-tree-difference-0703c2f11f81ed83.json",
+    "durationSeconds" : 0.02313995361328125,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:duplicate+swap+block-comment:phase2-infix:assign-member",
+    "index" : 500743,
+    "seed" : 1663246799498458970,
+    "signalHash" : "e0aa8bb58e410cad",
+    "signalSummary" : "tree-difference|line=19|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "0703c2f11f81ed83",
+    "sourceLength" : 33,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n.x.y  \/* c *\/ = 1\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  MissingExpr\n                    identifier(\"<#expression#>\") \"<#expression#>\"\n                  AssignmentExpr\n                    equal \"=\"\n                  IntegerLiteralExpr\n                    integerLiteral(\"1\") \"1\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.x.y »"
+    ],
+    "grammarCoverage" : [
+      "integerLiteral\t[decimalLiteral]",
+      "signedIntegerLiteral\t[ integerLiteral]",
+      "numericLiteral\t[signedIntegerLiteral]",
+      "literal\t[numericLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 125,
+      "descriptorCount" : 372,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 200,
+      "parseSeconds" : 0.0045850276947021484,
+      "sourceLength" : 16,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 10,
+      "yieldCount" : 312
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  MemberAccessExpr\n                    MemberAccessExpr\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"x\") \"x\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"y\") \"y\"\n                  AssignmentExpr\n                    equal \"=\"\n                  IntegerLiteralExpr\n                    integerLiteral(\"1\") \"1\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 33,
+  "source" : " () {\n.x.y = 1\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  MissingExpr\\n                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  IntegerLiteralExpr\\n                    integerLiteral(\\\"1\\\") \\\"1\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.x.y »\"],\"grammarCoverage\":[\"integerLiteral\\t[decimalLiteral]\",\"signedIntegerLiteral\\t[ integerLiteral]\",\"numericLiteral\\t[signedIntegerLiteral]\",\"literal\\t[numericLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":125,\"descriptorCount\":372,\"duplicateDescriptorCount\":0,\"oraclePruned\":200,\"parseSeconds\":0.0045850276947021484,\"sourceLength\":16,\"suppressedDescriptorCount\":45,\"tokenCount\":10,\"yieldCount\":312},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  MemberAccessExpr\\n                    MemberAccessExpr\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"x\\\") \\\"x\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"y\\\") \\\"y\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  IntegerLiteralExpr\\n                    integerLiteral(\\\"1\\\") \\\"1\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

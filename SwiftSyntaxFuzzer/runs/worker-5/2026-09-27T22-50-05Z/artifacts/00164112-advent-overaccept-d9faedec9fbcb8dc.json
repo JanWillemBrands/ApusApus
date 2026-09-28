@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00164112-advent-overaccept-d9faedec9fbcb8dc.json",
+    "durationSeconds" : 0.08618497848510742,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:duplicate+glue+newline:translated:testTry2#1",
+    "index" : 164112,
+    "seed" : 13064011101222712141,
+    "signalHash" : "fb6ca0a6abb819c5",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/OperatorD",
+    "sourceHash" : "d9faedec9fbcb8dc",
+    "sourceLength" : 354,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n\/\/ Intentionally has lower precedence between assignments and ?:\ninfix\/\/ Intentionally has lower precedence between assignments and ?:\ninfix operator %%% : MiddlingPrecedence\nprecedencegroup MiddlingPrecedence {associativity: none\n  higherThan: AssignmentPrecedence\n  lowerThan: TernaryPrecedence\n}\nfunc %%%<T, U>(x: T, y:\nU) -> Int { return 1 }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"infix\") \"infix\"\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"%%%\") \"%%%\"\n          CodeBlockItem\n            PrecedenceGroupDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.precedencegroup) \"precedencegroup\"\n              identifier(\"MiddlingPrecedence\") \"MiddlingPrecedence\"\n              leftBrace \"{\"\n              PrecedenceGroupAttributeList\n                PrecedenceGroupAssociativity\n                  keyword(SwiftSyntax.Keyword.associativity) \"associativity\"\n                  colon \":\"\n                  keyword(SwiftSyntax.Keyword.none) \"none\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      ".DO\t[\"none\"]",
+      "precedenceGroupAssociativity\t[\"associativity\" \":\" ]",
+      "precedenceGroupAttribute\t[precedenceGroupAssociativity]",
+      "precedenceGroupAttributes\t[precedenceGroupAttribute ]",
+      ".OPT\t[precedenceGroupAttributes]",
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "precedenceGroupDeclaration\t[\"precedencegroup\" precedenceGroupName \"{\"  \"}\"]",
+      "declaration\t[precedenceGroupDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statements\t[statement statementSeparator statements]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 251,
+      "descriptorCount" : 558,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 221,
+      "parseSeconds" : 0.015007972717285156,
+      "sourceLength" : 151,
+      "suppressedDescriptorCount" : 87,
+      "tokenCount" : 13,
+      "yieldCount" : 322
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              UnexpectedNodes\n                DeclModifier\n                  keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"%%%\") \"%%%\"\n          CodeBlockItem\n            PrecedenceGroupDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.precedencegroup) \"precedencegroup\"\n              identifier(\"MiddlingPrecedence\") \"MiddlingPrecedence\"\n              leftBrace \"{\"\n              PrecedenceGroupAttributeList\n                PrecedenceGroupAssociativity\n                  keyword(SwiftSyntax.Keyword.associativity) \"associativity\"\n                  colon \":\"\n                  keyword(SwiftSyntax.Keyword.none) \"none\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\ninfix\/\/ Intentionally has lower precedence between assignments and ?:\ninfix operator %%%\nprecedencegroup MiddlingPrecedence {associativity: none\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"infix\\\") \\\"infix\\\"\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"%%%\\\") \\\"%%%\\\"\\n          CodeBlockItem\\n            PrecedenceGroupDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.precedencegroup) \\\"precedencegroup\\\"\\n              identifier(\\\"MiddlingPrecedence\\\") \\\"MiddlingPrecedence\\\"\\n              leftBrace \\\"{\\\"\\n              PrecedenceGroupAttributeList\\n                PrecedenceGroupAssociativity\\n                  keyword(SwiftSyntax.Keyword.associativity) \\\"associativity\\\"\\n                  colon \\\":\\\"\\n                  keyword(SwiftSyntax.Keyword.none) \\\"none\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\".DO\\t[\\\"none\\\"]\",\"precedenceGroupAssociativity\\t[\\\"associativity\\\" \\\":\\\" ]\",\"precedenceGroupAttribute\\t[precedenceGroupAssociativity]\",\"precedenceGroupAttributes\\t[precedenceGroupAttribute ]\",\".OPT\\t[precedenceGroupAttributes]\",\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"precedenceGroupDeclaration\\t[\\\"precedencegroup\\\" precedenceGroupName \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[precedenceGroupDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statements\\t[statement statementSeparator statements]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":251,\"descriptorCount\":558,\"duplicateDescriptorCount\":0,\"oraclePruned\":221,\"parseSeconds\":0.015007972717285156,\"sourceLength\":151,\"suppressedDescriptorCount\":87,\"tokenCount\":13,\"yieldCount\":322},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              UnexpectedNodes\\n                DeclModifier\\n                  keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"%%%\\\") \\\"%%%\\\"\\n          CodeBlockItem\\n            PrecedenceGroupDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.precedencegroup) \\\"precedencegroup\\\"\\n              identifier(\\\"MiddlingPrecedence\\\") \\\"MiddlingPrecedence\\\"\\n              leftBrace \\\"{\\\"\\n              PrecedenceGroupAttributeList\\n                PrecedenceGroupAssociativity\\n                  keyword(SwiftSyntax.Keyword.associativity) \\\"associativity\\\"\\n                  colon \\\":\\\"\\n                  keyword(SwiftSyntax.Keyword.none) \\\"none\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

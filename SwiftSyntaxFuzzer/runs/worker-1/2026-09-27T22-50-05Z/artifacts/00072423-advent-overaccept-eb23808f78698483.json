@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00072423-advent-overaccept-eb23808f78698483.json",
+    "durationSeconds" : 0.01877295970916748,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline:reject:testModuleSelectorImports#3",
+    "index" : 72423,
+    "seed" : 4354586988532835097,
+    "signalHash" : "8ab1ce2e67137a86",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "eb23808f78698483",
+    "sourceLength" : 68,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nimport struct ModuleSelectorTestingKit\n.Submodule::A\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ImportDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.import) \"import\"\n                ImportPathComponentList\n                  ImportPathComponent\n                    identifier(\"ModuleSelectorTestingKit\") \"ModuleSelectorTestingKit\"\n            CodeBlockItem\n              MemberAccessExpr\n                period \".\"\n                DeclReferenceExpr\n                  ModuleSelector\n                    identifier(\"Submodule\") \"Submodule\"\n                    colonColon \"::\"\n                  identifier(\"A\") \"A\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      ".OPT\t[moduleSelector]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "importPath\t[identifierToken ]",
+      "importDeclaration\t[  \"import\"  importPath]",
+      "declaration\t[importDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 102,
+      "descriptorCount" : 284,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 153,
+      "parseSeconds" : 0.010381937026977539,
+      "sourceLength" : 53,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 10,
+      "yieldCount" : 246
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ImportDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.import) \"import\"\n                ImportPathComponentList\n                  ImportPathComponent\n                    identifier(\"ModuleSelectorTestingKit\") \"ModuleSelectorTestingKit\"\n                    period \".\"\n                  ImportPathComponent\n                    identifier(\"Submodule\") \"Submodule\"\n                    UnexpectedNodes\n                      colonColon \"::\"\n                  ImportPathComponent\n                    identifier(\"A\") \"A\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : " () {\nimport ModuleSelectorTestingKit\n.Submodule::A\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ImportDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.import) \\\"import\\\"\\n                ImportPathComponentList\\n                  ImportPathComponent\\n                    identifier(\\\"ModuleSelectorTestingKit\\\") \\\"ModuleSelectorTestingKit\\\"\\n            CodeBlockItem\\n              MemberAccessExpr\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  ModuleSelector\\n                    identifier(\\\"Submodule\\\") \\\"Submodule\\\"\\n                    colonColon \\\"::\\\"\\n                  identifier(\\\"A\\\") \\\"A\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\".OPT\\t[moduleSelector]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"importPath\\t[identifierToken ]\",\"importDeclaration\\t[  \\\"import\\\"  importPath]\",\"declaration\\t[importDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":102,\"descriptorCount\":284,\"duplicateDescriptorCount\":0,\"oraclePruned\":153,\"parseSeconds\":0.010381937026977539,\"sourceLength\":53,\"suppressedDescriptorCount\":33,\"tokenCount\":10,\"yieldCount\":246},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ImportDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.import) \\\"import\\\"\\n                ImportPathComponentList\\n                  ImportPathComponent\\n                    identifier(\\\"ModuleSelectorTestingKit\\\") \\\"ModuleSelectorTestingKit\\\"\\n                    period \\\".\\\"\\n                  ImportPathComponent\\n                    identifier(\\\"Submodule\\\") \\\"Submodule\\\"\\n                    UnexpectedNodes\\n                      colonColon \\\"::\\\"\\n                  ImportPathComponent\\n                    identifier(\\\"A\\\") \\\"A\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

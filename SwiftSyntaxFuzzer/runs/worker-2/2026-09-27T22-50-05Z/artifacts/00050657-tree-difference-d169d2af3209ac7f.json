@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00050657-tree-difference-d169d2af3209ac7f.json",
+    "durationSeconds" : 0.029046058654785156,
+    "exitCode" : 1,
+    "generator" : "wide:closure:delete:phase2-postfix:member-chain",
+    "index" : 50657,
+    "seed" : 15755288686696214284,
+    "signalHash" : "d75d0823edf5f9b4",
+    "signalSummary" : "tree-difference|line=27|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "d169d2af3209ac7f",
+    "sourceLength" : 34,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\nlet a = .y.z\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.y.z\n»"
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 123,
+      "descriptorCount" : 365,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 189,
+      "parseSeconds" : 0.00745999813079834,
+      "sourceLength" : 13,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 8,
+      "yieldCount" : 283
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                MemberAccessExpr\n                  MemberAccessExpr\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"y\") \"y\"\n                  period \".\"\n                  DeclReferenceExpr\n                    identifier(\"z\") \"z\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 27,
+  "source" : " { a = .y.z\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.y.z\\n»\"],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":123,\"descriptorCount\":365,\"duplicateDescriptorCount\":0,\"oraclePruned\":189,\"parseSeconds\":0.00745999813079834,\"sourceLength\":13,\"suppressedDescriptorCount\":43,\"tokenCount\":8,\"yieldCount\":283},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MemberAccessExpr\\n                  MemberAccessExpr\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"y\\\") \\\"y\\\"\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"z\\\") \\\"z\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

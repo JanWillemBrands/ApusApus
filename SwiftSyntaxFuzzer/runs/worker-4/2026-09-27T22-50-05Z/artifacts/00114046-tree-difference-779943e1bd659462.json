@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00114046-tree-difference-779943e1bd659462.json",
+    "durationSeconds" : 0.03442704677581787,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:glue+block-comment:declaration:testOperators#2",
+    "index" : 114046,
+    "seed" : 1663246799498458970,
+    "signalHash" : "2afe4caaddfc4d7d",
+    "signalSummary" : "tree-difference|line=20|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "779943e1bd659462",
+    "sourceLength" : 297,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\ninfix operator<*<<< : MediumPrecedence, &\nprefix operator ^^ : PrefixMagicOperatorProtocol\ninfix operator  <*< : MediumPrecedence, InfixMagicOperatorProtocol\n \/* c *\/ postfix operator ^^ : PostfixMagicOperatorProtocol\ninfix operator ^^ : PostfixMagicOperatorProtocol, Class, Struct\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"<*<<<\") \"<*<<<\"\n                OperatorPrecedenceAndTypes\n                  colon \":\"\n                  identifier(\"MediumPrecedence\") \"MediumPrecedence\"\n                  DesignatedTypeList\n                    DesignatedType\n                      comma \",\"\n                      binaryOperator(\"&\") \"&\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "nonWordToken\t[\"&\"]",
+      "designatedType\t[nonWordToken]",
+      "designatedTypes\t[\",\" designatedType ]",
+      ".OPT\t[designatedTypes]",
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 159,
+      "descriptorCount" : 363,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 201,
+      "parseSeconds" : 0.008749008178710938,
+      "sourceLength" : 49,
+      "suppressedDescriptorCount" : 50,
+      "tokenCount" : 11,
+      "yieldCount" : 276
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                postfixOperator(\"<*<<<\") \"<*<<<\"\n                OperatorPrecedenceAndTypes\n                  colon \":\"\n                  identifier(\"MediumPrecedence\") \"MediumPrecedence\"\n                  DesignatedTypeList\n                    DesignatedType\n                      comma \",\"\n                      binaryOperator(\"&\") \"&\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 43,
+  "source" : " () {\ninfix operator<*<<< : MediumPrecedence, &\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"<*<<<\\\") \\\"<*<<<\\\"\\n                OperatorPrecedenceAndTypes\\n                  colon \\\":\\\"\\n                  identifier(\\\"MediumPrecedence\\\") \\\"MediumPrecedence\\\"\\n                  DesignatedTypeList\\n                    DesignatedType\\n                      comma \\\",\\\"\\n                      binaryOperator(\\\"&\\\") \\\"&\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"nonWordToken\\t[\\\"&\\\"]\",\"designatedType\\t[nonWordToken]\",\"designatedTypes\\t[\\\",\\\" designatedType ]\",\".OPT\\t[designatedTypes]\",\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":159,\"descriptorCount\":363,\"duplicateDescriptorCount\":0,\"oraclePruned\":201,\"parseSeconds\":0.008749008178710938,\"sourceLength\":49,\"suppressedDescriptorCount\":50,\"tokenCount\":11,\"yieldCount\":276},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                postfixOperator(\\\"<*<<<\\\") \\\"<*<<<\\\"\\n                OperatorPrecedenceAndTypes\\n                  colon \\\":\\\"\\n                  identifier(\\\"MediumPrecedence\\\") \\\"MediumPrecedence\\\"\\n                  DesignatedTypeList\\n                    DesignatedType\\n                      comma \\\",\\\"\\n                      binaryOperator(\\\"&\\\") \\\"&\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

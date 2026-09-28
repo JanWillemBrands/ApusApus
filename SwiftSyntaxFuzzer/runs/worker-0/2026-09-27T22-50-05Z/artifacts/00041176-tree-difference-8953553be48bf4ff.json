@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00041176-tree-difference-8953553be48bf4ff.json",
+    "durationSeconds" : 0.06082606315612793,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:delete+delete:real:SyntaxProtocol:172",
+    "index" : 41176,
+    "seed" : 11400601876238378790,
+    "signalHash" : "48ab0e517be2c45f",
+    "signalSummary" : "tree-difference|line=71|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "8953553be48bf4ff",
+    "sourceLength" : 779,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "struct Fuzz {\nextension SyntaxProtocol {\n  \/\/\/ The kind of the syntax node, e.g. if it is a ``SyntaxKind\/functionDecl``.\n  \/\/\/\n  \/\/\/ If you want to check for a node's kind and cast the node to that type, see\n  \/\/\/ `self.as(FunctionDeclSyntax.self)` or `self.as(SyntaxEnum.self)`.\n  public var kind: SyntaxKind {\n    return raw.kind\n  }\n\n  \/\/\/ The dynamic metatype of the concrete node.\n  \/\/\/\n  \/\/\/ You almost always want to prefer this over `type(of: self)` because if\n  \/\/\/ `self` is a ``DeclSyntax`` representing a ``FunctionDeclSyntax``,\n  \/\/\/ `type(of: self)` will return ``DeclSyntax``, while `syntaxNodeType` looks\n  \/\/\/ at the dynamic kind of this node and returns ``FunctionDeclSyntax``.\n  public var syntaxNodeType: SyntaxProtocol.Type { .raw.kind.syntaxNodeType\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"syntaxNodeType\") \"syntaxNodeType\"\n                        TypeAnnotation\n                          colon \":\"\n                          IdentifierType\n                            identifier(\"Type\") \"Type\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              MissingExpr\n                                identifier(\"<#expression#>\") \"<#expression#>\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.kind.syntaxNodeType\n  »"
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      ".OPT\t[typeAnnotation]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 170,
+      "descriptorCount" : 476,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 214,
+      "parseSeconds" : 0.011466026306152344,
+      "sourceLength" : 60,
+      "suppressedDescriptorCount" : 50,
+      "tokenCount" : 14,
+      "yieldCount" : 357
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"syntaxNodeType\") \"syntaxNodeType\"\n                        TypeAnnotation\n                          colon \":\"\n                          IdentifierType\n                            identifier(\"Type\") \"Type\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              MemberAccessExpr\n                                MemberAccessExpr\n                                  period \".\"\n                                  DeclReferenceExpr\n                                    identifier(\"kind\") \"kind\"\n                                period \".\"\n                                DeclReferenceExpr\n                                  identifier(\"syntaxNodeType\") \"syntaxNodeType\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { { var syntaxNodeType: Type { .kind.syntaxNodeType\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"syntaxNodeType\\\") \\\"syntaxNodeType\\\"\\n                        TypeAnnotation\\n                          colon \\\":\\\"\\n                          IdentifierType\\n                            identifier(\\\"Type\\\") \\\"Type\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              MissingExpr\\n                                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.kind.syntaxNodeType\\n  »\"],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\".OPT\\t[typeAnnotation]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":170,\"descriptorCount\":476,\"duplicateDescriptorCount\":0,\"oraclePruned\":214,\"parseSeconds\":0.011466026306152344,\"sourceLength\":60,\"suppressedDescriptorCount\":50,\"tokenCount\":14,\"yieldCount\":357},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"syntaxNodeType\\\") \\\"syntaxNodeType\\\"\\n                        TypeAnnotation\\n                          colon \\\":\\\"\\n                          IdentifierType\\n                            identifier(\\\"Type\\\") \\\"Type\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              MemberAccessExpr\\n                                MemberAccessExpr\\n                                  period \\\".\\\"\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"kind\\\") \\\"kind\\\"\\n                                period \\\".\\\"\\n                                DeclReferenceExpr\\n                                  identifier(\\\"syntaxNodeType\\\") \\\"syntaxNodeType\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

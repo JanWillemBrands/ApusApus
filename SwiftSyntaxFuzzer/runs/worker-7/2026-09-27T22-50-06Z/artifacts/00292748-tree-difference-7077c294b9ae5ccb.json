@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00292748-tree-difference-7077c294b9ae5ccb.json",
+    "durationSeconds" : 0.035415053367614746,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword:phase3-enum-case:case-ifconfig-elseif",
+    "index" : 292748,
+    "seed" : 17418700093595237275,
+    "signalHash" : "89a390e70b5928a4",
+    "signalSummary" : "tree-difference|line=60|ref=DeclModifier|advent=keyword()",
+    "sourceHash" : "7077c294b9ae5ccb",
+    "sourceLength" : 83,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nenum E {\ncase x\n#if FOO\ncase a\n#elseif BAR\ncase b\nindirect\ncase c\n#endif\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"E\") \"E\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    IfConfigDecl\n                      IfConfigClauseList\n                        IfConfigClause\n                          poundIf \"#if\"\n                          DeclReferenceExpr\n                            identifier(\"FOO\") \"FOO\"\n                          MemberBlockItemList\n                            MemberBlockItem\n                              EnumCaseDecl\n                                AttributeList\n                                DeclModifierList\n                                keyword(SwiftSyntax.Keyword.case) \"case\"\n                                EnumCaseElementList\n                                  EnumCaseElement\n                                    identifier(\"c\") \"c\"\n                      poundEndif \"#endif\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertEnumCaseDeclaration(_:from:to:): indirect enum case modifier not converted — «indirect\ncase c\n»"
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "enumCaseName\t[identifierToken]",
+      "enumCaseElement\t[enumCaseName  ]",
+      "enumCaseElementList\t[enumCaseElement ]",
+      ".OPT\t[\"indirect\"]",
+      "enumCaseDeclaration\t[  \"case\" enumCaseElementList]",
+      "memberDeclaration\t[enumCaseDeclaration]",
+      "memberIfItem\t[memberDeclaration]",
+      "memberIfBody\t[memberIfItem  ]",
+      ".OPT\t[memberIfBody]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "memberIfDirectiveClause\t[ifDirective compilationCondition <n> ]",
+      "memberConditionalCompilationBlock\t[memberIfDirectiveClause   endifDirective]",
+      "memberCompilerControlStatement\t[memberConditionalCompilationBlock]",
+      "enumMember\t[memberCompilerControlStatement]",
+      "enumMembers\t[enumMember ]",
+      ".OPT\t[enumMembers]",
+      "enumName\t[identifierToken]",
+      "enumDeclaration\t[  \"enum\" enumName    \"{\"  \"}\"]",
+      "declaration\t[enumDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 204,
+      "descriptorCount" : 374,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 91,
+      "parseSeconds" : 0.008940935134887695,
+      "sourceLength" : 46,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 13,
+      "yieldCount" : 196
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"E\") \"E\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    IfConfigDecl\n                      IfConfigClauseList\n                        IfConfigClause\n                          poundIf \"#if\"\n                          DeclReferenceExpr\n                            identifier(\"FOO\") \"FOO\"\n                          MemberBlockItemList\n                            MemberBlockItem\n                              EnumCaseDecl\n                                AttributeList\n                                DeclModifierList\n                                  DeclModifier\n                                    keyword(SwiftSyntax.Keyword.indirect) \"indirect\"\n                                keyword(SwiftSyntax.Keyword.case) \"case\"\n                                EnumCaseElementList\n                                  EnumCaseElement\n                                    identifier(\"c\") \"c\"\n                      poundEndif \"#endif\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nenum E {\n#if FOO\nindirect\ncase c\n#endif\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"E\\\") \\\"E\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    IfConfigDecl\\n                      IfConfigClauseList\\n                        IfConfigClause\\n                          poundIf \\\"#if\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                          MemberBlockItemList\\n                            MemberBlockItem\\n                              EnumCaseDecl\\n                                AttributeList\\n                                DeclModifierList\\n                                keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                                EnumCaseElementList\\n                                  EnumCaseElement\\n                                    identifier(\\\"c\\\") \\\"c\\\"\\n                      poundEndif \\\"#endif\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertEnumCaseDeclaration(_:from:to:): indirect enum case modifier not converted — «indirect\\ncase c\\n»\"],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"enumCaseName\\t[identifierToken]\",\"enumCaseElement\\t[enumCaseName  ]\",\"enumCaseElementList\\t[enumCaseElement ]\",\".OPT\\t[\\\"indirect\\\"]\",\"enumCaseDeclaration\\t[  \\\"case\\\" enumCaseElementList]\",\"memberDeclaration\\t[enumCaseDeclaration]\",\"memberIfItem\\t[memberDeclaration]\",\"memberIfBody\\t[memberIfItem  ]\",\".OPT\\t[memberIfBody]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"memberIfDirectiveClause\\t[ifDirective compilationCondition <n> ]\",\"memberConditionalCompilationBlock\\t[memberIfDirectiveClause   endifDirective]\",\"memberCompilerControlStatement\\t[memberConditionalCompilationBlock]\",\"enumMember\\t[memberCompilerControlStatement]\",\"enumMembers\\t[enumMember ]\",\".OPT\\t[enumMembers]\",\"enumName\\t[identifierToken]\",\"enumDeclaration\\t[  \\\"enum\\\" enumName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[enumDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":204,\"descriptorCount\":374,\"duplicateDescriptorCount\":0,\"oraclePruned\":91,\"parseSeconds\":0.008940935134887695,\"sourceLength\":46,\"suppressedDescriptorCount\":32,\"tokenCount\":13,\"yieldCount\":196},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"E\\\") \\\"E\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    IfConfigDecl\\n                      IfConfigClauseList\\n                        IfConfigClause\\n                          poundIf \\\"#if\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                          MemberBlockItemList\\n                            MemberBlockItem\\n                              EnumCaseDecl\\n                                AttributeList\\n                                DeclModifierList\\n                                  DeclModifier\\n                                    keyword(SwiftSyntax.Keyword.indirect) \\\"indirect\\\"\\n                                keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                                EnumCaseElementList\\n                                  EnumCaseElement\\n                                    identifier(\\\"c\\\") \\\"c\\\"\\n                      poundEndif \\\"#endif\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

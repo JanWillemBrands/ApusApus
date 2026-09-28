@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00132812-residual-ambiguity-9921e7918b78eb02.json",
+    "durationSeconds" : 0.030776023864746094,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword:real:ApusTerminals:69",
+    "index" : 132812,
+    "seed" : 1663246799498458970,
+    "signalHash" : "a1aa54e1967bb8bc",
+    "signalSummary" : "residual-ambiguity|prefixExpression\tambiguous alternate\t[ postfixExpression] | [\"copy\" >->(\"(\" \".\" \"[\") <s> >n< prefixExpression]",
+    "sourceHash" : "9921e7918b78eb02",
+    "sourceLength" : 95,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "fuzz {\nlet linecommentRegex = copy {\n    \"\/\/\"\n    ZeroOrMore {\n        .anyNonNewline\n    }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"linecommentRegex\") \"linecommentRegex\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"copy\") \"copy\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "primaryExpression\t[genericIdentifier]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 138,
+      "descriptorCount" : 412,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 155,
+      "parseSeconds" : 0.0050629377365112305,
+      "sourceLength" : 36,
+      "suppressedDescriptorCount" : 51,
+      "tokenCount" : 9,
+      "yieldCount" : 290
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"linecommentRegex\") \"linecommentRegex\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"copy\") \"copy\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "prefixExpression\tambiguous alternate\t[ postfixExpression] | [\"copy\" >->(\"(\" \".\" \"[\") <s> >n< prefixExpression]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 49,
+  "source" : " { linecommentRegex = copy { {\n}\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"linecommentRegex\\\") \\\"linecommentRegex\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"copy\\\") \\\"copy\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"primaryExpression\\t[genericIdentifier]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":138,\"descriptorCount\":412,\"duplicateDescriptorCount\":0,\"oraclePruned\":155,\"parseSeconds\":0.0050629377365112305,\"sourceLength\":36,\"suppressedDescriptorCount\":51,\"tokenCount\":9,\"yieldCount\":290},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"linecommentRegex\\\") \\\"linecommentRegex\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"copy\\\") \\\"copy\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"prefixExpression\\tambiguous alternate\\t[ postfixExpression] | [\\\"copy\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< prefixExpression]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

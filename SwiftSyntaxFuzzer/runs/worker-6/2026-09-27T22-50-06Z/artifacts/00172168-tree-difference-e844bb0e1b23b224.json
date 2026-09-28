@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00172168-tree-difference-e844bb0e1b23b224.json",
+    "durationSeconds" : 0.04473602771759033,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:splice:translated:testRegex1#1",
+    "index" : 172168,
+    "seed" : 6018003910102630304,
+    "signalHash" : "6d3d6182c51a1e11",
+    "signalSummary" : "tree-difference|line=17|ref=RegexLiteralExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "e844bb0e1b23b224",
+    "sourceLength" : 45,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n_ -> \/abc\/\n_ = #\/abc\/#\n_ = ##\/abc\/##\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                ArrowExpr\n                  arrow \"->\"\n                PrefixOperatorExpr\n                  prefixOperator(\"\/\") \"\/\"\n                  PostfixOperatorExpr\n                    DeclReferenceExpr\n                      identifier(\"abc\") \"abc\"\n                    postfixOperator(\"\/\") \"\/\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "postfixOperator\t[postfixOperatorToken]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperator <s>]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 112,
+      "descriptorCount" : 308,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 138,
+      "parseSeconds" : 0.0052928924560546875,
+      "sourceLength" : 15,
+      "suppressedDescriptorCount" : 31,
+      "tokenCount" : 7,
+      "yieldCount" : 225
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                ArrowExpr\n                  arrow \"->\"\n                RegexLiteralExpr\n                  regexSlash \"\/\"\n                  regexLiteralPattern(\"abc\") \"abc\"\n                  regexSlash \"\/\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 28,
+  "source" : " {\n_ -> \/abc\/\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                  PostfixOperatorExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"abc\\\") \\\"abc\\\"\\n                    postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"postfixOperator\\t[postfixOperatorToken]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperator <s>]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":112,\"descriptorCount\":308,\"duplicateDescriptorCount\":0,\"oraclePruned\":138,\"parseSeconds\":0.0052928924560546875,\"sourceLength\":15,\"suppressedDescriptorCount\":31,\"tokenCount\":7,\"yieldCount\":225},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                RegexLiteralExpr\\n                  regexSlash \\\"\\\/\\\"\\n                  regexLiteralPattern(\\\"abc\\\") \\\"abc\\\"\\n                  regexSlash \\\"\\\/\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -21,6 +21,10 @@ struct RunnerOptions {
     var grammarPath = "grammars/Swift.apus"
     var outputRoot = "SwiftSyntaxFuzzer/runs"
     var seedCorpusPath = "SwiftSyntaxFuzzer/seeds/known-problems.txt"
+    var wideCorpusPaths = ["SwiftSyntaxFuzzer/seeds/swift-syntax-corpus.txt", "SwiftSyntaxFuzzer/seeds/real-source.txt"]
+    var widePercent = 50
+    var interestingCorpusPaths: [String] = []
+    var interestingPercent = 15
     var includePassingEvents = true
     var heartbeatEvery = 25
     var maxArtifacts = 10_000
@@ -29,6 +33,9 @@ struct RunnerOptions {
     var artifactStatuses: Set<String>? = RunnerOptions.defaultArtifactStatuses
     var maxArtifactsPerStatus: Int? = nil
     var dedupeBySignal = false
+    var reduceArtifactBudget = 0
+    var retainInterestingPasses = true
+    var maxInterestingPasses = 2_000
 
     static func parse(_ raw: ArraySlice<String>) throws -> RunnerOptions {
         var options = RunnerOptions()
@@ -50,6 +57,15 @@ struct RunnerOptions {
                 options.outputRoot = try parseString(iterator.next(), name: arg)
             case "--seed-corpus":
                 options.seedCorpusPath = try parseString(iterator.next(), name: arg)
+            case "--wide-corpus":
+                options.wideCorpusPaths = try parseString(iterator.next(), name: arg)
+                    .split(separator: ",").map(String.init)
+            case "--wide-percent":
+                options.widePercent = try parseValue(iterator.next(), as: Int.self, name: arg)
+            case "--interesting-corpus":
+                options.interestingCorpusPaths = try parsePathList(iterator.next(), name: arg)
+            case "--interesting-percent":
+                options.interestingPercent = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--heartbeat-every":
                 options.heartbeatEvery = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--max-artifacts":
@@ -64,6 +80,14 @@ struct RunnerOptions {
                 options.maxArtifactsPerStatus = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--dedupe-by-signal":
                 options.dedupeBySignal = true
+            case "--reduce-artifacts":
+                options.reduceArtifactBudget = try parseValue(iterator.next(), as: Int.self, name: arg)
+            case "--interesting-passes":
+                options.retainInterestingPasses = true
+            case "--no-interesting-passes":
+                options.retainInterestingPasses = false
+            case "--max-interesting-passes":
+                options.maxInterestingPasses = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--quiet-passes":
                 options.includePassingEvents = false
             case "--persistent-probe":
@@ -84,6 +108,12 @@ struct RunnerOptions {
     private static func parseString(_ raw: String?, name: String) throws -> String {
         guard let raw else { throw RunnerError("missing value for \(name)") }
         return raw
+    }
+
+    private static func parsePathList(_ raw: String?, name: String) throws -> [String] {
+        try parseString(raw, name: name)
+            .split(separator: ",")
+            .map(String.init)
     }
 
     private static func parseValue<T: LosslessStringConvertible>(_ raw: String?, as type: T.Type, name: String) throws -> T {
@@ -148,6 +178,7 @@ struct ProbeOutput: Codable {
     let compilerTypecheckAccepted: Bool?
     let compilerTypecheckStderr: String?
     let residualAmbiguities: [String]
+    let grammarCoverage: [String]?
     let generatorDiagnostics: [String]
     let referenceDump: String?
     let adventDump: String?
@@ -180,9 +211,22 @@ struct TelemetryRecord: Codable {
     let source: String
 }
 
+/// One line of `interesting.jsonl`: a passing source retained because it reached new cheap novelty.
+struct InterestingRecord: Codable {
+    let index: Int
+    let generator: String
+    let sourceHash: String
+    let novelty: [String]
+    let metrics: ProbeOutput.Metrics?
+    let grammarCoverage: [String]?
+    let source: String
+}
+
 struct Artifact: Codable {
     let event: Event
     let source: String
+    let originalSource: String?
+    let reductionProbes: Int?
     let stdout: String
     let stderr: String
     let probe: ProbeOutput?
@@ -253,6 +297,52 @@ struct SeedCorpus {
         } catch {
             return SeedCorpus(entries: [], warnings: ["failed to read: \(error)"])
         }
+    }
+}
+
+struct InterestingCorpus {
+    private struct Line: Codable {
+        let generator: String?
+        let sourceHash: String?
+        let source: String
+    }
+
+    let entries: [SeedEntry]
+    let warnings: [String]
+
+    static func load(paths: [String]) -> InterestingCorpus {
+        var entries: [SeedEntry] = []
+        var warnings: [String] = []
+        var seenSources = Set<String>()
+
+        for path in paths {
+            let url = URL(fileURLWithPath: path)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                warnings.append("\(path): not found")
+                continue
+            }
+
+            do {
+                let text = try String(contentsOf: url, encoding: .utf8)
+                for (offset, rawLine) in text.split(separator: "\n", omittingEmptySubsequences: true).enumerated() {
+                    guard let data = rawLine.data(using: .utf8) else { continue }
+                    do {
+                        let decoded = try JSONDecoder().decode(Line.self, from: data)
+                        let source = decoded.source.trimmedForSeedCorpus()
+                        guard !source.isEmpty, seenSources.insert(source).inserted else { continue }
+                        let id = decoded.sourceHash ?? stableHash(source)
+                        let label = decoded.generator.map { "\($0):\(id)" } ?? "interesting:\(id)"
+                        entries.append(SeedEntry(label: label, source: source))
+                    } catch {
+                        warnings.append("\(path): line \(offset + 1): \(error)")
+                    }
+                }
+            } catch {
+                warnings.append("\(path): failed to read: \(error)")
+            }
+        }
+
+        return InterestingCorpus(entries: entries, warnings: warnings)
     }
 }
 
@@ -492,6 +582,15 @@ struct AdventFuzzRunner {
         defer { try? telemetryHandle.close() }
         var seenTelemetry = Set<String>()
 
+        let interestingURL = runURL.appendingPathComponent("interesting.jsonl")
+        fileManager.createFile(atPath: interestingURL.path, contents: nil)
+        let interestingHandle = try FileHandle(forWritingTo: interestingURL)
+        defer { try? interestingHandle.close() }
+        var noveltyTracker = NoveltyTracker()
+        var interestingCount = 0
+        var seenReduced = Set<String>()
+        var reducedDuplicates = 0
+
         let probeURL = URL(fileURLWithPath: options.probePath)
         guard fileManager.isExecutableFile(atPath: probeURL.path) else {
             throw RunnerError("probe is not executable: \(probeURL.path). Run SwiftSyntaxFuzzer/bin/build.sh first.")
@@ -505,7 +604,17 @@ struct AdventFuzzRunner {
         let seedCorpusURL = URL(fileURLWithPath: options.seedCorpusPath)
         let seedCorpus = SeedCorpus.load(from: seedCorpusURL)
         var rng = SplitMix64(seed: options.seed)
-        var generator = SwiftFragmentGenerator(seedCorpus: seedCorpus.entries)
+        let wideCorpus = options.wideCorpusPaths.flatMap { SeedCorpus.load(from: URL(fileURLWithPath: $0)).entries }
+        let interestingCorpus = InterestingCorpus.load(paths: options.interestingCorpusPaths)
+        var generator = SwiftFragmentGenerator(
+            seedCorpus: seedCorpus.entries,
+            wideCorpus: wideCorpus,
+            widePercent: options.widePercent,
+            interestingCorpus: interestingCorpus.entries,
+            interestingPercent: options.interestingPercent
+        )
+        print("wide corpus: \(wideCorpus.count) entries, \(options.widePercent)% of inputs")
+        print("interesting corpus: \(interestingCorpus.entries.count) entries, \(interestingCorpus.entries.isEmpty ? 0 : options.interestingPercent)% of inputs")
         var counts: [String: Int] = [:]
         var seenArtifacts = Set<String>()
         var artifactCount = 0
@@ -526,6 +635,9 @@ struct AdventFuzzRunner {
         for warning in seedCorpus.warnings {
             print("seed corpus warning: \(warning)")
         }
+        for warning in interestingCorpus.warnings {
+            print("interesting corpus warning: \(warning)")
+        }
         print("artifact cap: \(options.maxArtifacts) files, \(options.maxArtifactMB) MB")
         if let artifactStatuses = options.artifactStatuses {
             print("artifact statuses: \(artifactStatuses.sorted().joined(separator: ","))")
@@ -538,11 +650,18 @@ struct AdventFuzzRunner {
         if options.dedupeBySignal {
             print("artifact dedupe: signal")
         }
+        if options.retainInterestingPasses {
+            print("interesting passes: \(interestingURL.path) (cap \(options.maxInterestingPasses))")
+        } else {
+            print("interesting passes: disabled")
+        }
 
         var completed = 0
         var consecutiveHarnessFailures = 0
         var persistentProbe = options.usePersistentProbe ? try PersistentProbe(probeURL: probeURL, grammarURL: grammarURL) : nil
+        var reducerProbe: PersistentProbe? = nil
         defer { persistentProbe?.stop() }
+        defer { reducerProbe?.stop() }
         for index in 0..<options.iterations {
             if StopFlag.shared.isStopped {
                 print("stop requested; finishing after \(completed) completed inputs")
@@ -659,21 +778,115 @@ struct AdventFuzzRunner {
                 }
             }
 
-            if let artifactName {
-                let artifact = Artifact(
-                    event: event,
-                    source: generated.source,
-                    stdout: result.stdout,
-                    stderr: result.stderr,
-                    probe: decoded
+            if options.retainInterestingPasses,
+               status == "same",
+               interestingCount < options.maxInterestingPasses {
+                let novelty = noveltyTracker.record(
+                    generator: generated.label,
+                    metrics: decoded?.metrics,
+                    grammarCoverage: decoded?.grammarCoverage
                 )
-                let data = try prettyJSON(artifact)
-                let targetURL = artifactURL.appendingPathComponent(artifactName)
-                if (try? data.write(to: targetURL, options: .atomic)) != nil {
+                if !novelty.isEmpty {
+                    try? appendJSONLine(InterestingRecord(
+                        index: index,
+                        generator: generated.label,
+                        sourceHash: sourceHash,
+                        novelty: novelty,
+                        metrics: decoded?.metrics,
+                        grammarCoverage: decoded?.grammarCoverage,
+                        source: generated.source
+                    ), to: interestingHandle)
+                    interestingCount += 1
+                }
+            }
+
+            if let artifactName {
+                var artifactSource = generated.source
+                var artifactResult = result
+                var artifactProbe = decoded
+                var originalSource: String? = nil
+                var reductionProbes: Int? = nil
+                var skipArtifactWrite = false
+                if options.reduceArtifactBudget > 0,
+                   let decoded,
+                   FailureReducer.reducibleStatuses.contains(status) {
+                    let targetKey = FailureReducer.key(decoded)
+                    let reducer = FailureReducer(probe: { candidate in
+                        do {
+                            if reducerProbe == nil {
+                                reducerProbe = try PersistentProbe(probeURL: probeURL, grammarURL: grammarURL)
+                            }
+                            guard let activeReducerProbe = reducerProbe else { return nil }
+                            let reducedResult = try activeReducerProbe.run(
+                                source: candidate,
+                                timeoutSeconds: options.timeoutSeconds
+                            )
+                            if reducedResult.timedOut {
+                                activeReducerProbe.stop(killProcess: true)
+                                reducerProbe = nil
+                                return nil
+                            }
+                            return try? JSONDecoder().decode(ProbeOutput.self, from: Data(reducedResult.stdout.utf8))
+                        } catch {
+                            reducerProbe?.stop(killProcess: true)
+                            reducerProbe = nil
+                            return nil
+                        }
+                    }, budget: options.reduceArtifactBudget)
+                    let reduced = reducer.reduce(generated.source, key: targetKey)
+                    if reduced.source != generated.source {
+                        do {
+                            if reducerProbe == nil {
+                                reducerProbe = try PersistentProbe(probeURL: probeURL, grammarURL: grammarURL)
+                            }
+                            if let reducerProbe {
+                                let finalResult = try reducerProbe.run(
+                                    source: reduced.source,
+                                    timeoutSeconds: options.timeoutSeconds
+                                )
+                                if let finalProbe = try? JSONDecoder().decode(ProbeOutput.self, from: Data(finalResult.stdout.utf8)),
+                                   FailureReducer.key(finalProbe) == targetKey {
+                                    artifactSource = reduced.source
+                                    artifactResult = finalResult
+                                    artifactProbe = finalProbe
+                                    originalSource = generated.source
+                                    reductionProbes = reduced.probes + 1
+                                }
+                            }
+                        } catch {
+                            reducerProbe?.stop(killProcess: true)
+                            reducerProbe = nil
+                        }
+                    } else if reduced.probes > 0 {
+                        reductionProbes = reduced.probes
+                    }
+                }
+                // Many signals shrink to the SAME minimal source (wrapper and prelude variants of one
+                // bug). Only the first reduced form of each is written.
+                let reducedKey = "\(status):\(stableHash(artifactSource))"
+                if originalSource != nil, !seenReduced.insert(reducedKey).inserted {
                     seenArtifacts.insert(dedupeKey)
-                    artifactCount += 1
-                    artifactCountsByStatus[status, default: 0] += 1
-                    artifactBytes += UInt64(data.count)
+                    reducedDuplicates += 1
+                    skipArtifactWrite = true
+                }
+                if !skipArtifactWrite {
+                    let artifact = Artifact(
+                        event: event,
+                        source: artifactSource,
+                        originalSource: originalSource,
+                        reductionProbes: reductionProbes,
+                        stdout: artifactResult.stdout,
+                        stderr: artifactResult.stderr,
+                        probe: artifactProbe
+                    )
+                    let data = try prettyJSON(artifact)
+                    let targetURL = artifactURL.appendingPathComponent(artifactName)
+                    if (try? data.write(to: targetURL, options: .atomic)) != nil {
+                        seenArtifacts.insert(dedupeKey)
+                        artifactCount += 1
+                        artifactCountsByStatus[status, default: 0] += 1
+                        artifactBytes += UInt64(data.count)
+                    }
                 }
             }
 
@@ -714,10 +927,12 @@ struct AdventFuzzRunner {
             }
         }
 
-        let summary = counts
+        var summaryLines = counts
             .sorted { $0.key < $1.key }
             .map { "\($0.key): \($0.value)" }
-            .joined(separator: "\n")
+        summaryLines.append("interesting-passes: \(interestingCount)")
+        summaryLines.append("reduced-duplicates: \(reducedDuplicates)")
+        let summary = summaryLines.joined(separator: "\n")
         try? summary.write(to: summaryURL, atomically: true, encoding: .utf8)
         try? writeHeartbeat(
             to: heartbeatURL,
@@ -888,6 +1103,51 @@ func isHarnessFailure(status: String, result: ProcessResult) -> Bool {
     return false
 }
 
+struct NoveltyTracker {
+    private var seen = Set<String>()
+
+    mutating func record(generator: String, metrics: ProbeOutput.Metrics?, grammarCoverage: [String]?) -> [String] {
+        var novelty: [String] = []
+
+        insert("generator:\(generator)", into: &novelty)
+        for fingerprint in grammarCoverage ?? [] {
+            insert("coverage:\(fingerprint)", into: &novelty)
+        }
+        guard let metrics else { return novelty }
+
+        insertBucket("sourceLength", metrics.sourceLength, into: &novelty)
+        insertBucket("tokenCount", metrics.tokenCount, into: &novelty)
+        insertBucket("descriptorCount", metrics.descriptorCount, into: &novelty)
+        insertBucket("duplicateDescriptorCount", metrics.duplicateDescriptorCount, into: &novelty)
+        insertBucket("suppressedDescriptorCount", metrics.suppressedDescriptorCount, into: &novelty)
+        insertBucket("crfCount", metrics.crfCount, into: &novelty)
+        insertBucket("yieldCount", metrics.yieldCount, into: &novelty)
+        insertBucket("oraclePruned", metrics.oraclePruned, into: &novelty)
+        insertBucket("parseMillis", Int((metrics.parseSeconds * 1000.0).rounded(.up)), into: &novelty)
+
+        return novelty
+    }
+
+    private mutating func insertBucket(_ name: String, _ value: Int, into novelty: inout [String]) {
+        insert("\(name):\(bucket(value))", into: &novelty)
+    }
+
+    private mutating func insert(_ key: String, into novelty: inout [String]) {
+        if seen.insert(key).inserted {
+            novelty.append(key)
+        }
+    }
+
+    private func bucket(_ value: Int) -> String {
+        if value <= 0 { return "0" }
+        var upper = 1
+        while upper < value && upper < Int.max / 2 {
+            upper *= 2
+        }
+        return "\(upper / 2 + 1)-\(upper)"
+    }
+}
+
 struct GeneratedSource {
     let label: String
     let source: String
@@ -896,8 +1156,44 @@ struct GeneratedSource {
 struct SwiftFragmentGenerator {
     private let seedCorpus: [SeedEntry]
 
-    init(seedCorpus: [SeedEntry] = []) {
+    private let wideCorpus: [SeedEntry]
+    private let widePercent: Int
+    private let tokenMutator: TokenMutator
+    private let interestingCorpus: [SeedEntry]
+    private let interestingPercent: Int
+
+    init(
+        seedCorpus: [SeedEntry] = [],
+        wideCorpus: [SeedEntry] = [],
+        widePercent: Int = 0,
+        interestingCorpus: [SeedEntry] = [],
+        interestingPercent: Int = 0
+    ) {
         self.seedCorpus = seedCorpus
+        self.wideCorpus = wideCorpus
+        self.widePercent = wideCorpus.isEmpty ? 0 : widePercent
+        self.tokenMutator = TokenMutator(corpus: wideCorpus)
+        self.interestingCorpus = interestingCorpus
+        self.interestingPercent = interestingCorpus.isEmpty ? 0 : interestingPercent
+    }
+
+    /// Wide lane: a real-code seed (sometimes two), mutated at 1–3 token boundaries (80%), in one
+    /// of `fuzzContexts`.
+    private func wideSource(using rng: inout SplitMix64) -> GeneratedSource {
+        let entry = wideCorpus.random(using: &rng)
+        var source = entry.source
+        var label = entry.label
+        if rng.nextInt(upperBound: 5) == 0 {
+            let second = wideCorpus.random(using: &rng)
+            source += "\n" + second.source
+            label += "+" + second.label
+        }
+        var edits = "raw"
+        if rng.nextInt(upperBound: 5) != 0 {
+            (source, edits) = tokenMutator.mutate(source, using: &rng)
+        }
+        let context = fuzzContexts.random(using: &rng)
+        return GeneratedSource(label: "wide:\(context.name):\(edits):\(label)", source: context.wrap(source))
     }
 
     private let identifiers = [
@@ -980,7 +1276,13 @@ struct SwiftFragmentGenerator {
     private let callLabels = ["default", "operator", "repeat", "async", "await", "inout"]
 
     mutating func next(using rng: inout SplitMix64) -> GeneratedSource {
-        let curatedLaneCount = 52
+        if interestingPercent > 0, rng.nextInt(upperBound: 100) < interestingPercent {
+            return interestingCorpusSource(using: &rng)
+        }
+        if widePercent > 0, rng.nextInt(upperBound: 100) < widePercent {
+            return wideSource(using: &rng)
+        }
+        let curatedLaneCount = 55
         let choice = rng.nextInt(upperBound: seedCorpus.isEmpty ? curatedLaneCount : curatedLaneCount + 4)
         switch choice {
         case 0:
@@ -1096,11 +1398,19 @@ struct SwiftFragmentGenerator {
         case 51:
             return GeneratedSource(label: "macro-attribute-directive-boundary", source: macroAttributeDirectiveBoundary(using: &rng))
         case 52:
-            return seedCorpusSource(using: &rng, mutated: false)
+            return GeneratedSource(label: "attribute-ifconfig-elseif-list", source: attributeIfConfigElseifList(using: &rng))
         case 53:
-            return seedCorpusSource(using: &rng, mutated: true)
+            return GeneratedSource(label: "multiline-interpolation-boundary", source: multilineInterpolationBoundary(using: &rng))
         case 54:
+            return GeneratedSource(label: "grammarish-member-list", source: grammarishMemberList(using: &rng))
+        case 55:
+            return seedCorpusSource(using: &rng, mutated: false)
+        case 56:
+            return seedCorpusSource(using: &rng, mutated: true)
+        case 57:
             return wrappedSeedCorpusSource(using: &rng)
+        case 58:
+            return structuralSeedSplice(using: &rng)
         default:
             return seedCorpusCrossover(using: &rng)
         }
@@ -1618,11 +1928,113 @@ struct SwiftFragmentGenerator {
         ].random(using: &rng)
     }
 
+    private func attributeIfConfigElseifList(using rng: inout SplitMix64) -> String {
+        let attributePool = [
+            "@available(*)",
+            "@available(*, deprecated)",
+            "@MainActor",
+            "@discardableResult",
+            "@_spi(Private)"
+        ]
+        let target = ["func fuzz() {}", "var value: Int { 1 }", "struct Fuzz {}", "enum Fuzz { case value }"].random(using: &rng)
+        return """
+        #if A
+        \(attributePool.random(using: &rng))
+        #elseif B
+        \(attributePool.random(using: &rng))
+        #elseif C
+        \(attributePool.random(using: &rng))
+        #else
+        \(attributePool.random(using: &rng))
+        #endif
+        \(target)
+        """
+    }
+
+    private func multilineInterpolationBoundary(using rng: inout SplitMix64) -> String {
+        let hole = ["value", "try? f(value)", "value as? Foo ?? fallback", "/a  b/", "items.map { $0 }"].random(using: &rng)
+        let indent = ["", "    ", "\t"].random(using: &rng)
+        let trailer = ["", ".count", "\nlet other = fuzzValue"].random(using: &rng)
+        return """
+        struct Foo { var bar: Int = 0 }
+        let value = 1
+        let fallback = 2
+        let items = [value]
+        let fuzzValue = \"\"\"
+        \(indent)prefix \\(\(hole))
+        \(indent)suffix
+        \(indent)\"\"\"\(trailer)
+        """
+    }
+
+    private func grammarishMemberList(using rng: inout SplitMix64) -> String {
+        let ifMember = """
+        #if A
+        @available(*, deprecated)
+        func a() {}
+        #elseif B
+        var b: Int { 1 }
+        #else
+        subscript(index: Int) -> Int { index }
+        #endif
+        """
+        let members = [
+            "case value(Int)",
+            "@MainActor\nfunc call<T>(_ value: T) async throws -> T { value }",
+            "typealias Element = Array<Foo.Bar?>",
+            "init?<T>(_ value: T) where T: P {}",
+            ifMember
+        ]
+        let body = (0..<max(2, rng.nextInt(upperBound: 5) + 2)).map { _ in members.random(using: &rng) }.joined(separator: ["\n", ";\n"].random(using: &rng))
+        return ["enum", "struct", "class", "actor", "protocol"].random(using: &rng) == "enum"
+            ? "enum Fuzz {\n\(body)\n}"
+            : "struct Foo { struct Bar {} }\nprotocol P {}\nstruct Fuzz {\n\(body)\n}"
+    }
+
+    private func structuralSeedSplice(using rng: inout SplitMix64) -> GeneratedSource {
+        let entry = seedCorpus.random(using: &rng)
+        let mutated = mutateSeed(entry.source, using: &rng)
+        let wrapper = [
+            "struct Fuzz {\n#if A\n\(mutated)\n#elseif B\nvar sentinel: Int = 1\n#endif\n}",
+            "#if A\n\(mutated)\n#elseif B\n.member\n#else\nlet sentinel = 1\n#endif",
+            "func fuzz() {\n#if A\n\(mutated)\n#elseif B\nreturn\n#endif\n}",
+            "@available(*, deprecated)\n\(mutated)"
+        ].random(using: &rng)
+        return GeneratedSource(label: "seed-corpus-structural-splice:\(entry.label)", source: wrapper)
+    }
+
     private func seedCorpusSource(using rng: inout SplitMix64, mutated: Bool) -> GeneratedSource {
         let entry = seedCorpus.random(using: &rng)
         let source = mutated ? mutateSeed(entry.source, using: &rng) : entry.source
         let mode = mutated ? "mutated" : "raw"
         return GeneratedSource(label: "seed-corpus-\(mode):\(entry.label)", source: source)
+    }
+
+    private func interestingCorpusSource(using rng: inout SplitMix64) -> GeneratedSource {
+        let entry = interestingCorpus.random(using: &rng)
+        switch rng.nextInt(upperBound: 5) {
+        case 0:
+            return GeneratedSource(label: "interesting-corpus-raw:\(entry.label)", source: entry.source)
+        case 1:
+            return GeneratedSource(label: "interesting-corpus-mutated:\(entry.label)", source: mutateSeed(entry.source, using: &rng))
+        case 2:
+            let context = fuzzContexts.random(using: &rng)
+            return GeneratedSource(
+                label: "interesting-corpus-wide:\(context.name):\(entry.label)",
+                source: context.wrap(mutateSeed(entry.source, using: &rng))
+            )
+        case 3 where interestingCorpus.count > 1:
+            let second = interestingCorpus.random(using: &rng)
+            return GeneratedSource(
+                label: "interesting-corpus-crossover:\(entry.label)+\(second.label)",
+                source: "\(mutateSeed(entry.source, using: &rng))\n\(mutateSeed(second.source, using: &rng))"
+            )
+        default:
+            return GeneratedSource(
+                label: "interesting-corpus-ifconfig:\(entry.label)",
+                source: "#if A\n\(entry.source)\n#elseif B\n\(mutateSeed(entry.source, using: &rng))\n#endif"
+            )
+        }
     }
 
     private func wrappedSeedCorpusSource(using rng: inout SplitMix64) -> GeneratedSource {
@@ -1782,19 +2194,19 @@ func makeFailureSignal(
     case "advent-overaccept":
         rawSummary = [
             "advent-overaccept",
+            "compiler=\(probe?.compilerAccepted?.description ?? "unknown")",
             "swiftSyntaxHasError=\(probe?.swiftSyntaxHasError.description ?? "unknown")",
-            "adventBuiltTree=\(probe?.adventBuiltTree.description ?? "unknown")",
             dumpShapeSignal(probe?.referenceDump)
         ].joined(separator: "|")
-    case "advent-underaccept", "compiler-rejects-swiftsyntax-accepts", "compiler-typecheck-rejects-swiftsyntax-accepts":
+    case "advent-underaccept":
         rawSummary = [
-            status,
+            "advent-underaccept",
             "compiler=\(probe?.compilerAccepted?.description ?? "unknown")",
-            "typecheck=\(probe?.compilerTypecheckAccepted?.description ?? "unknown")",
+            "swiftSyntaxHasError=\(probe?.swiftSyntaxHasError.description ?? "unknown")",
             dumpShapeSignal(probe?.referenceDump)
         ].joined(separator: "|")
     case "residual-ambiguity":
-        rawSummary = "\(status)|\(firstUsefulLine(probe?.residualAmbiguities.joined(separator: "\n")))"
+        rawSummary = "\(status)|\(firstUsefulLine(probe?.residualAmbiguities.first ?? ""))"
     case "advent-no-generated-tree":
         rawSummary = "\(status)|\(firstUsefulLine(probe?.generatorDiagnostics.joined(separator: "\n")))|\(dumpShapeSignal(probe?.referenceDump))"
     case "timeout":
@@ -1919,6 +2331,12 @@ func printHelp() {
       --grammar PATH       Swift.apus path (default: grammars/Swift.apus)
       --output PATH        Run output directory (default: SwiftSyntaxFuzzer/runs)
       --seed-corpus PATH   Labeled seed corpus (default: SwiftSyntaxFuzzer/seeds/known-problems.txt)
+      --wide-corpus PATHS  Comma-separated real-code seed files for the wide lanes (default: seeds/swift-syntax-corpus.txt,seeds/real-source.txt; "" disables)
+      --wide-percent N     Share of inputs from the wide lanes (default: 50)
+      --interesting-corpus PATHS
+                           Comma-separated interesting.jsonl files to feed back as a coverage corpus
+      --interesting-percent N
+                           Share of inputs from the interesting corpus when provided (default: 15)
       --heartbeat-every N  Write heartbeat/state every N inputs (default: 25)
       --max-artifacts N    Stop writing new artifact files after N unique artifacts (default: 10000)
       --max-artifact-mb N  Stop writing new artifact files after N MB (default: 1024)
@@ -1928,6 +2346,12 @@ func printHelp() {
       --max-artifacts-per-status N
                            Stop writing new artifact files after N unique artifacts for any single status
       --dedupe-by-signal   Dedupe artifact writes by failure-shape signal instead of exact source hash
+      --reduce-artifacts N Try up to N probe calls to shrink each newly-written reducible artifact
+      --interesting-passes Retain passing inputs that add cheap novelty (default)
+      --no-interesting-passes
+                           Disable interesting passing-input retention
+      --max-interesting-passes N
+                           Cap interesting passing inputs written to interesting.jsonl (default: 2000)
       --quiet-passes       Only write non-same events to events.jsonl
       --persistent-probe   Reuse one probe process and cached grammar (default)
       --isolated-probe     Launch a fresh probe process per input

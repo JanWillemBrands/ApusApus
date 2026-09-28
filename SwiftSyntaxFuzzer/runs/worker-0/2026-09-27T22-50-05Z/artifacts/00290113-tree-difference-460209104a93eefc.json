@@ -1,0 +1,63 @@
+{
+  "event" : {
+    "artifact" : "00290113-tree-difference-460209104a93eefc.json",
+    "durationSeconds" : 0.03604400157928467,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:delete:phase4-keypath:kp-rootless-chain",
+    "index" : 290113,
+    "seed" : 11400601876238378790,
+    "signalHash" : "398be25da7c28b57",
+    "signalSummary" : "tree-difference|line=26|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "460209104a93eefc",
+    "sourceLength" : 34,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\nlet a = .foo.bar",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — « .foo.bar»"
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 60,
+      "descriptorCount" : 190,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 137,
+      "parseSeconds" : 0.0022149085998535156,
+      "sourceLength" : 9,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 4,
+      "yieldCount" : 177
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      MemberAccessExpr\n        MemberAccessExpr\n          period \".\"\n          DeclReferenceExpr\n            identifier(\"foo\") \"foo\"\n        period \".\"\n        DeclReferenceExpr\n          identifier(\"bar\") \"bar\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 9,
+  "source" : " .foo.bar",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — « .foo.bar»\"],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":60,\"descriptorCount\":190,\"duplicateDescriptorCount\":0,\"oraclePruned\":137,\"parseSeconds\":0.0022149085998535156,\"sourceLength\":9,\"suppressedDescriptorCount\":22,\"tokenCount\":4,\"yieldCount\":177},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      MemberAccessExpr\\n        MemberAccessExpr\\n          period \\\".\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"foo\\\") \\\"foo\\\"\\n        period \\\".\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"bar\\\") \\\"bar\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

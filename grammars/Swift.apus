@@ -90,6 +90,18 @@ lexerClassifiedKeyword = "Any" | "as" | "associatedtype" | "break" | "case" | "c
                        | "repeat" | "rethrows" | "return" | "self" | "Self" | "static" | "struct"
                        | "subscript" | "super" | "switch" | "throw" | "throws" | "true" | "try"
                        | "typealias" | "var" | "where" | "while" .
+// Lexer-classified keywords that put a following SPACED `/` in regex position, rather than binary
+// division position. The excluded words mirror the previous-token allow-list on
+// `plainRegularExpressionLiteral`.
+regexForcingLexerKeyword = "as" | "associatedtype" | "break" | "case" | "catch" | "class"
+                          | "continue" | "default" | "defer" | "deinit" | "do" | "else" | "enum"
+                          | "extension" | "fallthrough" | "fileprivate" | "for"
+                          | "guard" | "if" | "import" | "in" | "init" | "inout" | "internal" | "is" | "let"
+                          | "precedencegroup" | "private" | "protocol" | "public"
+                          | "repeat" | "rethrows" | "return" | "static" | "struct"
+                          | "subscript" | "switch" | "throw" | "throws" | "try"
+                          | "typealias" | "var" | "where" | "while" .
+regexSafeLexerKeyword = "Any" | "false" | "func" | "nil" | "operator" | "self" | "Self" | "super" | "true" .
 // swift-syntax's `.identifier` TOKEN: any word the lexer does not classify as a keyword (so every
 // contextual keyword — `get`, `await`, `each`, …), an escaped name, or `$x`. The name positions that
 // swift-syntax fills with `expectIdentifier()` / `consume(if: .identifier)` use this. (Formerly
@@ -123,7 +135,9 @@ argumentLabel =
 // keyword matrix: `.\`init\``, `.init`, `._borrowing`, `.deinit`, `.subscript` all already agreed,
 // `.inout` was the lone divergence.
 memberName =
-    | identifier ---( "_" )
+    | regexForcingLexerKeyword >-> ( regexSlash )
+    | regexSafeLexerKeyword
+    | identifier ---( "_" lexerClassifiedKeyword )
     | escapedIdentifier
     | propertyWrapperProjection
     .
@@ -592,8 +606,17 @@ placeholderType = "_" .
 typeIdentifier  =
     // `>-> ( "any" "some" "each" )`: in TYPE position swift-syntax always reads these as specifiers
     // (`parseSimpleOrCompositionType` / `parseType`, Types.swift), never as a type NAME.
-    | >-> ( "any" "some" "each" ) typeName typeGenericArgumentClause?
-    | typeIdentifier "." >n< >-> ( "Type" "Protocol" ) typeName typeGenericArgumentClause?
+    //
+    // `>-> ( openAngle )` on the name WITHOUT arguments: in type position a following `<` ALWAYS
+    // starts generic arguments (swift-syntax checks `at(prefix: "<")`, no `canParse` lookahead as in
+    // expressions), so a type name may not stop right before one. `x as Int < 5`, `x as Int <= 5`,
+    // `x is Int << 2` and `value as A<B>??x` are errors in swift-syntax; without this gate the type
+    // stopped at `Int`/`A` and `<` continued as an operator. The `@longest` on `infixExpression` only
+    // masked this for the cast case, and only via dead extents the Oracle kept by accident.
+    | >-> ( "any" "some" "each" ) typeName typeGenericArgumentClause
+    | >-> ( "any" "some" "each" ) typeName >-> ( openAngle )
+    | typeIdentifier "." >n< >-> ( "Type" "Protocol" ) typeName typeGenericArgumentClause
+    | typeIdentifier "." >n< >-> ( "Type" "Protocol" ) typeName >-> ( openAngle )
     .
 
 typeName =
@@ -887,7 +910,10 @@ awaitOperator =
 // `postfixOperatorToken` already means exactly "operator body not starting with `!`/`?`", so it is
 // reused here rather than cloned; `dotOperator` (`a...b`) and `"&"` (`a&b`) stay reachable.
 @longest
-infixExpression = @cannotParse( genericArgumentClause ) >s< ( postfixOperatorToken | dotOperator | "&" ) >s< tryOperator? awaitOperator? prefixExpression .
+// `>-> ( "." )`: a left-bound operator directly followed by `.` is POSTFIX, never binary (swift-syntax
+// `isRightBound`: for a following `.` it returns `!isLeftBound`). `LOOK()*!*. // c⏎exclaim()` is
+// `(LOOK()*!*)` + a dot with whitespace after it (an error), not `LOOK() *!* .exclaim()`.
+infixExpression = @cannotParse( genericArgumentClause ) >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression .
 // The two hand-written mark-ending dot operators that used to live here are GONE. `dotOperator`
 // now keeps a trailing `?`/`!` run (see the regex library), so the tight-infix alternate above
 // covers `\Foo.?.?[0]`'s `binaryOperator(".?")` directly, and maximal munch — not a `>-> ( "." )`
@@ -925,7 +951,10 @@ infixExpressions = infixExpression infixExpressions? .
 arrowExpr = typeEffectSpecifiers? "->" >->( "async" "throws" "rethrows" ) .
 typeEffectSpecifiers = "async" | "async" throwsClause | throwsClause .
 
-conditionInfixExpression = >s< infixOperator >s< tryOperator? awaitOperator? prefixExpression .
+// Tight form mirrors the tight `infixExpression` exactly (operator set, generic-argument predicate,
+// `.` gate); the families differ only by the absence of assignment. With plain `infixOperator` a
+// tight `??` was a binary operator in conditions only: `if rhs??b {}` accepted, swift rejects.
+conditionInfixExpression = @cannotParse( genericArgumentClause ) >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression .
 conditionInfixExpression = <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression .
 // No explicit try/await here: `expression` already starts with those optionals,
 // and repeating them gives the ternary false branch two attachment points.
@@ -1275,7 +1304,9 @@ captureSpecifier    = "weak" | "unowned" | "unowned" "(" "safe" ")" | "unowned" 
 // parses the decl-reference name without an at-start-of-line guard, so a newline
 // between `.` and `some(value)` is accepted in expression and matching-pattern positions.
 implicitMemberExpression = "." moduleSelector? memberName .          // allows e.g. '.public', '.Swift::min' (SE-0491)
-implicitMemberExpression = "." moduleSelector? memberName "." >n< postfixExpression .
+// The chain continues with a member NAME (`.a.b(c)`), not an arbitrary postfix expression:
+// `.Bar.[2]` is an error in swift-syntax, but `postfixExpression` let `[2]` through as an array literal.
+implicitMemberExpression = "." moduleSelector? memberName "." >n< >+> ( identifier escapedIdentifier propertyWrapperProjection decimalDigits ) postfixExpression .
 
 /// Grammar of a parenthesized expression
 /// parenthesized-expression → ( expression )
@@ -1620,7 +1651,10 @@ initializerExpression = "init" >-> ( "{" ) .
 // the base. swift-syntax accepts `x⏎.⏎member` and `x .⏎member` but rejects `x.⏎member`. The old
 // unconditional `>n<` sent `f { value }⏎.⏎member` down the implicit-member route instead
 // (a separate `.member` statement: tree difference).
-explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) decimalDigits .
+// `<-<` on the TIGHT dot: `1.0` is ONE float literal in swift-syntax's lexer, never the integer `1`
+// with a tuple member `.0`. Without the gate that split survived and let a literal take a trailing
+// closure (`_ = 1.0 { … }` accepted; the literal-callee ban below did not see a literal).
+explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >n< | <s> "." ) decimalDigits .
 explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName .
 // Unparenthesized key paths are postfix islands; swift-syntax stays inside
 // key-path parsing instead of reinterpreting a shorter key-path prefix as a
@@ -1914,9 +1948,10 @@ catchPattern = whereClause .
 /// compiler-control-statement → line-control-statement
 /// compiler-control-statement → diagnostic-statement
 
-compilerControlStatement = conditionalCompilationBlock .
-compilerControlStatement = lineControlStatement .
+compilerControlStatement = lineControlStatement | conditionalCompilationBlock .
 // `#warning` and `#error` are MacroExpansionExpr in swift-syntax.
+
+memberCompilerControlStatement = lineControlStatement | memberConditionalCompilationBlock .
 
 /// Grammar of a conditional compilation block
 /// conditional-compilation-block → if-directive-clause elseif-directive-clauses? else-directive-clause? endif-directive
@@ -1949,14 +1984,36 @@ compilerControlStatement = lineControlStatement .
 
 conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
 
+// Clause bodies use their own statement list so nested `#if` blocks whose immediate body starts
+// with `.member` can be parsed at a real statement boundary. Keep that body-only route out of the
+// ordinary `statements` list, where it would compete with postfix `#if` after `let v = x`.
+ifConfigStatements = ifConfigStatement ";"? .
+ifConfigStatements = ifConfigStatement statementSeparator ifConfigStatements .
+ifConfigStatement = statement .
+ifConfigStatement = ifConfigBodyConditionalCompilationBlock .
+ifConfigBodyConditionalCompilationBlock = ifConfigBodyIfDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
+ifConfigBodyIfDirectiveClause = ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+
+memberConditionalCompilationBlock = memberIfDirectiveClause memberElseifDirectiveClauses? memberElseDirectiveClause? endifDirective .
+memberIfDirectiveClause = ifDirective compilationCondition <n> memberIfBody? .
+memberElseifDirectiveClauses = memberElseifDirectiveClause memberElseifDirectiveClauses? .
+memberElseifDirectiveClause = elseifDirective compilationCondition <n> memberIfBody? .
+memberElseDirectiveClause = elseDirective memberIfBody? .
+memberIfBody = memberIfItem { statementSeparator memberIfItem } ";"? .
+memberIfItem = memberDeclaration | memberCompilerControlStatement .
+
 // Postfix-position variant — same directive skeleton, but each clause body is a postfix continuation
 // (see the note at `explicitMemberExpression`). `postfixIfBody` also admits a nested block, matching
 // swift's `parser.at(.poundIf)` branch, where the nested `#if` has no base expression of its own.
+
 postfixConditionalCompilationBlock = postfixIfDirectiveClause postfixElseifDirectiveClauses? postfixElseDirectiveClause? endifDirective .
+
 // The FIRST body decides whether this is postfix at all: swift-syntax (`Expressions.swift` ~1005)
 // skips any nested `#if` lines and requires `atStartOfPostfixExprSuffix` — a `.`. Otherwise
 // (`1⏎#if FOO⏎2⏎#endif`, or an empty first clause) it is a statement-level `IfConfigDecl`.
+
 postfixIfDirectiveClause = ifDirective compilationCondition >+>( "." "#if" ) <n> postfixIfBody .
+
 postfixElseifDirectiveClauses = postfixElseifDirectiveClause postfixElseifDirectiveClauses? .
 postfixElseifDirectiveClause = elseifDirective compilationCondition <n> postfixIfBody? .
 postfixElseDirectiveClause = elseDirective postfixIfBody? .
@@ -1976,16 +2033,23 @@ postfixNestedBlocks = postfixConditionalCompilationBlock postfixNestedBlocks? .
 // `>->( "." )`: when a clause body starts with a leading dot after an expression-like
 // token, swift-syntax treats the directive as postfix-ifconfig and diagnoses any non-postfix
 // tail there. The statement-level route must not shadow that recovery path.
-ifDirectiveClause = ifDirective compilationCondition >->( "." ) <n> statements? .
+
+ifDirectiveClause =
+    ifDirective compilationCondition >->( "." ) <n> ifConfigStatements? .
+
 // But at a true statement/declaration boundary, swift-syntax accepts a leading-dot body:
 // `#if FOO \n .member \n #endif` is an `IfConfigDecl` whose element is a `MemberAccessExpr`.
-ifDirectiveClause = <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark ) ifDirective compilationCondition >+>( "." ) <n> statements? .
+
+ifDirectiveClause =
+    <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark )
+    ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+
 elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
 // `#elseif`/`#else` bodies are ungated: swift-syntax decides postfix-vs-statement from the `#if`
 // clause alone (see `postfixIfDirectiveClause`), and when that clause is postfix-shaped the gate on
 // `ifDirectiveClause` above already kills this route. `x⏎#if FOO⏎#else⏎.b⏎#endif` is statement-level.
-elseifDirectiveClause = elseifDirective compilationCondition <n> statements? .
-elseDirectiveClause = elseDirective statements? .
+elseifDirectiveClause = elseifDirective compilationCondition <n> ifConfigStatements? .
+elseDirectiveClause = elseDirective ifConfigStatements? .
 ifDirective = "#if" .
 elseifDirective = "#elseif" .
 elseDirective = "#else" <n> .
@@ -2010,8 +2074,9 @@ compilationCondition = compilationCondition "||" compilationCondition .
 // Version comparisons need no special rules either: `swift(>=5)` / `compiler(>=10.0)` /
 // `canImport(A, _version: >=2.2)` parse via this generic call with `>=5` as a tight-prefix
 // operator expression, matching swift-syntax's reading.
-compilationCondition = identifierToken functionCallArgumentClause .
+compilationCondition = identifierToken >n< functionCallArgumentClause .
 // reuse the general call-argument clause (handles multi-arg + labels + trailing comma); the inline "(" functionCallArgumentList? ","? ")" form failed on multi-arg conditions like canImport(A, _version: 2)
+
 
 /// Grammar of a line control statement
 /// line-control-statement → #sourceLocation ( file: file-path , line: line-number )
@@ -2019,11 +2084,9 @@ compilationCondition = identifierToken functionCallArgumentClause .
 /// line-number → A decimal integer greater than zero
 /// file-path → static-string-literal
 
-// A named TERMINAL must be defined BEFORE it is referenced (Grammar.handleNonTerminal:
-// a reference resolves against `nonTerminals` only, and a later terminal definition is
-// reported as `undefinedNonTerminal(definedAsTerminal: true)`). Nonterminals may be
-// forward-referenced, so this ordering constraint only bites the `-` productions.
-lineNumber - /0*[1-9][0-9]*/ .   // `-` not `=` — single-regex production, see `decimalDigits`.
+lineNumber - /0*[1-9][0-9]*/ .
+
+filePath = staticStringLiteral .
 
 // Two FLAT alternates rather than one with an optional `[ … ]` group, which mirrors the two
 // swift-syntax shapes (`arguments` nil vs present) and, more practically, keeps `filePath` and
@@ -2031,8 +2094,6 @@ lineNumber - /0*[1-9][0-9]*/ .   // `-` not `=` — single-regex production, see
 // `find` does not see them, so the arguments came out nil and the tree lost them.
 lineControlStatement = "#sourceLocation" "(" ")" .
 lineControlStatement = "#sourceLocation" "(" "file" ":" filePath "," "line" ":" lineNumber ")" .
-
-filePath = staticStringLiteral .
 
 /// Grammar of an availability condition
 /// availability-condition → #available ( availability-arguments )
@@ -2115,19 +2176,14 @@ declaration = operatorDeclaration .
 declaration = precedenceGroupDeclaration .
 declaration = associatedTypeDeclaration .
 declaration = usingDeclaration .
-// Bare freestanding macros are declarations only in member position; in
-// statement/expression position swift-syntax parses `#foo` as MacroExpansionExpr.
-// Attributed/modified macro expansions are declarations everywhere declarations
-// are allowed.
-memberDeclaration = declaration | freestandingMacroExpansionDeclaration .
-// swift-syntax parseDecl recognizes `case` as the start of an EnumCaseDeclSyntax in any member
-// context; the compiler enforces the semantic constraint that cases only live in enum bodies.
-// Not in TSPL: swift-syntax parses enum cases in any member context; the
-// compiler enforces the enum-only restriction semantically.
-// Confined to the six member-list contexts, not to `memberDeclaration`: a `#if` clause inside a member
-// list parses its body as `statements`, so a case there is inside an `enumMember` (via its
-// `compilerControlStatement`) but inside no `memberDeclaration`. swift-syntax accepts that case.
-declaration = @confinedTo(enumMember structMember classMember actorMember protocolMember extensionMember) enumCaseDeclaration .
+// Bare freestanding macros and enum cases are declarations only in member position; in
+// statement/expression position swift-syntax parses `#foo` as MacroExpansionExpr and rejects `case`.
+// Attributed/modified macro expansions are declarations everywhere declarations are allowed.
+// Not in TSPL: swift-syntax parses enum cases in any member context; the compiler enforces the
+// enum-only restriction semantically. Keep enum cases structurally member-only rather than using
+// span containment: containment sees function bodies nested inside member lists and would accept
+// invalid `case` declarations in statement bodies.
+memberDeclaration = declaration | enumCaseDeclaration | freestandingMacroExpansionDeclaration .
 declaration = macroExpansionDeclaration .   // attributed/modified freestanding macro (see below); bare form is member-only
 
 // macroExpansionDeclaration REQUIRES a leading attribute or declaration-modifier (so a bare `#foo`
@@ -2313,9 +2369,9 @@ willSetClause = attributes? "willSet" setterName? accessorEffects? codeBlock .
 didSetClause = attributes? "didSet" setterName? accessorEffects? codeBlock .
 
 // Shared `parseAccessorEffectSpecifiers` shape (Specifiers.swift): `throws` alone, or `async` optionally
-// followed by `throws`. Typed throws (`throws(E)`) parsing in accessor positions is handled by `throwsClause`
-// elsewhere — kept simple here per current grammar style.
-accessorEffects = "throws" | "async" "throws"? .
+// followed by `throws`. The throws part is `throwsClause`, so typed throws (SE-0413, `get throws(E)`)
+// parses here as it does on functions; swift-syntax accepts it (measured 2026-09-27).
+accessorEffects = throwsClause | "async" throwsClause? .
 
 /// Grammar of a type alias declaration
 /// typealias-declaration → attributes? access-level-modifier? typealias typealias-name generic-parameter-clause? typealias-assignment
@@ -2438,7 +2494,7 @@ defaultArgumentClause = assignmentOperator expression .
 enumDeclaration = attributes? declarationModifiers? "enum" enumName genericParameterClause? typeInheritanceClause? genericWhereClause? "{" enumMembers? "}" .
 enumMembers = enumMember ";"? .
 enumMembers = enumMember statementSeparator enumMembers .
-enumMember = memberDeclaration | compilerControlStatement .
+enumMember = memberDeclaration | memberCompilerControlStatement .
 
 // swift-syntax `parseEnumCaseParameter` (Parameters.swift:241-295): associated values are a
 // distinct EnumCaseParameterListSyntax with function-parameter-like elements — optional
@@ -2479,7 +2535,7 @@ structBody = "{" structMembers? "}" .
 
 structMembers = structMember ";"? .
 structMembers = structMember statementSeparator structMembers .
-structMember = memberDeclaration | compilerControlStatement .
+structMember = memberDeclaration | memberCompilerControlStatement .
 
 /// Grammar of a class declaration
 /// class-declaration → attributes? access-level-modifier? final? class class-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? class-body
@@ -2495,7 +2551,7 @@ classBody = "{" classMembers? "}" .
 
 classMembers = classMember ";"? .
 classMembers = classMember statementSeparator classMembers .
-classMember = memberDeclaration | compilerControlStatement .
+classMember = memberDeclaration | memberCompilerControlStatement .
 
 /// Grammar of an actor declaration
 /// actor-declaration → attributes? access-level-modifier? actor actor-name generic-parameter-clause? type-inheritance-clause? generic-where-clause? actor-body
@@ -2510,7 +2566,7 @@ actorBody = "{" actorMembers? "}" .
 
 actorMembers = actorMember ";"? .
 actorMembers = actorMember statementSeparator actorMembers .
-actorMember = memberDeclaration | compilerControlStatement .
+actorMember = memberDeclaration | memberCompilerControlStatement .
 
 /// Grammar of a protocol declaration
 /// protocol-declaration → attributes? access-level-modifier? protocol protocol-name type-inheritance-clause? generic-where-clause? protocol-body
@@ -2557,7 +2613,7 @@ protocolMembers = protocolMember statementSeparator protocolMembers .
 // So a protocol member is just a general `declaration`; compiler-only
 // restrictions are left semantic. The bodyless `var x: Int { get set }` /
 // `subscript(...) { get }` forms are already covered by variableDeclaration / subscriptDeclaration.
-protocolMember = memberDeclaration | compilerControlStatement .
+protocolMember = memberDeclaration | memberCompilerControlStatement .
 
 // `>-> ( "each" )`: swift-syntax `parseAssociatedTypeDeclaration` consumes a leading `each` as an
 // (invalid) pack attempt, so `associatedtype each` is an error.
@@ -2620,7 +2676,7 @@ extensionBody = "{" extensionMembers? "}" .
 
 extensionMembers = extensionMember ";"? .
 extensionMembers = extensionMember statementSeparator extensionMembers .
-extensionMember = memberDeclaration | compilerControlStatement .
+extensionMember = memberDeclaration | memberCompilerControlStatement .
 
 /// Grammar of a subscript declaration
 /// subscript-declaration → subscript-head subscript-result generic-where-clause? code-block
@@ -3054,10 +3110,10 @@ attributeHeadName = identifierToken | selfType .
 
 attributes = attribute attributes? .
 attributes = conditionalCompilationAttributes attributes? .
-conditionalCompilationAttributes = ifDirectiveAttributes elseifDirectiveAttributes? elseDirectiveAttributes? endifDirective .
+conditionalCompilationAttributes = ifDirectiveAttributes elseifDirectiveAttributeClauses? elseDirectiveAttributes? endifDirective .
 ifDirectiveAttributes = ifDirective compilationCondition attributes? .
-elseifDirectiveAttributes = elseifDirectiveAttributes elseifDirectiveAttributes? .
-elseifDirectiveAttributes = elseifDirective compilationCondition attributes? .
+elseifDirectiveAttributeClauses = elseifDirectiveAttributeClause elseifDirectiveAttributeClauses? .
+elseifDirectiveAttributeClause = elseifDirective compilationCondition attributes? .
 elseDirectiveAttributes = elseDirective attributes? .
 
 // Non-word residue for `designatedType`, the one surviving consume-any-token context. It holds ONLY
@@ -3282,7 +3338,7 @@ genericParameter = attributes? "each"? >-> ( "each" ) genericParameterName .
 // keyword and fails the gate: `struct Fuzz<T: Self>` is an error in swift-syntax (measured), and so
 // is `T: Self.Type`. `(A)`, `[A]` and `_` (a wildcard token, not an identifier) fail it too;
 // `` `class` `` is an identifier token and passes.
-genericParameter = attributes? "each"? >-> ( "each" ) genericParameterName ":" >+> ( identifier escapedIdentifier "Any" "protocol" "~" ) >-> ( "Self" "_" ) type .
+genericParameter = attributes? "each"? >-> ( "each" ) genericParameterName ":" >+> ( identifier escapedIdentifier "Any" "protocol" "~" ) >-> ( "Self" "_" "repeat" ) type .
 genericParameter = attributes? "let" genericParameterName ":" type .
 
 genericWhereClause = "where" requirementList .

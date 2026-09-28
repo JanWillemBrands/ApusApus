@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00714597-tree-difference-d3c6b9a568b04c87.json",
+    "durationSeconds" : 0.028201937675476074,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+glue+block-comment:phase4-keypath:kp-mark-run-spaced-dot",
+    "index" : 714597,
+    "seed" : 11400601876238378790,
+    "signalHash" : "7b7703cfd4c1f9f9",
+    "signalSummary" : "tree-difference|line=35|ref=KeyPathOptionalComponent|advent=period",
+    "sourceHash" : "d3c6b9a568b04c87",
+    "sourceLength" : 41,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nlet a =\n\\Foo.foo??  \/* c *\/ .bar\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              KeyPathComponentList\n                KeyPathComponent\n                  period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      identifier(\"foo\") \"foo\"\n                KeyPathComponent\n                  KeyPathOptionalComponent\n                    postfixQuestionMark \"?\"\n                KeyPathComponent\n                  period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      identifier(\"bar\") \"bar\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in appendKeyPathPivot(_:from:to:into:): key-path component form has no converter: <no nonterminal in alternate> — «?  \/* c *\/ »"
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "memberName\t[identifier]",
+      "keyPathMemberName\t[ memberName]",
+      "keyPathProperty\t[\".\" >n< keyPathMemberName]",
+      "keyPathBareComponent\t[keyPathProperty]",
+      ".KLN\t[keyPathBareComponent]",
+      "keyPathBareComponent\t[>s< optionalMark]",
+      "keyPathBareTail\t[keyPathBareComponent ]",
+      ".OPT\t[keyPathBareTail]",
+      "keyPathPivot\t[>s< optionalMark]",
+      "keyPathComponents\t[keyPathProperty  keyPathPivot  keyPathBareStop]",
+      "keyPathExpression\t[\"\\\\\" >+>(keyPathDot) keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 79,
+      "descriptorCount" : 183,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 87,
+      "parseSeconds" : 0.004022955894470215,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 17,
+      "tokenCount" : 9,
+      "yieldCount" : 172
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              KeyPathComponentList\n                KeyPathComponent\n                  period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      identifier(\"foo\") \"foo\"\n                KeyPathComponent\n                  KeyPathOptionalComponent\n                    postfixQuestionMark \"?\"\n                KeyPathComponent\n                  KeyPathOptionalComponent\n                    postfixQuestionMark \"?\"\n                KeyPathComponent\n                  period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      identifier(\"bar\") \"bar\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 36,
+  "source" : " {\n\\.foo??  \/* c *\/ .bar\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      identifier(\\\"foo\\\") \\\"foo\\\"\\n                KeyPathComponent\\n                  KeyPathOptionalComponent\\n                    postfixQuestionMark \\\"?\\\"\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      identifier(\\\"bar\\\") \\\"bar\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in appendKeyPathPivot(_:from:to:into:): key-path component form has no converter: <no nonterminal in alternate> — «?  \\\/* c *\\\/ »\"],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"memberName\\t[identifier]\",\"keyPathMemberName\\t[ memberName]\",\"keyPathProperty\\t[\\\".\\\" >n< keyPathMemberName]\",\"keyPathBareComponent\\t[keyPathProperty]\",\".KLN\\t[keyPathBareComponent]\",\"keyPathBareComponent\\t[>s< optionalMark]\",\"keyPathBareTail\\t[keyPathBareComponent ]\",\".OPT\\t[keyPathBareTail]\",\"keyPathPivot\\t[>s< optionalMark]\",\"keyPathComponents\\t[keyPathProperty  keyPathPivot  keyPathBareStop]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" >+>(keyPathDot) keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":79,\"descriptorCount\":183,\"duplicateDescriptorCount\":0,\"oraclePruned\":87,\"parseSeconds\":0.004022955894470215,\"sourceLength\":26,\"suppressedDescriptorCount\":17,\"tokenCount\":9,\"yieldCount\":172},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      identifier(\\\"foo\\\") \\\"foo\\\"\\n                KeyPathComponent\\n                  KeyPathOptionalComponent\\n                    postfixQuestionMark \\\"?\\\"\\n                KeyPathComponent\\n                  KeyPathOptionalComponent\\n                    postfixQuestionMark \\\"?\\\"\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      identifier(\\\"bar\\\") \\\"bar\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00670266-tree-difference-162d2ea41383536c.json",
+    "durationSeconds" : 0.042027950286865234,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline+newline+splice:expression:probeParenKeyPathPostfix#1",
+    "index" : 670266,
+    "seed" : 4354586988532835097,
+    "signalHash" : "ea62090bb120949e",
+    "signalSummary" : "tree-difference|line=11|ref=SequenceExpr|advent=GenericSpecializationExpr",
+    "sourceHash" : "162d2ea41383536c",
+    "sourceLength" : 37,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\n(\\Foo).method<Int\n>\n()\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                GenericSpecializationExpr\n                  MemberAccessExpr\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"method\") \"method\"\n                  GenericArgumentClause\n                    leftAngle \"<\"\n                    GenericArgumentList\n                      GenericArgument\n                        IdentifierType\n                          identifier(\"Int\") \"Int\"\n                    rightAngle \">\"\n              CodeBlockItem\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "genericArgument\t[type]",
+      "genericArgumentList\t[genericArgument ]",
+      "genericArgumentClause\t[openAngle genericArgumentList  closeAngle >+>(\"!\" \"&\" \"(\" \")\" \",\" \".\" \":\" \";\" \"?\" \"[\" \"]\" \"{\" \"}\" keyPathDot ○)]",
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "explicitMemberExpression\t[postfixExpression   memberName genericArgumentClause]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "ifConfigStatements\t[ifConfigStatement statementSeparator ifConfigStatements]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 243,
+      "descriptorCount" : 599,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 298,
+      "parseSeconds" : 0.007609963417053223,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 13,
+      "yieldCount" : 411
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    MemberAccessExpr\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                        rightParen \")\"\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"method\") \"method\"\n                    BinaryOperatorExpr\n                      binaryOperator(\"<\") \"<\"\n                    DeclReferenceExpr\n                      identifier(\"Int\") \"Int\"\n                    BinaryOperatorExpr\n                      binaryOperator(\">\") \">\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 42,
+  "source" : "#if FOO\n().method<Int\n>\n()\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                GenericSpecializationExpr\\n                  MemberAccessExpr\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"method\\\") \\\"method\\\"\\n                  GenericArgumentClause\\n                    leftAngle \\\"<\\\"\\n                    GenericArgumentList\\n                      GenericArgument\\n                        IdentifierType\\n                          identifier(\\\"Int\\\") \\\"Int\\\"\\n                    rightAngle \\\">\\\"\\n              CodeBlockItem\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"genericArgument\\t[type]\",\"genericArgumentList\\t[genericArgument ]\",\"genericArgumentClause\\t[openAngle genericArgumentList  closeAngle >+>(\\\"!\\\" \\\"&\\\" \\\"(\\\" \\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"?\\\" \\\"[\\\" \\\"]\\\" \\\"{\\\" \\\"}\\\" keyPathDot ○)]\",\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"explicitMemberExpression\\t[postfixExpression   memberName genericArgumentClause]\",\"postfixExpression\\t[explicitMemberExpression]\",\"ifConfigStatements\\t[ifConfigStatement statementSeparator ifConfigStatements]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":243,\"descriptorCount\":599,\"duplicateDescriptorCount\":0,\"oraclePruned\":298,\"parseSeconds\":0.007609963417053223,\"sourceLength\":33,\"suppressedDescriptorCount\":47,\"tokenCount\":13,\"yieldCount\":411},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    MemberAccessExpr\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                        rightParen \\\")\\\"\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"method\\\") \\\"method\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\"<\\\") \\\"<\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"Int\\\") \\\"Int\\\"\\n                    BinaryOperatorExpr\\n                      binaryOperator(\\\">\\\") \\\">\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

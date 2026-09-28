@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00547364-tree-difference-4b9986b0861da18b.json",
+    "durationSeconds" : 0.06301796436309814,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:line-comment+glue+line-comment:fuzz-harvest:constraint-suppressed",
+    "index" : 547364,
+    "seed" : 8709271582791740263,
+    "signalHash" : "7fc2a4138af8b207",
+    "signalSummary" : "tree-difference|line=35|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "4b9986b0861da18b",
+    "sourceLength" : 58,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\nstruct S<T: ~Copyable& \/\/ c\n P> { \/\/ c\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"S\") \"S\"\n        GenericParameterClause\n          leftAngle \"<\"\n          GenericParameterList\n            GenericParameter\n              AttributeList\n              identifier(\"T\") \"T\"\n              colon \":\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"Copyable\") \"Copyable\"\n                    binaryOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"P\") \"P\"\n          rightAngle \">\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "structBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "protocolCompositionElement\t[ typeIdentifier]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[  >->(\"each\") genericParameterName \":\" >+>(\"Any\" \"protocol\" \"~\" escapedIdentifier identifier) >->(\"Self\" \"_\" \"repeat\") type]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 68,
+      "descriptorCount" : 146,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 28,
+      "parseSeconds" : 0.002701997756958008,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 15,
+      "tokenCount" : 11,
+      "yieldCount" : 111
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"S\") \"S\"\n        GenericParameterClause\n          leftAngle \"<\"\n          GenericParameterList\n            GenericParameter\n              AttributeList\n              identifier(\"T\") \"T\"\n              colon \":\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"Copyable\") \"Copyable\"\n                    postfixOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"P\") \"P\"\n          rightAngle \">\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 41,
+  "source" : "struct S<T: Copyable&\nP> {\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"S\\\") \\\"S\\\"\\n        GenericParameterClause\\n          leftAngle \\\"<\\\"\\n          GenericParameterList\\n            GenericParameter\\n              AttributeList\\n              identifier(\\\"T\\\") \\\"T\\\"\\n              colon \\\":\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"P\\\") \\\"P\\\"\\n          rightAngle \\\">\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"protocolCompositionElement\\t[ typeIdentifier]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[  >->(\\\"each\\\") genericParameterName \\\":\\\" >+>(\\\"Any\\\" \\\"protocol\\\" \\\"~\\\" escapedIdentifier identifier) >->(\\\"Self\\\" \\\"_\\\" \\\"repeat\\\") type]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":68,\"descriptorCount\":146,\"duplicateDescriptorCount\":0,\"oraclePruned\":28,\"parseSeconds\":0.002701997756958008,\"sourceLength\":28,\"suppressedDescriptorCount\":15,\"tokenCount\":11,\"yieldCount\":111},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"S\\\") \\\"S\\\"\\n        GenericParameterClause\\n          leftAngle \\\"<\\\"\\n          GenericParameterList\\n            GenericParameter\\n              AttributeList\\n              identifier(\\\"T\\\") \\\"T\\\"\\n              colon \\\":\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    postfixOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"P\\\") \\\"P\\\"\\n          rightAngle \\\">\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

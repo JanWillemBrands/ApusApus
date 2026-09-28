@@ -220,10 +220,9 @@ struct FailureReducer {
     let probe: (String) -> ProbeOutput?
     let budget: Int
 
-    /// What must survive reduction: the status, and for tree differences / ambiguities the SHAPE of
-    /// the failure (divergent node pair, ambiguous nonterminal) so a reduction cannot drift onto an
-    /// unrelated bug with the same status. Compiler statuses reduce as the underacceptance they are
-    /// under `skipCompiler`.
+    /// What must survive reduction: the compiler-first status, and for tree differences /
+    /// ambiguities the SHAPE of the failure (divergent node pair, ambiguous nonterminal) so a
+    /// reduction cannot drift onto an unrelated bug with the same status.
     static func key(_ output: ProbeOutput) -> String {
         switch output.status {
         case "tree-difference":
@@ -231,9 +230,7 @@ struct FailureReducer {
             return "tree-difference|" + signal.split(separator: "|").dropFirst().joined(separator: "|")
         case "residual-ambiguity":
             let first = output.residualAmbiguities.first ?? ""
-            return "residual-ambiguity|" + (first.split(separator: " ").first.map(String.init) ?? "")
-        case "compiler-rejects-swiftsyntax-accepts", "compiler-typecheck-rejects-swiftsyntax-accepts":
-            return "advent-underaccept"
+            return "residual-ambiguity|" + first
         default:
             return output.status
         }
@@ -241,8 +238,7 @@ struct FailureReducer {
 
     static let reducibleStatuses: Set<String> = [
         "advent-underaccept", "advent-overaccept", "tree-difference", "residual-ambiguity",
-        "advent-no-generated-tree", "compiler-rejects-swiftsyntax-accepts",
-        "compiler-typecheck-rejects-swiftsyntax-accepts",
+        "advent-no-generated-tree",
     ]
 
     func reduce(_ source: String, key target: String) -> (source: String, probes: Int) {

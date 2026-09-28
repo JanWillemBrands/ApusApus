@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00031711-tree-difference-cdd00116ae562e0f.json",
+    "durationSeconds" : 0.021150946617126465,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue:statement:testMissingIfClauseIntroducer#1",
+    "index" : 31711,
+    "seed" : 17418700093595237275,
+    "signalHash" : "6974eed8d62330c4",
+    "signalSummary" : "tree-difference|line=15|ref=ConditionElement|advent=CodeBlock",
+    "sourceHash" : "cdd00116ae562e0f",
+    "sourceLength" : 21,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nif _ = 42 {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              IfExpr\n                keyword(SwiftSyntax.Keyword.if) \"if\"\n                ConditionElementList\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in collectConditions(_:from:to:into:): condition kind has no converter: missingIntroducerWildcardCondition — «_ = 42 »"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "integerLiteral\t[decimalLiteral]",
+      "signedIntegerLiteral\t[ integerLiteral]",
+      "numericLiteral\t[signedIntegerLiteral]",
+      "literal\t[numericLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "missingIntroducerWildcardCondition\t[\"_\" initializer]",
+      "condition\t[missingIntroducerWildcardCondition]",
+      "conditionList\t[condition ]",
+      "ifExpression\t[\"if\" >->(\"{\") conditionList codeBlock ]",
+      "conditionalExpression\t[ifExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 100,
+      "descriptorCount" : 260,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 81,
+      "parseSeconds" : 0.0032869577407836914,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 8,
+      "yieldCount" : 171
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              IfExpr\n                keyword(SwiftSyntax.Keyword.if) \"if\"\n                ConditionElementList\n                  ConditionElement\n                    SequenceExpr\n                      ExprList\n                        DiscardAssignmentExpr\n                          wildcard \"_\"\n                        AssignmentExpr\n                          equal \"=\"\n                        IntegerLiteralExpr\n                          integerLiteral(\"42\") \"42\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 29,
+  "source" : " {\nif _ = 42 {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              IfExpr\\n                keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                ConditionElementList\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in collectConditions(_:from:to:into:): condition kind has no converter: missingIntroducerWildcardCondition — «_ = 42 »\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"integerLiteral\\t[decimalLiteral]\",\"signedIntegerLiteral\\t[ integerLiteral]\",\"numericLiteral\\t[signedIntegerLiteral]\",\"literal\\t[numericLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"missingIntroducerWildcardCondition\\t[\\\"_\\\" initializer]\",\"condition\\t[missingIntroducerWildcardCondition]\",\"conditionList\\t[condition ]\",\"ifExpression\\t[\\\"if\\\" >->(\\\"{\\\") conditionList codeBlock ]\",\"conditionalExpression\\t[ifExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":100,\"descriptorCount\":260,\"duplicateDescriptorCount\":0,\"oraclePruned\":81,\"parseSeconds\":0.0032869577407836914,\"sourceLength\":17,\"suppressedDescriptorCount\":21,\"tokenCount\":8,\"yieldCount\":171},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              IfExpr\\n                keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                ConditionElementList\\n                  ConditionElement\\n                    SequenceExpr\\n                      ExprList\\n                        DiscardAssignmentExpr\\n                          wildcard \\\"_\\\"\\n                        AssignmentExpr\\n                          equal \\\"=\\\"\\n                        IntegerLiteralExpr\\n                          integerLiteral(\\\"42\\\") \\\"42\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

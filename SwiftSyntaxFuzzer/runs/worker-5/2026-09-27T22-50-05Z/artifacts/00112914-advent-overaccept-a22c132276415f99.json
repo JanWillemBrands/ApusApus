@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00112914-advent-overaccept-a22c132276415f99.json",
+    "durationSeconds" : 0.05847489833831787,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:swap:translated:testForwardSlashRegex62#1",
+    "index" : 112914,
+    "seed" : 13064011101222712141,
+    "signalHash" : "5356dda1782cab99",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "a22c132276415f99",
+    "sourceLength" : 34,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\n_ = \/[abc\/ :\/abc\/]\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                PrefixOperatorExpr\n                  prefixOperator(\"\/\") \"\/\"\n                  ArrayExpr\n                    leftSquare \"[\"\n                    ArrayElementList\n                      ArrayElement\n                        PostfixOperatorExpr\n                          DeclReferenceExpr\n                            identifier(\"abc\") \"abc\"\n                          postfixOperator(\"\/\") \"\/\"\n                    rightSquare \"]\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperatorToken >+>(\")\" \",\" \".\" \":\" \";\" \"]\" \"}\" ○)]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "arrayLiteralItem\t[expression]",
+      "arrayLiteralItems\t[arrayLiteralItem ]",
+      ".OPT\t[arrayLiteralItems]",
+      "arrayLiteral\t[\"[\"   \"]\"]",
+      "literalExpression\t[arrayLiteral]",
+      "primaryExpression\t[literalExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 159,
+      "descriptorCount" : 438,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 218,
+      "parseSeconds" : 0.00971996784210205,
+      "sourceLength" : 16,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 11,
+      "yieldCount" : 331
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                RegexLiteralExpr\n                  regexSlash \"\/\"\n                  regexLiteralPattern(\"[abc\") \"[abc\"\n                  regexSlash \"\/\"\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                rightSquare \"]\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 28,
+  "source" : " {\n_ = \/[abc\/]\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                  ArrayExpr\\n                    leftSquare \\\"[\\\"\\n                    ArrayElementList\\n                      ArrayElement\\n                        PostfixOperatorExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"abc\\\") \\\"abc\\\"\\n                          postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                    rightSquare \\\"]\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperatorToken >+>(\\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"]\\\" \\\"}\\\" ○)]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"arrayLiteralItem\\t[expression]\",\"arrayLiteralItems\\t[arrayLiteralItem ]\",\".OPT\\t[arrayLiteralItems]\",\"arrayLiteral\\t[\\\"[\\\"   \\\"]\\\"]\",\"literalExpression\\t[arrayLiteral]\",\"primaryExpression\\t[literalExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":159,\"descriptorCount\":438,\"duplicateDescriptorCount\":0,\"oraclePruned\":218,\"parseSeconds\":0.00971996784210205,\"sourceLength\":16,\"suppressedDescriptorCount\":47,\"tokenCount\":11,\"yieldCount\":331},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                RegexLiteralExpr\\n                  regexSlash \\\"\\\/\\\"\\n                  regexLiteralPattern(\\\"[abc\\\") \\\"[abc\\\"\\n                  regexSlash \\\"\\\/\\\"\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                rightSquare \\\"]\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

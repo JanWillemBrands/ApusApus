@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00724109-tree-difference-f48923e065fc2aff.json",
+    "durationSeconds" : 0.03751993179321289,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword+line-comment+space:declaration:testVariableDeclarations#6",
+    "index" : 724109,
+    "seed" : 11400601876238378790,
+    "signalHash" : "a9de574a3b7e3f5f",
+    "signalSummary" : "tree-difference|line=21|ref=FunctionCallExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "f48923e065fc2aff",
+    "sourceLength" : 49,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nvar a =  init \/\/ c\n<Int>?(from: decoder)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                DeclReferenceExpr\n                  keyword(SwiftSyntax.Keyword.init) \"init\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                PrefixOperatorExpr\n                  prefixOperator(\">?\") \">?\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        identifier(\"from\") \"from\"\n                        colon \":\"\n                        DeclReferenceExpr\n                          identifier(\"decoder\") \"decoder\"\n                    rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "argumentLabel\t[identifier]",
+      "tupleExpression\t[\"(\" argumentLabel \":\" expression  \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 178,
+      "descriptorCount" : 496,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 218,
+      "parseSeconds" : 0.013914942741394043,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 57,
+      "tokenCount" : 12,
+      "yieldCount" : 348
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  OptionalChainingExpr\n                    GenericSpecializationExpr\n                      DeclReferenceExpr\n                        keyword(SwiftSyntax.Keyword.init) \"init\"\n                      GenericArgumentClause\n                        leftAngle \"<\"\n                        GenericArgumentList\n                        rightAngle \">\"\n                    postfixQuestionMark \"?\"\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      identifier(\"from\") \"from\"\n                      colon \":\"\n                      DeclReferenceExpr\n                        identifier(\"decoder\") \"decoder\"\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 44,
+  "source" : " { a = init\n< >?(from: decoder)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                DeclReferenceExpr\\n                  keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\">?\\\") \\\">?\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        identifier(\\\"from\\\") \\\"from\\\"\\n                        colon \\\":\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"decoder\\\") \\\"decoder\\\"\\n                    rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"argumentLabel\\t[identifier]\",\"tupleExpression\\t[\\\"(\\\" argumentLabel \\\":\\\" expression  \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":178,\"descriptorCount\":496,\"duplicateDescriptorCount\":1,\"oraclePruned\":218,\"parseSeconds\":0.013914942741394043,\"sourceLength\":33,\"suppressedDescriptorCount\":57,\"tokenCount\":12,\"yieldCount\":348},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  OptionalChainingExpr\\n                    GenericSpecializationExpr\\n                      DeclReferenceExpr\\n                        keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                      GenericArgumentClause\\n                        leftAngle \\\"<\\\"\\n                        GenericArgumentList\\n                        rightAngle \\\">\\\"\\n                    postfixQuestionMark \\\"?\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      identifier(\\\"from\\\") \\\"from\\\"\\n                      colon \\\":\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"decoder\\\") \\\"decoder\\\"\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

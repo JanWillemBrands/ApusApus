@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00026960-residual-ambiguity-0ad0adb834c9889f.json",
+    "durationSeconds" : 0.026203036308288574,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:raw:translated:testCanImportWithStringVersion#1+real:DeclSyntaxParseable:51",
+    "index" : 26960,
+    "seed" : 17418700093595237275,
+    "signalHash" : "98e591a09c5b9874",
+    "signalSummary" : "residual-ambiguity|structMembers\tambiguous alternate\t[structMember ] | [structMember statementSeparator structMembers]",
+    "sourceHash" : "0ad0adb834c9889f",
+    "sourceLength" : 118,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "struct Fuzz {\n#if canImport(MyModule, _version: \"1.2.3\")\n#endif\nextension FunctionDeclSyntax: DeclSyntaxParseable {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              ExtensionDecl\n                AttributeList\n                  IfConfigDecl\n                    IfConfigClauseList\n                      IfConfigClause\n                        poundIf \"#if\"\n                        FunctionCallExpr\n                          DeclReferenceExpr\n                            identifier(\"canImport\") \"canImport\"\n                          leftParen \"(\"\n                          LabeledExprList\n                          rightParen \")\"\n                          MultipleTrailingClosureElementList\n                        AttributeList\n                    poundEndif \"#endif\"\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                IdentifierType\n                  identifier(\"DeclSyntaxParseable\") \"DeclSyntaxParseable\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "extensionBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".DO\t[typeIdentifier]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "compilationCondition\t[identifierToken >n< functionCallArgumentClause]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveAttributes\t[ifDirective compilationCondition ]",
+      "conditionalCompilationAttributes\t[ifDirectiveAttributes   endifDirective]",
+      "attributes\t[conditionalCompilationAttributes ]",
+      ".OPT\t[attributes]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "structMember\t[memberDeclaration]",
+      "structMembers\t[structMember ]",
+      "statementSeparator\t[<n>]",
+      "memberIfDirectiveClause\t[ifDirective compilationCondition <n> ]",
+      "memberConditionalCompilationBlock\t[memberIfDirectiveClause   endifDirective]",
+      "memberCompilerControlStatement\t[memberConditionalCompilationBlock]",
+      "structMember\t[memberCompilerControlStatement]",
+      ".OPT\t[structMembers]",
+      "structBody\t[\"{\"  \"}\"]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 133,
+      "descriptorCount" : 273,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 50,
+      "parseSeconds" : 0.004730939865112305,
+      "sourceLength" : 72,
+      "suppressedDescriptorCount" : 36,
+      "tokenCount" : 14,
+      "yieldCount" : 172
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              IfConfigDecl\n                IfConfigClauseList\n                  IfConfigClause\n                    poundIf \"#if\"\n                    FunctionCallExpr\n                      DeclReferenceExpr\n                        identifier(\"canImport\") \"canImport\"\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                    MemberBlockItemList\n                poundEndif \"#endif\"\n            MemberBlockItem\n              ExtensionDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                IdentifierType\n                  identifier(\"DeclSyntaxParseable\") \"DeclSyntaxParseable\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "structMembers\tambiguous alternate\t[structMember ] | [structMember statementSeparator structMembers]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "struct Fuzz {\n#if canImport( )\n#endif\nextension DeclSyntaxParseable {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              ExtensionDecl\\n                AttributeList\\n                  IfConfigDecl\\n                    IfConfigClauseList\\n                      IfConfigClause\\n                        poundIf \\\"#if\\\"\\n                        FunctionCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"canImport\\\") \\\"canImport\\\"\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                          rightParen \\\")\\\"\\n                          MultipleTrailingClosureElementList\\n                        AttributeList\\n                    poundEndif \\\"#endif\\\"\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                IdentifierType\\n                  identifier(\\\"DeclSyntaxParseable\\\") \\\"DeclSyntaxParseable\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".DO\\t[typeIdentifier]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"compilationCondition\\t[identifierToken >n< functionCallArgumentClause]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveAttributes\\t[ifDirective compilationCondition ]\",\"conditionalCompilationAttributes\\t[ifDirectiveAttributes   endifDirective]\",\"attributes\\t[conditionalCompilationAttributes ]\",\".OPT\\t[attributes]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"memberDeclaration\\t[declaration]\",\"structMember\\t[memberDeclaration]\",\"structMembers\\t[structMember ]\",\"statementSeparator\\t[<n>]\",\"memberIfDirectiveClause\\t[ifDirective compilationCondition <n> ]\",\"memberConditionalCompilationBlock\\t[memberIfDirectiveClause   endifDirective]\",\"memberCompilerControlStatement\\t[memberConditionalCompilationBlock]\",\"structMember\\t[memberCompilerControlStatement]\",\".OPT\\t[structMembers]\",\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":133,\"descriptorCount\":273,\"duplicateDescriptorCount\":0,\"oraclePruned\":50,\"parseSeconds\":0.004730939865112305,\"sourceLength\":72,\"suppressedDescriptorCount\":36,\"tokenCount\":14,\"yieldCount\":172},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              IfConfigDecl\\n                IfConfigClauseList\\n                  IfConfigClause\\n                    poundIf \\\"#if\\\"\\n                    FunctionCallExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"canImport\\\") \\\"canImport\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                    MemberBlockItemList\\n                poundEndif \\\"#endif\\\"\\n            MemberBlockItem\\n              ExtensionDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                IdentifierType\\n                  identifier(\\\"DeclSyntaxParseable\\\") \\\"DeclSyntaxParseable\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"structMembers\\tambiguous alternate\\t[structMember ] | [structMember statementSeparator structMembers]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

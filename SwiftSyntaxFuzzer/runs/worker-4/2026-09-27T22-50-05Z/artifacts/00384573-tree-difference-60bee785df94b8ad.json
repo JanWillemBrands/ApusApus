@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00384573-tree-difference-60bee785df94b8ad.json",
+    "durationSeconds" : 0.037384986877441406,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:block-comment+line-comment:phase4-keypath:kp-bare-subscript",
+    "index" : 384573,
+    "seed" : 1663246799498458970,
+    "signalHash" : "32e746568a09b2a5",
+    "signalSummary" : "tree-difference|line=26|ref=CodeBlockItem|advent=KeyPathComponent",
+    "sourceHash" : "60bee785df94b8ad",
+    "sourceLength" : 41,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nlet a = \\Foo \/\/ c\n[0\/*c*\/]\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                VariableDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.let) \"let\"\n                  PatternBindingList\n                    PatternBinding\n                      IdentifierPattern\n                        identifier(\"a\") \"a\"\n                      InitializerClause\n                        equal \"=\"\n                        KeyPathExpr\n                          backslash \"\\\"\n                          IdentifierType\n                            identifier(\"Foo\") \"Foo\"\n                          KeyPathComponentList\n                            KeyPathComponent\n                              KeyPathSubscriptComponent\n                                leftSquare \"[\"\n                                LabeledExprList\n                                rightSquare \"]\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "keyPathPivotFirst\t[\"[\"  \"]\"]",
+      "keyPathComponents\t[keyPathPivotFirst  keyPathBareStop]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "keyPathRootBase\t[typeName >->(openAngle)]",
+      "keyPathRootType\t[keyPathRootBase  >->(keyPathMetatypeStart)]",
+      "keyPathExpression\t[\"\\\\\" keyPathRootType keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      ".OPT\t[initializer]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 184,
+      "descriptorCount" : 413,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 140,
+      "parseSeconds" : 0.006031990051269531,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 19,
+      "tokenCount" : 11,
+      "yieldCount" : 239
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                VariableDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.let) \"let\"\n                  PatternBindingList\n                    PatternBinding\n                      IdentifierPattern\n                        identifier(\"a\") \"a\"\n                      InitializerClause\n                        equal \"=\"\n                        KeyPathExpr\n                          backslash \"\\\"\n                          IdentifierType\n                            identifier(\"Foo\") \"Foo\"\n                          KeyPathComponentList\n              CodeBlockItem\n                ArrayExpr\n                  leftSquare \"[\"\n                  ArrayElementList\n                  rightSquare \"]\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 39,
+  "source" : "#if FOO\nlet a = \\Foo\n[ ]\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                VariableDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                  PatternBindingList\\n                    PatternBinding\\n                      IdentifierPattern\\n                        identifier(\\\"a\\\") \\\"a\\\"\\n                      InitializerClause\\n                        equal \\\"=\\\"\\n                        KeyPathExpr\\n                          backslash \\\"\\\\\\\"\\n                          IdentifierType\\n                            identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                          KeyPathComponentList\\n                            KeyPathComponent\\n                              KeyPathSubscriptComponent\\n                                leftSquare \\\"[\\\"\\n                                LabeledExprList\\n                                rightSquare \\\"]\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"keyPathPivotFirst\\t[\\\"[\\\"  \\\"]\\\"]\",\"keyPathComponents\\t[keyPathPivotFirst  keyPathBareStop]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"keyPathRootBase\\t[typeName >->(openAngle)]\",\"keyPathRootType\\t[keyPathRootBase  >->(keyPathMetatypeStart)]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" keyPathRootType keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\".OPT\\t[initializer]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":184,\"descriptorCount\":413,\"duplicateDescriptorCount\":0,\"oraclePruned\":140,\"parseSeconds\":0.006031990051269531,\"sourceLength\":31,\"suppressedDescriptorCount\":19,\"tokenCount\":11,\"yieldCount\":239},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                VariableDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                  PatternBindingList\\n                    PatternBinding\\n                      IdentifierPattern\\n                        identifier(\\\"a\\\") \\\"a\\\"\\n                      InitializerClause\\n                        equal \\\"=\\\"\\n                        KeyPathExpr\\n                          backslash \\\"\\\\\\\"\\n                          IdentifierType\\n                            identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                          KeyPathComponentList\\n              CodeBlockItem\\n                ArrayExpr\\n                  leftSquare \\\"[\\\"\\n                  ArrayElementList\\n                  rightSquare \\\"]\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

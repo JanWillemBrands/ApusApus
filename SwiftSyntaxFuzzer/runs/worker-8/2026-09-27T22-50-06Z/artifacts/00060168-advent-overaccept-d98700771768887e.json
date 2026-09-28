@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00060168-advent-overaccept-d98700771768887e.json",
+    "durationSeconds" : 0.04555690288543701,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:raw:attribute:testImportAttributes#1+type:testLifetimeSpecifier#2",
+    "index" : 60168,
+    "seed" : 10372684106311075726,
+    "signalHash" : "8cb9f5df2bdf1e9c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/ImportDec",
+    "sourceHash" : "d98700771768887e",
+    "sourceLength" : 174,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\nimport A\n@_implementationOnly import B\npublic import C\npackage import D\ninternal import E\nfileprivate import F\nprivate import G\nfunc foo() -> dependsOn(x, y) X\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                FunctionDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.func) \"func\"\n                  identifier(\"foo\") \"foo\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      leftParen \"(\"\n                      FunctionParameterList\n                      rightParen \")\"\n                    ReturnClause\n                      arrow \"->\"\n                      AttributedType\n                        TypeSpecifierList\n                          SimpleTypeSpecifier\n                            identifier(\"dependsOn(x,y)\") \"dependsOn(x,y)\"\n                        AttributeList\n                        TypeSpecifierList\n                        IdentifierType\n                          identifier(\"X\") \"X\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(x, y) »"
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "lifetimeSpecifierArgument\t[identifierToken]",
+      ".KLN\t[\",\" lifetimeSpecifierArgument]",
+      "parenthesisedTypeSpecifier\t[\"dependsOn\" >s< \"(\"  lifetimeSpecifierArgument  \")\"]",
+      "parameterModifier\t[parenthesisedTypeSpecifier]",
+      "type\t[parameterModifier type]",
+      "resultType\t[type]",
+      "functionResult\t[\"->\" resultType]",
+      ".OPT\t[functionResult]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 180,
+      "descriptorCount" : 384,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 107,
+      "parseSeconds" : 0.010368943214416504,
+      "sourceLength" : 46,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 16,
+      "yieldCount" : 210
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                FunctionDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.func) \"func\"\n                  identifier(\"foo\") \"foo\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      leftParen \"(\"\n                      FunctionParameterList\n                      rightParen \")\"\n                    ReturnClause\n                      arrow \"->\"\n                      IdentifierType\n                        identifier(\"dependsOn\") \"dependsOn\"\n              CodeBlockItem\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      DeclReferenceExpr\n                        identifier(\"x\") \"x\"\n                      comma \",\"\n                    LabeledExpr\n                      DeclReferenceExpr\n                        identifier(\"y\") \"y\"\n                  rightParen \")\"\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"X\") \"X\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 38,
+  "source" : "#if FOO\nfunc foo() -> dependsOn(x, y) X\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                FunctionDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                  identifier(\\\"foo\\\") \\\"foo\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      leftParen \\\"(\\\"\\n                      FunctionParameterList\\n                      rightParen \\\")\\\"\\n                    ReturnClause\\n                      arrow \\\"->\\\"\\n                      AttributedType\\n                        TypeSpecifierList\\n                          SimpleTypeSpecifier\\n                            identifier(\\\"dependsOn(x,y)\\\") \\\"dependsOn(x,y)\\\"\\n                        AttributeList\\n                        TypeSpecifierList\\n                        IdentifierType\\n                          identifier(\\\"X\\\") \\\"X\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(x, y) »\"],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"lifetimeSpecifierArgument\\t[identifierToken]\",\".KLN\\t[\\\",\\\" lifetimeSpecifierArgument]\",\"parenthesisedTypeSpecifier\\t[\\\"dependsOn\\\" >s< \\\"(\\\"  lifetimeSpecifierArgument  \\\")\\\"]\",\"parameterModifier\\t[parenthesisedTypeSpecifier]\",\"type\\t[parameterModifier type]\",\"resultType\\t[type]\",\"functionResult\\t[\\\"->\\\" resultType]\",\".OPT\\t[functionResult]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":180,\"descriptorCount\":384,\"duplicateDescriptorCount\":0,\"oraclePruned\":107,\"parseSeconds\":0.010368943214416504,\"sourceLength\":46,\"suppressedDescriptorCount\":22,\"tokenCount\":16,\"yieldCount\":210},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                FunctionDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                  identifier(\\\"foo\\\") \\\"foo\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      leftParen \\\"(\\\"\\n                      FunctionParameterList\\n                      rightParen \\\")\\\"\\n                    ReturnClause\\n                      arrow \\\"->\\\"\\n                      IdentifierType\\n                        identifier(\\\"dependsOn\\\") \\\"dependsOn\\\"\\n              CodeBlockItem\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"x\\\") \\\"x\\\"\\n                      comma \\\",\\\"\\n                    LabeledExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"y\\\") \\\"y\\\"\\n                  rightParen \\\")\\\"\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"X\\\") \\\"X\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

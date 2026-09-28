@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00319521-tree-difference-741f61b1310bdbf2.json",
+    "durationSeconds" : 0.029942989349365234,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:splice+line-comment:attribute:testMacroRoleNames#3",
+    "index" : 319521,
+    "seed" : 4354586988532835097,
+    "signalHash" : "6963f39e557af13c",
+    "signalSummary" : "tree-difference|line=41|ref=keyword()|advent=identifier()",
+    "sourceHash" : "741f61b1310bdbf2",
+    "sourceLength" : 73,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n@attached(member, names: named( \/\/ c\ninit(a:return:)))\nmacro m()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  DeclReferenceExpr\n                    identifier(\"member\") \"member\"\n                  comma \",\"\n                LabeledExpr\n                  identifier(\"names\") \"names\"\n                  colon \":\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.init) \"init\"\n                          DeclNameArguments\n                            leftParen \"(\"\n                            DeclNameArgumentList\n                              DeclNameArgument\n                                identifier(\"a\") \"a\"\n                                colon \":\"\n                              DeclNameArgument\n                                identifier(\"return\") \"return\"\n                                colon \":\"\n                            rightParen \")\"\n                    rightParen \")\"\n              rightParen \")\"\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"macro\") \"macro\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "argumentLabel\t[identifier]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      ".OPT\t[argumentNames]",
+      "compoundNameBase\t[\"init\"]",
+      "primaryExpression\t[compoundNameBase \"(\" argumentNames \")\"]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "tupleElement\t[argumentLabel \":\" expression]",
+      "tupleElementList\t[tupleElement ]",
+      "tupleElement\t[expression]",
+      "tupleExpression\t[\"(\" tupleElement \",\" tupleElementList  \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 311,
+      "descriptorCount" : 818,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 429,
+      "parseSeconds" : 0.009964942932128906,
+      "sourceLength" : 54,
+      "suppressedDescriptorCount" : 94,
+      "tokenCount" : 20,
+      "yieldCount" : 595
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  DeclReferenceExpr\n                    identifier(\"member\") \"member\"\n                  comma \",\"\n                LabeledExpr\n                  identifier(\"names\") \"names\"\n                  colon \":\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.init) \"init\"\n                          DeclNameArguments\n                            leftParen \"(\"\n                            DeclNameArgumentList\n                              DeclNameArgument\n                                identifier(\"a\") \"a\"\n                                colon \":\"\n                              DeclNameArgument\n                                keyword(SwiftSyntax.Keyword.return) \"return\"\n                                colon \":\"\n                            rightParen \")\"\n                    rightParen \")\"\n              rightParen \")\"\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"macro\") \"macro\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n(member, names: ( \/\/ c\ninit(a:return:)))\nmacro ()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"member\\\") \\\"member\\\"\\n                  comma \\\",\\\"\\n                LabeledExpr\\n                  identifier(\\\"names\\\") \\\"names\\\"\\n                  colon \\\":\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                          DeclNameArguments\\n                            leftParen \\\"(\\\"\\n                            DeclNameArgumentList\\n                              DeclNameArgument\\n                                identifier(\\\"a\\\") \\\"a\\\"\\n                                colon \\\":\\\"\\n                              DeclNameArgument\\n                                identifier(\\\"return\\\") \\\"return\\\"\\n                                colon \\\":\\\"\\n                            rightParen \\\")\\\"\\n                    rightParen \\\")\\\"\\n              rightParen \\\")\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"macro\\\") \\\"macro\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"argumentLabel\\t[identifier]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\".OPT\\t[argumentNames]\",\"compoundNameBase\\t[\\\"init\\\"]\",\"primaryExpression\\t[compoundNameBase \\\"(\\\" argumentNames \\\")\\\"]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"tupleElement\\t[argumentLabel \\\":\\\" expression]\",\"tupleElementList\\t[tupleElement ]\",\"tupleElement\\t[expression]\",\"tupleExpression\\t[\\\"(\\\" tupleElement \\\",\\\" tupleElementList  \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":311,\"descriptorCount\":818,\"duplicateDescriptorCount\":0,\"oraclePruned\":429,\"parseSeconds\":0.009964942932128906,\"sourceLength\":54,\"suppressedDescriptorCount\":94,\"tokenCount\":20,\"yieldCount\":595},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"member\\\") \\\"member\\\"\\n                  comma \\\",\\\"\\n                LabeledExpr\\n                  identifier(\\\"names\\\") \\\"names\\\"\\n                  colon \\\":\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                          DeclNameArguments\\n                            leftParen \\\"(\\\"\\n                            DeclNameArgumentList\\n                              DeclNameArgument\\n                                identifier(\\\"a\\\") \\\"a\\\"\\n                                colon \\\":\\\"\\n                              DeclNameArgument\\n                                keyword(SwiftSyntax.Keyword.return) \\\"return\\\"\\n                                colon \\\":\\\"\\n                            rightParen \\\")\\\"\\n                    rightParen \\\")\\\"\\n              rightParen \\\")\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"macro\\\") \\\"macro\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

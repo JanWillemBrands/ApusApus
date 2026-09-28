@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00154111-tree-difference-d3512883dc6eb5b3.json",
+    "durationSeconds" : 0.0386730432510376,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:splice:statement:testIfHasSymbol#2+type:testInverseTypes#8",
+    "index" : 154111,
+    "seed" : 15755288686696214284,
+    "signalHash" : "7c9e64274587329c",
+    "signalSummary" : "tree-difference|line=55|ref=CompositionType|advent=IdentifierType",
+    "sourceHash" : "d3512883dc6eb5b3",
+    "sourceLength" : 59,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nif #_hasSymbol(foo as () -> ()) {}\nX<any P & ~_>()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"X\") \"X\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    IdentifierType\n                      identifier(\"P\") \"P\"\n                BinaryOperatorExpr\n                  binaryOperator(\"&\") \"&\"\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "infixOperator\t[\"&\"]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 154,
+      "descriptorCount" : 431,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 200,
+      "parseSeconds" : 0.004870057106018066,
+      "sourceLength" : 16,
+      "suppressedDescriptorCount" : 50,
+      "tokenCount" : 8,
+      "yieldCount" : 308
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"X\") \"X\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    CompositionType\n                      CompositionTypeElementList\n                        CompositionTypeElement\n                          IdentifierType\n                            identifier(\"P\") \"P\"\n                          binaryOperator(\"&\") \"&\"\n                        CompositionTypeElement\n                          IdentifierType\n                            wildcard \"_\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 36,
+  "source" : " {\nX<any P & _\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"X\\\") \\\"X\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    IdentifierType\\n                      identifier(\\\"P\\\") \\\"P\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"&\\\") \\\"&\\\"\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"infixOperator\\t[\\\"&\\\"]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":154,\"descriptorCount\":431,\"duplicateDescriptorCount\":0,\"oraclePruned\":200,\"parseSeconds\":0.004870057106018066,\"sourceLength\":16,\"suppressedDescriptorCount\":50,\"tokenCount\":8,\"yieldCount\":308},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"X\\\") \\\"X\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    CompositionType\\n                      CompositionTypeElementList\\n                        CompositionTypeElement\\n                          IdentifierType\\n                            identifier(\\\"P\\\") \\\"P\\\"\\n                          binaryOperator(\\\"&\\\") \\\"&\\\"\\n                        CompositionTypeElement\\n                          IdentifierType\\n                            wildcard \\\"_\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

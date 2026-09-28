@@ -1,0 +1,50 @@
+{
+  "event" : {
+    "artifact" : "00581571-advent-underaccept-684340f85e910864.json",
+    "durationSeconds" : 0.49273598194122314,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:block-comment+line-comment:real:Oracle:24",
+    "index" : 581571,
+    "seed" : 8709271582791740263,
+    "signalHash" : "b9f863b7ec63123d",
+    "signalSummary" : "advent-underaccept|compiler=true|typecheck=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/ProtocolDecl\/AttributeLis",
+    "sourceHash" : "684340f85e910864",
+    "sourceLength" : 1249,
+    "status" : "advent-underaccept"
+  },
+  "originalSource" : "#if FOO\nprotocol DisambiguationRule {\n    func prune(_ yields: inout Set< \/\/ c\nBinarySpan\/*\n*\/>) -> Int\n    \/\/\/ HARD CONSTRAINT (`true`) vs PREFERENCE (`false`) — decides the pass this rule runs in.\n    \/\/\/\n    \/\/\/ Hard constraints say what the LANGUAGE permits: a lookahead\/containment predicate or a\n    \/\/\/ trivia-mode span rule removes a reading swift-syntax would never construct. Preferences\n    \/\/\/ (`@longest`\/`@shortest`\/`@prefer`\/`@avoid`, associativity) merely choose among readings that\n    \/\/\/ are all legal.\n    \/\/\/\n    \/\/\/ Order matters because prunes are irreversible. Running them interleaved let a PREFERENCE\n    \/\/\/ delete a reading that a hard constraint was about to make the only legal one:\n    \/\/\/ `var x: Int = foo()⏎{ didSet {} }` — `LongestMatchRule` dropped the short `prefixExpression`\n    \/\/\/ `foo()` in favour of the maximal `foo() { … }`, and the accessor-block reading needs exactly\n    \/\/\/ that short one. The lookahead predicate then removed the trailing closure, leaving nothing\n    \/\/\/ and turning valid input into a reject. Constraints first, then preferences over the\n    \/\/\/ survivors, with a dead-wood sweep between so the cascade is visible to the second pass.\n    var isHardConstraint: Bool { get }\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : false,
+    "adventGeneratedSwiftSyntax" : false,
+    "adventMatched" : false,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 72,
+      "descriptorCount" : 122,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 0,
+      "parseSeconds" : 0.003708958625793457,
+      "sourceLength" : 57,
+      "suppressedDescriptorCount" : 3,
+      "tokenCount" : 1,
+      "yieldCount" : 13
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"prune\") \"prune\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                          FunctionParameter\n                            AttributeList\n                            DeclModifierList\n                            identifier(\"yields\") \"yields\"\n                            colon \":\"\n                            IdentifierType\n                              identifier(\"Set\") \"Set\"\n                              GenericArgumentClause\n                                leftAngle \"<\"\n                                GenericArgumentList\n                                rightAngle \">\"\n                        rightParen \")\"\n                      ReturnClause\n                        arrow \"->\"\n                        IdentifierType\n                          identifier(\"Int\") \"Int\"\n              rightBrace \"}\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-underaccept",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "#if {\n    func prune( yields: Set<\/*\n*\/>) -> Int\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":false,\"adventGeneratedSwiftSyntax\":false,\"adventMatched\":false,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[],\"metrics\":{\"crfCount\":72,\"descriptorCount\":122,\"duplicateDescriptorCount\":0,\"oraclePruned\":0,\"parseSeconds\":0.003708958625793457,\"sourceLength\":57,\"suppressedDescriptorCount\":3,\"tokenCount\":1,\"yieldCount\":13},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"prune\\\") \\\"prune\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                          FunctionParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            identifier(\\\"yields\\\") \\\"yields\\\"\\n                            colon \\\":\\\"\\n                            IdentifierType\\n                              identifier(\\\"Set\\\") \\\"Set\\\"\\n                              GenericArgumentClause\\n                                leftAngle \\\"<\\\"\\n                                GenericArgumentList\\n                                rightAngle \\\">\\\"\\n                        rightParen \\\")\\\"\\n                      ReturnClause\\n                        arrow \\\"->\\\"\\n                        IdentifierType\\n                          identifier(\\\"Int\\\") \\\"Int\\\"\\n              rightBrace \\\"}\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-underaccept\",\"swiftSyntaxHasError\":false}"
+}

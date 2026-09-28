@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00134844-advent-overaccept-baac9f67a4a52628.json",
+    "durationSeconds" : 0.1802140474319458,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:splice+newline+block-comment:translated:testTypeExpr11#1",
+    "index" : 134844,
+    "seed" : 3326659872777667553,
+    "signalHash" : "44ea7e5b88701e7f",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "baac9f67a4a52628",
+    "sourceLength" : 372,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\nfunc genQualifiedType() {\n  _ = Gen<Foo>.Bar.self\n  _ = Gen<Foo>.Bar()\n  _ = Gen<Foo>.Bar.prop\n  _ = Gen<Foo>.Bar. \/* c *\/ meth\n  let _ : () = Gen<Foo>.Bar.meth\n()\n  _ = Gen<Foo>.Bar.instMeth\n  _ = Gen<Foo>.Bar\n  _ = Gen<Foo->Bar.dynamicType\n\n  _ = (G<X>).Y.self\n  _ = X?.Y.self\n  _ = (X)?.Y.self\n  _ = (X?).Y.self\n  _ = [X].Y.self\n  _ = [X : Y].Z.self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  AssignmentExpr\n                    equal \"=\"\n                  MemberAccessExpr\n                    DeclReferenceExpr\n                      identifier(\"Bar\") \"Bar\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"meth\") \"meth\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 116,
+      "descriptorCount" : 323,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 182,
+      "parseSeconds" : 0.010212063789367676,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 40,
+      "tokenCount" : 9,
+      "yieldCount" : 283
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  AssignmentExpr\n                    equal \"=\"\n                  MemberAccessExpr\n                    DeclReferenceExpr\n                      identifier(\"Bar\") \"Bar\"\n                    UnexpectedNodes\n                      period \".\"\n                    DeclReferenceExpr\n                      identifier(\"meth\") \"meth\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " () {\n  _ = Bar. \/* c *\/ meth\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  MemberAccessExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Bar\\\") \\\"Bar\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"meth\\\") \\\"meth\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":116,\"descriptorCount\":323,\"duplicateDescriptorCount\":0,\"oraclePruned\":182,\"parseSeconds\":0.010212063789367676,\"sourceLength\":31,\"suppressedDescriptorCount\":40,\"tokenCount\":9,\"yieldCount\":283},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  MemberAccessExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Bar\\\") \\\"Bar\\\"\\n                    UnexpectedNodes\\n                      period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"meth\\\") \\\"meth\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00259872-tree-difference-7c9550986dc9a6c6.json",
+    "durationSeconds" : 0.06359601020812988,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:splice:phase4-string:multiline-2line+expression:testClosureParameterWithModifier#1",
+    "index" : 259872,
+    "seed" : 8709271582791740263,
+    "signalHash" : "2937749881df7aaf",
+    "signalSummary" : "tree-difference|line=52|ref=DeclModifier|advent=identifier()",
+    "sourceHash" : "7c9550986dc9a6c6",
+    "sourceLength" : 66,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nlet a = \"\"\"\nabc\ndef\n\"\"\"\n_ = { (_const x, Int) in }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    ClosureSignature\n                      AttributeList\n                      ClosureParameterClause\n                        leftParen \"(\"\n                        ClosureParameterList\n                          ClosureParameter\n                            AttributeList\n                            DeclModifierList\n                            identifier(\"_const\") \"_const\"\n                            identifier(\"Int\") \"Int\"\n                        rightParen \")\"\n                      keyword(SwiftSyntax.Keyword.in) \"in\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "closureParameterName\t[identifierToken]",
+      "argumentLabel\t[identifier]",
+      "externalParameterName\t[argumentLabel]",
+      "closureParameterNames\t[externalParameterName closureParameterName]",
+      "closureParameter\t[  closureParameterNames ]",
+      "closureParameterList\t[closureParameter ]",
+      "closureParameterClause\t[\"(\" closureParameterList  \")\"]",
+      "closureSignature\t[  closureParameterClause    \"in\"]",
+      ".OPT\t[closureSignature]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "wildcardExpression\t[\"_\"]",
+      "nonLiteralPrimary\t[wildcardExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 177,
+      "descriptorCount" : 462,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 203,
+      "parseSeconds" : 0.00598299503326416,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 53,
+      "tokenCount" : 12,
+      "yieldCount" : 330
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    ClosureSignature\n                      AttributeList\n                      ClosureParameterClause\n                        leftParen \"(\"\n                        ClosureParameterList\n                          ClosureParameter\n                            AttributeList\n                            DeclModifierList\n                              DeclModifier\n                                keyword(SwiftSyntax.Keyword._const) \"_const\"\n                            identifier(\"Int\") \"Int\"\n                        rightParen \")\"\n                      keyword(SwiftSyntax.Keyword.in) \"in\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { a =\n_ { (_const Int) in }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    ClosureSignature\\n                      AttributeList\\n                      ClosureParameterClause\\n                        leftParen \\\"(\\\"\\n                        ClosureParameterList\\n                          ClosureParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            identifier(\\\"_const\\\") \\\"_const\\\"\\n                            identifier(\\\"Int\\\") \\\"Int\\\"\\n                        rightParen \\\")\\\"\\n                      keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"closureParameterName\\t[identifierToken]\",\"argumentLabel\\t[identifier]\",\"externalParameterName\\t[argumentLabel]\",\"closureParameterNames\\t[externalParameterName closureParameterName]\",\"closureParameter\\t[  closureParameterNames ]\",\"closureParameterList\\t[closureParameter ]\",\"closureParameterClause\\t[\\\"(\\\" closureParameterList  \\\")\\\"]\",\"closureSignature\\t[  closureParameterClause    \\\"in\\\"]\",\".OPT\\t[closureSignature]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"nonLiteralPrimary\\t[wildcardExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":177,\"descriptorCount\":462,\"duplicateDescriptorCount\":1,\"oraclePruned\":203,\"parseSeconds\":0.00598299503326416,\"sourceLength\":30,\"suppressedDescriptorCount\":53,\"tokenCount\":12,\"yieldCount\":330},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    ClosureSignature\\n                      AttributeList\\n                      ClosureParameterClause\\n                        leftParen \\\"(\\\"\\n                        ClosureParameterList\\n                          ClosureParameter\\n                            AttributeList\\n                            DeclModifierList\\n                              DeclModifier\\n                                keyword(SwiftSyntax.Keyword._const) \\\"_const\\\"\\n                            identifier(\\\"Int\\\") \\\"Int\\\"\\n                        rightParen \\\")\\\"\\n                      keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

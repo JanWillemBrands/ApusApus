@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00124199-advent-overaccept-acf823d8d8a492bc.json",
+    "durationSeconds" : 0.028010964393615723,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:glue+newline:type:testNonisolatedSpecifier#9",
+    "index" : 124199,
+    "seed" : 3326659872777667553,
+    "signalHash" : "4566eac6c8792d81",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "acf823d8d8a492bc",
+    "sourceLength" : 75,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nS<nonisolated(nonsending) @Sendable (Int) async -> Void>\n()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"S\") \"S\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"nonisolated\") \"nonisolated\"\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      DeclReferenceExpr\n                        identifier(\"nonsending\") \"nonsending\"\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n                ArrowExpr\n                  TypeEffectSpecifiers\n                    keyword(SwiftSyntax.Keyword.async) \"async\"\n                  arrow \"->\"\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "typeEffectSpecifiers\t[\"async\"]",
+      ".OPT\t[typeEffectSpecifiers]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "expression\t[  prefixExpression ]",
+      "functionCallArgument\t[expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 196,
+      "descriptorCount" : 536,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 280,
+      "parseSeconds" : 0.00686800479888916,
+      "sourceLength" : 42,
+      "suppressedDescriptorCount" : 68,
+      "tokenCount" : 12,
+      "yieldCount" : 416
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"S\") \"S\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                TypeExpr\n                  AttributedType\n                    TypeSpecifierList\n                      NonisolatedTypeSpecifier\n                        keyword(SwiftSyntax.Keyword.nonisolated) \"nonisolated\"\n                        NonisolatedSpecifierArgument\n                          leftParen \"(\"\n                          keyword(SwiftSyntax.Keyword.nonsending) \"nonsending\"\n                          rightParen \")\"\n                    AttributeList\n                    TypeSpecifierList\n                    FunctionType\n                      TupleTypeElementList\n                        TupleTypeElement\n                          IdentifierType\n                            identifier(\"async\") \"async\"\n                      ReturnClause\n                        arrow \"->\"\n                        TupleType\n                          leftParen \"(\"\n                          TupleTypeElementList\n                          rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nS<nonisolated(nonsending) async ->\n()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"S\\\") \\\"S\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"nonisolated\\\") \\\"nonisolated\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"nonsending\\\") \\\"nonsending\\\"\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n                ArrowExpr\\n                  TypeEffectSpecifiers\\n                    keyword(SwiftSyntax.Keyword.async) \\\"async\\\"\\n                  arrow \\\"->\\\"\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"typeEffectSpecifiers\\t[\\\"async\\\"]\",\".OPT\\t[typeEffectSpecifiers]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"expression\\t[  prefixExpression ]\",\"functionCallArgument\\t[expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":196,\"descriptorCount\":536,\"duplicateDescriptorCount\":0,\"oraclePruned\":280,\"parseSeconds\":0.00686800479888916,\"sourceLength\":42,\"suppressedDescriptorCount\":68,\"tokenCount\":12,\"yieldCount\":416},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"S\\\") \\\"S\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                TypeExpr\\n                  AttributedType\\n                    TypeSpecifierList\\n                      NonisolatedTypeSpecifier\\n                        keyword(SwiftSyntax.Keyword.nonisolated) \\\"nonisolated\\\"\\n                        NonisolatedSpecifierArgument\\n                          leftParen \\\"(\\\"\\n                          keyword(SwiftSyntax.Keyword.nonsending) \\\"nonsending\\\"\\n                          rightParen \\\")\\\"\\n                    AttributeList\\n                    TypeSpecifierList\\n                    FunctionType\\n                      TupleTypeElementList\\n                        TupleTypeElement\\n                          IdentifierType\\n                            identifier(\\\"async\\\") \\\"async\\\"\\n                      ReturnClause\\n                        arrow \\\"->\\\"\\n                        TupleType\\n                          leftParen \\\"(\\\"\\n                          TupleTypeElementList\\n                          rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

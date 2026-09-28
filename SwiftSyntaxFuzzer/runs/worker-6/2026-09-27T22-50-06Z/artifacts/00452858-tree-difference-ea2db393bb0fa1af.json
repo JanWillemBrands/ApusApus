@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00452858-tree-difference-ea2db393bb0fa1af.json",
+    "durationSeconds" : 0.0365300178527832,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+splice+line-comment:translated:testTrailingClosures5#1",
+    "index" : 452858,
+    "seed" : 6018003910102630304,
+    "signalHash" : "eafed1d7f6db1b3b",
+    "signalSummary" : "tree-difference|line=21|ref=DeclReferenceExpr|advent=FunctionCallExpr",
+    "sourceHash" : "ea2db393bb0fa1af",
+    "sourceLength" : 53,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nlet _ = when \/\/ c\n (3 < 3) { 3 } else: { 4\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"when\") \"when\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n                    MultipleTrailingClosureElement\n                      identifier(\"else\") \"else\"\n                      colon \":\"\n                      ClosureExpr\n                        leftBrace \"{\"\n                        CodeBlockItemList\n                        rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosureLabel\t[identifier]",
+      "labeledTrailingClosure\t[trailingClosureLabel \":\" closureExpression]",
+      "labeledTrailingClosures\t[labeledTrailingClosure ]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression labeledTrailingClosures]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 136,
+      "descriptorCount" : 391,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 205,
+      "parseSeconds" : 0.005430936813354492,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 44,
+      "tokenCount" : 13,
+      "yieldCount" : 320
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                DeclReferenceExpr\n                  identifier(\"when\") \"when\"\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n                MultipleTrailingClosureElement\n                  identifier(\"else\") \"else\"\n                  colon \":\"\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { _ = when \/\/ c\n ( ) { } else: {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"when\\\") \\\"when\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n                    MultipleTrailingClosureElement\\n                      identifier(\\\"else\\\") \\\"else\\\"\\n                      colon \\\":\\\"\\n                      ClosureExpr\\n                        leftBrace \\\"{\\\"\\n                        CodeBlockItemList\\n                        rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosureLabel\\t[identifier]\",\"labeledTrailingClosure\\t[trailingClosureLabel \\\":\\\" closureExpression]\",\"labeledTrailingClosures\\t[labeledTrailingClosure ]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression labeledTrailingClosures]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":136,\"descriptorCount\":391,\"duplicateDescriptorCount\":0,\"oraclePruned\":205,\"parseSeconds\":0.005430936813354492,\"sourceLength\":37,\"suppressedDescriptorCount\":44,\"tokenCount\":13,\"yieldCount\":320},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"when\\\") \\\"when\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n                MultipleTrailingClosureElement\\n                  identifier(\\\"else\\\") \\\"else\\\"\\n                  colon \\\":\\\"\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

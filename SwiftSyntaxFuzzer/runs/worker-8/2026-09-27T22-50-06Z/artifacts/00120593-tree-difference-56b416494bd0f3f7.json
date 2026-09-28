@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00120593-tree-difference-56b416494bd0f3f7.json",
+    "durationSeconds" : 0.05183696746826172,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:delete:real:ActiveSyntaxRewriter:423+declaration:testCoroutineAccessors#1",
+    "index" : 120593,
+    "seed" : 10372684106311075726,
+    "signalHash" : "71ea85acd400ce96",
+    "signalSummary" : "tree-difference|line=104|ref=AccessorBlock|advent=<missing>",
+    "sourceHash" : "56b416494bd0f3f7",
+    "sourceLength" : 364,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\nextension ExprSyntaxProtocol {\n  \/\/\/ Whether any of the nodes in this expression involve compiler or feature\n  \/\/\/ checks.\n  fileprivate var containsFeatureCheck: Bool {\n    let visitor = (viewMode: .fixedUp)\n    visitor.walk(self)\n    return visitor.foundFeatureCheck\n  }\n}\nvar irm: Int {\n  read {\n    yield _i\n  }\n  modify {\n    yield &_i\n  }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"containsFeatureCheck\") \"containsFeatureCheck\"\n        rightBrace \"}\"\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.var) \"var\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"Int\") \"Int\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in appendAccessorEntry(_:into:): experimental coroutine accessor 'read' not converted — «read {\n  }\n»",
+      "unhandled in convertInitializedAccessorBlock(_:from:to:): initialized accessor block with no accessors — «{\n  read {\n  }\n}»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "coroutineSpecifier\t[\"read\"]",
+      "coroutineAccessorClause\t[  coroutineSpecifier  codeBlock]",
+      "accessorClauseEntryNoInit\t[coroutineAccessorClause]",
+      "accessorClauseListNoInit\t[accessorClauseEntryNoInit ]",
+      "initializedAccessorBlock\t[\"{\" accessorClauseListNoInit \"}\"]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "patternInitializer\t[bindingPattern ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement statementSeparator statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 149,
+      "descriptorCount" : 382,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 163,
+      "parseSeconds" : 0.005240917205810547,
+      "sourceLength" : 54,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 11,
+      "yieldCount" : 272
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"containsFeatureCheck\") \"containsFeatureCheck\"\n        rightBrace \"}\"\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.var) \"var\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"Int\") \"Int\"\n            AccessorBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      identifier(\"read\") \"read\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { var containsFeatureCheck\n}\nvar Int {\n  read {\n  }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"containsFeatureCheck\\\") \\\"containsFeatureCheck\\\"\\n        rightBrace \\\"}\\\"\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"Int\\\") \\\"Int\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in appendAccessorEntry(_:into:): experimental coroutine accessor 'read' not converted — «read {\\n  }\\n»\",\"unhandled in convertInitializedAccessorBlock(_:from:to:): initialized accessor block with no accessors — «{\\n  read {\\n  }\\n}»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"coroutineSpecifier\\t[\\\"read\\\"]\",\"coroutineAccessorClause\\t[  coroutineSpecifier  codeBlock]\",\"accessorClauseEntryNoInit\\t[coroutineAccessorClause]\",\"accessorClauseListNoInit\\t[accessorClauseEntryNoInit ]\",\"initializedAccessorBlock\\t[\\\"{\\\" accessorClauseListNoInit \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"patternInitializer\\t[bindingPattern ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement statementSeparator statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":149,\"descriptorCount\":382,\"duplicateDescriptorCount\":0,\"oraclePruned\":163,\"parseSeconds\":0.005240917205810547,\"sourceLength\":54,\"suppressedDescriptorCount\":32,\"tokenCount\":11,\"yieldCount\":272},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"containsFeatureCheck\\\") \\\"containsFeatureCheck\\\"\\n        rightBrace \\\"}\\\"\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"Int\\\") \\\"Int\\\"\\n            AccessorBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"read\\\") \\\"read\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

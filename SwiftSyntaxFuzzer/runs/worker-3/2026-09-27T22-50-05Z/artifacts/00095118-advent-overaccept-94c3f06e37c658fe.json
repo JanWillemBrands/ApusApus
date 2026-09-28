@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00095118-advent-overaccept-94c3f06e37c658fe.json",
+    "durationSeconds" : 0.028790950775146484,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment:declaration:testInitializerWithReturnType#1",
+    "index" : 95118,
+    "seed" : 8709271582791740263,
+    "signalHash" : "8aca9c5748ecfc29",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/DeclReferenceExpr\/identifier()\/CodeBlockItem\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/InitializerDecl\/AttributeLis",
+    "sourceHash" : "94c3f06e37c658fe",
+    "sourceLength" : 101,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\ninit(_ ptr: UnsafeRawBufferPointer, _ a:  \/* c *\/ borrowing Array<Int>) -> dependsOn(a) Self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.init) \"init\"\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  identifier(\"ptr\") \"ptr\"\n                  colon \":\"\n                  DeclReferenceExpr\n                    identifier(\"UnsafeRawBufferPointer\") \"UnsafeRawBufferPointer\"\n                  comma \",\"\n                LabeledExpr\n                  identifier(\"a\") \"a\"\n                  colon \":\"\n                  DeclReferenceExpr\n                    binaryOperator(\">\") \">\"\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "argumentLabel\t[identifier]",
+      "functionCallArgument\t[argumentLabel \":\" operator]",
+      ".KLN\t[\",\" functionCallArgument]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "functionCallArgument\t[argumentLabel \":\" expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 202,
+      "descriptorCount" : 525,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 300,
+      "parseSeconds" : 0.006348013877868652,
+      "sourceLength" : 45,
+      "suppressedDescriptorCount" : 64,
+      "tokenCount" : 12,
+      "yieldCount" : 416
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            InitializerDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.init) \"init\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                    FunctionParameter\n                      AttributeList\n                      DeclModifierList\n                      identifier(\"ptr\") \"ptr\"\n                      colon \":\"\n                      IdentifierType\n                        identifier(\"UnsafeRawBufferPointer\") \"UnsafeRawBufferPointer\"\n                      comma \",\"\n                    FunctionParameter\n                      AttributeList\n                      DeclModifierList\n                      identifier(\"a\") \"a\"\n                      colon \":\"\n                      MissingType\n                  UnexpectedNodes\n                    binaryOperator(\">\") \">\"\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\ninit( ptr: UnsafeRawBufferPointer, a: >)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  identifier(\\\"ptr\\\") \\\"ptr\\\"\\n                  colon \\\":\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"UnsafeRawBufferPointer\\\") \\\"UnsafeRawBufferPointer\\\"\\n                  comma \\\",\\\"\\n                LabeledExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                  colon \\\":\\\"\\n                  DeclReferenceExpr\\n                    binaryOperator(\\\">\\\") \\\">\\\"\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"argumentLabel\\t[identifier]\",\"functionCallArgument\\t[argumentLabel \\\":\\\" operator]\",\".KLN\\t[\\\",\\\" functionCallArgument]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"functionCallArgument\\t[argumentLabel \\\":\\\" expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":202,\"descriptorCount\":525,\"duplicateDescriptorCount\":0,\"oraclePruned\":300,\"parseSeconds\":0.006348013877868652,\"sourceLength\":45,\"suppressedDescriptorCount\":64,\"tokenCount\":12,\"yieldCount\":416},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            InitializerDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                    FunctionParameter\\n                      AttributeList\\n                      DeclModifierList\\n                      identifier(\\\"ptr\\\") \\\"ptr\\\"\\n                      colon \\\":\\\"\\n                      IdentifierType\\n                        identifier(\\\"UnsafeRawBufferPointer\\\") \\\"UnsafeRawBufferPointer\\\"\\n                      comma \\\",\\\"\\n                    FunctionParameter\\n                      AttributeList\\n                      DeclModifierList\\n                      identifier(\\\"a\\\") \\\"a\\\"\\n                      colon \\\":\\\"\\n                      MissingType\\n                  UnexpectedNodes\\n                    binaryOperator(\\\">\\\") \\\">\\\"\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

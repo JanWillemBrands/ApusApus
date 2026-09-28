@@ -1561,6 +1561,7 @@ let phase4AttrSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "attr-with-modifier", source: "@objc public func f() {}",         origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "attr-var",        source: "@objc var x = 1",                     origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "attr-extension",  source: "@objc extension S {}",                origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "attr-ifconfig-elseif-list", source: "#if A\n@available(*)\n#elseif B\n@available(*)\n#elseif C\n@available(*)\n#else\n@available(*)\n#endif\nfunc f() {}", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "generic-func",    source: "func f<T>(x: T) {}",                  origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "generic-func-2",  source: "func f<T, U>(x: T, y: U) {}",         origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "generic-bound",   source: "func f<T: Equatable>(x: T) {}",       origin: "Phase4", syntaxVersion: "603.0.1"),
@@ -1953,6 +1954,8 @@ let phase3EnumCaseOutsideMembersSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "case-top-level",        source: "case a",                                origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-top-level-ifconfig", source: "#if FOO\ncase a\n#endif",           origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "case-function-ifconfig", source: "func f() {\n#if FOO\ncase a\n#endif\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-nested-member-function", source: "struct S {\nfunc f() {\ncase a\n}\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "case-nested-member-function-ifconfig", source: "struct S {\nfunc f() {\n#if FOO\ncase a\n#endif\n}\n}", origin: "Phase3", syntaxVersion: "603.0.1"),
 ]
 
 /// Plain `/…/` regex whitespace (TODO.md / Fix the regex-literal accept/reject failures): spaces are
@@ -2013,12 +2016,36 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "requirement-self-member", source: "struct S<T> where T: Sequence.self {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "requirement-layout",    source: "extension S where T: _Class {}",      origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "suppressed-composition", source: "let v: ~Copyable & P = x",           origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-27 long fuzzer harvest: valid source-file `#if` bodies may start with `.member`.
+    SwiftSnippet(label: "ifconfig-leading-dot-nested", source: "#if os(macOS)\n#if FOO\n.member\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-leading-dot-after-decl", source: "#if os(macOS)\n@MainActor\nfunc fuzz() {}\n#endif\n#if FOO\n.member\n#endif\n#if FOO\nlet fuzzSentinel = 1\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-leading-dot-after-extension", source: "extension UInt8? {\nfunc fuzz() {}\n}\n#if FOO\nlet fuzzSentinel = 1\n#endif\n#if FOO\n.member\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-self",       source: "struct S<T: Self> {}",                origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-wildcard",   source: "struct S<T: _> {}",                   origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-tuple",      source: "struct S<T: (A)> {}",                 origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-27: rejects that the Oracle used to reach only through dead readings it kept alive by
+    // accident (differential fuzzing after the `pruneUnproductive` bracket fix). Each now has its
+    // own grammar rule; keep them so a future engine change cannot silently depend on dead wood.
+    SwiftSnippet(label: "cast-then-less",        source: "let v = x as Int < 5",                origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "cast-then-less-equal",  source: "let v = x as Int <= 5",               origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "is-then-shift",         source: "let v = x is Int << 2",               origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "cast-generic-optional", source: "let v = value as A<B>??x",            origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "float-trailing-closure", source: "_ = 1.0 { return 1.0 }",             origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "implicit-member-array", source: "_ = .Bar.[2]",                        origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "newline-member-array",  source: "Foo // c\n.Bar.[2]",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "postfix-op-dot-space",  source: "fuzz {\nLOOK(\n)*!*. // c\nexclaim()\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "condition-tight-coalesce", source: "if rhs??b {}",                     origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-27 long fuzzer harvest overaccepts.
+    SwiftSnippet(label: "keypath-default-spaced-slash", source: "let fuzzValue = \\.default / value", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-root-default-spaced-slash", source: "let fuzzValue = \\Foo.default / value", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-member-default-spaced-slash", source: "let fuzzValue = \\Foo.Bar.default / value", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-repeat-each", source: "struct Fuzz<T: repeat each T> { var value: T }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "member-ifconfig-leading-dot", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "member-ifconfig-leading-dot-warning", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n#warning(\"seed\")\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-newline-call-overaccept", source: "struct Fuzz {\n#if A\n(if let x = value as? T ?? nil { _ = x })\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - fuzz harvest fixes")
@@ -3020,6 +3047,11 @@ struct Phase4LoopTests {
 /// Phase 4, sixth slice: computed properties and accessor blocks. These bypass
 /// `patternInitializerList` in the grammar but are still ONE PatternBinding in swift-syntax.
 let phase4AccessorSnippets: [SwiftSnippet] = [
+    // SE-0413 typed throws on accessors: `accessorEffects` uses `throwsClause`.
+    SwiftSnippet(label: "get-typed-throws",       source: "struct S { var x: Int { get throws(E) { 0 } } }",        origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "get-async-typed-throws", source: "struct S { var x: Int { get async throws(E) { 0 } } }",  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "subscript-typed-throws", source: "struct S { subscript(i: Int) -> Int { get throws(any Error) { 0 } } }", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "protocol-typed-throws",  source: "protocol P { var x: Int { get async throws(E) } }",       origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "computed-shorthand", source: "struct S { var x: Int { 0 } }",                    origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "computed-get",       source: "struct S { var x: Int { get { 0 } } }",            origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "computed-get-set",   source: "struct S { var x: Int { get { 0 } set { y = newValue } } }", origin: "Phase4", syntaxVersion: "603.0.1"),

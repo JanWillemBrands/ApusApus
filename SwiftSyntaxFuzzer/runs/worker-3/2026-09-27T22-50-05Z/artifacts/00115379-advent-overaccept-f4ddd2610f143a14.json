@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00115379-advent-overaccept-f4ddd2610f143a14.json",
+    "durationSeconds" : 0.034811973571777344,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+splice:translated:testForwardSlashRegexSkipping3#1",
+    "index" : 115379,
+    "seed" : 8709271582791740263,
+    "signalHash" : "fab2afaa83414fd1",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/StructDec",
+    "sourceHash" : "f4ddd2610f143a14",
+    "sourceLength" : 62,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nstruct A{\n  static let r = \/test\"abc\\\n(def)\"(.*?)\"\/\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      DeclReferenceExpr\n                        identifier(\"r\") \"r\"\n                      AssignmentExpr\n                        equal \"=\"\n                      RegexLiteralExpr\n                        regexSlash \"\/\"\n                        regexLiteralPattern(\"\\\"abc\\\\\\n(def)\\\"\\\"\") \"\"abc\\\n(def)\"\"\"\n                        regexSlash \"\/\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "regexItem\t[regexNonOperatorAtom]",
+      ".KLN\t[>n<  >n< regexItem]",
+      ".DO\t[regexItem]",
+      ".KLN\t[>n< ]",
+      "regexGroup\t[\"(\"  >n< \")\"]",
+      "regexItem\t[regexGroup]",
+      "regexItem\t[regexEscape]",
+      "regexBody\t[regexItem ]",
+      "plainRegularExpressionLiteral\t[>n< <-<(\")\" \"->\" \".\" \"...\" \">\" \"@\" \"Any\" \"Self\" \"]\" \"_\" \"false\" \"func\" \"nil\" \"operator\" \"self\" \"super\" \"true\" \"}\" binaryLiteral closeAngle decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection regexSlash) >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]",
+      "regularExpressionLiteral\t[plainRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 142,
+      "descriptorCount" : 403,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 150,
+      "parseSeconds" : 0.007727980613708496,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 35,
+      "tokenCount" : 20,
+      "yieldCount" : 350
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      DeclReferenceExpr\n                        identifier(\"r\") \"r\"\n                      AssignmentExpr\n                        equal \"=\"\n                      PrefixOperatorExpr\n                        prefixOperator(\"\/\") \"\/\"\n                        StringLiteralExpr\n                          stringQuote \"\"\"\n                          StringLiteralSegmentList\n                            StringSegment\n                              stringSegment(\"abc\\\\\") \"abc\\\"\n                CodeBlockItem\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          identifier(\"def\") \"def\"\n                    rightParen \")\"\n                CodeBlockItem\n                  PostfixOperatorExpr\n                    StringLiteralExpr\n                      stringQuote \"\"\"\n                      StringLiteralSegmentList\n                        StringSegment\n                      stringQuote \"\"\"\n                    postfixOperator(\"\/\") \"\/\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n{ r = \/\"abc\\\n(def)\"\"\/\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      DeclReferenceExpr\\n                        identifier(\\\"r\\\") \\\"r\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      RegexLiteralExpr\\n                        regexSlash \\\"\\\/\\\"\\n                        regexLiteralPattern(\\\"\\\\\\\"abc\\\\\\\\\\\\n(def)\\\\\\\"\\\\\\\"\\\") \\\"\\\"abc\\\\\\n(def)\\\"\\\"\\\"\\n                        regexSlash \\\"\\\/\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"regexItem\\t[regexNonOperatorAtom]\",\".KLN\\t[>n<  >n< regexItem]\",\".DO\\t[regexItem]\",\".KLN\\t[>n< ]\",\"regexGroup\\t[\\\"(\\\"  >n< \\\")\\\"]\",\"regexItem\\t[regexGroup]\",\"regexItem\\t[regexEscape]\",\"regexBody\\t[regexItem ]\",\"plainRegularExpressionLiteral\\t[>n< <-<(\\\")\\\" \\\"->\\\" \\\".\\\" \\\"...\\\" \\\">\\\" \\\"@\\\" \\\"Any\\\" \\\"Self\\\" \\\"]\\\" \\\"_\\\" \\\"false\\\" \\\"func\\\" \\\"nil\\\" \\\"operator\\\" \\\"self\\\" \\\"super\\\" \\\"true\\\" \\\"}\\\" binaryLiteral closeAngle decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection regexSlash) >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]\",\"regularExpressionLiteral\\t[plainRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":142,\"descriptorCount\":403,\"duplicateDescriptorCount\":0,\"oraclePruned\":150,\"parseSeconds\":0.007727980613708496,\"sourceLength\":28,\"suppressedDescriptorCount\":35,\"tokenCount\":20,\"yieldCount\":350},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      DeclReferenceExpr\\n                        identifier(\\\"r\\\") \\\"r\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      PrefixOperatorExpr\\n                        prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                        StringLiteralExpr\\n                          stringQuote \\\"\\\"\\\"\\n                          StringLiteralSegmentList\\n                            StringSegment\\n                              stringSegment(\\\"abc\\\\\\\\\\\") \\\"abc\\\\\\\"\\n                CodeBlockItem\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"def\\\") \\\"def\\\"\\n                    rightParen \\\")\\\"\\n                CodeBlockItem\\n                  PostfixOperatorExpr\\n                    StringLiteralExpr\\n                      stringQuote \\\"\\\"\\\"\\n                      StringLiteralSegmentList\\n                        StringSegment\\n                      stringQuote \\\"\\\"\\\"\\n                    postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

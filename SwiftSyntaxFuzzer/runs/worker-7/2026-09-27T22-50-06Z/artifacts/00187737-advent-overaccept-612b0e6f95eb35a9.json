@@ -1,0 +1,67 @@
+{
+  "event" : {
+    "artifact" : "00187737-advent-overaccept-612b0e6f95eb35a9.json",
+    "durationSeconds" : 0.025317072868347168,
+    "exitCode" : 1,
+    "generator" : "wide:closure:block-comment+keyword:phase4-keypath:kp-chain",
+    "index" : 187737,
+    "seed" : 17418700093595237275,
+    "signalHash" : "d7d94887cfe0e981",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "612b0e6f95eb35a9",
+    "sourceLength" : 51,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nlet a = \\Foo.var. \/* c *\/ baz\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.var. baz\n»"
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "regexForcingLexerKeyword\t[\"var\"]",
+      "memberName\t[regexForcingLexerKeyword >->(regexSlash)]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 82,
+      "descriptorCount" : 257,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 138,
+      "parseSeconds" : 0.005146980285644531,
+      "sourceLength" : 14,
+      "suppressedDescriptorCount" : 29,
+      "tokenCount" : 6,
+      "yieldCount" : 207
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              MemberAccessExpr\n                period \".\"\n                DeclReferenceExpr\n                  identifier(\"var\") \"var\"\n              UnexpectedNodes\n                period \".\"\n              DeclReferenceExpr\n                identifier(\"baz\") \"baz\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : " { .var. baz\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.var. baz\\n»\"],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"regexForcingLexerKeyword\\t[\\\"var\\\"]\",\"memberName\\t[regexForcingLexerKeyword >->(regexSlash)]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":82,\"descriptorCount\":257,\"duplicateDescriptorCount\":0,\"oraclePruned\":138,\"parseSeconds\":0.005146980285644531,\"sourceLength\":14,\"suppressedDescriptorCount\":29,\"tokenCount\":6,\"yieldCount\":207},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              MemberAccessExpr\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"var\\\") \\\"var\\\"\\n              UnexpectedNodes\\n                period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"baz\\\") \\\"baz\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

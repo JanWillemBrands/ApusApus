@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00131537-advent-overaccept-326b26fae671e074.json",
+    "durationSeconds" : 0.05805397033691406,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:newline+newline+line-comment:translated:testErrors32#1",
+    "index" : 131537,
+    "seed" : 1663246799498458970,
+    "signalHash" : "6ad7c8ce90da7150",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "326b26fae671e074",
+    "sourceLength" : 255,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func\nfoo() throws {}\n  do {\n#if\nfalse\n    try foo()\n#endif\n  } catch {    \/\/ don't warn, #if code should be scanned.\n  }\n  do { \/\/ c\n\n#if false\n    throw opaque_error()\n#endif\n  } catch {    \/\/ don't warn, #if code should be scanned.\n  }\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  BooleanLiteralExpr\n                    keyword(SwiftSyntax.Keyword.false) \"false\"\n                  CodeBlockItemList\n              poundEndif \"#endif\"\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  BooleanLiteralExpr\n                    keyword(SwiftSyntax.Keyword.false) \"false\"\n                  CodeBlockItemList\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "booleanLiteral\t[\"false\"]",
+      "compilationCondition\t[booleanLiteral]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 236,
+      "descriptorCount" : 537,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 158,
+      "parseSeconds" : 0.008509039878845215,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 80,
+      "tokenCount" : 10,
+      "yieldCount" : 245
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  MissingExpr\n                  CodeBlockItemList\n                    CodeBlockItem\n                      BooleanLiteralExpr\n                        keyword(SwiftSyntax.Keyword.false) \"false\"\n              poundEndif \"#endif\"\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  BooleanLiteralExpr\n                    keyword(SwiftSyntax.Keyword.false) \"false\"\n                  CodeBlockItemList\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n#if\nfalse\n#endif\n#if false\n#endif\n  }",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  BooleanLiteralExpr\\n                    keyword(SwiftSyntax.Keyword.false) \\\"false\\\"\\n                  CodeBlockItemList\\n              poundEndif \\\"#endif\\\"\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  BooleanLiteralExpr\\n                    keyword(SwiftSyntax.Keyword.false) \\\"false\\\"\\n                  CodeBlockItemList\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"booleanLiteral\\t[\\\"false\\\"]\",\"compilationCondition\\t[booleanLiteral]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":236,\"descriptorCount\":537,\"duplicateDescriptorCount\":0,\"oraclePruned\":158,\"parseSeconds\":0.008509039878845215,\"sourceLength\":40,\"suppressedDescriptorCount\":80,\"tokenCount\":10,\"yieldCount\":245},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  MissingExpr\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      BooleanLiteralExpr\\n                        keyword(SwiftSyntax.Keyword.false) \\\"false\\\"\\n              poundEndif \\\"#endif\\\"\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  BooleanLiteralExpr\\n                    keyword(SwiftSyntax.Keyword.false) \\\"false\\\"\\n                  CodeBlockItemList\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

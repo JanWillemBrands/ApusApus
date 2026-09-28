@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00235932-tree-difference-3667ec10e5624041.json",
+    "durationSeconds" : 0.07876002788543701,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:space+newline+block-comment:fuzz-harvest:dot-own-line+type:testTypedThrows#1",
+    "index" : 235932,
+    "seed" : 10372684106311075726,
+    "signalHash" : "4c044f1d8aaab0bf",
+    "signalSummary" : "tree-difference|line=26|ref=FunctionCallExpr|advent=MemberAccessExpr",
+    "sourceHash" : "3667ec10e5624041",
+    "sourceLength" : 89,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\nlet v = f { \/*\n*\/value\n}\n.\n member\n{ () throws(PosixError) -> Void in }",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      MemberAccessExpr\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        period \".\"\n        DeclReferenceExpr\n          identifier(\"member\") \"member\"\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        ClosureSignature\n          AttributeList\n          ClosureParameterClause\n            leftParen \"(\"\n            ClosureParameterList\n            rightParen \")\"\n          TypeEffectSpecifiers\n            ThrowsClause\n              keyword(SwiftSyntax.Keyword.throws) \"throws\"\n              leftParen \"(\"\n              IdentifierType\n                identifier(\"PosixError\") \"PosixError\"\n              rightParen \")\"\n          keyword(SwiftSyntax.Keyword.in) \"in\"\n        CodeBlockItemList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "closureParameterClause\t[\"(\" \")\"]",
+      "closureSignature\t[  closureParameterClause    \"in\"]",
+      ".OPT\t[closureSignature]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "memberName\t[identifier]",
+      ".DO\t[<s> \".\"]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 145,
+      "descriptorCount" : 409,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 209,
+      "parseSeconds" : 0.014830946922302246,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 13,
+      "yieldCount" : 306
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        MemberAccessExpr\n          ClosureExpr\n            leftBrace \"{\"\n            CodeBlockItemList\n            rightBrace \"}\"\n          period \".\"\n          DeclReferenceExpr\n            identifier(\"member\") \"member\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          ClosureSignature\n            AttributeList\n            ClosureParameterClause\n              leftParen \"(\"\n              ClosureParameterList\n              rightParen \")\"\n            TypeEffectSpecifiers\n              ThrowsClause\n                keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                leftParen \"(\"\n                IdentifierType\n                  identifier(\"PosixError\") \"PosixError\"\n                rightParen \")\"\n            keyword(SwiftSyntax.Keyword.in) \"in\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n}\n.\n member\n{ () throws(PosixError) in }",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      MemberAccessExpr\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        period \\\".\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"member\\\") \\\"member\\\"\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        ClosureSignature\\n          AttributeList\\n          ClosureParameterClause\\n            leftParen \\\"(\\\"\\n            ClosureParameterList\\n            rightParen \\\")\\\"\\n          TypeEffectSpecifiers\\n            ThrowsClause\\n              keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n              leftParen \\\"(\\\"\\n              IdentifierType\\n                identifier(\\\"PosixError\\\") \\\"PosixError\\\"\\n              rightParen \\\")\\\"\\n          keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        CodeBlockItemList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"closureParameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"closureSignature\\t[  closureParameterClause    \\\"in\\\"]\",\".OPT\\t[closureSignature]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"memberName\\t[identifier]\",\".DO\\t[<s> \\\".\\\"]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":145,\"descriptorCount\":409,\"duplicateDescriptorCount\":1,\"oraclePruned\":209,\"parseSeconds\":0.014830946922302246,\"sourceLength\":43,\"suppressedDescriptorCount\":43,\"tokenCount\":13,\"yieldCount\":306},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        MemberAccessExpr\\n          ClosureExpr\\n            leftBrace \\\"{\\\"\\n            CodeBlockItemList\\n            rightBrace \\\"}\\\"\\n          period \\\".\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"member\\\") \\\"member\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          ClosureSignature\\n            AttributeList\\n            ClosureParameterClause\\n              leftParen \\\"(\\\"\\n              ClosureParameterList\\n              rightParen \\\")\\\"\\n            TypeEffectSpecifiers\\n              ThrowsClause\\n                keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                leftParen \\\"(\\\"\\n                IdentifierType\\n                  identifier(\\\"PosixError\\\") \\\"PosixError\\\"\\n                rightParen \\\")\\\"\\n            keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

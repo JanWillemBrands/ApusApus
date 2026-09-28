@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00086303-advent-overaccept-e9c8b6ff93017c65.json",
+    "durationSeconds" : 0.02682793140411377,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:raw:type:testLifetimeSpecifier#3+real:SyntaxTraits:736",
+    "index" : 86303,
+    "seed" : 8709271582791740263,
+    "signalHash" : "d2900028a38d5b03",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "e9c8b6ff93017c65",
+    "sourceLength" : 113,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\nfunc foo() -> dependsOn(x) dependsOn(scoped y) X\nextension DoStmtSyntax: WithCodeBlockSyntax {}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"foo\") \"foo\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            AttributedType\n              TypeSpecifierList\n                SimpleTypeSpecifier\n                  identifier(\"dependsOn(x)\") \"dependsOn(x)\"\n                SimpleTypeSpecifier\n                  identifier(\"dependsOn(y)\") \"dependsOn(y)\"\n              AttributeList\n              TypeSpecifierList\n              IdentifierType\n                identifier(\"X\") \"X\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(x) »",
+      "unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn( y) »"
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "lifetimeSpecifierArgument\t[identifierToken]",
+      "parenthesisedTypeSpecifier\t[\"dependsOn\" >s< \"(\"  lifetimeSpecifierArgument  \")\"]",
+      "parameterModifier\t[parenthesisedTypeSpecifier]",
+      "type\t[parameterModifier type]",
+      "resultType\t[type]",
+      "functionResult\t[\"->\" resultType]",
+      ".OPT\t[functionResult]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 101,
+      "descriptorCount" : 242,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 119,
+      "parseSeconds" : 0.008764982223510742,
+      "sourceLength" : 42,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 14,
+      "yieldCount" : 203
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"foo\") \"foo\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            IdentifierType\n              identifier(\"dependsOn\") \"dependsOn\"\n    CodeBlockItem\n      TupleExpr\n        leftParen \"(\"\n        LabeledExprList\n          LabeledExpr\n            DeclReferenceExpr\n              identifier(\"x\") \"x\"\n        rightParen \")\"\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"dependsOn\") \"dependsOn\"\n        leftParen \"(\"\n        LabeledExprList\n          LabeledExpr\n            DeclReferenceExpr\n              identifier(\"y\") \"y\"\n        rightParen \")\"\n        MultipleTrailingClosureElementList\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"X\") \"X\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 41,
+  "source" : "func foo() -> dependsOn(x) dependsOn( y) X",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"foo\\\") \\\"foo\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            AttributedType\\n              TypeSpecifierList\\n                SimpleTypeSpecifier\\n                  identifier(\\\"dependsOn(x)\\\") \\\"dependsOn(x)\\\"\\n                SimpleTypeSpecifier\\n                  identifier(\\\"dependsOn(y)\\\") \\\"dependsOn(y)\\\"\\n              AttributeList\\n              TypeSpecifierList\\n              IdentifierType\\n                identifier(\\\"X\\\") \\\"X\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(x) »\",\"unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn( y) »\"],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"lifetimeSpecifierArgument\\t[identifierToken]\",\"parenthesisedTypeSpecifier\\t[\\\"dependsOn\\\" >s< \\\"(\\\"  lifetimeSpecifierArgument  \\\")\\\"]\",\"parameterModifier\\t[parenthesisedTypeSpecifier]\",\"type\\t[parameterModifier type]\",\"resultType\\t[type]\",\"functionResult\\t[\\\"->\\\" resultType]\",\".OPT\\t[functionResult]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":101,\"descriptorCount\":242,\"duplicateDescriptorCount\":0,\"oraclePruned\":119,\"parseSeconds\":0.008764982223510742,\"sourceLength\":42,\"suppressedDescriptorCount\":22,\"tokenCount\":14,\"yieldCount\":203},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"foo\\\") \\\"foo\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            IdentifierType\\n              identifier(\\\"dependsOn\\\") \\\"dependsOn\\\"\\n    CodeBlockItem\\n      TupleExpr\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n          LabeledExpr\\n            DeclReferenceExpr\\n              identifier(\\\"x\\\") \\\"x\\\"\\n        rightParen \\\")\\\"\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"dependsOn\\\") \\\"dependsOn\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n          LabeledExpr\\n            DeclReferenceExpr\\n              identifier(\\\"y\\\") \\\"y\\\"\\n        rightParen \\\")\\\"\\n        MultipleTrailingClosureElementList\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"X\\\") \\\"X\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

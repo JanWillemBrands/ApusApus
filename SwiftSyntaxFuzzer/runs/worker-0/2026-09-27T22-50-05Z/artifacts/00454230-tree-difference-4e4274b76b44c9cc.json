@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00454230-tree-difference-4e4274b76b44c9cc.json",
+    "durationSeconds" : 0.05897200107574463,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+block-comment+space:translated:testSelfRebinding9#1",
+    "index" : 454230,
+    "seed" : 11400601876238378790,
+    "signalHash" : "8566b510adf3ae68",
+    "signalSummary" : "tree-difference|line=47|ref=MemberAccessExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "4e4274b76b44c9cc",
+    "sourceLength" : 179,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nenum EnumCaseNamedSelf {\n    case `self`\n    init\n() {\n        self = .\/*c*\/self \/\/ OK\n        self = .`self` \/\/ OK\n         self = EnumCaseNamedSelf.`self` \/\/ OK\n    }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          SequenceExpr\n                            ExprList\n                              DeclReferenceExpr\n                                keyword(SwiftSyntax.Keyword.self) \"self\"\n                              AssignmentExpr\n                                equal \"=\"\n                              PrefixOperatorExpr\n                                prefixOperator(\".\/*\") \".\/*\"\n                                DeclReferenceExpr\n                                  identifier(\"c\") \"c\"\n                              BinaryOperatorExpr\n                                binaryOperator(\"*\/\") \"*\/\"\n                              DeclReferenceExpr\n                                keyword(SwiftSyntax.Keyword.self) \"self\"\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "selfExpression\t[\"self\"]",
+      "primaryExpression\t[selfExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "operator\t[dotOperator]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 170,
+      "descriptorCount" : 496,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 201,
+      "parseSeconds" : 0.007304072380065918,
+      "sourceLength" : 51,
+      "suppressedDescriptorCount" : 59,
+      "tokenCount" : 14,
+      "yieldCount" : 370
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          SequenceExpr\n                            ExprList\n                              DeclReferenceExpr\n                                keyword(SwiftSyntax.Keyword.self) \"self\"\n                              AssignmentExpr\n                                equal \"=\"\n                              MemberAccessExpr\n                                period \".\"\n                                DeclReferenceExpr\n                                  keyword(SwiftSyntax.Keyword.self) \"self\"\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n() {\n        self = .\/*c*\/self \/\/ OK\n    }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          SequenceExpr\\n                            ExprList\\n                              DeclReferenceExpr\\n                                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                              AssignmentExpr\\n                                equal \\\"=\\\"\\n                              PrefixOperatorExpr\\n                                prefixOperator(\\\".\\\/*\\\") \\\".\\\/*\\\"\\n                                DeclReferenceExpr\\n                                  identifier(\\\"c\\\") \\\"c\\\"\\n                              BinaryOperatorExpr\\n                                binaryOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                              DeclReferenceExpr\\n                                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"selfExpression\\t[\\\"self\\\"]\",\"primaryExpression\\t[selfExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"operator\\t[dotOperator]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":170,\"descriptorCount\":496,\"duplicateDescriptorCount\":1,\"oraclePruned\":201,\"parseSeconds\":0.007304072380065918,\"sourceLength\":51,\"suppressedDescriptorCount\":59,\"tokenCount\":14,\"yieldCount\":370},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          SequenceExpr\\n                            ExprList\\n                              DeclReferenceExpr\\n                                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                              AssignmentExpr\\n                                equal \\\"=\\\"\\n                              MemberAccessExpr\\n                                period \\\".\\\"\\n                                DeclReferenceExpr\\n                                  keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

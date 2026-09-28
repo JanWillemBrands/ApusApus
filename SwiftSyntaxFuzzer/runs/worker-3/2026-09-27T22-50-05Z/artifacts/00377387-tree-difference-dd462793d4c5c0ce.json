@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00377387-tree-difference-dd462793d4c5c0ce.json",
+    "durationSeconds" : 0.04755806922912598,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:delete:translated:testTypeExpr9#1",
+    "index" : 377387,
+    "seed" : 8709271582791740263,
+    "signalHash" : "648ad807de61fac7",
+    "signalSummary" : "tree-difference|line=35|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "dd462793d4c5c0ce",
+    "sourceLength" : 157,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n\/\/ We allow '.Type' in expr context\nfunc metaType() {\n  let _ = .Type.self\n  let _ = Foo.Type.self\n  let _ = Foo.Type\n  let _ = type(of: Foo.Type)\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      DiscardAssignmentExpr\n                        wildcard \"_\"\n                      AssignmentExpr\n                        equal \"=\"\n                      MissingExpr\n                        identifier(\"<#expression#>\") \"<#expression#>\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.Type.self\n»"
+    ],
+    "grammarCoverage" : [
+      "selfExpression\t[\"self\"]",
+      "primaryExpression\t[selfExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 133,
+      "descriptorCount" : 402,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 199,
+      "parseSeconds" : 0.011850953102111816,
+      "sourceLength" : 23,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 10,
+      "yieldCount" : 313
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      DiscardAssignmentExpr\n                        wildcard \"_\"\n                      AssignmentExpr\n                        equal \"=\"\n                      MemberAccessExpr\n                        MemberAccessExpr\n                          period \".\"\n                          DeclReferenceExpr\n                            identifier(\"Type\") \"Type\"\n                        period \".\"\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.self) \"self\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { { _ = .Type.self\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      DiscardAssignmentExpr\\n                        wildcard \\\"_\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      MissingExpr\\n                        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.Type.self\\n»\"],\"grammarCoverage\":[\"selfExpression\\t[\\\"self\\\"]\",\"primaryExpression\\t[selfExpression]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":133,\"descriptorCount\":402,\"duplicateDescriptorCount\":0,\"oraclePruned\":199,\"parseSeconds\":0.011850953102111816,\"sourceLength\":23,\"suppressedDescriptorCount\":45,\"tokenCount\":10,\"yieldCount\":313},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      DiscardAssignmentExpr\\n                        wildcard \\\"_\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      MemberAccessExpr\\n                        MemberAccessExpr\\n                          period \\\".\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"Type\\\") \\\"Type\\\"\\n                        period \\\".\\\"\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

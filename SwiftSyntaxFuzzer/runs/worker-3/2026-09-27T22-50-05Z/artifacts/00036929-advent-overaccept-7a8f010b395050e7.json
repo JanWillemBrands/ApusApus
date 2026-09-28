@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00036929-advent-overaccept-7a8f010b395050e7.json",
+    "durationSeconds" : 0.029955029487609863,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:duplicate:attribute:testABIAttribute#10+declaration:testTypedThrows#2",
+    "index" : 36929,
+    "seed" : 8709271582791740263,
+    "signalHash" : "8c43d7c52eb6e6ba",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/VariableD",
+    "sourceHash" : "7a8f010b395050e7",
+    "sourceLength" : 84,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n@abi(var v1, v2)\nvar v1, v2\nstruct X {\n  init() throws(any any Error) { }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n                      FunctionEffectSpecifiers\n                        ThrowsClause\n                          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                          leftParen \"(\"\n                          SomeOrAnyType\n                            keyword(SwiftSyntax.Keyword.any) \"any\"\n                            SomeOrAnyType\n                              keyword(SwiftSyntax.Keyword.any) \"any\"\n                              IdentifierType\n                                identifier(\"Error\") \"Error\"\n                          rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "type\t[boxedProtocolType]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      "declarationThrowsClause\t[throwsClause]",
+      ".OPT\t[declarationThrowsClause]",
+      "parameterClause\t[\"(\" \")\"]",
+      "initializerHead\t[  \"init\"]",
+      "bodylessInitializerDeclaration\t[initializerHead  parameterClause    ]",
+      "declaration\t[bodylessInitializerDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 153,
+      "descriptorCount" : 398,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 193,
+      "parseSeconds" : 0.0069550275802612305,
+      "sourceLength" : 39,
+      "suppressedDescriptorCount" : 40,
+      "tokenCount" : 13,
+      "yieldCount" : 302
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n                      FunctionEffectSpecifiers\n                        ThrowsClause\n                          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                          leftParen \"(\"\n                          SomeOrAnyType\n                            keyword(SwiftSyntax.Keyword.any) \"any\"\n                            IdentifierType\n                              identifier(\"any\") \"any\"\n                          UnexpectedNodes\n                            identifier(\"Error\") \"Error\"\n                          rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  init() throws(any any Error)\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n                      FunctionEffectSpecifiers\\n                        ThrowsClause\\n                          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                          leftParen \\\"(\\\"\\n                          SomeOrAnyType\\n                            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                            SomeOrAnyType\\n                              keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                              IdentifierType\\n                                identifier(\\\"Error\\\") \\\"Error\\\"\\n                          rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"type\\t[boxedProtocolType]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\"declarationThrowsClause\\t[throwsClause]\",\".OPT\\t[declarationThrowsClause]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"initializerHead\\t[  \\\"init\\\"]\",\"bodylessInitializerDeclaration\\t[initializerHead  parameterClause    ]\",\"declaration\\t[bodylessInitializerDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":153,\"descriptorCount\":398,\"duplicateDescriptorCount\":0,\"oraclePruned\":193,\"parseSeconds\":0.0069550275802612305,\"sourceLength\":39,\"suppressedDescriptorCount\":40,\"tokenCount\":13,\"yieldCount\":302},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n                      FunctionEffectSpecifiers\\n                        ThrowsClause\\n                          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                          leftParen \\\"(\\\"\\n                          SomeOrAnyType\\n                            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                            IdentifierType\\n                              identifier(\\\"any\\\") \\\"any\\\"\\n                          UnexpectedNodes\\n                            identifier(\\\"Error\\\") \\\"Error\\\"\\n                          rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

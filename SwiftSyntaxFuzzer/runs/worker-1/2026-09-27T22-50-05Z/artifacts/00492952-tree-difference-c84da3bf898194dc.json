@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00492952-tree-difference-c84da3bf898194dc.json",
+    "durationSeconds" : 0.0504230260848999,
+    "exitCode" : 1,
+    "generator" : "wide:top:keyword+line-comment:declaration:testAttributeInPoundIf#1",
+    "index" : 492952,
+    "seed" : 4354586988532835097,
+    "signalHash" : "0f088914de38f45e",
+    "signalSummary" : "tree-difference|line=9|ref=AwaitExpr|advent=FunctionCallExpr",
+    "sourceHash" : "c84da3bf898194dc",
+    "sourceLength" : 51,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if await(foo)\n@foo\n#endif\nstruct \/\/ c\n MyStruct {}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"await\") \"await\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n            CodeBlockItemList\n        poundEndif \"#endif\"\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"MyStruct\") \"MyStruct\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken >n< functionCallArgumentClause]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 149,
+      "descriptorCount" : 350,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 130,
+      "parseSeconds" : 0.008558988571166992,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 44,
+      "tokenCount" : 9,
+      "yieldCount" : 208
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            AwaitExpr\n              keyword(SwiftSyntax.Keyword.await) \"await\"\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"MyStruct\") \"MyStruct\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 45,
+  "source" : "#if await()\n#endif\nMyStruct {}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"await\\\") \\\"await\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken >n< functionCallArgumentClause]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":149,\"descriptorCount\":350,\"duplicateDescriptorCount\":0,\"oraclePruned\":130,\"parseSeconds\":0.008558988571166992,\"sourceLength\":30,\"suppressedDescriptorCount\":44,\"tokenCount\":9,\"yieldCount\":208},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            AwaitExpr\\n              keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

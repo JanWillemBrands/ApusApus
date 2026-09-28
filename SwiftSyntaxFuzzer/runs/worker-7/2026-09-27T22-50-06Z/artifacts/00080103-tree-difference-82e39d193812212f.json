@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00080103-tree-difference-82e39d193812212f.json",
+    "durationSeconds" : 0.041597962379455566,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:splice+keyword+keyword:attribute:testEffects#2",
+    "index" : 80103,
+    "seed" : 17418700093595237275,
+    "signalHash" : "59cdeaf4c16636d9",
+    "signalSummary" : "tree-difference|line=19|ref=keyword()|advent=identifier()",
+    "sourceHash" : "82e39d193812212f",
+    "sourceLength" : 77,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n@_effects(if self.any**.class*.value** => return.in**)\nfunc foo() {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"_effects\") \"_effects\"\n                  leftParen \"(\"\n                  EffectsAttributeArgumentList\n                    identifier(\"if\") \"if\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"foo\") \"foo\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "effectsToken\t[identifier]",
+      ".POS\t[effectsToken]",
+      "attribute\t[\"@\" >s< \"_effects\" >s< \"(\"  \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 128,
+      "descriptorCount" : 304,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 117,
+      "parseSeconds" : 0.005030989646911621,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 13,
+      "yieldCount" : 199
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"_effects\") \"_effects\"\n                  leftParen \"(\"\n                  EffectsAttributeArgumentList\n                    keyword(SwiftSyntax.Keyword.if) \"if\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"foo\") \"foo\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 48,
+  "source" : " {\n@_effects(if )\nfunc foo() {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                  leftParen \\\"(\\\"\\n                  EffectsAttributeArgumentList\\n                    identifier(\\\"if\\\") \\\"if\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"foo\\\") \\\"foo\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"effectsToken\\t[identifier]\",\".POS\\t[effectsToken]\",\"attribute\\t[\\\"@\\\" >s< \\\"_effects\\\" >s< \\\"(\\\"  \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":128,\"descriptorCount\":304,\"duplicateDescriptorCount\":0,\"oraclePruned\":117,\"parseSeconds\":0.005030989646911621,\"sourceLength\":33,\"suppressedDescriptorCount\":30,\"tokenCount\":13,\"yieldCount\":199},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                  leftParen \\\"(\\\"\\n                  EffectsAttributeArgumentList\\n                    keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"foo\\\") \\\"foo\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

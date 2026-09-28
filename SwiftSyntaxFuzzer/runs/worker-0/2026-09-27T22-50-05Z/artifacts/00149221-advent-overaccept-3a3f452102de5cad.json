@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00149221-advent-overaccept-3a3f452102de5cad.json",
+    "durationSeconds" : 0.027583003044128418,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+splice:reject:testTypedThrows#1",
+    "index" : 149221,
+    "seed" : 11400601876238378790,
+    "signalHash" : "01f88919ca65a01c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "3a3f452102de5cad",
+    "sourceLength" : 50,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nfunc test() throws(MyError) \/*\n*\/async {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            PrefixOperatorExpr\n              prefixOperator(\"*\/\") \"*\/\"\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"async\") \"async\"\n                LabeledExprList\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 66,
+      "descriptorCount" : 190,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 75,
+      "parseSeconds" : 0.004691004753112793,
+      "sourceLength" : 15,
+      "suppressedDescriptorCount" : 25,
+      "tokenCount" : 6,
+      "yieldCount" : 150
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                unknown(\"*\/\") \"*\/\"\n                identifier(\"async\") \"async\"\n                leftBrace \"{\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 26,
+  "source" : " {\n*\/async {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"async\\\") \\\"async\\\"\\n                LabeledExprList\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":66,\"descriptorCount\":190,\"duplicateDescriptorCount\":0,\"oraclePruned\":75,\"parseSeconds\":0.004691004753112793,\"sourceLength\":15,\"suppressedDescriptorCount\":25,\"tokenCount\":6,\"yieldCount\":150},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                unknown(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                identifier(\\\"async\\\") \\\"async\\\"\\n                leftBrace \\\"{\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00376188-tree-difference-2891a415aaa50248.json",
+    "durationSeconds" : 0.019829988479614258,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:keyword+keyword:translated:testForwardSlashRegex88#1",
+    "index" : 376188,
+    "seed" : 11400601876238378790,
+    "signalHash" : "067051f15e0a0749",
+    "signalSummary" : "tree-difference|line=19|ref=FunctionCallExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "2891a415aaa50248",
+    "sourceLength" : 36,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nconsume \/x\/.super {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ConsumeExpr\n                keyword(SwiftSyntax.Keyword.consume) \"consume\"\n                PrefixOperatorExpr\n                  prefixOperator(\"\/\") \"\/\"\n                  FunctionCallExpr\n                    MemberAccessExpr\n                      PostfixOperatorExpr\n                        DeclReferenceExpr\n                          identifier(\"x\") \"x\"\n                        postfixOperator(\"\/\") \"\/\"\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"super\") \"super\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "regexSafeLexerKeyword\t[\"super\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperatorToken >+>(\")\" \",\" \".\" \":\" \";\" \"]\" \"}\" ○)]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "nonLiteralPostfix\t[explicitMemberExpression]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "prefixExpression\t[\"consume\" >->(\"(\" \".\" \"[\") <s> >n< prefixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 153,
+      "descriptorCount" : 438,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 273,
+      "parseSeconds" : 0.00846099853515625,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 57,
+      "tokenCount" : 12,
+      "yieldCount" : 385
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ConsumeExpr\n                keyword(SwiftSyntax.Keyword.consume) \"consume\"\n                FunctionCallExpr\n                  MemberAccessExpr\n                    RegexLiteralExpr\n                      regexSlash \"\/\"\n                      regexLiteralPattern(\"x\") \"x\"\n                      regexSlash \"\/\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"super\") \"super\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 36,
+  "source" : " () {\nconsume \/x\/.super {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ConsumeExpr\\n                keyword(SwiftSyntax.Keyword.consume) \\\"consume\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                  FunctionCallExpr\\n                    MemberAccessExpr\\n                      PostfixOperatorExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n                        postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"super\\\") \\\"super\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"regexSafeLexerKeyword\\t[\\\"super\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperatorToken >+>(\\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"]\\\" \\\"}\\\" ○)]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"nonLiteralPostfix\\t[explicitMemberExpression]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"prefixExpression\\t[\\\"consume\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< prefixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":153,\"descriptorCount\":438,\"duplicateDescriptorCount\":0,\"oraclePruned\":273,\"parseSeconds\":0.00846099853515625,\"sourceLength\":28,\"suppressedDescriptorCount\":57,\"tokenCount\":12,\"yieldCount\":385},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ConsumeExpr\\n                keyword(SwiftSyntax.Keyword.consume) \\\"consume\\\"\\n                FunctionCallExpr\\n                  MemberAccessExpr\\n                    RegexLiteralExpr\\n                      regexSlash \\\"\\\/\\\"\\n                      regexLiteralPattern(\\\"x\\\") \\\"x\\\"\\n                      regexSlash \\\"\\\/\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"super\\\") \\\"super\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

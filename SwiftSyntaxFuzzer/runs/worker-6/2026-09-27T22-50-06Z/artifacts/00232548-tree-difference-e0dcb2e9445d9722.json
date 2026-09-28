@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00232548-tree-difference-e0dcb2e9445d9722.json",
+    "durationSeconds" : 0.025708913803100586,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+keyword:expression:testKeyPathMethodAndInitializers#4+translated:testOperatorDecl18#1",
+    "index" : 232548,
+    "seed" : 6018003910102630304,
+    "signalHash" : "d2a2d0f829c19d36",
+    "signalSummary" : "tree-difference|line=25|ref=keyword()|advent=identifier()",
+    "sourceHash" : "e0dcb2e9445d9722",
+    "sourceLength" : 101,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n\\Foo.method(else:)\nprecedencegroup CaretCaretCaret{\n  assignment: true\n  assignment: false\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              DeclReferenceExpr\n                identifier(\"Foo\") \"Foo\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"method\") \"method\"\n                DeclNameArguments\n                  leftParen \"(\"\n                  DeclNameArgumentList\n                    DeclNameArgument\n                      identifier(\"else\") \"else\"\n                      colon \":\"\n                  rightParen \")\"\n          CodeBlockItem\n            PrecedenceGroupDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.precedencegroup) \"precedencegroup\"\n              identifier(\"CaretCaretCaret\") \"CaretCaretCaret\"\n              leftBrace \"{\"\n              PrecedenceGroupAttributeList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "precedenceGroupDeclaration\t[\"precedencegroup\" precedenceGroupName \"{\"  \"}\"]",
+      "declaration\t[precedenceGroupDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "argumentLabel\t[identifier]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName \"(\" argumentNames \")\"]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 132,
+      "descriptorCount" : 346,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 173,
+      "parseSeconds" : 0.005033016204833984,
+      "sourceLength" : 57,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 13,
+      "yieldCount" : 268
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              DeclReferenceExpr\n                identifier(\"Foo\") \"Foo\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"method\") \"method\"\n                DeclNameArguments\n                  leftParen \"(\"\n                  DeclNameArgumentList\n                    DeclNameArgument\n                      keyword(SwiftSyntax.Keyword.else) \"else\"\n                      colon \":\"\n                  rightParen \")\"\n          CodeBlockItem\n            PrecedenceGroupDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.precedencegroup) \"precedencegroup\"\n              identifier(\"CaretCaretCaret\") \"CaretCaretCaret\"\n              leftBrace \"{\"\n              PrecedenceGroupAttributeList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nFoo.method(else:)\nprecedencegroup CaretCaretCaret{\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              DeclReferenceExpr\\n                identifier(\\\"Foo\\\") \\\"Foo\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"method\\\") \\\"method\\\"\\n                DeclNameArguments\\n                  leftParen \\\"(\\\"\\n                  DeclNameArgumentList\\n                    DeclNameArgument\\n                      identifier(\\\"else\\\") \\\"else\\\"\\n                      colon \\\":\\\"\\n                  rightParen \\\")\\\"\\n          CodeBlockItem\\n            PrecedenceGroupDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.precedencegroup) \\\"precedencegroup\\\"\\n              identifier(\\\"CaretCaretCaret\\\") \\\"CaretCaretCaret\\\"\\n              leftBrace \\\"{\\\"\\n              PrecedenceGroupAttributeList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"precedenceGroupDeclaration\\t[\\\"precedencegroup\\\" precedenceGroupName \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[precedenceGroupDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"argumentLabel\\t[identifier]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName \\\"(\\\" argumentNames \\\")\\\"]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":132,\"descriptorCount\":346,\"duplicateDescriptorCount\":0,\"oraclePruned\":173,\"parseSeconds\":0.005033016204833984,\"sourceLength\":57,\"suppressedDescriptorCount\":32,\"tokenCount\":13,\"yieldCount\":268},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              DeclReferenceExpr\\n                identifier(\\\"Foo\\\") \\\"Foo\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"method\\\") \\\"method\\\"\\n                DeclNameArguments\\n                  leftParen \\\"(\\\"\\n                  DeclNameArgumentList\\n                    DeclNameArgument\\n                      keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n                      colon \\\":\\\"\\n                  rightParen \\\")\\\"\\n          CodeBlockItem\\n            PrecedenceGroupDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.precedencegroup) \\\"precedencegroup\\\"\\n              identifier(\\\"CaretCaretCaret\\\") \\\"CaretCaretCaret\\\"\\n              leftBrace \\\"{\\\"\\n              PrecedenceGroupAttributeList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

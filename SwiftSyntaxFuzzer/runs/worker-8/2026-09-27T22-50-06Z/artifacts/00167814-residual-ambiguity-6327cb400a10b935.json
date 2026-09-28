@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00167814-residual-ambiguity-6327cb400a10b935.json",
+    "durationSeconds" : 0.029623985290527344,
+    "exitCode" : 1,
+    "generator" : "wide:closure:splice+block-comment:pattern:testNonBinding1#1",
+    "index" : 167814,
+    "seed" : 10372684106311075726,
+    "signalHash" : "9e4081e76542537f",
+    "signalSummary" : "residual-ambiguity|matchPattern\tambiguous pivot\tbody=[matchPattern initializer]",
+    "sourceHash" : "6327cb400a10b935",
+    "sourceLength" : 61,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "let fuzzClosure = {\nif case let E=Int>.e \/* c *\/ (y) = x {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              IfExpr\n                keyword(SwiftSyntax.Keyword.if) \"if\"\n                ConditionElementList\n                  ConditionElement\n                    MatchingPatternCondition\n                      keyword(SwiftSyntax.Keyword.case) \"case\"\n                      ExpressionPattern\n                        DeclReferenceExpr\n                          identifier(\"E\") \"E\"\n                      InitializerClause\n                        equal \"=\"\n                        SequenceExpr\n                          ExprList\n                            DeclReferenceExpr\n                              identifier(\"Int\") \"Int\"\n                            AssignmentExpr\n                              equal \"=\"\n                            DeclReferenceExpr\n                              identifier(\"x\") \"x\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "assignmentOperator\t[>s< \"=\" >s<]",
+      "initializer\t[assignmentOperator expression]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "condition\t[caseCondition]",
+      "conditionList\t[condition ]",
+      "ifExpression\t[\"if\" >->(\"{\") conditionList codeBlock ]",
+      "conditionalExpression\t[ifExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 177,
+      "descriptorCount" : 505,
+      "duplicateDescriptorCount" : 4,
+      "oraclePruned" : 219,
+      "parseSeconds" : 0.013087034225463867,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 53,
+      "tokenCount" : 11,
+      "yieldCount" : 373
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              IfExpr\n                keyword(SwiftSyntax.Keyword.if) \"if\"\n                ConditionElementList\n                  ConditionElement\n                    MatchingPatternCondition\n                      keyword(SwiftSyntax.Keyword.case) \"case\"\n                      ExpressionPattern\n                        DeclReferenceExpr\n                          identifier(\"E\") \"E\"\n                      InitializerClause\n                        equal \"=\"\n                        SequenceExpr\n                          ExprList\n                            DeclReferenceExpr\n                              identifier(\"Int\") \"Int\"\n                            AssignmentExpr\n                              equal \"=\"\n                            DeclReferenceExpr\n                              identifier(\"x\") \"x\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "matchPattern\tambiguous pivot\tbody=[matchPattern initializer]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nif case E=Int = x {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              IfExpr\\n                keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                ConditionElementList\\n                  ConditionElement\\n                    MatchingPatternCondition\\n                      keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                      ExpressionPattern\\n                        DeclReferenceExpr\\n                          identifier(\\\"E\\\") \\\"E\\\"\\n                      InitializerClause\\n                        equal \\\"=\\\"\\n                        SequenceExpr\\n                          ExprList\\n                            DeclReferenceExpr\\n                              identifier(\\\"Int\\\") \\\"Int\\\"\\n                            AssignmentExpr\\n                              equal \\\"=\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"x\\\") \\\"x\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"assignmentOperator\\t[>s< \\\"=\\\" >s<]\",\"initializer\\t[assignmentOperator expression]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"condition\\t[caseCondition]\",\"conditionList\\t[condition ]\",\"ifExpression\\t[\\\"if\\\" >->(\\\"{\\\") conditionList codeBlock ]\",\"conditionalExpression\\t[ifExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":177,\"descriptorCount\":505,\"duplicateDescriptorCount\":4,\"oraclePruned\":219,\"parseSeconds\":0.013087034225463867,\"sourceLength\":25,\"suppressedDescriptorCount\":53,\"tokenCount\":11,\"yieldCount\":373},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              IfExpr\\n                keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                ConditionElementList\\n                  ConditionElement\\n                    MatchingPatternCondition\\n                      keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                      ExpressionPattern\\n                        DeclReferenceExpr\\n                          identifier(\\\"E\\\") \\\"E\\\"\\n                      InitializerClause\\n                        equal \\\"=\\\"\\n                        SequenceExpr\\n                          ExprList\\n                            DeclReferenceExpr\\n                              identifier(\\\"Int\\\") \\\"Int\\\"\\n                            AssignmentExpr\\n                              equal \\\"=\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"x\\\") \\\"x\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"matchPattern\\tambiguous pivot\\tbody=[matchPattern initializer]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

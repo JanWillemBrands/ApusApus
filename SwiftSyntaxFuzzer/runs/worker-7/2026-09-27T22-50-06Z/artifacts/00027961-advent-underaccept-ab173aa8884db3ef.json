@@ -1,0 +1,50 @@
+{
+  "event" : {
+    "artifact" : "00027961-advent-underaccept-ab173aa8884db3ef.json",
+    "durationSeconds" : 0.4968940019607544,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:block-comment+block-comment+newline:translated:testSelfRebinding9#1",
+    "index" : 27961,
+    "seed" : 17418700093595237275,
+    "signalHash" : "119ed7282277707a",
+    "signalSummary" : "advent-underaccept|compiler=true|typecheck=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/EnumDecl\/AttributeLi",
+    "sourceHash" : "ab173aa8884db3ef",
+    "sourceLength" : 189,
+    "status" : "advent-underaccept"
+  },
+  "originalSource" : "struct Fuzz {\nenum EnumCaseNamedSelf {\n    case `self`\n    init() {\n        self = .self \/\/ OK\n        self =\n.`self` \/\/ OK\n        self \/*c*\/= EnumCaseNamedSelf.`self` \/\/ OK\n    \/*\n*\/}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : false,
+    "adventGeneratedSwiftSyntax" : false,
+    "adventMatched" : false,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 102,
+      "descriptorCount" : 211,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 0,
+      "parseSeconds" : 0.003607034683227539,
+      "sourceLength" : 88,
+      "suppressedDescriptorCount" : 11,
+      "tokenCount" : 9,
+      "yieldCount" : 106
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"EnumCaseNamedSelf\") \"EnumCaseNamedSelf\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    InitializerDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.init) \"init\"\n                      FunctionSignature\n                        FunctionParameterClause\n                          leftParen \"(\"\n                          FunctionParameterList\n                          rightParen \")\"\n                      CodeBlock\n                        leftBrace \"{\"\n                        CodeBlockItemList\n                          CodeBlockItem\n                            SequenceExpr\n                              ExprList\n                                DeclReferenceExpr\n                                  keyword(SwiftSyntax.Keyword.self) \"self\"\n                                AssignmentExpr\n                                  equal \"=\"\n                                DeclReferenceExpr\n                                  identifier(\"`self`\") \"`self`\"\n                        rightBrace \"}\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-underaccept",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nenum EnumCaseNamedSelf {\n    init() {\n        self \/*c*\/= `self` \/\/ OK\n    \/*\n*\/}\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":false,\"adventGeneratedSwiftSyntax\":false,\"adventMatched\":false,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[],\"metrics\":{\"crfCount\":102,\"descriptorCount\":211,\"duplicateDescriptorCount\":0,\"oraclePruned\":0,\"parseSeconds\":0.003607034683227539,\"sourceLength\":88,\"suppressedDescriptorCount\":11,\"tokenCount\":9,\"yieldCount\":106},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"EnumCaseNamedSelf\\\") \\\"EnumCaseNamedSelf\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    InitializerDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                      FunctionSignature\\n                        FunctionParameterClause\\n                          leftParen \\\"(\\\"\\n                          FunctionParameterList\\n                          rightParen \\\")\\\"\\n                      CodeBlock\\n                        leftBrace \\\"{\\\"\\n                        CodeBlockItemList\\n                          CodeBlockItem\\n                            SequenceExpr\\n                              ExprList\\n                                DeclReferenceExpr\\n                                  keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                                AssignmentExpr\\n                                  equal \\\"=\\\"\\n                                DeclReferenceExpr\\n                                  identifier(\\\"`self`\\\") \\\"`self`\\\"\\n                        rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-underaccept\",\"swiftSyntaxHasError\":false}"
+}

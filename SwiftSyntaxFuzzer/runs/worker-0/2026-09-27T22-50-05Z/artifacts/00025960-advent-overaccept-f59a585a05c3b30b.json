@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00025960-advent-overaccept-f59a585a05c3b30b.json",
+    "durationSeconds" : 0.055130958557128906,
+    "exitCode" : 1,
+    "generator" : "wide:closure:delete+newline:translated:testSuper1#1",
+    "index" : 25960,
+    "seed" : 11400601876238378790,
+    "signalHash" : "0f92dc257ed35ab0",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "f59a585a05c3b30b",
+    "sourceLength" : 141,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nclass B {\n  var foo: Int\n  func bar() {}\n  init() {}\n  init(x: Int)\n{}\n  subscript(x: Int) -> Int {\n    get {} {}\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                        rightParen \")\"\n                      ArrowExpr\n                        arrow \"->\"\n                      FunctionCallExpr\n                        DeclReferenceExpr\n                          identifier(\"Int\") \"Int\"\n                        LabeledExprList\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              FunctionCallExpr\n                                FunctionCallExpr\n                                  DeclReferenceExpr\n                                    identifier(\"get\") \"get\"\n                                  LabeledExprList\n                                  ClosureExpr\n                                    leftBrace \"{\"\n                                    CodeBlockItemList\n                                    rightBrace \"}\"\n                                  MultipleTrailingClosureElementList\n                                LabeledExprList\n                                ClosureExpr\n                                  leftBrace \"{\"\n                                  CodeBlockItemList\n                                  rightBrace \"}\"\n                                MultipleTrailingClosureElementList\n                          rightBrace \"}\"\n                        MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "nonLiteralPostfix\t[functionCallExpression]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 195,
+      "descriptorCount" : 545,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 246,
+      "parseSeconds" : 0.006824970245361328,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 74,
+      "tokenCount" : 15,
+      "yieldCount" : 421
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              ClosureSignature\n                AttributeList\n                ClosureParameterClause\n                  leftParen \"(\"\n                  ClosureParameterList\n                  rightParen \")\"\n                ReturnClause\n                  arrow \"->\"\n                  IdentifierType\n                    identifier(\"Int\") \"Int\"\n              CodeBlockItemList\n                CodeBlockItem\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        FunctionCallExpr\n                          DeclReferenceExpr\n                            identifier(\"get\") \"get\"\n                          LabeledExprList\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                            rightBrace \"}\"\n                          MultipleTrailingClosureElementList\n                      CodeBlockItem\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  () -> Int {\n    get {} {}\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                        rightParen \\\")\\\"\\n                      ArrowExpr\\n                        arrow \\\"->\\\"\\n                      FunctionCallExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"Int\\\") \\\"Int\\\"\\n                        LabeledExprList\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              FunctionCallExpr\\n                                FunctionCallExpr\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"get\\\") \\\"get\\\"\\n                                  LabeledExprList\\n                                  ClosureExpr\\n                                    leftBrace \\\"{\\\"\\n                                    CodeBlockItemList\\n                                    rightBrace \\\"}\\\"\\n                                  MultipleTrailingClosureElementList\\n                                LabeledExprList\\n                                ClosureExpr\\n                                  leftBrace \\\"{\\\"\\n                                  CodeBlockItemList\\n                                  rightBrace \\\"}\\\"\\n                                MultipleTrailingClosureElementList\\n                          rightBrace \\\"}\\\"\\n                        MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"nonLiteralPostfix\\t[functionCallExpression]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":195,\"descriptorCount\":545,\"duplicateDescriptorCount\":0,\"oraclePruned\":246,\"parseSeconds\":0.006824970245361328,\"sourceLength\":40,\"suppressedDescriptorCount\":74,\"tokenCount\":15,\"yieldCount\":421},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              ClosureSignature\\n                AttributeList\\n                ClosureParameterClause\\n                  leftParen \\\"(\\\"\\n                  ClosureParameterList\\n                  rightParen \\\")\\\"\\n                ReturnClause\\n                  arrow \\\"->\\\"\\n                  IdentifierType\\n                    identifier(\\\"Int\\\") \\\"Int\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        FunctionCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"get\\\") \\\"get\\\"\\n                          LabeledExprList\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                            rightBrace \\\"}\\\"\\n                          MultipleTrailingClosureElementList\\n                      CodeBlockItem\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

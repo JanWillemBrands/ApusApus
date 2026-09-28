@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00208298-advent-overaccept-9650516652a5cf3d.json",
+    "durationSeconds" : 0.10059893131256104,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+splice:translated:testTry9#1",
+    "index" : 208298,
+    "seed" : 6018003910102630304,
+    "signalHash" : "6edb9f7e1335f642",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "9650516652a5cf3d",
+    "sourceLength" : 274,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nvar i = try? foo() + bar()\nlet _: Double = i\ni = try? foo() + bar()\ni ?+= try>. foo() + bar()\ni ?+= try? foo() %%%% bar()\ni ?+= try? foo() %%% bar()\n_ = foo() == try? bar()\n_ = (try? foo()) == bar\n()\n_ = foo() == (try? bar())\n_ = (try? foo()) == (try? bar())\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"i\") \"i\"\n                BinaryOperatorExpr\n                  binaryOperator(\"?+=\") \"?+=\"\n                TryExpr\n                  keyword(SwiftSyntax.Keyword.try) \"try\"\n                  PrefixOperatorExpr\n                    prefixOperator(\">\") \">\"\n                    MemberAccessExpr\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"foo\") \"foo\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "tryOperator\t[\"try\" >s< >->(forceMark optionalMark)]",
+      ".OPT\t[tryOperator]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 107,
+      "descriptorCount" : 292,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 98,
+      "parseSeconds" : 0.004285931587219238,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 28,
+      "tokenCount" : 8,
+      "yieldCount" : 189
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"i\") \"i\"\n                BinaryOperatorExpr\n                  binaryOperator(\"?+=\") \"?+=\"\n                TryExpr\n                  keyword(SwiftSyntax.Keyword.try) \"try\"\n                  MissingExpr\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                postfixOperator(\">\") \">\"\n                period \".\"\n                identifier(\"foo\") \"foo\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 37,
+  "source" : " {\ni ?+= try>. foo\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"i\\\") \\\"i\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"?+=\\\") \\\"?+=\\\"\\n                TryExpr\\n                  keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\">\\\") \\\">\\\"\\n                    MemberAccessExpr\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"foo\\\") \\\"foo\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"tryOperator\\t[\\\"try\\\" >s< >->(forceMark optionalMark)]\",\".OPT\\t[tryOperator]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":107,\"descriptorCount\":292,\"duplicateDescriptorCount\":0,\"oraclePruned\":98,\"parseSeconds\":0.004285931587219238,\"sourceLength\":20,\"suppressedDescriptorCount\":28,\"tokenCount\":8,\"yieldCount\":189},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"i\\\") \\\"i\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"?+=\\\") \\\"?+=\\\"\\n                TryExpr\\n                  keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n                  MissingExpr\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                postfixOperator(\\\">\\\") \\\">\\\"\\n                period \\\".\\\"\\n                identifier(\\\"foo\\\") \\\"foo\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

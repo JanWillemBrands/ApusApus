@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00149889-residual-ambiguity-58e0f750e68e4409.json",
+    "durationSeconds" : 0.03561806678771973,
+    "exitCode" : 1,
+    "generator" : "wide:top:newline+glue+line-comment:translated:testUnknownPlatform3#1",
+    "index" : 149889,
+    "seed" : 13064011101222712141,
+    "signalHash" : "50b1215b1178af6f",
+    "signalSummary" : "residual-ambiguity|compilationCondition\tambiguous pivot\tbody=[compilationCondition >->(\".\") <n> ]",
+    "sourceHash" : "58e0f750e68e4409",
+    "sourceLength" : 103,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "\/\/ Current compiler, short-circuit right-hand side\n#if compiler(<10.0) \/\/ c\n ||hasGreeble(blah\n)\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"compiler\") \"compiler\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n            CodeBlockItemList\n              CodeBlockItem\n                PrefixOperatorExpr\n                  prefixOperator(\"||\") \"||\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          identifier(\"blah\") \"blah\"\n                    rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken >n< functionCallArgumentClause]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "compilationCondition\t[compilationCondition \"||\" compilationCondition]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 164,
+      "descriptorCount" : 405,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 116,
+      "parseSeconds" : 0.005670070648193359,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 52,
+      "tokenCount" : 10,
+      "yieldCount" : 215
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"compiler\") \"compiler\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n            CodeBlockItemList\n              CodeBlockItem\n                PrefixOperatorExpr\n                  prefixOperator(\"||\") \"||\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          identifier(\"blah\") \"blah\"\n                    rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+      "compilationCondition\tambiguous pivot\tbody=[compilationCondition >->(\".\") <n> ]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 41,
+  "source" : "#if compiler()\n||(blah\n)\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"compiler\\\") \\\"compiler\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n            CodeBlockItemList\\n              CodeBlockItem\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"||\\\") \\\"||\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"blah\\\") \\\"blah\\\"\\n                    rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken >n< functionCallArgumentClause]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"compilationCondition\\t[compilationCondition \\\"||\\\" compilationCondition]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":164,\"descriptorCount\":405,\"duplicateDescriptorCount\":1,\"oraclePruned\":116,\"parseSeconds\":0.005670070648193359,\"sourceLength\":31,\"suppressedDescriptorCount\":52,\"tokenCount\":10,\"yieldCount\":215},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"compiler\\\") \\\"compiler\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n            CodeBlockItemList\\n              CodeBlockItem\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"||\\\") \\\"||\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"blah\\\") \\\"blah\\\"\\n                    rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[\"compilationCondition\\tambiguous pivot\\tbody=[compilationCondition >->(\\\".\\\") <n> ]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

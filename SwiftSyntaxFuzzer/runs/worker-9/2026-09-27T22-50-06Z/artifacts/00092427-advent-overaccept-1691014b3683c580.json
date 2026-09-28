@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00092427-advent-overaccept-1691014b3683c580.json",
+    "durationSeconds" : 0.03290903568267822,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+splice:translated:testUnknownPlatform1#1",
+    "index" : 92427,
+    "seed" : 3326659872777667553,
+    "signalHash" : "feebe8231c01dd78",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "1691014b3683c580",
+    "sourceLength" : 40,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\n#if\nhasGreeble(Y)\n#endif\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              IfConfigDecl\n                IfConfigClauseList\n                  IfConfigClause\n                    poundIf \"#if\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                        LabeledExpr\n                          DeclReferenceExpr\n                            identifier(\"Y\") \"Y\"\n                      rightParen \")\"\n                    CodeBlockItemList\n                poundEndif \"#endif\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 150,
+      "descriptorCount" : 341,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 119,
+      "parseSeconds" : 0.006330966949462891,
+      "sourceLength" : 22,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 10,
+      "yieldCount" : 192
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              IfConfigDecl\n                IfConfigClauseList\n                  IfConfigClause\n                    poundIf \"#if\"\n                    MissingExpr\n                    CodeBlockItemList\n                      CodeBlockItem\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                            LabeledExpr\n                              DeclReferenceExpr\n                                identifier(\"Y\") \"Y\"\n                          rightParen \")\"\n                poundEndif \"#endif\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 36,
+  "source" : " () {\n#if\n(Y)\n#endif\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              IfConfigDecl\\n                IfConfigClauseList\\n                  IfConfigClause\\n                    poundIf \\\"#if\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                        LabeledExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"Y\\\") \\\"Y\\\"\\n                      rightParen \\\")\\\"\\n                    CodeBlockItemList\\n                poundEndif \\\"#endif\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":150,\"descriptorCount\":341,\"duplicateDescriptorCount\":0,\"oraclePruned\":119,\"parseSeconds\":0.006330966949462891,\"sourceLength\":22,\"suppressedDescriptorCount\":43,\"tokenCount\":10,\"yieldCount\":192},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              IfConfigDecl\\n                IfConfigClauseList\\n                  IfConfigClause\\n                    poundIf \\\"#if\\\"\\n                    MissingExpr\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                            LabeledExpr\\n                              DeclReferenceExpr\\n                                identifier(\\\"Y\\\") \\\"Y\\\"\\n                          rightParen \\\")\\\"\\n                poundEndif \\\"#endif\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

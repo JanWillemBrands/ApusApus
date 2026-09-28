@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00113723-tree-difference-d57b49e8f8f9aad2.json",
+    "durationSeconds" : 0.044960975646972656,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment+glue+glue:translated:testRecovery162#1",
+    "index" : 113723,
+    "seed" : 4354586988532835097,
+    "signalHash" : "c43cd27d8320001d",
+    "signalSummary" : "tree-difference|line=41|ref=FunctionCallExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "d57b49e8f8f9aad2",
+    "sourceLength" : 208,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n\/\/ rdar:\/\/22240342 - Crash in diagRecursivePropertyAccess\nclass r22240342 {\n  lazy var xx: Int = {\n    foo \/\/ c\n {\n      let issueView = 42\n      issueView.delegate = 12\n    }\n    return 42\n    }()\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"xx\") \"xx\"\n                        InitializerClause\n                          equal \"=\"\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                DeclReferenceExpr\n                                  identifier(\"foo\") \"foo\"\n                              CodeBlockItem\n                                ClosureExpr\n                                  leftBrace \"{\"\n                                  CodeBlockItemList\n                                  rightBrace \"}\"\n                            rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      ".OPT\t[initializer]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 167,
+      "descriptorCount" : 464,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 136,
+      "parseSeconds" : 0.009356975555419922,
+      "sourceLength" : 47,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 12,
+      "yieldCount" : 298
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"xx\") \"xx\"\n                        InitializerClause\n                          equal \"=\"\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                FunctionCallExpr\n                                  DeclReferenceExpr\n                                    identifier(\"foo\") \"foo\"\n                                  LabeledExprList\n                                  ClosureExpr\n                                    leftBrace \"{\"\n                                    CodeBlockItemList\n                                    rightBrace \"}\"\n                                  MultipleTrailingClosureElementList\n                            rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { { var xx = {\n    foo \/\/ c\n {\n    }\n    }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"xx\\\") \\\"xx\\\"\\n                        InitializerClause\\n                          equal \\\"=\\\"\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                DeclReferenceExpr\\n                                  identifier(\\\"foo\\\") \\\"foo\\\"\\n                              CodeBlockItem\\n                                ClosureExpr\\n                                  leftBrace \\\"{\\\"\\n                                  CodeBlockItemList\\n                                  rightBrace \\\"}\\\"\\n                            rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\".OPT\\t[initializer]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":167,\"descriptorCount\":464,\"duplicateDescriptorCount\":0,\"oraclePruned\":136,\"parseSeconds\":0.009356975555419922,\"sourceLength\":47,\"suppressedDescriptorCount\":45,\"tokenCount\":12,\"yieldCount\":298},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"xx\\\") \\\"xx\\\"\\n                        InitializerClause\\n                          equal \\\"=\\\"\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                FunctionCallExpr\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"foo\\\") \\\"foo\\\"\\n                                  LabeledExprList\\n                                  ClosureExpr\\n                                    leftBrace \\\"{\\\"\\n                                    CodeBlockItemList\\n                                    rightBrace \\\"}\\\"\\n                                  MultipleTrailingClosureElementList\\n                            rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

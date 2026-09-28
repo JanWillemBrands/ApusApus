@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00039441-advent-overaccept-b229c705f0a12678.json",
+    "durationSeconds" : 0.016302108764648438,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:block-comment:phase4-coroutine:op-trailing-comma",
+    "index" : 39441,
+    "seed" : 15755288686696214284,
+    "signalHash" : "ebab2771de019020",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "b229c705f0a12678",
+    "sourceLength" : 61,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\n\/*\n*\/infix operator +++ : AdditionPrecedence,\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"+++\") \"+++\"\n                OperatorPrecedenceAndTypes\n                  colon \":\"\n                  identifier(\"AdditionPrecedence\") \"AdditionPrecedence\"\n                  DesignatedTypeList\n                    DesignatedType\n                      comma \",\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "designatedTypes\t[\",\"]",
+      ".OPT\t[designatedTypes]",
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 155,
+      "descriptorCount" : 347,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 185,
+      "parseSeconds" : 0.004906058311462402,
+      "sourceLength" : 48,
+      "suppressedDescriptorCount" : 49,
+      "tokenCount" : 10,
+      "yieldCount" : 254
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"+++\") \"+++\"\n                OperatorPrecedenceAndTypes\n                  colon \":\"\n                  identifier(\"AdditionPrecedence\") \"AdditionPrecedence\"\n                  DesignatedTypeList\n                    DesignatedType\n                      comma \",\"\n                      rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 36,
+  "source" : " () {\ninfix operator +++ : AdditionPrecedence,\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n                OperatorPrecedenceAndTypes\\n                  colon \\\":\\\"\\n                  identifier(\\\"AdditionPrecedence\\\") \\\"AdditionPrecedence\\\"\\n                  DesignatedTypeList\\n                    DesignatedType\\n                      comma \\\",\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"designatedTypes\\t[\\\",\\\"]\",\".OPT\\t[designatedTypes]\",\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":155,\"descriptorCount\":347,\"duplicateDescriptorCount\":0,\"oraclePruned\":185,\"parseSeconds\":0.004906058311462402,\"sourceLength\":48,\"suppressedDescriptorCount\":49,\"tokenCount\":10,\"yieldCount\":254},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n                OperatorPrecedenceAndTypes\\n                  colon \\\":\\\"\\n                  identifier(\\\"AdditionPrecedence\\\") \\\"AdditionPrecedence\\\"\\n                  DesignatedTypeList\\n                    DesignatedType\\n                      comma \\\",\\\"\\n                      rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

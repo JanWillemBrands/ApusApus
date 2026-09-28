@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00692402-tree-difference-01491a6d0c5df1be.json",
+    "durationSeconds" : 0.05792093276977539,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+space+delete:fuzz-harvest:ifconfig-postfix",
+    "index" : 692402,
+    "seed" : 8709271582791740263,
+    "signalHash" : "1e0b3cb17dcc3ac8",
+    "signalSummary" : "tree-difference|line=30|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "01491a6d0c5df1be",
+    "sourceLength" : 41,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nlet v = x\n#if FOO\n.a\n.b\n  #endif\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  DeclReferenceExpr\n                    identifier(\"FOO\") \"FOO\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      MissingExpr\n                        identifier(\"<#expression#>\") \"<#expression#>\"\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.a\n.b\n»"
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[<-<(\")\" \"]\" \"false\" \"nil\" \"true\" binaryLiteral decimalFloatingPointLiteral decimalLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection) ifDirective compilationCondition >+>(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 203,
+      "descriptorCount" : 537,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 203,
+      "parseSeconds" : 0.00966799259185791,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 10,
+      "yieldCount" : 300
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  DeclReferenceExpr\n                    identifier(\"FOO\") \"FOO\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      MemberAccessExpr\n                        MemberAccessExpr\n                          period \".\"\n                          DeclReferenceExpr\n                            identifier(\"a\") \"a\"\n                        period \".\"\n                        DeclReferenceExpr\n                          identifier(\"b\") \"b\"\n              poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 44,
+  "source" : " {\n#if FOO\n.a\n.b\n#endif\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      MissingExpr\\n                        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.a\\n.b\\n»\"],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[<-<(\\\")\\\" \\\"]\\\" \\\"false\\\" \\\"nil\\\" \\\"true\\\" binaryLiteral decimalFloatingPointLiteral decimalLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection) ifDirective compilationCondition >+>(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":203,\"descriptorCount\":537,\"duplicateDescriptorCount\":0,\"oraclePruned\":203,\"parseSeconds\":0.00966799259185791,\"sourceLength\":25,\"suppressedDescriptorCount\":42,\"tokenCount\":10,\"yieldCount\":300},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      MemberAccessExpr\\n                        MemberAccessExpr\\n                          period \\\".\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"a\\\") \\\"a\\\"\\n                        period \\\".\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"b\\\") \\\"b\\\"\\n              poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

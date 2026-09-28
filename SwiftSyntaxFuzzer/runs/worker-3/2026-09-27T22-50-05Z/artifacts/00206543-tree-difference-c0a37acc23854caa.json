@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00206543-tree-difference-c0a37acc23854caa.json",
+    "durationSeconds" : 0.03162205219268799,
+    "exitCode" : 1,
+    "generator" : "wide:closure:newline+line-comment+line-comment:phase4-type:member-type-3",
+    "index" : 206543,
+    "seed" : 8709271582791740263,
+    "signalHash" : "184abd20d3c46e13",
+    "signalSummary" : "tree-difference|line=27|ref=MemberType|advent=IdentifierType",
+    "sourceHash" : "c0a37acc23854caa",
+    "sourceLength" : 50,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\nlet a: A \/\/ c\n. \/\/ c\nB.C\n= x\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.let) \"let\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"a\") \"a\"\n                  TypeAnnotation\n                    colon \":\"\n                    IdentifierType\n                      identifier(\"A\") \"A\"\n          CodeBlockItem\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.\nB.C\n»"
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      ".OPT\t[typeAnnotation]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 131,
+      "descriptorCount" : 380,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 183,
+      "parseSeconds" : 0.00911092758178711,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 38,
+      "tokenCount" : 10,
+      "yieldCount" : 293
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.let) \"let\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"a\") \"a\"\n                  TypeAnnotation\n                    colon \":\"\n                    MemberType\n                      MemberType\n                        IdentifierType\n                          identifier(\"A\") \"A\"\n                        period \".\"\n                        identifier(\"B\") \"B\"\n                      period \".\"\n                      identifier(\"C\") \"C\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 34,
+  "source" : " {\nlet a: A\n.\nB.C\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"a\\\") \\\"a\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    IdentifierType\\n                      identifier(\\\"A\\\") \\\"A\\\"\\n          CodeBlockItem\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.\\nB.C\\n»\"],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\".OPT\\t[typeAnnotation]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":131,\"descriptorCount\":380,\"duplicateDescriptorCount\":0,\"oraclePruned\":183,\"parseSeconds\":0.00911092758178711,\"sourceLength\":19,\"suppressedDescriptorCount\":38,\"tokenCount\":10,\"yieldCount\":293},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"a\\\") \\\"a\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    MemberType\\n                      MemberType\\n                        IdentifierType\\n                          identifier(\\\"A\\\") \\\"A\\\"\\n                        period \\\".\\\"\\n                        identifier(\\\"B\\\") \\\"B\\\"\\n                      period \\\".\\\"\\n                      identifier(\\\"C\\\") \\\"C\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

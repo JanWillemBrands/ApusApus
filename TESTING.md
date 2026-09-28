@@ -594,6 +594,14 @@ inside the recorded band — luck, not evidence. Redone properly, the same chang
   suite, ~4 minutes for the whole of AdventTests.
 - Parallel test output interleaves. Redirect to a log and grep it; line numbers shift between
   runs, so never `sed -n '<range>p'` against a freshly re-run invocation.
+- In the Xcode Coding Assistant sandbox, direct `xcodebuild test` can fail before building because
+  SwiftPM tries to emit manifest diagnostics under
+  `~/Library/Caches/org.swift.swiftpm/manifests/ManifestLoading/*.dia`, even when
+  `-derivedDataPath`, `-clonedSourcePackagesDirPath`, and `HOME=/tmp/...` are supplied. The symptom is
+  `cannot open file ... swift-syntax.dia ... Operation not permitted`. Use the Xcode MCP test/build
+  tools for focused runs in that environment, or run outside the sandbox. If a parametrized test only
+  reruns one stale argument through MCP, add a temporary or focused non-parametric probe and remove it
+  when done.
 
 ## Sleep, not flakiness — diagnosing a "hung" run
 

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00711964-tree-difference-1644987f4a4ff471.json",
+    "durationSeconds" : 0.0380169153213501,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment:type:testInverseTypes#2",
+    "index" : 711964,
+    "seed" : 11400601876238378790,
+    "signalHash" : "8e08a8abb13b06bb",
+    "signalSummary" : "tree-difference|line=16|ref=TypeExpr|advent=SequenceExpr",
+    "sourceHash" : "1644987f4a4ff471",
+    "sourceLength" : 32,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n[any ~ \/\/ c\nCopyable]()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              ArrayExpr\n                leftSquare \"[\"\n                ArrayElementList\n                  ArrayElement\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          identifier(\"any\") \"any\"\n                        BinaryOperatorExpr\n                          binaryOperator(\"~\") \"~\"\n                        DeclReferenceExpr\n                          identifier(\"Copyable\") \"Copyable\"\n                rightSquare \"]\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[  prefixExpression ]",
+      "arrayLiteralItem\t[expression]",
+      "arrayLiteralItems\t[arrayLiteralItem ]",
+      ".OPT\t[arrayLiteralItems]",
+      "arrayLiteral\t[\"[\"   \"]\"]",
+      "literalExpression\t[arrayLiteral]",
+      "primaryExpression\t[literalExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 149,
+      "descriptorCount" : 401,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 173,
+      "parseSeconds" : 0.01358497142791748,
+      "sourceLength" : 23,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 9,
+      "yieldCount" : 286
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              ArrayExpr\n                leftSquare \"[\"\n                ArrayElementList\n                  ArrayElement\n                    TypeExpr\n                      SomeOrAnyType\n                        keyword(SwiftSyntax.Keyword.any) \"any\"\n                        SuppressedType\n                          prefixOperator(\"~\") \"~\"\n                          IdentifierType\n                            identifier(\"Copyable\") \"Copyable\"\n                rightSquare \"]\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 34,
+  "source" : " {\n[any ~\nCopyable]()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              ArrayExpr\\n                leftSquare \\\"[\\\"\\n                ArrayElementList\\n                  ArrayElement\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          identifier(\\\"any\\\") \\\"any\\\"\\n                        BinaryOperatorExpr\\n                          binaryOperator(\\\"~\\\") \\\"~\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                rightSquare \\\"]\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expression\\t[  prefixExpression ]\",\"arrayLiteralItem\\t[expression]\",\"arrayLiteralItems\\t[arrayLiteralItem ]\",\".OPT\\t[arrayLiteralItems]\",\"arrayLiteral\\t[\\\"[\\\"   \\\"]\\\"]\",\"literalExpression\\t[arrayLiteral]\",\"primaryExpression\\t[literalExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":149,\"descriptorCount\":401,\"duplicateDescriptorCount\":0,\"oraclePruned\":173,\"parseSeconds\":0.01358497142791748,\"sourceLength\":23,\"suppressedDescriptorCount\":47,\"tokenCount\":9,\"yieldCount\":286},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              ArrayExpr\\n                leftSquare \\\"[\\\"\\n                ArrayElementList\\n                  ArrayElement\\n                    TypeExpr\\n                      SomeOrAnyType\\n                        keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                        SuppressedType\\n                          prefixOperator(\\\"~\\\") \\\"~\\\"\\n                          IdentifierType\\n                            identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                rightSquare \\\"]\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

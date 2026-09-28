@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00574352-tree-difference-6f38bcab330df402.json",
+    "durationSeconds" : 0.02994096279144287,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+delete:declaration:testVariableDeclarations#10",
+    "index" : 574352,
+    "seed" : 8709271582791740263,
+    "signalHash" : "5ea27690cadab72b",
+    "signalSummary" : "tree-difference|line=36|ref=PlatformVersion|advent=identifier()",
+    "sourceHash" : "6f38bcab330df402",
+    "sourceLength" : 114,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nvar foo: Int {\n  @available(swift )\n  func myFun() -> Int {\n     \/* c *\/ return 42\n  }\n  return myFun()\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                      Attribute\n                        atSign \"@\"\n                        IdentifierType\n                          identifier(\"available\") \"available\"\n                        leftParen \"(\"\n                        AvailabilityArgumentList\n                          AvailabilityArgument\n                            identifier(\"swift\") \"swift\"\n                        rightParen \")\"\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"myFun\") \"myFun\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "platformName\t[identifierToken]",
+      "availabilityAttributeArgument\t[platformName ]",
+      "availabilityAttributeArguments\t[availabilityAttributeArgument ]",
+      "availableAttribute\t[\"@\" >s< \"available\" >s< \"(\" availabilityAttributeArguments \")\"]",
+      "attribute\t[availableAttribute]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 151,
+      "descriptorCount" : 370,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 124,
+      "parseSeconds" : 0.006549954414367676,
+      "sourceLength" : 44,
+      "suppressedDescriptorCount" : 37,
+      "tokenCount" : 13,
+      "yieldCount" : 234
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                      Attribute\n                        atSign \"@\"\n                        IdentifierType\n                          identifier(\"available\") \"available\"\n                        leftParen \"(\"\n                        AvailabilityArgumentList\n                          AvailabilityArgument\n                            PlatformVersion\n                              identifier(\"swift\") \"swift\"\n                        rightParen \")\"\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"myFun\") \"myFun\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  @available(swift )\n  func myFun()\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                      Attribute\\n                        atSign \\\"@\\\"\\n                        IdentifierType\\n                          identifier(\\\"available\\\") \\\"available\\\"\\n                        leftParen \\\"(\\\"\\n                        AvailabilityArgumentList\\n                          AvailabilityArgument\\n                            identifier(\\\"swift\\\") \\\"swift\\\"\\n                        rightParen \\\")\\\"\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"myFun\\\") \\\"myFun\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"platformName\\t[identifierToken]\",\"availabilityAttributeArgument\\t[platformName ]\",\"availabilityAttributeArguments\\t[availabilityAttributeArgument ]\",\"availableAttribute\\t[\\\"@\\\" >s< \\\"available\\\" >s< \\\"(\\\" availabilityAttributeArguments \\\")\\\"]\",\"attribute\\t[availableAttribute]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":151,\"descriptorCount\":370,\"duplicateDescriptorCount\":0,\"oraclePruned\":124,\"parseSeconds\":0.006549954414367676,\"sourceLength\":44,\"suppressedDescriptorCount\":37,\"tokenCount\":13,\"yieldCount\":234},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                      Attribute\\n                        atSign \\\"@\\\"\\n                        IdentifierType\\n                          identifier(\\\"available\\\") \\\"available\\\"\\n                        leftParen \\\"(\\\"\\n                        AvailabilityArgumentList\\n                          AvailabilityArgument\\n                            PlatformVersion\\n                              identifier(\\\"swift\\\") \\\"swift\\\"\\n                        rightParen \\\")\\\"\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"myFun\\\") \\\"myFun\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

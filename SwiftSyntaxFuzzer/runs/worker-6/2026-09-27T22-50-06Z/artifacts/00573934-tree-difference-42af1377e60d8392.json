@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00573934-tree-difference-42af1377e60d8392.json",
+    "durationSeconds" : 0.04602396488189697,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:raw:declaration:testCoroutineAccessors#1+real:SyntaxLiteralUtils:15",
+    "index" : 573934,
+    "seed" : 6018003910102630304,
+    "signalHash" : "8a54ad119f264bfe",
+    "signalSummary" : "tree-difference|line=25|ref=AccessorBlock|advent=MemberBlockItem",
+    "sourceHash" : "42af1377e60d8392",
+    "sourceLength" : 208,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "extension Fuzz {\nvar irm: Int {\n  read {\n    yield _i\n  }\n  modify {\n    yield &_i\n  }\n}\nextension BooleanLiteralExprSyntax {\n  var literalValue: Bool {\n    return literal.tokenKind == .keyword(.true)\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExtensionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.extension) \"extension\"\n        IdentifierType\n          identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.var) \"var\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"Int\") \"Int\"\n            MemberBlockItem\n              ExtensionDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                IdentifierType\n                  identifier(\"BooleanLiteralExprSyntax\") \"BooleanLiteralExprSyntax\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                    MemberBlockItem\n                      VariableDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.var) \"var\"\n                        PatternBindingList\n                          PatternBinding\n                            IdentifierPattern\n                              identifier(\"Bool\") \"Bool\"\n                            AccessorBlock\n                              leftBrace \"{\"\n                              CodeBlockItemList\n                              rightBrace \"}\"\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in appendAccessorEntry(_:into:): experimental coroutine accessor 'read' not converted — «read {\n  }\n»",
+      "unhandled in convertInitializedAccessorBlock(_:from:to:): initialized accessor block with no accessors — «{\n  read {\n  }\n}\n»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "extensionMember\t[memberDeclaration]",
+      "extensionMembers\t[extensionMember ]",
+      ".OPT\t[extensionMembers]",
+      "extensionBody\t[\"{\"  \"}\"]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".DO\t[typeIdentifier]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statementSeparator\t[<n>]",
+      "coroutineSpecifier\t[\"read\"]",
+      "coroutineAccessorClause\t[  coroutineSpecifier  codeBlock]",
+      "accessorClauseEntryNoInit\t[coroutineAccessorClause]",
+      "accessorClauseListNoInit\t[accessorClauseEntryNoInit ]",
+      "initializedAccessorBlock\t[\"{\" accessorClauseListNoInit \"}\"]",
+      "extensionMembers\t[extensionMember statementSeparator extensionMembers]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 166,
+      "descriptorCount" : 388,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 170,
+      "parseSeconds" : 0.008686065673828125,
+      "sourceLength" : 99,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 19,
+      "yieldCount" : 324
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExtensionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.extension) \"extension\"\n        IdentifierType\n          identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.var) \"var\"\n                PatternBindingList\n                  PatternBinding\n                    IdentifierPattern\n                      identifier(\"Int\") \"Int\"\n                    AccessorBlock\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          FunctionCallExpr\n                            DeclReferenceExpr\n                              identifier(\"read\") \"read\"\n                            LabeledExprList\n                            ClosureExpr\n                              leftBrace \"{\"\n                              CodeBlockItemList\n                              rightBrace \"}\"\n                            MultipleTrailingClosureElementList\n                      rightBrace \"}\"\n            MemberBlockItem\n              ExtensionDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                IdentifierType\n                  identifier(\"BooleanLiteralExprSyntax\") \"BooleanLiteralExprSyntax\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                    MemberBlockItem\n                      VariableDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.var) \"var\"\n                        PatternBindingList\n                          PatternBinding\n                            IdentifierPattern\n                              identifier(\"Bool\") \"Bool\"\n                            AccessorBlock\n                              leftBrace \"{\"\n                              CodeBlockItemList\n                              rightBrace \"}\"\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "extension Fuzz {\nvar Int {\n  read {\n  }\n}\nextension BooleanLiteralExprSyntax {\n  var Bool {\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExtensionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n        IdentifierType\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"Int\\\") \\\"Int\\\"\\n            MemberBlockItem\\n              ExtensionDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                IdentifierType\\n                  identifier(\\\"BooleanLiteralExprSyntax\\\") \\\"BooleanLiteralExprSyntax\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                    MemberBlockItem\\n                      VariableDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                        PatternBindingList\\n                          PatternBinding\\n                            IdentifierPattern\\n                              identifier(\\\"Bool\\\") \\\"Bool\\\"\\n                            AccessorBlock\\n                              leftBrace \\\"{\\\"\\n                              CodeBlockItemList\\n                              rightBrace \\\"}\\\"\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in appendAccessorEntry(_:into:): experimental coroutine accessor 'read' not converted — «read {\\n  }\\n»\",\"unhandled in convertInitializedAccessorBlock(_:from:to:): initialized accessor block with no accessors — «{\\n  read {\\n  }\\n}\\n»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"memberDeclaration\\t[declaration]\",\"extensionMember\\t[memberDeclaration]\",\"extensionMembers\\t[extensionMember ]\",\".OPT\\t[extensionMembers]\",\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".DO\\t[typeIdentifier]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statementSeparator\\t[<n>]\",\"coroutineSpecifier\\t[\\\"read\\\"]\",\"coroutineAccessorClause\\t[  coroutineSpecifier  codeBlock]\",\"accessorClauseEntryNoInit\\t[coroutineAccessorClause]\",\"accessorClauseListNoInit\\t[accessorClauseEntryNoInit ]\",\"initializedAccessorBlock\\t[\\\"{\\\" accessorClauseListNoInit \\\"}\\\"]\",\"extensionMembers\\t[extensionMember statementSeparator extensionMembers]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":166,\"descriptorCount\":388,\"duplicateDescriptorCount\":0,\"oraclePruned\":170,\"parseSeconds\":0.008686065673828125,\"sourceLength\":99,\"suppressedDescriptorCount\":43,\"tokenCount\":19,\"yieldCount\":324},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExtensionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n        IdentifierType\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    IdentifierPattern\\n                      identifier(\\\"Int\\\") \\\"Int\\\"\\n                    AccessorBlock\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          FunctionCallExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"read\\\") \\\"read\\\"\\n                            LabeledExprList\\n                            ClosureExpr\\n                              leftBrace \\\"{\\\"\\n                              CodeBlockItemList\\n                              rightBrace \\\"}\\\"\\n                            MultipleTrailingClosureElementList\\n                      rightBrace \\\"}\\\"\\n            MemberBlockItem\\n              ExtensionDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                IdentifierType\\n                  identifier(\\\"BooleanLiteralExprSyntax\\\") \\\"BooleanLiteralExprSyntax\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                    MemberBlockItem\\n                      VariableDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                        PatternBindingList\\n                          PatternBinding\\n                            IdentifierPattern\\n                              identifier(\\\"Bool\\\") \\\"Bool\\\"\\n                            AccessorBlock\\n                              leftBrace \\\"{\\\"\\n                              CodeBlockItemList\\n                              rightBrace \\\"}\\\"\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00238437-advent-overaccept-6ac81a5c0f7a50c6.json",
+    "durationSeconds" : 0.02318406105041504,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:delete+newline+newline:phase4-loop:for-wildcard",
+    "index" : 238437,
+    "seed" : 10372684106311075726,
+    "signalHash" : "571f403ff428ceb8",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "6ac81a5c0f7a50c6",
+    "sourceLength" : 38,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nfunc f\n()\n{ _ in xs { g() } }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"f\") \"f\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              ClosureSignature\n                AttributeList\n                ClosureShorthandParameterList\n                  ClosureShorthandParameter\n                    wildcard \"_\"\n                keyword(SwiftSyntax.Keyword.in) \"in\"\n              CodeBlockItemList\n                CodeBlockItem\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "closureParameterName\t[\"_\"]",
+      "closureShorthandNameList\t[closureParameterName ]",
+      "closureParameterClause\t[closureShorthandNameList]",
+      "closureSignature\t[  closureParameterClause    \"in\"]",
+      ".OPT\t[closureSignature]",
+      "statementSeparator\t[<n>]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement statementSeparator statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 147,
+      "descriptorCount" : 370,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 114,
+      "parseSeconds" : 0.007817983627319336,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 12,
+      "yieldCount" : 244
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"f\") \"f\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    DiscardAssignmentExpr\n                      wildcard \"_\"\n                  CodeBlockItem\n                    UnexpectedCodeDecl\n                      UnexpectedNodes\n                        keyword(SwiftSyntax.Keyword.in) \"in\"\n                        leftBrace \"{\"\n                        rightBrace \"}\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nfunc f\n()\n{ _ in { } }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"f\\\") \\\"f\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              ClosureSignature\\n                AttributeList\\n                ClosureShorthandParameterList\\n                  ClosureShorthandParameter\\n                    wildcard \\\"_\\\"\\n                keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"closureParameterName\\t[\\\"_\\\"]\",\"closureShorthandNameList\\t[closureParameterName ]\",\"closureParameterClause\\t[closureShorthandNameList]\",\"closureSignature\\t[  closureParameterClause    \\\"in\\\"]\",\".OPT\\t[closureSignature]\",\"statementSeparator\\t[<n>]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement statementSeparator statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":147,\"descriptorCount\":370,\"duplicateDescriptorCount\":0,\"oraclePruned\":114,\"parseSeconds\":0.007817983627319336,\"sourceLength\":27,\"suppressedDescriptorCount\":30,\"tokenCount\":12,\"yieldCount\":244},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"f\\\") \\\"f\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    DiscardAssignmentExpr\\n                      wildcard \\\"_\\\"\\n                  CodeBlockItem\\n                    UnexpectedCodeDecl\\n                      UnexpectedNodes\\n                        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n                        leftBrace \\\"{\\\"\\n                        rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

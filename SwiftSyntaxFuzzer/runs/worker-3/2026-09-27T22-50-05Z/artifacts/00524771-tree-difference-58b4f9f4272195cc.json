@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00524771-tree-difference-58b4f9f4272195cc.json",
+    "durationSeconds" : 0.03590404987335205,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword:declaration:testAccessorBlockAfterPatternBindingDeclWithAttribute#1",
+    "index" : 524771,
+    "seed" : 8709271582791740263,
+    "signalHash" : "0db90acba0a38233",
+    "signalSummary" : "tree-difference|line=47|ref=PlatformVersion|advent=identifier()",
+    "sourceHash" : "58b4f9f4272195cc",
+    "sourceLength" : 69,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nvar x: Int = foo()\n{\n  @available(*, required)\n  didSet {}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"x\") \"x\"\n                  InitializerClause\n                    equal \"=\"\n                    DeclReferenceExpr\n                      identifier(\"foo\") \"foo\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    AccessorDeclList\n                      AccessorDecl\n                        AttributeList\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"available\") \"available\"\n                            leftParen \"(\"\n                            AvailabilityArgumentList\n                              AvailabilityArgument\n                                identifier(\"required\") \"required\"\n                            rightParen \")\"\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.didSet) \"didSet\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "platformName\t[identifierToken]",
+      "availabilityAttributeArgument\t[platformName ]",
+      "availabilityAttributeArguments\t[availabilityAttributeArgument ]",
+      "availableAttribute\t[\"@\" >s< \"available\" >s< \"(\" availabilityAttributeArguments \")\"]",
+      "attribute\t[availableAttribute]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "didSetClause\t[ \"didSet\"   codeBlock]",
+      "willSetDidSetBlock\t[\"{\" didSetClause  \"}\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "variableName\t[identifierToken]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead variableName initializer willSetDidSetBlock]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 241,
+      "descriptorCount" : 642,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 337,
+      "parseSeconds" : 0.008172988891601562,
+      "sourceLength" : 56,
+      "suppressedDescriptorCount" : 80,
+      "tokenCount" : 16,
+      "yieldCount" : 450
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"x\") \"x\"\n                  InitializerClause\n                    equal \"=\"\n                    DeclReferenceExpr\n                      identifier(\"foo\") \"foo\"\n                  AccessorBlock\n                    leftBrace \"{\"\n                    AccessorDeclList\n                      AccessorDecl\n                        AttributeList\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"available\") \"available\"\n                            leftParen \"(\"\n                            AvailabilityArgumentList\n                              AvailabilityArgument\n                                PlatformVersion\n                                  identifier(\"required\") \"required\"\n                            rightParen \")\"\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.didSet) \"didSet\"\n                        CodeBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nvar x = foo\n{\n  @available( required)\n  didSet {}\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  InitializerClause\\n                    equal \\\"=\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"foo\\\") \\\"foo\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    AccessorDeclList\\n                      AccessorDecl\\n                        AttributeList\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"available\\\") \\\"available\\\"\\n                            leftParen \\\"(\\\"\\n                            AvailabilityArgumentList\\n                              AvailabilityArgument\\n                                identifier(\\\"required\\\") \\\"required\\\"\\n                            rightParen \\\")\\\"\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.didSet) \\\"didSet\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"platformName\\t[identifierToken]\",\"availabilityAttributeArgument\\t[platformName ]\",\"availabilityAttributeArguments\\t[availabilityAttributeArgument ]\",\"availableAttribute\\t[\\\"@\\\" >s< \\\"available\\\" >s< \\\"(\\\" availabilityAttributeArguments \\\")\\\"]\",\"attribute\\t[availableAttribute]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"didSetClause\\t[ \\\"didSet\\\"   codeBlock]\",\"willSetDidSetBlock\\t[\\\"{\\\" didSetClause  \\\"}\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"variableName\\t[identifierToken]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead variableName initializer willSetDidSetBlock]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":241,\"descriptorCount\":642,\"duplicateDescriptorCount\":0,\"oraclePruned\":337,\"parseSeconds\":0.008172988891601562,\"sourceLength\":56,\"suppressedDescriptorCount\":80,\"tokenCount\":16,\"yieldCount\":450},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  InitializerClause\\n                    equal \\\"=\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"foo\\\") \\\"foo\\\"\\n                  AccessorBlock\\n                    leftBrace \\\"{\\\"\\n                    AccessorDeclList\\n                      AccessorDecl\\n                        AttributeList\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"available\\\") \\\"available\\\"\\n                            leftParen \\\"(\\\"\\n                            AvailabilityArgumentList\\n                              AvailabilityArgument\\n                                PlatformVersion\\n                                  identifier(\\\"required\\\") \\\"required\\\"\\n                            rightParen \\\")\\\"\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.didSet) \\\"didSet\\\"\\n                        CodeBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

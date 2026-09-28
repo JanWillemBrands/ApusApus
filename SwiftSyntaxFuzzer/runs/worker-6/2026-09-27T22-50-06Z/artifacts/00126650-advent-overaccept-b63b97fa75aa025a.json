@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00126650-advent-overaccept-b63b97fa75aa025a.json",
+    "durationSeconds" : 0.03350389003753662,
+    "exitCode" : 1,
+    "generator" : "wide:closure:keyword+glue:attribute:testBackDeployed#3",
+    "index" : 126650,
+    "seed" : 6018003910102630304,
+    "signalHash" : "53b1bf48f424459c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "b63b97fa75aa025a",
+    "sourceLength" : 142,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n@available(macOS 11.0, *)\n@backDeployed(before: _macOS12_1)\npublic func backDeployTopLevelFunc2() -> await { return 48 }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                ArrowExpr\n                  arrow \"->\"\n                AwaitExpr\n                  keyword(SwiftSyntax.Keyword.await) \"await\"\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "awaitOperator\t[\"await\" <s>]",
+      ".OPT\t[awaitOperator]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 120,
+      "descriptorCount" : 313,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 116,
+      "parseSeconds" : 0.007086038589477539,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 29,
+      "tokenCount" : 8,
+      "yieldCount" : 198
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        ClosureSignature\n          AttributeList\n          ClosureParameterClause\n            leftParen \"(\"\n            ClosureParameterList\n            rightParen \")\"\n          TypeEffectSpecifiers\n          ReturnClause\n            arrow \"->\"\n            UnexpectedNodes\n              keyword(SwiftSyntax.Keyword.await) \"await\"\n            MissingType\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { () -> await { }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                AwaitExpr\\n                  keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"awaitOperator\\t[\\\"await\\\" <s>]\",\".OPT\\t[awaitOperator]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":120,\"descriptorCount\":313,\"duplicateDescriptorCount\":0,\"oraclePruned\":116,\"parseSeconds\":0.007086038589477539,\"sourceLength\":20,\"suppressedDescriptorCount\":29,\"tokenCount\":8,\"yieldCount\":198},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        ClosureSignature\\n          AttributeList\\n          ClosureParameterClause\\n            leftParen \\\"(\\\"\\n            ClosureParameterList\\n            rightParen \\\")\\\"\\n          TypeEffectSpecifiers\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            UnexpectedNodes\\n              keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n            MissingType\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

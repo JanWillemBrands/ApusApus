@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00590071-tree-difference-ec0e8a14a8707e09.json",
+    "durationSeconds" : 0.02915799617767334,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:keyword:reject:testForwardSlashRegex95#1+translated:testGenericDisambiguation6a#1",
+    "index" : 590071,
+    "seed" : 6018003910102630304,
+    "signalHash" : "2cb4b90d3c4a2ce6",
+    "signalSummary" : "tree-difference|line=25|ref=RegexLiteralExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "ec0e8a14a8707e09",
+    "sourceLength" : 44,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\ndo {\n  await \/x\/\n}\n_ = a < b\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    AwaitExpr\n                      keyword(SwiftSyntax.Keyword.await) \"await\"\n                      PrefixOperatorExpr\n                        prefixOperator(\"\/\") \"\/\"\n                        PostfixOperatorExpr\n                          DeclReferenceExpr\n                            identifier(\"x\") \"x\"\n                          postfixOperator(\"\/\") \"\/\"\n                rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "postfixOperator\t[postfixOperatorToken]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperator <s>]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "awaitOperator\t[\"await\" <s>]",
+      ".OPT\t[awaitOperator]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 142,
+      "descriptorCount" : 394,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 163,
+      "parseSeconds" : 0.009341955184936523,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 10,
+      "yieldCount" : 270
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    AwaitExpr\n                      keyword(SwiftSyntax.Keyword.await) \"await\"\n                      RegexLiteralExpr\n                        regexSlash \"\/\"\n                        regexLiteralPattern(\"x\") \"x\"\n                        regexSlash \"\/\"\n                rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 46,
+  "source" : " () { {\nawait \/x\/\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    AwaitExpr\\n                      keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                      PrefixOperatorExpr\\n                        prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                        PostfixOperatorExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"x\\\") \\\"x\\\"\\n                          postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"postfixOperator\\t[postfixOperatorToken]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperator <s>]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"awaitOperator\\t[\\\"await\\\" <s>]\",\".OPT\\t[awaitOperator]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":142,\"descriptorCount\":394,\"duplicateDescriptorCount\":0,\"oraclePruned\":163,\"parseSeconds\":0.009341955184936523,\"sourceLength\":21,\"suppressedDescriptorCount\":42,\"tokenCount\":10,\"yieldCount\":270},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    AwaitExpr\\n                      keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                      RegexLiteralExpr\\n                        regexSlash \\\"\\\/\\\"\\n                        regexLiteralPattern(\\\"x\\\") \\\"x\\\"\\n                        regexSlash \\\"\\\/\\\"\\n                rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00398945-tree-difference-9d2972f0930d33f5.json",
+    "durationSeconds" : 0.036939024925231934,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+block-comment+glue:translated:testForwardSlashRegexSkipping21#1+translated:testInitDeinit15#1",
+    "index" : 398945,
+    "seed" : 4354586988532835097,
+    "signalHash" : "96d732108dcefd72",
+    "signalSummary" : "tree-difference|line=38|ref=regexSlash|advent=\/*c*",
+    "sourceHash" : "9d2972f0930d33f5",
+    "sourceLength" : 96,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nfunc\nn() {\n  _ = 2\n  \/x}\/\n    \/*c*\/.bitWidth\n}\nenum BarUnion {\n  init() {}\n  deinit{}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    RegexLiteralExpr\n                      regexSlash \"\/\"\n                      regexLiteralPattern(\"}\/\\n    \/*c*\") \"}\/\n    \/*c*\"\n                      regexSlash \"\/\"\n                  CodeBlockItem\n                    DeclReferenceExpr\n                      identifier(\"bitWidth\") \"bitWidth\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "regexItem\t[regexNonOperatorAtom]",
+      "regexBody\t[regexItem ]",
+      "plainRegularExpressionLiteral\t[<n> >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]",
+      "regularExpressionLiteral\t[plainRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 127,
+      "descriptorCount" : 351,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 126,
+      "parseSeconds" : 0.004966020584106445,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 10,
+      "yieldCount" : 255
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    RegexLiteralExpr\n                      regexSlash \"\/\"\n                      regexLiteralPattern(\"}\") \"}\"\n                      regexSlash \"\/\"\n                  CodeBlockItem\n                    DeclReferenceExpr\n                      identifier(\"bitWidth\") \"bitWidth\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n() {\n  \/}\/\n    \/*c*\/bitWidth\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    RegexLiteralExpr\\n                      regexSlash \\\"\\\/\\\"\\n                      regexLiteralPattern(\\\"}\\\/\\\\n    \\\/*c*\\\") \\\"}\\\/\\n    \\\/*c*\\\"\\n                      regexSlash \\\"\\\/\\\"\\n                  CodeBlockItem\\n                    DeclReferenceExpr\\n                      identifier(\\\"bitWidth\\\") \\\"bitWidth\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"regexItem\\t[regexNonOperatorAtom]\",\"regexBody\\t[regexItem ]\",\"plainRegularExpressionLiteral\\t[<n> >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]\",\"regularExpressionLiteral\\t[plainRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":127,\"descriptorCount\":351,\"duplicateDescriptorCount\":0,\"oraclePruned\":126,\"parseSeconds\":0.004966020584106445,\"sourceLength\":35,\"suppressedDescriptorCount\":42,\"tokenCount\":10,\"yieldCount\":255},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    RegexLiteralExpr\\n                      regexSlash \\\"\\\/\\\"\\n                      regexLiteralPattern(\\\"}\\\") \\\"}\\\"\\n                      regexSlash \\\"\\\/\\\"\\n                  CodeBlockItem\\n                    DeclReferenceExpr\\n                      identifier(\\\"bitWidth\\\") \\\"bitWidth\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

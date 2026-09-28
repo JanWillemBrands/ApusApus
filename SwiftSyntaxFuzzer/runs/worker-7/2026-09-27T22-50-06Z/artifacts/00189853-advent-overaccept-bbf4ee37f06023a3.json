@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00189853-advent-overaccept-bbf4ee37f06023a3.json",
+    "durationSeconds" : 0.030479073524475098,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:space+newline+newline:real:Lookahead:104",
+    "index" : 189853,
+    "seed" : 17418700093595237275,
+    "signalHash" : "cbd8c524493c2d4b",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "bbf4ee37f06023a3",
+    "sourceLength" : 115,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nextension Parser. Lookahead {\n  func peek() -> Lexer.Lexeme {\n    return\nself.lexemes.peek\n()\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              MemberAccessExpr\n                DeclReferenceExpr\n                  identifier(\"Parser\") \"Parser\"\n                period \".\"\n                DeclReferenceExpr\n                  identifier(\"Lookahead\") \"Lookahead\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    SequenceExpr\n                      ExprList\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                          rightParen \")\"\n                        ArrowExpr\n                          arrow \"->\"\n                        DeclReferenceExpr\n                          identifier(\"Lexer\") \"Lexer\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "nonLiteralPostfix\t[explicitMemberExpression]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 168,
+      "descriptorCount" : 453,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 226,
+      "parseSeconds" : 0.009234905242919922,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 58,
+      "tokenCount" : 11,
+      "yieldCount" : 353
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              MemberAccessExpr\n                DeclReferenceExpr\n                  identifier(\"Parser\") \"Parser\"\n                UnexpectedNodes\n                  period \".\"\n                DeclReferenceExpr\n                  identifier(\"Lookahead\") \"Lookahead\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                ClosureSignature\n                  AttributeList\n                  ClosureParameterClause\n                    leftParen \"(\"\n                    ClosureParameterList\n                    rightParen \")\"\n                  ReturnClause\n                    arrow \"->\"\n                    IdentifierType\n                      identifier(\"Lexer\") \"Lexer\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { Parser. Lookahead { () -> Lexer\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              MemberAccessExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"Parser\\\") \\\"Parser\\\"\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Lookahead\\\") \\\"Lookahead\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    SequenceExpr\\n                      ExprList\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                          rightParen \\\")\\\"\\n                        ArrowExpr\\n                          arrow \\\"->\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"Lexer\\\") \\\"Lexer\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"nonLiteralPostfix\\t[explicitMemberExpression]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":168,\"descriptorCount\":453,\"duplicateDescriptorCount\":0,\"oraclePruned\":226,\"parseSeconds\":0.009234905242919922,\"sourceLength\":38,\"suppressedDescriptorCount\":58,\"tokenCount\":11,\"yieldCount\":353},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              MemberAccessExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"Parser\\\") \\\"Parser\\\"\\n                UnexpectedNodes\\n                  period \\\".\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Lookahead\\\") \\\"Lookahead\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                ClosureSignature\\n                  AttributeList\\n                  ClosureParameterClause\\n                    leftParen \\\"(\\\"\\n                    ClosureParameterList\\n                    rightParen \\\")\\\"\\n                  ReturnClause\\n                    arrow \\\"->\\\"\\n                    IdentifierType\\n                      identifier(\\\"Lexer\\\") \\\"Lexer\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

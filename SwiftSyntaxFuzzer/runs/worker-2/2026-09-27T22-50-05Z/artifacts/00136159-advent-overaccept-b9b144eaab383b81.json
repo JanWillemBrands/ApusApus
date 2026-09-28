@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00136159-advent-overaccept-b9b144eaab383b81.json",
+    "durationSeconds" : 0.038765907287597656,
+    "exitCode" : 1,
+    "generator" : "wide:closure:raw:translated:testFunctionTypeExpr#14+statement:testForUnsafeStatement#1",
+    "index" : 136159,
+    "seed" : 15755288686696214284,
+    "signalHash" : "d8ace6353d840a2a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "b9b144eaab383b81",
+    "sourceLength" : 73,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n(([X]) -> [Y]).self\nfor try await unsafe x in e { }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SubscriptCallExpr\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                        rightParen \")\"\n                      leftSquare \"[\"\n                      LabeledExprList\n                      rightSquare \"]\"\n                      MultipleTrailingClosureElementList\n                rightParen \")\"\n              period \".\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.self) \"self\"\n          CodeBlockItem\n            ForStmt\n              keyword(SwiftSyntax.Keyword.for) \"for\"\n              IdentifierPattern\n                identifier(\"x\") \"x\"\n              keyword(SwiftSyntax.Keyword.in) \"in\"\n              DeclReferenceExpr\n                identifier(\"e\") \"e\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "forInStatement\t[\"for\"    >->(\"await\") bindingPattern \"in\" expression  codeBlock]",
+      "loopStatement\t[forInStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "regexSafeLexerKeyword\t[\"self\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      ".DO\t[>s< \".\" >n<]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "subscriptExpression\t[postfixExpression >n< \"[\"  \"]\"]",
+      "postfixExpression\t[subscriptExpression]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "statement\t[expression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 172,
+      "descriptorCount" : 452,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 235,
+      "parseSeconds" : 0.007405996322631836,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 54,
+      "tokenCount" : 16,
+      "yieldCount" : 372
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        ClosureSignature\n          AttributeList\n          ClosureParameterClause\n            leftParen \"(\"\n            ClosureParameterList\n              ClosureParameter\n                AttributeList\n                DeclModifierList\n                TupleType\n                  leftParen \"(\"\n                  TupleTypeElementList\n                  rightParen \")\"\n            UnexpectedNodes\n              leftSquare \"[\"\n              rightSquare \"]\"\n            rightParen \")\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              period \".\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.self) \"self\"\n          CodeBlockItem\n            ForStmt\n              keyword(SwiftSyntax.Keyword.for) \"for\"\n              IdentifierPattern\n                identifier(\"x\") \"x\"\n              keyword(SwiftSyntax.Keyword.in) \"in\"\n              DeclReferenceExpr\n                identifier(\"e\") \"e\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n(() []).self\nfor x in e { }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SubscriptCallExpr\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                        rightParen \\\")\\\"\\n                      leftSquare \\\"[\\\"\\n                      LabeledExprList\\n                      rightSquare \\\"]\\\"\\n                      MultipleTrailingClosureElementList\\n                rightParen \\\")\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n          CodeBlockItem\\n            ForStmt\\n              keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n              IdentifierPattern\\n                identifier(\\\"x\\\") \\\"x\\\"\\n              keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"e\\\") \\\"e\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"forInStatement\\t[\\\"for\\\"    >->(\\\"await\\\") bindingPattern \\\"in\\\" expression  codeBlock]\",\"loopStatement\\t[forInStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"regexSafeLexerKeyword\\t[\\\"self\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"subscriptExpression\\t[postfixExpression >n< \\\"[\\\"  \\\"]\\\"]\",\"postfixExpression\\t[subscriptExpression]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"statement\\t[expression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":172,\"descriptorCount\":452,\"duplicateDescriptorCount\":0,\"oraclePruned\":235,\"parseSeconds\":0.007405996322631836,\"sourceLength\":32,\"suppressedDescriptorCount\":54,\"tokenCount\":16,\"yieldCount\":372},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        ClosureSignature\\n          AttributeList\\n          ClosureParameterClause\\n            leftParen \\\"(\\\"\\n            ClosureParameterList\\n              ClosureParameter\\n                AttributeList\\n                DeclModifierList\\n                TupleType\\n                  leftParen \\\"(\\\"\\n                  TupleTypeElementList\\n                  rightParen \\\")\\\"\\n            UnexpectedNodes\\n              leftSquare \\\"[\\\"\\n              rightSquare \\\"]\\\"\\n            rightParen \\\")\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n          CodeBlockItem\\n            ForStmt\\n              keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n              IdentifierPattern\\n                identifier(\\\"x\\\") \\\"x\\\"\\n              keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"e\\\") \\\"e\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

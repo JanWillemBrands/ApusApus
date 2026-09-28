@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00407977-tree-difference-79288fea4924e743.json",
+    "durationSeconds" : 0.04762601852416992,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+delete+line-comment:fuzz-harvest:dot-own-line",
+    "index" : 407977,
+    "seed" : 4354586988532835097,
+    "signalHash" : "ec13d1aa30d5417a",
+    "signalSummary" : "tree-difference|line=17|ref=MemberAccessExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "79288fea4924e743",
+    "sourceLength" : 40,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n v = f \/\/ c\n { value }\n.\nmember\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"f\") \"f\"\n          CodeBlockItem\n            MemberAccessExpr\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"member\") \"member\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[<s> \".\"]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 120,
+      "descriptorCount" : 360,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 163,
+      "parseSeconds" : 0.004237055778503418,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 41,
+      "tokenCount" : 7,
+      "yieldCount" : 254
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"f\") \"f\"\n                LabeledExprList\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"member\") \"member\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 35,
+  "source" : " { f\n{ }\n.\nmember\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"f\\\") \\\"f\\\"\\n          CodeBlockItem\\n            MemberAccessExpr\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"member\\\") \\\"member\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[<s> \\\".\\\"]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":120,\"descriptorCount\":360,\"duplicateDescriptorCount\":0,\"oraclePruned\":163,\"parseSeconds\":0.004237055778503418,\"sourceLength\":19,\"suppressedDescriptorCount\":41,\"tokenCount\":7,\"yieldCount\":254},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"f\\\") \\\"f\\\"\\n                LabeledExprList\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"member\\\") \\\"member\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

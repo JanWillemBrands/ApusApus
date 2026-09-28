@@ -1,0 +1,50 @@
+{
+  "event" : {
+    "artifact" : "00145209-advent-underaccept-00945cb1074e95b8.json",
+    "durationSeconds" : 0.5970031023025513,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:block-comment:translated:testSubscripting5#1",
+    "index" : 145209,
+    "seed" : 8709271582791740263,
+    "signalHash" : "e50d24b415c1a405",
+    "signalSummary" : "advent-underaccept|compiler=true|typecheck=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/StructDecl\/Attribute",
+    "sourceHash" : "00945cb1074e95b8",
+    "sourceLength" : 194,
+    "status" : "advent-underaccept"
+  },
+  "originalSource" : "struct Fuzz {\nstruct X4 {\n  var stored: Int\n  subscript(i: Int, j: Int) -> Int {\n    get {\n      return stored + i + j\n    }\n    mutating\n    set(v) {\n      stored = v + i \/*c*\/- j\n    }\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : false,
+    "adventGeneratedSwiftSyntax" : false,
+    "adventMatched" : false,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 252,
+      "descriptorCount" : 607,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 0,
+      "parseSeconds" : 0.013635039329528809,
+      "sourceLength" : 98,
+      "suppressedDescriptorCount" : 66,
+      "tokenCount" : 20,
+      "yieldCount" : 370
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"X4\") \"X4\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    SubscriptDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.subscript) \"subscript\"\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                          FunctionParameter\n                            AttributeList\n                            DeclModifierList\n                            identifier(\"j\") \"j\"\n                            colon \":\"\n                            IdentifierType\n                              identifier(\"Int\") \"Int\"\n                        rightParen \")\"\n                      ReturnClause\n                        arrow \"->\"\n                        IdentifierType\n                          identifier(\"Int\") \"Int\"\n                      AccessorBlock\n                        leftBrace \"{\"\n                        AccessorDeclList\n                          AccessorDecl\n                            AttributeList\n                            DeclModifierList\n                            keyword(SwiftSyntax.Keyword.get) \"get\"\n                            CodeBlock\n                              leftBrace \"{\"\n                              CodeBlockItemList\n                                CodeBlockItem\n                                  SequenceExpr\n                                    ExprList\n                                      DeclReferenceExpr\n                                        identifier(\"stored\") \"stored\"\n                                      AssignmentExpr\n                                        equal \"=\"\n                                      DeclReferenceExpr\n                                        identifier(\"v\") \"v\"\n                                      BinaryOperatorExpr\n                                        binaryOperator(\"+\") \"+\"\n                                      DeclReferenceExpr\n                                        identifier(\"i\") \"i\"\n                                      BinaryOperatorExpr\n                                        binaryOperator(\"-\") \"-\"\n                                      DeclReferenceExpr\n                                        identifier(\"j\") \"j\"\n                              rightBrace \"}\"\n                        rightBrace \"}\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-underaccept",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nstruct X4 {\n  subscript( j: Int) -> Int {\n    get {\n      stored = v + i \/*c*\/- j\n    }\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":false,\"adventGeneratedSwiftSyntax\":false,\"adventMatched\":false,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[],\"metrics\":{\"crfCount\":252,\"descriptorCount\":607,\"duplicateDescriptorCount\":1,\"oraclePruned\":0,\"parseSeconds\":0.013635039329528809,\"sourceLength\":98,\"suppressedDescriptorCount\":66,\"tokenCount\":20,\"yieldCount\":370},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"X4\\\") \\\"X4\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    SubscriptDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.subscript) \\\"subscript\\\"\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                          FunctionParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            identifier(\\\"j\\\") \\\"j\\\"\\n                            colon \\\":\\\"\\n                            IdentifierType\\n                              identifier(\\\"Int\\\") \\\"Int\\\"\\n                        rightParen \\\")\\\"\\n                      ReturnClause\\n                        arrow \\\"->\\\"\\n                        IdentifierType\\n                          identifier(\\\"Int\\\") \\\"Int\\\"\\n                      AccessorBlock\\n                        leftBrace \\\"{\\\"\\n                        AccessorDeclList\\n                          AccessorDecl\\n                            AttributeList\\n                            DeclModifierList\\n                            keyword(SwiftSyntax.Keyword.get) \\\"get\\\"\\n                            CodeBlock\\n                              leftBrace \\\"{\\\"\\n                              CodeBlockItemList\\n                                CodeBlockItem\\n                                  SequenceExpr\\n                                    ExprList\\n                                      DeclReferenceExpr\\n                                        identifier(\\\"stored\\\") \\\"stored\\\"\\n                                      AssignmentExpr\\n                                        equal \\\"=\\\"\\n                                      DeclReferenceExpr\\n                                        identifier(\\\"v\\\") \\\"v\\\"\\n                                      BinaryOperatorExpr\\n                                        binaryOperator(\\\"+\\\") \\\"+\\\"\\n                                      DeclReferenceExpr\\n                                        identifier(\\\"i\\\") \\\"i\\\"\\n                                      BinaryOperatorExpr\\n                                        binaryOperator(\\\"-\\\") \\\"-\\\"\\n                                      DeclReferenceExpr\\n                                        identifier(\\\"j\\\") \\\"j\\\"\\n                              rightBrace \\\"}\\\"\\n                        rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-underaccept\",\"swiftSyntaxHasError\":false}"
+}

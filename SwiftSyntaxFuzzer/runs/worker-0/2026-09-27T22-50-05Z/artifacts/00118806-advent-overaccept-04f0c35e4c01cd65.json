@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00118806-advent-overaccept-04f0c35e4c01cd65.json",
+    "durationSeconds" : 0.06064903736114502,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue:translated:testFunctionTypeExpr#23",
+    "index" : 118806,
+    "seed" : 11400601876238378790,
+    "signalHash" : "8abaa0f04df54234",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/MemberAcc",
+    "sourceHash" : "04f0c35e4c01cd65",
+    "sourceLength" : 37,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n((A & B) -> C &D).self\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                MemberAccessExpr\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        SequenceExpr\n                          ExprList\n                            TupleExpr\n                              leftParen \"(\"\n                              LabeledExprList\n                              rightParen \")\"\n                            ArrowExpr\n                              arrow \"->\"\n                            TypeExpr\n                              CompositionType\n                                CompositionTypeElementList\n                                  CompositionTypeElement\n                                    IdentifierType\n                                      identifier(\"C\") \"C\"\n                                    binaryOperator(\"&\") \"&\"\n                                  CompositionTypeElement\n                                    IdentifierType\n                                      identifier(\"D\") \"D\"\n                    rightParen \")\"\n                  period \".\"\n                  DeclReferenceExpr\n                    keyword(SwiftSyntax.Keyword.self) \"self\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "regexSafeLexerKeyword\t[\"self\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      ".DO\t[>s< \".\" >n<]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "protocolCompositionElement\t[ typeIdentifier]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "functionTypeArgumentClause\t[\"(\" \")\"]",
+      "functionType\t[functionTypeArgumentClause   \"->\" type]",
+      "primaryExpression\t[\"(\" functionType \")\"]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 225,
+      "descriptorCount" : 532,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 220,
+      "parseSeconds" : 0.00908505916595459,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 49,
+      "tokenCount" : 14,
+      "yieldCount" : 326
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                MemberAccessExpr\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        SequenceExpr\n                          ExprList\n                            TupleExpr\n                              leftParen \"(\"\n                              LabeledExprList\n                              rightParen \")\"\n                            ArrowExpr\n                              arrow \"->\"\n                            DeclReferenceExpr\n                              identifier(\"C\") \"C\"\n                    UnexpectedNodes\n                      prefixAmpersand \"&\"\n                      identifier(\"D\") \"D\"\n                    rightParen \")\"\n                  period \".\"\n                  DeclReferenceExpr\n                    keyword(SwiftSyntax.Keyword.self) \"self\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 45,
+  "source" : "#if FOO\n(( ) -> C &D).self\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                MemberAccessExpr\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        SequenceExpr\\n                          ExprList\\n                            TupleExpr\\n                              leftParen \\\"(\\\"\\n                              LabeledExprList\\n                              rightParen \\\")\\\"\\n                            ArrowExpr\\n                              arrow \\\"->\\\"\\n                            TypeExpr\\n                              CompositionType\\n                                CompositionTypeElementList\\n                                  CompositionTypeElement\\n                                    IdentifierType\\n                                      identifier(\\\"C\\\") \\\"C\\\"\\n                                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                                  CompositionTypeElement\\n                                    IdentifierType\\n                                      identifier(\\\"D\\\") \\\"D\\\"\\n                    rightParen \\\")\\\"\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"regexSafeLexerKeyword\\t[\\\"self\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"protocolCompositionElement\\t[ typeIdentifier]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"functionTypeArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionType\\t[functionTypeArgumentClause   \\\"->\\\" type]\",\"primaryExpression\\t[\\\"(\\\" functionType \\\")\\\"]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":225,\"descriptorCount\":532,\"duplicateDescriptorCount\":0,\"oraclePruned\":220,\"parseSeconds\":0.00908505916595459,\"sourceLength\":33,\"suppressedDescriptorCount\":49,\"tokenCount\":14,\"yieldCount\":326},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                MemberAccessExpr\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        SequenceExpr\\n                          ExprList\\n                            TupleExpr\\n                              leftParen \\\"(\\\"\\n                              LabeledExprList\\n                              rightParen \\\")\\\"\\n                            ArrowExpr\\n                              arrow \\\"->\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"C\\\") \\\"C\\\"\\n                    UnexpectedNodes\\n                      prefixAmpersand \\\"&\\\"\\n                      identifier(\\\"D\\\") \\\"D\\\"\\n                    rightParen \\\")\\\"\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00205488-tree-difference-c67832312592cb3c.json",
+    "durationSeconds" : 0.03156709671020508,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:line-comment:reject:testRecovery20#1+reject:testCoroutineAccessors#1",
+    "index" : 205488,
+    "seed" : 4354586988532835097,
+    "signalHash" : "4b797418e369da6c",
+    "signalSummary" : "tree-difference|line=42|ref=FunctionCallExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "c67832312592cb3c",
+    "sourceLength" : 100,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nwhile\nvar i_rm: Int {\n  _read {\n    yield _i\n  }\n  modify \/\/ c\n {\n    yield &_i\n  }\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                WhileStmt\n                  keyword(SwiftSyntax.Keyword.while) \"while\"\n                  ConditionElementList\n                    ConditionElement\n                      DeclReferenceExpr\n                        identifier(\"Int\") \"Int\"\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        DeclReferenceExpr\n                          identifier(\"modify\") \"modify\"\n                      CodeBlockItem\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                          rightBrace \"}\"\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "conditionExpression\t[  prefixExpression ]",
+      "condition\t[conditionExpression]",
+      "conditionList\t[condition ]",
+      "whileStatement\t[\"while\" >->(\"{\") conditionList codeBlock]",
+      "loopStatement\t[whileStatement]",
+      "statement\t[loopStatement]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 217,
+      "descriptorCount" : 526,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 148,
+      "parseSeconds" : 0.014195084571838379,
+      "sourceLength" : 39,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 11,
+      "yieldCount" : 271
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                WhileStmt\n                  keyword(SwiftSyntax.Keyword.while) \"while\"\n                  ConditionElementList\n                    ConditionElement\n                      DeclReferenceExpr\n                        identifier(\"Int\") \"Int\"\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        FunctionCallExpr\n                          DeclReferenceExpr\n                            identifier(\"modify\") \"modify\"\n                          LabeledExprList\n                          ClosureExpr\n                            leftBrace \"{\"\n                            CodeBlockItemList\n                            rightBrace \"}\"\n                          MultipleTrailingClosureElementList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 45,
+  "source" : "#if FOO\nwhile Int {\nmodify\n{\n}\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                WhileStmt\\n                  keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n                  ConditionElementList\\n                    ConditionElement\\n                      DeclReferenceExpr\\n                        identifier(\\\"Int\\\") \\\"Int\\\"\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        DeclReferenceExpr\\n                          identifier(\\\"modify\\\") \\\"modify\\\"\\n                      CodeBlockItem\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"conditionExpression\\t[  prefixExpression ]\",\"condition\\t[conditionExpression]\",\"conditionList\\t[condition ]\",\"whileStatement\\t[\\\"while\\\" >->(\\\"{\\\") conditionList codeBlock]\",\"loopStatement\\t[whileStatement]\",\"statement\\t[loopStatement]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":217,\"descriptorCount\":526,\"duplicateDescriptorCount\":0,\"oraclePruned\":148,\"parseSeconds\":0.014195084571838379,\"sourceLength\":39,\"suppressedDescriptorCount\":43,\"tokenCount\":11,\"yieldCount\":271},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                WhileStmt\\n                  keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n                  ConditionElementList\\n                    ConditionElement\\n                      DeclReferenceExpr\\n                        identifier(\\\"Int\\\") \\\"Int\\\"\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        FunctionCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"modify\\\") \\\"modify\\\"\\n                          LabeledExprList\\n                          ClosureExpr\\n                            leftBrace \\\"{\\\"\\n                            CodeBlockItemList\\n                            rightBrace \\\"}\\\"\\n                          MultipleTrailingClosureElementList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

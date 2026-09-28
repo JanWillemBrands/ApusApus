@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00662740-tree-difference-1d61cfc3ec7bb083.json",
+    "durationSeconds" : 0.028338074684143066,
+    "exitCode" : 1,
+    "generator" : "wide:closure:block-comment+block-comment+space:translated:testModuleSelectorExpr#19",
+    "index" : 662740,
+    "seed" : 13064011101222712141,
+    "signalHash" : "6c6409e4c176b899",
+    "signalSummary" : "tree-difference|line=23|ref=MemberAccessExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "1d61cfc3ec7bb083",
+    "sourceLength" : 59,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\n_ = x \/* c *\/ .\/*\n*\/Swift::Type .self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                DeclReferenceExpr\n                  identifier(\"x\") \"x\"\n                BinaryOperatorExpr\n                  binaryOperator(\".\/*\") \".\/*\"\n                PrefixOperatorExpr\n                  prefixOperator(\"*\/\") \"*\/\"\n                  DeclReferenceExpr\n                    ModuleSelector\n                      identifier(\"Swift\") \"Swift\"\n                      colonColon \"::\"\n                    identifier(\"self\") \"self\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "moduleGenericIdentifier\t[moduleSelector identifier ]",
+      "primaryExpression\t[moduleGenericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "operator\t[dotOperator]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 121,
+      "descriptorCount" : 363,
+      "duplicateDescriptorCount" : 2,
+      "oraclePruned" : 183,
+      "parseSeconds" : 0.004855990409851074,
+      "sourceLength" : 36,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 10,
+      "yieldCount" : 298
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                MemberAccessExpr\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  period \".\"\n                  DeclReferenceExpr\n                    ModuleSelector\n                      identifier(\"Swift\") \"Swift\"\n                      colonColon \"::\"\n                    identifier(\"self\") \"self\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n_ = x \/* c *\/ .\/*\n*\/Swift::self\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"x\\\") \\\"x\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\".\\\/*\\\") \\\".\\\/*\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                  DeclReferenceExpr\\n                    ModuleSelector\\n                      identifier(\\\"Swift\\\") \\\"Swift\\\"\\n                      colonColon \\\"::\\\"\\n                    identifier(\\\"self\\\") \\\"self\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"moduleGenericIdentifier\\t[moduleSelector identifier ]\",\"primaryExpression\\t[moduleGenericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"operator\\t[dotOperator]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":121,\"descriptorCount\":363,\"duplicateDescriptorCount\":2,\"oraclePruned\":183,\"parseSeconds\":0.004855990409851074,\"sourceLength\":36,\"suppressedDescriptorCount\":45,\"tokenCount\":10,\"yieldCount\":298},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MemberAccessExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    ModuleSelector\\n                      identifier(\\\"Swift\\\") \\\"Swift\\\"\\n                      colonColon \\\"::\\\"\\n                    identifier(\\\"self\\\") \\\"self\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

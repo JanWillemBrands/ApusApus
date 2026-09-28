@@ -72,6 +72,28 @@ class DerivationBuilder {
     private var expanding = Set<NodeSpan>()
     private var endCache = [NodePos: Set<CharPosition>]()
     private var endGuard = Set<NodePos>()
+    /// Per-symbol index over the (post-Oracle, now immutable) yields: `i → {j}` and `k → {j}`.
+    /// `endPositions` used to answer every query by scanning all of the symbol's yields, i.e.
+    /// O(yields × queries) — the same quadratic the Oracle's `YieldIndex` removed on 2026-09-26.
+    /// On a 200-statement closure-shaped list the builder was ~85% of the whole run (2026-09-27).
+    private var endsByI = [Int: [CharPosition: Set<CharPosition>]]()
+    private var endsByK = [Int: [CharPosition: Set<CharPosition>]]()
+    private func buildIndex(_ sym: GrammarNode) {
+        guard endsByI[sym.number] == nil else { return }
+        var byI = [CharPosition: Set<CharPosition>](), byK = [CharPosition: Set<CharPosition>]()
+        for y in parser.yield(of: sym) {
+            byI[y.i, default: []].insert(y.j)
+            byK[y.k, default: []].insert(y.j)
+        }
+        endsByI[sym.number] = byI
+        endsByK[sym.number] = byK
+    }
+    private func ends(_ sym: GrammarNode, startingAtI from: CharPosition) -> Set<CharPosition> {
+        buildIndex(sym); return endsByI[sym.number]?[from] ?? []
+    }
+    private func ends(_ sym: GrammarNode, pivotK from: CharPosition) -> Set<CharPosition> {
+        buildIndex(sym); return endsByK[sym.number]?[from] ?? []
+    }
 
     private struct NodeSpan: Hashable { let id: ObjectIdentifier; let from, to: CharPosition }
     private struct NodePos: Hashable  { let id: ObjectIdentifier; let from: CharPosition }
@@ -104,9 +126,13 @@ class DerivationBuilder {
     }
 
     private(set) var diagnostics: [Diagnostic] = []
+    private(set) var coverage: [String] = []
+    private var seenCoverage = Set<String>()
 
     func buildAST() -> ParseTreeNode? {
         diagnostics = []
+        coverage = []
+        seenCoverage = []
         let n = input.endIndex
         let origin = input.startIndex
         // A yield ending at `y.j` also counts when only trivia separates `y.j` from
@@ -172,7 +198,20 @@ class DerivationBuilder {
             ))
         }
 
-        return candidates.first?.children ?? []
+        if let chosen = candidates.first {
+            recordCoverage(node: node, alternate: chosen.alt)
+            return chosen.children
+        }
+        return []
+    }
+
+    private func recordCoverage(node: GrammarNode, alternate: GrammarNode) {
+        let body = alternate.bodySymbols.filter { $0.kind != .EPS }.map(\.name).joined(separator: " ")
+        let subject = node.name.isEmpty ? node.kindName : node.name
+        let fingerprint = "\(subject)\t[\(body)]"
+        if seenCoverage.insert(fingerprint).inserted {
+            coverage.append(fingerprint)
+        }
     }
 
     /// Memo for `tileASTBody`, keyed by (first body symbol, suffix length, span).
@@ -211,9 +250,13 @@ class DerivationBuilder {
         var candidates: [ParseTreeNode]? = nil
         var candidateCount = 0
 
-        for mid in endPositions(first, from: from) where mid <= to {
-            guard let head = buildASTSymbol(first, from: from, to: mid) else { continue }
+        // TAIL FIRST: it is memoised and cheap to reject, while building `head` constructs a whole
+        // subtree. With head first, a closure followed by an optional (`{ sep statement } ";"?`) built
+        // the closure subtree for EVERY candidate end — O(n²) statement subtrees for an n-statement
+        // list — and dead heads also emitted spurious ambiguity diagnostics.
+        for mid in endPositions(first, from: from).sorted() where mid <= to {
             guard let tail = tileASTBody(rest, from: mid, to: to) else { continue }
+            guard let head = buildASTSymbol(first, from: from, to: mid) else { continue }
             if candidateCount == 0 {
                 candidates = [head] + tail
             }
@@ -284,10 +327,12 @@ class DerivationBuilder {
             var firstChildren: [ParseTreeNode]? = nil
             var successful = 0
             let ends = iterationEndPositions(bracket, from: pos).filter { $0 > pos && $0 <= to }
-            for end in ends {
-                let head = buildASTAlternate(bracket, from: pos, to: end)
+            for end in ends.sorted() {
+                // Tail first, as in `tileASTBody`: only build the iteration's subtree where the rest
+                // of the closure can actually be tiled.
                 let tail = build(from: end)
                 guard tail.count > 0, let tailChildren = tail.children else { continue }
+                let head = buildASTAlternate(bracket, from: pos, to: end)
                 if firstChildren == nil {
                     firstChildren = head + tailChildren
                 }
@@ -324,22 +369,22 @@ class DerivationBuilder {
         let result: Set<CharPosition>
         switch sym.kind {
         case .T, .TI, .C, .B:
-            result = Set(parser.yield(of: sym).lazy.filter { $0.k == from }.map(\.j))
+            result = ends(sym, pivotK: from)
         case .N:
             if sym.isRHS {
                 guard let lhs = sym.alt else { return [] }
-                let occurrenceEnds = Set(parser.yield(of: sym).lazy.filter { $0.k == from }.map(\.j))
-                let lhsEnds = Set(parser.yield(of: lhs).lazy.filter { $0.i == from }.map(\.j))
+                let occurrenceEnds = ends(sym, pivotK: from)
+                let lhsEnds = ends(lhs, startingAtI: from)
                 result = occurrenceEnds.intersection(lhsEnds)
             } else {
-                result = Set(parser.yield(of: sym).lazy.filter { $0.i == from }.map(\.j))
+                result = ends(sym, startingAtI: from)
             }
         case .DO, .OPT, .KLN, .POS:
             if sym.disambiguation != nil {
                 // ANNOTATED bracket (@longest/@shortest): read its OWN (Oracle-prunable)
                 // yields so the extent prune drives the builder's ambiguity/tiling.
                 // Yields are (alternate-start, k = bracket-start, j) → filter k == from.
-                result = Set(parser.yield(of: sym).lazy.filter { $0.k == from }.map(\.j))
+                result = ends(sym, pivotK: from)
             } else {
                 // UNANNOTATED bracket: original body-recompute path, untouched.
                 var positions = Set<CharPosition>()

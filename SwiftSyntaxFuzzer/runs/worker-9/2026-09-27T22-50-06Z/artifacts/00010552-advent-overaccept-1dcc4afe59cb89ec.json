@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00010552-advent-overaccept-1dcc4afe59cb89ec.json",
+    "durationSeconds" : 0.030616044998168945,
+    "exitCode" : 1,
+    "generator" : "wide:closure:keyword:phase4-available:avail-introduced",
+    "index" : 10552,
+    "seed" : 3326659872777667553,
+    "signalHash" : "71ce837df30bbd97",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "1dcc4afe59cb89ec",
+    "sourceLength" : 64,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n@available(macOS, lazy: 10.15) func f() {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"available\") \"available\"\n                  leftParen \"(\"\n                  AvailabilityArgumentList\n                    AvailabilityArgument\n                      AvailabilityLabeledArgument\n                        identifier(\"macOS\") \"macOS\"\n                        colon \":\"\n                        VersionTuple\n                          integerLiteral(\"10\") \"10\"\n                          VersionComponentList\n                            VersionComponent\n                              period \".\"\n                              integerLiteral(\"15\") \"15\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"f\") \"f\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "platformVersion\t[decimalDigits \".\" >n< decimalDigits]",
+      "availabilityValue\t[platformVersion]",
+      "availabilityLabel\t[identifierToken]",
+      "availabilityAttributeArgument\t[availabilityLabel \":\" availabilityValue]",
+      "availabilityAttributeArguments\t[availabilityAttributeArgument ]",
+      "availableAttribute\t[\"@\" >s< \"available\" >s< \"(\" availabilityAttributeArguments \")\"]",
+      "attribute\t[availableAttribute]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 137,
+      "descriptorCount" : 327,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 138,
+      "parseSeconds" : 0.007284998893737793,
+      "sourceLength" : 41,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 17,
+      "yieldCount" : 237
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"available\") \"available\"\n                  leftParen \"(\"\n                  AvailabilityArgumentList\n                    AvailabilityArgument\n                      PlatformVersion\n                        identifier(\"macOS\") \"macOS\"\n                  UnexpectedNodes\n                    colon \":\"\n                    floatLiteral(\"10.15\") \"10.15\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"f\") \"f\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n@available(macOS: 10.15) func f() {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"available\\\") \\\"available\\\"\\n                  leftParen \\\"(\\\"\\n                  AvailabilityArgumentList\\n                    AvailabilityArgument\\n                      AvailabilityLabeledArgument\\n                        identifier(\\\"macOS\\\") \\\"macOS\\\"\\n                        colon \\\":\\\"\\n                        VersionTuple\\n                          integerLiteral(\\\"10\\\") \\\"10\\\"\\n                          VersionComponentList\\n                            VersionComponent\\n                              period \\\".\\\"\\n                              integerLiteral(\\\"15\\\") \\\"15\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"f\\\") \\\"f\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"platformVersion\\t[decimalDigits \\\".\\\" >n< decimalDigits]\",\"availabilityValue\\t[platformVersion]\",\"availabilityLabel\\t[identifierToken]\",\"availabilityAttributeArgument\\t[availabilityLabel \\\":\\\" availabilityValue]\",\"availabilityAttributeArguments\\t[availabilityAttributeArgument ]\",\"availableAttribute\\t[\\\"@\\\" >s< \\\"available\\\" >s< \\\"(\\\" availabilityAttributeArguments \\\")\\\"]\",\"attribute\\t[availableAttribute]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":137,\"descriptorCount\":327,\"duplicateDescriptorCount\":0,\"oraclePruned\":138,\"parseSeconds\":0.007284998893737793,\"sourceLength\":41,\"suppressedDescriptorCount\":32,\"tokenCount\":17,\"yieldCount\":237},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"available\\\") \\\"available\\\"\\n                  leftParen \\\"(\\\"\\n                  AvailabilityArgumentList\\n                    AvailabilityArgument\\n                      PlatformVersion\\n                        identifier(\\\"macOS\\\") \\\"macOS\\\"\\n                  UnexpectedNodes\\n                    colon \\\":\\\"\\n                    floatLiteral(\\\"10.15\\\") \\\"10.15\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"f\\\") \\\"f\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

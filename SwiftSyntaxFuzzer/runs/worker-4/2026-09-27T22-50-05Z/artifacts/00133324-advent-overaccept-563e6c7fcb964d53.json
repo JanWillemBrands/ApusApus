@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00133324-advent-overaccept-563e6c7fcb964d53.json",
+    "durationSeconds" : 0.024729013442993164,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:space:type:testInverseTypes#7",
+    "index" : 133324,
+    "seed" : 1663246799498458970,
+    "signalHash" : "18634894a3a2f4b1",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "563e6c7fcb964d53",
+    "sourceLength" : 35,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nX<P & ~ Copyable>()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                GenericSpecializationExpr\n                  DeclReferenceExpr\n                    identifier(\"X\") \"X\"\n                  GenericArgumentClause\n                    leftAngle \"<\"\n                    GenericArgumentList\n                      GenericArgument\n                        CompositionType\n                          CompositionTypeElementList\n                            CompositionTypeElement\n                              IdentifierType\n                                identifier(\"P\") \"P\"\n                              binaryOperator(\"&\") \"&\"\n                            CompositionTypeElement\n                              SuppressedType\n                                prefixOperator(\"~\") \"~\"\n                                IdentifierType\n                                  identifier(\"Copyable\") \"Copyable\"\n                    rightAngle \">\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".OPT\t[\"~\"]",
+      "protocolCompositionElement\t[ typeIdentifier]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "genericArgument\t[type]",
+      "genericArgumentList\t[genericArgument ]",
+      "genericArgumentClause\t[openAngle genericArgumentList  closeAngle >+>(\"!\" \"&\" \"(\" \")\" \",\" \".\" \":\" \";\" \"?\" \"[\" \"]\" \"{\" \"}\" keyPathDot ○)]",
+      ".OPT\t[genericArgumentClause]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 154,
+      "descriptorCount" : 425,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 261,
+      "parseSeconds" : 0.005800962448120117,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 60,
+      "tokenCount" : 13,
+      "yieldCount" : 377
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"X\") \"X\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"<\") \"<\"\n                  DeclReferenceExpr\n                    identifier(\"P\") \"P\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"&\") \"&\"\n                  MissingExpr\n            CodeBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  binaryOperator(\"~\") \"~\"\n                  identifier(\"Copyable\") \"Copyable\"\n                  binaryOperator(\">\") \">\"\n                  leftParen \"(\"\n                  rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 40,
+  "source" : " () {\nX<P & ~ Copyable>()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                GenericSpecializationExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"X\\\") \\\"X\\\"\\n                  GenericArgumentClause\\n                    leftAngle \\\"<\\\"\\n                    GenericArgumentList\\n                      GenericArgument\\n                        CompositionType\\n                          CompositionTypeElementList\\n                            CompositionTypeElement\\n                              IdentifierType\\n                                identifier(\\\"P\\\") \\\"P\\\"\\n                              binaryOperator(\\\"&\\\") \\\"&\\\"\\n                            CompositionTypeElement\\n                              SuppressedType\\n                                prefixOperator(\\\"~\\\") \\\"~\\\"\\n                                IdentifierType\\n                                  identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    rightAngle \\\">\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".OPT\\t[\\\"~\\\"]\",\"protocolCompositionElement\\t[ typeIdentifier]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"genericArgument\\t[type]\",\"genericArgumentList\\t[genericArgument ]\",\"genericArgumentClause\\t[openAngle genericArgumentList  closeAngle >+>(\\\"!\\\" \\\"&\\\" \\\"(\\\" \\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"?\\\" \\\"[\\\" \\\"]\\\" \\\"{\\\" \\\"}\\\" keyPathDot ○)]\",\".OPT\\t[genericArgumentClause]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":154,\"descriptorCount\":425,\"duplicateDescriptorCount\":0,\"oraclePruned\":261,\"parseSeconds\":0.005800962448120117,\"sourceLength\":27,\"suppressedDescriptorCount\":60,\"tokenCount\":13,\"yieldCount\":377},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"X\\\") \\\"X\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"<\\\") \\\"<\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"P\\\") \\\"P\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                  MissingExpr\\n            CodeBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  binaryOperator(\\\"~\\\") \\\"~\\\"\\n                  identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                  binaryOperator(\\\">\\\") \\\">\\\"\\n                  leftParen \\\"(\\\"\\n                  rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00058838-tree-difference-4eb26e55887bfab2.json",
+    "durationSeconds" : 0.03892505168914795,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+block-comment+line-comment:real:ApusTerminals:83",
+    "index" : 58838,
+    "seed" : 8709271582791740263,
+    "signalHash" : "34b7809a1427c005",
+    "signalSummary" : "tree-difference|line=32|ref=regexSlash|advent=\/*",
+    "sourceHash" : "4eb26e55887bfab2",
+    "sourceLength" : 126,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nlet identifierRegex \/\/ c\n = Regex {\n    \/\\p{XID_Start}\/\n    \/*\n*\/ZeroOrMore \/*c*\/{\n        \/\\p{XID_Continue}\/\n    }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  RegexLiteralExpr\n                    regexSlash \"\/\"\n                    regexLiteralPattern(\"}\/\\n    \/*\\n*\") \"}\/\n    \/*\n*\"\n                    regexSlash \"\/\"\n                CodeBlockItem\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      identifier(\"ZeroOrMore\") \"ZeroOrMore\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "regexItem\t[regexNonOperatorAtom]",
+      "regexBody\t[regexItem ]",
+      "plainRegularExpressionLiteral\t[<n> >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]",
+      "regularExpressionLiteral\t[plainRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 117,
+      "descriptorCount" : 341,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 115,
+      "parseSeconds" : 0.006451010704040527,
+      "sourceLength" : 49,
+      "suppressedDescriptorCount" : 41,
+      "tokenCount" : 10,
+      "yieldCount" : 249
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  RegexLiteralExpr\n                    regexSlash \"\/\"\n                    regexLiteralPattern(\"}\") \"}\"\n                    regexSlash \"\/\"\n                CodeBlockItem\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      identifier(\"ZeroOrMore\") \"ZeroOrMore\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n    \/}\/\n    \/*\n*\/ZeroOrMore \/*c*\/{\n    }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  RegexLiteralExpr\\n                    regexSlash \\\"\\\/\\\"\\n                    regexLiteralPattern(\\\"}\\\/\\\\n    \\\/*\\\\n*\\\") \\\"}\\\/\\n    \\\/*\\n*\\\"\\n                    regexSlash \\\"\\\/\\\"\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"ZeroOrMore\\\") \\\"ZeroOrMore\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"regexItem\\t[regexNonOperatorAtom]\",\"regexBody\\t[regexItem ]\",\"plainRegularExpressionLiteral\\t[<n> >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]\",\"regularExpressionLiteral\\t[plainRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":117,\"descriptorCount\":341,\"duplicateDescriptorCount\":0,\"oraclePruned\":115,\"parseSeconds\":0.006451010704040527,\"sourceLength\":49,\"suppressedDescriptorCount\":41,\"tokenCount\":10,\"yieldCount\":249},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  RegexLiteralExpr\\n                    regexSlash \\\"\\\/\\\"\\n                    regexLiteralPattern(\\\"}\\\") \\\"}\\\"\\n                    regexSlash \\\"\\\/\\\"\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"ZeroOrMore\\\") \\\"ZeroOrMore\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

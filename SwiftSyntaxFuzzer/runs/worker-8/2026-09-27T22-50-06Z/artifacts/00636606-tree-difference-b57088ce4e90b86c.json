@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00636606-tree-difference-b57088ce4e90b86c.json",
+    "durationSeconds" : 0.0438690185546875,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:block-comment+newline+keyword:phase4-loop:while-let",
+    "index" : 636606,
+    "seed" : 10372684106311075726,
+    "signalHash" : "7b99cf2c91ebe3e9",
+    "signalSummary" : "tree-difference|line=46|ref=FunctionCallExpr|advent=TypeExpr",
+    "sourceHash" : "b57088ce4e90b86c",
+    "sourceLength" : 62,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\nfunc f() { while let x = y\n{ any(x\/*\n*\/) } }",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            WhileStmt\n              keyword(SwiftSyntax.Keyword.while) \"while\"\n              ConditionElementList\n                ConditionElement\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    TypeExpr\n                      SomeOrAnyType\n                        keyword(SwiftSyntax.Keyword.any) \"any\"\n                        TupleType\n                          leftParen \"(\"\n                          TupleTypeElementList\n                          rightParen \")\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "conditionExpression\t[  prefixExpression ]",
+      "condition\t[conditionExpression]",
+      "conditionList\t[condition ]",
+      "whileStatement\t[\"while\" >->(\"{\") conditionList codeBlock]",
+      "loopStatement\t[whileStatement]",
+      "statement\t[loopStatement]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 125,
+      "descriptorCount" : 346,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 148,
+      "parseSeconds" : 0.0042040348052978516,
+      "sourceLength" : 23,
+      "suppressedDescriptorCount" : 35,
+      "tokenCount" : 9,
+      "yieldCount" : 243
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            WhileStmt\n              keyword(SwiftSyntax.Keyword.while) \"while\"\n              ConditionElementList\n                ConditionElement\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    FunctionCallExpr\n                      DeclReferenceExpr\n                        identifier(\"any\") \"any\"\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 46,
+  "source" : " { while x\n{ any(\n) } }",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            WhileStmt\\n              keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n              ConditionElementList\\n                ConditionElement\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    TypeExpr\\n                      SomeOrAnyType\\n                        keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                        TupleType\\n                          leftParen \\\"(\\\"\\n                          TupleTypeElementList\\n                          rightParen \\\")\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"conditionExpression\\t[  prefixExpression ]\",\"condition\\t[conditionExpression]\",\"conditionList\\t[condition ]\",\"whileStatement\\t[\\\"while\\\" >->(\\\"{\\\") conditionList codeBlock]\",\"loopStatement\\t[whileStatement]\",\"statement\\t[loopStatement]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":125,\"descriptorCount\":346,\"duplicateDescriptorCount\":0,\"oraclePruned\":148,\"parseSeconds\":0.0042040348052978516,\"sourceLength\":23,\"suppressedDescriptorCount\":35,\"tokenCount\":9,\"yieldCount\":243},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            WhileStmt\\n              keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n              ConditionElementList\\n                ConditionElement\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    FunctionCallExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"any\\\") \\\"any\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

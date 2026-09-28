@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00201525-advent-overaccept-f07e68b8746d4d80.json",
+    "durationSeconds" : 0.04052400588989258,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:duplicate+newline:declaration:testVariableDeclarations#11+translated:testIfConfigExpr33#1",
+    "index" : 201525,
+    "seed" : 13064011101222712141,
+    "signalHash" : "7f70a2d7d489afd1",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "f07e68b8746d4d80",
+    "sourceLength" : 101,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\nvar foo: Int { mutating set set {\n    test += 1\n  }\n}\n#if arch(x86_64)\n#line\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.var) \"var\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"foo\") \"foo\"\n            AccessorBlock\n              leftBrace \"{\"\n              AccessorDeclList\n                AccessorDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.set) \"set\"\n                AccessorDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.set) \"set\"\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n              rightBrace \"}\"\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  DeclReferenceExpr\n                    identifier(\"x86_64\") \"x86_64\"\n              rightParen \")\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      ".OPT\t[codeBlock]",
+      "setterClause\t[  \"set\"   ]",
+      "accessorClauseEntryNoInit\t[setterClause]",
+      "accessorClauseListNoInit\t[accessorClauseEntryNoInit ]",
+      ".OPT\t[accessorClauseListNoInit]",
+      "initializedAccessorBlock\t[\"{\" accessorClauseListNoInit \"}\"]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 206,
+      "descriptorCount" : 461,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 174,
+      "parseSeconds" : 0.006389021873474121,
+      "sourceLength" : 45,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 14,
+      "yieldCount" : 274
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.var) \"var\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"foo\") \"foo\"\n            AccessorBlock\n              leftBrace \"{\"\n              AccessorDeclList\n                AccessorDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.set) \"set\"\n                  CodeBlock\n                    UnexpectedNodes\n                      identifier(\"set\") \"set\"\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n              rightBrace \"}\"\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  DeclReferenceExpr\n                    identifier(\"x86_64\") \"x86_64\"\n              rightParen \")\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "var foo { set set {\n  }\n}\n#if (x86_64)\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"foo\\\") \\\"foo\\\"\\n            AccessorBlock\\n              leftBrace \\\"{\\\"\\n              AccessorDeclList\\n                AccessorDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.set) \\\"set\\\"\\n                AccessorDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.set) \\\"set\\\"\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"x86_64\\\") \\\"x86_64\\\"\\n              rightParen \\\")\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\".OPT\\t[codeBlock]\",\"setterClause\\t[  \\\"set\\\"   ]\",\"accessorClauseEntryNoInit\\t[setterClause]\",\"accessorClauseListNoInit\\t[accessorClauseEntryNoInit ]\",\".OPT\\t[accessorClauseListNoInit]\",\"initializedAccessorBlock\\t[\\\"{\\\" accessorClauseListNoInit \\\"}\\\"]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":206,\"descriptorCount\":461,\"duplicateDescriptorCount\":0,\"oraclePruned\":174,\"parseSeconds\":0.006389021873474121,\"sourceLength\":45,\"suppressedDescriptorCount\":43,\"tokenCount\":14,\"yieldCount\":274},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"foo\\\") \\\"foo\\\"\\n            AccessorBlock\\n              leftBrace \\\"{\\\"\\n              AccessorDeclList\\n                AccessorDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.set) \\\"set\\\"\\n                  CodeBlock\\n                    UnexpectedNodes\\n                      identifier(\\\"set\\\") \\\"set\\\"\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"x86_64\\\") \\\"x86_64\\\"\\n              rightParen \\\")\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00517514-tree-difference-d4e7879c7e02a4fa.json",
+    "durationSeconds" : 0.0498279333114624,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline:translated:testTypeExpr25m#1+translated:testDeprecatedWhere10#1",
+    "index" : 517514,
+    "seed" : 10372684106311075726,
+    "signalHash" : "aef6fe0dab7bd9b7",
+    "signalSummary" : "tree-difference|line=53|ref=GenericWhereClause|advent=rightAngle",
+    "sourceHash" : "d4e7879c7e02a4fa",
+    "sourceLength" : 137,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n_ = () -> (Int, Int)\n.2\n\/\/ NominalTypeDecl: Choose 3\n\/\/ 1,2,3\nstruct S123<T: Mashable where T: Womparable> where T: Equatable {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"S123\") \"S123\"\n              GenericParameterClause\n                leftAngle \"<\"\n                GenericParameterList\n                  GenericParameter\n                    AttributeList\n                    identifier(\"T\") \"T\"\n                rightAngle \">\"\n              GenericWhereClause\n                keyword(SwiftSyntax.Keyword.where) \"where\"\n                GenericRequirementList\n                  GenericRequirement\n                    ConformanceRequirement\n                      IdentifierType\n                        identifier(\"T\") \"T\"\n                      colon \":\"\n                      IdentifierType\n                        identifier(\"Equatable\") \"Equatable\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "structBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "conformanceRequirementRHS\t[>->(\"_BridgeObject\" \"_Class\" \"_NativeClass\" \"_NativeRefCountedObject\" \"_RefCountedObject\" \"_Trivial\" \"_TrivialAtMost\" \"_TrivialStride\" \"_UnknownLayout\") type]",
+      "conformanceRequirement\t[type \":\" conformanceRequirementRHS]",
+      "requirement\t[conformanceRequirement]",
+      "requirementList\t[requirement ]",
+      "genericWhereClause\t[\"where\" requirementList]",
+      ".OPT\t[genericWhereClause]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[  >->(\"each\") genericParameterName]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 141,
+      "descriptorCount" : 326,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 77,
+      "parseSeconds" : 0.008981943130493164,
+      "sourceLength" : 61,
+      "suppressedDescriptorCount" : 40,
+      "tokenCount" : 17,
+      "yieldCount" : 224
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"S123\") \"S123\"\n              GenericParameterClause\n                leftAngle \"<\"\n                GenericParameterList\n                  GenericParameter\n                    AttributeList\n                    identifier(\"T\") \"T\"\n                GenericWhereClause\n                  keyword(SwiftSyntax.Keyword.where) \"where\"\n                  GenericRequirementList\n                    GenericRequirement\n                      ConformanceRequirement\n                        IdentifierType\n                          identifier(\"T\") \"T\"\n                        colon \":\"\n                        IdentifierType\n                          identifier(\"Womparable\") \"Womparable\"\n                rightAngle \">\"\n              GenericWhereClause\n                keyword(SwiftSyntax.Keyword.where) \"where\"\n                GenericRequirementList\n                  GenericRequirement\n                    ConformanceRequirement\n                      IdentifierType\n                        identifier(\"T\") \"T\"\n                      colon \":\"\n                      IdentifierType\n                        identifier(\"Equatable\") \"Equatable\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nstruct S123<T where T: Womparable> where T: Equatable {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"S123\\\") \\\"S123\\\"\\n              GenericParameterClause\\n                leftAngle \\\"<\\\"\\n                GenericParameterList\\n                  GenericParameter\\n                    AttributeList\\n                    identifier(\\\"T\\\") \\\"T\\\"\\n                rightAngle \\\">\\\"\\n              GenericWhereClause\\n                keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                GenericRequirementList\\n                  GenericRequirement\\n                    ConformanceRequirement\\n                      IdentifierType\\n                        identifier(\\\"T\\\") \\\"T\\\"\\n                      colon \\\":\\\"\\n                      IdentifierType\\n                        identifier(\\\"Equatable\\\") \\\"Equatable\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"conformanceRequirementRHS\\t[>->(\\\"_BridgeObject\\\" \\\"_Class\\\" \\\"_NativeClass\\\" \\\"_NativeRefCountedObject\\\" \\\"_RefCountedObject\\\" \\\"_Trivial\\\" \\\"_TrivialAtMost\\\" \\\"_TrivialStride\\\" \\\"_UnknownLayout\\\") type]\",\"conformanceRequirement\\t[type \\\":\\\" conformanceRequirementRHS]\",\"requirement\\t[conformanceRequirement]\",\"requirementList\\t[requirement ]\",\"genericWhereClause\\t[\\\"where\\\" requirementList]\",\".OPT\\t[genericWhereClause]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[  >->(\\\"each\\\") genericParameterName]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":141,\"descriptorCount\":326,\"duplicateDescriptorCount\":0,\"oraclePruned\":77,\"parseSeconds\":0.008981943130493164,\"sourceLength\":61,\"suppressedDescriptorCount\":40,\"tokenCount\":17,\"yieldCount\":224},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"S123\\\") \\\"S123\\\"\\n              GenericParameterClause\\n                leftAngle \\\"<\\\"\\n                GenericParameterList\\n                  GenericParameter\\n                    AttributeList\\n                    identifier(\\\"T\\\") \\\"T\\\"\\n                GenericWhereClause\\n                  keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                  GenericRequirementList\\n                    GenericRequirement\\n                      ConformanceRequirement\\n                        IdentifierType\\n                          identifier(\\\"T\\\") \\\"T\\\"\\n                        colon \\\":\\\"\\n                        IdentifierType\\n                          identifier(\\\"Womparable\\\") \\\"Womparable\\\"\\n                rightAngle \\\">\\\"\\n              GenericWhereClause\\n                keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                GenericRequirementList\\n                  GenericRequirement\\n                    ConformanceRequirement\\n                      IdentifierType\\n                        identifier(\\\"T\\\") \\\"T\\\"\\n                      colon \\\":\\\"\\n                      IdentifierType\\n                        identifier(\\\"Equatable\\\") \\\"Equatable\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

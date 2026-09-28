@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00021387-advent-overaccept-800b39bc5e83caf3.json",
+    "durationSeconds" : 0.061694979667663574,
+    "exitCode" : 1,
+    "generator" : "wide:closure:duplicate+space:translated:testFunctionTypeExpr#18+fuzz-harvest:any-optional",
+    "index" : 21387,
+    "seed" : 17418700093595237275,
+    "signalHash" : "0503bc077efd0a80",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "800b39bc5e83caf3",
+    "sourceLength" : 84,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n(([Foo].Element) ->  [Foo].Element).self\nlet v: any any P? = x\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.let) \"let\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"v\") \"v\"\n                  TypeAnnotation\n                    colon \":\"\n                    SomeOrAnyType\n                      keyword(SwiftSyntax.Keyword.any) \"any\"\n                      SomeOrAnyType\n                        keyword(SwiftSyntax.Keyword.any) \"any\"\n                        IdentifierType\n                          identifier(\"x\") \"x\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "type\t[boxedProtocolType]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      ".OPT\t[typeAnnotation]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 98,
+      "descriptorCount" : 239,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 60,
+      "parseSeconds" : 0.008028984069824219,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 19,
+      "tokenCount" : 8,
+      "yieldCount" : 143
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.let) \"let\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"v\") \"v\"\n                  TypeAnnotation\n                    colon \":\"\n                    SomeOrAnyType\n                      keyword(SwiftSyntax.Keyword.any) \"any\"\n                      IdentifierType\n                        identifier(\"any\") \"any\"\n                  InitializerClause\n                    DeclReferenceExpr\n                      identifier(\"x\") \"x\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 25,
+  "source" : " {\nlet v: any any x\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"v\\\") \\\"v\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    SomeOrAnyType\\n                      keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                      SomeOrAnyType\\n                        keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                        IdentifierType\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"type\\t[boxedProtocolType]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\".OPT\\t[typeAnnotation]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":98,\"descriptorCount\":239,\"duplicateDescriptorCount\":0,\"oraclePruned\":60,\"parseSeconds\":0.008028984069824219,\"sourceLength\":21,\"suppressedDescriptorCount\":19,\"tokenCount\":8,\"yieldCount\":143},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"v\\\") \\\"v\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    SomeOrAnyType\\n                      keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                      IdentifierType\\n                        identifier(\\\"any\\\") \\\"any\\\"\\n                  InitializerClause\\n                    DeclReferenceExpr\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

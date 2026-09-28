@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00460363-tree-difference-a3c457dbc653e0d5.json",
+    "durationSeconds" : 0.02114403247833252,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:swap:type:testInverseTypes#2",
+    "index" : 460363,
+    "seed" : 8709271582791740263,
+    "signalHash" : "f304eb95c58fc217",
+    "signalSummary" : "tree-difference|line=18|ref=SubscriptCallExpr|advent=TypeExpr",
+    "sourceHash" : "a3c457dbc653e0d5",
+    "sourceLength" : 33,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nany[ ~Copyable]()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    ArrayType\n                      leftSquare \"[\"\n                      IdentifierType\n                        identifier(\"Copyable\") \"Copyable\"\n                      rightSquare \"]\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "arrayType\t[\"[\" type \"]\"]",
+      "type\t[arrayType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 144,
+      "descriptorCount" : 407,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 260,
+      "parseSeconds" : 0.007239937782287598,
+      "sourceLength" : 24,
+      "suppressedDescriptorCount" : 60,
+      "tokenCount" : 10,
+      "yieldCount" : 348
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                SubscriptCallExpr\n                  DeclReferenceExpr\n                    identifier(\"any\") \"any\"\n                  leftSquare \"[\"\n                  LabeledExprList\n                    LabeledExpr\n                      DeclReferenceExpr\n                        identifier(\"Copyable\") \"Copyable\"\n                  rightSquare \"]\"\n                  MultipleTrailingClosureElementList\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 35,
+  "source" : " () {\nany[ Copyable]()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    ArrayType\\n                      leftSquare \\\"[\\\"\\n                      IdentifierType\\n                        identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                      rightSquare \\\"]\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"arrayType\\t[\\\"[\\\" type \\\"]\\\"]\",\"type\\t[arrayType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":144,\"descriptorCount\":407,\"duplicateDescriptorCount\":0,\"oraclePruned\":260,\"parseSeconds\":0.007239937782287598,\"sourceLength\":24,\"suppressedDescriptorCount\":60,\"tokenCount\":10,\"yieldCount\":348},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                SubscriptCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"any\\\") \\\"any\\\"\\n                  leftSquare \\\"[\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                  rightSquare \\\"]\\\"\\n                  MultipleTrailingClosureElementList\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

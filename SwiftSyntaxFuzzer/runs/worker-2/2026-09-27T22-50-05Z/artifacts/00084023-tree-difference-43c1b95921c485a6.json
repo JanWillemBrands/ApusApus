@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00084023-tree-difference-43c1b95921c485a6.json",
+    "durationSeconds" : 0.032663941383361816,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue:translated:testOperators2#1",
+    "index" : 84023,
+    "seed" : 15755288686696214284,
+    "signalHash" : "e609416b1303a42a",
+    "signalSummary" : "tree-difference|line=14|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "43c1b95921c485a6",
+    "sourceLength" : 104,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\ninfix operator== : Equal\nprecedencegroup Equal {\n  associativity: left\n  higherThan: FatArrow\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"==\") \"==\"\n              OperatorPrecedenceAndTypes\n                colon \":\"\n                identifier(\"Equal\") \"Equal\"\n                DesignatedTypeList\n          CodeBlockItem\n            PrecedenceGroupDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.precedencegroup) \"precedencegroup\"\n              identifier(\"Equal\") \"Equal\"\n              leftBrace \"{\"\n              PrecedenceGroupAttributeList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "precedenceGroupDeclaration\t[\"precedencegroup\" precedenceGroupName \"{\"  \"}\"]",
+      "declaration\t[precedenceGroupDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 160,
+      "descriptorCount" : 351,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 142,
+      "parseSeconds" : 0.00941610336303711,
+      "sourceLength" : 55,
+      "suppressedDescriptorCount" : 41,
+      "tokenCount" : 11,
+      "yieldCount" : 216
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              postfixOperator(\"==\") \"==\"\n              OperatorPrecedenceAndTypes\n                colon \":\"\n                identifier(\"Equal\") \"Equal\"\n                DesignatedTypeList\n          CodeBlockItem\n            PrecedenceGroupDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.precedencegroup) \"precedencegroup\"\n              identifier(\"Equal\") \"Equal\"\n              leftBrace \"{\"\n              PrecedenceGroupAttributeList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 45,
+  "source" : " {\ninfix operator== : Equal\nprecedencegroup Equal {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"==\\\") \\\"==\\\"\\n              OperatorPrecedenceAndTypes\\n                colon \\\":\\\"\\n                identifier(\\\"Equal\\\") \\\"Equal\\\"\\n                DesignatedTypeList\\n          CodeBlockItem\\n            PrecedenceGroupDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.precedencegroup) \\\"precedencegroup\\\"\\n              identifier(\\\"Equal\\\") \\\"Equal\\\"\\n              leftBrace \\\"{\\\"\\n              PrecedenceGroupAttributeList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"precedenceGroupDeclaration\\t[\\\"precedencegroup\\\" precedenceGroupName \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[precedenceGroupDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":160,\"descriptorCount\":351,\"duplicateDescriptorCount\":0,\"oraclePruned\":142,\"parseSeconds\":0.00941610336303711,\"sourceLength\":55,\"suppressedDescriptorCount\":41,\"tokenCount\":11,\"yieldCount\":216},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              postfixOperator(\\\"==\\\") \\\"==\\\"\\n              OperatorPrecedenceAndTypes\\n                colon \\\":\\\"\\n                identifier(\\\"Equal\\\") \\\"Equal\\\"\\n                DesignatedTypeList\\n          CodeBlockItem\\n            PrecedenceGroupDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.precedencegroup) \\\"precedencegroup\\\"\\n              identifier(\\\"Equal\\\") \\\"Equal\\\"\\n              leftBrace \\\"{\\\"\\n              PrecedenceGroupAttributeList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

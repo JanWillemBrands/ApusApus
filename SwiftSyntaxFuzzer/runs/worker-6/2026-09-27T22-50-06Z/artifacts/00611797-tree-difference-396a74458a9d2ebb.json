@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00611797-tree-difference-396a74458a9d2ebb.json",
+    "durationSeconds" : 0.04350996017456055,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+newline+delete:phase4-attr:generic-func",
+    "index" : 611797,
+    "seed" : 6018003910102630304,
+    "signalHash" : "aa16eff881246f88",
+    "signalSummary" : "tree-difference|line=11|ref=SequenceExpr|advent=FunctionCallExpr",
+    "sourceHash" : "396a74458a9d2ebb",
+    "sourceLength" : 24,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n f<T>\n(x: T) {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              GenericSpecializationExpr\n                DeclReferenceExpr\n                  identifier(\"f\") \"f\"\n                GenericArgumentClause\n                  leftAngle \"<\"\n                  GenericArgumentList\n                    GenericArgument\n                      IdentifierType\n                        identifier(\"T\") \"T\"\n                  rightAngle \">\"\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  identifier(\"x\") \"x\"\n                  colon \":\"\n                  DeclReferenceExpr\n                    identifier(\"T\") \"T\"\n              rightParen \")\"\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "argumentLabel\t[identifier]",
+      "functionCallArgument\t[argumentLabel \":\" expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "genericArgument\t[type]",
+      "genericArgumentList\t[genericArgument ]",
+      "genericArgumentClause\t[openAngle genericArgumentList  closeAngle >+>(\"!\" \"&\" \"(\" \")\" \",\" \".\" \":\" \";\" \"?\" \"[\" \"]\" \"{\" \"}\" keyPathDot ○)]",
+      ".OPT\t[genericArgumentClause]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 216,
+      "descriptorCount" : 669,
+      "duplicateDescriptorCount" : 2,
+      "oraclePruned" : 448,
+      "parseSeconds" : 0.008533000946044922,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 96,
+      "tokenCount" : 13,
+      "yieldCount" : 571
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"f\") \"f\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                PostfixOperatorExpr\n                  DeclReferenceExpr\n                    identifier(\"T\") \"T\"\n                  postfixOperator(\">\") \">\"\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    identifier(\"x\") \"x\"\n                    colon \":\"\n                    DeclReferenceExpr\n                      identifier(\"T\") \"T\"\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 42,
+  "source" : " {\nf<T>\n(x: T) {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              GenericSpecializationExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"f\\\") \\\"f\\\"\\n                GenericArgumentClause\\n                  leftAngle \\\"<\\\"\\n                  GenericArgumentList\\n                    GenericArgument\\n                      IdentifierType\\n                        identifier(\\\"T\\\") \\\"T\\\"\\n                  rightAngle \\\">\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  identifier(\\\"x\\\") \\\"x\\\"\\n                  colon \\\":\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"T\\\") \\\"T\\\"\\n              rightParen \\\")\\\"\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"argumentLabel\\t[identifier]\",\"functionCallArgument\\t[argumentLabel \\\":\\\" expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"genericArgument\\t[type]\",\"genericArgumentList\\t[genericArgument ]\",\"genericArgumentClause\\t[openAngle genericArgumentList  closeAngle >+>(\\\"!\\\" \\\"&\\\" \\\"(\\\" \\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"?\\\" \\\"[\\\" \\\"]\\\" \\\"{\\\" \\\"}\\\" keyPathDot ○)]\",\".OPT\\t[genericArgumentClause]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":216,\"descriptorCount\":669,\"duplicateDescriptorCount\":2,\"oraclePruned\":448,\"parseSeconds\":0.008533000946044922,\"sourceLength\":19,\"suppressedDescriptorCount\":96,\"tokenCount\":13,\"yieldCount\":571},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"f\\\") \\\"f\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                PostfixOperatorExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"T\\\") \\\"T\\\"\\n                  postfixOperator(\\\">\\\") \\\">\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                    colon \\\":\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"T\\\") \\\"T\\\"\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

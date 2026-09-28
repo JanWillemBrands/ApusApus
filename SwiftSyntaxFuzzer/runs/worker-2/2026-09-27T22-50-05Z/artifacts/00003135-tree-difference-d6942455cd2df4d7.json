@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00003135-tree-difference-d6942455cd2df4d7.json",
+    "durationSeconds" : 0.045001983642578125,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:space+line-comment:expression:testKeyPathFollowedByOperator#1+statement:testIf#4",
+    "index" : 3135,
+    "seed" : 15755288686696214284,
+    "signalHash" : "ec056b05d184777a",
+    "signalSummary" : "tree-difference|line=56|ref=FunctionCallExpr|advent=MemberAccessExpr",
+    "sourceHash" : "d6942455cd2df4d7",
+    "sourceLength" : 95,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\n\\Foo?.?.bar.?.blah\nif includeSavedHints { a = a.flatMap \/\/ c\n{ $0 }  ?? nil }",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                MemberAccessExpr\n                  period \".\"\n                  DeclReferenceExpr\n                    identifier(\"flatMap\") \"flatMap\"\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n                BinaryOperatorExpr\n                  binaryOperator(\"??\") \"??\"\n                NilLiteralExpr\n                  keyword(SwiftSyntax.Keyword.nil) \"nil\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "nilLiteral\t[\"nil\"]",
+      "literal\t[nilLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 142,
+      "descriptorCount" : 392,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 135,
+      "parseSeconds" : 0.0049620866775512695,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 43,
+      "tokenCount" : 10,
+      "yieldCount" : 272
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  MemberAccessExpr\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"flatMap\") \"flatMap\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n                BinaryOperatorExpr\n                  binaryOperator(\"??\") \"??\"\n                NilLiteralExpr\n                  keyword(SwiftSyntax.Keyword.nil) \"nil\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 37,
+  "source" : " { a = .flatMap\n{ } ?? nil }",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MemberAccessExpr\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"flatMap\\\") \\\"flatMap\\\"\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"??\\\") \\\"??\\\"\\n                NilLiteralExpr\\n                  keyword(SwiftSyntax.Keyword.nil) \\\"nil\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"nilLiteral\\t[\\\"nil\\\"]\",\"literal\\t[nilLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":142,\"descriptorCount\":392,\"duplicateDescriptorCount\":0,\"oraclePruned\":135,\"parseSeconds\":0.0049620866775512695,\"sourceLength\":28,\"suppressedDescriptorCount\":43,\"tokenCount\":10,\"yieldCount\":272},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  MemberAccessExpr\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"flatMap\\\") \\\"flatMap\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"??\\\") \\\"??\\\"\\n                NilLiteralExpr\\n                  keyword(SwiftSyntax.Keyword.nil) \\\"nil\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

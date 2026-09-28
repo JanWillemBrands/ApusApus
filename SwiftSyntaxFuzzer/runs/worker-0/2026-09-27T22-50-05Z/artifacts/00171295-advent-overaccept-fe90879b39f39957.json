@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00171295-advent-overaccept-fe90879b39f39957.json",
+    "durationSeconds" : 0.041657090187072754,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:splice:reject:testModuleSelectorExpr#16",
+    "index" : 171295,
+    "seed" : 11400601876238378790,
+    "signalHash" : "743ba728f5f44728",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "fe90879b39f39957",
+    "sourceLength" : 33,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nSwift::struct = 1\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    ModuleSelector\n                      identifier(\"Swift\") \"Swift\"\n                      colonColon \"::\"\n                    identifier(\"struct\") \"struct\"\n                  AssignmentExpr\n                    equal \"=\"\n                  IntegerLiteralExpr\n                    integerLiteral(\"1\") \"1\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "integerLiteral\t[decimalLiteral]",
+      "signedIntegerLiteral\t[ integerLiteral]",
+      "numericLiteral\t[signedIntegerLiteral]",
+      "literal\t[numericLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "moduleGenericIdentifier\t[moduleSelector identifier ]",
+      "primaryExpression\t[moduleGenericIdentifier]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 112,
+      "descriptorCount" : 308,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 163,
+      "parseSeconds" : 0.005061030387878418,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 9,
+      "yieldCount" : 266
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  identifier(\"Swift\") \"Swift\"\n                  colonColon \"::\"\n            CodeBlockItem\n              StructDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                MemberBlock\n                  MemberBlockItemList\n                    MemberBlockItem\n                      UnexpectedCodeDecl\n                        UnexpectedNodes\n                          equal \"=\"\n                          integerLiteral(\"1\") \"1\"\n                  rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 32,
+  "source" : " () {\nSwift::struct = 1\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    ModuleSelector\\n                      identifier(\\\"Swift\\\") \\\"Swift\\\"\\n                      colonColon \\\"::\\\"\\n                    identifier(\\\"struct\\\") \\\"struct\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  IntegerLiteralExpr\\n                    integerLiteral(\\\"1\\\") \\\"1\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"integerLiteral\\t[decimalLiteral]\",\"signedIntegerLiteral\\t[ integerLiteral]\",\"numericLiteral\\t[signedIntegerLiteral]\",\"literal\\t[numericLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"moduleGenericIdentifier\\t[moduleSelector identifier ]\",\"primaryExpression\\t[moduleGenericIdentifier]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":112,\"descriptorCount\":308,\"duplicateDescriptorCount\":0,\"oraclePruned\":163,\"parseSeconds\":0.005061030387878418,\"sourceLength\":25,\"suppressedDescriptorCount\":45,\"tokenCount\":9,\"yieldCount\":266},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  identifier(\\\"Swift\\\") \\\"Swift\\\"\\n                  colonColon \\\"::\\\"\\n            CodeBlockItem\\n              StructDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                MemberBlock\\n                  MemberBlockItemList\\n                    MemberBlockItem\\n                      UnexpectedCodeDecl\\n                        UnexpectedNodes\\n                          equal \\\"=\\\"\\n                          integerLiteral(\\\"1\\\") \\\"1\\\"\\n                  rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

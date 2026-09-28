@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00055850-advent-overaccept-beb80dc1ac99bef7.json",
+    "durationSeconds" : 0.0268099308013916,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:line-comment:reject:testTypedThrows#12",
+    "index" : 55850,
+    "seed" : 6018003910102630304,
+    "signalHash" : "4174e0c6a1a3735c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "beb80dc1ac99bef7",
+    "sourceLength" : 57,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nfunc test() throws(MyError) \/\/ c\nasync {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"test\") \"test\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n                FunctionEffectSpecifiers\n                  ThrowsClause\n                    keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                    leftParen \"(\"\n                    IdentifierType\n                      identifier(\"MyError\") \"MyError\"\n                    rightParen \")\"\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"async\") \"async\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      "declarationThrowsClause\t[throwsClause]",
+      ".OPT\t[declarationThrowsClause]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 177,
+      "descriptorCount" : 394,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 144,
+      "parseSeconds" : 0.0057059526443481445,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 11,
+      "yieldCount" : 248
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"test\") \"test\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n                FunctionEffectSpecifiers\n                  ThrowsClause\n                    keyword(SwiftSyntax.Keyword.throws) \"throws\"\n                    leftParen \"(\"\n                    IdentifierType\n                      identifier(\"MyError\") \"MyError\"\n                    rightParen \")\"\n                  UnexpectedNodes\n                    keyword(SwiftSyntax.Keyword.async) \"async\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 34,
+  "source" : " {\nfunc test() throws(MyError)\nasync\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"test\\\") \\\"test\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n                FunctionEffectSpecifiers\\n                  ThrowsClause\\n                    keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                    leftParen \\\"(\\\"\\n                    IdentifierType\\n                      identifier(\\\"MyError\\\") \\\"MyError\\\"\\n                    rightParen \\\")\\\"\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"async\\\") \\\"async\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\"declarationThrowsClause\\t[throwsClause]\",\".OPT\\t[declarationThrowsClause]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":177,\"descriptorCount\":394,\"duplicateDescriptorCount\":0,\"oraclePruned\":144,\"parseSeconds\":0.0057059526443481445,\"sourceLength\":38,\"suppressedDescriptorCount\":46,\"tokenCount\":11,\"yieldCount\":248},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"test\\\") \\\"test\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n                FunctionEffectSpecifiers\\n                  ThrowsClause\\n                    keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n                    leftParen \\\"(\\\"\\n                    IdentifierType\\n                      identifier(\\\"MyError\\\") \\\"MyError\\\"\\n                    rightParen \\\")\\\"\\n                  UnexpectedNodes\\n                    keyword(SwiftSyntax.Keyword.async) \\\"async\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

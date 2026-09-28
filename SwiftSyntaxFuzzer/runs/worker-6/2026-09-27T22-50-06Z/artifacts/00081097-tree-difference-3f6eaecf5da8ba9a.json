@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00081097-tree-difference-3f6eaecf5da8ba9a.json",
+    "durationSeconds" : 0.029039978981018066,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:raw:translated:testTupleTypeExpr#16+type:testClosureSignatures#2",
+    "index" : 81097,
+    "seed" : 6018003910102630304,
+    "signalHash" : "6f754614ecaa2f21",
+    "signalSummary" : "tree-difference|line=11|ref=FunctionCallExpr|advent=MemberAccessExpr",
+    "sourceHash" : "3f6eaecf5da8ba9a",
+    "sourceLength" : 63,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n(X.Protocol, Y.Protocol).self\n{ ()\nthrows -> Void in }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              period \".\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.self) \"self\"\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              ClosureSignature\n                AttributeList\n                ClosureParameterClause\n                  leftParen \"(\"\n                  ClosureParameterList\n                  rightParen \")\"\n                ReturnClause\n                  arrow \"->\"\n                  IdentifierType\n                    identifier(\"Void\") \"Void\"\n                keyword(SwiftSyntax.Keyword.in) \"in\"\n              CodeBlockItemList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "resultType\t[type]",
+      "functionResult\t[\"->\" resultType]",
+      ".OPT\t[functionResult]",
+      "closureParameterClause\t[\"(\" \")\"]",
+      "closureSignature\t[  closureParameterClause    \"in\"]",
+      ".OPT\t[closureSignature]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "regexSafeLexerKeyword\t[\"self\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      ".DO\t[>s< \".\" >n<]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 183,
+      "descriptorCount" : 481,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 243,
+      "parseSeconds" : 0.00958096981048584,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 51,
+      "tokenCount" : 13,
+      "yieldCount" : 363
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              MemberAccessExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                period \".\"\n                DeclReferenceExpr\n                  keyword(SwiftSyntax.Keyword.self) \"self\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                ClosureSignature\n                  AttributeList\n                  ClosureParameterClause\n                    leftParen \"(\"\n                    ClosureParameterList\n                    rightParen \")\"\n                  ReturnClause\n                    arrow \"->\"\n                    IdentifierType\n                      identifier(\"Void\") \"Void\"\n                  keyword(SwiftSyntax.Keyword.in) \"in\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n().self\n{ () -> Void in }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              ClosureSignature\\n                AttributeList\\n                ClosureParameterClause\\n                  leftParen \\\"(\\\"\\n                  ClosureParameterList\\n                  rightParen \\\")\\\"\\n                ReturnClause\\n                  arrow \\\"->\\\"\\n                  IdentifierType\\n                    identifier(\\\"Void\\\") \\\"Void\\\"\\n                keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"resultType\\t[type]\",\"functionResult\\t[\\\"->\\\" resultType]\",\".OPT\\t[functionResult]\",\"closureParameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"closureSignature\\t[  closureParameterClause    \\\"in\\\"]\",\".OPT\\t[closureSignature]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"regexSafeLexerKeyword\\t[\\\"self\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":183,\"descriptorCount\":481,\"duplicateDescriptorCount\":0,\"oraclePruned\":243,\"parseSeconds\":0.00958096981048584,\"sourceLength\":30,\"suppressedDescriptorCount\":51,\"tokenCount\":13,\"yieldCount\":363},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              MemberAccessExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                ClosureSignature\\n                  AttributeList\\n                  ClosureParameterClause\\n                    leftParen \\\"(\\\"\\n                    ClosureParameterList\\n                    rightParen \\\")\\\"\\n                  ReturnClause\\n                    arrow \\\"->\\\"\\n                    IdentifierType\\n                      identifier(\\\"Void\\\") \\\"Void\\\"\\n                  keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

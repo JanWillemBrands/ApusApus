@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00096441-tree-difference-a84541ba10022b70.json",
+    "durationSeconds" : 0.035025954246520996,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:block-comment:attribute:testEffects#2+declaration:testEnumParsing#1",
+    "index" : 96441,
+    "seed" : 15755288686696214284,
+    "signalHash" : "61a6890708b17934",
+    "signalSummary" : "tree-difference|line=28|ref=prefixOperator()|advent=postfixOperator()",
+    "sourceHash" : "a84541ba10022b70",
+    "sourceLength" : 175,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "extension Fuzz {\n@_effects(escaping self.value**.class\/*\n*\/*.value** => return.value**)\nfunc foo() {}\nenum Foo {\n  @preconcurrency case custom(@Sendable () throws -> Void)\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"_effects\") \"_effects\"\n                  leftParen \"(\"\n                  EffectsAttributeArgumentList\n                    postfixOperator(\"*\") \"*\"\n                    period \".\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"Foo\") \"Foo\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "enumName\t[identifierToken]",
+      "nonWordToken\t[\".\"]",
+      "effectsToken\t[nonWordToken]",
+      ".POS\t[effectsToken]",
+      "operator\t[nonArrowOperatorToken]",
+      "effectsToken\t[operator]",
+      "attribute\t[\"@\" >s< \"_effects\" >s< \"(\"  \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "enumDeclaration\t[  \"enum\" enumName    \"{\"  \"}\"]",
+      "declaration\t[enumDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 121,
+      "descriptorCount" : 289,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 105,
+      "parseSeconds" : 0.007465004920959473,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 12,
+      "yieldCount" : 179
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"_effects\") \"_effects\"\n                  leftParen \"(\"\n                  EffectsAttributeArgumentList\n                    prefixOperator(\"*\") \"*\"\n                    period \".\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"Foo\") \"Foo\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n@_effects(\/*\n*\/*. )\nenum Foo {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                  leftParen \\\"(\\\"\\n                  EffectsAttributeArgumentList\\n                    postfixOperator(\\\"*\\\") \\\"*\\\"\\n                    period \\\".\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"Foo\\\") \\\"Foo\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"enumName\\t[identifierToken]\",\"nonWordToken\\t[\\\".\\\"]\",\"effectsToken\\t[nonWordToken]\",\".POS\\t[effectsToken]\",\"operator\\t[nonArrowOperatorToken]\",\"effectsToken\\t[operator]\",\"attribute\\t[\\\"@\\\" >s< \\\"_effects\\\" >s< \\\"(\\\"  \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"enumDeclaration\\t[  \\\"enum\\\" enumName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[enumDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":121,\"descriptorCount\":289,\"duplicateDescriptorCount\":0,\"oraclePruned\":105,\"parseSeconds\":0.007465004920959473,\"sourceLength\":37,\"suppressedDescriptorCount\":30,\"tokenCount\":12,\"yieldCount\":179},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"_effects\\\") \\\"_effects\\\"\\n                  leftParen \\\"(\\\"\\n                  EffectsAttributeArgumentList\\n                    prefixOperator(\\\"*\\\") \\\"*\\\"\\n                    period \\\".\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"Foo\\\") \\\"Foo\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,48 @@
+{
+  "event" : {
+    "artifact" : "00002497-advent-overaccept-82ea48206c97f33a.json",
+    "durationSeconds" : 0.057920098304748535,
+    "exitCode" : 1,
+    "generator" : "seed-corpus-structural-splice:ifconfig-leading-dot-expression",
+    "index" : 2497,
+    "seed" : 6018003907115959188,
+    "signalHash" : "92a52cbbf224e7e5",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/VariableD",
+    "sourceHash" : "82ea48206c97f33a",
+    "sourceLength" : 152,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if A\nlet base = Foo.Bar()\nlet fuzzValue = base\n#if FOO\n.methodOne() + 12\n#else\n.methodTwo() + 14\n#endif\n#elseif B\n.member\n#else\nlet sentinel = 1\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"A\") \"A\"\n            CodeBlockItemList\n              CodeBlockItem\n                VariableDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.let) \"let\"\n                  PatternBindingList\n                    PatternBinding\n                      IdentifierPattern\n                        identifier(\"fuzzValue\") \"fuzzValue\"\n                      InitializerClause\n                        equal \"=\"\n                        DeclReferenceExpr\n                          identifier(\"base\") \"base\"\n              CodeBlockItem\n                IfConfigDecl\n                  IfConfigClauseList\n                    IfConfigClause\n                      poundIf \"#if\"\n                      DeclReferenceExpr\n                        identifier(\"FOO\") \"FOO\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          SequenceExpr\n                            ExprList\n                              MemberAccessExpr\n                                period \".\"\n                                DeclReferenceExpr\n                                  identifier(\"methodOne\") \"methodOne\"\n                              BinaryOperatorExpr\n                                binaryOperator(\"+\") \"+\"\n                              IntegerLiteralExpr\n                                integerLiteral(\"12\") \"12\"\n                  poundEndif \"#endif\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 317,
+      "descriptorCount" : 714,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 130,
+      "parseSeconds" : 0.016085028648376465,
+      "sourceLength" : 64,
+      "suppressedDescriptorCount" : 39,
+      "tokenCount" : 16,
+      "yieldCount" : 335
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"A\") \"A\"\n            CodeBlockItemList\n              CodeBlockItem\n                VariableDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.let) \"let\"\n                  PatternBindingList\n                    PatternBinding\n                      IdentifierPattern\n                        identifier(\"fuzzValue\") \"fuzzValue\"\n                      InitializerClause\n                        equal \"=\"\n                        PostfixIfConfigExpr\n                          DeclReferenceExpr\n                            identifier(\"base\") \"base\"\n                          IfConfigDecl\n                            IfConfigClauseList\n                              IfConfigClause\n                                poundIf \"#if\"\n                                DeclReferenceExpr\n                                  identifier(\"FOO\") \"FOO\"\n                                MemberAccessExpr\n                                  period \".\"\n                                  DeclReferenceExpr\n                                    identifier(\"methodOne\") \"methodOne\"\n                            UnexpectedNodes\n                              binaryOperator(\"+\") \"+\"\n                              integerLiteral(\"12\") \"12\"\n                            poundEndif \"#endif\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 53,
+  "source" : "#if A\nlet fuzzValue = base\n#if FOO\n.methodOne + 12\n#endif\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"A\\\") \\\"A\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                VariableDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                  PatternBindingList\\n                    PatternBinding\\n                      IdentifierPattern\\n                        identifier(\\\"fuzzValue\\\") \\\"fuzzValue\\\"\\n                      InitializerClause\\n                        equal \\\"=\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"base\\\") \\\"base\\\"\\n              CodeBlockItem\\n                IfConfigDecl\\n                  IfConfigClauseList\\n                    IfConfigClause\\n                      poundIf \\\"#if\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          SequenceExpr\\n                            ExprList\\n                              MemberAccessExpr\\n                                period \\\".\\\"\\n                                DeclReferenceExpr\\n                                  identifier(\\\"methodOne\\\") \\\"methodOne\\\"\\n                              BinaryOperatorExpr\\n                                binaryOperator(\\\"+\\\") \\\"+\\\"\\n                              IntegerLiteralExpr\\n                                integerLiteral(\\\"12\\\") \\\"12\\\"\\n                  poundEndif \\\"#endif\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"metrics\":{\"crfCount\":317,\"descriptorCount\":714,\"duplicateDescriptorCount\":0,\"oraclePruned\":130,\"parseSeconds\":0.016085028648376465,\"sourceLength\":64,\"suppressedDescriptorCount\":39,\"tokenCount\":16,\"yieldCount\":335},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"A\\\") \\\"A\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                VariableDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                  PatternBindingList\\n                    PatternBinding\\n                      IdentifierPattern\\n                        identifier(\\\"fuzzValue\\\") \\\"fuzzValue\\\"\\n                      InitializerClause\\n                        equal \\\"=\\\"\\n                        PostfixIfConfigExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"base\\\") \\\"base\\\"\\n                          IfConfigDecl\\n                            IfConfigClauseList\\n                              IfConfigClause\\n                                poundIf \\\"#if\\\"\\n                                DeclReferenceExpr\\n                                  identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                                MemberAccessExpr\\n                                  period \\\".\\\"\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"methodOne\\\") \\\"methodOne\\\"\\n                            UnexpectedNodes\\n                              binaryOperator(\\\"+\\\") \\\"+\\\"\\n                              integerLiteral(\\\"12\\\") \\\"12\\\"\\n                            poundEndif \\\"#endif\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

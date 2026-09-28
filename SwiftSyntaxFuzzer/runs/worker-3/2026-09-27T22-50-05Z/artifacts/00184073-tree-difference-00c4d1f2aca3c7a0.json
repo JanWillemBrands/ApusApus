@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00184073-tree-difference-00c4d1f2aca3c7a0.json",
+    "durationSeconds" : 0.0599440336227417,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment+keyword+space:attribute:testIsolatedTypeAttribute#6",
+    "index" : 184073,
+    "seed" : 8709271582791740263,
+    "signalHash" : "753d3f3874c6bd42",
+    "signalSummary" : "tree-difference|line=43|ref=keyword()|advent=identifier()",
+    "sourceHash" : "00c4d1f2aca3c7a0",
+    "sourceLength" : 70,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nvar array = [@convention(swift)  @Self(any) () -> \/\/ c\n ()]()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              ArrayExpr\n                leftSquare \"[\"\n                ArrayElementList\n                  ArrayElement\n                    TypeExpr\n                      AttributedType\n                        TypeSpecifierList\n                        AttributeList\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"convention\") \"convention\"\n                            leftParen \"(\"\n                            LabeledExprList\n                              LabeledExpr\n                                DeclReferenceExpr\n                                  identifier(\"swift\") \"swift\"\n                            rightParen \")\"\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"Self\") \"Self\"\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                        TypeSpecifierList\n                        TupleType\n                          leftParen \"(\"\n                          TupleTypeElementList\n                          rightParen \")\"\n                rightSquare \"]\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "attributeArgumentExprClause\t[>s< \"(\"  \")\"]",
+      ".OPT\t[attributeArgumentExprClause]",
+      "selfType\t[\"Self\"]",
+      "attributeHeadName\t[selfType]",
+      "attributeName\t[attributeHeadName ]",
+      "attribute\t[\"@\" >->(\"_backDeploy\" \"_documentation\" \"_dynamicReplacement\" \"_effects\" \"_implements\" \"_originallyDefinedIn\" \"_specialize\" \"abi\" \"attached\" \"available\" \"backDeployed\" \"convention\" \"derivative\" \"differentiable\" \"freestanding\" \"isolated\" \"lifetime\" \"objc\" \"specialized\" \"transpose\") >s< attributeName ]",
+      "type\t[attribute type]",
+      "identifierToken\t[identifier]",
+      "conventionArgument\t[identifierToken]",
+      "conventionArguments\t[conventionArgument ]",
+      "attribute\t[\"@\" >s< \"convention\" >s< \"(\" conventionArguments \")\"]",
+      "primaryExpression\t[attribute type]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "arrayLiteralItem\t[expression]",
+      "arrayLiteralItems\t[arrayLiteralItem ]",
+      ".OPT\t[arrayLiteralItems]",
+      "arrayLiteral\t[\"[\"   \"]\"]",
+      "literalExpression\t[arrayLiteral]",
+      "primaryExpression\t[literalExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 136,
+      "descriptorCount" : 428,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 301,
+      "parseSeconds" : 0.006410002708435059,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 17,
+      "yieldCount" : 425
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              ArrayExpr\n                leftSquare \"[\"\n                ArrayElementList\n                  ArrayElement\n                    TypeExpr\n                      AttributedType\n                        TypeSpecifierList\n                        AttributeList\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              identifier(\"convention\") \"convention\"\n                            leftParen \"(\"\n                            LabeledExprList\n                              LabeledExpr\n                                DeclReferenceExpr\n                                  identifier(\"swift\") \"swift\"\n                            rightParen \")\"\n                          Attribute\n                            atSign \"@\"\n                            IdentifierType\n                              keyword(SwiftSyntax.Keyword.Self) \"Self\"\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                        TypeSpecifierList\n                        TupleType\n                          leftParen \"(\"\n                          TupleTypeElementList\n                          rightParen \")\"\n                rightSquare \"]\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { [@convention(swift)  @Self() () ]()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              ArrayExpr\\n                leftSquare \\\"[\\\"\\n                ArrayElementList\\n                  ArrayElement\\n                    TypeExpr\\n                      AttributedType\\n                        TypeSpecifierList\\n                        AttributeList\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"convention\\\") \\\"convention\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                              LabeledExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"swift\\\") \\\"swift\\\"\\n                            rightParen \\\")\\\"\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"Self\\\") \\\"Self\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                        TypeSpecifierList\\n                        TupleType\\n                          leftParen \\\"(\\\"\\n                          TupleTypeElementList\\n                          rightParen \\\")\\\"\\n                rightSquare \\\"]\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"attributeArgumentExprClause\\t[>s< \\\"(\\\"  \\\")\\\"]\",\".OPT\\t[attributeArgumentExprClause]\",\"selfType\\t[\\\"Self\\\"]\",\"attributeHeadName\\t[selfType]\",\"attributeName\\t[attributeHeadName ]\",\"attribute\\t[\\\"@\\\" >->(\\\"_backDeploy\\\" \\\"_documentation\\\" \\\"_dynamicReplacement\\\" \\\"_effects\\\" \\\"_implements\\\" \\\"_originallyDefinedIn\\\" \\\"_specialize\\\" \\\"abi\\\" \\\"attached\\\" \\\"available\\\" \\\"backDeployed\\\" \\\"convention\\\" \\\"derivative\\\" \\\"differentiable\\\" \\\"freestanding\\\" \\\"isolated\\\" \\\"lifetime\\\" \\\"objc\\\" \\\"specialized\\\" \\\"transpose\\\") >s< attributeName ]\",\"type\\t[attribute type]\",\"identifierToken\\t[identifier]\",\"conventionArgument\\t[identifierToken]\",\"conventionArguments\\t[conventionArgument ]\",\"attribute\\t[\\\"@\\\" >s< \\\"convention\\\" >s< \\\"(\\\" conventionArguments \\\")\\\"]\",\"primaryExpression\\t[attribute type]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"arrayLiteralItem\\t[expression]\",\"arrayLiteralItems\\t[arrayLiteralItem ]\",\".OPT\\t[arrayLiteralItems]\",\"arrayLiteral\\t[\\\"[\\\"   \\\"]\\\"]\",\"literalExpression\\t[arrayLiteral]\",\"primaryExpression\\t[literalExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":136,\"descriptorCount\":428,\"duplicateDescriptorCount\":0,\"oraclePruned\":301,\"parseSeconds\":0.006410002708435059,\"sourceLength\":40,\"suppressedDescriptorCount\":42,\"tokenCount\":17,\"yieldCount\":425},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              ArrayExpr\\n                leftSquare \\\"[\\\"\\n                ArrayElementList\\n                  ArrayElement\\n                    TypeExpr\\n                      AttributedType\\n                        TypeSpecifierList\\n                        AttributeList\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              identifier(\\\"convention\\\") \\\"convention\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                              LabeledExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"swift\\\") \\\"swift\\\"\\n                            rightParen \\\")\\\"\\n                          Attribute\\n                            atSign \\\"@\\\"\\n                            IdentifierType\\n                              keyword(SwiftSyntax.Keyword.Self) \\\"Self\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                        TypeSpecifierList\\n                        TupleType\\n                          leftParen \\\"(\\\"\\n                          TupleTypeElementList\\n                          rightParen \\\")\\\"\\n                rightSquare \\\"]\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

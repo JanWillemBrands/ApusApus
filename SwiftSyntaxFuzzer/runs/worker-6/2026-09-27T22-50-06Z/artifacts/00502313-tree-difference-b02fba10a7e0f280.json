@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00502313-tree-difference-b02fba10a7e0f280.json",
+    "durationSeconds" : 0.09491002559661865,
+    "exitCode" : 1,
+    "generator" : "wide:closure:glue+line-comment+glue:real:OperatorTable+Folding:19+translated:testForwardSlashRegex10#1",
+    "index" : 502313,
+    "seed" : 6018003910102630304,
+    "signalHash" : "3fd663f4d88197fd",
+    "signalSummary" : "tree-difference|line=91|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "b02fba10a7e0f280",
+    "sourceLength" : 298,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\nextension ExprSyntax {\n  \/\/ Is this an unresolved explicit cast?\n  fileprivate var isUnresolvedExplicitCast: Bool {\n    self.is(UnresolvedIsExprSyntax.self) || self.is(UnresolvedAsExprSyntax.self)\n  }\n}\ninfix operator^^\/ : P\nfunc ^^\/ (lhs:Int, rhs \/\/ c\n: Int) -> Int { 1 \/ 2 }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    VariableDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.var) \"var\"\n                      PatternBindingList\n                        PatternBinding\n                          IdentifierPattern\n                            identifier(\"isUnresolvedExplicitCast\") \"isUnresolvedExplicitCast\"\n                rightBrace \"}\"\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"^^\/\") \"^^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement statementSeparator statements]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 195,
+      "descriptorCount" : 464,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 179,
+      "parseSeconds" : 0.009629964828491211,
+      "sourceLength" : 67,
+      "suppressedDescriptorCount" : 59,
+      "tokenCount" : 10,
+      "yieldCount" : 294
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    VariableDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.var) \"var\"\n                      PatternBindingList\n                        PatternBinding\n                          IdentifierPattern\n                            identifier(\"isUnresolvedExplicitCast\") \"isUnresolvedExplicitCast\"\n                rightBrace \"}\"\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                postfixOperator(\"^^\/\") \"^^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " fuzzClosure { { var isUnresolvedExplicitCast\n}\ninfix operator^^\/\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    VariableDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                      PatternBindingList\\n                        PatternBinding\\n                          IdentifierPattern\\n                            identifier(\\\"isUnresolvedExplicitCast\\\") \\\"isUnresolvedExplicitCast\\\"\\n                rightBrace \\\"}\\\"\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"^^\\\/\\\") \\\"^^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement statementSeparator statements]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":195,\"descriptorCount\":464,\"duplicateDescriptorCount\":0,\"oraclePruned\":179,\"parseSeconds\":0.009629964828491211,\"sourceLength\":67,\"suppressedDescriptorCount\":59,\"tokenCount\":10,\"yieldCount\":294},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    VariableDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                      PatternBindingList\\n                        PatternBinding\\n                          IdentifierPattern\\n                            identifier(\\\"isUnresolvedExplicitCast\\\") \\\"isUnresolvedExplicitCast\\\"\\n                rightBrace \\\"}\\\"\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                postfixOperator(\\\"^^\\\/\\\") \\\"^^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

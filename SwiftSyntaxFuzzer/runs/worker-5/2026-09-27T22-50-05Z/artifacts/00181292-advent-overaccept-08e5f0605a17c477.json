@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00181292-advent-overaccept-08e5f0605a17c477.json",
+    "durationSeconds" : 0.03982901573181152,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:newline:declaration:testAttributeInPoundIf#1",
+    "index" : 181292,
+    "seed" : 13064011101222712141,
+    "signalHash" : "a190cd9d96fc870a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/IfCo",
+    "sourceHash" : "08e5f0605a17c477",
+    "sourceLength" : 68,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "struct Fuzz {\n#if hasAttribute(foo)\n@foo #endif\nstruct MyStruct {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n                IfConfigDecl\n                  IfConfigClauseList\n                    IfConfigClause\n                      poundIf \"#if\"\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                          LabeledExpr\n                            DeclReferenceExpr\n                              identifier(\"foo\") \"foo\"\n                        rightParen \")\"\n                      AttributeList\n                  poundEndif \"#endif\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"MyStruct\") \"MyStruct\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "structBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "structName\t[identifierToken]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveAttributes\t[ifDirective compilationCondition ]",
+      "conditionalCompilationAttributes\t[ifDirectiveAttributes   endifDirective]",
+      "attributes\t[conditionalCompilationAttributes ]",
+      ".OPT\t[attributes]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 121,
+      "descriptorCount" : 264,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 66,
+      "parseSeconds" : 0.005793929100036621,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 11,
+      "yieldCount" : 146
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          identifier(\"foo\") \"foo\"\n                    rightParen \")\"\n                  UnexpectedNodes\n                    poundEndif \"#endif\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      StructDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                        identifier(\"MyStruct\") \"MyStruct\"\n                        MemberBlock\n                          leftBrace \"{\"\n                          MemberBlockItemList\n                          rightBrace \"}\"\n                    CodeBlockItem\n                      UnexpectedCodeDecl\n                        UnexpectedNodes\n                          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 46,
+  "source" : " {\n#if (foo) #endif\nstruct MyStruct {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n                IfConfigDecl\\n                  IfConfigClauseList\\n                    IfConfigClause\\n                      poundIf \\\"#if\\\"\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                          LabeledExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"foo\\\") \\\"foo\\\"\\n                        rightParen \\\")\\\"\\n                      AttributeList\\n                  poundEndif \\\"#endif\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"structName\\t[identifierToken]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveAttributes\\t[ifDirective compilationCondition ]\",\"conditionalCompilationAttributes\\t[ifDirectiveAttributes   endifDirective]\",\"attributes\\t[conditionalCompilationAttributes ]\",\".OPT\\t[attributes]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":121,\"descriptorCount\":264,\"duplicateDescriptorCount\":0,\"oraclePruned\":66,\"parseSeconds\":0.005793929100036621,\"sourceLength\":40,\"suppressedDescriptorCount\":33,\"tokenCount\":11,\"yieldCount\":146},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"foo\\\") \\\"foo\\\"\\n                    rightParen \\\")\\\"\\n                  UnexpectedNodes\\n                    poundEndif \\\"#endif\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      StructDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                        identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n                        MemberBlock\\n                          leftBrace \\\"{\\\"\\n                          MemberBlockItemList\\n                          rightBrace \\\"}\\\"\\n                    CodeBlockItem\\n                      UnexpectedCodeDecl\\n                        UnexpectedNodes\\n                          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

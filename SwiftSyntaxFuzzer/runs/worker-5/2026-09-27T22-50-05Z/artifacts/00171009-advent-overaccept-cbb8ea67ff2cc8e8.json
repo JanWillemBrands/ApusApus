@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00171009-advent-overaccept-cbb8ea67ff2cc8e8.json",
+    "durationSeconds" : 0.042511940002441406,
+    "exitCode" : 1,
+    "generator" : "wide:closure:block-comment+line-comment:statement:testSwitch#3",
+    "index" : 171009,
+    "seed" : 13064011101222712141,
+    "signalHash" : "83090c1155e80654",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "cbb8ea67ff2cc8e8",
+    "sourceLength" : 130,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nswitch x {\ncase .A:\n  break\ncase .B:\n  break\n#if NEVER\n#elseif \/*\n*\/ENABLE_C\ncase .C: \/\/ c\n\n  break\n#endif\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  IfConfigDecl\n                    IfConfigClauseList\n                      IfConfigClause\n                        poundIf \"#if\"\n                        DeclReferenceExpr\n                          identifier(\"NEVER\") \"NEVER\"\n                        CodeBlockItemList\n                      IfConfigClause\n                        poundElseif \"#elseif\"\n                        DeclReferenceExpr\n                          identifier(\"ENABLE_C\") \"ENABLE_C\"\n                        CodeBlockItemList\n                    poundEndif \"#endif\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "elseifDirective\t[\"#elseif\"]",
+      "elseifDirectiveClause\t[elseifDirective compilationCondition <n> ]",
+      "elseifDirectiveClauses\t[elseifDirectiveClause ]",
+      ".OPT\t[elseifDirectiveClauses]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 193,
+      "descriptorCount" : 448,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 119,
+      "parseSeconds" : 0.010300993919372559,
+      "sourceLength" : 47,
+      "suppressedDescriptorCount" : 44,
+      "tokenCount" : 11,
+      "yieldCount" : 217
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  IfConfigDecl\n                    IfConfigClauseList\n                      IfConfigClause\n                        poundIf \"#if\"\n                        DeclReferenceExpr\n                          identifier(\"NEVER\") \"NEVER\"\n                        CodeBlockItemList\n                      IfConfigClause\n                        poundElseif \"#elseif\"\n                        MissingExpr\n                        CodeBlockItemList\n                          CodeBlockItem\n                            DeclReferenceExpr\n                              identifier(\"ENABLE_C\") \"ENABLE_C\"\n                    poundEndif \"#endif\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n#if NEVER\n#elseif \/*\n*\/ENABLE_C\n#endif\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  IfConfigDecl\\n                    IfConfigClauseList\\n                      IfConfigClause\\n                        poundIf \\\"#if\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"NEVER\\\") \\\"NEVER\\\"\\n                        CodeBlockItemList\\n                      IfConfigClause\\n                        poundElseif \\\"#elseif\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"ENABLE_C\\\") \\\"ENABLE_C\\\"\\n                        CodeBlockItemList\\n                    poundEndif \\\"#endif\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"elseifDirective\\t[\\\"#elseif\\\"]\",\"elseifDirectiveClause\\t[elseifDirective compilationCondition <n> ]\",\"elseifDirectiveClauses\\t[elseifDirectiveClause ]\",\".OPT\\t[elseifDirectiveClauses]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":193,\"descriptorCount\":448,\"duplicateDescriptorCount\":0,\"oraclePruned\":119,\"parseSeconds\":0.010300993919372559,\"sourceLength\":47,\"suppressedDescriptorCount\":44,\"tokenCount\":11,\"yieldCount\":217},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  IfConfigDecl\\n                    IfConfigClauseList\\n                      IfConfigClause\\n                        poundIf \\\"#if\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"NEVER\\\") \\\"NEVER\\\"\\n                        CodeBlockItemList\\n                      IfConfigClause\\n                        poundElseif \\\"#elseif\\\"\\n                        MissingExpr\\n                        CodeBlockItemList\\n                          CodeBlockItem\\n                            DeclReferenceExpr\\n                              identifier(\\\"ENABLE_C\\\") \\\"ENABLE_C\\\"\\n                    poundEndif \\\"#endif\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

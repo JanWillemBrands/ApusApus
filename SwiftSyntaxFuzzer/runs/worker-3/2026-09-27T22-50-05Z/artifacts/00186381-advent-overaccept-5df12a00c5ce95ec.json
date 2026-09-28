@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00186381-advent-overaccept-5df12a00c5ce95ec.json",
+    "durationSeconds" : 0.25458693504333496,
+    "exitCode" : 1,
+    "generator" : "wide:closure:swap+block-comment+newline:translated:testGenericDisambiguation8#1",
+    "index" : 186381,
+    "seed" : 8709271582791740263,
+    "signalHash" : "631a40187eebec50",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "5df12a00c5ce95ec",
+    "sourceLength" : 387,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nA<B>.c()\nA<A<B>>.c()\nA<A<B>.F>.c()\nA<(A<B>) -> B>.c()\nA<[\n[Int]]>.c()\nA[<[A<B>]]>.c()\nA<(Int, UnicodeScalar)>.\/*c*\/c()\nA<(a:Int, b:UnicodeScalar)>.c()\nA<Runcible & Fungible>.c()\nA<@convention(c) () -> Int32>.c()\nA<(@autoclosure @escaping () -> Int, Int) -> Void>.c()\n_ = [@convention(block) ()  -> Int]().count\n_ = [String: (@escaping (A<B>) -> Int) -> Void]().keys\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                BinaryOperatorExpr\n                  binaryOperator(\">\") \">\"\n                PrefixOperatorExpr\n                  prefixOperator(\".\/*\") \".\/*\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[dotOperator]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 96,
+      "descriptorCount" : 243,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 107,
+      "parseSeconds" : 0.004001021385192871,
+      "sourceLength" : 13,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 8,
+      "yieldCount" : 186
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              PostfixOperatorExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                postfixOperator(\">\") \">\"\n              UnexpectedNodes\n                period \".\"\n              DeclReferenceExpr\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n()>.\/*()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\">\\\") \\\">\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\".\\\/*\\\") \\\".\\\/*\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[dotOperator]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":96,\"descriptorCount\":243,\"duplicateDescriptorCount\":0,\"oraclePruned\":107,\"parseSeconds\":0.004001021385192871,\"sourceLength\":13,\"suppressedDescriptorCount\":22,\"tokenCount\":8,\"yieldCount\":186},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              PostfixOperatorExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                postfixOperator(\\\">\\\") \\\">\\\"\\n              UnexpectedNodes\\n                period \\\".\\\"\\n              DeclReferenceExpr\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

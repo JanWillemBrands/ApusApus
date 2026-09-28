@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00430864-tree-difference-646a6fa03d384c19.json",
+    "durationSeconds" : 0.035099029541015625,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:splice+keyword+block-comment:translated:testOptional3b#1+translated:testForwardSlashRegex29#1",
+    "index" : 430864,
+    "seed" : 3326659872777667553,
+    "signalHash" : "c98419cd97a66b64",
+    "signalSummary" : "tree-difference|line=49|ref=ForceUnwrapExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "646a6fa03d384c19",
+    "sourceLength" : 53,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nvar d : (\/*c*\/)? = a?.open()\n_ -> \/x\/!\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    DiscardAssignmentExpr\n                      wildcard \"_\"\n                    ArrowExpr\n                      arrow \"->\"\n                    PrefixOperatorExpr\n                      prefixOperator(\"\/\") \"\/\"\n                      PostfixOperatorExpr\n                        DeclReferenceExpr\n                          identifier(\"x\") \"x\"\n                        postfixOperator(\"\/!\") \"\/!\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "postfixOperator\t[postfixOperatorToken]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperator <s>]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 174,
+      "descriptorCount" : 423,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 134,
+      "parseSeconds" : 0.005540013313293457,
+      "sourceLength" : 24,
+      "suppressedDescriptorCount" : 29,
+      "tokenCount" : 9,
+      "yieldCount" : 225
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    DiscardAssignmentExpr\n                      wildcard \"_\"\n                    ArrowExpr\n                      arrow \"->\"\n                    ForceUnwrapExpr\n                      RegexLiteralExpr\n                        regexSlash \"\/\"\n                        regexLiteralPattern(\"x\") \"x\"\n                        regexSlash \"\/\"\n                      exclamationMark \"!\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 24,
+  "source" : "#if FOO\n_ -> \/x\/!\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    DiscardAssignmentExpr\\n                      wildcard \\\"_\\\"\\n                    ArrowExpr\\n                      arrow \\\"->\\\"\\n                    PrefixOperatorExpr\\n                      prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                      PostfixOperatorExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n                        postfixOperator(\\\"\\\/!\\\") \\\"\\\/!\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"postfixOperator\\t[postfixOperatorToken]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperator <s>]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":174,\"descriptorCount\":423,\"duplicateDescriptorCount\":0,\"oraclePruned\":134,\"parseSeconds\":0.005540013313293457,\"sourceLength\":24,\"suppressedDescriptorCount\":29,\"tokenCount\":9,\"yieldCount\":225},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    DiscardAssignmentExpr\\n                      wildcard \\\"_\\\"\\n                    ArrowExpr\\n                      arrow \\\"->\\\"\\n                    ForceUnwrapExpr\\n                      RegexLiteralExpr\\n                        regexSlash \\\"\\\/\\\"\\n                        regexLiteralPattern(\\\"x\\\") \\\"x\\\"\\n                        regexSlash \\\"\\\/\\\"\\n                      exclamationMark \\\"!\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

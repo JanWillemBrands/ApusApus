@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00371673-residual-ambiguity-326583595711402d.json",
+    "durationSeconds" : 0.051550984382629395,
+    "exitCode" : 1,
+    "generator" : "wide:extension-member:raw:translated:testUnknownPlatform1#1+translated:testTypeExpr4#1",
+    "index" : 371673,
+    "seed" : 11400601876238378790,
+    "signalHash" : "f85fc65cc91b5d54",
+    "signalSummary" : "residual-ambiguity|extensionMembers\tambiguous alternate\t[extensionMember ] | [extensionMember statementSeparator extensionMembers]",
+    "sourceHash" : "326583595711402d",
+    "sourceLength" : 139,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "extension Fuzz {\n#if hasGreeble(blah)\n#endif\nprotocol Zim {\n  associatedtype Zang\n  init()\n  static func meth() {}\n  func instMeth() {}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExtensionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.extension) \"extension\"\n        IdentifierType\n          identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              ProtocolDecl\n                AttributeList\n                  IfConfigDecl\n                    IfConfigClauseList\n                      IfConfigClause\n                        poundIf \"#if\"\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                            LabeledExpr\n                              DeclReferenceExpr\n                                identifier(\"blah\") \"blah\"\n                          rightParen \")\"\n                        AttributeList\n                    poundEndif \"#endif\"\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.protocol) \"protocol\"\n                identifier(\"Zim\") \"Zim\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "protocolBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "protocolName\t[identifierToken]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveAttributes\t[ifDirective compilationCondition ]",
+      "conditionalCompilationAttributes\t[ifDirectiveAttributes   endifDirective]",
+      "attributes\t[conditionalCompilationAttributes ]",
+      ".OPT\t[attributes]",
+      "protocolDeclaration\t[  \"protocol\" protocolName    protocolBody]",
+      "declaration\t[protocolDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "extensionMember\t[memberDeclaration]",
+      "extensionMembers\t[extensionMember ]",
+      "statementSeparator\t[<n>]",
+      "memberIfDirectiveClause\t[ifDirective compilationCondition <n> ]",
+      "memberConditionalCompilationBlock\t[memberIfDirectiveClause   endifDirective]",
+      "memberCompilerControlStatement\t[memberConditionalCompilationBlock]",
+      "extensionMember\t[memberCompilerControlStatement]",
+      ".OPT\t[extensionMembers]",
+      "extensionBody\t[\"{\"  \"}\"]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".DO\t[typeIdentifier]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 132,
+      "descriptorCount" : 272,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 45,
+      "parseSeconds" : 0.006370902061462402,
+      "sourceLength" : 53,
+      "suppressedDescriptorCount" : 35,
+      "tokenCount" : 14,
+      "yieldCount" : 167
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExtensionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.extension) \"extension\"\n        IdentifierType\n          identifier(\"Fuzz\") \"Fuzz\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n            MemberBlockItem\n              IfConfigDecl\n                IfConfigClauseList\n                  IfConfigClause\n                    poundIf \"#if\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                        LabeledExpr\n                          DeclReferenceExpr\n                            identifier(\"blah\") \"blah\"\n                      rightParen \")\"\n                    MemberBlockItemList\n                poundEndif \"#endif\"\n            MemberBlockItem\n              ProtocolDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.protocol) \"protocol\"\n                identifier(\"Zim\") \"Zim\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "extensionMembers\tambiguous alternate\t[extensionMember ] | [extensionMember statementSeparator extensionMembers]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 48,
+  "source" : "extension Fuzz {\n#if (blah)\n#endif\nprotocol Zim {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExtensionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n        IdentifierType\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              ProtocolDecl\\n                AttributeList\\n                  IfConfigDecl\\n                    IfConfigClauseList\\n                      IfConfigClause\\n                        poundIf \\\"#if\\\"\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                            LabeledExpr\\n                              DeclReferenceExpr\\n                                identifier(\\\"blah\\\") \\\"blah\\\"\\n                          rightParen \\\")\\\"\\n                        AttributeList\\n                    poundEndif \\\"#endif\\\"\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.protocol) \\\"protocol\\\"\\n                identifier(\\\"Zim\\\") \\\"Zim\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"protocolBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"protocolName\\t[identifierToken]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveAttributes\\t[ifDirective compilationCondition ]\",\"conditionalCompilationAttributes\\t[ifDirectiveAttributes   endifDirective]\",\"attributes\\t[conditionalCompilationAttributes ]\",\".OPT\\t[attributes]\",\"protocolDeclaration\\t[  \\\"protocol\\\" protocolName    protocolBody]\",\"declaration\\t[protocolDeclaration]\",\"memberDeclaration\\t[declaration]\",\"extensionMember\\t[memberDeclaration]\",\"extensionMembers\\t[extensionMember ]\",\"statementSeparator\\t[<n>]\",\"memberIfDirectiveClause\\t[ifDirective compilationCondition <n> ]\",\"memberConditionalCompilationBlock\\t[memberIfDirectiveClause   endifDirective]\",\"memberCompilerControlStatement\\t[memberConditionalCompilationBlock]\",\"extensionMember\\t[memberCompilerControlStatement]\",\".OPT\\t[extensionMembers]\",\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".DO\\t[typeIdentifier]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":132,\"descriptorCount\":272,\"duplicateDescriptorCount\":0,\"oraclePruned\":45,\"parseSeconds\":0.006370902061462402,\"sourceLength\":53,\"suppressedDescriptorCount\":35,\"tokenCount\":14,\"yieldCount\":167},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExtensionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n        IdentifierType\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n            MemberBlockItem\\n              IfConfigDecl\\n                IfConfigClauseList\\n                  IfConfigClause\\n                    poundIf \\\"#if\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                        LabeledExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"blah\\\") \\\"blah\\\"\\n                      rightParen \\\")\\\"\\n                    MemberBlockItemList\\n                poundEndif \\\"#endif\\\"\\n            MemberBlockItem\\n              ProtocolDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.protocol) \\\"protocol\\\"\\n                identifier(\\\"Zim\\\") \\\"Zim\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"extensionMembers\\tambiguous alternate\\t[extensionMember ] | [extensionMember statementSeparator extensionMembers]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00086989-advent-overaccept-cb9d3783137a1ddc.json",
+    "durationSeconds" : 0.05061495304107666,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+line-comment+space:translated:testBuiltinBridgeObject4#1+type:testInverseTypesInParameter#10",
+    "index" : 86989,
+    "seed" : 17418700093595237275,
+    "signalHash" : "126f123c4ee35369",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/VariableD",
+    "sourceHash" : "cb9d3783137a1ddc",
+    "sourceLength" : 214,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nvar c: C\nlet bo = Builtin. castToBridgeObject(c, word)\nc = Builtin.castReferenceFromBridgeObject( bo)\nword = Builtin.castBitPatternFromBridgeObject \/\/ c\n(bo)\ntypealias T = (borrowing any ~Copyable) -> Void\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"bo\") \"bo\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  MemberAccessExpr\n                    DeclReferenceExpr\n                      identifier(\"Builtin\") \"Builtin\"\n                    period \".\"\n                    DeclReferenceExpr\n                      identifier(\"castToBridgeObject\") \"castToBridgeObject\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 119,
+      "descriptorCount" : 338,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 199,
+      "parseSeconds" : 0.010535955429077148,
+      "sourceLength" : 39,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 9,
+      "yieldCount" : 300
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"bo\") \"bo\"\n                AssignmentExpr\n                  equal \"=\"\n                FunctionCallExpr\n                  MemberAccessExpr\n                    DeclReferenceExpr\n                      identifier(\"Builtin\") \"Builtin\"\n                    UnexpectedNodes\n                      period \".\"\n                    DeclReferenceExpr\n                      identifier(\"castToBridgeObject\") \"castToBridgeObject\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 43,
+  "source" : " { bo = Builtin. castToBridgeObject()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"bo\\\") \\\"bo\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  MemberAccessExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Builtin\\\") \\\"Builtin\\\"\\n                    period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"castToBridgeObject\\\") \\\"castToBridgeObject\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":119,\"descriptorCount\":338,\"duplicateDescriptorCount\":0,\"oraclePruned\":199,\"parseSeconds\":0.010535955429077148,\"sourceLength\":39,\"suppressedDescriptorCount\":42,\"tokenCount\":9,\"yieldCount\":300},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"bo\\\") \\\"bo\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                FunctionCallExpr\\n                  MemberAccessExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Builtin\\\") \\\"Builtin\\\"\\n                    UnexpectedNodes\\n                      period \\\".\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"castToBridgeObject\\\") \\\"castToBridgeObject\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

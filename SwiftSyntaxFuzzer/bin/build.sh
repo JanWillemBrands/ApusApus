@@ -166,6 +166,7 @@ xcrun swiftc \
   -O \
   -parse-as-library \
   -module-cache-path "$BUILD/module-cache" \
+  "$FUZZER/Sources/AdventFuzzRunner/Widening.swift" \
   "$FUZZER/Sources/AdventFuzzRunner/main.swift" \
   -o "$BUILD/advent-fuzz-runner"
 

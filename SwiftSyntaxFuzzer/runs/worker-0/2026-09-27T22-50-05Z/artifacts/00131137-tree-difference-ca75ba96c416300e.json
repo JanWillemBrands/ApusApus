@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00131137-tree-difference-ca75ba96c416300e.json",
+    "durationSeconds" : 0.03217005729675293,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+line-comment+newline:declaration:testSuppressedImplicitConformance#3",
+    "index" : 131137,
+    "seed" : 11400601876238378790,
+    "signalHash" : "e0f2a750045880f5",
+    "signalSummary" : "tree-difference|line=26|ref=MetatypeType|advent=IdentifierType",
+    "sourceHash" : "ca75ba96c416300e",
+    "sourceLength" : 51,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\ntypealias\nZ = ~Copyable\n. \/\/ c\nType\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeAliasDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.typealias) \"typealias\"\n                identifier(\"Z\") \"Z\"\n                TypeInitializerClause\n                  equal \"=\"\n                  IdentifierType\n                    identifier(\"Copyable\") \"Copyable\"\n            CodeBlockItem\n              MemberAccessExpr\n                period \".\"\n                DeclReferenceExpr\n                  identifier(\"Type\") \"Type\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "typealiasAssignment\t[assignmentOperator type]",
+      "typealiasName\t[identifierToken]",
+      "typealiasDeclaration\t[  \"typealias\" typealiasName  typealiasAssignment]",
+      "declaration\t[typealiasDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 108,
+      "descriptorCount" : 286,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 107,
+      "parseSeconds" : 0.003913998603820801,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 10,
+      "yieldCount" : 210
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeAliasDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.typealias) \"typealias\"\n                identifier(\"Z\") \"Z\"\n                TypeInitializerClause\n                  equal \"=\"\n                  MetatypeType\n                    IdentifierType\n                      identifier(\"Copyable\") \"Copyable\"\n                    period \".\"\n                    keyword(SwiftSyntax.Keyword.Type) \"Type\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 41,
+  "source" : " () {\ntypealias\nZ = Copyable\n.\nType\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeAliasDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.typealias) \\\"typealias\\\"\\n                identifier(\\\"Z\\\") \\\"Z\\\"\\n                TypeInitializerClause\\n                  equal \\\"=\\\"\\n                  IdentifierType\\n                    identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n            CodeBlockItem\\n              MemberAccessExpr\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Type\\\") \\\"Type\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"typealiasAssignment\\t[assignmentOperator type]\",\"typealiasName\\t[identifierToken]\",\"typealiasDeclaration\\t[  \\\"typealias\\\" typealiasName  typealiasAssignment]\",\"declaration\\t[typealiasDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":108,\"descriptorCount\":286,\"duplicateDescriptorCount\":0,\"oraclePruned\":107,\"parseSeconds\":0.003913998603820801,\"sourceLength\":37,\"suppressedDescriptorCount\":27,\"tokenCount\":10,\"yieldCount\":210},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeAliasDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.typealias) \\\"typealias\\\"\\n                identifier(\\\"Z\\\") \\\"Z\\\"\\n                TypeInitializerClause\\n                  equal \\\"=\\\"\\n                  MetatypeType\\n                    IdentifierType\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    period \\\".\\\"\\n                    keyword(SwiftSyntax.Keyword.Type) \\\"Type\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

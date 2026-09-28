@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00153156-tree-difference-466466eb637f2e35.json",
+    "durationSeconds" : 0.03423607349395752,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+newline+block-comment:expression:testKeyPathFollowedByOperator#1",
+    "index" : 153156,
+    "seed" : 15755288686696214284,
+    "signalHash" : "7bca4b3de93fb636",
+    "signalSummary" : "tree-difference|line=31|ref=DeclReferenceExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "466466eb637f2e35",
+    "sourceLength" : 33,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n\\Foo?.?.bar\n.?.\/*\n*\/blah\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"Foo\") \"Foo\"\n                BinaryOperatorExpr\n                  binaryOperator(\".?.\/*\") \".?.\/*\"\n                PrefixOperatorExpr\n                  prefixOperator(\"*\/\") \"*\/\"\n                  DeclReferenceExpr\n                    identifier(\"blah\") \"blah\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "operator\t[dotOperator]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s>   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 101,
+      "descriptorCount" : 272,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 95,
+      "parseSeconds" : 0.004135012626647949,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 29,
+      "tokenCount" : 6,
+      "yieldCount" : 180
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"Foo\") \"Foo\"\n                BinaryOperatorExpr\n                  binaryOperator(\".?.\") \".?.\"\n                DeclReferenceExpr\n                  identifier(\"blah\") \"blah\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 39,
+  "source" : " {\nFoo\n.?.\/*\n*\/blah\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\".?.\\\/*\\\") \\\".?.\\\/*\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"blah\\\") \\\"blah\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"operator\\t[dotOperator]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s>   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":101,\"descriptorCount\":272,\"duplicateDescriptorCount\":0,\"oraclePruned\":95,\"parseSeconds\":0.004135012626647949,\"sourceLength\":21,\"suppressedDescriptorCount\":29,\"tokenCount\":6,\"yieldCount\":180},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\".?.\\\") \\\".?.\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"blah\\\") \\\"blah\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

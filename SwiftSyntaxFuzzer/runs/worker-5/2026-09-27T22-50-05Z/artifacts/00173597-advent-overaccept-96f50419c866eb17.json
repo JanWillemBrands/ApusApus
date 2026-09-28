@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00173597-advent-overaccept-96f50419c866eb17.json",
+    "durationSeconds" : 0.021765947341918945,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue+delete:translated:testUnknownPlatform6#1",
+    "index" : 173597,
+    "seed" : 13064011101222712141,
+    "signalHash" : "63bb32c1b53637b2",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/IfConfigD",
+    "sourceHash" : "96f50419c866eb17",
+    "sourceLength" : 102,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n\/\/ Not a \"version\" check, so don't short-circuit.\n#if (macOS)&& hasGreeble(blah)\n#endif\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                IfConfigDecl\n                  IfConfigClauseList\n                    IfConfigClause\n                      poundIf \"#if\"\n                      SequenceExpr\n                        ExprList\n                          TupleExpr\n                            leftParen \"(\"\n                            LabeledExprList\n                              LabeledExpr\n                                DeclReferenceExpr\n                                  identifier(\"macOS\") \"macOS\"\n                            rightParen \")\"\n                          BinaryOperatorExpr\n                            binaryOperator(\"&&\") \"&&\"\n                          FunctionCallExpr\n                            DeclReferenceExpr\n                              identifier(\"hasGreeble\") \"hasGreeble\"\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                            MultipleTrailingClosureElementList\n                      CodeBlockItemList\n                  poundEndif \"#endif\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken >n< functionCallArgumentClause]",
+      "compilationCondition\t[identifierToken]",
+      "compilationCondition\t[\"(\" compilationCondition \")\"]",
+      "compilationCondition\t[compilationCondition \"&&\" compilationCondition]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 218,
+      "descriptorCount" : 474,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 132,
+      "parseSeconds" : 0.009753942489624023,
+      "sourceLength" : 48,
+      "suppressedDescriptorCount" : 59,
+      "tokenCount" : 14,
+      "yieldCount" : 210
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                IfConfigDecl\n                  IfConfigClauseList\n                    IfConfigClause\n                      poundIf \"#if\"\n                      PostfixOperatorExpr\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                            LabeledExpr\n                              DeclReferenceExpr\n                                identifier(\"macOS\") \"macOS\"\n                          rightParen \")\"\n                        postfixOperator(\"&&\") \"&&\"\n                      UnexpectedNodes\n                        identifier(\"hasGreeble\") \"hasGreeble\"\n                        leftParen \"(\"\n                        rightParen \")\"\n                      CodeBlockItemList\n                  poundEndif \"#endif\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 46,
+  "source" : "#if FOO\n#if (macOS)&& hasGreeble()\n#endif\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                IfConfigDecl\\n                  IfConfigClauseList\\n                    IfConfigClause\\n                      poundIf \\\"#if\\\"\\n                      SequenceExpr\\n                        ExprList\\n                          TupleExpr\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                              LabeledExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"macOS\\\") \\\"macOS\\\"\\n                            rightParen \\\")\\\"\\n                          BinaryOperatorExpr\\n                            binaryOperator(\\\"&&\\\") \\\"&&\\\"\\n                          FunctionCallExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"hasGreeble\\\") \\\"hasGreeble\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                            MultipleTrailingClosureElementList\\n                      CodeBlockItemList\\n                  poundEndif \\\"#endif\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken >n< functionCallArgumentClause]\",\"compilationCondition\\t[identifierToken]\",\"compilationCondition\\t[\\\"(\\\" compilationCondition \\\")\\\"]\",\"compilationCondition\\t[compilationCondition \\\"&&\\\" compilationCondition]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":218,\"descriptorCount\":474,\"duplicateDescriptorCount\":0,\"oraclePruned\":132,\"parseSeconds\":0.009753942489624023,\"sourceLength\":48,\"suppressedDescriptorCount\":59,\"tokenCount\":14,\"yieldCount\":210},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                IfConfigDecl\\n                  IfConfigClauseList\\n                    IfConfigClause\\n                      poundIf \\\"#if\\\"\\n                      PostfixOperatorExpr\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                            LabeledExpr\\n                              DeclReferenceExpr\\n                                identifier(\\\"macOS\\\") \\\"macOS\\\"\\n                          rightParen \\\")\\\"\\n                        postfixOperator(\\\"&&\\\") \\\"&&\\\"\\n                      UnexpectedNodes\\n                        identifier(\\\"hasGreeble\\\") \\\"hasGreeble\\\"\\n                        leftParen \\\"(\\\"\\n                        rightParen \\\")\\\"\\n                      CodeBlockItemList\\n                  poundEndif \\\"#endif\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

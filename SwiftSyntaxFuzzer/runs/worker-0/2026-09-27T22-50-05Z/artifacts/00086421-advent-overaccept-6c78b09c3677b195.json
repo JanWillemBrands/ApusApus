@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00086421-advent-overaccept-6c78b09c3677b195.json",
+    "durationSeconds" : 0.054167985916137695,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+line-comment:translated:testErrors3#1",
+    "index" : 86421,
+    "seed" : 11400601876238378790,
+    "signalHash" : "e1f1f23efccb4dbd",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/DoStmt\/ke",
+    "sourceHash" : "6c78b09c3677b195",
+    "sourceLength" : 98,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\ndo {\n  throw opaque_error()\n} catch MSV.Foo, MSV.CarriesInt\n(let num) {\n} catch \/\/ c\n {\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DoStmt\n              keyword(SwiftSyntax.Keyword.do) \"do\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              CatchClauseList\n                CatchClause\n                  keyword(SwiftSyntax.Keyword.catch) \"catch\"\n                  CatchItemList\n                    CatchItem\n                      ExpressionPattern\n                        FunctionCallExpr\n                          DeclReferenceExpr\n                            identifier(\"CarriesInt\") \"CarriesInt\"\n                          leftParen \"(\"\n                          LabeledExprList\n                          rightParen \")\"\n                          MultipleTrailingClosureElementList\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                CatchClause\n                  keyword(SwiftSyntax.Keyword.catch) \"catch\"\n                  CatchItemList\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "catchClause\t[\"catch\"  codeBlock]",
+      "catchClauses\t[catchClause ]",
+      ".OPT\t[catchClauses]",
+      "tupleMatchPattern\t[\"(\"  \")\"]",
+      "identifierToken\t[identifier]",
+      "enumCaseName\t[identifierToken]",
+      "enumCasePattern\t[enumCaseName tupleMatchPattern]",
+      "matchPattern\t[enumCasePattern]",
+      "catchPattern\t[matchPattern ]",
+      "catchPatternList\t[catchPattern ]",
+      ".OPT\t[catchPatternList]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 153,
+      "descriptorCount" : 402,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 228,
+      "parseSeconds" : 0.01093900203704834,
+      "sourceLength" : 51,
+      "suppressedDescriptorCount" : 37,
+      "tokenCount" : 14,
+      "yieldCount" : 316
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DoStmt\n              keyword(SwiftSyntax.Keyword.do) \"do\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              CatchClauseList\n                CatchClause\n                  keyword(SwiftSyntax.Keyword.catch) \"catch\"\n                  CatchItemList\n                    CatchItem\n                      ExpressionPattern\n                        DeclReferenceExpr\n                          identifier(\"CarriesInt\") \"CarriesInt\"\n                  CodeBlock\n                    UnexpectedNodes\n                      leftParen \"(\"\n                      rightParen \")\"\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n                CatchClause\n                  keyword(SwiftSyntax.Keyword.catch) \"catch\"\n                  CatchItemList\n                  CodeBlock\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                    rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\ndo {\n} catch CarriesInt\n() {\n} catch \/\/ c\n {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DoStmt\\n              keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              CatchClauseList\\n                CatchClause\\n                  keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n                  CatchItemList\\n                    CatchItem\\n                      ExpressionPattern\\n                        FunctionCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"CarriesInt\\\") \\\"CarriesInt\\\"\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                          rightParen \\\")\\\"\\n                          MultipleTrailingClosureElementList\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                CatchClause\\n                  keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n                  CatchItemList\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"catchClause\\t[\\\"catch\\\"  codeBlock]\",\"catchClauses\\t[catchClause ]\",\".OPT\\t[catchClauses]\",\"tupleMatchPattern\\t[\\\"(\\\"  \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"enumCaseName\\t[identifierToken]\",\"enumCasePattern\\t[enumCaseName tupleMatchPattern]\",\"matchPattern\\t[enumCasePattern]\",\"catchPattern\\t[matchPattern ]\",\"catchPatternList\\t[catchPattern ]\",\".OPT\\t[catchPatternList]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":153,\"descriptorCount\":402,\"duplicateDescriptorCount\":0,\"oraclePruned\":228,\"parseSeconds\":0.01093900203704834,\"sourceLength\":51,\"suppressedDescriptorCount\":37,\"tokenCount\":14,\"yieldCount\":316},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DoStmt\\n              keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              CatchClauseList\\n                CatchClause\\n                  keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n                  CatchItemList\\n                    CatchItem\\n                      ExpressionPattern\\n                        DeclReferenceExpr\\n                          identifier(\\\"CarriesInt\\\") \\\"CarriesInt\\\"\\n                  CodeBlock\\n                    UnexpectedNodes\\n                      leftParen \\\"(\\\"\\n                      rightParen \\\")\\\"\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n                CatchClause\\n                  keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n                  CatchItemList\\n                  CodeBlock\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

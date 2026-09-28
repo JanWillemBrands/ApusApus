@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00387965-tree-difference-660d9b0d9736eda0.json",
+    "durationSeconds" : 0.05114400386810303,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:delete+glue:translated:testForwardSlashRegex135#1",
+    "index" : 387965,
+    "seed" : 17418700093595237275,
+    "signalHash" : "6d3d6182c51a1e11",
+    "signalSummary" : "tree-difference|line=17|ref=RegexLiteralExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "660d9b0d9736eda0",
+    "sourceLength" : 17,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n_ = \/[]\/\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            PrefixOperatorExpr\n              prefixOperator(\"\/\") \"\/\"\n              PostfixOperatorExpr\n                ArrayExpr\n                  leftSquare \"[\"\n                  ArrayElementList\n                  rightSquare \"]\"\n                postfixOperator(\"\/\") \"\/\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "postfixOperator\t[postfixOperatorToken]",
+      "arrayLiteral\t[\"[\"   \"]\"]",
+      "literalExpression\t[arrayLiteral]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperator <s>]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 82,
+      "descriptorCount" : 219,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 96,
+      "parseSeconds" : 0.006345033645629883,
+      "sourceLength" : 9,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 6,
+      "yieldCount" : 163
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            RegexLiteralExpr\n              regexSlash \"\/\"\n              regexLiteralPattern(\"[]\") \"[]\"\n              regexSlash \"\/\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 25,
+  "source" : " { \/[]\/\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n              PostfixOperatorExpr\\n                ArrayExpr\\n                  leftSquare \\\"[\\\"\\n                  ArrayElementList\\n                  rightSquare \\\"]\\\"\\n                postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"postfixOperator\\t[postfixOperatorToken]\",\"arrayLiteral\\t[\\\"[\\\"   \\\"]\\\"]\",\"literalExpression\\t[arrayLiteral]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperator <s>]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":82,\"descriptorCount\":219,\"duplicateDescriptorCount\":0,\"oraclePruned\":96,\"parseSeconds\":0.006345033645629883,\"sourceLength\":9,\"suppressedDescriptorCount\":21,\"tokenCount\":6,\"yieldCount\":163},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            RegexLiteralExpr\\n              regexSlash \\\"\\\/\\\"\\n              regexLiteralPattern(\\\"[]\\\") \\\"[]\\\"\\n              regexSlash \\\"\\\/\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

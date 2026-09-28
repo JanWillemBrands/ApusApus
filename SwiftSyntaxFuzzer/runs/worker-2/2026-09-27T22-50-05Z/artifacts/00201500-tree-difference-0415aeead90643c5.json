@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00201500-tree-difference-0415aeead90643c5.json",
+    "durationSeconds" : 0.038699984550476074,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:glue:fuzz-harvest:suppressed-composition",
+    "index" : 201500,
+    "seed" : 15755288686696214284,
+    "signalHash" : "2afe4caaddfc4d7d",
+    "signalSummary" : "tree-difference|line=20|ref=postfixOperator()|advent=binaryOperator()",
+    "sourceHash" : "0415aeead90643c5",
+    "sourceLength" : 41,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let v: ~Copyable& P = x\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"v\") \"v\"\n            TypeAnnotation\n              colon \":\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"Copyable\") \"Copyable\"\n                    binaryOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"x\") \"x\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "protocolCompositionElement\t[ typeIdentifier]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      ".OPT\t[typeAnnotation]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 62,
+      "descriptorCount" : 155,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 61,
+      "parseSeconds" : 0.002351045608520508,
+      "sourceLength" : 18,
+      "suppressedDescriptorCount" : 16,
+      "tokenCount" : 6,
+      "yieldCount" : 126
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"v\") \"v\"\n            TypeAnnotation\n              colon \":\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"Copyable\") \"Copyable\"\n                    postfixOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"x\") \"x\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 24,
+  "source" : "let v: Copyable& x",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"v\\\") \\\"v\\\"\\n            TypeAnnotation\\n              colon \\\":\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"protocolCompositionElement\\t[ typeIdentifier]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\".OPT\\t[typeAnnotation]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":62,\"descriptorCount\":155,\"duplicateDescriptorCount\":0,\"oraclePruned\":61,\"parseSeconds\":0.002351045608520508,\"sourceLength\":18,\"suppressedDescriptorCount\":16,\"tokenCount\":6,\"yieldCount\":126},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"v\\\") \\\"v\\\"\\n            TypeAnnotation\\n              colon \\\":\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    postfixOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

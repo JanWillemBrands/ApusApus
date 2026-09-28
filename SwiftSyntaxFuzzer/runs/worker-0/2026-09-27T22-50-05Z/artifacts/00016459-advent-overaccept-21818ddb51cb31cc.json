@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00016459-advent-overaccept-21818ddb51cb31cc.json",
+    "durationSeconds" : 0.02426290512084961,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:keyword:real:Macro+Format:14",
+    "index" : 16459,
+    "seed" : 11400601876238378790,
+    "signalHash" : "aeac0ee19f123d7a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "21818ddb51cb31cc",
+    "sourceLength" : 421,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\npublic enum FormatMode: Sendable {\n  \/\/\/ Perform a basic format of the expansion. This is primarily for inserting\n  \/\/\/ whitespace as required (eg. between two keywords), but also adds simple\n  \/\/\/ newline and indentation.\n  case auto\n\n  \/\/\/ Disable automatically formatting the expanded macro. Trivia must be\n  \/\/\/ manually inserted where required (eg. adding spaces between keywords).\n  using disabled\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              EnumDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.enum) \"enum\"\n                identifier(\"FormatMode\") \"FormatMode\"\n                InheritanceClause\n                  colon \":\"\n                  InheritedTypeList\n                    InheritedType\n                      IdentifierType\n                        identifier(\"Sendable\") \"Sendable\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                    MemberBlockItem\n                      UsingDecl\n                        keyword(SwiftSyntax.Keyword.using) \"using\"\n                        identifier(\"disabled\") \"disabled\"\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "usingModifier\t[identifier]",
+      ".DO\t[usingModifier]",
+      "usingDeclaration\t[\"using\" >n< ]",
+      "declaration\t[usingDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "enumMember\t[memberDeclaration]",
+      "enumMembers\t[enumMember ]",
+      ".OPT\t[enumMembers]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "typeInheritance\t[   typeIdentifier]",
+      "typeInheritanceClause\t[\":\" typeInheritance ]",
+      ".OPT\t[typeInheritanceClause]",
+      "enumName\t[identifierToken]",
+      "enumDeclaration\t[  \"enum\" enumName    \"{\"  \"}\"]",
+      "declaration\t[enumDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 89,
+      "descriptorCount" : 207,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 69,
+      "parseSeconds" : 0.005012989044189453,
+      "sourceLength" : 54,
+      "suppressedDescriptorCount" : 20,
+      "tokenCount" : 12,
+      "yieldCount" : 168
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              EnumDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.enum) \"enum\"\n                identifier(\"FormatMode\") \"FormatMode\"\n                InheritanceClause\n                  colon \":\"\n                  InheritedTypeList\n                    InheritedType\n                      IdentifierType\n                        identifier(\"Sendable\") \"Sendable\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                    MemberBlockItem\n                      UnexpectedCodeDecl\n                        UnexpectedNodes\n                          identifier(\"using\") \"using\"\n                          identifier(\"disabled\") \"disabled\"\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " () { enum FormatMode: Sendable {\n  using disabled\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              EnumDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n                identifier(\\\"FormatMode\\\") \\\"FormatMode\\\"\\n                InheritanceClause\\n                  colon \\\":\\\"\\n                  InheritedTypeList\\n                    InheritedType\\n                      IdentifierType\\n                        identifier(\\\"Sendable\\\") \\\"Sendable\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                    MemberBlockItem\\n                      UsingDecl\\n                        keyword(SwiftSyntax.Keyword.using) \\\"using\\\"\\n                        identifier(\\\"disabled\\\") \\\"disabled\\\"\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"usingModifier\\t[identifier]\",\".DO\\t[usingModifier]\",\"usingDeclaration\\t[\\\"using\\\" >n< ]\",\"declaration\\t[usingDeclaration]\",\"memberDeclaration\\t[declaration]\",\"enumMember\\t[memberDeclaration]\",\"enumMembers\\t[enumMember ]\",\".OPT\\t[enumMembers]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"typeInheritance\\t[   typeIdentifier]\",\"typeInheritanceClause\\t[\\\":\\\" typeInheritance ]\",\".OPT\\t[typeInheritanceClause]\",\"enumName\\t[identifierToken]\",\"enumDeclaration\\t[  \\\"enum\\\" enumName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[enumDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":89,\"descriptorCount\":207,\"duplicateDescriptorCount\":0,\"oraclePruned\":69,\"parseSeconds\":0.005012989044189453,\"sourceLength\":54,\"suppressedDescriptorCount\":20,\"tokenCount\":12,\"yieldCount\":168},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              EnumDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n                identifier(\\\"FormatMode\\\") \\\"FormatMode\\\"\\n                InheritanceClause\\n                  colon \\\":\\\"\\n                  InheritedTypeList\\n                    InheritedType\\n                      IdentifierType\\n                        identifier(\\\"Sendable\\\") \\\"Sendable\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                    MemberBlockItem\\n                      UnexpectedCodeDecl\\n                        UnexpectedNodes\\n                          identifier(\\\"using\\\") \\\"using\\\"\\n                          identifier(\\\"disabled\\\") \\\"disabled\\\"\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

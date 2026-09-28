@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00212050-tree-difference-11ebb4668385c305.json",
+    "durationSeconds" : 0.029431939125061035,
+    "exitCode" : 1,
+    "generator" : "wide:closure:glue+line-comment+line-comment:phase4-keypath:kp-subscript-arg-spaced",
+    "index" : 212050,
+    "seed" : 8709271582791740263,
+    "signalHash" : "7bb7410f23de6ce3",
+    "signalSummary" : "tree-difference|line=46|ref=KeyPathOptionalComponent|advent=period",
+    "sourceHash" : "11ebb4668385c305",
+    "sourceLength" : 72,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\nlet a = value[keyPath: \/\/ c\n \\Foo.foo! \/\/ c\n .bar]\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SubscriptCallExpr\n              DeclReferenceExpr\n                identifier(\"a\") \"a\"\n              leftSquare \"[\"\n              LabeledExprList\n                LabeledExpr\n                  identifier(\"keyPath\") \"keyPath\"\n                  colon \":\"\n                  KeyPathExpr\n                    backslash \"\\\"\n                    KeyPathComponentList\n                      KeyPathComponent\n                        period \".\"\n                        KeyPathPropertyComponent\n                          DeclReferenceExpr\n                            identifier(\"foo\") \"foo\"\n                      KeyPathComponent\n                        period \".\"\n                        KeyPathPropertyComponent\n                          DeclReferenceExpr\n                            identifier(\"bar\") \"bar\"\n              rightSquare \"]\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in appendKeyPathPivot(_:from:to:into:): key-path component form has no converter: <no nonterminal in alternate> — «! \/\/ c\n »"
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "memberName\t[identifier]",
+      "keyPathMemberName\t[ memberName]",
+      "keyPathProperty\t[\".\" >n< keyPathMemberName]",
+      "keyPathBareComponent\t[keyPathProperty]",
+      "keyPathBareTail\t[keyPathBareComponent ]",
+      ".OPT\t[keyPathBareTail]",
+      "keyPathPivot\t[>s< forceMark]",
+      "keyPathComponents\t[keyPathProperty  keyPathPivot  keyPathBareStop]",
+      "keyPathExpression\t[\"\\\\\" >+>(keyPathDot) keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "argumentLabel\t[identifier]",
+      "functionCallArgument\t[argumentLabel \":\" expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      ".OPT\t[functionCallArgumentList]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "subscriptExpression\t[postfixExpression >n< \"[\"  \"]\"]",
+      "postfixExpression\t[subscriptExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 142,
+      "descriptorCount" : 366,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 195,
+      "parseSeconds" : 0.016519904136657715,
+      "sourceLength" : 41,
+      "suppressedDescriptorCount" : 44,
+      "tokenCount" : 13,
+      "yieldCount" : 311
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SubscriptCallExpr\n              DeclReferenceExpr\n                identifier(\"a\") \"a\"\n              leftSquare \"[\"\n              LabeledExprList\n                LabeledExpr\n                  identifier(\"keyPath\") \"keyPath\"\n                  colon \":\"\n                  KeyPathExpr\n                    backslash \"\\\"\n                    KeyPathComponentList\n                      KeyPathComponent\n                        period \".\"\n                        KeyPathPropertyComponent\n                          DeclReferenceExpr\n                            identifier(\"foo\") \"foo\"\n                      KeyPathComponent\n                        KeyPathOptionalComponent\n                          exclamationMark \"!\"\n                      KeyPathComponent\n                        period \".\"\n                        KeyPathPropertyComponent\n                          DeclReferenceExpr\n                            identifier(\"bar\") \"bar\"\n              rightSquare \"]\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { a [keyPath: \/\/ c\n \\.foo! \/\/ c\n .bar]\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SubscriptCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"a\\\") \\\"a\\\"\\n              leftSquare \\\"[\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  identifier(\\\"keyPath\\\") \\\"keyPath\\\"\\n                  colon \\\":\\\"\\n                  KeyPathExpr\\n                    backslash \\\"\\\\\\\"\\n                    KeyPathComponentList\\n                      KeyPathComponent\\n                        period \\\".\\\"\\n                        KeyPathPropertyComponent\\n                          DeclReferenceExpr\\n                            identifier(\\\"foo\\\") \\\"foo\\\"\\n                      KeyPathComponent\\n                        period \\\".\\\"\\n                        KeyPathPropertyComponent\\n                          DeclReferenceExpr\\n                            identifier(\\\"bar\\\") \\\"bar\\\"\\n              rightSquare \\\"]\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in appendKeyPathPivot(_:from:to:into:): key-path component form has no converter: <no nonterminal in alternate> — «! \\\/\\\/ c\\n »\"],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"memberName\\t[identifier]\",\"keyPathMemberName\\t[ memberName]\",\"keyPathProperty\\t[\\\".\\\" >n< keyPathMemberName]\",\"keyPathBareComponent\\t[keyPathProperty]\",\"keyPathBareTail\\t[keyPathBareComponent ]\",\".OPT\\t[keyPathBareTail]\",\"keyPathPivot\\t[>s< forceMark]\",\"keyPathComponents\\t[keyPathProperty  keyPathPivot  keyPathBareStop]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" >+>(keyPathDot) keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"argumentLabel\\t[identifier]\",\"functionCallArgument\\t[argumentLabel \\\":\\\" expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\".OPT\\t[functionCallArgumentList]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"subscriptExpression\\t[postfixExpression >n< \\\"[\\\"  \\\"]\\\"]\",\"postfixExpression\\t[subscriptExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":142,\"descriptorCount\":366,\"duplicateDescriptorCount\":0,\"oraclePruned\":195,\"parseSeconds\":0.016519904136657715,\"sourceLength\":41,\"suppressedDescriptorCount\":44,\"tokenCount\":13,\"yieldCount\":311},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SubscriptCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"a\\\") \\\"a\\\"\\n              leftSquare \\\"[\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  identifier(\\\"keyPath\\\") \\\"keyPath\\\"\\n                  colon \\\":\\\"\\n                  KeyPathExpr\\n                    backslash \\\"\\\\\\\"\\n                    KeyPathComponentList\\n                      KeyPathComponent\\n                        period \\\".\\\"\\n                        KeyPathPropertyComponent\\n                          DeclReferenceExpr\\n                            identifier(\\\"foo\\\") \\\"foo\\\"\\n                      KeyPathComponent\\n                        KeyPathOptionalComponent\\n                          exclamationMark \\\"!\\\"\\n                      KeyPathComponent\\n                        period \\\".\\\"\\n                        KeyPathPropertyComponent\\n                          DeclReferenceExpr\\n                            identifier(\\\"bar\\\") \\\"bar\\\"\\n              rightSquare \\\"]\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

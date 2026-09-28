@@ -766,6 +766,12 @@ class Oracle {
     }
 
 /// Key for the `pruneUnsupported` (i,j) index — a yield's outer span, ignoring the pivot `k`.
+/// Memo key for the `pruneUnproductive` walk: a body-symbol sequence over a span.
+private struct TileKey: Hashable {
+    let symbols: [ObjectIdentifier]
+    let from, to: CharPosition
+}
+
 private struct IJPair: Hashable {
     let i: CharPosition
     let j: CharPosition
@@ -778,6 +784,21 @@ private struct IJPair: Hashable {
         var expanding = Set<NodeSpan>()
         var endCache = [NodePos: Set<CharPosition>]()
         var endGuard = Set<NodePos>()
+        // Memo tables for the walk (2026-09-27). Without them `tileBody`, `bodyTiles` and
+        // `visitBracket` re-derived the same (symbols, from, to) once per enclosing split point, which
+        // made the walk ~cubic in the length of a statement or member list (200 statements: 30 s).
+        // All three are safe to memoise unconditionally. `bodyTiles` is pure. The RETURN value of
+        // `tileBody` is pure too (feasibility from `endPositions`/`bodyTiles`, never from `visit`),
+        // and its marking side effects are idempotent: the only marks a cycle cut in `visit` skips
+        // are those of the key currently being expanded, which its outer frame marks when it
+        // completes. (A first version memoised only cut-free calls; cuts are so frequent that the
+        // memo never engaged.)
+        var bodyTilesMemo = [TileKey: Bool]()
+        var tileBodyMemo = [TileKey: Bool]()
+        var visitedBrackets = Set<NodeSpan>()
+        func tileKey(_ symbols: [GrammarNode], _ from: CharPosition, _ to: CharPosition) -> TileKey {
+            TileKey(symbols: symbols.map { ObjectIdentifier($0) }, from: from, to: to)
+        }
 
         // Per-node index over the yields, built lazily ONCE per call. The walk below asks two
         // questions millions of times — "ends of this symbol's yields that start at p" and "does a
@@ -933,6 +954,14 @@ private struct IJPair: Hashable {
         // decide, per enclosing context, which end positions of an EXTENT-annotated node keep
         // the parse complete — WITHOUT marking anything reachable.
         func bodyTiles(_ symbols: [GrammarNode], from: CharPosition, to: CharPosition) -> Bool {
+            let key = tileKey(symbols, from, to)
+            if let hit = bodyTilesMemo[key] { return hit }
+            let result = bodyTilesUncached(symbols, from: from, to: to)
+            bodyTilesMemo[key] = result
+            return result
+        }
+
+        func bodyTilesUncached(_ symbols: [GrammarNode], from: CharPosition, to: CharPosition) -> Bool {
             var frontier: Set<CharPosition> = [from]
             for sym in symbols {
                 var next = Set<CharPosition>()
@@ -1004,6 +1033,14 @@ private struct IJPair: Hashable {
         // Tile body symbols over [from, to]. Returns true if any complete
         // tiling exists, and recursively visits nonterminals along the way.
         func tileBody(_ symbols: [GrammarNode], from: CharPosition, to: CharPosition) -> Bool {
+            let key = tileKey(symbols, from, to)
+            if let hit = tileBodyMemo[key] { return hit }
+            let result = tileBodyUncached(symbols, from: from, to: to)
+            tileBodyMemo[key] = result
+            return result
+        }
+
+        func tileBodyUncached(_ symbols: [GrammarNode], from: CharPosition, to: CharPosition) -> Bool {
             if symbols.contains(where: { bracketExtent($0) != nil }) {
                 let tilings = constrainedTilings(symbols, from: from, to: to)
                 guard !tilings.isEmpty else { return false }
@@ -1053,6 +1090,8 @@ private struct IJPair: Hashable {
 
         func visitBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition) {
             if from == to { return }
+            let key = NodeSpan(id: ObjectIdentifier(bracket), from: from, to: to)
+            guard visitedBrackets.insert(key).inserted else { return }
             // For a non-closure bracket, iterate the bracket's OWN (Oracle-pruned) end
             // positions — so an extent prune on the bracket is honored by the reachability
             // walk and dead sibling/prefix yields get removed ("walk the rest of the
@@ -1060,10 +1099,21 @@ private struct IJPair: Hashable {
             // re-marked extent-pruned spans reachable, leaving stale readings that kept an
             // enclosing pivot ambiguous. Closures still step per-iteration (their own ends
             // are transitive, not single-step) and recurse below.
+            //
+            // A NON-closure bracket (`X?`, `( … )`) is ONE iteration, so only `end == to` belongs to a
+            // derivation of [from, to] (2026-09-27). Visiting every `end <= to` walked and marked
+            // prefixes in no derivation — for `statements?` in `codeBlock`, `statements(from, j)` for
+            // every statement boundary j: O(n²) on an n-statement block (400 statements: 187 s → 4.5 s).
+            // CLOSURE iterations deliberately still visit every iteration end, even ones from which
+            // `to` is unreachable: the dead extents this keeps alive are what `@longest` compares
+            // against (maximal munch, e.g. `value as A<B>??x` must see the dead `as A<B>??`). Pruning
+            // them made those casts accepted. TODO.md / whole-file parsing: make that dependency
+            // explicit instead of relying on the walk's over-marking.
             let ends = bracket.kind.isClosure
                 ? iterEndPositions(bracket, from: from)
                 : endPositions(bracket, from: from)
             for end in ends where end <= to && end > from {
+                if !bracket.kind.isClosure, end != to { continue }
                 if visitAlternates(bracket, from: from, to: end) {
                     reachable.insert(NodeSpan(id: ObjectIdentifier(bracket), from: from, to: end))
                     if end == to {

@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00077107-advent-overaccept-4f3e8d0aad6e8736.json",
+    "durationSeconds" : 0.04424691200256348,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+space:real:MissingNodeInitializers:83",
+    "index" : 77107,
+    "seed" : 15755288686696214284,
+    "signalHash" : "a51e0534dab32002",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/Extension",
+    "sourceHash" : "4f3e8d0aad6e8736",
+    "sourceLength" : 232,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nextension RawMissingExprSyntax {\n  public init(arena: __shared RawSyntaxArena) {\n    self. init(\n      placeholder: RawTokenSyntax(missing: .identifier, text: \"<#expression#>\", arena:  arena),\n      arena: arena\n    )\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      keyword(SwiftSyntax.Keyword.init) \"init\"\n                      DeclNameArguments\n                        leftParen \"(\"\n                        DeclNameArgumentList\n                          DeclNameArgument\n                            identifier(\"arena\") \"arena\"\n                            colon \":\"\n                        rightParen \")\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          TupleExpr\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "argumentLabel\t[identifier]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      "compoundNameBase\t[\"init\"]",
+      "nonLiteralPrimary\t[compoundNameBase \"(\" argumentNames \")\"]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 180,
+      "descriptorCount" : 479,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 254,
+      "parseSeconds" : 0.012468934059143066,
+      "sourceLength" : 36,
+      "suppressedDescriptorCount" : 54,
+      "tokenCount" : 13,
+      "yieldCount" : 378
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                          FunctionParameter\n                            AttributeList\n                            DeclModifierList\n                            identifier(\"arena\") \"arena\"\n                            colon \":\"\n                            MissingType\n                        rightParen \")\"\n                    CodeBlock\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                        CodeBlockItem\n                          TupleExpr\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                      rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { { init(arena: ) { (\n    )\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                      DeclNameArguments\\n                        leftParen \\\"(\\\"\\n                        DeclNameArgumentList\\n                          DeclNameArgument\\n                            identifier(\\\"arena\\\") \\\"arena\\\"\\n                            colon \\\":\\\"\\n                        rightParen \\\")\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          TupleExpr\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"argumentLabel\\t[identifier]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\"compoundNameBase\\t[\\\"init\\\"]\",\"nonLiteralPrimary\\t[compoundNameBase \\\"(\\\" argumentNames \\\")\\\"]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":180,\"descriptorCount\":479,\"duplicateDescriptorCount\":0,\"oraclePruned\":254,\"parseSeconds\":0.012468934059143066,\"sourceLength\":36,\"suppressedDescriptorCount\":54,\"tokenCount\":13,\"yieldCount\":378},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                          FunctionParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            identifier(\\\"arena\\\") \\\"arena\\\"\\n                            colon \\\":\\\"\\n                            MissingType\\n                        rightParen \\\")\\\"\\n                    CodeBlock\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                        CodeBlockItem\\n                          TupleExpr\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                      rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

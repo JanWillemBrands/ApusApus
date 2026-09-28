@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00255854-tree-difference-0c127c1a8080d325.json",
+    "durationSeconds" : 0.037396907806396484,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:delete+block-comment:translated:testGenericDisambiguation9#1",
+    "index" : 255854,
+    "seed" : 10372684106311075726,
+    "signalHash" : "0ea55a86e8931560",
+    "signalSummary" : "tree-difference|line=11|ref=FunctionCallExpr|advent=SequenceExpr",
+    "sourceHash" : "0c127c1a8080d325",
+    "sourceLength" : 23,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nA<\/*c*\/>(x: 0)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"A\") \"A\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                RegexLiteralExpr\n                  regexSlash \"\/\"\n                  regexLiteralPattern(\"* *\") \"* *\"\n                  regexSlash \"\/\"\n                BinaryOperatorExpr\n                  binaryOperator(\">\") \">\"\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      identifier(\"x\") \"x\"\n                      colon \":\"\n                      IntegerLiteralExpr\n                        integerLiteral(\"0\") \"0\"\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "integerLiteral\t[decimalLiteral]",
+      "signedIntegerLiteral\t[ integerLiteral]",
+      "numericLiteral\t[signedIntegerLiteral]",
+      "literal\t[numericLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "argumentLabel\t[identifier]",
+      "tupleExpression\t[\"(\" argumentLabel \":\" expression  \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "regexItem\t[regexOperatorChar]",
+      ".KLN\t[>n<  >n< regexItem]",
+      "regexBody\t[regexItem ]",
+      "plainRegularExpressionLiteral\t[>n< <-<(\")\" \"->\" \".\" \"...\" \">\" \"@\" \"Any\" \"Self\" \"]\" \"_\" \"false\" \"func\" \"nil\" \"operator\" \"self\" \"super\" \"true\" \"}\" binaryLiteral closeAngle decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection regexSlash) >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]",
+      "regularExpressionLiteral\t[plainRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 174,
+      "descriptorCount" : 480,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 223,
+      "parseSeconds" : 0.008440971374511719,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 51,
+      "tokenCount" : 14,
+      "yieldCount" : 373
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              GenericSpecializationExpr\n                DeclReferenceExpr\n                  identifier(\"A\") \"A\"\n                GenericArgumentClause\n                  leftAngle \"<\"\n                  GenericArgumentList\n                  rightAngle \">\"\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  identifier(\"x\") \"x\"\n                  colon \":\"\n                  IntegerLiteralExpr\n                    integerLiteral(\"0\") \"0\"\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 32,
+  "source" : " {\nA<\/* *\/>(x: 0)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"A\\\") \\\"A\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                RegexLiteralExpr\\n                  regexSlash \\\"\\\/\\\"\\n                  regexLiteralPattern(\\\"* *\\\") \\\"* *\\\"\\n                  regexSlash \\\"\\\/\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\">\\\") \\\">\\\"\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n                      colon \\\":\\\"\\n                      IntegerLiteralExpr\\n                        integerLiteral(\\\"0\\\") \\\"0\\\"\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"integerLiteral\\t[decimalLiteral]\",\"signedIntegerLiteral\\t[ integerLiteral]\",\"numericLiteral\\t[signedIntegerLiteral]\",\"literal\\t[numericLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"argumentLabel\\t[identifier]\",\"tupleExpression\\t[\\\"(\\\" argumentLabel \\\":\\\" expression  \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"regexItem\\t[regexOperatorChar]\",\".KLN\\t[>n<  >n< regexItem]\",\"regexBody\\t[regexItem ]\",\"plainRegularExpressionLiteral\\t[>n< <-<(\\\")\\\" \\\"->\\\" \\\".\\\" \\\"...\\\" \\\">\\\" \\\"@\\\" \\\"Any\\\" \\\"Self\\\" \\\"]\\\" \\\"_\\\" \\\"false\\\" \\\"func\\\" \\\"nil\\\" \\\"operator\\\" \\\"self\\\" \\\"super\\\" \\\"true\\\" \\\"}\\\" binaryLiteral closeAngle decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection regexSlash) >->(tabbedPlainRegularExpressionLiteral) regexSlash >s< regexBody >s< regexSlash]\",\"regularExpressionLiteral\\t[plainRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":174,\"descriptorCount\":480,\"duplicateDescriptorCount\":0,\"oraclePruned\":223,\"parseSeconds\":0.008440971374511719,\"sourceLength\":19,\"suppressedDescriptorCount\":51,\"tokenCount\":14,\"yieldCount\":373},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              GenericSpecializationExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"A\\\") \\\"A\\\"\\n                GenericArgumentClause\\n                  leftAngle \\\"<\\\"\\n                  GenericArgumentList\\n                  rightAngle \\\">\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  identifier(\\\"x\\\") \\\"x\\\"\\n                  colon \\\":\\\"\\n                  IntegerLiteralExpr\\n                    integerLiteral(\\\"0\\\") \\\"0\\\"\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

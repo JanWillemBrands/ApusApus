@@ -1,0 +1,50 @@
+{
+  "event" : {
+    "artifact" : "00653857-advent-underaccept-20f171ebde08edce.json",
+    "durationSeconds" : 0.45662009716033936,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:duplicate:expression:testAwaitSwitch3#1",
+    "index" : 653857,
+    "seed" : 17418700093595237275,
+    "signalHash" : "3d75a91e104b9922",
+    "signalSummary" : "advent-underaccept|compiler=true|typecheck=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/FunctionDecl\/Attribu",
+    "sourceHash" : "20f171ebde08edce",
+    "sourceLength" : 128,
+    "status" : "advent-underaccept"
+  },
+  "originalSource" : "struct Fuzz {\nfunc foo() async -> Int {\n  let x = await await switch Bool.random() { case true: 0 case false: 1 }\n  return x\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : false,
+    "adventGeneratedSwiftSyntax" : false,
+    "adventMatched" : false,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 127,
+      "descriptorCount" : 278,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 0,
+      "parseSeconds" : 0.004545927047729492,
+      "sourceLength" : 71,
+      "suppressedDescriptorCount" : 6,
+      "tokenCount" : 11,
+      "yieldCount" : 98
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"foo\") \"foo\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    VariableDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.let) \"let\"\n                      PatternBindingList\n                        PatternBinding\n                          IdentifierPattern\n                            identifier(\"x\") \"x\"\n                          InitializerClause\n                            equal \"=\"\n                            AwaitExpr\n                              keyword(SwiftSyntax.Keyword.await) \"await\"\n                              AwaitExpr\n                                keyword(SwiftSyntax.Keyword.await) \"await\"\n                                SwitchExpr\n                                  keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                                  DeclReferenceExpr\n                                    identifier(\"Bool\") \"Bool\"\n                                  leftBrace \"{\"\n                                  SwitchCaseList\n                                    SwitchCase\n                                      SwitchCaseLabel\n                                        keyword(SwiftSyntax.Keyword.case) \"case\"\n                                        SwitchCaseItemList\n                                          SwitchCaseItem\n                                            ExpressionPattern\n                                              BooleanLiteralExpr\n                                                keyword(SwiftSyntax.Keyword.false) \"false\"\n                                        colon \":\"\n                                      CodeBlockItemList\n                                        CodeBlockItem\n                                          IntegerLiteralExpr\n                                            integerLiteral(\"1\") \"1\"\n                                  rightBrace \"}\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-underaccept",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nfunc foo() {\n  let x = await await switch Bool { case false: 1 }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":false,\"adventGeneratedSwiftSyntax\":false,\"adventMatched\":false,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[],\"metrics\":{\"crfCount\":127,\"descriptorCount\":278,\"duplicateDescriptorCount\":0,\"oraclePruned\":0,\"parseSeconds\":0.004545927047729492,\"sourceLength\":71,\"suppressedDescriptorCount\":6,\"tokenCount\":11,\"yieldCount\":98},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"foo\\\") \\\"foo\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    VariableDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                      PatternBindingList\\n                        PatternBinding\\n                          IdentifierPattern\\n                            identifier(\\\"x\\\") \\\"x\\\"\\n                          InitializerClause\\n                            equal \\\"=\\\"\\n                            AwaitExpr\\n                              keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                              AwaitExpr\\n                                keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                                SwitchExpr\\n                                  keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"Bool\\\") \\\"Bool\\\"\\n                                  leftBrace \\\"{\\\"\\n                                  SwitchCaseList\\n                                    SwitchCase\\n                                      SwitchCaseLabel\\n                                        keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                                        SwitchCaseItemList\\n                                          SwitchCaseItem\\n                                            ExpressionPattern\\n                                              BooleanLiteralExpr\\n                                                keyword(SwiftSyntax.Keyword.false) \\\"false\\\"\\n                                        colon \\\":\\\"\\n                                      CodeBlockItemList\\n                                        CodeBlockItem\\n                                          IntegerLiteralExpr\\n                                            integerLiteral(\\\"1\\\") \\\"1\\\"\\n                                  rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-underaccept\",\"swiftSyntaxHasError\":false}"
+}

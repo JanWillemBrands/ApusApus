@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00238658-tree-difference-cf3493fc71606dfa.json",
+    "durationSeconds" : 0.03771400451660156,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space:translated:testModuleSelectorExpr#2+translated:testTypeExpr10#4",
+    "index" : 238658,
+    "seed" : 3326659872777667553,
+    "signalHash" : "d688d2ad6b37c7eb",
+    "signalSummary" : "tree-difference|line=33|ref=CodeBlockItem|advent=KeyPathComponent",
+    "sourceHash" : "cf3493fc71606dfa",
+    "sourceLength" : 49,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n_ = \\main ::Foo.BarKit::bar\n[X : Y].self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              IdentifierType\n                ModuleSelector\n                  identifier(\"BarKit\") \"BarKit\"\n                  colonColon \"::\"\n                identifier(\"bar\") \"bar\"\n              KeyPathComponentList\n                KeyPathComponent\n                  KeyPathSubscriptComponent\n                    leftSquare \"[\"\n                    LabeledExprList\n                    rightSquare \"]\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "keyPathPivotFirst\t[\"[\"  \"]\"]",
+      "keyPathComponents\t[keyPathPivotFirst  keyPathBareStop]",
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector identifier]",
+      "keyPathRootBase\t[typeName >->(openAngle)]",
+      "keyPathRootType\t[keyPathRootBase  >->(keyPathMetatypeStart)]",
+      "keyPathExpression\t[\"\\\\\" keyPathRootType keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 81,
+      "descriptorCount" : 213,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 117,
+      "parseSeconds" : 0.00487208366394043,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 8,
+      "yieldCount" : 189
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              IdentifierType\n                ModuleSelector\n                  identifier(\"BarKit\") \"BarKit\"\n                  colonColon \"::\"\n                identifier(\"bar\") \"bar\"\n              KeyPathComponentList\n          CodeBlockItem\n            ArrayExpr\n              leftSquare \"[\"\n              ArrayElementList\n              rightSquare \"]\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 43,
+  "source" : " { \\BarKit::bar\n[ ]\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              IdentifierType\\n                ModuleSelector\\n                  identifier(\\\"BarKit\\\") \\\"BarKit\\\"\\n                  colonColon \\\"::\\\"\\n                identifier(\\\"bar\\\") \\\"bar\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  KeyPathSubscriptComponent\\n                    leftSquare \\\"[\\\"\\n                    LabeledExprList\\n                    rightSquare \\\"]\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"keyPathPivotFirst\\t[\\\"[\\\"  \\\"]\\\"]\",\"keyPathComponents\\t[keyPathPivotFirst  keyPathBareStop]\",\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector identifier]\",\"keyPathRootBase\\t[typeName >->(openAngle)]\",\"keyPathRootType\\t[keyPathRootBase  >->(keyPathMetatypeStart)]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" keyPathRootType keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":81,\"descriptorCount\":213,\"duplicateDescriptorCount\":0,\"oraclePruned\":117,\"parseSeconds\":0.00487208366394043,\"sourceLength\":21,\"suppressedDescriptorCount\":21,\"tokenCount\":8,\"yieldCount\":189},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              IdentifierType\\n                ModuleSelector\\n                  identifier(\\\"BarKit\\\") \\\"BarKit\\\"\\n                  colonColon \\\"::\\\"\\n                identifier(\\\"bar\\\") \\\"bar\\\"\\n              KeyPathComponentList\\n          CodeBlockItem\\n            ArrayExpr\\n              leftSquare \\\"[\\\"\\n              ArrayElementList\\n              rightSquare \\\"]\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

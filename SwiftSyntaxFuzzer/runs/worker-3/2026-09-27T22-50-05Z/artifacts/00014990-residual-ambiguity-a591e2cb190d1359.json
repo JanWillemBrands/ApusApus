@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00014990-residual-ambiguity-a591e2cb190d1359.json",
+    "durationSeconds" : 0.03795599937438965,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment:translated:testBuiltinWord2#1",
+    "index" : 14990,
+    "seed" : 8709271582791740263,
+    "signalHash" : "b82ec93d3d1a1c67",
+    "signalSummary" : "residual-ambiguity|statement\tambiguous pivot\tbody=[statement statementSeparator statements]",
+    "sourceHash" : "a591e2cb190d1359",
+    "sourceLength" : 131,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "fuzz {\nvar word: Builtin.Word\nvar i16: Builtin.Int16\nvar i32: Builtin \/\/ c\n.Int32\nvar i64: Builtin.Int64\nvar i128: Builtin.Int128\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"word\") \"word\"\n                  TypeAnnotation\n                    colon \":\"\n                    IdentifierType\n                      identifier(\"Builtin\") \"Builtin\"\n          CodeBlockItem\n            MemberAccessExpr\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"Int32\") \"Int32\"\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"i128\") \"i128\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement statementSeparator statements]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      ".OPT\t[typeAnnotation]",
+      "typeIdentifier\t[typeIdentifier \".\" >n< >->(\"Protocol\" \"Type\") typeName >->(openAngle)]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 139,
+      "descriptorCount" : 375,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 115,
+      "parseSeconds" : 0.005891919136047363,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 38,
+      "tokenCount" : 10,
+      "yieldCount" : 279
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"word\") \"word\"\n                  TypeAnnotation\n                    colon \":\"\n                    MemberType\n                      IdentifierType\n                        identifier(\"Builtin\") \"Builtin\"\n                      period \".\"\n                      identifier(\"Int32\") \"Int32\"\n          CodeBlockItem\n            VariableDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.var) \"var\"\n              PatternBindingList\n                PatternBinding\n                  IdentifierPattern\n                    identifier(\"i128\") \"i128\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+      "statement\tambiguous pivot\tbody=[statement statementSeparator statements]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nvar word: Builtin\n.Int32\nvar i128\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"word\\\") \\\"word\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    IdentifierType\\n                      identifier(\\\"Builtin\\\") \\\"Builtin\\\"\\n          CodeBlockItem\\n            MemberAccessExpr\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"Int32\\\") \\\"Int32\\\"\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"i128\\\") \\\"i128\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement statementSeparator statements]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\".OPT\\t[typeAnnotation]\",\"typeIdentifier\\t[typeIdentifier \\\".\\\" >n< >->(\\\"Protocol\\\" \\\"Type\\\") typeName >->(openAngle)]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":139,\"descriptorCount\":375,\"duplicateDescriptorCount\":1,\"oraclePruned\":115,\"parseSeconds\":0.005891919136047363,\"sourceLength\":38,\"suppressedDescriptorCount\":38,\"tokenCount\":10,\"yieldCount\":279},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"word\\\") \\\"word\\\"\\n                  TypeAnnotation\\n                    colon \\\":\\\"\\n                    MemberType\\n                      IdentifierType\\n                        identifier(\\\"Builtin\\\") \\\"Builtin\\\"\\n                      period \\\".\\\"\\n                      identifier(\\\"Int32\\\") \\\"Int32\\\"\\n          CodeBlockItem\\n            VariableDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n              PatternBindingList\\n                PatternBinding\\n                  IdentifierPattern\\n                    identifier(\\\"i128\\\") \\\"i128\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[\"statement\\tambiguous pivot\\tbody=[statement statementSeparator statements]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

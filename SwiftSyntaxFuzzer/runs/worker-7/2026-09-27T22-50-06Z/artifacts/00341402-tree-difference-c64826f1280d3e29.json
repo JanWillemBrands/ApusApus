@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00341402-tree-difference-c64826f1280d3e29.json",
+    "durationSeconds" : 0.03405499458312988,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:keyword+space:fuzz-harvest:requirement-layout",
+    "index" : 341402,
+    "seed" : 17418700093595237275,
+    "signalHash" : "ff2ae5853fa4730f",
+    "signalSummary" : "tree-difference|line=14|ref=keyword()|advent=DeclModifier",
+    "sourceHash" : "c64826f1280d3e29",
+    "sourceLength" : 50,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "#if FOO\nextension final where T: _Class { }\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ExtensionDecl\n                  AttributeList\n                  DeclModifierList\n                    DeclModifier\n                      keyword(SwiftSyntax.Keyword.final) \"final\"\n                  keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                  IdentifierType\n                    identifier(\"final\") \"final\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "extensionBody\t[\"{\"  \"}\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      ".DO\t[typeIdentifier]",
+      "extensionDeclaration\t[  \"extension\"    extensionBody]",
+      "declaration\t[extensionDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 138,
+      "descriptorCount" : 281,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 40,
+      "parseSeconds" : 0.008303999900817871,
+      "sourceLength" : 34,
+      "suppressedDescriptorCount" : 12,
+      "tokenCount" : 8,
+      "yieldCount" : 102
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ExtensionDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.extension) \"extension\"\n                  IdentifierType\n                    identifier(\"final\") \"final\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 20,
+  "source" : "#if FOO\nextension final { }\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ExtensionDecl\\n                  AttributeList\\n                  DeclModifierList\\n                    DeclModifier\\n                      keyword(SwiftSyntax.Keyword.final) \\\"final\\\"\\n                  keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                  IdentifierType\\n                    identifier(\\\"final\\\") \\\"final\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"extensionBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\".DO\\t[typeIdentifier]\",\"extensionDeclaration\\t[  \\\"extension\\\"    extensionBody]\",\"declaration\\t[extensionDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":138,\"descriptorCount\":281,\"duplicateDescriptorCount\":0,\"oraclePruned\":40,\"parseSeconds\":0.008303999900817871,\"sourceLength\":34,\"suppressedDescriptorCount\":12,\"tokenCount\":8,\"yieldCount\":102},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ExtensionDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.extension) \\\"extension\\\"\\n                  IdentifierType\\n                    identifier(\\\"final\\\") \\\"final\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

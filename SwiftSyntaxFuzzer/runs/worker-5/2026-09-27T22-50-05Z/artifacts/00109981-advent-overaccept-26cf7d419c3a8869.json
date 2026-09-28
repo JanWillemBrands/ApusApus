@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00109981-advent-overaccept-26cf7d419c3a8869.json",
+    "durationSeconds" : 0.03641998767852783,
+    "exitCode" : 1,
+    "generator" : "wide:closure:keyword+keyword:translated:testFunctionTypeExpr#16",
+    "index" : 109981,
+    "seed" : 13064011101222712141,
+    "signalHash" : "cf1e5e744227aa5e",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/Initiali",
+    "sourceHash" : "26cf7d419c3a8869",
+    "sourceLength" : 59,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n((try<Foo>.Bar) -> Gen<Foo>.Bar).case\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SequenceExpr\n                      ExprList\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                            LabeledExpr\n                              TryExpr\n                                keyword(SwiftSyntax.Keyword.try) \"try\"\n                                PrefixOperatorExpr\n                                  prefixOperator(\"<\") \"<\"\n                                  DeclReferenceExpr\n                                    identifier(\"Bar\") \"Bar\"\n                          rightParen \")\"\n                        ArrowExpr\n                          arrow \"->\"\n                        DeclReferenceExpr\n                          identifier(\"Gen\") \"Gen\"\n                rightParen \")\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"case\") \"case\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "regexForcingLexerKeyword\t[\"case\"]",
+      "memberName\t[regexForcingLexerKeyword >->(regexSlash)]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "tryOperator\t[\"try\" >s< >->(forceMark optionalMark)]",
+      ".OPT\t[tryOperator]",
+      "expression\t[  prefixExpression ]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 189,
+      "descriptorCount" : 504,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 227,
+      "parseSeconds" : 0.006115078926086426,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 53,
+      "tokenCount" : 13,
+      "yieldCount" : 362
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SequenceExpr\n                      ExprList\n                        TupleExpr\n                          leftParen \"(\"\n                          LabeledExprList\n                            LabeledExpr\n                              SequenceExpr\n                                ExprList\n                                  TryExpr\n                                    keyword(SwiftSyntax.Keyword.try) \"try\"\n                                    MissingExpr\n                                  BinaryOperatorExpr\n                                    binaryOperator(\"<\") \"<\"\n                                  DeclReferenceExpr\n                                    identifier(\"Bar\") \"Bar\"\n                          rightParen \")\"\n                        ArrowExpr\n                          arrow \"->\"\n                        DeclReferenceExpr\n                          identifier(\"Gen\") \"Gen\"\n                rightParen \")\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"case\") \"case\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n((try<Bar) -> Gen).case\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SequenceExpr\\n                      ExprList\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                            LabeledExpr\\n                              TryExpr\\n                                keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n                                PrefixOperatorExpr\\n                                  prefixOperator(\\\"<\\\") \\\"<\\\"\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"Bar\\\") \\\"Bar\\\"\\n                          rightParen \\\")\\\"\\n                        ArrowExpr\\n                          arrow \\\"->\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"Gen\\\") \\\"Gen\\\"\\n                rightParen \\\")\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"case\\\") \\\"case\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"regexForcingLexerKeyword\\t[\\\"case\\\"]\",\"memberName\\t[regexForcingLexerKeyword >->(regexSlash)]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"tryOperator\\t[\\\"try\\\" >s< >->(forceMark optionalMark)]\",\".OPT\\t[tryOperator]\",\"expression\\t[  prefixExpression ]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":189,\"descriptorCount\":504,\"duplicateDescriptorCount\":0,\"oraclePruned\":227,\"parseSeconds\":0.006115078926086426,\"sourceLength\":28,\"suppressedDescriptorCount\":53,\"tokenCount\":13,\"yieldCount\":362},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SequenceExpr\\n                      ExprList\\n                        TupleExpr\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                            LabeledExpr\\n                              SequenceExpr\\n                                ExprList\\n                                  TryExpr\\n                                    keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n                                    MissingExpr\\n                                  BinaryOperatorExpr\\n                                    binaryOperator(\\\"<\\\") \\\"<\\\"\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"Bar\\\") \\\"Bar\\\"\\n                          rightParen \\\")\\\"\\n                        ArrowExpr\\n                          arrow \\\"->\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"Gen\\\") \\\"Gen\\\"\\n                rightParen \\\")\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"case\\\") \\\"case\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

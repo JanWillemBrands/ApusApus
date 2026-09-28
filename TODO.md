@@ -2,52 +2,27 @@
 
 This file is the canonical active TODO list for the project. Keep completed investigations, fix logs, and historical run notes out of this file unless they directly describe an open issue.
 
-## Parser / Grammar Correctness
+1. **Improve fuzzer coverage guidance and parallelism.**
+   Add feedback from grammar coverage so the corpus keeps inputs that reach something new: a
+   `Swift.apus` alternate never seen in a final derivation, an Oracle rule that removes something for
+   the first time, a swift-syntax node kind never seen before, or a new `signalHash`. If
+   overacceptance stays dominant, add a generation lane from `Swift.apus` itself using depth limits
+   and weights that fall as alternatives are used. Later, add tree mutators over the real-source and
+   swift-syntax corpora (swap same-kind nodes, delete or duplicate list/optional elements, hoist). Do
+   not spend time on a full LibFuzzer/code-coverage integration unless the cheaper coverage signals
+   stop finding bugs. Done 2026-09-27: `bin/run-night.sh` now uses all cores by default and gives each
+   worker a distinct derived seed.
 
-1. **Fuzzer: regex after a keyword-spelled member name (last open case of the 2026-09-23/25 harvests).**
-   `x.default / y`, `x.for / y`, `x.in / y`, `x.init / y`, `\.default / value` are rejected by
-   swift-syntax and accepted by Advent. swift-syntax's lexer classifies `default` as a KEYWORD even in
-   member position, and after any keyword except `true false nil self Self super Any` a `/` is in
-   regex position. A SPACED `/` there is forced to be a regex (`RegexLiteralLexer.swift`
-   ~715, `mustBeRegex`), which then fails. Advent's member name commits the word as `identifier`, so
-   the regex lookbehind treats it as a non-regex position and `/` becomes the division operator.
-   A fix needs both: member names spelled as lexer keywords committed as keyword terminals (e.g. a
-   `lexerClassifiedKeyword` alternate in `memberName`), and a gate forbidding a spaced binary `/`
-   in regex position. Tight `x.default/y` already agrees.
+2. **Finish the list migration: the semicolon-bearing member lists.**
+   Check if these can/should be converted: enumMembers`, `structMembers`, `classMembers`, actorMembers`, `protocolMembers`, and `extensionMembers`.
 
-   Done 2026-09-27 (fixtures: `SwiftSyntax - fuzz harvest fixes`): every other saved case replays
-   as `same` — 66 of 68 across both runs' artifacts (`tools/replay_fuzz_sources.py`). Policy:
-   swift-syntax is the ground truth, so `compiler-typecheck-rejects-swiftsyntax-accepts` counts as
-   Advent underacceptance; its sources now land in `telemetry.jsonl` (FUZZER.md / Triage).
+3. **Remove or diagnose SwiftSyntax reparsing fallback for multiline interpolated strings.**
+   `GenerateSwiftSyntaxAST.reparseStringLiteralExpression` calls SwiftSyntax's parser for plain
+   multiline strings with active interpolation, so `trees match` compares SwiftSyntax with itself for
+   that subtree and hides APUS converter gaps. Replace it with APUS-derived conversion, or at least
+   record a fallback diagnostic before returning the reparsed subtree.
 
-2. **Finish the list migration: the 7 semicolon-bearing member lists.**
-   17 of 24 list rules are now EBNF closures (done 2026-09-21). The remaining seven —
-   `statements`, `enumMembers`, `structMembers`, `classMembers`, `actorMembers`,
-   `protocolMembers`, `extensionMembers` — were left DELIBERATELY, because the rewrite is not a
-   simplification there:
-
-       statements = statement ";"? .
-       statements = statement statementSeparator statements .
-
-   with `statementSeparator = <n> | ";"`. The `";"?` base case puts a semicolon in the SAME hop as
-   the member it terminates, which is what `collectMembers`/`hasExplicitSemicolon(in: hop)` relies
-   on ("it belongs to the member it terminates"). A closure spelling
-   `statement { statementSeparator statement } ";"?` moves each separator into the hop of the
-   FOLLOWING member, inverting that association — same language, different semicolon attribution.
-   Converting these needs the semicolon association reworked first (probably per-hop lookbehind
-   rather than per-hop membership), so it is a separate change with its own fixtures, not part of a
-   mechanical sweep.
-
-   Also leave alone permanently — these are right-recursive but NOT lists, so `{ }` would change
-   their meaning: `type = parameterModifier type` / `attribute type`,
-   `prefixExpression = "consume"/"borrow"/"copy"/"unsafe" … prefixExpression`, and
-   `compilationCondition` `&&`/`||` (prefix chains and operator precedence, not repetition).
-
-   Verified 2026-09-23: still present. `Swift.apus` still has the seven right-recursive
-   semicolon-bearing member-list forms at `statements`, `enumMembers`, `structMembers`, `classMembers`,
-   `actorMembers`, `protocolMembers`, and `extensionMembers`.
-
-3. **Fix or replace `@sameLine` (`SameLineSpanRule` in `Oracle.swift`).**
+4. **Fix or replace `@sameLine` (`SameLineSpanRule` in `Oracle.swift`).**
    Kept as is on 2026-09-25; only the stale "exactly one alternate" assertion was removed (it fired
    on every parse once assertions ran in Debug, because `singleLineInterpolatedStringLiteral` has a
    plain and an extended alternate, both legitimately single-line). Known defects, from reading the
@@ -72,20 +47,7 @@ This file is the canonical active TODO list for the project. Keep completed inve
    enumeration, as `KeyPathGrammarTests` does. Open question: whether the lexer has a hook for a
    hand-written check like this.
 
-4. **Enum cases in a function body nested in a member list are wrongly accepted.**
-   `struct S { func f() {⏎#if FOO⏎case a⏎#endif⏎} }` (and without the `#if`) is rejected by
-   swift-syntax but accepted by Advent. `enumCaseDeclaration` is `@confinedTo` the six member-list
-   nonterminals, and containment is by SPAN: the function body lies inside a `structMember`, so the
-   case counts as contained. The real rule is "the NEAREST enclosing block is a member list", which
-   span containment cannot express. Fixed 2026-09-25 alongside this: cases inside `#if` in a member
-   list were REJECTED (fixtures `case-ifconfig*` in `Phase3EnumCaseTests`). Options: a
-   nearest-context containment rule, or parse member-position `#if` bodies as members and make
-   `enumCaseDeclaration` a `memberDeclaration`-only alternative (structural, but the converter's
-   member `#if` path reads `statements` today).
-
-## Regex / Trivia Architecture
-
-3. **Convert the plain-regex body to a lexical recognizer only after the blockers are solved.**
+5. **Convert the plain-regex body to a lexical recognizer only after the blockers are solved.**
    Prior attempts regressed reject behavior because `regexSlash >s< regexBody >s< regexSlash` also forbids spaces adjacent to delimiters, and recognizer bodies do not automatically propagate tightness through ordinary `=` nonterminals. A viable retry must express delimiter-adjacent space structurally and either inline the recognizer body or safely propagate trivia suppression through recognizer-only calls.
 
    Related dead code to remove when this is touched: the LEADING `>n< <-<` gate on
@@ -93,10 +55,10 @@ This file is the canonical active TODO list for the project. Keep completed inve
    log, so the lookbehind finds nothing and the negative form returns true. It is currently masked
    by the live gates on `plainRegularExpressionLiteral`.
 
-4. **Keep regex literal text reconstruction faithful.**
+6. **Keep regex literal text reconstruction faithful.**
    `convertLiteral` treats `regularExpressionLiteral` as opaque, but `collectTerminalText` / `tiledText` reconstructs text from committed child tokens. If regex trivia ownership changes, add coverage for spaces and tabs inside regex literals. The overnight run found Advent building `regexLiteralPattern("ab")` for SwiftSyntax's `regexLiteralPattern("a  b")` in `try? /a  b/`; keep the known `_ = /a<TAB>b/` accept/reject gap covered too.
 
-5. **Make trivia handling principled.**
+7. **Make trivia handling principled.**
    Current trivia ownership depends on mode: normal tokens consume trailing trivia, recognizers leave it for the surrounding recognizer, and boundary checks are computed on the hot path. Open design work remains around explicit cursor normalization, cached boundary/trivia facts, and a round-trip test asserting trivia spans reconstruct the source byte-for-byte.
 
    GLOBAL REVISIT (2026-09-25): trivia is being handled case by case and is turning into a
@@ -153,62 +115,248 @@ This file is the canonical active TODO list for the project. Keep completed inve
    trims and re-express the sameLine and layout checks over the same facts. The round-trip test
    (`TODO.md / Add a preserving-trivia round-trip test`) is the guard for this refactor.
 
-## Tests / Fixtures Needed
-
-6. **Add a preserving-trivia round-trip test.**
+8. **Add a preserving-trivia round-trip test.**
    This should assert that token/trivia spans reconstruct the original source exactly.
 
-7. **Add tuple-type label ambiguity fixture.**
+9. **Add tuple-type label ambiguity fixture.**
    `elementName` was fixed to avoid ambiguity on `(_: Int)`, but no dedicated ambiguity fixture currently protects that shape.
 
-8. **Add extension converter tree fixtures.**
+10. **Add extension converter tree fixtures.**
    `convertExtensionDeclaration` now delegates to `convertType`, covering `extension [Int] {}` and `extension UInt8? {}`. Add tree-equality fixtures so this converter path is protected, not only acceptance-tested.
 
-9. **Measure swift-syntax source-file tree equality when affordable.**
+11. **Measure swift-syntax source-file tree equality when affordable.**
    Advent source-file tree equality is clean, but the swift-syntax source corpus tree comparison is still too expensive for routine runs. Profile tree building before turning the 317-file tree comparison into a regular gate.
    FIRST DATA POINT (2026-09-21): they are NOT clean — `CompilerPluginMessageHandler.swift`
    differs. Only the Advent corpus was ever brought to tree parity, so the 317 need their own
    pass. A full tree run is ~40min, so profile the tree path first.
 
-## Performance Work
-
-10. **Investigate remaining context-free prediction cost for interpolation Tail/Part terminals.**
+12. **Investigate remaining context-free prediction cost for interpolation Tail/Part terminals.**
    The earlier `followCheck` and Oracle work removed known cliffs, but interpolation Tail/Part prediction can still drive many distinct regex probes. Profile before changing prediction order or caching; `cachedLex` already memoizes `(position, terminalID)` and many expensive calls are first-time queries.
 
-11. **Fix the Oracle stack overflow and very long parses on large source files.**
-   Found 2026-09-25 while running the opt-in source-file suites (`APUS_SOURCE_FILE_SUITES=1`, Release).
-   - CRASH: the swift-syntax corpus dies with `EXC_BAD_ACCESS` "Thread stack size exceeded due to
-     excessive recursion". The stack is the mutual recursion `visit` → `visitAlternates` →
-     `tileBody` → `visitSymbol` → … inside `Oracle.pruneUnproductive(endPosition:)`, bottoming out in
-     `endPositions`. Recursion depth tracks derivation depth, which on a whole file (long statement
-     lists, deep nesting) exceeds the small stack of a Swift Testing worker thread. First files hit:
+13. **Make whole-file parsing reliable and fast enough to crawl GitHub repositories.**
+   Measured 2026-09-27 with the fuzz probe (Release). Typical files cost ~1 ms/token, split about
+   half parse, half post-parse (Oracle + DerivationBuilder + converter): `Expressions.swift` 93 KB
+   10 s, `SyntaxNodesD.swift` 147 KB 19 s. But size does not predict time: `SyntaxEnum.swift` (61 KB,
+   one ~300-case enum plus a ~500-case switch) takes > 300 s.
+   - LONG LISTS ARE SUPERLINEAR — the main bottleneck. One function with N `let vI = g(xI).y` lines:
+
+         N     parse   total    yields
+         50    0.2 s    0.9 s    24 k
+         100   0.4 s    4.6 s    69 k
+         200   0.9 s   30.6 s   218 k
+         400           > 120 s
+
+     An enum with N `case aI(TI)` lines behaves the same (0.3 / 1.8 / 13.1 s for 50/100/200). The
+     parse is ~linear; YIELDS grow ~quadratically (a list should need ~linear), and post-parse time
+     ~cubically. Hypothesis: the Oracle's fixpoint loops (`disambiguate()`: `pruneUnsupported` and
+     `pruneUnproductive` alternate, each rescanning ALL yields per pass) need a number of passes that
+     grows with N — N passes × N² yields.
+   - CRASH: `EXC_BAD_ACCESS` "Thread stack size exceeded" in the recursive walk `visit` →
+     `visitAlternates` → `tileBody` → `visitSymbol` → … inside `Oracle.pruneUnproductive`, bottoming
+     out in `endPositions`. Depth tracks derivation depth. First hit on swift-syntax's
      `BasicFormat.swift`, `Indenter.swift`, `InferIndentation.swift`, `Syntax+Extensions.swift`,
-     `SyntaxProtocol+Formatted.swift`. One crash kills the test process, so every remaining case in
-     the run reports the same crash.
-   - SLOW — FIXED 2026-09-26. Profiled with `sample` on the fuzzer probe: ~87% of Oracle time was
-     `pruneUnproductive` answering "ends of this symbol's yields starting at p" and "is there a yield
-     spanning [p, q]" by SCANNING the symbol's yields, i.e. O(yields × queries) — quadratic. A
-     per-call yield index (`YieldIndex` in `pruneUnproductive`) makes them lookups. Result: the
-     524 KB file 20+ min → ~140 s (parse ~28 s, Oracle ~62 s, tree ~3 s); `ApusToHTML.swift`
-     321 s → 10 s; the whole Advent source-file suite now passes in ~145 s.
-     Remaining cost is linear but repeated: `pruneUnsupported` and `pruneUnproductive` each rescan
-     all ~2M yields per fixpoint pass, and the Oracle alternates them until nothing is removed.
-     Next step if it matters: a worklist (re-check only yields whose supporters changed).
-   Fix direction for the CRASH: make the walk iterative (explicit work stack) rather than raising
-   the thread stack size, which only moves the limit.
+     `SyntaxProtocol+Formatted.swift` (Swift Testing worker thread, small stack). Fix: iterative
+     walks (explicit work stack), not a bigger stack.
+   - Fixed cost: grammar load ~0.95 s per process, so a crawler must reuse one persistent process.
+   - Acceptance: 2 of the first 5 swift-syntax files tried were rejected (`ArenaAllocatedBuffer.swift`,
+     `RawSyntax.swift`); a crawl must record rejects rather than stop on them.
+   Plan, in order:
+   1. Count Oracle fixpoint passes for N = 50/100/200; if they grow with N, replace the rescans with
+      a worklist that re-checks only yields whose supporters changed.
+   2. Find why list yields are quadratic (right-recursive `statements`/member lists — item 2 — plus
+      separators, or code blocks also deriving as closures) and fix it in the grammar or engine.
+   3. Make the Oracle and converter walks iterative (the crash).
+   4. Crawl harness: one persistent probe per core, per-file timeout that records and moves on, a
+      token cap for pathological files.
+   Progress 2026-09-27 (profiled with `sample`):
+   - DONE: the Oracle fixpoint hypothesis was WRONG (2 rounds at every N). The cost was
+     `pruneUnproductive.visitBracket`: for a NON-closure bracket (`statements?` in `codeBlock`) it
+     visited the alternates for every end `<= to`, walking `statements(from, j)` for every statement
+     boundary j — O(n²) work — and marked prefixes that are in no derivation. Now only `end == to`.
+     400 statements: 187 s → 4.6 s (incl. ~1 s grammar load); growth now ~linear.
+   - DONE: `DerivationBuilder` built each candidate head subtree before checking that the tail tiles
+     (`tileASTBody`, `buildASTClosure`); tail-first now. It also indexes yields per symbol instead of
+     scanning them per query. `tileBody` / `bodyTiles` / `visitBracket` in the Oracle are memoised.
+   - RESOLVED: the old over-marking had been LOAD-BEARING. Several rejects were reached only through
+     dead readings it kept alive (mostly `@longest` comparing against them). A general "compare
+     against all parsed extents" for `@longest` broke 372 tests and was reverted. Instead each case
+     got the grammar rule swift-syntax actually applies (all in `SwiftSyntax - fuzz harvest fixes`):
+     - type position: a type name may not stop right before `<` (`typeIdentifier >-> ( openAngle )`);
+       fixes `value as A<B>??x` and the previously unnoticed `x as Int < 5` / `<=` / `is Int << 2`;
+     - `1.0` is one float literal, never `1` + tuple member `.0` (`<-<` integer literal before `.`);
+     - a left-bound operator directly before `.` is postfix, not binary (`>-> ( "." )`);
+     - an implicit-member chain continues with a name (`.Bar.[2]` rejected);
+     - the tight condition infix mirrors the tight expression infix (`if rhs??b {}` rejected).
+     Verified: full test plan (only item 14's two fixtures fail), the 4,594-source corpus vs the
+     pre-change probe, and differential fuzzing old vs new probe — 40,000 inputs, every status
+     difference traced and fixed.
+   - Still open: iterative walks (the stack-overflow crash), the crawl harness (steps 3–4), and
+     converting the right-recursive member lists (item 2), which would also make yields linear.
+     Pre-existing, seen on the way: implicit-member chains (`let x: Foo = .a.b`) build a different
+     tree than swift-syntax.
+   History: 2026-09-26 `YieldIndex` in `pruneUnproductive` removed a quadratic scan (524 KB file
+   20+ min → ~140 s; profiled with `sample`). Use the profiler again only if steps 1–2 do not bring
+   N = 200 statements to about a second.
+
+14. **Leading-dot `#if` body after another `#if … #endif` block is rejected.**
+   swift-syntax accepts, Advent rejects (measured 2026-09-27). Minimal case:
+
+       #if A
+       #endif
+       #if FOO
+       .member
+       #endif
+
+   The same `#if FOO⏎.member⏎#endif` parses when it follows a declaration, a statement, a call, a
+   closure, or nothing, so the trigger is specifically a preceding `#endif`. Fixtures
+   `ifconfig-leading-dot-after-decl` and `ifconfig-leading-dot-after-extension`
+   (`SwiftSyntax - fuzz harvest fixes`) fail on it. Not yet diagnosed; first suspect is the gating on
+   the statement-level `ifDirectiveClause` (`>->( "." )` and the `<-<` lookbehind list, `Swift.apus`
+   ~1971) when the previous token is `#endif`.
+
+15. **Accept compiler-valid `#if` declarations with unsafe address accessors.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00560924-advent-underaccept-5a47e4ef682e23b0.json`: `swiftc -parse`
+   accepts but Apus rejects a declaration wrapped in `#if FOO … #endif`:
+
+       public struct ArenaAllocatedPointer<Element: Sendable>: @unchecked Sendable {
+         init(_ pointer: UnsafePointer<Element>) {}
+         var pointee: Element { @_transparent unsafeAddress { pointer } }
+         var unsafeRawPointer: UnsafeRawPointer {}
+       }
+
+   Start from the original artifact source, not only the reducer output. Determine whether the
+   rejection is caused by `@unchecked Sendable` inheritance, `unsafeAddress`, attribute handling in
+   accessor blocks, or their combination inside `ifConfigStatements`.
+
+16. **Accept compiler-valid module-selector function types and operator references.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00179090-advent-underaccept-1365cd1db8327d78.json`: `swiftc -parse`
+   accepts but Apus rejects:
+
+       func fuzz() {
+         let fn: (Swift::Int, Swift::Int) /*
+         */-> Swift::Int = (Swift::+)
+       }
+
+   Fix the grammar path for `Swift::Int` and `Swift::+` in function types / operator references,
+   including block-comment trivia before `->`.
+
+17. **Accept compiler-valid split attribute spelling in parameter types.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00472975-advent-underaccept-de0b72093adc87f6.json`: `swiftc -parse`
+   accepts but Apus rejects:
+
+       struct Fuzz {
+         func foo(closure:
+         @ // c
+         escaping () -> Void) {}
+       }
+
+   Diagnose the attribute/type path that fails when `@` and `escaping` are separated by line-comment
+   trivia and a newline.
+
+18. **Accept compiler-valid function signatures with effect specifiers and commented arrows.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00698942-advent-underaccept-40e086591b3408ff.json`: `swiftc -parse`
+   accepts but Apus rejects:
+
+       let fuzzClosure = {
+         func f() async throws /*
+         */-> Int {}
+       }
+
+   Check `functionSignature`, `functionResult`, and trivia/layout gates around `async throws ->`
+   when a block comment containing a newline appears before the result arrow.
+
+19. **Reject compiler-invalid underscored ownership keywords in patterns.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00087112-advent-overaccept-2edafa850dc2ab91.json`: the compiler rejects but
+   Apus accepts switch cases such as:
+
+       switch x {
+       case _consuming a:
+       }
+
+   Restrict pattern/value-binding grammar so `_consuming`, `_borrowing`, and `_mutating` are not
+   accepted as pattern introducers unless the compiler accepts that exact context.
+
+20. **Reject compiler-invalid multiline `#if` condition continuations after infix operators.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00053524-advent-overaccept-1d29475078c42e30.json`: the compiler rejects but
+   Apus accepts:
+
+       #if compiler(<10.0) ||
+       hasGreeble(blah)
+       #endif
+
+   Tighten `compilationCondition` so newline layout after `||` does not form a valid condition when
+   the compiler treats the directive as malformed.
+
+21. **Reject compiler-invalid whitespace after dots in key paths and member/type references.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00112114-advent-overaccept-0462034f66529290.json`: the compiler rejects but
+   Apus accepts forms reduced to:
+
+       #if FOO
+       AStruct. Type
+       #endif
+
+   The original source is a key path `\AStruct. Type.property`. Enforce tight dot/member spelling in
+   key-path roots and member/type references.
+
+22. **Reject compiler-invalid whitespace in qualified extension type names.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00225614-advent-overaccept-679fb6858b645800.json`: the compiler rejects but
+   Apus accepts an extension header with a spaced qualified type:
+
+       extension Parser. Lookahead {
+         func canParseArgumentLabelList() -> Bool {}
+       }
+
+   Tighten the `typeIdentifier` / `designatedType` grammar for dotted names so whitespace after `.`
+   is rejected in extension and declaration contexts.
+
+23. **Resolve `ifConfigStatements` ambiguity for dotted imports inside `#if`.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00018685-residual-ambiguity-7209f57a1652e8c3.json`: compiler and Apus accept,
+   but derivation remains ambiguous:
+
+       #if FOO
+       import A.B
+       .C
+       #endif
+
+   Residual signature: `ifConfigStatements ambiguous alternate [ifConfigStatement ] |
+   [ifConfigStatement statementSeparator ifConfigStatements]`. Decide whether `.C` belongs to the
+   import path or starts a following statement, and make the list derivation unique.
+
+24. **Resolve `copy` / `consume` / `borrow` prefix-expression ambiguity.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-1/artifacts/00327596-residual-ambiguity-069c0e7040058152.json`: compiler and Apus accept,
+   but `copy { g() }` leaves `prefixExpression` ambiguous between a normal postfix expression and
+   the ownership-keyword prefix form. Fix the contextual-keyword gate for `copy`, `consume`, and
+   `borrow` before closure/block-looking syntax.
+
+25. **Resolve statement-list pivot ambiguity for declaration-like statements in blocks.**
+   Compiler-first fuzzer run `2026-09-27T22-50-05Z`, artifact
+   `worker-0/artifacts/00055365-residual-ambiguity-f855f49a2c0b3c73.json`: compiler and Apus accept,
+   but `statement` / `statements` tiling is ambiguous around adjacent declaration-like statements:
+
+       while TokenSyntax {
+         var isMissing: Bool /*
+         */{
+         }
+         var isPresent: Bool {
+         }
+       }
+
+   Residual signature: `statement ambiguous pivot body=[statement statementSeparator statements]`.
+   This is related to the right-recursive list cleanup, but start with this concrete block/property
+   case and verify that the fix also reduces the broader `statements` residual cluster.
 
 ## Maintenance Rule
 
 - Add new TODOs here only when they are active and actionable.
 - Move completed investigations and historical explanations to design notes or commit messages.
-- Reference an item by its TITLE, never by its number — e.g.
-  `TODO.md / Make trivia handling principled`. Numbers rot on every renumber, and at the
-  2026-09-23 cleanup a dozen references across `Swift.apus`, the tests and the design notes pointed
-  at items that had moved or no longer existed (`TODO #0`, `TODO.md 23`, `TODO.md 10`). The live
-  ones were converted to titles; any remaining `TODO #n` in a design note is historical.
-- Prefer an executable MODEL over per-case patching when an area starts accreting filters: port the
-  reference algorithm, validate it against swift-syntax by enumeration, then use it as the oracle
-  for the grammar. That is what closed key paths, and the same harness (`KeyPathGrammarTests`) is
-  the template — a sweep that reports over- and under-acceptance separately, with NO allowance list
-  (an exemption written for one class silently swallowed a different one).
-- `Advent/codex.md` and `Advent/claude.md` should reference this file instead of maintaining separate TODO lists.
+- `codex.md` and `claude.md` reference this file instead of maintaining separate TODO lists.

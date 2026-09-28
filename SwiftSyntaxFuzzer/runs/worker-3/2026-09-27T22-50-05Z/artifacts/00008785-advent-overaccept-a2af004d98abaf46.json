@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00008785-advent-overaccept-a2af004d98abaf46.json",
+    "durationSeconds" : 0.02681899070739746,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:duplicate:fuzz-harvest:some-optional-iuo",
+    "index" : 8785,
+    "seed" : 8709271582791740263,
+    "signalHash" : "60b615b0fcb5e9e3",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/TypeAnno",
+    "sourceHash" : "a2af004d98abaf46",
+    "sourceLength" : 42,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let v: some some P?! = x\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"v\") \"v\"\n            TypeAnnotation\n              colon \":\"\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.some) \"some\"\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.some) \"some\"\n                  IdentifierType\n                    identifier(\"P\") \"P\"\n            InitializerClause\n              equal \"=\"\n              DeclReferenceExpr\n                identifier(\"x\") \"x\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      ".OPT\t[initializer]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "opaqueType\t[\"some\" type]",
+      "type\t[opaqueType]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      ".OPT\t[typeAnnotation]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 102,
+      "descriptorCount" : 259,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 84,
+      "parseSeconds" : 0.003152012825012207,
+      "sourceLength" : 22,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 8,
+      "yieldCount" : 164
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"v\") \"v\"\n            TypeAnnotation\n              colon \":\"\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.some) \"some\"\n                IdentifierType\n                  identifier(\"some\") \"some\"\n            InitializerClause\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"P\") \"P\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 28,
+  "source" : "let v: some some P = x",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"v\\\") \\\"v\\\"\\n            TypeAnnotation\\n              colon \\\":\\\"\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n                  IdentifierType\\n                    identifier(\\\"P\\\") \\\"P\\\"\\n            InitializerClause\\n              equal \\\"=\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"x\\\") \\\"x\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\".OPT\\t[initializer]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"opaqueType\\t[\\\"some\\\" type]\",\"type\\t[opaqueType]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\".OPT\\t[typeAnnotation]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":102,\"descriptorCount\":259,\"duplicateDescriptorCount\":0,\"oraclePruned\":84,\"parseSeconds\":0.003152012825012207,\"sourceLength\":22,\"suppressedDescriptorCount\":21,\"tokenCount\":8,\"yieldCount\":164},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"v\\\") \\\"v\\\"\\n            TypeAnnotation\\n              colon \\\":\\\"\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n                IdentifierType\\n                  identifier(\\\"some\\\") \\\"some\\\"\\n            InitializerClause\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"P\\\") \\\"P\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

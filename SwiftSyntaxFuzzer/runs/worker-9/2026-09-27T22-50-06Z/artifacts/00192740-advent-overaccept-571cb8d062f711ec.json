@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00192740-advent-overaccept-571cb8d062f711ec.json",
+    "durationSeconds" : 0.12552201747894287,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+space:translated:testTypeExpr10#1",
+    "index" : 192740,
+    "seed" : 3326659872777667553,
+    "signalHash" : "4752eadf820c0ad9",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "571cb8d062f711ec",
+    "sourceLength" : 224,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nfunc genType() {\n  _ = Gen<Foo>.self\n  _ = Gen<Foo>()\n  _ = Gen<Foo>. prop\n  _ = Gen<Foo>.meth\n  let _ : () = Gen<Foo>.meth()\n  _ = Gen<Foo>.instMeth\n  _ = Gen<Foo>\n\n  _ = X?.self\n  _ = [X].self\n  _ = [X : Y].self\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      DiscardAssignmentExpr\n                        wildcard \"_\"\n                      AssignmentExpr\n                        equal \"=\"\n                      MemberAccessExpr\n                        PostfixOperatorExpr\n                          DeclReferenceExpr\n                            identifier(\"Gen\") \"Gen\"\n                          postfixOperator(\">\") \">\"\n                        period \".\"\n                        DeclReferenceExpr\n                          identifier(\"prop\") \"prop\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperatorToken >+>(\")\" \",\" \".\" \":\" \";\" \"]\" \"}\" ○)]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 134,
+      "descriptorCount" : 389,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 212,
+      "parseSeconds" : 0.012017011642456055,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 10,
+      "yieldCount" : 332
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  SequenceExpr\n                    ExprList\n                      DiscardAssignmentExpr\n                        wildcard \"_\"\n                      AssignmentExpr\n                        equal \"=\"\n                      MemberAccessExpr\n                        PostfixOperatorExpr\n                          DeclReferenceExpr\n                            identifier(\"Gen\") \"Gen\"\n                          postfixOperator(\">\") \">\"\n                        UnexpectedNodes\n                          period \".\"\n                        DeclReferenceExpr\n                          identifier(\"prop\") \"prop\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  _ = Gen>. prop\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      DiscardAssignmentExpr\\n                        wildcard \\\"_\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      MemberAccessExpr\\n                        PostfixOperatorExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"Gen\\\") \\\"Gen\\\"\\n                          postfixOperator(\\\">\\\") \\\">\\\"\\n                        period \\\".\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"prop\\\") \\\"prop\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperatorToken >+>(\\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"]\\\" \\\"}\\\" ○)]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":134,\"descriptorCount\":389,\"duplicateDescriptorCount\":0,\"oraclePruned\":212,\"parseSeconds\":0.012017011642456055,\"sourceLength\":25,\"suppressedDescriptorCount\":47,\"tokenCount\":10,\"yieldCount\":332},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  SequenceExpr\\n                    ExprList\\n                      DiscardAssignmentExpr\\n                        wildcard \\\"_\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      MemberAccessExpr\\n                        PostfixOperatorExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"Gen\\\") \\\"Gen\\\"\\n                          postfixOperator(\\\">\\\") \\\">\\\"\\n                        UnexpectedNodes\\n                          period \\\".\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"prop\\\") \\\"prop\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00283893-tree-difference-643d60b241e6e2f8.json",
+    "durationSeconds" : 0.03928196430206299,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword+glue:translated:testTupleTypeExpr#11",
+    "index" : 283893,
+    "seed" : 10372684106311075726,
+    "signalHash" : "c2eb5cfaa6968987",
+    "signalSummary" : "tree-difference|line=16|ref=MemberAccessExpr|advent=SequenceExpr",
+    "sourceHash" : "643d60b241e6e2f8",
+    "sourceLength" : 33,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n(init<A>.B, G<C>.D).self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.init) \"init\"\n                        BinaryOperatorExpr\n                          binaryOperator(\"<\") \"<\"\n                        MemberAccessExpr\n                          PostfixOperatorExpr\n                            DeclReferenceExpr\n                              identifier(\"A\") \"A\"\n                            postfixOperator(\">\") \">\"\n                          period \".\"\n                          DeclReferenceExpr\n                            identifier(\"D\") \"D\"\n                rightParen \")\"\n              period \".\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.self) \"self\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "regexSafeLexerKeyword\t[\"self\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      ".DO\t[>s< \".\" >n<]",
+      "memberName\t[identifier]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperatorToken >+>(\")\" \",\" \".\" \":\" \";\" \"]\" \"}\" ○)]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "expression\t[  prefixExpression ]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 151,
+      "descriptorCount" : 423,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 282,
+      "parseSeconds" : 0.00855708122253418,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 59,
+      "tokenCount" : 12,
+      "yieldCount" : 402
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    MemberAccessExpr\n                      GenericSpecializationExpr\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.init) \"init\"\n                        GenericArgumentClause\n                          leftAngle \"<\"\n                          GenericArgumentList\n                            GenericArgument\n                              IdentifierType\n                                identifier(\"A\") \"A\"\n                          rightAngle \">\"\n                      period \".\"\n                      DeclReferenceExpr\n                        identifier(\"D\") \"D\"\n                rightParen \")\"\n              period \".\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.self) \"self\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 41,
+  "source" : " {\n(init<A>.D).self\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                        BinaryOperatorExpr\\n                          binaryOperator(\\\"<\\\") \\\"<\\\"\\n                        MemberAccessExpr\\n                          PostfixOperatorExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"A\\\") \\\"A\\\"\\n                            postfixOperator(\\\">\\\") \\\">\\\"\\n                          period \\\".\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"D\\\") \\\"D\\\"\\n                rightParen \\\")\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"regexSafeLexerKeyword\\t[\\\"self\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"memberName\\t[identifier]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperatorToken >+>(\\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"]\\\" \\\"}\\\" ○)]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"expression\\t[  prefixExpression ]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":151,\"descriptorCount\":423,\"duplicateDescriptorCount\":0,\"oraclePruned\":282,\"parseSeconds\":0.00855708122253418,\"sourceLength\":21,\"suppressedDescriptorCount\":59,\"tokenCount\":12,\"yieldCount\":402},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    MemberAccessExpr\\n                      GenericSpecializationExpr\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                        GenericArgumentClause\\n                          leftAngle \\\"<\\\"\\n                          GenericArgumentList\\n                            GenericArgument\\n                              IdentifierType\\n                                identifier(\\\"A\\\") \\\"A\\\"\\n                          rightAngle \\\">\\\"\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"D\\\") \\\"D\\\"\\n                rightParen \\\")\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

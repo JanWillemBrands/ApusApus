@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00035518-residual-ambiguity-3fcfcafb410ea5fb.json",
+    "durationSeconds" : 0.02152097225189209,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline+splice:phase4-import:import-dotted",
+    "index" : 35518,
+    "seed" : 8709271582791740263,
+    "signalHash" : "98670bd27bfc8956",
+    "signalSummary" : "residual-ambiguity|ifConfigStatements\tambiguous alternate\t[ifConfigStatement ] | [ifConfigStatement statementSeparator ifConfigStatements]",
+    "sourceHash" : "3fcfcafb410ea5fb",
+    "sourceLength" : 28,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "#if FOO\nimport A\n.B.C\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ImportDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.import) \"import\"\n                  ImportPathComponentList\n                    ImportPathComponent\n                      identifier(\"A\") \"A\"\n                      period \".\"\n                    ImportPathComponent\n                      identifier(\"C\") \"C\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      ".KLN\t[\".\" identifierToken]",
+      "importPath\t[identifierToken ]",
+      "importDeclaration\t[  \"import\"  importPath]",
+      "declaration\t[importDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      "statementSeparator\t[<n>]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 156,
+      "descriptorCount" : 347,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 62,
+      "parseSeconds" : 0.008262991905212402,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 15,
+      "tokenCount" : 8,
+      "yieldCount" : 158
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ImportDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.import) \"import\"\n                  ImportPathComponentList\n                    ImportPathComponent\n                      identifier(\"A\") \"A\"\n                      period \".\"\n                    ImportPathComponent\n                      identifier(\"C\") \"C\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+      "ifConfigStatements\tambiguous alternate\t[ifConfigStatement ] | [ifConfigStatement statementSeparator ifConfigStatements]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 22,
+  "source" : "#if FOO\nimport A\n.C\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ImportDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.import) \\\"import\\\"\\n                  ImportPathComponentList\\n                    ImportPathComponent\\n                      identifier(\\\"A\\\") \\\"A\\\"\\n                      period \\\".\\\"\\n                    ImportPathComponent\\n                      identifier(\\\"C\\\") \\\"C\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\".KLN\\t[\\\".\\\" identifierToken]\",\"importPath\\t[identifierToken ]\",\"importDeclaration\\t[  \\\"import\\\"  importPath]\",\"declaration\\t[importDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\"statementSeparator\\t[<n>]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":156,\"descriptorCount\":347,\"duplicateDescriptorCount\":0,\"oraclePruned\":62,\"parseSeconds\":0.008262991905212402,\"sourceLength\":26,\"suppressedDescriptorCount\":15,\"tokenCount\":8,\"yieldCount\":158},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ImportDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.import) \\\"import\\\"\\n                  ImportPathComponentList\\n                    ImportPathComponent\\n                      identifier(\\\"A\\\") \\\"A\\\"\\n                      period \\\".\\\"\\n                    ImportPathComponent\\n                      identifier(\\\"C\\\") \\\"C\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[\"ifConfigStatements\\tambiguous alternate\\t[ifConfigStatement ] | [ifConfigStatement statementSeparator ifConfigStatements]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

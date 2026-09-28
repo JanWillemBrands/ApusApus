@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00592991-tree-difference-4d16bfe1e27a4db5.json",
+    "durationSeconds" : 0.03706705570220947,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:glue+block-comment:translated:testRegexParseError19#1",
+    "index" : 592991,
+    "seed" : 1663246799498458970,
+    "signalHash" : "6d464c6f92ad7b87",
+    "signalSummary" : "tree-difference|line=46|ref=RegexLiteralExpr|advent=MissingExpr",
+    "sourceHash" : "4d16bfe1e27a4db5",
+    "sourceLength" : 64,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nfoo(#\/(?\/#, #\/abc\/#) \nfoo(#\/(?C\/#\/*c*\/, #\/abc\/#)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"foo\") \"foo\"\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  MissingExpr\n                    identifier(\"<#expression#>\") \"<#expression#>\"\n                  comma \",\"\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertLiteral(_:from:to:): regex literal form has no converter — «#\/ \/#\/*c*\/»"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\",\"]",
+      "regularExpressionLiteral\t[<-<(\")\" \"->\" \".\" \"...\" \">\" \"@\" \"Any\" \"Self\" \"]\" \"false\" \"func\" \"nil\" \"operator\" \"self\" \"super\" \"true\" \"}\" binaryLiteral decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral propertyWrapperProjection regexSlash) extendedRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "functionCallArgument\t[expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 98,
+      "descriptorCount" : 267,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 117,
+      "parseSeconds" : 0.0071179866790771484,
+      "sourceLength" : 22,
+      "suppressedDescriptorCount" : 29,
+      "tokenCount" : 7,
+      "yieldCount" : 205
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"foo\") \"foo\"\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  RegexLiteralExpr\n                    regexPoundDelimiter(\"#\") \"#\"\n                    regexSlash \"\/\"\n                    regexLiteralPattern(\" \") \" \"\n                    regexSlash \"\/\"\n                    regexPoundDelimiter(\"#\") \"#\"\n                  comma \",\"\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 48,
+  "source" : " {\nfoo(#\/ \/#\/*c*\/, )\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"foo\\\") \\\"foo\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  MissingExpr\\n                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n                  comma \\\",\\\"\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertLiteral(_:from:to:): regex literal form has no converter — «#\\\/ \\\/#\\\/*c*\\\/»\"],\"grammarCoverage\":[\".OPT\\t[\\\",\\\"]\",\"regularExpressionLiteral\\t[<-<(\\\")\\\" \\\"->\\\" \\\".\\\" \\\"...\\\" \\\">\\\" \\\"@\\\" \\\"Any\\\" \\\"Self\\\" \\\"]\\\" \\\"false\\\" \\\"func\\\" \\\"nil\\\" \\\"operator\\\" \\\"self\\\" \\\"super\\\" \\\"true\\\" \\\"}\\\" binaryLiteral decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral propertyWrapperProjection regexSlash) extendedRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"functionCallArgument\\t[expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":98,\"descriptorCount\":267,\"duplicateDescriptorCount\":0,\"oraclePruned\":117,\"parseSeconds\":0.0071179866790771484,\"sourceLength\":22,\"suppressedDescriptorCount\":29,\"tokenCount\":7,\"yieldCount\":205},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"foo\\\") \\\"foo\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  RegexLiteralExpr\\n                    regexPoundDelimiter(\\\"#\\\") \\\"#\\\"\\n                    regexSlash \\\"\\\/\\\"\\n                    regexLiteralPattern(\\\" \\\") \\\" \\\"\\n                    regexSlash \\\"\\\/\\\"\\n                    regexPoundDelimiter(\\\"#\\\") \\\"#\\\"\\n                  comma \\\",\\\"\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

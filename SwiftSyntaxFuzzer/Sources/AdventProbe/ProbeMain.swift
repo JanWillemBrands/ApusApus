@@ -28,6 +28,7 @@ struct ProbeOutput: Codable {
     let compilerTypecheckAccepted: Bool?
     let compilerTypecheckStderr: String?
     let residualAmbiguities: [String]
+    let grammarCoverage: [String]
     let generatorDiagnostics: [String]
     let referenceDump: String?
     let adventDump: String?
@@ -38,8 +39,8 @@ struct ProbeOutput: Codable {
 private struct ProbeRequest: Codable {
     let source: String
     let includeDumps: Bool?
-    /// Reducer requests: classify swift-syntax-accepts/Advent-rejects as `advent-underaccept`
-    /// without running `swiftc` (hundreds of reduction steps would each pay for two compiles).
+    /// Compatibility with older runners. Compiler-first classification ignores this; reducers must
+    /// preserve the compiler parse result.
     let skipCompiler: Bool?
 }
 
@@ -68,6 +69,7 @@ struct AdventProbe {
                     compilerTypecheckAccepted: nil,
                     compilerTypecheckStderr: nil,
                     residualAmbiguities: [],
+                    grammarCoverage: [],
                     generatorDiagnostics: [],
                     referenceDump: nil,
                     adventDump: nil,
@@ -95,6 +97,7 @@ struct AdventProbe {
                 compilerTypecheckAccepted: nil,
                 compilerTypecheckStderr: nil,
                 residualAmbiguities: [],
+                grammarCoverage: [],
                 generatorDiagnostics: [],
                 referenceDump: nil,
                 adventDump: nil,
@@ -160,6 +163,7 @@ struct AdventProbe {
         var builtTree = false
         var generatedTree = false
         var ambiguityDiagnostics: [String] = []
+        var grammarCoverage: [String] = []
         var generatorDiagnostics: [String] = []
         var adventDump: String? = nil
 
@@ -169,7 +173,8 @@ struct AdventProbe {
             if builder.buildAST() != nil {
                 builtTree = true
             }
-            ambiguityDiagnostics = builder.diagnostics.map(\.description)
+            ambiguityDiagnostics = builder.diagnostics.map(\.fingerprint)
+            grammarCoverage = builder.coverage
 
             var generator = SwiftSyntaxGenerator(parser: parser, input: source)
             if let tree = generator.generate() {
@@ -184,40 +189,23 @@ struct AdventProbe {
         // counts as accepting the input. Keep `adventMatched` in the output as raw telemetry.
         let adventAccepted = builtTree
 
-        let compilerResult: CompilerResult?
-        var compilerTypecheckResult: CompilerResult? = nil
+        let compilerResult = runCompilerParse(source: source)
+        let compilerTypecheckResult: CompilerResult? = nil
         let status: String
-        if !referenceHasError && !adventAccepted && ambiguityDiagnostics.isEmpty && skipCompiler {
-            compilerResult = nil
-            status = "advent-underaccept"
-        } else if !referenceHasError && !adventAccepted && ambiguityDiagnostics.isEmpty {
-            compilerResult = runCompilerParse(source: source)
-            if compilerResult?.accepted == false {
-                status = "compiler-rejects-swiftsyntax-accepts"
-            } else {
-                compilerTypecheckResult = runCompilerTypecheck(source: source)
-                if compilerTypecheckResult?.accepted == false {
-                    status = "compiler-typecheck-rejects-swiftsyntax-accepts"
-                } else {
-                    status = "advent-underaccept"
-                }
-            }
-        } else {
-            compilerResult = nil
-            compilerTypecheckResult = nil
-            if referenceHasError && adventAccepted {
-                status = "advent-overaccept"
-            } else if referenceHasError && !adventAccepted {
-                status = "same"
+        if compilerResult.accepted {
+            if !adventAccepted {
+                status = "advent-underaccept"
             } else if !ambiguityDiagnostics.isEmpty {
                 status = "residual-ambiguity"
             } else if adventAccepted, adventDump == nil {
                 status = "advent-no-generated-tree"
-            } else if let adventDump, adventDump != referenceDump {
+            } else if !referenceHasError, let adventDump, adventDump != referenceDump {
                 status = "tree-difference"
             } else {
                 status = "same"
             }
+        } else {
+            status = adventAccepted ? "advent-overaccept" : "same"
         }
 
         let metrics = ProbeOutput.Metrics(
@@ -238,13 +226,14 @@ struct AdventProbe {
             adventMatched: matched,
             adventBuiltTree: builtTree,
             adventGeneratedSwiftSyntax: generatedTree,
-            compilerChecked: compilerResult != nil,
-            compilerAccepted: compilerResult?.accepted,
-            compilerStderr: compilerResult?.stderr.isEmpty == false ? compilerResult?.stderr : nil,
-            compilerTypecheckChecked: compilerTypecheckResult != nil,
+            compilerChecked: true,
+            compilerAccepted: compilerResult.accepted,
+            compilerStderr: compilerResult.stderr.isEmpty == false ? compilerResult.stderr : nil,
+            compilerTypecheckChecked: false,
             compilerTypecheckAccepted: compilerTypecheckResult?.accepted,
             compilerTypecheckStderr: compilerTypecheckResult?.stderr.isEmpty == false ? compilerTypecheckResult?.stderr : nil,
             residualAmbiguities: ambiguityDiagnostics,
+            grammarCoverage: grammarCoverage,
             generatorDiagnostics: generatorDiagnostics,
             referenceDump: includeDumps || status != "same" ? referenceDump : nil,
             adventDump: includeDumps || status != "same" ? adventDump : nil,
@@ -354,6 +343,7 @@ struct AdventProbe {
             compilerTypecheckAccepted: nil,
             compilerTypecheckStderr: nil,
             residualAmbiguities: [],
+            grammarCoverage: [],
             generatorDiagnostics: [],
             referenceDump: nil,
             adventDump: nil,

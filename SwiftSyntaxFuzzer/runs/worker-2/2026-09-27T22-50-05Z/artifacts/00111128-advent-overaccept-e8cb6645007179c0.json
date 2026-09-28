@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00111128-advent-overaccept-e8cb6645007179c0.json",
+    "durationSeconds" : 0.04810011386871338,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:delete+splice:real:SwiftSyntaxCompatibility:813",
+    "index" : 111128,
+    "seed" : 15755288686696214284,
+    "signalHash" : "e7e023b44b81174a",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "e8cb6645007179c0",
+    "sourceLength" : 208,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nextension NamedDeclSyntax {\n  @available(*, deprecated, renamed: \"name\")\n  public var identifier: TokenSyntax {\n    get {\n      return self.name\n    } {\n      self.names = newValue\n    }\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"TokenSyntax\") \"TokenSyntax\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              FunctionCallExpr\n                                FunctionCallExpr\n                                  DeclReferenceExpr\n                                    identifier(\"get\") \"get\"\n                                  LabeledExprList\n                                  ClosureExpr\n                                    leftBrace \"{\"\n                                    CodeBlockItemList\n                                    rightBrace \"}\"\n                                  MultipleTrailingClosureElementList\n                                LabeledExprList\n                                ClosureExpr\n                                  leftBrace \"{\"\n                                  CodeBlockItemList\n                                  rightBrace \"}\"\n                                MultipleTrailingClosureElementList\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "nonLiteralPostfix\t[functionCallExpression]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializedAccessorBlock\t[codeBlock]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 155,
+      "descriptorCount" : 412,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 180,
+      "parseSeconds" : 0.005846977233886719,
+      "sourceLength" : 54,
+      "suppressedDescriptorCount" : 49,
+      "tokenCount" : 13,
+      "yieldCount" : 327
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"TokenSyntax\") \"TokenSyntax\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          AccessorDeclList\n                            AccessorDecl\n                              AttributeList\n                              DeclModifierList\n                              keyword(SwiftSyntax.Keyword.get) \"get\"\n                              CodeBlock\n                                leftBrace \"{\"\n                                CodeBlockItemList\n                                rightBrace \"}\"\n                          UnexpectedNodes\n                            leftBrace \"{\"\n                            rightBrace \"}\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { { var TokenSyntax {\n    get {\n    } {\n    }\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"TokenSyntax\\\") \\\"TokenSyntax\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              FunctionCallExpr\\n                                FunctionCallExpr\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"get\\\") \\\"get\\\"\\n                                  LabeledExprList\\n                                  ClosureExpr\\n                                    leftBrace \\\"{\\\"\\n                                    CodeBlockItemList\\n                                    rightBrace \\\"}\\\"\\n                                  MultipleTrailingClosureElementList\\n                                LabeledExprList\\n                                ClosureExpr\\n                                  leftBrace \\\"{\\\"\\n                                  CodeBlockItemList\\n                                  rightBrace \\\"}\\\"\\n                                MultipleTrailingClosureElementList\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"nonLiteralPostfix\\t[functionCallExpression]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializedAccessorBlock\\t[codeBlock]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":155,\"descriptorCount\":412,\"duplicateDescriptorCount\":0,\"oraclePruned\":180,\"parseSeconds\":0.005846977233886719,\"sourceLength\":54,\"suppressedDescriptorCount\":49,\"tokenCount\":13,\"yieldCount\":327},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"TokenSyntax\\\") \\\"TokenSyntax\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          AccessorDeclList\\n                            AccessorDecl\\n                              AttributeList\\n                              DeclModifierList\\n                              keyword(SwiftSyntax.Keyword.get) \\\"get\\\"\\n                              CodeBlock\\n                                leftBrace \\\"{\\\"\\n                                CodeBlockItemList\\n                                rightBrace \\\"}\\\"\\n                          UnexpectedNodes\\n                            leftBrace \\\"{\\\"\\n                            rightBrace \\\"}\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

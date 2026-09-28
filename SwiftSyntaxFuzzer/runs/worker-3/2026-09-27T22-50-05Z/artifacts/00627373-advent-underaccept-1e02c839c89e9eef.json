@@ -1,0 +1,50 @@
+{
+  "event" : {
+    "artifact" : "00627373-advent-underaccept-1e02c839c89e9eef.json",
+    "durationSeconds" : 0.5220149755477905,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:splice+block-comment:translated:testUseCopyVariable#1",
+    "index" : 627373,
+    "seed" : 8709271582791740263,
+    "signalHash" : "f713c44151c776e7",
+    "signalSummary" : "advent-underaccept|compiler=true|typecheck=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/FunctionDecl\/Attribu",
+    "sourceHash" : "1e02c839c89e9eef",
+    "sourceLength" : 292,
+    "status" : "advent-underaccept"
+  },
+  "originalSource" : "struct Fuzz {\nfunc useCopyVar(copy: inout String) {\n    let s = copy\n    copy = s\n\n    \/\/ We can copy from a variable named `copy`\n    let t = copy copy\n    copy = t\n\n    \/\/ We can do member access and subscript a variable named `copy`\n    let i = copy.startIndex\n    let _ \/*c*\/= copy[i]\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : false,
+    "adventGeneratedSwiftSyntax" : false,
+    "adventMatched" : false,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 169,
+      "descriptorCount" : 426,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 0,
+      "parseSeconds" : 0.0058640241622924805,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 8,
+      "yieldCount" : 272
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionCallExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    identifier(\"copy\") \"copy\"\n                    colon \":\"\n                    DeclReferenceExpr\n                      identifier(\"String\") \"String\"\n                rightParen \")\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    SequenceExpr\n                      ExprList\n                        DiscardAssignmentExpr\n                          wildcard \"_\"\n                        AssignmentExpr\n                          equal \"=\"\n                        SubscriptCallExpr\n                          DeclReferenceExpr\n                            identifier(\"copy\") \"copy\"\n                          leftSquare \"[\"\n                          LabeledExprList\n                            LabeledExpr\n                              DeclReferenceExpr\n                                identifier(\"i\") \"i\"\n                          rightSquare \"]\"\n                          MultipleTrailingClosureElementList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-underaccept",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { (copy: String) { _ \/*c*\/= copy[i]\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":false,\"adventGeneratedSwiftSyntax\":false,\"adventMatched\":false,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[],\"metrics\":{\"crfCount\":169,\"descriptorCount\":426,\"duplicateDescriptorCount\":0,\"oraclePruned\":0,\"parseSeconds\":0.0058640241622924805,\"sourceLength\":40,\"suppressedDescriptorCount\":46,\"tokenCount\":8,\"yieldCount\":272},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionCallExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    identifier(\\\"copy\\\") \\\"copy\\\"\\n                    colon \\\":\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"String\\\") \\\"String\\\"\\n                rightParen \\\")\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    SequenceExpr\\n                      ExprList\\n                        DiscardAssignmentExpr\\n                          wildcard \\\"_\\\"\\n                        AssignmentExpr\\n                          equal \\\"=\\\"\\n                        SubscriptCallExpr\\n                          DeclReferenceExpr\\n                            identifier(\\\"copy\\\") \\\"copy\\\"\\n                          leftSquare \\\"[\\\"\\n                          LabeledExprList\\n                            LabeledExpr\\n                              DeclReferenceExpr\\n                                identifier(\\\"i\\\") \\\"i\\\"\\n                          rightSquare \\\"]\\\"\\n                          MultipleTrailingClosureElementList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-underaccept\",\"swiftSyntaxHasError\":false}"
+}

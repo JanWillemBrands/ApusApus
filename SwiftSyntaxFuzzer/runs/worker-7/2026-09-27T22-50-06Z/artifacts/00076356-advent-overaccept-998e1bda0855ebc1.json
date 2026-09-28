@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00076356-advent-overaccept-998e1bda0855ebc1.json",
+    "durationSeconds" : 0.03804898262023926,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:duplicate+newline+delete:reject:testInvalid29#1",
+    "index" : 76356,
+    "seed" : 17418700093595237275,
+    "signalHash" : "c40f213cf1ed4f0b",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/StructDec",
+    "sourceHash" : "998e1bda0855ebc1",
+    "sourceLength" : 49,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nstruct Weak<T\n:: class> { let value: T\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"Weak\") \"Weak\"\n              GenericParameterClause\n                leftAngle \"<\"\n                GenericParameterList\n                  GenericParameter\n                    AttributeList\n                    identifier(\"T::class\") \"T::class\"\n                rightAngle \">\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    VariableDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.let) \"let\"\n                      PatternBindingList\n                        PatternBinding\n                          IdentifierPattern\n                            identifier(\"T\") \"T\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "memberDeclaration\t[declaration]",
+      "structMember\t[memberDeclaration]",
+      "structMembers\t[structMember ]",
+      ".OPT\t[structMembers]",
+      "structBody\t[\"{\"  \"}\"]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector identifier]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[  >->(\"each\") genericParameterName]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    structBody]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 88,
+      "descriptorCount" : 192,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 46,
+      "parseSeconds" : 0.003975987434387207,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 12,
+      "tokenCount" : 13,
+      "yieldCount" : 154
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"Weak\") \"Weak\"\n              GenericParameterClause\n                leftAngle \"<\"\n                GenericParameterList\n                  GenericParameter\n                    AttributeList\n                    identifier(\"T\") \"T\"\n              MemberBlock\n                MemberBlockItemList\n                  MemberBlockItem\n                    UnexpectedCodeDecl\n                      UnexpectedNodes\n                        colonColon \"::\"\n                  MemberBlockItem\n                    ClassDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.class) \"class\"\n                      MemberBlock\n                        UnexpectedNodes\n                          postfixOperator(\">\") \">\"\n                        leftBrace \"{\"\n                        MemberBlockItemList\n                          MemberBlockItem\n                            VariableDecl\n                              AttributeList\n                              DeclModifierList\n                              keyword(SwiftSyntax.Keyword.let) \"let\"\n                              PatternBindingList\n                                PatternBinding\n                                  IdentifierPattern\n                                    identifier(\"T\") \"T\"\n                        rightBrace \"}\"\n                rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\nstruct Weak<T\n:: class> { let T\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"Weak\\\") \\\"Weak\\\"\\n              GenericParameterClause\\n                leftAngle \\\"<\\\"\\n                GenericParameterList\\n                  GenericParameter\\n                    AttributeList\\n                    identifier(\\\"T::class\\\") \\\"T::class\\\"\\n                rightAngle \\\">\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    VariableDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                      PatternBindingList\\n                        PatternBinding\\n                          IdentifierPattern\\n                            identifier(\\\"T\\\") \\\"T\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"memberDeclaration\\t[declaration]\",\"structMember\\t[memberDeclaration]\",\"structMembers\\t[structMember ]\",\".OPT\\t[structMembers]\",\"structBody\\t[\\\"{\\\"  \\\"}\\\"]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector identifier]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[  >->(\\\"each\\\") genericParameterName]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    structBody]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":88,\"descriptorCount\":192,\"duplicateDescriptorCount\":0,\"oraclePruned\":46,\"parseSeconds\":0.003975987434387207,\"sourceLength\":38,\"suppressedDescriptorCount\":12,\"tokenCount\":13,\"yieldCount\":154},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"Weak\\\") \\\"Weak\\\"\\n              GenericParameterClause\\n                leftAngle \\\"<\\\"\\n                GenericParameterList\\n                  GenericParameter\\n                    AttributeList\\n                    identifier(\\\"T\\\") \\\"T\\\"\\n              MemberBlock\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    UnexpectedCodeDecl\\n                      UnexpectedNodes\\n                        colonColon \\\"::\\\"\\n                  MemberBlockItem\\n                    ClassDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.class) \\\"class\\\"\\n                      MemberBlock\\n                        UnexpectedNodes\\n                          postfixOperator(\\\">\\\") \\\">\\\"\\n                        leftBrace \\\"{\\\"\\n                        MemberBlockItemList\\n                          MemberBlockItem\\n                            VariableDecl\\n                              AttributeList\\n                              DeclModifierList\\n                              keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n                              PatternBindingList\\n                                PatternBinding\\n                                  IdentifierPattern\\n                                    identifier(\\\"T\\\") \\\"T\\\"\\n                        rightBrace \\\"}\\\"\\n                rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

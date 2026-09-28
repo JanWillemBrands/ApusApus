@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00261474-tree-difference-71e3914287eeebf8.json",
+    "durationSeconds" : 0.04597008228302002,
+    "exitCode" : 1,
+    "generator" : "wide:top:block-comment+newline+delete:real:RawSyntax:947",
+    "index" : 261474,
+    "seed" : 1663246799498458970,
+    "signalHash" : "e20dcabd08232631",
+    "signalSummary" : "tree-difference|line=46|ref=MemberAccessExpr|advent=MissingExpr",
+    "sourceHash" : "71e3914287eeebf8",
+    "sourceLength" : 218,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "extension RawSyntax {\n  var view: RawSyntaxView {\n    \/*c*\/switch raw.payload {\n    case .parsedToken .materializedToken:\n      return .token(tokenView!)\n    case .layout:\n      return .layout(layoutView!\n)\n    }\n  }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  ExpressionStmt\n                    SwitchExpr\n                      keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                      DeclReferenceExpr\n                        identifier(\"raw\") \"raw\"\n                      leftBrace \"{\"\n                      SwitchCaseList\n                        SwitchCase\n                          SwitchCaseLabel\n                            keyword(SwiftSyntax.Keyword.case) \"case\"\n                            SwitchCaseItemList\n                              SwitchCaseItem\n                                ExpressionPattern\n                                  MissingExpr\n                                    identifier(\"<#expression#>\") \"<#expression#>\"\n                            colon \":\"\n                          CodeBlockItemList\n                      rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.parsedToken .materializedToken»"
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName \".\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseItemList\t[matchPattern  ]",
+      "caseLabel\t[ \"case\" caseItemList \":\"]",
+      "switchCase\t[caseLabel ]",
+      "switchCases\t[switchCase ]",
+      ".OPT\t[switchCases]",
+      "switchExpression\t[\"switch\" >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 193,
+      "descriptorCount" : 523,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 210,
+      "parseSeconds" : 0.013713955879211426,
+      "sourceLength" : 80,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 14,
+      "yieldCount" : 353
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  ExpressionStmt\n                    SwitchExpr\n                      keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                      DeclReferenceExpr\n                        identifier(\"raw\") \"raw\"\n                      leftBrace \"{\"\n                      SwitchCaseList\n                        SwitchCase\n                          SwitchCaseLabel\n                            keyword(SwiftSyntax.Keyword.case) \"case\"\n                            SwitchCaseItemList\n                              SwitchCaseItem\n                                ExpressionPattern\n                                  MemberAccessExpr\n                                    MemberAccessExpr\n                                      period \".\"\n                                      DeclReferenceExpr\n                                        identifier(\"parsedToken\") \"parsedToken\"\n                                    period \".\"\n                                    DeclReferenceExpr\n                                      identifier(\"materializedToken\") \"materializedToken\"\n                            colon \":\"\n                          CodeBlockItemList\n                      rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n    \/*c*\/switch raw {\n    case .parsedToken .materializedToken:\n    }\n  }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  ExpressionStmt\\n                    SwitchExpr\\n                      keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"raw\\\") \\\"raw\\\"\\n                      leftBrace \\\"{\\\"\\n                      SwitchCaseList\\n                        SwitchCase\\n                          SwitchCaseLabel\\n                            keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                            SwitchCaseItemList\\n                              SwitchCaseItem\\n                                ExpressionPattern\\n                                  MissingExpr\\n                                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n                            colon \\\":\\\"\\n                          CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[\"unhandled in convertImplicitMemberExpression(_:from:to:): chained implicit member (.a.b) not converted — «.parsedToken .materializedToken»\"],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName \\\".\\\" >n< >+>(decimalDigits escapedIdentifier identifier propertyWrapperProjection) postfixExpression]\",\"primaryExpression\\t[implicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseItemList\\t[matchPattern  ]\",\"caseLabel\\t[ \\\"case\\\" caseItemList \\\":\\\"]\",\"switchCase\\t[caseLabel ]\",\"switchCases\\t[switchCase ]\",\".OPT\\t[switchCases]\",\"switchExpression\\t[\\\"switch\\\" >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":193,\"descriptorCount\":523,\"duplicateDescriptorCount\":0,\"oraclePruned\":210,\"parseSeconds\":0.013713955879211426,\"sourceLength\":80,\"suppressedDescriptorCount\":47,\"tokenCount\":14,\"yieldCount\":353},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  ExpressionStmt\\n                    SwitchExpr\\n                      keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                      DeclReferenceExpr\\n                        identifier(\\\"raw\\\") \\\"raw\\\"\\n                      leftBrace \\\"{\\\"\\n                      SwitchCaseList\\n                        SwitchCase\\n                          SwitchCaseLabel\\n                            keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                            SwitchCaseItemList\\n                              SwitchCaseItem\\n                                ExpressionPattern\\n                                  MemberAccessExpr\\n                                    MemberAccessExpr\\n                                      period \\\".\\\"\\n                                      DeclReferenceExpr\\n                                        identifier(\\\"parsedToken\\\") \\\"parsedToken\\\"\\n                                    period \\\".\\\"\\n                                    DeclReferenceExpr\\n                                      identifier(\\\"materializedToken\\\") \\\"materializedToken\\\"\\n                            colon \\\":\\\"\\n                          CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

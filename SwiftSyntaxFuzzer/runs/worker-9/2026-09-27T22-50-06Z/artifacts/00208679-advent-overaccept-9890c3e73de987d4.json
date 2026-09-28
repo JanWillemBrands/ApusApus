@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00208679-advent-overaccept-9890c3e73de987d4.json",
+    "durationSeconds" : 0.08751702308654785,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:glue+keyword+block-comment:phase4-coroutine:op-trailing-comma+translated:testStillAbleToCallFunctionCalledCopy#1",
+    "index" : 208679,
+    "seed" : 3326659872777667553,
+    "signalHash" : "6c6594ba8057126c",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/Oper",
+    "sourceHash" : "9890c3e73de987d4",
+    "sourceLength" : 567,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "struct Fuzz {\ninfix operator +++ : AdditionPrecedence,\nfunc copy() {}\nfunc copy(_: String) {}\nfunc copy(_: String, _: Int) {}\nfunc copy(x: String, y: Int) {}\n\nfunc useCopyFunc() {\n    var s = String()\n    var i = global\n\n    copy()\n    copy(s)\n    copy(i) \/\/ expected-error{{cannot convert value of type 'Int' to expected argument type 'String'}}\n    return(s, i)\n    copy(i, s) \/\/ expected-error{{unnamed argument #2 must precede unnamed argument #1}}\n    copy(x: s \/* c *\/ , y: i)\n    copy(y: i, x: s) \/\/ expected-error{{argument 'x' must precede argument 'y'}}\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"+++\") \"+++\"\n              OperatorPrecedenceAndTypes\n                colon \":\"\n                identifier(\"AdditionPrecedence\") \"AdditionPrecedence\"\n                DesignatedTypeList\n                  DesignatedType\n                    comma \",\"\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"useCopyFunc\") \"useCopyFunc\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "designatedTypes\t[\",\"]",
+      ".OPT\t[designatedTypes]",
+      "precedenceGroupName\t[identifierToken]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statements\t[statement statementSeparator statements]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 182,
+      "descriptorCount" : 406,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 190,
+      "parseSeconds" : 0.01362299919128418,
+      "sourceLength" : 68,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 14,
+      "yieldCount" : 287
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.infix) \"infix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"+++\") \"+++\"\n              OperatorPrecedenceAndTypes\n                colon \":\"\n                identifier(\"AdditionPrecedence\") \"AdditionPrecedence\"\n                DesignatedTypeList\n                  DesignatedType\n                    comma \",\"\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"useCopyFunc\") \"useCopyFunc\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\ninfix operator +++ : AdditionPrecedence,\nfunc useCopyFunc() {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n              OperatorPrecedenceAndTypes\\n                colon \\\":\\\"\\n                identifier(\\\"AdditionPrecedence\\\") \\\"AdditionPrecedence\\\"\\n                DesignatedTypeList\\n                  DesignatedType\\n                    comma \\\",\\\"\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"useCopyFunc\\\") \\\"useCopyFunc\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"designatedTypes\\t[\\\",\\\"]\",\".OPT\\t[designatedTypes]\",\"precedenceGroupName\\t[identifierToken]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statements\\t[statement statementSeparator statements]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":182,\"descriptorCount\":406,\"duplicateDescriptorCount\":0,\"oraclePruned\":190,\"parseSeconds\":0.01362299919128418,\"sourceLength\":68,\"suppressedDescriptorCount\":45,\"tokenCount\":14,\"yieldCount\":287},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n              OperatorPrecedenceAndTypes\\n                colon \\\":\\\"\\n                identifier(\\\"AdditionPrecedence\\\") \\\"AdditionPrecedence\\\"\\n                DesignatedTypeList\\n                  DesignatedType\\n                    comma \\\",\\\"\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"useCopyFunc\\\") \\\"useCopyFunc\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

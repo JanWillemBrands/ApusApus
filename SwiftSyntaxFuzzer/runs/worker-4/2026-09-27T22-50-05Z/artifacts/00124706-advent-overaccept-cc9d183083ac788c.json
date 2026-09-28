@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00124706-advent-overaccept-cc9d183083ac788c.json",
+    "durationSeconds" : 0.04829096794128418,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:space+keyword:type:testInverseTypesInParameter#11",
+    "index" : 124706,
+    "seed" : 1663246799498458970,
+    "signalHash" : "b7219c78384e7c50",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/TypeAlias",
+    "sourceHash" : "cc9d183083ac788c",
+    "sourceLength" : 69,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\ntypealias T = (_ x: borrowing any ~Copyable) ->  await\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                TypeAliasDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.typealias) \"typealias\"\n                  identifier(\"T\") \"T\"\n                  TypeInitializerClause\n                    equal \"=\"\n                    FunctionType\n                      leftParen \"(\"\n                      TupleTypeElementList\n                        TupleTypeElement\n                          identifier(\"x\") \"x\"\n                          colon \":\"\n                          IdentifierType\n                            identifier(\"Copyable\") \"Copyable\"\n                      rightParen \")\"\n                      ReturnClause\n                        arrow \"->\"\n                        IdentifierType\n                          identifier(\"await\") \"await\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName >->(openAngle)]",
+      "type\t[typeIdentifier]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      "argumentLabel\t[identifier]",
+      "localArgumentLabel\t[argumentLabel]",
+      "functionTypeArgument\t[ localArgumentLabel typeAnnotation]",
+      "functionTypeArgumentList\t[functionTypeArgument ]",
+      "functionTypeArgumentClause\t[\"(\" functionTypeArgumentList   \")\"]",
+      "functionType\t[functionTypeArgumentClause   \"->\" type]",
+      "type\t[functionType]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "typealiasAssignment\t[assignmentOperator type]",
+      "typealiasName\t[identifierToken]",
+      "typealiasDeclaration\t[  \"typealias\" typealiasName  typealiasAssignment]",
+      "declaration\t[typealiasDeclaration]",
+      "statement\t[declaration]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 196,
+      "descriptorCount" : 434,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 120,
+      "parseSeconds" : 0.010934114456176758,
+      "sourceLength" : 52,
+      "suppressedDescriptorCount" : 36,
+      "tokenCount" : 14,
+      "yieldCount" : 229
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                TypeAliasDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.typealias) \"typealias\"\n                  identifier(\"T\") \"T\"\n                  TypeInitializerClause\n                    equal \"=\"\n                    FunctionType\n                      leftParen \"(\"\n                      TupleTypeElementList\n                        TupleTypeElement\n                          identifier(\"x\") \"x\"\n                          colon \":\"\n                          IdentifierType\n                            identifier(\"Copyable\") \"Copyable\"\n                      rightParen \")\"\n                      TypeEffectSpecifiers\n                      ReturnClause\n                        arrow \"->\"\n                        UnexpectedNodes\n                          keyword(SwiftSyntax.Keyword.await) \"await\"\n                        MissingType\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 50,
+  "source" : "#if FOO\ntypealias T = ( x: Copyable) -> await\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                TypeAliasDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.typealias) \\\"typealias\\\"\\n                  identifier(\\\"T\\\") \\\"T\\\"\\n                  TypeInitializerClause\\n                    equal \\\"=\\\"\\n                    FunctionType\\n                      leftParen \\\"(\\\"\\n                      TupleTypeElementList\\n                        TupleTypeElement\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n                          colon \\\":\\\"\\n                          IdentifierType\\n                            identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                      rightParen \\\")\\\"\\n                      ReturnClause\\n                        arrow \\\"->\\\"\\n                        IdentifierType\\n                          identifier(\\\"await\\\") \\\"await\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName >->(openAngle)]\",\"type\\t[typeIdentifier]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\"argumentLabel\\t[identifier]\",\"localArgumentLabel\\t[argumentLabel]\",\"functionTypeArgument\\t[ localArgumentLabel typeAnnotation]\",\"functionTypeArgumentList\\t[functionTypeArgument ]\",\"functionTypeArgumentClause\\t[\\\"(\\\" functionTypeArgumentList   \\\")\\\"]\",\"functionType\\t[functionTypeArgumentClause   \\\"->\\\" type]\",\"type\\t[functionType]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"typealiasAssignment\\t[assignmentOperator type]\",\"typealiasName\\t[identifierToken]\",\"typealiasDeclaration\\t[  \\\"typealias\\\" typealiasName  typealiasAssignment]\",\"declaration\\t[typealiasDeclaration]\",\"statement\\t[declaration]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":196,\"descriptorCount\":434,\"duplicateDescriptorCount\":0,\"oraclePruned\":120,\"parseSeconds\":0.010934114456176758,\"sourceLength\":52,\"suppressedDescriptorCount\":36,\"tokenCount\":14,\"yieldCount\":229},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                TypeAliasDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.typealias) \\\"typealias\\\"\\n                  identifier(\\\"T\\\") \\\"T\\\"\\n                  TypeInitializerClause\\n                    equal \\\"=\\\"\\n                    FunctionType\\n                      leftParen \\\"(\\\"\\n                      TupleTypeElementList\\n                        TupleTypeElement\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n                          colon \\\":\\\"\\n                          IdentifierType\\n                            identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                      rightParen \\\")\\\"\\n                      TypeEffectSpecifiers\\n                      ReturnClause\\n                        arrow \\\"->\\\"\\n                        UnexpectedNodes\\n                          keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                        MissingType\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00384387-tree-difference-f2c983e39fa89ecb.json",
+    "durationSeconds" : 0.021349072456359863,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:splice:translated:testForwardSlashRegex41#1",
+    "index" : 384387,
+    "seed" : 3326659872777667553,
+    "signalHash" : "cec418d0a4f0f229",
+    "signalSummary" : "tree-difference|line=23|ref=OptionalChainingExpr|advent=PrefixOperatorExpr",
+    "sourceHash" : "f2c983e39fa89ecb",
+    "sourceLength" : 29,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n_ -> \/x\/??\/x\/\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  ArrowExpr\n                    arrow \"->\"\n                  PrefixOperatorExpr\n                    prefixOperator(\"\/\") \"\/\"\n                    DeclReferenceExpr\n                      identifier(\"x\") \"x\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"\/??\/\") \"\/??\/\"\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s<   prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "nonLiteralPrimary\t[tupleExpression]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 147,
+      "descriptorCount" : 403,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 174,
+      "parseSeconds" : 0.012858986854553223,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 41,
+      "tokenCount" : 10,
+      "yieldCount" : 291
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  ArrowExpr\n                    arrow \"->\"\n                  OptionalChainingExpr\n                    OptionalChainingExpr\n                      RegexLiteralExpr\n                        regexSlash \"\/\"\n                        regexLiteralPattern(\"x\") \"x\"\n                        regexSlash \"\/\"\n                      postfixQuestionMark \"?\"\n                    postfixQuestionMark \"?\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"\/\") \"\/\"\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 35,
+  "source" : " () {\n_ -> \/x\/??\/x\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  ArrowExpr\\n                    arrow \\\"->\\\"\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"\\\/??\\\/\\\") \\\"\\\/??\\\/\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s<   prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"nonLiteralPrimary\\t[tupleExpression]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":147,\"descriptorCount\":403,\"duplicateDescriptorCount\":0,\"oraclePruned\":174,\"parseSeconds\":0.012858986854553223,\"sourceLength\":20,\"suppressedDescriptorCount\":41,\"tokenCount\":10,\"yieldCount\":291},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  ArrowExpr\\n                    arrow \\\"->\\\"\\n                  OptionalChainingExpr\\n                    OptionalChainingExpr\\n                      RegexLiteralExpr\\n                        regexSlash \\\"\\\/\\\"\\n                        regexLiteralPattern(\\\"x\\\") \\\"x\\\"\\n                        regexSlash \\\"\\\/\\\"\\n                      postfixQuestionMark \\\"?\\\"\\n                    postfixQuestionMark \\\"?\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

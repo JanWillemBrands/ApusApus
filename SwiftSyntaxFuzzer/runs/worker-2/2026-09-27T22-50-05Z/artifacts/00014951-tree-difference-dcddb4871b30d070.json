@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00014951-tree-difference-dcddb4871b30d070.json",
+    "durationSeconds" : 0.028619050979614258,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:raw:expression:testKeyPathSubscript#1+translated:testTypeExpr10#3",
+    "index" : 14951,
+    "seed" : 15755288686696214284,
+    "signalHash" : "1b67314cdfdd3d43",
+    "signalSummary" : "tree-difference|line=28|ref=CodeBlockItem|advent=KeyPathComponent",
+    "sourceHash" : "dcddb4871b30d070",
+    "sourceLength" : 31,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\n\\Foo.Type.[2]\n[X].self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              KeyPathComponentList\n                KeyPathComponent\n                  period \".\"\n                  KeyPathSubscriptComponent\n                    leftSquare \"[\"\n                    LabeledExprList\n                    rightSquare \"]\"\n                KeyPathComponent\n                  KeyPathSubscriptComponent\n                    leftSquare \"[\"\n                    LabeledExprList\n                    rightSquare \"]\"\n                KeyPathComponent\n                  period \".\"\n                  KeyPathPropertyComponent\n                    DeclReferenceExpr\n                      keyword(SwiftSyntax.Keyword.self) \"self\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "keyPathBareStop\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]",
+      "regexSafeLexerKeyword\t[\"self\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      "keyPathMemberName\t[ memberName]",
+      "keyPathProperty\t[\".\" >n< keyPathMemberName]",
+      "keyPathBareComponent\t[keyPathProperty]",
+      ".KLN\t[keyPathBareComponent]",
+      "keyPathBareComponent\t[\"[\"  \"]\"]",
+      "keyPathBareTail\t[keyPathBareComponent ]",
+      ".OPT\t[keyPathBareTail]",
+      "keyPathPivotFirst\t[\".\" >n< \"[\"  \"]\"]",
+      "keyPathComponents\t[keyPathPivotFirst  keyPathBareStop]",
+      "keyPathExpression\t[\"\\\\\" >+>(keyPathDot) keyPathComponents]",
+      "prefixExpression\t[keyPathExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 100,
+      "descriptorCount" : 270,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 187,
+      "parseSeconds" : 0.004703998565673828,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 24,
+      "tokenCount" : 10,
+      "yieldCount" : 267
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            KeyPathExpr\n              backslash \"\\\"\n              KeyPathComponentList\n                KeyPathComponent\n                  period \".\"\n                  KeyPathSubscriptComponent\n                    leftSquare \"[\"\n                    LabeledExprList\n                    rightSquare \"]\"\n          CodeBlockItem\n            MemberAccessExpr\n              ArrayExpr\n                leftSquare \"[\"\n                ArrayElementList\n                rightSquare \"]\"\n              period \".\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.self) \"self\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 45,
+  "source" : " {\n\\.[]\n[].self\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathSubscriptComponent\\n                    leftSquare \\\"[\\\"\\n                    LabeledExprList\\n                    rightSquare \\\"]\\\"\\n                KeyPathComponent\\n                  KeyPathSubscriptComponent\\n                    leftSquare \\\"[\\\"\\n                    LabeledExprList\\n                    rightSquare \\\"]\\\"\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathPropertyComponent\\n                    DeclReferenceExpr\\n                      keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"keyPathBareStop\\t[>->(keyPathDotSubscriptStart keyPathMarkRunStart)]\",\"regexSafeLexerKeyword\\t[\\\"self\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\"keyPathMemberName\\t[ memberName]\",\"keyPathProperty\\t[\\\".\\\" >n< keyPathMemberName]\",\"keyPathBareComponent\\t[keyPathProperty]\",\".KLN\\t[keyPathBareComponent]\",\"keyPathBareComponent\\t[\\\"[\\\"  \\\"]\\\"]\",\"keyPathBareTail\\t[keyPathBareComponent ]\",\".OPT\\t[keyPathBareTail]\",\"keyPathPivotFirst\\t[\\\".\\\" >n< \\\"[\\\"  \\\"]\\\"]\",\"keyPathComponents\\t[keyPathPivotFirst  keyPathBareStop]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" >+>(keyPathDot) keyPathComponents]\",\"prefixExpression\\t[keyPathExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":100,\"descriptorCount\":270,\"duplicateDescriptorCount\":0,\"oraclePruned\":187,\"parseSeconds\":0.004703998565673828,\"sourceLength\":17,\"suppressedDescriptorCount\":24,\"tokenCount\":10,\"yieldCount\":267},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            KeyPathExpr\\n              backslash \\\"\\\\\\\"\\n              KeyPathComponentList\\n                KeyPathComponent\\n                  period \\\".\\\"\\n                  KeyPathSubscriptComponent\\n                    leftSquare \\\"[\\\"\\n                    LabeledExprList\\n                    rightSquare \\\"]\\\"\\n          CodeBlockItem\\n            MemberAccessExpr\\n              ArrayExpr\\n                leftSquare \\\"[\\\"\\n                ArrayElementList\\n                rightSquare \\\"]\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

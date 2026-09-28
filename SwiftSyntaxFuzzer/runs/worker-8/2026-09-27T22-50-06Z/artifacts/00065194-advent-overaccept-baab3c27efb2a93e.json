@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00065194-advent-overaccept-baab3c27efb2a93e.json",
+    "durationSeconds" : 0.027224063873291016,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment:fuzz-harvest:member-compound-name",
+    "index" : 65194,
+    "seed" : 10372684106311075726,
+    "signalHash" : "e3fdde253313abd2",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/VariableD",
+    "sourceHash" : "baab3c27efb2a93e",
+    "sourceLength" : 32,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nlet v = x.y \/\/ c\n(a:b:)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"v\") \"v\"\n                AssignmentExpr\n                  equal \"=\"\n                MemberAccessExpr\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  period \".\"\n                  DeclReferenceExpr\n                    identifier(\"y\") \"y\"\n                    DeclNameArguments\n                      leftParen \"(\"\n                      DeclNameArgumentList\n                        DeclNameArgument\n                          identifier(\"a\") \"a\"\n                          colon \":\"\n                        DeclNameArgument\n                          identifier(\"b\") \"b\"\n                          colon \":\"\n                      rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "argumentLabel\t[identifier]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      ".OPT\t[argumentNames]",
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName \"(\" argumentNames \")\"]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 202,
+      "descriptorCount" : 566,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 327,
+      "parseSeconds" : 0.02294003963470459,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 67,
+      "tokenCount" : 13,
+      "yieldCount" : 439
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"v\") \"v\"\n                AssignmentExpr\n                  equal \"=\"\n                MemberAccessExpr\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  period \".\"\n                  DeclReferenceExpr\n                    identifier(\"y\") \"y\"\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  identifier(\"a\") \"a\"\n                  colon \":\"\n                  DeclReferenceExpr\n                    identifier(\"b\") \"b\"\n              UnexpectedNodes\n                colon \":\"\n              rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : " { v = x.y\n(a:b:)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"v\\\") \\\"v\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MemberAccessExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"y\\\") \\\"y\\\"\\n                    DeclNameArguments\\n                      leftParen \\\"(\\\"\\n                      DeclNameArgumentList\\n                        DeclNameArgument\\n                          identifier(\\\"a\\\") \\\"a\\\"\\n                          colon \\\":\\\"\\n                        DeclNameArgument\\n                          identifier(\\\"b\\\") \\\"b\\\"\\n                          colon \\\":\\\"\\n                      rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"argumentLabel\\t[identifier]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\".OPT\\t[argumentNames]\",\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName \\\"(\\\" argumentNames \\\")\\\"]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":202,\"descriptorCount\":566,\"duplicateDescriptorCount\":0,\"oraclePruned\":327,\"parseSeconds\":0.02294003963470459,\"sourceLength\":19,\"suppressedDescriptorCount\":67,\"tokenCount\":13,\"yieldCount\":439},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"v\\\") \\\"v\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                MemberAccessExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  period \\\".\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"y\\\") \\\"y\\\"\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                  colon \\\":\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"b\\\") \\\"b\\\"\\n              UnexpectedNodes\\n                colon \\\":\\\"\\n              rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

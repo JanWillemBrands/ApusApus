@@ -1,0 +1,67 @@
+{
+  "event" : {
+    "artifact" : "00021841-advent-overaccept-a31b5f74c0e2c133.json",
+    "durationSeconds" : 0.025883078575134277,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:space+keyword+newline:phase4-keypath:kp-mixed",
+    "index" : 21841,
+    "seed" : 3326659872777667553,
+    "signalHash" : "f59453322ba45b41",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/VariableD",
+    "sourceHash" : "a31b5f74c0e2c133",
+    "sourceLength" : 34,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nlet any = \\\nFoo. bar?.baz\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              DeclReferenceExpr\n                identifier(\"Foo\") \"Foo\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"baz\") \"baz\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 80,
+      "descriptorCount" : 216,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 114,
+      "parseSeconds" : 0.0027359724044799805,
+      "sourceLength" : 13,
+      "suppressedDescriptorCount" : 26,
+      "tokenCount" : 5,
+      "yieldCount" : 178
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              DeclReferenceExpr\n                identifier(\"Foo\") \"Foo\"\n              UnexpectedNodes\n                period \".\"\n              DeclReferenceExpr\n                identifier(\"baz\") \"baz\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 27,
+  "source" : " {\nFoo. baz\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              DeclReferenceExpr\\n                identifier(\\\"Foo\\\") \\\"Foo\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"baz\\\") \\\"baz\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":80,\"descriptorCount\":216,\"duplicateDescriptorCount\":0,\"oraclePruned\":114,\"parseSeconds\":0.0027359724044799805,\"sourceLength\":13,\"suppressedDescriptorCount\":26,\"tokenCount\":5,\"yieldCount\":178},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              DeclReferenceExpr\\n                identifier(\\\"Foo\\\") \\\"Foo\\\"\\n              UnexpectedNodes\\n                period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"baz\\\") \\\"baz\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

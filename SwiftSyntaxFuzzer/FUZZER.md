@@ -1,240 +1,218 @@
-# Advent Fuzzer
+# ApusApus SwiftSyntax Fuzzer
 
-This folder contains a first Advent-vs-swift-syntax differential fuzzer kept outside the Advent source tree.
+Differential fuzzer for `Swift.apus` against `swiftc -parse`. The fuzzer generates or mutates
+Swift source, sends each input to `advent-fuzz-probe`, and records compiler/ApusApus mismatches,
+residual ambiguity, tree-conversion gaps, telemetry, and novelty. SwiftSyntax is an instrument for
+reference trees and corpus material; it is not the validity oracle.
 
-## Shape
+## Components
 
-- `Sources/AdventFuzzRunner/main.swift` is the long-running supervisor.
-- `Sources/AdventProbe/ProbeMain.swift` is a one-input probe compiled together with Advent source files.
-- `bin/build.sh` builds the Advent target with Xcode, then compiles:
-  - `.build/advent-fuzz-probe`
-  - `.build/advent-fuzz-runner`
-- `runs/<timestamp>/events.jsonl` records probe outcomes.
-- `runs/<timestamp>/artifacts/*.json` stores selected non-matching inputs, probe output, stderr, and tree dumps.
-
-By default, the runner keeps one persistent probe process alive. The probe loads the immutable Swift grammar once, then creates a fresh `MessageParser` for every input, matching the SwiftSyntax test-suite strategy. Use `--isolated-probe` to return to the older one-process-per-input mode when debugging crashes or timeout containment.
+- `Sources/AdventProbe/ProbeMain.swift`: one-input probe. It loads `Swift.apus`, compares
+  `swiftc -parse` and ApusApus, and emits one JSON response.
+- `Sources/AdventFuzzRunner/main.swift`: run supervisor, generator, artifact writer, telemetry,
+  novelty retention, and persistent-probe driver.
+- `Sources/AdventFuzzRunner/Widening.swift`: token mutator, wide real-source contexts, and artifact
+  reducer.
+- `bin/build.sh`: builds `.build/advent-fuzz-probe` and `.build/advent-fuzz-runner`.
+- `bin/run-night.sh`: launches a multi-worker campaign.
+- `tools/cluster_ambiguities.py`: clusters residual-ambiguity artifacts by grammar signature.
+- `tools/replay_fuzz_sources.py`: replays saved artifacts or telemetry after grammar changes.
 
 ## Build
 
-From repository root:
+From the repository root:
 
 ```sh
 SwiftSyntaxFuzzer/bin/build.sh
 ```
 
-By default, the script asks Xcode to build the ApusApus scheme into fuzzer-local DerivedData under `~/Library/Caches/ApusApusFuzzer/DerivedData` (outside the repository, because the fuzzer folder is part of the Xcode project), then compiles the probe and runner against those products.
-
-Inside this agent/Xcode environment, the reliable path is to build Advent with Xcode first, then rebuild only the fuzzer binaries:
+In this Xcode agent environment, build ApusApus with Xcode first, then rebuild only the fuzzer
+binaries:
 
 ```sh
 ADVENT_FUZZER_SKIP_XCODEBUILD=1 SwiftSyntaxFuzzer/bin/build.sh
 ```
 
-The fuzzer keeps Swift/Clang module-cache output under `SwiftSyntaxFuzzer/.build/module-cache`. The build script discovers usable Release products automatically; if needed, override discovery with `ADVENT_FUZZER_PRODUCTS=/path/to/Build/Products/Release`. Other escape hatches are `ADVENT_FUZZER_DERIVED_DATA`, `ADVENT_FUZZER_SOURCE_PACKAGES`, `ADVENT_FUZZER_SWIFT_SYNTAX_SHIMS`, and `ADVENT_FUZZER_XCODE_LOG`.
+If the full build is killed by resource pressure while compiling the probe, validate runner-only
+changes with:
+
+```sh
+xcrun swiftc -swift-version 5 -O -parse-as-library \
+  -module-cache-path SwiftSyntaxFuzzer/.build/module-cache \
+  SwiftSyntaxFuzzer/Sources/AdventFuzzRunner/Widening.swift \
+  SwiftSyntaxFuzzer/Sources/AdventFuzzRunner/main.swift \
+  -o /tmp/advent-fuzz-runner-check
+```
 
 ## Run
 
-```sh
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner --iterations 1000 --timeout 10
-```
-
-Useful options:
+Single-worker smoke:
 
 ```sh
 SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
-  --iterations 100000 \
+  --iterations 2000 \
   --timeout 10 \
-  --seed 0xA0C2021 \
-  --output SwiftSyntaxFuzzer/runs \
-  --seed-corpus SwiftSyntaxFuzzer/seeds/known-problems.txt \
-  --heartbeat-every 25 \
-  --max-artifacts 10000 \
-  --max-artifact-mb 1024
-
-# Crash-isolating fallback:
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
-  --iterations 1000 \
-  --timeout 10 \
-  --isolated-probe
-```
-
-For quieter long runs:
-
-```sh
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner --iterations 100000 --quiet-passes
-```
-
-By default, full artifacts are written for Advent correctness statuses, tree differences, residual ambiguity, timeouts, crashes, and harness errors. Compiler-only telemetry statuses are still counted and written to `events.jsonl`, but they do not write full artifacts unless requested. Use `--all-artifacts` or an explicit `--artifact-statuses` list when you want those telemetry artifacts too.
-
-For accept/reject-focused harvesting, keep full artifacts for correctness statuses and let tree differences remain as event telemetry:
-
-```sh
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
-  --iterations 100000 \
-  --timeout 15 \
   --quiet-passes \
-  --artifact-statuses advent-underaccept,advent-overaccept,timeout,crash,invalid-probe-output,probe-error \
-  --max-artifacts-per-status 200 \
-  --dedupe-by-signal
+  --dedupe-by-signal \
+  --reduce-artifacts 30 \
+  --output /tmp/apus-fuzzer-smoke
 ```
 
-In this Xcode agent environment, the reliable long-run launch is a direct attached TTY run. Detached
-`nohup`, `screen`, and piped `tee` launches have been temperamental here and should not be used as the
-canonical path.
+Full-core campaign in this environment:
 
 ```sh
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
-  --iterations 1000000 \
-  --timeout 15 \
-  --seed 0xA0C2021 \
-  --heartbeat-every 250 \
-  --quiet-passes \
-  --max-artifacts-per-status 500 \
-  --dedupe-by-signal
+SWIFT_DETERMINISTIC_HASHING=1 \
+FOREGROUND=1 \
+WORKERS=10 \
+ITERATIONS=1000000 \
+TIMEOUT=10 \
+HEARTBEAT_EVERY=250 \
+MAX_ARTIFACTS_PER_STATUS=500 \
+DEDUPE_BY_SIGNAL=1 \
+REDUCE_ARTIFACTS=50 \
+SwiftSyntaxFuzzer/bin/run-night.sh
 ```
 
-During a run, inspect:
+Use `FOREGROUND=1` here. Detached `nohup` workers have been unreliable in this managed Xcode
+environment.
 
-- `heartbeat.json` for counts and rate
-- `state.json` for next index and stop status
-- `events.jsonl` for event records
-- `artifacts/` for unique non-`same` cases
+## Important Runner Options
+
+- `--wide-corpus PATHS`: comma-separated labeled corpora for the wide real-source lanes.
+  Default: `SwiftSyntaxFuzzer/seeds/swift-syntax-corpus.txt,SwiftSyntaxFuzzer/seeds/real-source.txt`.
+  Pass `--wide-corpus ""` to disable.
+- `--wide-percent N`: percentage of generated inputs drawn from wide real-code lanes. Default: `50`.
+- `--seed-corpus PATH`: labeled known-problem corpus. Default:
+  `SwiftSyntaxFuzzer/seeds/known-problems.txt`.
+- `--interesting-corpus PATHS`: comma-separated `interesting.jsonl` files from earlier runs. These
+  passing sources are sampled, mutated, wrapped, and crossed over as a coverage corpus.
+- `--interesting-percent N`: percentage of generated inputs drawn from `--interesting-corpus` when
+  provided. Default: `15`.
+- `--dedupe-by-signal`: deduplicate artifacts by failure shape instead of exact source hash.
+- `--reduce-artifacts N`: run up to `N` reducer probes before writing each reducible artifact.
+- `--interesting-passes` / `--no-interesting-passes`: retain passing sources that add cheap novelty.
+  Enabled by default.
+- `--max-interesting-passes N`: cap retained passing sources. Default: `2000`.
+- `--artifact-statuses LIST`: restrict full artifact writes. Counts and events are still recorded.
+- `--all-artifacts`: write full artifacts for every non-`same` status.
+
+## Outputs
+
+Each run directory contains:
+
+- `events.jsonl`: event records for non-`same` inputs, plus passing inputs unless `--quiet-passes`.
+- `telemetry.jsonl`: compact source records for status-filtered events, usually compiler-only
+  telemetry.
+- `interesting.jsonl`: passing sources retained because they reached new novelty: generator lane,
+  bucketed probe metric, or post-Oracle grammar alternate coverage.
+- `artifacts/*.json`: full artifacts for selected non-`same` statuses.
+- `heartbeat.json`: current counts, rate, artifact bytes, and freshness.
+- `state.json`: resumable run state information.
+- `summary.txt`: final status counts plus interesting-pass and reduced-duplicate counts.
+
+Artifact JSON includes:
+
+- `source`: reduced source when reduction succeeded, otherwise original generated source.
+- `originalSource`: unreduced source when `source` was reduced.
+- `reductionProbes`: reducer probe count when applicable.
+- `probe`: decoded probe output, including dumps, metrics, residual ambiguity fingerprints, and
+  post-Oracle grammar coverage fingerprints.
+
+Reduction preserves the compiler-first status. For reduced artifacts, `source` should keep the same
+compiler parse result and ApusApus failure class as `originalSource`.
 
 ## Outcome Classes
 
-For status classification, Advent accepts only when the post-Oracle `DerivationBuilder` produces a tree.
-The JSON `adventMatched` field is raw pre-Oracle root-yield telemetry.
+- `same`: `swiftc -parse` and ApusApus agree on syntax acceptance.
+- `advent-underaccept`: `swiftc -parse` accepts, but ApusApus does not build a tree.
+- `advent-overaccept`: `swiftc -parse` rejects, but ApusApus builds a tree.
+- `residual-ambiguity`: compiler and ApusApus accept, but the post-Oracle derivation is still
+  ambiguous.
+- `tree-difference`: compiler, ApusApus, and SwiftSyntax accept, but normalized tree dumps differ.
+- `advent-no-generated-tree`: compiler and ApusApus accept, but the SwiftSyntax generator does not.
+- `timeout`, `crash`, `invalid-probe-output`, `probe-error`: harness or probe failures.
 
-- `same`: swift-syntax and Advent agree for the selected checks.
-- `advent-underaccept`: swift-syntax and the compiler accept, but Advent does not produce a full parse.
-- `advent-overaccept`: swift-syntax has an error, but Advent produces a post-Oracle tree.
-- `compiler-rejects-swiftsyntax-accepts`: swift-syntax accepts and Advent rejects, but `swiftc -parse` rejects too. The two real parsers disagree; keep as telemetry.
-- `compiler-typecheck-rejects-swiftsyntax-accepts`: swift-syntax and `swiftc -parse` accept and Advent rejects, but `swiftc -typecheck` rejects. swift-syntax is the ground truth, so this IS an Advent underacceptance of a parse-valid, type-invalid input (decided 2026-09-27; e.g. `struct S<T: any P>` was one). Only the full artifact is filtered by default; the source goes to `telemetry.jsonl`.
-- `residual-ambiguity`: Advent produces a post-Oracle tree, but the post-Oracle derivation still has ambiguity.
-- `advent-no-generated-tree`: Advent produces a post-Oracle tree, but the SwiftSyntax generator did not produce a source-file tree.
-- `tree-difference`: both sides accept, but normalized SwiftSyntax dumps differ.
-- `timeout`: the probe exceeded the per-input timeout and was killed.
-- `crash` / `invalid-probe-output` / `probe-error`: harness or Advent process failure; keep the artifact.
+`swiftc -parse` is the validity oracle. SwiftSyntax parse results are reference-tree telemetry only.
 
-## First Generator
+## Generator Lanes
 
-The current generator is deliberately simple. It samples Swift fragments around the choice points that have historically mattered in Advent:
+Current lanes are:
 
-- generic angle brackets vs operators
-- `?` / `!` token boundaries
-- tight `try`, `try?`, and `try!` token boundaries
-- cast operators followed by optional, force, generic, or prefix-operator-looking types
-- trailing closures
-- regex literals and regex-vs-division boundaries
-- conditional compilation expressions
-- dotted keyword case/member names
-- key-path component and member-name boundaries
-- string interpolation around regex, casts, and `try`
-- closure labels and call/trailing-closure boundaries
-- optional, tuple, and nested binding patterns
-- attributes and generic declarations
-- generic `where` clauses
-- extension type grammar edges
-- ownership modifiers and `consume` / `copy` expressions
-- effectful accessors and effectful function types
-- macro and pound-directive boundaries
-- modifier stacks such as `public private(set)` and `nonisolated(unsafe)`
-- collection type spelling around arrays, dictionaries, tuples, and function types
-- member-list separators across structs, conditionals, attributes, subscripts, and initializers
-- protocol requirements, operator declarations, async/throwing initializers, and effectful subscripts
-- nested `#if` / `#sourceLocation` / macro-ish directive combinations
-- regex bodies with interior spaces and tabs
-- dense cast / `try` / operator clusters
-- larger optional-case and cast-pattern matrices
-- `#if` in member and expression-leading-dot contexts
-- key-path optional, force, subscript, and dynamic-member components
-- slash-heavy regex, ternary, and division boundaries
-- wider member-list containers, including class, actor, extension, protocol, and enum bodies
-- composed existential, opaque, pack, isolated, sending, and effectful function types
-- contextual-keyword declaration/member/call-label positions
-- import declarations with attributes, kinds, and operators
-- closure/result-builder-ish bodies with conditional compilation
-- statement control-flow edges around typed throws, availability, pattern conditions, and `for try await`
-- macro declaration, attribute, and source-location directive boundaries
-- labeled seed-corpus snippets, both raw and structurally mutated
+- Curated fragment lanes for known sharp edges: generics, regex, key paths, conditional
+  compilation, attributes, interpolation, member lists, declarations, statements, operators, and
+  contextual keywords.
+- Known-problem seed lanes: raw replay, mutation, wrapping, structural splicing, and crossover.
+- Wide real-source lanes: snippets from swift-syntax and real-source corpora, optionally token
+  mutated, then placed in source, function, member, closure, interpolation, and `#if` contexts.
+- Interesting corpus lane: retained passing sources from previous `interesting.jsonl` files,
+  replayed, mutated, context-wrapped, `#if`-wrapped, and crossed over.
+- Interesting-pass retention: passing inputs that hit a new generator, bucketed probe metric, or
+  post-Oracle grammar alternate are written to `interesting.jsonl`.
 
-It then embeds those fragments in small source-file templates. This is the LegoFuzz/Grammarinator idea in miniature: generate reusable structured fragments, compose them cheaply, and keep the expensive oracle deterministic.
+Wide lanes are intentionally approximate. They are expected to produce many `same` rejections while
+occasionally reaching parser states that curated local fragments miss.
 
-## Seed Corpus
+## Triage Workflow
 
-`SwiftSyntaxFuzzer/seeds/known-problems.txt` is loaded by default. Each seed starts with a label line:
-
-```text
-### short-label
-swift source goes here
-```
-
-The runner mixes these seeds into the generated stream in four forms:
-
-- raw replay,
-- structural mutation,
-- wrapping inside a function, type, `do`, or `#if`,
-- crossover with another seed.
-
-Use `--seed-corpus PATH` to point at a different corpus. If the file is missing, the runner prints a warning and disables only the seed-corpus lane.
-
-## Triage
-
-For any artifact:
-
-1. Read `source`.
-2. Check `probe.status`.
-3. For `tree-difference`, compare `probe.referenceDump` and `probe.adventDump`.
-4. For `residual-ambiguity`, inspect `probe.residualAmbiguities`.
-5. For accept/reject mismatches, minimize the `source` manually or with a later reducer.
-
-The artifact filename includes the iteration, status, and stable source hash.
-
-Each non-`same` event includes `signalHash` and `signalSummary`. The signal is a normalized failure-shape fingerprint: tree differences use the first normalized dump divergence, accept/reject mismatches use normalized SwiftSyntax tree shape plus compiler verdicts, and harness failures use the compact diagnostic or generator family. Use this to group many surface variants of the same underlying problem.
-
-The runner deduplicates artifact files by `(status, sourceHash)` by default. Duplicate events still appear in `events.jsonl` with `note: "duplicate-artifact"`, but they do not write another full artifact. Add `--dedupe-by-signal` to deduplicate artifact writes by `(status, signalHash)` instead; this is usually better for long campaigns once exact source duplicates are rare. Artifact writes also stop after `--max-artifacts`, `--max-artifact-mb`, `--max-artifacts-per-status`, or the artifact-status filter. The default filter skips full artifacts for `compiler-rejects-swiftsyntax-accepts` and `compiler-typecheck-rejects-swiftsyntax-accepts`, because their large compiler stderr dominates the artifact directory.
-
-Every status-filtered event still leaves its source behind: `telemetry.jsonl` in the run directory holds one compact line (`status`, `generator`, `signalHash`, `sourceHash`, `source`) per distinct `(status, signalHash)`. Replay saved sources against the current grammar after grammar changes:
+Cluster residual ambiguity first:
 
 ```sh
-tools/replay_fuzz_sources.py SwiftSyntaxFuzzer/runs/<run>/telemetry.jsonl
+tools/cluster_ambiguities.py SwiftSyntaxFuzzer/runs/worker-*/<run>/artifacts/*.json --top 30
+```
+
+Replay after a grammar or converter change:
+
+```sh
 tools/replay_fuzz_sources.py --only-changed SwiftSyntaxFuzzer/runs/<run>/artifacts/*.json
+tools/replay_fuzz_sources.py SwiftSyntaxFuzzer/runs/<run>/telemetry.jsonl
 ```
 
-It prints each case's current status and an `old → new` transition table. Rebuild the probe first when the engine or converter changed.
+For a long run:
 
-`SIGINT` and `SIGTERM` request a graceful stop between probes. The current probe is allowed to finish or hit its timeout, then `summary.txt`, `heartbeat.json`, and `state.json` are flushed.
+1. Read `summary.txt`.
+2. Group artifacts by status and signal.
+3. For `residual-ambiguity`, use `cluster_ambiguities.py`.
+4. For reduced artifacts, inspect `originalSource` before deciding compiler validity.
+5. Replay fixed artifacts with the rebuilt probe.
+6. Run a bounded smoke with `--dedupe-by-signal --reduce-artifacts`.
 
-In persistent mode, each request is a JSON line sent to the probe and each response is one JSON line back. If a request times out, the runner kills that persistent child, records the timeout, and starts a fresh child for the next input. If probe launching or probe output becomes harness-broken repeatedly, for example empty stdout from otherwise successful probes or runner-side file descriptor failures, the runner stops after a short consecutive-failure threshold instead of flooding artifacts.
+## Phased Roadmap
 
-## Next Work
+Phase 1 is implemented:
 
-- Add a reducer that preserves the same status.
-- Add a seed-corpus mode that mutates existing SwiftSyntax/Advent snippets.
-- Persist interesting passing inputs that increase Advent metrics such as `yieldCount` or `oraclePruned`.
-- Add a tree/fragments corpus and structure-aware crossover.
-- Add a worker pool of persistent probes to multiply the single-probe speedup toward the 100x target.
+- full-core worker launcher,
+- signal dedupe,
+- bounded artifact reduction,
+- residual-ambiguity clustering,
+- wide real-source lanes,
+- cheap novelty retention in `interesting.jsonl`.
 
-## Smoke Result
+Phase 2 is partially implemented:
 
-Initial smoke run:
+- record grammar alternates reached by final derivations,
 
-```sh
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner --iterations 5 --timeout 15
-```
+Phase 2 should next make novelty broader:
 
-Recent smoke run:
+- replace name/body alternate fingerprints with explicit stable alternate IDs,
+- record SwiftSyntax node kinds and converter fallback diagnostics,
+- retain sources that cover a new node kind, Oracle prune kind, or converter diagnostic.
 
-```sh
-SwiftSyntaxFuzzer/.build/advent-fuzz-runner --iterations 8 --timeout 15 --quiet-passes --output /tmp/advent-fuzzer-smoke
-```
+Phase 3 should add structure-aware mutation:
 
-Result after compiler parse and type-check tie-breaks: 7 `same`, 1 `compiler-typecheck-rejects-swiftsyntax-accepts`.
+- parse retained sources into SwiftSyntax trees,
+- delete, duplicate, swap, and wrap same-kind nodes,
+- splice expressions/types/patterns only into compatible contexts,
+- use `interesting.jsonl` as the evolving corpus.
 
-The telemetry artifact was:
+Phase 4 should add grammar-directed generation:
 
-```swift
-struct Fuzz<T: any P> { var value: T }
-```
+- generate from `Swift.apus` with depth limits,
+- bias alternatives by inverse hit count,
+- validate generated sources against swift-syntax,
+- feed accepted or novel rejected sources back into the retained corpus.
 
-That confirms the runner can persist divergences for offline triage without counting compiler-rejected generic constraints as Advent underacceptance bugs.
+Phase 5 should run separate campaigns for converter parity:
+
+- artifact and signal policy optimized for `tree-difference`,
+- passing-source retention based on new SwiftSyntax dump shapes,
+- tree-difference clustering by first normalized dump divergence.

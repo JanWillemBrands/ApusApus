@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00217036-advent-overaccept-24941fdec4c5d4be.json",
+    "durationSeconds" : 0.03190791606903076,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:space+delete+glue:declaration:testProtocolParsing#2+phase3-enum-case:case-ifconfig-else",
+    "index" : 217036,
+    "seed" : 3326659872777667553,
+    "signalHash" : "089969214d4de1fb",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/Function",
+    "sourceHash" : "24941fdec4c5d4be",
+    "sourceLength" : 89,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\n P  { init() }\nenum E {\n#if FOO\ncase value(Int)\n#else\ncase other\n#endif\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  DeclReferenceExpr\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n              rightBrace \"}\"\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"E\") \"E\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    IfConfigDecl\n                      IfConfigClauseList\n                        IfConfigClause\n                          poundIf \"#if\"\n                          DeclReferenceExpr\n                            identifier(\"FOO\") \"FOO\"\n                          MemberBlockItemList\n                      poundEndif \"#endif\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "memberIfDirectiveClause\t[ifDirective compilationCondition <n> ]",
+      "memberConditionalCompilationBlock\t[memberIfDirectiveClause   endifDirective]",
+      "memberCompilerControlStatement\t[memberConditionalCompilationBlock]",
+      "enumMember\t[memberCompilerControlStatement]",
+      "enumMembers\t[enumMember ]",
+      ".OPT\t[enumMembers]",
+      "enumName\t[identifierToken]",
+      "enumDeclaration\t[  \"enum\" enumName    \"{\"  \"}\"]",
+      "declaration\t[enumDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "statements\t[statement statementSeparator statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 188,
+      "descriptorCount" : 427,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 125,
+      "parseSeconds" : 0.005913972854614258,
+      "sourceLength" : 40,
+      "suppressedDescriptorCount" : 51,
+      "tokenCount" : 13,
+      "yieldCount" : 251
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        FunctionParameterList\n              rightBrace \"}\"\n          CodeBlockItem\n            EnumDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.enum) \"enum\"\n              identifier(\"E\") \"E\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                  MemberBlockItem\n                    IfConfigDecl\n                      IfConfigClauseList\n                        IfConfigClause\n                          poundIf \"#if\"\n                          DeclReferenceExpr\n                            identifier(\"FOO\") \"FOO\"\n                          MemberBlockItemList\n                      poundEndif \"#endif\"\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {  { init }\nenum E {\n#if FOO\n#endif\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  DeclReferenceExpr\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"E\\\") \\\"E\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    IfConfigDecl\\n                      IfConfigClauseList\\n                        IfConfigClause\\n                          poundIf \\\"#if\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                          MemberBlockItemList\\n                      poundEndif \\\"#endif\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"memberIfDirectiveClause\\t[ifDirective compilationCondition <n> ]\",\"memberConditionalCompilationBlock\\t[memberIfDirectiveClause   endifDirective]\",\"memberCompilerControlStatement\\t[memberConditionalCompilationBlock]\",\"enumMember\\t[memberCompilerControlStatement]\",\"enumMembers\\t[enumMember ]\",\".OPT\\t[enumMembers]\",\"enumName\\t[identifierToken]\",\"enumDeclaration\\t[  \\\"enum\\\" enumName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[enumDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"statements\\t[statement statementSeparator statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":188,\"descriptorCount\":427,\"duplicateDescriptorCount\":0,\"oraclePruned\":125,\"parseSeconds\":0.005913972854614258,\"sourceLength\":40,\"suppressedDescriptorCount\":51,\"tokenCount\":13,\"yieldCount\":251},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        FunctionParameterList\\n              rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            EnumDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.enum) \\\"enum\\\"\\n              identifier(\\\"E\\\") \\\"E\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                  MemberBlockItem\\n                    IfConfigDecl\\n                      IfConfigClauseList\\n                        IfConfigClause\\n                          poundIf \\\"#if\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"FOO\\\") \\\"FOO\\\"\\n                          MemberBlockItemList\\n                      poundEndif \\\"#endif\\\"\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

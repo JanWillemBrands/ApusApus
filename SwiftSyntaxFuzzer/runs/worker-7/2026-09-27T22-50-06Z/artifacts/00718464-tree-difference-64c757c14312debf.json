@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00718464-tree-difference-64c757c14312debf.json",
+    "durationSeconds" : 0.032138943672180176,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:keyword:fuzz-harvest:dot-own-line",
+    "index" : 718464,
+    "seed" : 17418700093595237275,
+    "signalHash" : "1f41927eac9fb8de",
+    "signalSummary" : "tree-difference|line=13|ref=DeclReferenceExpr|advent=MemberAccessExpr",
+    "sourceHash" : "64c757c14312debf",
+    "sourceLength" : 47,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let v = f { didSet }\n.\nmember\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"v\") \"v\"\n            InitializerClause\n              equal \"=\"\n              MemberAccessExpr\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"f\") \"f\"\n                  LabeledExprList\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        DeclReferenceExpr\n                          identifier(\"didSet\") \"didSet\"\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n                period \".\"\n                DeclReferenceExpr\n                  identifier(\"member\") \"member\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[<s> \".\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "nonLiteralPrimary\t[genericIdentifier]",
+      "nonLiteralPostfix\t[nonLiteralPrimary]",
+      "functionCallExpression\t[nonLiteralPostfix >n< trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      ".OPT\t[initializer]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 150,
+      "descriptorCount" : 431,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 249,
+      "parseSeconds" : 0.004860043525695801,
+      "sourceLength" : 29,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 9,
+      "yieldCount" : 354
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"v\") \"v\"\n            InitializerClause\n              equal \"=\"\n              DeclReferenceExpr\n                identifier(\"f\") \"f\"\n            AccessorBlock\n              leftBrace \"{\"\n              AccessorDeclList\n                AccessorDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.didSet) \"didSet\"\n              rightBrace \"}\"\n    CodeBlockItem\n      MemberAccessExpr\n        period \".\"\n        DeclReferenceExpr\n          identifier(\"member\") \"member\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 27,
+  "source" : "let v = f { didSet }\n.\nmember",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"v\\\") \\\"v\\\"\\n            InitializerClause\\n              equal \\\"=\\\"\\n              MemberAccessExpr\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"f\\\") \\\"f\\\"\\n                  LabeledExprList\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        DeclReferenceExpr\\n                          identifier(\\\"didSet\\\") \\\"didSet\\\"\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"member\\\") \\\"member\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[<s> \\\".\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"nonLiteralPrimary\\t[genericIdentifier]\",\"nonLiteralPostfix\\t[nonLiteralPrimary]\",\"functionCallExpression\\t[nonLiteralPostfix >n< trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\".OPT\\t[initializer]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern ]\",\"patternInitializerList\\t[patternInitializer ]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":150,\"descriptorCount\":431,\"duplicateDescriptorCount\":0,\"oraclePruned\":249,\"parseSeconds\":0.004860043525695801,\"sourceLength\":29,\"suppressedDescriptorCount\":46,\"tokenCount\":9,\"yieldCount\":354},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"v\\\") \\\"v\\\"\\n            InitializerClause\\n              equal \\\"=\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"f\\\") \\\"f\\\"\\n            AccessorBlock\\n              leftBrace \\\"{\\\"\\n              AccessorDeclList\\n                AccessorDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.didSet) \\\"didSet\\\"\\n              rightBrace \\\"}\\\"\\n    CodeBlockItem\\n      MemberAccessExpr\\n        period \\\".\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"member\\\") \\\"member\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00082857-advent-overaccept-f335be8dbb447c7a.json",
+    "durationSeconds" : 0.037706971168518066,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:line-comment+line-comment+splice:translated:testDiagnoseAvailability3#1",
+    "index" : 82857,
+    "seed" : 17418700093595237275,
+    "signalHash" : "708e753fa88da385",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionD",
+    "sourceHash" : "f335be8dbb447c7a",
+    "sourceLength" : 121,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n@available(OSX, meta2: 10.0 \/\/ c\n, deprecated: 10.12) \/\/ no error\nfunc introducedFollowedByDeprecated() \/\/ c\n {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"available\") \"available\"\n                  leftParen \"(\"\n                  AvailabilityArgumentList\n                    AvailabilityArgument\n                      AvailabilityLabeledArgument\n                        identifier(\"OSX\") \"OSX\"\n                        colon \":\"\n                        VersionTuple\n                          integerLiteral(\"10\") \"10\"\n                          VersionComponentList\n                            VersionComponent\n                              period \".\"\n                              integerLiteral(\"0\") \"0\"\n                      comma \",\"\n                    AvailabilityArgument\n                      keyword(SwiftSyntax.Keyword.deprecated) \"deprecated\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"introducedFollowedByDeprecated\") \"introducedFollowedByDeprecated\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "platformName\t[identifierToken]",
+      "availabilityAttributeArgument\t[platformName ]",
+      ".KLN\t[\",\" availabilityAttributeArgument]",
+      "platformVersion\t[decimalDigits \".\" >n< decimalDigits]",
+      "availabilityValue\t[platformVersion]",
+      "availabilityLabel\t[identifierToken]",
+      "availabilityAttributeArgument\t[availabilityLabel \":\" availabilityValue]",
+      "availabilityAttributeArguments\t[availabilityAttributeArgument ]",
+      "availableAttribute\t[\"@\" >s< \"available\" >s< \"(\" availabilityAttributeArguments \")\"]",
+      "attribute\t[availableAttribute]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 137,
+      "descriptorCount" : 325,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 131,
+      "parseSeconds" : 0.008211970329284668,
+      "sourceLength" : 99,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 17,
+      "yieldCount" : 232
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"available\") \"available\"\n                  leftParen \"(\"\n                  AvailabilityArgumentList\n                    AvailabilityArgument\n                      PlatformVersion\n                        identifier(\"OSX\") \"OSX\"\n                  UnexpectedNodes\n                    colon \":\"\n                    floatLiteral(\"10.0\") \"10.0\"\n                    comma \",\"\n                    identifier(\"deprecated\") \"deprecated\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"introducedFollowedByDeprecated\") \"introducedFollowedByDeprecated\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n@available(OSX: 10.0 \/\/ c\n, deprecated) \/\/ no error\nfunc introducedFollowedByDeprecated() \/\/ c\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"available\\\") \\\"available\\\"\\n                  leftParen \\\"(\\\"\\n                  AvailabilityArgumentList\\n                    AvailabilityArgument\\n                      AvailabilityLabeledArgument\\n                        identifier(\\\"OSX\\\") \\\"OSX\\\"\\n                        colon \\\":\\\"\\n                        VersionTuple\\n                          integerLiteral(\\\"10\\\") \\\"10\\\"\\n                          VersionComponentList\\n                            VersionComponent\\n                              period \\\".\\\"\\n                              integerLiteral(\\\"0\\\") \\\"0\\\"\\n                      comma \\\",\\\"\\n                    AvailabilityArgument\\n                      keyword(SwiftSyntax.Keyword.deprecated) \\\"deprecated\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"introducedFollowedByDeprecated\\\") \\\"introducedFollowedByDeprecated\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"platformName\\t[identifierToken]\",\"availabilityAttributeArgument\\t[platformName ]\",\".KLN\\t[\\\",\\\" availabilityAttributeArgument]\",\"platformVersion\\t[decimalDigits \\\".\\\" >n< decimalDigits]\",\"availabilityValue\\t[platformVersion]\",\"availabilityLabel\\t[identifierToken]\",\"availabilityAttributeArgument\\t[availabilityLabel \\\":\\\" availabilityValue]\",\"availabilityAttributeArguments\\t[availabilityAttributeArgument ]\",\"availableAttribute\\t[\\\"@\\\" >s< \\\"available\\\" >s< \\\"(\\\" availabilityAttributeArguments \\\")\\\"]\",\"attribute\\t[availableAttribute]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":137,\"descriptorCount\":325,\"duplicateDescriptorCount\":0,\"oraclePruned\":131,\"parseSeconds\":0.008211970329284668,\"sourceLength\":99,\"suppressedDescriptorCount\":33,\"tokenCount\":17,\"yieldCount\":232},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"available\\\") \\\"available\\\"\\n                  leftParen \\\"(\\\"\\n                  AvailabilityArgumentList\\n                    AvailabilityArgument\\n                      PlatformVersion\\n                        identifier(\\\"OSX\\\") \\\"OSX\\\"\\n                  UnexpectedNodes\\n                    colon \\\":\\\"\\n                    floatLiteral(\\\"10.0\\\") \\\"10.0\\\"\\n                    comma \\\",\\\"\\n                    identifier(\\\"deprecated\\\") \\\"deprecated\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"introducedFollowedByDeprecated\\\") \\\"introducedFollowedByDeprecated\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

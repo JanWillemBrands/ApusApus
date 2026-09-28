@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00124898-advent-overaccept-32426ad88c5b5831.json",
+    "durationSeconds" : 0.030616044998168945,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+block-comment:real:CompilerPluginMessageHandler:144+declaration:testUsing#3",
+    "index" : 124898,
+    "seed" : 17418700093595237275,
+    "signalHash" : "81527cbba757b2d7",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/ProtocolD",
+    "sourceHash" : "32426ad88c5b5831",
+    "sourceLength" : 547,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\npublic protocol PluginMessageHandler {\n  \/\/\/ Handles a single message received from the plugin host.\n  func handleMessage(_ message: HostToPluginMessage) -> PluginToHostMessage\n\n  \/\/\/ Deterministically and synchronously cleans up resources that cannot be dealt with in\n  \/\/\/ a deinitializer due to possible errors thrown during the clean up. Usually this\n  \/\/\/ includes closure of file handles, sockets, shutting down external processes and IPC\n  \/\/\/ resources set up for these processes, etc.\n  func shutDown(\n) throws\n\/*c*\/}\nusing @Test\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"shutDown\") \"shutDown\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n              rightBrace \"}\"\n          CodeBlockItem\n            UsingDecl\n              keyword(SwiftSyntax.Keyword.using) \"using\"\n              identifier(\"Test\") \"Test\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "usingModifier\t[identifier]",
+      ".DO\t[usingModifier]",
+      "usingDeclaration\t[\"using\" >n< ]",
+      "declaration\t[usingDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement ]",
+      "statementSeparator\t[<n>]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement statementSeparator statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 122,
+      "descriptorCount" : 312,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 103,
+      "parseSeconds" : 0.006101012229919434,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 10,
+      "yieldCount" : 206
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.func) \"func\"\n                    identifier(\"shutDown\") \"shutDown\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                        rightParen \")\"\n              rightBrace \"}\"\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"using\") \"using\"\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"Test\") \"Test\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  func shutDown(\n)\n\/*c*\/}\nusing Test\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"shutDown\\\") \\\"shutDown\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            UsingDecl\\n              keyword(SwiftSyntax.Keyword.using) \\\"using\\\"\\n              identifier(\\\"Test\\\") \\\"Test\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"usingModifier\\t[identifier]\",\".DO\\t[usingModifier]\",\"usingDeclaration\\t[\\\"using\\\" >n< ]\",\"declaration\\t[usingDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement ]\",\"statementSeparator\\t[<n>]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement statementSeparator statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":122,\"descriptorCount\":312,\"duplicateDescriptorCount\":0,\"oraclePruned\":103,\"parseSeconds\":0.006101012229919434,\"sourceLength\":43,\"suppressedDescriptorCount\":27,\"tokenCount\":10,\"yieldCount\":206},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                    identifier(\\\"shutDown\\\") \\\"shutDown\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"using\\\") \\\"using\\\"\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"Test\\\") \\\"Test\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

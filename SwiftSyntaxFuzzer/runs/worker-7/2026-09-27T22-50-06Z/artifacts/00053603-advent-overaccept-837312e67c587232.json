@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00053603-advent-overaccept-837312e67c587232.json",
+    "durationSeconds" : 0.027598977088928223,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline+newline:translated:testEnum81b#1",
+    "index" : 53603,
+    "seed" : 17418700093595237275,
+    "signalHash" : "f6acbe439e208384",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/Expressio",
+    "sourceHash" : "837312e67c587232",
+    "sourceLength" : 48,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\nswitch self { case A\n(_): break\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ExpressionStmt\n                  SwitchExpr\n                    keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                    DeclReferenceExpr\n                      keyword(SwiftSyntax.Keyword.self) \"self\"\n                    leftBrace \"{\"\n                    SwitchCaseList\n                      SwitchCase\n                        SwitchCaseLabel\n                          keyword(SwiftSyntax.Keyword.case) \"case\"\n                          SwitchCaseItemList\n                            SwitchCaseItem\n                              ExpressionPattern\n                                FunctionCallExpr\n                                  DeclReferenceExpr\n                                    identifier(\"A\") \"A\"\n                                  leftParen \"(\"\n                                  LabeledExprList\n                                  rightParen \")\"\n                                  MultipleTrailingClosureElementList\n                          colon \":\"\n                        CodeBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "tupleMatchPattern\t[\"(\"  \")\"]",
+      "identifierToken\t[identifier]",
+      "enumCaseName\t[identifierToken]",
+      "enumCasePattern\t[enumCaseName tupleMatchPattern]",
+      "matchPattern\t[enumCasePattern]",
+      "caseItemList\t[matchPattern  ]",
+      "caseLabel\t[ \"case\" caseItemList \":\"]",
+      "switchCase\t[caseLabel ]",
+      "switchCases\t[switchCase ]",
+      ".OPT\t[switchCases]",
+      "selfExpression\t[\"self\"]",
+      "primaryExpression\t[selfExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "switchExpression\t[\"switch\" >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "expression\t[  conditionalExpression ]",
+      "statement\t[expression]",
+      "ifConfigStatement\t[statement]",
+      "ifConfigStatements\t[ifConfigStatement ]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 218,
+      "descriptorCount" : 493,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 137,
+      "parseSeconds" : 0.010515928268432617,
+      "sourceLength" : 41,
+      "suppressedDescriptorCount" : 26,
+      "tokenCount" : 13,
+      "yieldCount" : 233
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                ExpressionStmt\n                  SwitchExpr\n                    keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                    DeclReferenceExpr\n                      keyword(SwiftSyntax.Keyword.self) \"self\"\n                    leftBrace \"{\"\n                    SwitchCaseList\n                      SwitchCase\n                        SwitchCaseLabel\n                          keyword(SwiftSyntax.Keyword.case) \"case\"\n                          SwitchCaseItemList\n                            SwitchCaseItem\n                              ExpressionPattern\n                                DeclReferenceExpr\n                                  identifier(\"A\") \"A\"\n                        CodeBlockItemList\n                          CodeBlockItem\n                            TupleExpr\n                              leftParen \"(\"\n                              LabeledExprList\n                              rightParen \")\"\n                          CodeBlockItem\n                            UnexpectedCodeDecl\n                              UnexpectedNodes\n                                colon \":\"\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 42,
+  "source" : "#if FOO\nswitch self { case A\n():\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ExpressionStmt\\n                  SwitchExpr\\n                    keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                    DeclReferenceExpr\\n                      keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                    leftBrace \\\"{\\\"\\n                    SwitchCaseList\\n                      SwitchCase\\n                        SwitchCaseLabel\\n                          keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                          SwitchCaseItemList\\n                            SwitchCaseItem\\n                              ExpressionPattern\\n                                FunctionCallExpr\\n                                  DeclReferenceExpr\\n                                    identifier(\\\"A\\\") \\\"A\\\"\\n                                  leftParen \\\"(\\\"\\n                                  LabeledExprList\\n                                  rightParen \\\")\\\"\\n                                  MultipleTrailingClosureElementList\\n                          colon \\\":\\\"\\n                        CodeBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"tupleMatchPattern\\t[\\\"(\\\"  \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"enumCaseName\\t[identifierToken]\",\"enumCasePattern\\t[enumCaseName tupleMatchPattern]\",\"matchPattern\\t[enumCasePattern]\",\"caseItemList\\t[matchPattern  ]\",\"caseLabel\\t[ \\\"case\\\" caseItemList \\\":\\\"]\",\"switchCase\\t[caseLabel ]\",\"switchCases\\t[switchCase ]\",\".OPT\\t[switchCases]\",\"selfExpression\\t[\\\"self\\\"]\",\"primaryExpression\\t[selfExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"switchExpression\\t[\\\"switch\\\" >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"expression\\t[  conditionalExpression ]\",\"statement\\t[expression]\",\"ifConfigStatement\\t[statement]\",\"ifConfigStatements\\t[ifConfigStatement ]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":218,\"descriptorCount\":493,\"duplicateDescriptorCount\":0,\"oraclePruned\":137,\"parseSeconds\":0.010515928268432617,\"sourceLength\":41,\"suppressedDescriptorCount\":26,\"tokenCount\":13,\"yieldCount\":233},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                ExpressionStmt\\n                  SwitchExpr\\n                    keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                    DeclReferenceExpr\\n                      keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                    leftBrace \\\"{\\\"\\n                    SwitchCaseList\\n                      SwitchCase\\n                        SwitchCaseLabel\\n                          keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                          SwitchCaseItemList\\n                            SwitchCaseItem\\n                              ExpressionPattern\\n                                DeclReferenceExpr\\n                                  identifier(\\\"A\\\") \\\"A\\\"\\n                        CodeBlockItemList\\n                          CodeBlockItem\\n                            TupleExpr\\n                              leftParen \\\"(\\\"\\n                              LabeledExprList\\n                              rightParen \\\")\\\"\\n                          CodeBlockItem\\n                            UnexpectedCodeDecl\\n                              UnexpectedNodes\\n                                colon \\\":\\\"\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00061770-advent-overaccept-0c6523d301cc3046.json",
+    "durationSeconds" : 0.01776599884033203,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+block-comment:translated:testNumberIdentifierErrors1#1+expression:testKeypathExpression#7",
+    "index" : 61770,
+    "seed" : 13064011101222712141,
+    "signalHash" : "d7f2e1f9f96cbd06",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/KeyPathEx",
+    "sourceHash" : "0c6523d301cc3046",
+    "sourceLength" : 210,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n\/\/ Per rdar:\/\/problem\/32316666 , it is a common mistake for beginners\n\/\/ to start a function name with a number, so it's worth\n\/\/ special-casing the diagnostic to make it clearer.\n\/*c*\/\\S<T>. \/* c *\/ x\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              PostfixOperatorExpr\n                DeclReferenceExpr\n                  identifier(\"T\") \"T\"\n                postfixOperator(\">\") \">\"\n              period \".\"\n              DeclReferenceExpr\n                identifier(\"x\") \"x\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "memberName\t[identifier]",
+      ".DO\t[>s< \".\" >n<]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression >s< postfixOperatorToken >+>(\")\" \",\" \".\" \":\" \";\" \"]\" \"}\" ○)]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 89,
+      "descriptorCount" : 245,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 156,
+      "parseSeconds" : 0.003836989402770996,
+      "sourceLength" : 10,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 6,
+      "yieldCount" : 225
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            MemberAccessExpr\n              PostfixOperatorExpr\n                DeclReferenceExpr\n                  identifier(\"T\") \"T\"\n                postfixOperator(\">\") \">\"\n              UnexpectedNodes\n                period \".\"\n              DeclReferenceExpr\n                identifier(\"x\") \"x\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 34,
+  "source" : " {\nT>. x\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              PostfixOperatorExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"T\\\") \\\"T\\\"\\n                postfixOperator(\\\">\\\") \\\">\\\"\\n              period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"x\\\") \\\"x\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"memberName\\t[identifier]\",\".DO\\t[>s< \\\".\\\" >n<]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression >s< postfixOperatorToken >+>(\\\")\\\" \\\",\\\" \\\".\\\" \\\":\\\" \\\";\\\" \\\"]\\\" \\\"}\\\" ○)]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":89,\"descriptorCount\":245,\"duplicateDescriptorCount\":0,\"oraclePruned\":156,\"parseSeconds\":0.003836989402770996,\"sourceLength\":10,\"suppressedDescriptorCount\":33,\"tokenCount\":6,\"yieldCount\":225},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            MemberAccessExpr\\n              PostfixOperatorExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"T\\\") \\\"T\\\"\\n                postfixOperator(\\\">\\\") \\\">\\\"\\n              UnexpectedNodes\\n                period \\\".\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"x\\\") \\\"x\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

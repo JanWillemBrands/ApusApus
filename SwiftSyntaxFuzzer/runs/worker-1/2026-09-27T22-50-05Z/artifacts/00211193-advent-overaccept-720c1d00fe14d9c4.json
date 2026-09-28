@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00211193-advent-overaccept-720c1d00fe14d9c4.json",
+    "durationSeconds" : 0.0911940336227417,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline:translated:testFunctionTypeExpr#3+translated:testRawString34#1",
+    "index" : 211193,
+    "seed" : 4354586988532835097,
+    "signalHash" : "7b8cc843afdd624e",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/ClosureSignature\/AttributeList\/ClosurePar",
+    "sourceHash" : "720c1d00fe14d9c4",
+    "sourceLength" : 458,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n(X) -> Y -> Z\n_ = #\"enum\\s+.+\\{.*case\\s+[:upper:]\"#\n_ = #\"Alice: \"How long is forever?\" White Rabbit: \"Sometimes, just one second.\"\"#\n_\n= #\"\\#\\#1\"#\n_ = ##\"\\#1\"##\n_ = #\"c:\\windows\\system32\"#\n_ = #\"\\d{3) \\d{3} \\d{4}\"#\n_ = #\"\"\"\n    a string with\n    \"\"\"\n    in it\n    \"\"\"#\n_ = #\"a raw string containing \\r\\n\"#\n_ = #\"\"\"\n    [\n        {\n            \"id\": \"12345\",\n            \"title\": \"A title that \\\"contains\\\" \\\\\\\"\"\n        }\n    ]\n    \"\"\"#\n_ = #\"# #\"#\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                ArrowExpr\n                  arrow \"->\"\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n                AssignmentExpr\n                  equal \"=\"\n                StringLiteralExpr\n                  rawStringPoundDelimiter(\"#\") \"#\"\n                  multilineStringQuote \"\"\"\"\"\n                  StringLiteralSegmentList\n                  multilineStringQuote \"\"\"\"\"\n                  rawStringPoundDelimiter(\"#\") \"#\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "staticStringLiteral\t[extendedMultilineStringLiteral]",
+      "stringLiteral\t[staticStringLiteral]",
+      "literal\t[stringLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr   prefixExpression]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 131,
+      "descriptorCount" : 337,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 129,
+      "parseSeconds" : 0.011901021003723145,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 8,
+      "yieldCount" : 232
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        ClosureSignature\n          AttributeList\n          ClosureParameterClause\n            leftParen \"(\"\n            ClosureParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            IdentifierType\n              wildcard \"_\"\n        CodeBlockItemList\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                equal \"=\"\n                rawStringPoundDelimiter(\"#\") \"#\"\n                multilineStringQuote \"\"\"\"\"\n                stringSegment(\"    \") \"    \"\n                multilineStringQuote \"\"\"\"\"\n                rawStringPoundDelimiter(\"#\") \"#\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n() ->\n_ = #\"\"\"\n    \"\"\"#\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                StringLiteralExpr\\n                  rawStringPoundDelimiter(\\\"#\\\") \\\"#\\\"\\n                  multilineStringQuote \\\"\\\"\\\"\\\"\\\"\\n                  StringLiteralSegmentList\\n                  multilineStringQuote \\\"\\\"\\\"\\\"\\\"\\n                  rawStringPoundDelimiter(\\\"#\\\") \\\"#\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"staticStringLiteral\\t[extendedMultilineStringLiteral]\",\"stringLiteral\\t[staticStringLiteral]\",\"literal\\t[stringLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr   prefixExpression]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":131,\"descriptorCount\":337,\"duplicateDescriptorCount\":0,\"oraclePruned\":129,\"parseSeconds\":0.011901021003723145,\"sourceLength\":28,\"suppressedDescriptorCount\":30,\"tokenCount\":8,\"yieldCount\":232},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        ClosureSignature\\n          AttributeList\\n          ClosureParameterClause\\n            leftParen \\\"(\\\"\\n            ClosureParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            IdentifierType\\n              wildcard \\\"_\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                equal \\\"=\\\"\\n                rawStringPoundDelimiter(\\\"#\\\") \\\"#\\\"\\n                multilineStringQuote \\\"\\\"\\\"\\\"\\\"\\n                stringSegment(\\\"    \\\") \\\"    \\\"\\n                multilineStringQuote \\\"\\\"\\\"\\\"\\\"\\n                rawStringPoundDelimiter(\\\"#\\\") \\\"#\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

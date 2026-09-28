@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00073000-advent-overaccept-7ffddf19c35a5152.json",
+    "durationSeconds" : 0.02184593677520752,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:swap+delete:translated:testIfconfigExpr6#1",
+    "index" : 73000,
+    "seed" : 10372684106311075726,
+    "signalHash" : "b638983bf87b84ea",
+    "signalSummary" : "advent-overaccept|swiftSyntaxHasError=true|adventBuiltTree=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/PostfixIf",
+    "sourceHash" : "7ffddf19c35a5152",
+    "sourceLength" : 77,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nMyStruct()\n#if CONDITION_1\n  .methodOne()\n#else\n  (methodTwo)\n#endif\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            PostfixIfConfigExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              IfConfigDecl\n                IfConfigClauseList\n                  IfConfigClause\n                    poundIf \"#if\"\n                    DeclReferenceExpr\n                      identifier(\"CONDITION_1\") \"CONDITION_1\"\n                    FunctionCallExpr\n                      MemberAccessExpr\n                        period \".\"\n                        DeclReferenceExpr\n                          identifier(\"methodOne\") \"methodOne\"\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                  IfConfigClause\n                    poundElse \"#else\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerChecked" : false,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixIfBody\t[postfixExpression]",
+      ".OPT\t[postfixIfBody]",
+      "elseDirective\t[\"#else\" <n>]",
+      "postfixElseDirectiveClause\t[elseDirective ]",
+      ".OPT\t[postfixElseDirectiveClause]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "memberName\t[identifier]",
+      "implicitMemberExpression\t[\".\"  memberName]",
+      "primaryExpression\t[implicitMemberExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "identifierToken\t[identifier]",
+      "compilationCondition\t[identifierToken]",
+      "ifDirective\t[\"#if\"]",
+      "postfixIfDirectiveClause\t[ifDirective compilationCondition >+>(\"#if\" \".\") <n> postfixIfBody]",
+      "postfixConditionalCompilationBlock\t[postfixIfDirectiveClause   endifDirective]",
+      "explicitMemberExpression\t[postfixExpression postfixConditionalCompilationBlock]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[  prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 185,
+      "descriptorCount" : 468,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 174,
+      "parseSeconds" : 0.006479978561401367,
+      "sourceLength" : 56,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 14,
+      "yieldCount" : 287
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            PostfixIfConfigExpr\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n              IfConfigDecl\n                IfConfigClauseList\n                  IfConfigClause\n                    poundIf \"#if\"\n                    DeclReferenceExpr\n                      identifier(\"CONDITION_1\") \"CONDITION_1\"\n                    FunctionCallExpr\n                      MemberAccessExpr\n                        period \".\"\n                        DeclReferenceExpr\n                          identifier(\"methodOne\") \"methodOne\"\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                  IfConfigClause\n                    poundElse \"#else\"\n                UnexpectedNodes\n                  leftParen \"(\"\n                  rightParen \")\"\n                poundEndif \"#endif\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n()\n#if CONDITION_1\n  .methodOne()\n#else\n  ()\n#endif\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            PostfixIfConfigExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              IfConfigDecl\\n                IfConfigClauseList\\n                  IfConfigClause\\n                    poundIf \\\"#if\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"CONDITION_1\\\") \\\"CONDITION_1\\\"\\n                    FunctionCallExpr\\n                      MemberAccessExpr\\n                        period \\\".\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"methodOne\\\") \\\"methodOne\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                  IfConfigClause\\n                    poundElse \\\"#else\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerChecked\":false,\"compilerTypecheckChecked\":false,\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"postfixIfBody\\t[postfixExpression]\",\".OPT\\t[postfixIfBody]\",\"elseDirective\\t[\\\"#else\\\" <n>]\",\"postfixElseDirectiveClause\\t[elseDirective ]\",\".OPT\\t[postfixElseDirectiveClause]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"memberName\\t[identifier]\",\"implicitMemberExpression\\t[\\\".\\\"  memberName]\",\"primaryExpression\\t[implicitMemberExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"identifierToken\\t[identifier]\",\"compilationCondition\\t[identifierToken]\",\"ifDirective\\t[\\\"#if\\\"]\",\"postfixIfDirectiveClause\\t[ifDirective compilationCondition >+>(\\\"#if\\\" \\\".\\\") <n> postfixIfBody]\",\"postfixConditionalCompilationBlock\\t[postfixIfDirectiveClause   endifDirective]\",\"explicitMemberExpression\\t[postfixExpression postfixConditionalCompilationBlock]\",\"postfixExpression\\t[explicitMemberExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[  prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":185,\"descriptorCount\":468,\"duplicateDescriptorCount\":0,\"oraclePruned\":174,\"parseSeconds\":0.006479978561401367,\"sourceLength\":56,\"suppressedDescriptorCount\":45,\"tokenCount\":14,\"yieldCount\":287},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            PostfixIfConfigExpr\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n              IfConfigDecl\\n                IfConfigClauseList\\n                  IfConfigClause\\n                    poundIf \\\"#if\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"CONDITION_1\\\") \\\"CONDITION_1\\\"\\n                    FunctionCallExpr\\n                      MemberAccessExpr\\n                        period \\\".\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"methodOne\\\") \\\"methodOne\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                  IfConfigClause\\n                    poundElse \\\"#else\\\"\\n                UnexpectedNodes\\n                  leftParen \\\"(\\\"\\n                  rightParen \\\")\\\"\\n                poundEndif \\\"#endif\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}
