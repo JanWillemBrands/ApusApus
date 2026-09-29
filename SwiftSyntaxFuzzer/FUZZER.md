@@ -1,14 +1,14 @@
 # ApusApus SwiftSyntax Fuzzer
 
-Differential fuzzer for `Swift.apus` against `swiftc -parse`. The fuzzer generates or mutates
-Swift source, sends each input to `advent-fuzz-probe`, and records compiler/ApusApus mismatches,
-residual ambiguity, tree-conversion gaps, telemetry, and novelty. SwiftSyntax is an instrument for
-reference trees and corpus material; it is not the validity oracle.
+Differential fuzzer for `Swift.apus` against both `swiftc -swift-version 6 -parse` and SwiftSyntax.
+The fuzzer generates or mutates Swift source, sends each input to `advent-fuzz-probe`, and records
+strong compiler/SwiftSyntax/ApusApus mismatches, residual ambiguity, tree-conversion gaps,
+telemetry, and novelty.
 
 ## Components
 
 - `Sources/AdventProbe/ProbeMain.swift`: one-input probe. It loads `Swift.apus`, compares
-  `swiftc -parse` and ApusApus, and emits one JSON response.
+  `swiftc -swift-version 6 -parse`, SwiftSyntax, and ApusApus, and emits one JSON response.
 - `Sources/AdventFuzzRunner/main.swift`: run supervisor, generator, artifact writer, telemetry,
   novelty retention, and persistent-probe driver.
 - `Sources/AdventFuzzRunner/Widening.swift`: token mutator, wide real-source contexts, and artifact
@@ -121,18 +121,34 @@ Artifact JSON includes:
 Reduction preserves the compiler-first status. For reduced artifacts, `source` should keep the same
 compiler parse result and ApusApus failure class as `originalSource`.
 
+## Oracle Policy
+
+The fuzzer currently uses a **strong-bug policy** for acceptance mismatches:
+
+- If `swiftc -swift-version 6 -parse` and SwiftSyntax agree, ApusApus must agree with them.
+- If `swiftc` and SwiftSyntax disagree, the input is `reference-disagreement`; it is telemetry, not
+  an ApusApus grammar bug by default.
+- This is deliberate. The current phase favors grammar simplicity and avoids churn from choosing a
+  final winner between compiler strictness and SwiftSyntax recovery.
+
+Only strong bugs should become grammar TODOs during this phase. Reference-disagreement clusters can
+be revisited later if the project chooses a single final acceptance oracle.
+
 ## Outcome Classes
 
-- `same`: `swiftc -parse` and ApusApus agree on syntax acceptance.
-- `advent-underaccept`: `swiftc -parse` accepts, but ApusApus does not build a tree.
-- `advent-overaccept`: `swiftc -parse` rejects, but ApusApus builds a tree.
-- `residual-ambiguity`: compiler and ApusApus accept, but the post-Oracle derivation is still
-  ambiguous.
+- `same`: compiler and SwiftSyntax agree, and ApusApus agrees with them on syntax acceptance.
+- `reference-disagreement`: compiler and SwiftSyntax disagree; ApusApus agrees with one side.
+- `advent-underaccept`: compiler and SwiftSyntax both accept, but ApusApus does not build a tree.
+- `advent-overaccept`: compiler and SwiftSyntax both reject, but ApusApus builds a tree.
+- `residual-ambiguity`: compiler, SwiftSyntax, and ApusApus accept, but the post-Oracle derivation is
+  still ambiguous.
 - `tree-difference`: compiler, ApusApus, and SwiftSyntax accept, but normalized tree dumps differ.
 - `advent-no-generated-tree`: compiler and ApusApus accept, but the SwiftSyntax generator does not.
 - `timeout`, `crash`, `invalid-probe-output`, `probe-error`: harness or probe failures.
 
-`swiftc -parse` is the validity oracle. SwiftSyntax parse results are reference-tree telemetry only.
+`reference-disagreement` is not in the default artifact status set. It still appears in counts,
+events, and telemetry so long runs can quantify how much fuzzing is landing in compiler/SwiftSyntax
+disagreement space.
 
 ## Generator Lanes
 
@@ -141,6 +157,9 @@ Current lanes are:
 - Curated fragment lanes for known sharp edges: generics, regex, key paths, conditional
   compilation, attributes, interpolation, member lists, declarations, statements, operators, and
   contextual keywords.
+- TSPL-divergence lanes for structural places where `Swift.apus` intentionally differs from the
+  book grammar and where recent runs have less focused coverage: specialized attribute arguments,
+  protocol-body permissiveness, accessor-block commitment, modern type shapes, and pattern shapes.
 - Known-problem seed lanes: raw replay, mutation, wrapping, structural splicing, and crossover.
 - Wide real-source lanes: snippets from swift-syntax and real-source corpora, optionally token
   mutated, then placed in source, function, member, closure, interpolation, and `#if` contexts.

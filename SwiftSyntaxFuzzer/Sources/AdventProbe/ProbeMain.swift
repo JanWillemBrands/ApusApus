@@ -29,6 +29,13 @@ struct ProbeOutput: Codable {
     let compilerTypecheckStderr: String?
     let residualAmbiguities: [String]
     let grammarCoverage: [String]
+    /// Where the parse got stuck, for grouping rejects by CAUSE without reducing each file:
+    /// the furthest input offset any descriptor reached, the source around it, and what the
+    /// grammar expected there. Only meaningful when Advent built no tree.
+    let failureOffset: Int?
+    let failureLine: Int?
+    let failureContext: String?
+    let failureExpected: [String]
     let generatorDiagnostics: [String]
     let referenceDump: String?
     let adventDump: String?
@@ -70,6 +77,7 @@ struct AdventProbe {
                     compilerTypecheckStderr: nil,
                     residualAmbiguities: [],
                     grammarCoverage: [],
+                    failureOffset: nil, failureLine: nil, failureContext: nil, failureExpected: [],
                     generatorDiagnostics: [],
                     referenceDump: nil,
                     adventDump: nil,
@@ -98,6 +106,7 @@ struct AdventProbe {
                 compilerTypecheckStderr: nil,
                 residualAmbiguities: [],
                 grammarCoverage: [],
+                failureOffset: nil, failureLine: nil, failureContext: nil, failureExpected: [],
                 generatorDiagnostics: [],
                 referenceDump: nil,
                 adventDump: nil,
@@ -189,10 +198,30 @@ struct AdventProbe {
         // counts as accepting the input. Keep `adventMatched` in the output as raw telemetry.
         let adventAccepted = builtTree
 
+        // Failure site for reject clustering (crawl triage). `furthestMismatchIndex` is the
+        // furthest position any descriptor reached; the grammar slot there says what it wanted.
+        // The context is the source around it with newlines escaped, so a cluster key is one line.
+        var failureSite: (offset: Int, line: Int, context: String, expected: [String])? = nil
+        if !adventAccepted {
+            let index = parser.furthestMismatchIndex
+            let offset = source.distance(from: source.startIndex, to: index)
+            let line = source[source.startIndex..<index].reduce(1) { $1.isNewline ? $0 + 1 : $0 }
+            let from = source.index(index, offsetBy: -30, limitedBy: source.startIndex) ?? source.startIndex
+            let to = source.index(index, offsetBy: 30, limitedBy: source.endIndex) ?? source.endIndex
+            let context = source[from..<index] + "<HERE>" + source[index..<to]
+            failureSite = (offset, line,
+                           context.replacingOccurrences(of: "\n", with: "⏎"),
+                           parser.furthestMismatchExpected.sorted())
+        }
+
         let compilerResult = runCompilerParse(source: source)
         let compilerTypecheckResult: CompilerResult? = nil
+        let swiftSyntaxAccepted = !referenceHasError
+        let referencesAgree = compilerResult.accepted == swiftSyntaxAccepted
         let status: String
-        if compilerResult.accepted {
+        if !referencesAgree {
+            status = "reference-disagreement"
+        } else if compilerResult.accepted {
             if !adventAccepted {
                 status = "advent-underaccept"
             } else if !ambiguityDiagnostics.isEmpty {
@@ -234,6 +263,10 @@ struct AdventProbe {
             compilerTypecheckStderr: compilerTypecheckResult?.stderr.isEmpty == false ? compilerTypecheckResult?.stderr : nil,
             residualAmbiguities: ambiguityDiagnostics,
             grammarCoverage: grammarCoverage,
+            failureOffset: failureSite?.offset,
+            failureLine: failureSite?.line,
+            failureContext: failureSite?.context,
+            failureExpected: failureSite?.expected ?? [],
             generatorDiagnostics: generatorDiagnostics,
             referenceDump: includeDumps || status != "same" ? referenceDump : nil,
             adventDump: includeDumps || status != "same" ? adventDump : nil,
@@ -248,7 +281,7 @@ struct AdventProbe {
     }
 
     private static func runCompilerParse(source: String) -> CompilerResult {
-        runCompiler(source: source, arguments: ["swiftc", "-parse"], description: "compiler parse")
+        runCompiler(source: source, arguments: ["swiftc", "-swift-version", "6", "-parse"], description: "compiler parse")
     }
 
     private static func runCompilerTypecheck(source: String) -> CompilerResult {
@@ -274,7 +307,7 @@ struct AdventProbe {
         let children: [Foo] = []
 
         """
-        return runCompiler(source: prelude + source, arguments: ["swiftc", "-typecheck"], description: "compiler typecheck")
+        return runCompiler(source: prelude + source, arguments: ["swiftc", "-swift-version", "6", "-typecheck"], description: "compiler typecheck")
     }
 
     private static func runCompiler(source: String, arguments: [String], description: String) -> CompilerResult {
@@ -344,6 +377,7 @@ struct AdventProbe {
             compilerTypecheckStderr: nil,
             residualAmbiguities: [],
             grammarCoverage: [],
+            failureOffset: nil, failureLine: nil, failureContext: nil, failureExpected: [],
             generatorDiagnostics: [],
             referenceDump: nil,
             adventDump: nil,

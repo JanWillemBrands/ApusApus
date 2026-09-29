@@ -1689,6 +1689,7 @@ let phase4DeclSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "init-async",      source: "struct S { init() async {} }",          origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "init-modifier",   source: "class C { public init() {} }",          origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "init-body",       source: "struct S { init() { x = 1 } }",         origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "decl-name-keyword-labels", source: "struct S { func f() { _ = self.versions(for:); _ = self.match(case:in:) } }", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "op-infix",        source: "infix operator +++",                    origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "op-prefix",       source: "prefix operator +++",                   origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "op-postfix",      source: "postfix operator +++",                  origin: "Phase4", syntaxVersion: "603.0.1"),
@@ -2020,6 +2021,18 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "ifconfig-leading-dot-nested", source: "#if os(macOS)\n#if FOO\n.member\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-leading-dot-after-decl", source: "#if os(macOS)\n@MainActor\nfunc fuzz() {}\n#endif\n#if FOO\n.member\n#endif\n#if FOO\nlet fuzzSentinel = 1\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-leading-dot-after-extension", source: "extension UInt8? {\nfunc fuzz() {}\n}\n#if FOO\nlet fuzzSentinel = 1\n#endif\n#if FOO\n.member\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // TODO 3 (2026-09-29): `@_lifetime` was missing — only the bare `lifetime` spelling was listed,
+    // and `self` was not a legal target. Largest reject cluster (29 files) in the 30k-file crawl.
+    SwiftSnippet(label: "lifetime-underscored",      source: "@_lifetime(borrow e)\nfunc f(e: E) -> S {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "lifetime-bare",             source: "@lifetime(borrow e)\nfunc f(e: E) -> S {}",  origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "lifetime-borrow-self",      source: "struct S {\n  @_lifetime(borrow self)\n  public func f() -> T {}\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "lifetime-copy",             source: "@_lifetime(copy e)\nfunc f(e: E) -> S {}",   origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "lifetime-labelled",         source: "@_lifetime(eOut: borrow e)\nfunc f(e: E) -> S {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "lifetime-multiple",         source: "@_lifetime(e1, e2)\nfunc f() -> S {}",       origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "lifetime-inout",            source: "@_lifetime(&e)\nfunc f() -> S {}",           origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // TODO 1 (fixed by the `<+< ( "#endif" )` alternate): a leading-dot `#if` body after another
+    // `#if … #endif` block.
+    SwiftSnippet(label: "ifconfig-dot-after-endif",  source: "#if A\n#endif\n#if FOO\n.member\n#endif",  origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2039,13 +2052,14 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "postfix-op-dot-space",  source: "fuzz {\nLOOK(\n)*!*. // c\nexclaim()\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "condition-tight-coalesce", source: "if rhs??b {}",                     origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-09-27 long fuzzer harvest overaccepts.
-    SwiftSnippet(label: "keypath-default-spaced-slash", source: "let fuzzValue = \\.default / value", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "keypath-root-default-spaced-slash", source: "let fuzzValue = \\Foo.default / value", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "keypath-member-default-spaced-slash", source: "let fuzzValue = \\Foo.Bar.default / value", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-repeat-each", source: "struct Fuzz<T: repeat each T> { var value: T }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "pack-element-type", source: "func f<each T>(_ v: each T) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "pack-expansion-tuple-type", source: "func f<each A, each B>(_ v: (repeat (each A, each B))) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "attribute-argument-trailing-comma", source: "@Test(arguments: values,\n)\nstruct S {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "member-ifconfig-leading-dot", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "member-ifconfig-leading-dot-warning", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n#warning(\"seed\")\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-condition-newline-call-overaccept", source: "struct Fuzz {\n#if A\n(if let x = value as? T ?? nil { _ = x })\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "enum-case-payload-newline", source: "switch bar {\ncase .payload // c\n(borrowing x):\n  break\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - fuzz harvest fixes")
@@ -2939,7 +2953,7 @@ let phase4MacroSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "inout-arg",      source: "func f() { g(&x) }",                origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "inout-member",   source: "func f() { g(&x.y) }",              origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "consume",        source: "func f() { let a = consume x }",    origin: "Phase4", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "borrow",         source: "func f() { let a = borrow x }",     origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "borrow",         source: "func f() { let a = borrow x }",     origin: "Phase4", syntaxVersion: "603.0.1", compilerRejects: "consecutive statements on a line must be separated by ';'"),
     SwiftSnippet(label: "copy",           source: "func f() { let a = copy x }",       origin: "Phase4", syntaxVersion: "603.0.1"),
 ]
 

@@ -1282,7 +1282,7 @@ struct SwiftFragmentGenerator {
         if widePercent > 0, rng.nextInt(upperBound: 100) < widePercent {
             return wideSource(using: &rng)
         }
-        let curatedLaneCount = 55
+        let curatedLaneCount = 60
         let choice = rng.nextInt(upperBound: seedCorpus.isEmpty ? curatedLaneCount : curatedLaneCount + 4)
         switch choice {
         case 0:
@@ -1404,12 +1404,22 @@ struct SwiftFragmentGenerator {
         case 54:
             return GeneratedSource(label: "grammarish-member-list", source: grammarishMemberList(using: &rng))
         case 55:
-            return seedCorpusSource(using: &rng, mutated: false)
+            return GeneratedSource(label: "tspl-divergence-specialized-attribute", source: tsplDivergenceSpecializedAttribute(using: &rng))
         case 56:
-            return seedCorpusSource(using: &rng, mutated: true)
+            return GeneratedSource(label: "tspl-divergence-protocol-body", source: tsplDivergenceProtocolBody(using: &rng))
         case 57:
-            return wrappedSeedCorpusSource(using: &rng)
+            return GeneratedSource(label: "tspl-divergence-accessor-commitment", source: tsplDivergenceAccessorCommitment(using: &rng))
         case 58:
+            return GeneratedSource(label: "tspl-divergence-type-shape", source: tsplDivergenceTypeShape(using: &rng))
+        case 59:
+            return GeneratedSource(label: "tspl-divergence-pattern-shape", source: tsplDivergencePatternShape(using: &rng))
+        case 60:
+            return seedCorpusSource(using: &rng, mutated: false)
+        case 61:
+            return seedCorpusSource(using: &rng, mutated: true)
+        case 62:
+            return wrappedSeedCorpusSource(using: &rng)
+        case 63:
             return structuralSeedSplice(using: &rng)
         default:
             return seedCorpusCrossover(using: &rng)
@@ -1991,6 +2001,89 @@ struct SwiftFragmentGenerator {
             : "struct Foo { struct Bar {} }\nprotocol P {}\nstruct Fuzz {\n\(body)\n}"
     }
 
+    private func tsplDivergenceSpecializedAttribute(using rng: inout SplitMix64) -> String {
+        [
+            "@_dynamicReplacement(for: Foo.bar(_:))\nfunc fuzz(_ value: Int) -> Int { value }",
+            "@_implements(P, value)\nvar fuzzValue: Int { 1 }",
+            "@_documentation(metadata: \"fuzz\", visibility: internal)\nfunc fuzz() {}",
+            "@_originallyDefinedIn(module: \"FuzzKit\", macOS 10.15, iOS 13)\nstruct Fuzz {}",
+            "@_specialize(exported: true, kind: full, availability: macOS, introduced: 14.0; where T == Int)\nfunc fuzz<T>(_ value: T) -> T { value }",
+            "@differentiable(reverse, wrt: (x, y where T: FloatingPoint))\nfunc fuzz<T: FloatingPoint>(_ x: T, _ y: T) -> T { x }",
+            "@derivative(of: Foo.Bar.+, wrt: (0, 1))\nfunc fuzz(_ x: Double, _ y: Double) -> Double { x }",
+            "@attached(member, names: named(init), named(subscript(_:)), overloaded)\nmacro Fuzz() = #externalMacro(module: \"M\", type: \"F\")"
+        ].random(using: &rng)
+    }
+
+    private func tsplDivergenceProtocolBody(using rng: inout SplitMix64) -> String {
+        let members = [
+            "var value: Int = 1",
+            "var computed: Int { 1 }",
+            "static subscript(dynamicMember member: String) -> Int { get }",
+            "enum Nested { case value(Int) }",
+            "struct Nested { var value: Int }",
+            "deinit { }",
+            "func bodyful() { _ = Self.self }",
+            "@available(*, deprecated)\nvar annotated: Int { get async throws }"
+        ]
+        let body = (0..<max(2, rng.nextInt(upperBound: 4) + 2)).map { _ in
+            members.random(using: &rng)
+        }.joined(separator: "\n")
+        return """
+        protocol FuzzProtocol {
+        associatedtype Value
+        \(body)
+        }
+        """
+    }
+
+    private func tsplDivergenceAccessorCommitment(using rng: inout SplitMix64) -> String {
+        [
+            "struct Fuzz {\nvar value: Int {\nget\nset(value)\n}\n}",
+            "struct Fuzz {\nvar value: Int {\nget { 1 }\nset { _ = newValue }\n}\n}",
+            "struct Fuzz {\nvar value: Int = 0 {\nwillSet(value) { _ = value }\ndidSet { _ = oldValue }\n}\n}",
+            "struct Fuzz {\nvar value: Int {\n_read { yield 1 }\n_modify { var x = 1; yield &x }\n}\n}",
+            "struct Fuzz {\nvar value: Int {\nget async throws { 1 }\nset { _ = newValue }\n}\n}",
+            "struct Fuzz {\nvar value: Int {\n@available(*, deprecated) get { 1 }\nnonmutating set { _ = newValue }\n}\n}",
+            "struct Fuzz {\nsubscript(index: Int) -> Int {\nget { index }\nset(value) { _ = value }\n}\n}"
+        ].random(using: &rng)
+    }
+
+    private func tsplDivergenceTypeShape(using rng: inout SplitMix64) -> String {
+        let type = [
+            "any P",
+            "(any P & Sendable).Type",
+            "some P",
+            "(some P).Type",
+            "repeat each T",
+            "(repeat each T) -> Void",
+            "@Sendable (borrowing Foo, consuming Foo) async throws(FuzzError) -> sending Foo",
+            "nonisolated(nonsending) () async -> Void",
+            "dependsOn(self, scoped other) () -> Void",
+            "isolated any Actor",
+            "~Copyable",
+            "Foo.Bar?.Type"
+        ].random(using: &rng)
+        let wrapper = [
+            "protocol P {}\nstruct Foo { struct Bar {} }\nenum FuzzError: Error { case value }\nlet fuzzValue: \(type) = placeholder()",
+            "protocol P {}\nstruct Foo { struct Bar {} }\nstruct Fuzz<each T> { let value: \(type) }",
+            "protocol P {}\nstruct Foo { struct Bar {} }\nfunc fuzz<each T>(_ value: \(type)) {}",
+            "protocol P {}\nstruct Foo { struct Bar {} }\nextension \(type) { func fuzz() {} }"
+        ]
+        return wrapper.random(using: &rng)
+    }
+
+    private func tsplDivergencePatternShape(using rng: inout SplitMix64) -> String {
+        [
+            "switch value { case let .some(.some(x))?: _ = x default: break }",
+            "switch value { case Token.default(let value): _ = value case .operator(let name): _ = name default: break }",
+            "if case let Token.import(_, name) = token { _ = name }",
+            "if case var (a, b)? = Optional(pair) { _ = a; _ = b }",
+            "guard case let .some(value as (any P)) = Optional(value) else { return }",
+            "switch value { case is (any P).Type: break case let x as Foo.Bar?: _ = x default: break }",
+            "for case let .some(value)? in [Optional(Optional(value))] { _ = value }"
+        ].random(using: &rng)
+    }
+
     private func structuralSeedSplice(using rng: inout SplitMix64) -> GeneratedSource {
         let entry = seedCorpus.random(using: &rng)
         let mutated = mutateSeed(entry.source, using: &rng)
@@ -2201,6 +2294,13 @@ func makeFailureSignal(
     case "advent-underaccept":
         rawSummary = [
             "advent-underaccept",
+            "compiler=\(probe?.compilerAccepted?.description ?? "unknown")",
+            "swiftSyntaxHasError=\(probe?.swiftSyntaxHasError.description ?? "unknown")",
+            dumpShapeSignal(probe?.referenceDump)
+        ].joined(separator: "|")
+    case "reference-disagreement":
+        rawSummary = [
+            "reference-disagreement",
             "compiler=\(probe?.compilerAccepted?.description ?? "unknown")",
             "swiftSyntaxHasError=\(probe?.swiftSyntaxHasError.description ?? "unknown")",
             dumpShapeSignal(probe?.referenceDump)

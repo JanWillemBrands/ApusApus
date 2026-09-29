@@ -123,14 +123,17 @@ at that position.
 
 ### 4.1 Boundary predicates
 
-These predicates test the trivia between the previous token and the next token.
+These predicates test the trivia gap skipped between the previous committed token and the current
+parse position.
 
 | Predicate | True when |
 |---|---|
-| `<s>` | trivia is present |
-| `>s<` | no trivia is present |
-| `<n>` | the trivia contains a newline |
-| `>n<` | the trivia contains no newline |
+| `<s>` | there is a non-empty trivia gap |
+| `>s<` | there is no trivia gap |
+| `<n>` | the trivia gap contains a line break; the previous token and this position are on different source lines |
+| `>n<` | the trivia gap contains no line break; the previous token and this position are on the same source line |
+
+A line break inside skipped trivia counts, including inside a block comment.
 
 Use them for these decisions:
 
@@ -200,7 +203,7 @@ A hard constraint removes a reading that the language does not permit.
 | `@canParse(N)` | start of an alternate | Remove the alternate where no yield of `N` starts at the same position. |
 | `@confinedTo(N)` | start of an alternate | Keep the alternate only where a yield of `N` contains its span. |
 | `@excludedFrom(N)` | start of an alternate | Remove the alternate where a yield of `N` contains its span. |
-| `@sameLine` | before a nonterminal | Remove a yield whose span crosses a newline in the trivia. |
+| `@sameLine` | before a nonterminal | Keep the yield only if a surviving derivation crosses no newline trivia. |
 
 Details:
 
@@ -212,7 +215,12 @@ Details:
   here.
 - In `@confinedTo(A B)` the containers are alternatives: `A` or `B` must contain the span. Two
   annotations on one alternate must both be true.
-- A newline inside a token (for example, a multiline string) does not count for `@sameLine`.
+- `@sameLine` is derivation-local. It tiles the candidate yield through the current BSR and inspects
+  the exact terminal commits used by that tiling. Commits from dead or competing derivations do not
+  count.
+- For `@sameLine`, only token-to-token trivia gaps count. A newline inside a token (for example, a
+  multiline string) does not count. A newline in the annotated construct's trailing trivia does not
+  count either, because the construct did not cross it to reach another token.
 - The parser must try `N` at the anchor position of `@canParse(N)` or `@cannotParse(N)`. If the
   grammar never tries `N` there, `N` has no yield there, and `@cannotParse(N)` is always true.
   This is a specification error, not a false result. `GrammarDiagnostics` reports a target that
@@ -393,10 +401,11 @@ To see which rule removed which yield, set `APUS_TRACE_ORACLE=1`.
 
 ## 10. Rules
 
-**Oracle annotations change trees, not yields.** They cannot stop a derivation. To exclude a
-derivation, change the grammar. For example, `keyPathExpression` is an alternate of
-`prefixExpression` and not of `primaryExpression`. Thus a postfix operation cannot use a key
-path as its base.
+**Oracle annotations run after recognition.** They do not change which descriptors run or which raw
+yields the parser initially produces, but hard constraints can remove the last surviving derivation
+for invalid input. Use grammar gates when an early parser decision is required. For example,
+`keyPathExpression` is an alternate of `prefixExpression` and not of `primaryExpression`. Thus a
+postfix operation cannot use a key path as its base.
 
 **`@longest` selects only from complete derivations.** Step 1 removes a long reading that does
 not complete. `@longest` cannot then select it. Use a parser gate, for example

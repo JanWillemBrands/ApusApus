@@ -70,33 +70,10 @@ class DerivationBuilder {
     let input: String
 
     private var expanding = Set<NodeSpan>()
-    private var endCache = [NodePos: Set<CharPosition>]()
-    private var endGuard = Set<NodePos>()
-    /// Per-symbol index over the (post-Oracle, now immutable) yields: `i → {j}` and `k → {j}`.
-    /// `endPositions` used to answer every query by scanning all of the symbol's yields, i.e.
-    /// O(yields × queries) — the same quadratic the Oracle's `YieldIndex` removed on 2026-09-26.
-    /// On a 200-statement closure-shaped list the builder was ~85% of the whole run (2026-09-27).
-    private var endsByI = [Int: [CharPosition: Set<CharPosition>]]()
-    private var endsByK = [Int: [CharPosition: Set<CharPosition>]]()
-    private func buildIndex(_ sym: GrammarNode) {
-        guard endsByI[sym.number] == nil else { return }
-        var byI = [CharPosition: Set<CharPosition>](), byK = [CharPosition: Set<CharPosition>]()
-        for y in parser.yield(of: sym) {
-            byI[y.i, default: []].insert(y.j)
-            byK[y.k, default: []].insert(y.j)
-        }
-        endsByI[sym.number] = byI
-        endsByK[sym.number] = byK
-    }
-    private func ends(_ sym: GrammarNode, startingAtI from: CharPosition) -> Set<CharPosition> {
-        buildIndex(sym); return endsByI[sym.number]?[from] ?? []
-    }
-    private func ends(_ sym: GrammarNode, pivotK from: CharPosition) -> Set<CharPosition> {
-        buildIndex(sym); return endsByK[sym.number]?[from] ?? []
-    }
+    /// Shared, indexed BSR navigation (`YieldNavigator.swift`); the yields are final after the Oracle.
+    private lazy var navigator = YieldNavigator(parser: parser)
 
     private struct NodeSpan: Hashable { let id: ObjectIdentifier; let from, to: CharPosition }
-    private struct NodePos: Hashable  { let id: ObjectIdentifier; let from: CharPosition }
 
     init(parser: MessageParser, input: String) {
         self.parser = parser
@@ -254,7 +231,7 @@ class DerivationBuilder {
         // subtree. With head first, a closure followed by an optional (`{ sep statement } ";"?`) built
         // the closure subtree for EVERY candidate end — O(n²) statement subtrees for an n-statement
         // list — and dead heads also emitted spurious ambiguity diagnostics.
-        for mid in endPositions(first, from: from).sorted() where mid <= to {
+        for mid in navigator.endPositions(first, from: from).sorted() where mid <= to {
             guard let tail = tileASTBody(rest, from: mid, to: to) else { continue }
             guard let head = buildASTSymbol(first, from: from, to: mid) else { continue }
             if candidateCount == 0 {
@@ -280,7 +257,11 @@ class DerivationBuilder {
     private func buildASTSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition) -> ParseTreeNode? {
         switch sym.kind {
         case .T, .TI, .C:
-            let image = parser.terminalImage(startingAt: from) ?? input[from..<to]
+            // The EXACT commit of this tile (terminal id + both boundaries), not the longest commit
+            // at `from`: for a munch-split `>` out of `>>` the longest guess returned `>>`, an image
+            // extending past the leaf's own span (caught by `Trivia round-trip`).
+            let image = sym.nameID.flatMap { parser.terminalContent(terminalID: $0, triviaStart: from, triviaEnd: to) }
+                ?? input[from..<to]
             return ParseTreeNode(sym.name, from: from, to: to, image: image)
 
         case .B:
@@ -326,7 +307,7 @@ class DerivationBuilder {
 
             var firstChildren: [ParseTreeNode]? = nil
             var successful = 0
-            let ends = iterationEndPositions(bracket, from: pos).filter { $0 > pos && $0 <= to }
+            let ends = navigator.iterationEndPositions(bracket, from: pos).filter { $0 > pos && $0 <= to }
             for end in ends.sorted() {
                 // Tail first, as in `tileASTBody`: only build the iteration's subtree where the rest
                 // of the closure can actually be tiled.
@@ -360,79 +341,5 @@ class DerivationBuilder {
 
     // MARK: - BSR End Position Queries
 
-    private func endPositions(_ sym: GrammarNode, from: CharPosition) -> Set<CharPosition> {
-        let key = NodePos(id: ObjectIdentifier(sym), from: from)
-        if let cached = endCache[key] { return cached }
-        guard endGuard.insert(key).inserted else { return [] }
-        defer { endGuard.remove(key) }
 
-        let result: Set<CharPosition>
-        switch sym.kind {
-        case .T, .TI, .C, .B:
-            result = ends(sym, pivotK: from)
-        case .N:
-            if sym.isRHS {
-                guard let lhs = sym.alt else { return [] }
-                let occurrenceEnds = ends(sym, pivotK: from)
-                let lhsEnds = ends(lhs, startingAtI: from)
-                result = occurrenceEnds.intersection(lhsEnds)
-            } else {
-                result = ends(sym, startingAtI: from)
-            }
-        case .DO, .OPT, .KLN, .POS:
-            if sym.disambiguation != nil {
-                // ANNOTATED bracket (@longest/@shortest): read its OWN (Oracle-prunable)
-                // yields so the extent prune drives the builder's ambiguity/tiling.
-                // Yields are (alternate-start, k = bracket-start, j) → filter k == from.
-                result = ends(sym, pivotK: from)
-            } else {
-                // UNANNOTATED bracket: original body-recompute path, untouched.
-                var positions = Set<CharPosition>()
-                if sym.kind == .KLN || sym.kind == .OPT { positions.insert(from) }
-                if sym.kind.isClosure {
-                    var visited = Set<CharPosition>()
-                    var queue = [from]
-                    while !queue.isEmpty {
-                        let pos = queue.removeFirst()
-                        guard visited.insert(pos).inserted else { continue }
-                        for end in iterationEndPositions(sym, from: pos) where end > pos {
-                            positions.insert(end)
-                            queue.append(end)
-                        }
-                    }
-                } else {
-                    positions.formUnion(iterationEndPositions(sym, from: from))
-                }
-                result = positions
-            }
-        case .EPS:
-            result = [from]
-        default:
-            result = []
-        }
-        endCache[key] = result
-        return result
-    }
-
-    /// End positions after exactly one bracket iteration, computed by chaining
-    /// end positions through each alternate's body symbols.
-    private func iterationEndPositions(_ bracket: GrammarNode, from: CharPosition) -> Set<CharPosition> {
-        var positions = Set<CharPosition>()
-        var alt = bracket.alt
-        while let a = alt {
-            let body = a.bodySymbols.filter { $0.kind != .EPS }
-            if body.isEmpty {
-                positions.insert(from)
-            } else {
-                var frontier: Set<CharPosition> = [from]
-                for sym in body {
-                    frontier = frontier.reduce(into: Set()) { $0.formUnion(endPositions(sym, from: $1)) }
-                    if frontier.isEmpty { break }
-                }
-                positions.formUnion(frontier)
-            }
-            alt = a.alt
-        }
-        return positions
-    }
 }

@@ -8,12 +8,12 @@ update this file — it is meant to be the single home for "how we test."
 
 ---
 
-## 1. Test harnesses (and which one is the source of truth)
+## 1. Test harnesses (and which one is authoritative)
 
 There are **two** ways a Swift snippet gets fed to the grammar. They disagree on
-identical input, and only one is authoritative.
+identical input, and only one is the authoritative ApusApus test harness.
 
-### 1a. SwiftSyntax Swift Testing suites — THE SOURCE OF TRUTH
+### 1a. SwiftSyntax Swift Testing suites — authoritative harness
 
 `AdventTests/SwiftSyntax*.swift` — parametrized `swift-testing` suites over
 `SwiftSnippet` arrays, driven through `adventParse` →
@@ -70,7 +70,7 @@ NOT equal in authority:
 
 | `@Test` | Question | Authority |
 |--------|----------|-----------|
-| **`swiftSyntaxAccepts`** | does swift-syntax `Parser.parse(source:).hasError == false`? | baseline — confirms the snippet is valid input |
+| **`swiftSyntaxAccepts`** | does swift-syntax `Parser.parse(source:).hasError == false`? | SwiftSyntax reference signal; not final validity when the compiler disagrees |
 | **`Advent accepts`** | does the grammar produce a full-span root yield? | **correctness signal** — a failure is a real accept regression |
 | **`no residual ambiguity`** | after the Oracle, is the parse unambiguous? | **correctness signal** — a failure is a real ambiguity |
 | **`trees match`** | does Advent's derivation dump byte-match swift-syntax's tree dump? | **aspirational frontier** — most failures here are expected, not regressions |
@@ -84,6 +84,41 @@ that is the baseline, not a regression. When triaging a run, always split issues
 `@Test`: only `accepts` / `no residual ambiguity` failures are actionable
 correctness signals. A `treesMatch` count that is *stable vs baseline* means "no
 regression" even though the run is red.
+
+### 2a. Validity oracle: compiler first, swift-syntax second
+
+Changed in commit `a566011f` (2026-09-28): `swiftc -swift-version 6 -parse`
+decides whether an input is valid Swift for grammar-bug triage. SwiftSyntax is a
+second reference and tree-shape provider, not the final validity oracle. The fuzzer
+probe reports `reference-disagreement` when `swiftc` and SwiftSyntax differ.
+
+Current policy:
+
+- If `swiftc -swift-version 6 -parse` and SwiftSyntax agree, ApusApus must agree.
+- If they disagree, the input is telemetry/classification, not a default grammar
+  TODO.
+- A SwiftSyntax-rejects / compiler-accepts input that ApusApus accepts is correct
+  under the current policy. Verified 2026-09-29: `x.default / y`, `x.for / y`,
+  `\.default / value`. SwiftSyntax forces a spaced `/` after a keyword to start a
+  regex even in member position; `swiftc` does not, and ApusApus agrees with
+  `swiftc`.
+- A SwiftSyntax-accepts / compiler-rejects input that ApusApus rejects should be
+  marked with `compilerRejects` in the SwiftSyntax corpus, so accept/tree tests skip
+  it while `CompilerRejectTests` keeps the classification visible.
+
+Borrow-expression example: `borrow msg`, `use(borrow msg)`, `let b = (borrow
+self).buffer`, and `func f() { let a = borrow x }` are accepted by SwiftSyntax but
+rejected by `swiftc -swift-version 6 -parse`. The grammar intentionally does not
+include `prefixExpression = "borrow" >->( "(" "[" "." ) <s> >n< prefixExpression`;
+the affected SwiftSyntax corpus rows are marked `compilerRejects`, and the local
+tree-comparison row for `borrow msg` was removed. Do not restore that grammar rule
+unless the oracle policy changes.
+
+Migration note: some suites still use SwiftSyntax as the premise, for example
+`FuzzHarvestTests.adventRejects`, `RegexWhitespaceTests`, and source-file
+`#require(!Parser.parse(source: text).hasError)` checks. Where compiler and
+SwiftSyntax disagree, those premises need to be migrated to compiler-first checks
+or made explicit as reference-disagreement assertions.
 
 ---
 
@@ -154,15 +189,16 @@ Subsystem `com.magenta.apusParser`; categories `ui`/`scan`/`parse`/`grammar`/`ge
 OSLog **redacts** `\(interpolated)` values as `<private>` outside the debugger — for
 content, temporarily `fputs(…, stderr)` or read them in Xcode's console.
 
-### Probe swift-syntax truth with `hasError`, not `swiftc`
+### Probe reference disagreement deliberately
 
-Ground truth for "is this valid Swift?" is swift-syntax
-`Parser.parse(source:).hasError` (what `swiftSyntaxAccepts` uses). `swiftc -parse`
-is a *different* parser and diverges on trivia (it accepts `@available (*)`,
-`nonisolated ()->` with a space, that `hasError` rejects). To probe fast, add a temp
-`@Test` in `SwiftSyntaxTests.ParserProbe`, `print("PROBE …")`, run with
-`RunSomeTests`, grep `PROBE`, remove it. (`RunCodeSnippet` needs `-Onone`; the main
-target is `-O`.)
+For validity, probe `swiftc -swift-version 6 -parse`. For SwiftSyntax's reference
+tree and recovery behavior, probe `Parser.parse(source:).hasError`. They are
+different parsers and diverge on real inputs; when they disagree, classify the row
+instead of treating either result as an automatic grammar bug.
+
+To probe SwiftSyntax fast, add a temporary `@Test` in `SwiftSyntaxTests.ParserProbe`,
+`print("PROBE …")`, run with `RunSomeTests`, grep `PROBE`, remove it.
+(`RunCodeSnippet` needs `-Onone`; the main target is `-O`.)
 
 ---
 
@@ -294,12 +330,12 @@ The items below are the residual knowledge a script can't remove.*
 
 1. **Fix by root cause, not by test.** Cluster failures by shared cause (same as the
    ambiguity-signature workflow) — one grammar change usually clears a whole cluster.
-2. **Probe swift-syntax truth (`hasError`) before every faithfulness claim** (§4).
+2. **Probe reference disagreement deliberately** (§4).
 3. **Prefer structural grammar fixes over `@prefer`/oracle hacks** — only `.apus`
    declarations, no custom Swift disambiguation. `@prefer` is single-level (no 3-way
    priority) and can create *new* ambiguities; re-harvest after.
-4. **Measure with the right yardstick.** `Advent accepts` (decoded `source`) is ground
-   truth for acceptance; `harvest_ambiguity.py ALL` for ambiguity. The `^^^` /
+4. **Measure with the right yardstick.** `Advent accepts` (decoded `source`) is the
+   authoritative harness for ApusApus acceptance; `harvest_ambiguity.py ALL` for ambiguity. The `^^^` /
    `accept_dump.py` paths are unreliable (escaping).
 5. **After every change:** re-harvest (ambiguity unchanged or down) **and** run the
    affected suite (no acceptance regression).

@@ -347,6 +347,34 @@ Meaning:
 This is a parse-forest predicate, not a token lookaround. A coherent grammar should
 keep this separate from token lookaround.
 
+`@sameLine` is a nonterminal-level hard constraint. It occurs before a nonterminal
+definition, in the same production-start position as `@longest`.
+
+```swift
+@sameLine
+singleLineInterpolatedStringLiteral =
+    interpolatedStringLiteralHead expression? interpolatedStringLiteralTail .
+```
+
+Meaning:
+
+```text
+@sameLine = keep a yield only when at least one surviving derivation crosses no newline trivia.
+```
+
+The check is over the actual token path for the yield, not over every token that
+was ever committed in the same source span. This matters in ambiguous parses: a
+dead derivation that crossed a newline must not poison a live same-line derivation.
+
+Only token-to-token trivia gaps count. A newline inside token content, such as a
+nested multiline string literal, does not count. A newline in the annotated
+construct's trailing trivia also does not count, because the construct did not
+cross it to reach another token.
+
+Use `@sameLine` for constructs whose internal parse remains ordinary grammar, but
+whose skipped trivia must stay on one source line. Swift single-line string
+interpolation is the canonical example.
+
 ## Sequence Predicates
 
 ### Exclusion Sets `---()`
@@ -386,15 +414,16 @@ nextLine          = lhs <n> rhs .
 
 These are zero-width predicates over the trivia gap at the current parse position:
 
-| Annotation | Meaning |
+| Predicate | Meaning |
 |---|---|
-| `<s>` | some trivia exists |
-| `>s<` | no trivia exists |
-| `<n>` | newline trivia exists |
-| `>n<` | no newline trivia exists |
+| `<s>` | there is a non-empty trivia gap between the previous token and this position |
+| `>s<` | there is no trivia gap between the previous token and this position |
+| `<n>` | the trivia gap contains a line break, so the previous token and this position are on different source lines |
+| `>n<` | the trivia gap contains no line break, so the previous token and this position are on the same source line |
 
-These predicates consume no input. They check the relationship between the previous
-commit and the next token position and abandon the parse path if violated.
+These predicates consume no input. They inspect the trivia gap skipped between the previous
+committed token and the current parse position. A line break inside skipped trivia, including
+inside a block comment, counts for `<n>` / `>n<`.
 
 ### Token Lookaround
 

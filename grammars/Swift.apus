@@ -134,8 +134,12 @@ argumentLabel =
 // swift-syntax accepts both `x.inout` and `case .inout:`; Advent rejected both. Measured against a
 // keyword matrix: `.\`init\``, `.init`, `._borrowing`, `.deinit`, `.subscript` all already agreed,
 // `.inout` was the lone divergence.
+//
+// Do not apply the regex-forcing keyword slash gate here: once a keyword has been consumed as a
+// dotted member name, a following spaced `/` is after an expression (`x.default / y`,
+// `\.default / y`) and Swift 6 reads it as division.
 memberName =
-    | regexForcingLexerKeyword >-> ( regexSlash )
+    | regexForcingLexerKeyword
     | regexSafeLexerKeyword
     | identifier ---( "_" lexerClassifiedKeyword )
     | escapedIdentifier
@@ -554,7 +558,7 @@ type =
     | opaqueType
     | boxedProtocolType
     | @prefer metatypeType      // swift-syntax `parseSimpleType`recognizes `.Type`/`.Protocol` before member-type continuation.
-    | packExpansionType         // SE-0393 `repeat each T`
+    | packType                  // SE-0393 `repeat each T`, `repeat (each A, each B)`, `each T`
     | selfMemberType            // `Foo.self` / `A<B>?.self` in type position. No `@prefer` needed: `typeName` cannot be `self` (`identifierToken` excludes it), so no member-type reading competes.
     | anyType                   // `Self` reaches `type` through `typeIdentifier`.
     | "(" tupleTypeElement ")"  // reuse `tupleTypeElement` for parenthesized one-element types.
@@ -615,8 +619,8 @@ typeIdentifier  =
     // masked this for the cast case, and only via dead extents the Oracle kept by accident.
     | >-> ( "any" "some" "each" ) typeName typeGenericArgumentClause
     | >-> ( "any" "some" "each" ) typeName >-> ( openAngle )
-    | typeIdentifier "." >n< >-> ( "Type" "Protocol" ) typeName typeGenericArgumentClause
-    | typeIdentifier "." >n< >-> ( "Type" "Protocol" ) typeName >-> ( openAngle )
+    | typeIdentifier ( >s< "." >s< | <s> "." ) >-> ( "Type" "Protocol" ) typeName typeGenericArgumentClause
+    | typeIdentifier ( >s< "." >s< | <s> "." ) >-> ( "Type" "Protocol" ) typeName >-> ( openAngle )
     .
 
 typeName =
@@ -753,9 +757,11 @@ boxedProtocolType = "any" >-> ( "inout" "borrowing" "consuming" "isolated" "send
 metatypeType = simpleType "." >n< ( "Type" | "Protocol" ) .
 
 /// SE-0393 pack expansion / pack element TYPE. Two nonterminals because swift-syntax has two
-/// nodes: `PackExpansionType(repeatKeyword:, repetitionPattern:)` wrapping
-/// `PackElementType(eachKeyword:, pack:)`. `repeat each T` in `(_ value: repeat each T)`.
-packExpansionType = "repeat" packElementType .
+/// nodes: `PackExpansionType(repeatKeyword:, repetitionPattern:)` wrapping any repeated type
+/// pattern, and `PackElementType(eachKeyword:, pack:)` for `each T`. This covers both
+/// `repeat each T` and tuple patterns such as `repeat (each A, each B)`.
+packType          = packExpansionType | packElementType .
+packExpansionType = "repeat" type .
 packElementType   = "each" type .
 
 /// `T.self` in TYPE position — swift-syntax `MemberType` with a `self` name, e.g. the cast type in
@@ -840,9 +846,8 @@ packElementExpression   = "each" <s> postfixExpression .
 // answer (Statements.swift:987) — so spaced `unsafe ()` / `unsafe .lock` are UnsafeExprs, not calls.
 // Both readings are grammatical for us, hence the preference. Tight `unsafe(1)` never enters the
 // keyword rule (<s>), so the call reading survives unchallenged.
-prefixExpression    = "consume" >->( "(" "[" "." ) <s> >n< prefixExpression .
-prefixExpression    = "borrow"  >->( "(" "[" "." ) <s> >n< prefixExpression .
-prefixExpression    = "copy"    >->( "(" "[" "." ) <s> >n< prefixExpression .
+prefixExpression    = "consume" >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
+prefixExpression    = "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
 prefixExpression    = @prefer "unsafe"  <s> >n< prefixExpression .
 
 /// Grammar of an in-out expression
@@ -1391,7 +1396,7 @@ keyPathRootSuffixes = keyPathRootSuffix keyPathRootSuffixes? .
 keyPathRootSuffix =
     | >s< optionalMark // tight postfix `?` (Types.swift)
     | >s< forceMark // tight postfix `!` (Types.swift)
-    | "." >n< ( "Type" | "Protocol" ) // metatype, at any position in the run
+    | ( >s< "." >s< | <s> "." ) ( "Type" | "Protocol" ) // metatype, at any position in the run
     .
 
 // The generic clause is NOT optional-or-skipped, it is "take it, or there is no `<` at all".
@@ -1457,7 +1462,7 @@ keyPathMemberName = moduleSelector? memberName genericArgumentClause .
 keyPathMemberName = moduleSelector? memberName "(" keyPathArgumentLabels ")" .    // .method(_:) / .method(arg:) / .method(a:b:)
 keyPathArgumentLabels = keyPathArgumentLabel { keyPathArgumentLabel } .
 keyPathArgumentLabel = argumentLabel ":" .   // swift-syntax `isArgumentLabel` (Names.swift), as for any compound name
-keyPathProperty = "." >n< keyPathMemberName .
+keyPathProperty = ( >s< "." >s< | <s> "." ) keyPathMemberName .
 
 keyPathPivotFirst = keyPathDot >s< optionalMark .              // .?  (keyPathDot per operator dev 6)
 keyPathPivotFirst = keyPathDot >s< forceMark .                 // .!
@@ -1654,13 +1659,13 @@ initializerExpression = "init" >-> ( "{" ) .
 // `<-<` on the TIGHT dot: `1.0` is ONE float literal in swift-syntax's lexer, never the integer `1`
 // with a tuple member `.0`. Without the gate that split survived and let a literal take a trailing
 // closure (`_ = 1.0 { … }` accepted; the literal-callee ban below did not see a literal).
-explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >n< | <s> "." ) decimalDigits .
-explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName .
+explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
+explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName .
 // Unparenthesized key paths are postfix islands; swift-syntax stays inside
 // key-path parsing instead of reinterpreting a shorter key-path prefix as a
 // member-access base.
-explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName genericArgumentClause .   // island is structural — see `postfixExpression`
-explicitMemberExpression = postfixExpression ( >s< "." >n< | <s> "." ) moduleSelector? memberName "(" argumentNames ")" .
+explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName genericArgumentClause .   // island is structural — see `postfixExpression`
+explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName "(" argumentNames ")" .
 // A postfix `#if` clause body is a postfix continuation, not statements.
 // swift-syntax `parseIfConfigExpressionSuffix` accepts only a dotted suffix or
 // nested `#if`, then resumes the postfix suffix loop.
@@ -2043,6 +2048,8 @@ ifDirectiveClause =
 ifDirectiveClause =
     <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark )
     ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+ifDirectiveClause =
+    <+< ( "#endif" ) ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
 
 elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
 // `#elseif`/`#else` bodies are ungated: swift-syntax decides postfix-vs-statement from the `#if`
@@ -2055,18 +2062,23 @@ elseifDirective = "#elseif" .
 elseDirective = "#else" <n> .
 endifDirective = "#endif" <n> .
 
-compilationCondition = identifierToken .
-compilationCondition = booleanLiteral .
-compilationCondition = "(" compilationCondition ")" .
+compilationConditionOperand = identifierToken .
+compilationConditionOperand = booleanLiteral .
+compilationConditionOperand = "(" compilationCondition ")" .
 // A prefix `!`-RUN is ONE operator token, not nested negations: swift-syntax gives `#if !!FOO`
 // a single `prefixOperator("!!")` (measured 2026-09-23; the old note here modelled it as two
 // negations and produced two nested `PrefixOperatorExpr("!")`). A LONE `!` cannot be an `operator`
 // — `operatorBody` reserves it unless a continuation follows — so it stays a munch-exempt
 // `forceMark`, and `>-> ( forceMark )` keeps the two rules disjoint rather than ambiguous.
-compilationCondition = forceMark >s< >-> ( forceMark ) compilationCondition .
-compilationCondition = prefixOperator >s< compilationCondition .
-compilationCondition = compilationCondition "&&" compilationCondition .
-compilationCondition = compilationCondition "||" compilationCondition .
+compilationConditionOperand = forceMark >s< >-> ( forceMark ) compilationConditionOperand .
+compilationConditionOperand = prefixOperator >s< compilationConditionOperand .
+// FLAT, like every other operator chain in this grammar (`infixExpressions`) and like
+// swift-syntax, which emits ONE SequenceExpr and leaves precedence to the type checker
+// (`Directives.swift` parses the condition as a general expression). Written as nested binary
+// self-recursion this was ambiguous for 3+ operands — `A || B || C` had two derivations
+// (associativity) and `A && B || C` two more (precedence): 676 of 763 ambiguous files in the
+// 30k-file GitHub crawl, 2026-09-28. A list has exactly one derivation, so no `@left` is needed.
+compilationCondition = compilationConditionOperand { ( "&&" | "||" ) >n< compilationConditionOperand } .
 // swift-syntax parses the whole `#if` condition as a general expression (Directives.swift:67), so
 // every `name(args)` is a function-call expression: os(macOS), arch(arm64), canImport(Foo),
 // targetEnvironment(simulator), hasAttribute(x), AND unknown ones like hasGreeble(blah). The
@@ -2074,7 +2086,7 @@ compilationCondition = compilationCondition "||" compilationCondition .
 // Version comparisons need no special rules either: `swift(>=5)` / `compiler(>=10.0)` /
 // `canImport(A, _version: >=2.2)` parse via this generic call with `>=5` as a tight-prefix
 // operator expression, matching swift-syntax's reading.
-compilationCondition = identifierToken >n< functionCallArgumentClause .
+compilationConditionOperand = identifierToken >n< functionCallArgumentClause .
 // reuse the general call-argument clause (handles multi-arg + labels + trailing comma); the inline "(" functionCallArgumentList? ","? ")" form failed on multi-arg conditions like canImport(A, _version: 2)
 
 
@@ -2228,6 +2240,7 @@ importDeclaration = attributes? "import" importKind moduleSelector ( identifierT
 // identifier or operator, not keyword.
 
 importKind = "typealias" | "struct" | "class" | "enum" | "protocol" | "let" | "var" | "func" .
+@longest
 importPath = identifierToken { "." identifierToken } .
 // No moduleSelector in import paths; SE-0491 `::` qualifies referenced names,
 // not dotted import paths.
@@ -2246,6 +2259,7 @@ constantDeclaration = attributes? declarationModifiers? "let" patternInitializer
 
 patternInitializerList = patternInitializer { "," patternInitializer } .
 
+@longest
 patternInitializer = bindingPattern initializer? .
 patternInitializer = bindingPattern initializer? initializedAccessorBlock .
 initializer = assignmentOperator expression .
@@ -2355,7 +2369,7 @@ coroutineAccessorClause = attributes? accessorModifiers? coroutineSpecifier acce
 //     case TokenSpec(.modify) where experimentalFeatures.contains(.coroutineAccessors):
 //     case TokenSpec(.mutate) where experimentalFeatures.contains(.borrowAndMutateAccessors):
 // `_read`/`_modify`/`borrow` are ungated.
-coroutineSpecifier = "_read" | "read" | "_modify" | "modify" | "borrow" | "mutate" .
+coroutineSpecifier = "_read" | "read" | "_modify" | "modify" | "borrow" | "mutate" | "unsafeAddress" | "unsafeMutableAddress" .
 
 // Accessor-level modifiers use swift-syntax `AccessorModifierSyntax`, distinct
 // from declaration mutation modifiers.
@@ -2671,7 +2685,7 @@ deinitializerDeclaration = attributes? declarationModifiers? "deinit" "async"? c
 // `optionalType`/`implicitlyUnwrappedOptionalType` join the sugared forms admitted by fix 2:
 // `extension UInt8? {}` (UnicodeScalarExtensions.swift) and `extension Foo.Bar?` are accepted by
 // swift-syntax, as is the `!` spelling.
-extensionDeclaration = attributes? accessLevelModifier? "extension" ( typeIdentifier | arrayType | dictionaryType | optionalType | implicitlyUnwrappedOptionalType ) typeInheritanceClause? genericWhereClause? extensionBody .
+extensionDeclaration = attributes? declarationModifiers? "extension" ( typeIdentifier | arrayType | dictionaryType | optionalType | implicitlyUnwrappedOptionalType | packExpansionType ) typeInheritanceClause? genericWhereClause? extensionBody .
 extensionBody = "{" extensionMembers? "}" .
 
 extensionMembers = extensionMember ";"? .
@@ -2917,13 +2931,20 @@ derivativeNameAtom  = moduleSelector? identifierToken | moduleSelector? selfType
 // borrow/copy/inout expression.
 // `copy` and `&` are admitted for completeness even though the corpus only exercises `borrow`.
 
-attribute = "@" >s< "lifetime" >s< "(" lifetimeArguments ")" .
+// Both spellings: `@_lifetime` is the underscored form still used across swift-syntax,
+// swift-collections and the stdlib; swift-syntax AND `swiftc` accept either. Only the bare
+// `lifetime` was listed, which made `@_lifetime(borrow self)` the largest reject cluster
+// (29 files) in the 30k-file GitHub crawl, 2026-09-28.
+attribute = "@" >s< ( "lifetime" | "_lifetime" ) >s< "(" lifetimeArguments ")" .
 lifetimeArguments = lifetimeArgument { "," lifetimeArgument } .
 lifetimeArgument  = lifetimeTarget | identifierToken ":" lifetimeTarget .
-lifetimeTarget    = identifierToken
-                  | "borrow" identifierToken
-                  | "copy" identifierToken
-                  | "&" >s< identifierToken .
+// `self` is a legal target (`@_lifetime(borrow self)` is the commonest form in the stdlib and in
+// swift-collections) but is a keyword, so `identifierToken` does not cover it.
+lifetimeTargetName = identifierToken | "self" .
+lifetimeTarget    = lifetimeTargetName
+                  | "borrow" lifetimeTargetName
+                  | "copy" lifetimeTargetName
+                  | "&" >s< lifetimeTargetName .
 
 // `@backDeployed(before: macOS 12.0)` — swift-syntax BackDeployedAttributeArguments, whose
 // `platforms` is a PlatformVersionItemList (NOT the AvailabilityArgumentList that `@available`
@@ -3044,7 +3065,7 @@ specializeArgument  = "target" ":" attributeDeclName ","?
 // attribute that is legal without arguments needs its own bare alternate as well — `@objc` has
 // one for exactly this reason.
 attribute = "@"
-            >-> ( "abi" "attached" "available" "convention" "freestanding" "isolated" "backDeployed" "derivative" "differentiable" "lifetime" "objc" "specialized" "transpose" "_originallyDefinedIn" "_documentation" "_dynamicReplacement" "_implements" "_backDeploy" "_effects" "_specialize" )
+            >-> ( "abi" "attached" "available" "convention" "freestanding" "isolated" "backDeployed" "derivative" "differentiable" "lifetime" "_lifetime" "objc" "specialized" "transpose" "_originallyDefinedIn" "_documentation" "_dynamicReplacement" "_implements" "_backDeploy" "_effects" "_specialize" )
             >s< attributeName attributeArgumentExprClause? .
 
 // Module-qualified attribute name = a custom attribute → its args are an EXPRESSION argument list,
@@ -3052,13 +3073,13 @@ attribute = "@"
 // `@main::available(macOS 10.15, *)` rejects (availability spec is not an expression arg list);
 // `@main::available(foo: bar)` accepts.
 attribute = "@"
-            >-> ( "abi" "attached" "available" "convention" "freestanding" "isolated" "backDeployed" "derivative" "differentiable" "lifetime" "objc" "specialized" "transpose" "_originallyDefinedIn" "_documentation" "_dynamicReplacement" "_implements" "_backDeploy" "_effects" "_specialize" )
+            >-> ( "abi" "attached" "available" "convention" "freestanding" "isolated" "backDeployed" "derivative" "differentiable" "lifetime" "_lifetime" "objc" "specialized" "transpose" "_originallyDefinedIn" "_documentation" "_dynamicReplacement" "_implements" "_backDeploy" "_effects" "_specialize" )
             >s< moduleSelector attributeName attributeArgumentExprClause? .
 
 // `>s<`: the argument-clause `(` must be tight (no space after the attribute name). swift-syntax
 // requires this — `@available (macOS 11, *)` (space) is an error, `@available(macOS 11, *)` is not
 // A spaced `(` after an attribute belongs to a following type, not the args.
-attributeArgumentExprClause = >s< "(" functionCallArgumentList? ")" .
+attributeArgumentExprClause = >s< "(" functionCallArgumentList? ","? ")" .
 
 // `@attached(member, names: named(deinit))` — swift-syntax has NO macro-role node: the arguments
 // come out as a plain LabeledExprList, each `named(…)` a FunctionCallExpr over a decl-reference name.
@@ -3077,7 +3098,7 @@ macroRoleArguments = macroRoleArgument { "," macroRoleArgument } .
 // keywords (`true`, `nil`, `self`, …). Labelled arguments (`names: named(x)`) are expressions, which
 // is why `macroRoleDeclName` is a different set. Measured by `NamePositionTests` (macro-role, macro-role-name).
 macroRole          = identifierToken | "extension" .
-macroRoleArgument  = macroRole | identifierToken ":" macroRoleName .
+macroRoleArgument  = macroRole | macroRoleCallName | identifierToken ":" macroRoleName .
 // `named(x)` nests a name; `init(a:b:)` carries argument LABELS instead. The two can't overlap —
 // `argumentName = argumentLabel ":"` always has its colon.
 // `names: Swift::deinit` is legal (SE-0491), so moduleSelector is explicit.
@@ -3092,6 +3113,8 @@ macroRoleDeclName  = identifier ---( "_" "await" lexerClassifiedKeyword )
                    | "Any" | "true" | "false" | "nil" | "super" | "_" .
 macroRoleName      = moduleSelector? macroRoleDeclName
                    | moduleSelector? macroRoleDeclName >s< "(" macroRoleName ")"
+                   | moduleSelector? macroRoleDeclName >s< "(" argumentNames ")" .
+macroRoleCallName  = moduleSelector? macroRoleDeclName >s< "(" macroRoleName ")"
                    | moduleSelector? macroRoleDeclName >s< "(" argumentNames ")" .
 
 
@@ -3216,23 +3239,21 @@ identifierPattern = @confinedTo(optionalBindingCondition) "self" .
 /// value-binding-pattern → var pattern | let pattern
 
 // swift-syntax ValueBindingPatternSyntax.BindingSpecifierOptions (Parser+TokenSpecSet.swift:4112-4142):
-// let, var, inout, borrowing, plus the experimental reference-binding specifiers _borrowing,
-// _consuming, _mutating. We include the experimental ones to match swift-syntax fully.
+// let, var, inout, borrowing, plus the experimental reference-binding specifier _borrowing.
+// Swift 6 rejects _consuming/_mutating in pattern introducer position, even though swift-syntax
+// has token-set entries for them.
 
 // `>+>(identifier "_")`: port of swift-syntax `shouldParsePatternBinding` (Patterns.swift:274) —
 // `borrowing`/`_borrowing` introduce a value-binding pattern ONLY when the next token is an identifier
 // or `_` (`peek(isAt: .identifier, .wildcard)`). So `case borrowing(let x)` (next `(`) is the enum-case
-// pattern `borrowing(…)`, not a binding. Only these two introducers are gated in swift; let/var/inout/
-// _consuming/_mutating are unconditional.
+// pattern `borrowing(…)`, not a binding.
 
 valueBindingPattern = "var" matchPattern
                     | "let" matchPattern
                     | "inout" matchPattern
                     | "borrowing" >+> ( identifier "_" ) matchPattern .
 
-valueBindingPattern = "_borrowing" >+> ( identifier "_" ) matchPattern
-                    | "_consuming" matchPattern
-                    | "_mutating" matchPattern .
+valueBindingPattern = "_borrowing" >+> ( identifier "_" ) matchPattern .
 
 
 /// Grammar of a tuple pattern
@@ -3255,7 +3276,7 @@ tupleMatchElement = matchPattern | tupleMatchLabel ":" matchPattern .
 // SE-0036 — leading-dot-less enum-case pattern. swift-syntax's `parseMatchingPattern` accepts
 // a bare `Name(args)` form when the enum type is inferable from context; the compiler validates.
 
-enumCasePattern = enumCaseName tupleMatchPattern .
+enumCasePattern = enumCaseName >n< tupleMatchPattern .
 // `memberName`, not `enumCaseName`: after a `.` a keyword IS a legal case name
 // (`case .import(_, let s):` in Formatter.step9.swift). Only the DOTTED form — the bare
 // `enumCaseName tupleMatchPattern` above keeps `identifierToken`, because swift-syntax rejects
@@ -3264,7 +3285,7 @@ enumCasePattern = enumCaseName tupleMatchPattern .
 // through `implicitMemberExpression`, which took `memberName` in fix 3. Only the tuple form
 // has to come through here.
 // Dot layout as at `explicitMemberExpression`: `case .⏎some(let x)` parses, `case Foo.⏎bar` does not.
-enumCasePattern = typeIdentifier? ( >s< "." >n< | <s> "." ) memberName tupleMatchPattern? .
+enumCasePattern = typeIdentifier? ( >s< "." >n< | <s> "." ) memberName [ >n< tupleMatchPattern ] .
 
 /// Grammar of an optional pattern
 /// optional-pattern → identifier-pattern ?
@@ -3280,8 +3301,8 @@ enumCasePattern = typeIdentifier? ( >s< "." >n< | <s> "." ) memberName tupleMatc
 // a bare `.a?` already parses through the expression-pattern route, so admitting it here too would
 // give it two readings.
 optionalPattern = ( identifierPattern | tupleMatchPattern | enumCasePayloadPattern ) >s< optionalMark .
-enumCasePayloadPattern = typeIdentifier? ( >s< "." >n< | <s> "." ) memberName tupleMatchPattern
-                       | enumCaseName tupleMatchPattern .
+enumCasePayloadPattern = typeIdentifier? ( >s< "." >n< | <s> "." ) memberName >n< tupleMatchPattern
+                       | enumCaseName >n< tupleMatchPattern .
 
 /// Grammar of a type casting pattern
 /// type-casting-pattern → is-pattern | as-pattern
@@ -3330,6 +3351,9 @@ genericParameterName = typeName | "self" .
 // swift-syntax `parseGenericParameters` (Declarations.swift): `each`/`let` are consumed as a
 // SPECIFIER whenever present, so a parameter can never be NAMED `each` (`>-> ( "each" )`), and
 // the name is read with `allowSelfOrCapitalSelfAsIdentifier: true`, so `self` is a legal name.
+
+// TODO:  WTF is this: "each"? >-> ( "each" ) ???
+
 genericParameter = attributes? "each"? >-> ( "each" ) genericParameterName .
 // The constraint is ANY type, gated on its first token exactly as swift-syntax `parseGenericParameters`
 // (Declarations.swift ~652) gates `parseType()`: an identifier, `Any`, `protocol` or `~`. Contextual

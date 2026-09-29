@@ -41,6 +41,46 @@ struct TerminalCommit {
     let start: CharPosition
     let end: CharPosition
     let triviaEnd: CharPosition
+    /// Shape of the trailing trivia `input[end ..< triviaEnd]`, classified once when the commit is
+    /// recorded. Layout gates, `@sameLine` and the converter's operator boundness read this instead
+    /// of re-scanning the gap text.
+    let gap: GapFacts
+}
+
+/// What a trivia gap between two tokens contains. The single classifier for every consumer that
+/// asks "is there whitespace / a line break / a comment between these tokens?" (TODO.md item 7).
+struct GapFacts: OptionSet, Hashable {
+    let rawValue: UInt8
+    /// Any trivia at all (whitespace or comment).
+    static let nonEmpty  = GapFacts(rawValue: 1 << 0)
+    /// A `\n` or `\r` anywhere in the gap, including inside a comment.
+    static let lineBreak = GapFacts(rawValue: 1 << 1)
+    /// A `//` or `/* … */` comment. Trivia is whitespace and comments only, so any `/` is one.
+    static let comment   = GapFacts(rawValue: 1 << 2)
+
+    init(rawValue: UInt8) { self.rawValue = rawValue }
+
+    /// Classify a slice that consists of trivia only.
+    init(classifying gap: Substring) {
+        var facts: GapFacts = []
+        for ch in gap {
+            facts.insert(.nonEmpty)
+            if ch == "\n" || ch == "\r" { facts.insert(.lineBreak) }
+            else if ch == "/" { facts.insert(.comment) }
+        }
+        self = facts
+    }
+
+    /// The layout gates: `<s>` some trivia, `>s<` none, `<n>` a line break, `>n<` no line break.
+    func satisfies(_ boundary: String) -> Bool {
+        switch boundary {
+        case "<s>": return contains(.nonEmpty)
+        case ">s<": return !contains(.nonEmpty)
+        case "<n>": return contains(.lineBreak)
+        case ">n<": return !contains(.lineBreak)
+        default: fatalError("GapFacts.satisfies: unexpected boundary \(boundary)")
+        }
+    }
 }
 
 class MessageParser {
@@ -78,8 +118,10 @@ class MessageParser {
     var isSubParser = false
     /// True only for structured `:` / `-` recognizer sub-parsers. These parse inside a token/trivia
     /// island: direct body terminals can suppress leading trivia, normal `=` payloads may skip
-    /// trivia, and token commits return at content end so the surrounding recognizer owns following
-    /// trivia. Speculative recognizers such as `@preempt` keep the normal lex policy.
+    /// trivia, token commits return at content end so the surrounding recognizer owns following
+    /// trivia, and outer-tokenization literal munch is disabled so a delimiter like `*/` is not
+    /// swallowed by a longer Swift operator token. Speculative recognizers such as `@preempt` keep
+    /// the normal lex policy.
     var usesRecognizerLexBoundaries = false
 
     // MARK: - Lex memoization
@@ -104,7 +146,8 @@ class MessageParser {
                 at: pos,
                 terminalID: terminalID,
                 suppressesLeadingTrivia: suppressesLeadingTrivia,
-                consumesTrailingTrivia: !usesRecognizerLexBoundaries
+                consumesTrailingTrivia: !usesRecognizerLexBoundaries,
+                appliesLiteralMunch: !usesRecognizerLexBoundaries
             )
         }
         let key = LexCacheKey(pos: pos, terminalID: terminalID)
@@ -247,10 +290,73 @@ class MessageParser {
         return nil
     }
 
+    /// Exact trailing trivia facts for the terminal commit identified by a BSR tile.
+    /// This is the derivation-local counterpart of `gapFacts(endingAt:)`: the latter has to choose
+    /// among all commits ending at a cursor, while span constraints know the terminal kind and both
+    /// tile boundaries.
+    func terminalGapFacts(terminalID: Int, triviaStart: CharPosition, triviaEnd: CharPosition) -> GapFacts? {
+        guard let idxs = commitsByStart[triviaStart] else { return nil }
+        for i in idxs {
+            let c = commits[i]
+            if c.terminalID == terminalID && c.triviaEnd == triviaEnd {
+                return c.gap
+            }
+        }
+        return nil
+    }
+
+    // MARK: - Content spans and gap facts (TODO.md item 7)
+    //
+    // A yield spans `[triviaStart, triviaEnd)` of its tokens: content PLUS the trailing trivia of its
+    // last token. Readers that want the text or the layout around a span ask here instead of
+    // trimming or re-scanning source text. Several commits can end at one position (alternative
+    // lexicalisations); these pick the one with the LATEST content end, i.e. the smallest trailing
+    // gap — the same existential choice `boundaryMatches` makes.
+
+    private func latestContentCommit(endingAt position: CharPosition) -> TerminalCommit? {
+        guard let idxs = commitsByEnd[position], !idxs.isEmpty else { return nil }
+        return idxs.map { commits[$0] }.max { $0.end < $1.end }
+    }
+
+    /// The source text of `[from, to)` without leading and trailing trivia.
+    func contentText(from: CharPosition, to: CharPosition) -> Substring {
+        guard from < to else { return input[from..<from] }
+        let start = commitsByStart[from].flatMap { $0.map { commits[$0].start }.min() } ?? from
+        let end = latestContentCommit(endingAt: to)?.end ?? to
+        return start < end ? input[start..<end] : input[from..<from]
+    }
+
+    /// Shape of the trivia that ends at `position` (the gap after the token before it), or nil when
+    /// no token ends there (start of input).
+    func gapFacts(endingAt position: CharPosition) -> GapFacts? {
+        latestContentCommit(endingAt: position)?.gap
+    }
+
+    /// Last content character of the token whose trivia ends at `position`.
+    func lastContentCharacter(endingAt position: CharPosition) -> Character? {
+        guard let c = latestContentCommit(endingAt: position), c.start < c.end else { return nil }
+        return input[input.index(before: c.end)]
+    }
+
+    /// Content of the longest token starting at `triviaStart` — `terminalImage(startingAt:)`
+    /// without its leading trivia. Prefer `terminalContent(terminalID:triviaStart:triviaEnd:)` when
+    /// the tile (terminal and end) is known.
+    func tokenContent(startingAt triviaStart: CharPosition) -> Substring? {
+        guard let idxs = commitsByStart[triviaStart], !idxs.isEmpty else { return nil }
+        let c = idxs.map { commits[$0] }.max { $0.end < $1.end }!
+        return input[c.start..<c.end]
+    }
+
+    /// True when `range` holds trivia only (whitespace and comments), by the lexer's own definition.
+    func isTriviaOnly(_ range: Range<CharPosition>) -> Bool {
+        lexer.skipTrivia(from: range.lowerBound) >= range.upperBound
+    }
+
     @inline(always)
     final func recordCommit(terminalID: Int, triviaStart: CharPosition, start: CharPosition, end: CharPosition, triviaEnd: CharPosition) {
         let idx = commits.count
-        commits.append(TerminalCommit(terminalID: terminalID, triviaStart: triviaStart, start: start, end: end, triviaEnd: triviaEnd))
+        commits.append(TerminalCommit(terminalID: terminalID, triviaStart: triviaStart, start: start, end: end,
+                                      triviaEnd: triviaEnd, gap: GapFacts(classifying: input[end..<triviaEnd])))
         // Index by `triviaStart` — the position the parser cursor was at when
         // this commit started. This matches the BSR yield's `k` (= cI at lex
         // time), so AST/diagram consumers that get a position from the BSR
@@ -947,12 +1053,10 @@ class MessageParser {
     /// end before trailing-trivia skipping). The slice
     /// `input[end..<position]` is exactly the trivia text the lexer skipped,
     /// and the boundary semantics reduce to predicates on that slice. Multi-history GLL can produce multiple commits at the same
-    /// position; the answer must be consistent across them. We require
-    /// unanimity:
-    ///   - `<s>`/`<n>` (require trivia) → true iff every commit has trivia
-    ///     of the required shape
-    ///   - `>s<`/`>n<` (require none)   → true iff every commit has no trivia
-    ///     of the forbidden shape
+    /// position; they are alternative lexicalisations, so the check is EXISTENTIAL
+    /// (any one commit whose gap satisfies the boundary is enough — see the comment in the body).
+    /// The gap shape comes from `TerminalCommit.gap` (classified once at commit time); the
+    /// departing-trivia path uses the same classifier, so both paths share one definition.
     ///
     /// End-of-input rule for `<n>`: when `position == input.endIndex`, treat
     /// the boundary as satisfied unconditionally — languages that use `<n>`
@@ -966,14 +1070,7 @@ class MessageParser {
             // clause). Use the *departing* trivia — the gap the lexer would
             // skip FROM this position to reach the next token's content start.
             let contentStart = lexer.skipTrivia(from: position)
-            let gap = input[position..<contentStart]
-            switch boundary {
-            case "<s>": return !gap.isEmpty
-            case ">s<": return gap.isEmpty
-            case "<n>": return gap.contains(where: isLineBreak)
-            case ">n<": return !gap.contains(where: isLineBreak)
-            default: fatalError("\(#function): unexpected boundary \(boundary)")
-            }
+            return GapFacts(classifying: input[position..<contentStart]).satisfies(boundary)
         }
         // EXISTENTIAL over the commits ending here, not universal. Under multi-lex the commits
         // sharing a `triviaEnd` are ALTERNATIVE lexicalisations — disjuncts, not conjuncts — and this
@@ -984,25 +1081,7 @@ class MessageParser {
         // MONOTONICITY: adding a surviving lexicalisation could REMOVE a parse, which is why deleting
         // the FOLLOW-derived predict filter (which happened to prune the loser) wrongly rejected
         // `_ = /\ /`. Existential restores it — more commits can only ever make a boundary pass.
-        for i in idxs {
-            let c = commits[i]
-            let gap = input[c.end..<position]
-            let satisfied: Bool
-            switch boundary {
-            case "<s>": satisfied = !gap.isEmpty
-            case ">s<": satisfied = gap.isEmpty
-            case "<n>": satisfied = gap.contains(where: isLineBreak)
-            case ">n<": satisfied = !gap.contains(where: isLineBreak)
-            default: fatalError("\(#function): unexpected boundary \(boundary)")
-            }
-            if satisfied { return true }
-        }
-        return false
-    }
-
-    @inline(always)
-    final private func isLineBreak(_ ch: Character) -> Bool {
-        ch == "\n" || ch == "\r"
+        return idxs.contains { commits[$0].gap.satisfies(boundary) }
     }
 
     private func suppressesLeadingTriviaForPrediction(slot: GrammarNode, terminalID: Int) -> Bool {

@@ -225,9 +225,10 @@ struct ContainmentRule: DisambiguationRule {
     }
 }
 
-/// `@sameLine`. Prunes a yield whose span contains a newline that the parse crossed as trivia —
-/// i.e. a newline not inside any committed terminal's content. Newlines INSIDE a token (a nested
-/// multiline string, a block comment) are fine, which is what keeps `"a\("""⏎x⏎""")"` legal.
+/// `@sameLine`. Prunes a yield unless at least one surviving derivation of that yield crosses no
+/// line break in token-to-token trivia. Newlines INSIDE token content (a nested multiline string)
+/// are never in a gap, which is what keeps `"a\("""⏎x⏎""")"` legal. A trailing newline after the
+/// annotated span is also legal: only gaps before another token in the same span are crossed.
 ///
 /// Models swift-syntax's per-lexer-state trivia mode rather than a check: `Cursor.swift`
 /// `leadingTriviaLexingMode` returns `.noNewlines` while `inStringInterpolation` for a single-line
@@ -235,38 +236,161 @@ struct ContainmentRule: DisambiguationRule {
 /// paren depth, which is why a `>n<` gate on the owned boundaries cannot cover every case and this
 /// SPAN-level rule can.
 ///
-/// The token cover comes from `commits`, a flat log of every commit including ones from derivations
-/// that later died. That over-approximates the cover, so the rule can only ever MISS a prune, never
-/// remove a legitimate parse — the safe direction.
+/// The check is derivation-local. It tiles the candidate yield over the current BSR forest and, for
+/// each terminal tile, reads that exact commit's trailing-trivia facts. It never asks "what commits
+/// ended at this cursor?" globally, so dead or competing derivations cannot make a live same-line
+/// derivation look as if it crossed a newline.
 struct SameLineSpanRule: DisambiguationRule {
     var isHardConstraint: Bool { true }
-    /// Newline positions in the input.
-    let newlines: [CharPosition]
-    /// Content spans of the only tokens that may legitimately contain a newline (nested multiline
-    /// strings, block comments). Pre-filtered to those, so the cover is tiny and the intent is
-    /// explicit: a newline is legal ONLY inside such a token.
-    let newlineBearingTokens: [(CharPosition, CharPosition)]
-    /// Content start of every committed token, used to tell a CROSSED newline from a trailing one.
-    let tokenStarts: [CharPosition]
+    private struct NodeSpanMode: Hashable {
+        let id: ObjectIdentifier
+        let from: CharPosition
+        let to: CharPosition
+        let allowTrailingLineBreak: Bool
+    }
+
+    let parser: MessageParser
+    let node: GrammarNode
 
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        guard !newlines.isEmpty else { return 0 }
+        let navigator = YieldNavigator(parser: parser)
+        var nodeMemo: [NodeSpanMode: Bool] = [:]
+        var nodeStack = Set<NodeSpanMode>()
+        var symbolMemo: [NodeSpanMode: Bool] = [:]
+        var closureMemo: [NodeSpanMode: Bool] = [:]
+
+        func validNode(_ nt: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+            let key = NodeSpanMode(id: ObjectIdentifier(nt), from: from, to: to,
+                                   allowTrailingLineBreak: allowTrailingLineBreak)
+            if let cached = nodeMemo[key] { return cached }
+            guard nodeStack.insert(key).inserted else { return false }
+            defer { nodeStack.remove(key) }
+            guard navigator.hasSpan(nt, i: from, j: to) else {
+                nodeMemo[key] = false
+                return false
+            }
+            var alt = nt.alt
+            while let a = alt {
+                defer { alt = a.alt }
+                let body = a.bodySymbols.filter { $0.kind != .EPS }
+                if body.isEmpty {
+                    if from == to {
+                        nodeMemo[key] = true
+                        return true
+                    }
+                } else if validBody(body, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak) {
+                    nodeMemo[key] = true
+                    return true
+                }
+            }
+            nodeMemo[key] = false
+            return false
+        }
+
+        func validSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+            let key = NodeSpanMode(id: ObjectIdentifier(sym), from: from, to: to,
+                                   allowTrailingLineBreak: allowTrailingLineBreak)
+            if let cached = symbolMemo[key] { return cached }
+            let result: Bool
+            switch sym.kind {
+            case .T, .TI, .C:
+                guard navigator.hasPivotSpan(sym, k: from, j: to) else {
+                    result = false
+                    break
+                }
+                guard !allowTrailingLineBreak,
+                      let id = sym.nameID,
+                      let gap = parser.terminalGapFacts(terminalID: id, triviaStart: from, triviaEnd: to) else {
+                    result = true
+                    break
+                }
+                result = !gap.contains(.lineBreak)
+            case .B:
+                result = navigator.hasPivotSpan(sym, k: from, j: to)
+            case .EPS:
+                result = from == to
+            case .N:
+                guard navigator.hasPivotSpan(sym, k: from, j: to), let lhs = sym.alt else {
+                    result = false
+                    break
+                }
+                result = validNode(lhs, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak)
+            case .DO, .OPT:
+                if from == to, sym.kind == .OPT {
+                    result = true
+                } else {
+                    result = validBracket(sym, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak)
+                }
+            case .KLN, .POS:
+                if from == to, sym.kind == .KLN {
+                    result = true
+                } else {
+                    result = validClosure(sym, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak)
+                }
+            default:
+                result = true
+            }
+            symbolMemo[key] = result
+            return result
+        }
+
+        func validBody(_ symbols: [GrammarNode], from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+            guard let first = symbols.first else { return from == to }
+            let rest = Array(symbols.dropFirst())
+            for mid in navigator.endPositions(first, from: from).sorted() where mid <= to {
+                let firstIsLast = rest.isEmpty
+                let allowHeadTrailing = firstIsLast ? allowTrailingLineBreak : false
+                guard validSymbol(first, from: from, to: mid, allowTrailingLineBreak: allowHeadTrailing) else {
+                    continue
+                }
+                if validBody(rest, from: mid, to: to, allowTrailingLineBreak: allowTrailingLineBreak) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        func validBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+            var alt = bracket.alt
+            while let a = alt {
+                defer { alt = a.alt }
+                let body = a.bodySymbols.filter { $0.kind != .EPS }
+                if body.isEmpty {
+                    if from == to { return true }
+                } else if validBody(body, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        func validClosure(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+            let key = NodeSpanMode(id: ObjectIdentifier(bracket), from: from, to: to,
+                                   allowTrailingLineBreak: allowTrailingLineBreak)
+            if let cached = closureMemo[key] { return cached }
+            if from == to {
+                let result = bracket.kind == .KLN
+                closureMemo[key] = result
+                return result
+            }
+            for end in navigator.iterationEndPositions(bracket, from: from).sorted() where end > from && end <= to {
+                let isLast = end == to
+                if validBracket(bracket, from: from, to: end,
+                                allowTrailingLineBreak: isLast ? allowTrailingLineBreak : false),
+                   (isLast || validClosure(bracket, from: end, to: to,
+                                           allowTrailingLineBreak: allowTrailingLineBreak)) {
+                    closureMemo[key] = true
+                    return true
+                }
+            }
+            closureMemo[key] = false
+            return false
+        }
+
         var pruned = 0
-        for span in yields {
-            let crossedAsTrivia = newlines.contains { nl in
-                nl >= span.i && nl < span.j
-                    // Not inside a token that may legitimately contain newlines.
-                    && !newlineBearingTokens.contains { $0.0 <= nl && nl < $0.1 }
-                    // The parse must actually have CONTINUED past this newline inside the span.
-                    // A yield's `j` is `triviaEnd`, so every span includes its own TRAILING trivia —
-                    // `"\(x)"⏎` and `"\(x)"⏎// comment` both end with a newline that was never
-                    // crossed. Requiring a token to START after the newline (still inside the span)
-                    // distinguishes "crossed it" from "it merely trails".
-                    && tokenStarts.contains { $0 > nl && $0 < span.j }
-            }
-            if crossedAsTrivia {
-                yields.remove(span); pruned += 1
-            }
+        for span in yields where !validNode(node, from: span.i, to: span.j, allowTrailingLineBreak: true) {
+            yields.remove(span)
+            pruned += 1
         }
         return pruned
     }
@@ -353,15 +477,7 @@ class Oracle {
     /// (An earlier "exactly one alternate" assertion was a proxy for this and is gone.)
     private func registerSameLine(nonTerminal nt: GrammarNode) {
         guard nt.requiresSameLine else { return }
-        let newlines = input.indices.filter { input[$0] == "\n" || input[$0] == "\r" }
-        // Only tokens that actually contain a newline can excuse one, so pre-filter to those.
-        let bearing = parser.commits.compactMap { c -> (CharPosition, CharPosition)? in
-            input[c.start..<c.end].contains { $0 == "\n" || $0 == "\r" } ? (c.start, c.end) : nil
-        }
-        let starts = parser.commits.map(\.start)
-        rules.append((nt, SameLineSpanRule(
-            newlines: newlines, newlineBearingTokens: bearing, tokenStarts: starts
-        )))
+        rules.append((nt, SameLineSpanRule(parser: parser, node: nt)))
     }
 
     private struct NodeSpan: Hashable { let id: ObjectIdentifier; let from, to: CharPosition }
@@ -782,8 +898,15 @@ private struct IJPair: Hashable {
     private func pruneUnproductive(endPosition n: CharPosition) -> Int {
         var reachable = Set<NodeSpan>()
         var expanding = Set<NodeSpan>()
-        var endCache = [NodePos: Set<CharPosition>]()
-        var endGuard = Set<NodePos>()
+        // Shared, indexed BSR navigation (`YieldNavigator.swift`) — a fresh snapshot per pass, since
+        // the sweep at the end of this function mutates the yields.
+        let navigator = YieldNavigator(parser: parser)
+        func endPositions(_ sym: GrammarNode, from: CharPosition) -> Set<CharPosition> {
+            navigator.endPositions(sym, from: from)
+        }
+        func iterEndPositions(_ bracket: GrammarNode, from: CharPosition) -> Set<CharPosition> {
+            navigator.iterationEndPositions(bracket, from: from)
+        }
         // Memo tables for the walk (2026-09-27). Without them `tileBody`, `bodyTiles` and
         // `visitBracket` re-derived the same (symbols, from, to) once per enclosing split point, which
         // made the walk ~cubic in the length of a statement or member list (200 statements: 30 s).
@@ -800,111 +923,8 @@ private struct IJPair: Hashable {
             TileKey(symbols: symbols.map { ObjectIdentifier($0) }, from: from, to: to)
         }
 
-        // Per-node index over the yields, built lazily ONCE per call. The walk below asks two
-        // questions millions of times — "ends of this symbol's yields that start at p" and "does a
-        // yield span exactly [p, q]" — and answering them by scanning `parser.yield(of:)` made the
-        // walk O(yields × queries), i.e. quadratic in input size: 54 KB took ~1 s, a 524 KB file
-        // 20+ minutes (measured 2026-09-26 with `sample`: ~87% of Oracle time in these scans).
-        // The walk is read-only (the sweep at the end mutates yields AFTER it), so the index is
-        // valid for the whole walk.
-        struct YieldIndex {
-            var endsByI: [CharPosition: Set<CharPosition>] = [:]   // i → { j }
-            var endsByK: [CharPosition: Set<CharPosition>] = [:]   // k → { j }
-            var spansIJ: Set<IJPair> = []
-            var spansKJ: Set<IJPair> = []
-        }
-        var yieldIndex = [Int: YieldIndex]()
-        func index(_ sym: GrammarNode) -> YieldIndex {
-            if let cached = yieldIndex[sym.number] { return cached }
-            var x = YieldIndex()
-            for y in parser.yield(of: sym) {
-                x.endsByI[y.i, default: []].insert(y.j)
-                x.endsByK[y.k, default: []].insert(y.j)
-                x.spansIJ.insert(IJPair(i: y.i, j: y.j))
-                x.spansKJ.insert(IJPair(i: y.k, j: y.j))
-            }
-            yieldIndex[sym.number] = x
-            return x
-        }
 
-        // End positions reachable from `sym` starting at `from`.
-        // Mirrors DerivationBuilder.endPositions — read-only query on yields.
-        func endPositions(_ sym: GrammarNode, from: CharPosition) -> Set<CharPosition> {
-            let key = NodePos(id: ObjectIdentifier(sym), from: from)
-            if let cached = endCache[key] { return cached }
-            guard endGuard.insert(key).inserted else { return [] }
-            defer { endGuard.remove(key) }
 
-            let result: Set<CharPosition>
-            switch sym.kind {
-            case .T, .TI, .C, .B:
-                result = index(sym).endsByK[from] ?? []
-            case .N:
-                if sym.isRHS {
-                    guard let lhs = sym.alt else { return [] }
-                    let occurrenceEnds = index(sym).endsByK[from] ?? []
-                    let lhsEnds = index(lhs).endsByI[from] ?? []
-                    result = occurrenceEnds.intersection(lhsEnds)
-                } else {
-                    result = index(sym).endsByI[from] ?? []
-                }
-            case .DO, .OPT, .KLN, .POS:
-                if sym.disambiguation != nil {
-                    // ANNOTATED bracket (@longest/@shortest): read its OWN (Oracle-prunable)
-                    // yields so the extent prune is honored here. A bracket is an RHS
-                    // occurrence — yields are `(alternate-start, k = bracket-start, j)`,
-                    // filtered by `k == from` like a terminal; a closure's shared cluster
-                    // accumulates its transitive ends the same way.
-                    result = index(sym).endsByK[from] ?? []
-                } else {
-                    // UNANNOTATED bracket: original body-recompute path, untouched — so the
-                    // global operator/regex machinery keeps its exact phase-1 reachability.
-                    var positions = Set<CharPosition>()
-                    if sym.kind == .KLN || sym.kind == .OPT { positions.insert(from) }
-                    if sym.kind.isClosure {
-                        var visited = Set<CharPosition>()
-                        var queue = [from]
-                        while !queue.isEmpty {
-                            let pos = queue.removeFirst()
-                            guard visited.insert(pos).inserted else { continue }
-                            for end in iterEndPositions(sym, from: pos) where end > pos {
-                                positions.insert(end)
-                                queue.append(end)
-                            }
-                        }
-                    } else {
-                        positions.formUnion(iterEndPositions(sym, from: from))
-                    }
-                    result = positions
-                }
-            case .EPS:
-                result = [from]
-            default:
-                result = []
-            }
-            endCache[key] = result
-            return result
-        }
-
-        func iterEndPositions(_ bracket: GrammarNode, from: CharPosition) -> Set<CharPosition> {
-            var positions = Set<CharPosition>()
-            var alt = bracket.alt
-            while let a = alt {
-                let body = a.bodySymbols.filter { $0.kind != .EPS }
-                if body.isEmpty {
-                    positions.insert(from)
-                } else {
-                    var frontier: Set<CharPosition> = [from]
-                    for sym in body {
-                        frontier = frontier.reduce(into: Set()) { $0.formUnion(endPositions(sym, from: $1)) }
-                        if frontier.isEmpty { break }
-                    }
-                    positions.formUnion(frontier)
-                }
-                alt = a.alt
-            }
-            return positions
-        }
 
         // Walk the BSR graph top-down. Returns true if any valid tiling
         // of `node`'s alternates covers [from, to].
@@ -915,7 +935,7 @@ private struct IJPair: Hashable {
             guard expanding.insert(key).inserted else { return false }
             defer { expanding.remove(key) }
 
-            guard index(node).spansIJ.contains(IJPair(i: from, j: to)) else { return false }
+            guard navigator.hasSpan(node, i: from, j: to) else { return false }
 
             if visitAlternates(node, from: from, to: to) {
                 reachable.insert(key)
@@ -1072,8 +1092,7 @@ private struct IJPair: Hashable {
         }
 
         func visitSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition) {
-            let ix = index(sym)
-            if ix.spansIJ.contains(IJPair(i: from, j: to)) || ix.spansKJ.contains(IJPair(i: from, j: to)) {
+            if navigator.hasSpan(sym, i: from, j: to) || navigator.hasPivotSpan(sym, k: from, j: to) {
                 reachable.insert(NodeSpan(id: ObjectIdentifier(sym), from: from, to: to))
             }
 

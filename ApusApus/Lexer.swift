@@ -134,6 +134,7 @@ struct OnDemandLiteralLexer {
         terminalID: Int,
         suppressesLeadingTrivia: Bool = false,
         consumesTrailingTrivia: Bool = true,
+        appliesLiteralMunch: Bool = true,
         contentStart: CharPosition? = nil
     ) -> [LexMatch] {
         let scanStart = suppressesLeadingTrivia ? pos : (contentStart ?? skipTrivia(from: pos))
@@ -159,15 +160,17 @@ struct OnDemandLiteralLexer {
             let remaining = input[scanStart...]
             guard remaining.hasPrefix(literal) else { return [] }
             let literalEnd = input.index(scanStart, offsetBy: literal.count)
-            // Maximal munch (longest-across): suppress this literal if any declared
-            // `@literalMunch` terminal has a strictly longer match at the same
-            // start — `for` inside `foreach`, `_` inside `_foo`. Runtime prefix-
-            // match of the declared regex is the faithful test (no extension-set
-            // extraction, no probes). TODO #0.
-            for classID in literalMunchIDs where classID != terminalID {
-                guard let rx = regexByID[classID] else { continue }
-                if let rm = remaining.prefixMatch(of: rx), rm.range.upperBound > literalEnd {
-                    return []
+            if appliesLiteralMunch {
+                // Maximal munch (longest-across): suppress this literal if any declared
+                // `@literalMunch` terminal has a strictly longer match at the same
+                // start — `for` inside `foreach`, `_` inside `_foo`. Runtime prefix-
+                // match of the declared regex is the faithful test (no extension-set
+                // extraction, no probes). TODO #0.
+                for classID in literalMunchIDs where classID != terminalID {
+                    guard let rx = regexByID[classID] else { continue }
+                    if let rm = remaining.prefixMatch(of: rx), rm.range.upperBound > literalEnd {
+                        return []
+                    }
                 }
             }
             let cursorEnd = consumesTrailingTrivia ? skipTrivia(from: literalEnd) : literalEnd
