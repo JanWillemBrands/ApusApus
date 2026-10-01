@@ -2033,6 +2033,82 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     // TODO 1 (fixed by the `<+< ( "#endif" )` alternate): a leading-dot `#if` body after another
     // `#if … #endif` block.
     SwiftSnippet(label: "ifconfig-dot-after-endif",  source: "#if A\n#endif\n#if FOO\n.member\n#endif",  origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-29: formerly-classified rejects that are accepted by swiftc -swift-version 6,
+    // swift-syntax, and ApusApus after the Swift 6.4 grammar cleanup.
+    SwiftSnippet(label: "pack-element-type", source: "func f<each T>(_ v: each T) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "pack-expansion-tuple-type", source: "func f<each A, each B>(_ v: (repeat (each A, each B))) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "attribute-argument-trailing-comma", source: "@Test(arguments: values,\n)\nstruct S {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "dollar-identifier-continuation", source: "struct S { var _$id: Int = 0; func _$willModify() {} }\nlet v = a$b", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "leading-dollar-projection-still-valid", source: "let v = $abc\nlet w = $0", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "integer-generic-parameter", source: "struct S<let N: Int> {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-30: `return` vs `break`/`continue` resolve the same `X?` ambiguity in OPPOSITE
+    // directions, and these fixtures assert the TREES, not just acceptance — an engine change that
+    // flips either one shows up here. `parseReturnStatement` eats the expression eagerly with no
+    // newline test, so `return⏎a` returns `a`; `parseOptionalControlTransferTarget` opens with
+    // `guard !self.atStartOfLine`, so `break⏎foo` is a bare `break` plus a statement `foo`.
+    // These were the dominant residual ambiguity in the 30k-file crawl (52 files).
+    SwiftSnippet(label: "return-newline-takes-expression", source: "func g() -> Int {\n  return\n  a\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "return-newline-then-two-statements", source: "func g() {\n  return\n  a\n  b()\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "break-newline-is-not-a-label", source: "func g() {\n  outer: for i in 0..<2 {\n    break\n    foo\n  }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "continue-newline-is-not-a-label", source: "func g() {\n  outer: for i in 0..<2 {\n    continue\n    foo\n  }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "break-label-same-line", source: "func g() {\n  outer: for i in 0..<2 {\n    break outer\n  }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-30: a `;` belongs to the item it TERMINATES (`CodeBlockItem.semicolon`,
+    // `MemberBlockItem.semicolon`), but the grammar hangs it on the list, where the hop carrying it
+    // is an accident of the list's spelling. Under `xs = x { sep x } ";"? .` it was off by one in
+    // both directions — a trailing `;` landed on the FIRST item, a separator `;` on the item AFTER
+    // the one it closes. Single-item lists hid it, so every fixture here needs two items.
+    SwiftSnippet(label: "semicolon-on-last-statement", source: "func g() {\n  a()\n  return;\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-on-first-statement", source: "func g() {\n  a();\n  return\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-on-every-statement", source: "func g() {\n  a();\n  b();\n  c();\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-joins-one-line", source: "func g() {\n  a(); b()\n  c()\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-on-last-member", source: "struct S {\n  var a = 1\n  var b = 2;\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-on-first-member", source: "struct S {\n  var a = 1;\n  var b = 2\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-last-member-in-ifconfig", source: "struct S {\n#if DEBUG\n  var a = 1\n  var b = 2;\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "semicolon-first-member-in-ifconfig", source: "struct S {\n#if DEBUG\n  var a = 1;\n  var b = 2\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-30: an EMPTY `#if` before a DECLARATION used to have two readings — its own item, or
+    // that declaration's attribute list — because `ifDirectiveAttributes` had `attributes?`.
+    // swift-syntax keeps them mutually exclusive: an attribute `#if` must contain attributes
+    // (`didSeeAnyAttributes` in `consumeIfConfigOfAttributes`). These assert the TREES, so the
+    // empty ones must come out as a standalone `IfConfigDecl` item and the attribute-bearing ones
+    // inside the declaration's `AttributeList`. Only declarations were affected — attributes do not
+    // attach to expression statements — so each empty-`#if` fixture is followed by a declaration.
+    SwiftSnippet(label: "empty-ifconfig-then-decl", source: "func g() {\n#if D\n#endif\n    let c = 1\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "empty-ifconfig-then-nested-func", source: "func g() {\n#if D\n#endif\n    func h() {}\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "empty-ifconfig-then-member", source: "struct S {\n#if D\n#endif\n    var c = 1\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "empty-ifconfig-top-level", source: "#if D\n#endif\nlet c = 1", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "empty-ifconfig-else-then-decl", source: "func g() {\n#if D\n#else\n#endif\n    let c = 1\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-of-attributes", source: "#if A\n@objc\n#endif\nfunc h() {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-of-attributes-else", source: "#if A\n@objc\n#else\n@MainActor\n#endif\nfunc h() {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-09-30: `ifConfigStatements` took the same closure shape as `statements`, so a `;` inside
+    // an `#if` clause body now goes through the same position-based pairing as everywhere else.
+    // Under the previous right-recursive shape the hop carried its own `;`, so these were safe by
+    // accident; two items per clause is what exercises the pairing.
+    SwiftSnippet(label: "ifconfig-body-semicolon-last", source: "func g() {\n#if A\n  a()\n  b();\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-body-semicolon-first", source: "func g() {\n#if A\n  a();\n  b()\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-else-body-semicolon", source: "func g() {\n#if A\n  a()\n#else\n  b();\n  c()\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-01: a ternary in a CONDITION, where the else-branch is followed by more of the
+    // condition's own operator chain. `conditionInfixExpression` lacked the `@longest` that
+    // `infixExpression` carries, so `a ? b : c && d` had two tilings — `? b : (c && d)` or
+    // `? b : c` plus `&& d` — in conditions only. 9 files of the 30k-file crawl; the expression
+    // form (`let v = a ? b : c && d`) was always clean, which is what gave the asymmetry away.
+    SwiftSnippet(label: "ternary-in-if-condition-chain", source: "func g(a: Bool, b: Bool, c: Bool, d: Bool) {\n  if a ? b : c && d { }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ternary-in-while-condition-chain", source: "func g(a: Bool, b: Bool, c: Bool, d: Bool) {\n  while a ? b : c && d { }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ternary-in-guard-condition-chain", source: "func g(a: Bool, b: Bool, c: Bool, d: Bool) -> Int {\n  guard a ? b : c && d else { return 0 }\n  return 1\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ternary-in-condition-comparisons", source: "func g(distance: Int, l: Int) {\n  if distance > 0 ? l >= 0 && l < distance : l <= 0 && distance < l { }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ternary-in-expression-chain", source: "func g(a: Bool, b: Bool, c: Bool, d: Bool) {\n  let v = a ? b : c && d\n  _ = v\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-01: a trailing closure may start on the line AFTER the call's `)`. `>n<` on the
+    // closure brace used to push it out of the call, so it re-parsed as a separate closure
+    // STATEMENT (26 tree differences) and a following `b: { … }` then had nothing to attach to
+    // (4 underaccepts). These assert the TREES: the closure must be the call's `trailingClosure`,
+    // not a sibling `CodeBlockItem`.
+    SwiftSnippet(label: "trailing-closure-next-line", source: "func f(a: Int, _ c: () -> Void) {}\nf(a: 1)\n{ }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "trailing-closure-next-line-labeled", source: "func f(a: Int, _ c: () -> Void, b: () -> Void) {}\nf(a: 1)\n{ } b: { }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "trailing-closure-next-line-multiline-args", source: "func f(a: Int, _ c: () -> Void) {}\nf(\n  a: 1)\n{ }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "trailing-closure-same-line-still-works", source: "func f(a: Int, _ c: () -> Void, b: () -> Void) {}\nf(a: 1) { } b: { }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // The brace after a CONDITION is still the statement body, never a trailing closure —
+    // `atValidTrailingClosure`'s `.stmtCondition` branch, which we get from
+    // `@excludedFrom(conditionExpression)`. The `for`-`in` case is the reference's own example.
+    SwiftSnippet(label: "condition-brace-is-not-trailing-closure", source: "func g(f: (Int) -> Bool, y: [Int]) {\n  if y.isEmpty { }\n  while y.isEmpty { }\n  for x in y.filter { $0 > 4 } { _ = x }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2053,9 +2129,6 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "condition-tight-coalesce", source: "if rhs??b {}",                     origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-09-27 long fuzzer harvest overaccepts.
     SwiftSnippet(label: "constraint-repeat-each", source: "struct Fuzz<T: repeat each T> { var value: T }", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "pack-element-type", source: "func f<each T>(_ v: each T) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "pack-expansion-tuple-type", source: "func f<each A, each B>(_ v: (repeat (each A, each B))) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "attribute-argument-trailing-comma", source: "@Test(arguments: values,\n)\nstruct S {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "member-ifconfig-leading-dot", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "member-ifconfig-leading-dot-warning", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n#warning(\"seed\")\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-condition-newline-call-overaccept", source: "struct Fuzz {\n#if A\n(if let x = value as? T ?? nil { _ = x })\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),

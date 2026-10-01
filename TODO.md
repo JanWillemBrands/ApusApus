@@ -1,26 +1,37 @@
 # Active TODO
 
-This file is the canonical active TODO list for the project. It holds actionable items only; put
-completed work and historical explanations in design notes or commit messages.
+This file is the canonical active TODO list for the project.
+It holds actionable items only.
+Put completed work and historical explanations in design notes or commit messages.
 
-1. **`$` inside an identifier is rejected: `_$id`, `a$b`.**
-    5 files in the crawl, all FluentKit, which declares `var _$id` as a protocol requirement and
-    then uses `From()._$id.field.key`. Confirmed ground truth: `swiftc -parse` ACCEPTS both
-    `struct S { var _$id: Int = 0 }` and `let v = a$b`. Our failure sites put `<HERE>` exactly at
-    the `$` (`var _<HERE>$id`, `let v = a<HERE>$b`), so the lexer stops the identifier there.
-    - Fix in `ApusApus/SwiftGrammarRegexLibrary.swift`: `identifierCharacter` (line ~84) does not
-      include `$`. `identifierHead` (line ~65) must NOT get it — a LEADING `$` is the property
-      wrapper projection (`$foo`), which is already its own terminal
-      (`propertyWrapperProjection`), and admitting `$` in head position would make the two
-      terminals overlap.
-    - Check first what swift-syntax's lexer does (`Sources/SwiftParser/Lexer/Lexer+Cursor.swift`,
-      `advanceIfValidContinuationOfIdentifier`) — it diagnoses `$` in identifiers in some
-      positions, so the accepted set may be narrower than "any non-initial `$`". Ground the change
-      in that function plus `swiftc -parse`, not in TSPL, whose `identifier-character` omits `$`.
-    - Reproducers: the 5 non-`same` files in `/tmp/crawlW/results.jsonl`.
+1. Fix `_lifetime` labelled dependency arguments. `crawl3` found 22 underaccepts at
+   `_lifetime(self: copy self)`, for example
+   `/Users/janwillem/Library/Caches/ApusApusCorpus/repos/apple__swift-collections/Sources/BasicContainers/HashTable/_HTable+Deprecated.swift`
+   line 21. ApusApus currently stops at `self:` and expects `)`. Add the labelled
+   dependency form without weakening the existing `borrow/copy/&name` forms, then add a focused
+   SwiftSyntax regression for `@_lifetime(self: copy self)`.
 
-## Maintenance Rule
+2. Fix `&` type-composition underaccepts in conformance, associatedtype, and inheritance
+   positions. `crawl3` found about 19 files where the compiler and swift-syntax accept a type list
+   containing `&`, but ApusApus expects `.`, `::`, `where`, `#if`, or `#sourceLocation`. Examples:
+   `associatedtype Buffer: RangeReplaceableContainer<ReadElement> & ~Copyable` in
+   `apple__swift-async-algorithms/Sources/AsyncStreaming/AsyncReader/AsyncReader.swift`, and
+   `struct NonCopyableTests: ~Copyable & ~Escapable` in
+   `apple__swift-testing/Sources/Testing/ExitTests/ExitTest.CapturedValue.swift`. Keep the fix in
+   the shared type grammar if possible rather than adding position-specific hacks.
 
-- Add new TODOs here only when they are active and actionable.
-- Move completed investigations and historical explanations to design notes or commit messages.
-- `codex.md` and `claude.md` reference this file instead of maintaining separate TODO lists.
+3. Fix pack iteration and pack member type/expression forms from real source files. `crawl3`
+   underaccepts include `repeat inputTypes.append((each Input).self)`,
+   `Array(repeat (each T).self)`, `repeat (each lhs.values, each rhs.values)`, and type-member
+   forms such as `(each Input).Output` / `[any Markup].Index`. Example files include
+   `apple__swift-foundation/Sources/FoundationEssentials/Predicate/Archiving/PredicateExpressionConstruction.swift`
+   and `apple__swift-testing/Sources/Testing/ExitTests/ExitTest.swift`. Extend the existing
+   pack/type-member rules, preserving the recent `packType` consolidation.
+
+4. Fix multiple trailing closure labels after an unlabeled trailing closure. `crawl3` has 4
+   underaccepts and 26 tree differences around calls shaped like
+   `.confirmationDialog(...) { ... } message: { _ in ... }`, for example
+   `coteditor__CotEditor/CotEditor/Sources/Settings Window/Other Views/ThemeView.swift` line 261.
+   ApusApus currently stops before `message:` / `label:` in some cases, and the converter often
+   reports `ClosureExpr != MultipleTrailingClosureElementList`. Acceptance and tree shape should be
+   fixed together.

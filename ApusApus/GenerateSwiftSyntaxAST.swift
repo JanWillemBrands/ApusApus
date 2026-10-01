@@ -523,18 +523,41 @@ struct SwiftSyntaxGenerator {
         return false
     }
 
-    /// Is this list element terminated by an EXPLICIT `;`?
+    /// Where the explicit `;` tokens of one list hop are in the source.
     ///
-    /// Two places carry it: the trailing `";"?` of `statements = statement ";"?` (a direct
-    /// terminal) and the separator of `statements = statement statementSeparator statements`,
-    /// where `statementSeparator = <n> | ";"` hides it one level down. Checking only the direct
-    /// terminal missed every separator case.
-    private mutating func hasExplicitSemicolon(in spans: [(GrammarNode, CharPosition, CharPosition)]) -> Bool {
-        if spansContainKeyword(spans, ";") { return true }
-        guard let sepNT = find("statementSeparator", in: spans),
-              let (_, sepSpans) = tileAlternate(sepNT.nt, from: sepNT.from, to: sepNT.to)
-        else { return false }
-        return spansContainKeyword(sepSpans, ";")
+    /// A `;` hides in two places: a direct `";"?` terminal on the list, or one level down inside
+    /// `statementSeparator`. Reported as POSITIONS, so the caller can pair each `;` with the item
+    /// it terminates instead of with the hop that happens to carry it — which is an accident of
+    /// how the list is spelled.
+    private mutating func semicolonPositions(in spans: [(GrammarNode, CharPosition, CharPosition)]) -> [CharPosition] {
+        var positions: [CharPosition] = []
+        for (sym, f, t) in spans where f < t {
+            if sym.kind.isTerminal || sym.kind == .OPT || sym.kind == .DO {
+                var text = ""
+                if tiledText(sym, from: f, to: t, into: &text), text == ";" { positions.append(f) }
+            }
+        }
+        if let sepNT = find("statementSeparator", in: spans),
+           let (_, sepSpans) = tileAlternate(sepNT.nt, from: sepNT.from, to: sepNT.to) {
+            positions.append(contentsOf: semicolonPositions(in: sepSpans))
+        }
+        return positions
+    }
+
+    /// Which list items carry a `;`, by index into `itemEnds` (which must be in source order).
+    ///
+    /// swift-syntax hangs a `;` on the item it TERMINATES (`CodeBlockItem.semicolon`,
+    /// `MemberBlockItem.semicolon`, both filled by `consume(if: .semicolon)` after the item), while
+    /// the grammar hangs it on the list. The hop that carries it is an accident of spelling: under
+    /// `xs = x { sep x } ";"? .` hop 0 holds the list's trailing `;` even though it terminates the
+    /// LAST item, and hop i ≥ 1 opens with the `sep` that follows item i-1. Position settles it
+    /// without caring: a `;` terminates the last item that ends before the `;` begins.
+    private func semicolonOwners(itemEnds: [CharPosition], semicolons: [CharPosition]) -> Set<Int> {
+        var owners: Set<Int> = []
+        for semicolon in semicolons {
+            if let owner = itemEnds.lastIndex(where: { $0 <= semicolon }) { owners.insert(owner) }
+        }
+        return owners
     }
 
     /// Locate a named TERMINAL in `spans`. `find`/`findNonterminal` match `.N` nodes
@@ -578,29 +601,41 @@ struct SwiftSyntaxGenerator {
     /// Returns whole `CodeBlockItem`s, not bare items, because an explicit `;` belongs to the
     /// item it terminates (`CodeBlockItem.semicolon`) and is otherwise dropped.
     private mutating func convertStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        // statements = statement ";"? .
-        // statements = statement statementSeparator statements .
-        //
-        // A HOP walk: the `";"?` hangs on the list but belongs to the statement it terminates, so
-        // the hop's spans must be in hand when the statement is converted — same reason as
-        // `collectMembers`. Blind to the recursion-vs-closure spelling either way.
-        var items: [CodeBlockItemSyntax] = []
-        for hop in listHops(of: ["statements"], nt, from: from, to: to) {
+        convertStatementList(["statements"], nt, from: from, to: to)
+    }
+
+    /// The items of a statement list, each carrying the `;` that terminates IT.
+    ///
+    /// Serves `statements` and `ifConfigStatements`. The latter is the sentinel
+    /// `ifConfigStatements = statements .`, whose only job is to give `@confinedTo` a name for
+    /// "inside an `#if` clause body", so its caller passes BOTH names and the hop walk descends
+    /// through the sentinel into the list itself.
+    ///
+    /// A HOP walk, because the `;` hangs on the LIST while swift-syntax hangs it on the item it
+    /// terminates (`CodeBlockItem.semicolon`). It is NOT in the hop of the item that owns it: the
+    /// trailing `";"?` rides in hop 0 while terminating the LAST statement, and each iteration hop
+    /// opens with the separator that follows the PREVIOUS one. So collect items and `;` positions
+    /// separately and pair them up by position, which reads the same under either spelling.
+    private mutating func convertStatementList(_ listNames: Set<String>, _ nt: GrammarNode,
+                                               from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
+        var items: [(item: CodeBlockItemSyntax.Item, end: CharPosition)] = []
+        var semicolons: [CharPosition] = []
+        for hop in listHops(of: listNames, nt, from: from, to: to) {
+            semicolons.append(contentsOf: semicolonPositions(in: hop))
             if let stmtNT = find("statement", in: hop),
                let item = convertStatement(stmtNT.nt, from: stmtNT.from, to: stmtNT.to) {
-                items.append(CodeBlockItemSyntax(
-                    item: item,
-                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                ))
+                items.append((item, stmtNT.to))
             } else if let ccNT = find("compilerControlStatement", in: hop),
                       let decl = convertCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
-                items.append(CodeBlockItemSyntax(
-                    item: .decl(decl),
-                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                ))
+                items.append((.decl(decl), ccNT.to))
             }
         }
-        return items
+        items.sort { $0.end < $1.end }
+        let owners = semicolonOwners(itemEnds: items.map(\.end), semicolons: semicolons)
+        return items.enumerated().map { index, entry in
+            CodeBlockItemSyntax(item: entry.item,
+                                semicolon: owners.contains(index) ? .semicolonToken() : nil)
+        }
     }
 
     private mutating func convertCompilerControlDeclaration(
@@ -861,7 +896,7 @@ struct SwiftSyntaxGenerator {
             return DeclSyntax(convertFunctionDeclaration(funcNT.nt, from: funcNT.from, to: funcNT.to))
         }
         if let d = find("structDeclaration", in: spans) {
-            let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d, nameRule: "structName", bodyRule: "structBody", membersRule: "structMembers", memberRule: "structMember")
+            let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d, nameRule: "structName")
             return DeclSyntax(StructDeclSyntax(attributes: attrs, modifiers: modifiers, name: name,
                                              genericParameterClause: generics,
                                              inheritanceClause: inherit,
@@ -869,7 +904,7 @@ struct SwiftSyntaxGenerator {
                                              memberBlock: members))
         }
         if let d = find("classDeclaration", in: spans) {
-            let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d, nameRule: "className", bodyRule: "classBody", membersRule: "classMembers", memberRule: "classMember")
+            let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d, nameRule: "className")
             return DeclSyntax(ClassDeclSyntax(attributes: attrs, modifiers: modifiers, name: name,
                                              genericParameterClause: generics,
                                              inheritanceClause: inherit,
@@ -878,7 +913,7 @@ struct SwiftSyntaxGenerator {
         }
         if let d = find("enumDeclaration", in: spans) {
             // enumDeclaration inlines its braces — no body nonterminal.
-            let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d, nameRule: "enumName", bodyRule: nil, membersRule: "enumMembers", memberRule: "enumMember")
+            let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d, nameRule: "enumName")
             return DeclSyntax(EnumDeclSyntax(attributes: attrs, modifiers: modifiers, name: name,
                                              genericParameterClause: generics,
                                              inheritanceClause: inherit,
@@ -886,7 +921,7 @@ struct SwiftSyntaxGenerator {
                                              memberBlock: members))
         }
         if let d = find("protocolDeclaration", in: spans) {
-            let (name, attrs, modifiers, _, inherit, members) = nominalParts(d, nameRule: "protocolName", bodyRule: "protocolBody", membersRule: "protocolMembers", memberRule: "protocolMember")
+            let (name, attrs, modifiers, _, inherit, members) = nominalParts(d, nameRule: "protocolName")
             // A protocol's `<…>` is a PRIMARY ASSOCIATED TYPE clause (SE-0346), a different node
             // from a generic parameter clause even though the surface syntax matches — so it is
             // read here rather than taken from `nominalParts`.
@@ -908,8 +943,7 @@ struct SwiftSyntaxGenerator {
         }
         if let d = find("actorDeclaration", in: spans) {
             let (name, attrs, modifiers, generics, inherit, members) = nominalParts(d,
-                nameRule: "actorName", bodyRule: "actorBody",
-                membersRule: "actorMembers", memberRule: "actorMember")
+                nameRule: "actorName")
             return DeclSyntax(ActorDeclSyntax(attributes: attrs, modifiers: modifiers, name: name,
                                               genericParameterClause: generics,
                                               inheritanceClause: inherit,
@@ -1109,10 +1143,7 @@ struct SwiftSyntaxGenerator {
 
     private mutating func nominalParts(
         _ span: NTSpan,
-        nameRule: String,
-        bodyRule: String?,
-        membersRule: String,
-        memberRule: String
+        nameRule: String
     ) -> (name: TokenSyntax, attributes: AttributeListSyntax, modifiers: DeclModifierListSyntax,
           generics: GenericParameterClauseSyntax?, inheritance: InheritanceClauseSyntax?, members: MemberBlockSyntax) {
         let empty = MemberBlockSyntax(members: [])
@@ -1144,21 +1175,11 @@ struct SwiftSyntaxGenerator {
 
         // The member list sits under the body nonterminal, except for enum which
         // inlines its braces into the declaration rule.
-        var memberSpans = spans
-        if let bodyRule {
-            guard let bodyNT = find(bodyRule, in: spans),
-                  let (_, bodySpans) = tileAlternate(bodyNT.nt, from: bodyNT.from, to: bodyNT.to)
-            else {
-                record(.lookupFailed, "no \(bodyRule) child", from: span.from, to: span.to)
-                return (name, attributes, modifiers, generics, inheritance, empty)
-            }
-            memberSpans = bodySpans
-        }
+        let memberSpans = spans
 
         var items: [MemberBlockItemSyntax] = []
-        if let listNT = find(membersRule, in: memberSpans) {
-            collectMembers(listNT.nt, from: listNT.from, to: listNT.to,
-                           membersRule: membersRule, memberRule: memberRule, into: &items)
+        if let listNT = find("members", in: memberSpans) {
+            collectMembers(listNT.nt, from: listNT.from, to: listNT.to, into: &items)
         }
         let block = MemberBlockSyntax(
             leftBrace: .leftBraceToken(),
@@ -1201,11 +1222,9 @@ struct SwiftSyntaxGenerator {
         }
 
         var items: [MemberBlockItemSyntax] = []
-        if let bodyNT = find("extensionBody", in: spans),
-           let (_, bodySpans) = tileAlternate(bodyNT.nt, from: bodyNT.from, to: bodyNT.to),
-           let listNT = find("extensionMembers", in: bodySpans) {
+        if let listNT = find("members", in: spans) {
             collectMembers(listNT.nt, from: listNT.from, to: listNT.to,
-                           membersRule: "extensionMembers", memberRule: "extensionMember", into: &items)
+                           into: &items)
         }
         var extensionWhere: GenericWhereClauseSyntax? = nil
         if let wcNT = find("genericWhereClause", in: spans) {
@@ -1369,44 +1388,49 @@ struct SwiftSyntaxGenerator {
 
     private mutating func collectMembers(
         _ nt: GrammarNode, from: CharPosition, to: CharPosition,
-        membersRule: String, memberRule: String,
         into items: inout [MemberBlockItemSyntax]
     ) {
-        // A HOP walk, not an element walk: `<kind>Members = <kind>Member ";"? .` hangs the optional
-        // semicolon on the LIST, and it belongs to the member it terminates — so the hop's spans
-        // have to be in hand when the member is converted. Spelling-independent either way.
-        for hop in listHops(of: [membersRule], nt, from: from, to: to) {
-          if let memberNT = find(memberRule, in: hop),
+        // A HOP walk, not an element walk: the optional semicolon hangs on the LIST while
+        // swift-syntax hangs it on the member it terminates (`MemberBlockItem.semicolon`). It does
+        // NOT live in that member's own hop: a list spelled `xs = x { sep x } ";"? .` keeps the
+        // trailing `;` in hop 0 while it terminates the LAST member, and each iteration hop opens
+        // with the separator following the PREVIOUS one. So
+        // gather members and `;` positions separately and pair them by position, exactly as
+        // `convertStatements` does; that is also correct for the right-recursive member lists.
+        // `items` is `inout` and may already hold members from the caller, so ownership is scoped
+        // to the members collected here.
+        var collected: [(decl: DeclSyntax, end: CharPosition)] = []
+        var semicolons: [CharPosition] = []
+        for hop in listHops(of: ["members"], nt, from: from, to: to) {
+          semicolons.append(contentsOf: semicolonPositions(in: hop))
+          if let memberNT = find("member", in: hop),
            let (_, memberSpans) = tileAlternate(memberNT.nt, from: memberNT.from, to: memberNT.to) {
-            // <kind>Member = memberDeclaration | compilerControlStatement .
+            // member = memberDeclaration | memberCompilerControlStatement .
             if let mdNT = find("memberDeclaration", in: memberSpans),
                let (_, mdSpans) = tileAlternate(mdNT.nt, from: mdNT.from, to: mdNT.to) {
                 if let declNT = find("declaration", in: mdSpans),
                    let decl = convertDeclaration(declNT.nt, from: declNT.from, to: declNT.to) {
-                    // `<kind>Members = <kind>Member ";"? .` — an explicit `;` belongs to the
-                    // member it terminates, exactly as for statements.
-                    items.append(MemberBlockItemSyntax(
-                        decl: decl,
-                        semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                    ))
+                    collected.append((decl, memberNT.to))
                 } else if let decl = memberOnlyDeclaration(mdSpans, from: mdNT.from, to: mdNT.to) {
-                    items.append(MemberBlockItemSyntax(
-                        decl: decl,
-                        semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                    ))
+                    collected.append((decl, memberNT.to))
                 } else {
                     record(.unhandled, "member declaration has no converter", from: memberNT.from, to: memberNT.to)
                 }
             } else if let ccNT = find("memberCompilerControlStatement", in: memberSpans),
                       let decl = convertMemberCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
-                items.append(MemberBlockItemSyntax(
-                    decl: decl,
-                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                ))
+                collected.append((decl, memberNT.to))
             } else {
                 record(.unhandled, "member has no converter", from: memberNT.from, to: memberNT.to)
             }
           }
+        }
+        collected.sort { $0.end < $1.end }
+        let owners = semicolonOwners(itemEnds: collected.map(\.end), semicolons: semicolons)
+        for (index, entry) in collected.enumerated() {
+            items.append(MemberBlockItemSyntax(
+                decl: entry.decl,
+                semicolon: owners.contains(index) ? .semicolonToken() : nil
+            ))
         }
     }
 
@@ -4081,9 +4105,6 @@ struct SwiftSyntaxGenerator {
             if let attrNT = find("attributes", in: gpSpans) {
                 attributes = convertAttributes(attrNT.nt, from: attrNT.from, to: attrNT.to)
             }
-            if spansContainKeyword(gpSpans, "let") {
-                record(.unhandled, "value generic parameter (`let N: Int`) not converted", from: gpNT.from, to: gpNT.to)
-            }
             // genericParameterName = typeName | "self" .
             guard let nameNT = find("genericParameterName", in: gpSpans) else {
                 record(.lookupFailed, "no genericParameterName child", from: gpNT.from, to: gpNT.to)
@@ -4092,14 +4113,16 @@ struct SwiftSyntaxGenerator {
             // genericParameter = … genericParameterName ":" >+> ( … ) type .   Any type, as in
             // swift-syntax; `~Copyable` arrives as `type`'s own suppressed form.
             var inherited: TypeSyntax? = nil
-            if !spansContainKeyword(gpSpans, "let"), let typeNT = find("type", in: gpSpans) {
+            if let typeNT = find("type", in: gpSpans) {
                 inherited = convertType(typeNT.nt, from: typeNT.from, to: typeNT.to)
             }
-            // SE-0393 `each T` — a type parameter PACK. swift-syntax carries the keyword as
-            // `specifier`, between the attributes and the name.
+            // SE-0393 `each T` and SE-0452 `let N: Int` both use GenericParameterSyntax.specifier.
+            let specifier: TokenSyntax? = spansContainKeyword(gpSpans, "each") ? .keyword(.each)
+                : spansContainKeyword(gpSpans, "let") ? .keyword(.let)
+                : nil
             params.append(GenericParameterSyntax(
                 attributes: attributes,
-                specifier: spansContainKeyword(gpSpans, "each") ? .keyword(.each) : nil,
+                specifier: specifier,
                 name: .identifier(collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to)),
                 colon: inherited == nil ? nil : .colonToken(),
                 inheritedType: inherited
@@ -4242,8 +4265,8 @@ struct SwiftSyntaxGenerator {
         }
     }
 
-    /// typealiasDeclaration = attributes? accessLevelModifier? "typealias" typealiasName
-    ///                        genericParameterClause? typealiasAssignment .
+    /// typealiasDeclaration = attributes? declarationModifiers? "typealias" typealiasName
+    ///                        genericParameterClause? typealiasAssignment genericWhereClause? .
     /// typealiasAssignment  = assignmentOperator type .
     private mutating func convertTypealiasDeclaration(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> TypeAliasDeclSyntax {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
@@ -4274,13 +4297,21 @@ struct SwiftSyntaxGenerator {
         } else {
             record(.lookupFailed, "no typealiasAssignment/type child", from: from, to: to)
         }
+        // A trailing `where` clause is its own child on every declaration that admits one; a
+        // constrained generic alias (`typealias R<B> = Range<B> where B: Strideable`) is one —
+        // `parseTypealiasDeclaration` parses it after the initializer (Declarations.swift).
+        var genericWhereClause: GenericWhereClauseSyntax? = nil
+        if let wcNT = find("genericWhereClause", in: spans) {
+            genericWhereClause = convertGenericWhereClause(wcNT.nt, from: wcNT.from, to: wcNT.to)
+        }
         return TypeAliasDeclSyntax(
             attributes: attributes,
             modifiers: modifiers,
             typealiasKeyword: .keyword(.typealias),
             name: name,
             genericParameterClause: generics,
-            initializer: TypeInitializerClauseSyntax(equal: .equalToken(), value: value)
+            initializer: TypeInitializerClauseSyntax(equal: .equalToken(), value: value),
+            genericWhereClause: genericWhereClause
         )
     }
 
@@ -6115,7 +6146,7 @@ struct SwiftSyntaxGenerator {
             return IfConfigDeclSyntax(clauses: [])
         }
         var clauses: [IfConfigClauseSyntax] = []
-        if let ifNT = find("ifDirectiveClause", in: spans) ?? find("ifConfigBodyIfDirectiveClause", in: spans) {
+        if let ifNT = find("ifDirectiveClause", in: spans) {
             appendIfConfigClause(ifNT, keyword: .poundIfToken(), withCondition: true, into: &clauses)
         } else {
             record(.lookupFailed, "no ifDirectiveClause child", from: from, to: to)
@@ -6196,30 +6227,8 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertIfConfigStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        var items: [CodeBlockItemSyntax] = []
-        for hop in listHops(of: ["ifConfigStatements"], nt, from: from, to: to) {
-            guard let itemNT = find("ifConfigStatement", in: hop),
-                  let (_, itemSpans) = tileAlternate(itemNT.nt, from: itemNT.from, to: itemNT.to) else {
-                record(.lookupFailed, "ifConfigStatements hop without ifConfigStatement", from: from, to: to)
-                continue
-            }
-            if let stmtNT = find("statement", in: itemSpans),
-               let item = convertStatement(stmtNT.nt, from: stmtNT.from, to: stmtNT.to) {
-                items.append(CodeBlockItemSyntax(
-                    item: item,
-                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                ))
-            } else if let blockNT = find("ifConfigBodyConditionalCompilationBlock", in: itemSpans) {
-                items.append(CodeBlockItemSyntax(
-                    item: .decl(DeclSyntax(convertConditionalCompilationBlock(blockNT.nt, from: blockNT.from, to: blockNT.to))),
-                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                ))
-            } else {
-                record(.unhandled, "ifConfigStatement has no converter: \(alternateKind(itemSpans))",
-                       from: itemNT.from, to: itemNT.to)
-            }
-        }
-        return items
+        // `ifConfigStatements = statements .` is a sentinel for `@confinedTo`; walk THROUGH it.
+        convertStatementList(["ifConfigStatements", "statements"], nt, from: from, to: to)
     }
 
     private mutating func appendMemberIfConfigClause(_ span: NTSpan, keyword: TokenSyntax, withCondition: Bool, into clauses: inout [IfConfigClauseSyntax]) {
@@ -6242,7 +6251,7 @@ struct SwiftSyntaxGenerator {
         var items: [MemberBlockItemSyntax] = []
         if let stmtsNT = find("statements", in: spans) {
             items = convertMemberItemsFromStatements(stmtsNT.nt, from: stmtsNT.from, to: stmtsNT.to)
-        } else if let bodyNT = find("memberIfBody", in: spans) {
+        } else if let bodyNT = find("members", in: spans) {
             items = convertMemberIfBody(bodyNT.nt, from: bodyNT.from, to: bodyNT.to)
         }
         clauses.append(IfConfigClauseSyntax(
@@ -6269,39 +6278,15 @@ struct SwiftSyntaxGenerator {
         }
     }
 
+    /// `memberIfBody = memberIfItem { statementSeparator memberIfItem } ";"? .`
+    ///
+    /// Structurally the same list as `<kind>Members = <kind>Member …`, down to `memberIfItem` and
+    /// `<kind>Member` having the same two alternates, so `collectMembers` handles it — including
+    /// pairing each `;` with the member it terminates. This was a near-verbatim copy of that
+    /// function until 2026-09-30, and the copy still had the semicolon off by one.
     private mutating func convertMemberIfBody(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [MemberBlockItemSyntax] {
         var items: [MemberBlockItemSyntax] = []
-        for hop in listHops(of: ["memberIfBody"], nt, from: from, to: to) {
-            guard let itemNT = find("memberIfItem", in: hop),
-                  let (_, itemSpans) = tileAlternate(itemNT.nt, from: itemNT.from, to: itemNT.to)
-            else { continue }
-
-            if let mdNT = find("memberDeclaration", in: itemSpans),
-               let (_, mdSpans) = tileAlternate(mdNT.nt, from: mdNT.from, to: mdNT.to) {
-                if let declNT = find("declaration", in: mdSpans),
-                   let decl = convertDeclaration(declNT.nt, from: declNT.from, to: declNT.to) {
-                    items.append(MemberBlockItemSyntax(
-                        decl: decl,
-                        semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                    ))
-                } else if let decl = memberOnlyDeclaration(mdSpans, from: mdNT.from, to: mdNT.to) {
-                    items.append(MemberBlockItemSyntax(
-                        decl: decl,
-                        semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                    ))
-                } else {
-                    record(.unhandled, "member #if item declaration has no converter", from: itemNT.from, to: itemNT.to)
-                }
-            } else if let ccNT = find("memberCompilerControlStatement", in: itemSpans),
-                      let decl = convertMemberCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
-                items.append(MemberBlockItemSyntax(
-                    decl: decl,
-                    semicolon: hasExplicitSemicolon(in: hop) ? .semicolonToken() : nil
-                ))
-            } else {
-                record(.unhandled, "member #if item has no converter", from: itemNT.from, to: itemNT.to)
-            }
-        }
+        collectMembers(nt, from: from, to: to, into: &items)
         return items
     }
 

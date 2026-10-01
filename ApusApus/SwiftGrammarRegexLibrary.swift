@@ -59,7 +59,8 @@ enum ApusRegexLibrary {
     //      Character, FFFD = Replacement Character, etc.).
     //
     // `_` is folded into the head; bare `_` is the wildcard, excluded at
-    // name-consuming sites in Swift.apus via `---("_")`. Unlike coarse `\p{So}`,
+    // name-consuming sites in Swift.apus via `---("_")`. `$` is a swift-syntax/compiler
+    // extension over TSPL: it is an ASCII continuation only, never a head. Unlike coarse `\p{So}`,
     // these do NOT sweep in arbitrary BMP symbols — U+26BD ⚽ (∈ 2500–2775) is an
     // operator-head, not an identifier char, which is what disjoins the two classes.
     static let identifierHead = CharacterClass(
@@ -82,7 +83,7 @@ enum ApusRegexLibrary {
     ).subtracting(.anyOf("\u{F8FF}"))   // U+F8FF is a PUA code point, not an identifier char
 
     static let identifierCharacter = CharacterClass(
-        "A"..."Z", "a"..."z", "0"..."9", "_"..."_",
+        "A"..."Z", "a"..."z", "0"..."9", "_"..."_", "$"..."$",
         "\u{00A8}"..."\u{00A8}", "\u{00AA}"..."\u{00AA}", "\u{00AD}"..."\u{00AD}", "\u{00AF}"..."\u{00AF}",
         "\u{00B2}"..."\u{00B5}", "\u{00B7}"..."\u{00BA}", "\u{00BC}"..."\u{00BE}",
         "\u{00C0}"..."\u{00D6}", "\u{00D8}"..."\u{00F6}", "\u{00F8}"..."\u{167F}",

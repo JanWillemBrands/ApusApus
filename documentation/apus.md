@@ -331,6 +331,29 @@ These are span-containment predicates, not direct-parent predicates. If a gramma
 needs "directly inside N" or "co-started with N", that should be a separate
 primitive rather than a reinterpretation of `@confinedTo`.
 
+### Sentinel rules
+
+A containment predicate can only name a position that HAS a name, so a one-line
+alias is sometimes the point of a rule:
+
+```swift
+ifConfigStatements = statements .    // sentinel: the name is what `@confinedTo` refers to
+initializerBody    = codeBlock .    // sentinel: `@confinedTo(initializerBody)`
+```
+
+`@confinedTo(statements)` or `@confinedTo(codeBlock)` would be vacuous — nearly every
+statement sits inside both — so the alias is what makes the constraint say something.
+Do not "simplify" such a rule away by inlining it; it is not duplication, it is a
+named position. The same holds for names the AST converter resolves by lookup
+(`structName`, `argumentLabel`, `tupleMatchLabel`, …): re-pointing one is invisible to
+the parser and silently drops a child from the tree.
+
+The test for whether an identical-bodied rule is a sentinel or real duplication is
+whether anything depends on the NAME. If nothing does, delete it and repoint the uses
+(the six `<kind>Members` lists and five `<kind>Body` rules went that way on
+2026-09-30); if an annotation or a converter lookup does, keep it and say so in a
+comment.
+
 `@canParse(N)` and `@cannotParse(N)` with nonterminal operands are also Oracle constraints:
 
 ```swift
@@ -346,6 +369,17 @@ Meaning:
 
 This is a parse-forest predicate, not a token lookaround. A coherent grammar should
 keep this separate from token lookaround.
+
+"Can parse HERE" means N has a yield STARTING at this position; it does not require N
+to cover the alternate's span. The target set is `Set(parser.yield(of: N).map(\.i))`,
+snapshotted from the RAW forest before dead-wood pruning.
+
+The target must therefore be REACHABLE from the start symbol. A nonterminal written
+purely as a recogniser for a predicate, referenced by nothing else, is never attempted
+by the parser: its yield set is empty, so `@canParse` is always false and
+`@cannotParse` always true. These predicates can only interrogate parses the grammar
+already attempts for their own sake — they are not a way to run an arbitrary
+side-grammar as a lookahead.
 
 `@sameLine` is a nonterminal-level hard constraint. It occurs before a nonterminal
 definition, in the same production-start position as `@longest`.
