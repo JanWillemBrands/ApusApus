@@ -2109,6 +2109,13 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     // `atValidTrailingClosure`'s `.stmtCondition` branch, which we get from
     // `@excludedFrom(conditionExpression)`. The `for`-`in` case is the reference's own example.
     SwiftSnippet(label: "condition-brace-is-not-trailing-closure", source: "func g(f: (Int) -> Bool, y: [Int]) {\n  if y.isEmpty { }\n  while y.isEmpty { }\n  for x in y.filter { $0 > 4 } { _ = x }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // The other side of that split, and the reason `>n<` stays on the PARENLESS alternate: a
+    // closure on the next line does NOT chain onto a parenless trailing-closure call. Measured
+    // against the reference, which makes `x.map { … } ⏎ { … }` two statements (the second an
+    // applied ClosureExpr) while `f(1) {} ⏎ {}` is one chained call.
+    // `ExpressionTests.testClosureLiterals#3` is this shape; keep it here too, since that suite
+    // asserts acceptance and this asserts the TREE.
+    SwiftSnippet(label: "no-chain-onto-parenless-trailing-closure", source: "func f(x: [Void]) {\n  var y: [[Void]] = x.map { [$0] }\n  {\n    $0.reserveCapacity(1)\n  } (&y[0])\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),

@@ -788,8 +788,10 @@ classRestrictionType = "class" .
 
 // if/switch expressions may have at most one "as"/"as?"/"as!" coercion but not "is" or any other
 // infix operator. Mirrors swift-syntax's parseSingleValueStmt path.
-expression = tryOperator? awaitOperator? conditionalExpression coercingOperator? .
-expression = tryOperator? awaitOperator? prefixExpression infixExpressions? .
+expression =
+    | tryOperator? awaitOperator? prefixExpression infixExpressions?
+    | tryOperator? awaitOperator? conditionalExpression coercingOperator?
+    .
 
 /// Grammar of a prefix expression
 /// prefix-expression → prefix-operator? postfix-expression
@@ -799,24 +801,16 @@ expression = tryOperator? awaitOperator? prefixExpression infixExpressions? .
 // syntax. `@shortest` on the optional prefix operator lets the regex-literal
 // reading win when both exist. `@longest` keeps swift-syntax's greedy
 // type/composition operand behavior, e.g. `any P & Q`.
-@longest
-prefixExpression    = @shortest [ prefixOperator >s< ] postfixExpression .   // Prefix operators are right-bound.
-prefixExpression    = "!" >s< postfixExpression .
-prefixExpression    = inOutExpression .
 // The postfix ISLAND (see `primaryExpression`): a key path enters the expression grammar HERE, one
 // level above `postfixExpression`, so it is reachable as an operand everywhere `prefixExpression`
 // is — arguments, elements, initializers, sequence elements — while no postfix operation can take
 // it as a base. Its own `?`/`!`/`[…]`/`.member` suffixes are components inside `keyPathExpression`.
-prefixExpression    = keyPathExpression .
 // SE-0393 pack expansion / pack element EXPRESSION — `(repeat each value)`, and the for-in
 // sequence in `for item in repeat each value`. Mirrors the two swift-syntax nodes
 // `PackExpansionExpr(repeatKeyword:, repetitionPattern:)` / `PackElementExpr(eachKeyword:, pack:)`.
 // At `prefixExpression`, so it is reachable as an operand everywhere without being postfixable.
 // No lookahead is needed to keep it apart from `repeatWhileStatement` (`repeat` + codeBlock):
 // `packElementExpression` requires `each`, so `repeat {` simply has no derivation here.
-prefixExpression    = packExpansionExpression .
-packExpansionExpression = "repeat" packElementExpression .
-packElementExpression   = "each" <s> postfixExpression .
 // SE-0366 (consume), SE-0432 (borrow), SE-0429 (copy), SE-0411 (unsafe)
 // contextual-keyword prefix operators. swift-syntax Expressions.swift:483-558
 // parses these in parseUnaryExpression as contextual-keyword prefixes on a
@@ -830,15 +824,24 @@ packElementExpression   = "each" <s> postfixExpression .
 // answer (Statements.swift:987) — so spaced `unsafe ()` / `unsafe .lock` are UnsafeExprs, not calls.
 // Both readings are grammatical for us, hence the preference. Tight `unsafe(1)` never enters the
 // keyword rule (<s>), so the call reading survives unchallenged.
-prefixExpression    = "consume" >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
-prefixExpression    = "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
-prefixExpression    = @prefer "unsafe"  <s> >n< prefixExpression .
+@longest
+prefixExpression =
+    | @shortest [ prefixOperator >s< ] postfixExpression
+    | "!" >s< postfixExpression
+    | inOutExpression
+    | keyPathExpression
+    | packExpansionExpression
+    | "consume" >->( "(" "[" "." "{" ) <s> >n< prefixExpression
+    | "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression
+    | @prefer "unsafe"  <s> >n< prefixExpression
+    .
+packExpansionExpression = "repeat" packElementExpression .
+packElementExpression   = "each" <s> postfixExpression .
 
 /// Grammar of an in-out expression
 /// in-out-expression → & primary-expression
 
-// Inout `&` is right-bound: tight to its operand. Spaced `&` remains available
-// to infix/operator parsing.
+// Inout `&` is right-bound: tight to its operand. Spaced `&` remains available to infix/operator parsing.
 inOutExpression     = "&" >s< postfixExpression .
 
 /// Grammar of a try expression
@@ -967,8 +970,7 @@ conditionExpression = tryOperator? awaitOperator? conditionalExpression coercing
 /// Grammar of an assignment operator
 /// assignment-operator → =
 
-assignmentOperator = <s> "=" <s>
-                   | >s< "=" >s< .
+assignmentOperator = <s> "=" <s> | >s< "=" >s< .
 
 /// Grammar of a conditional operator
 /// conditional-operator → ? expression :
@@ -1012,7 +1014,81 @@ coercingOperator    = "as" type
 /// primary-expression → selector-expression
 /// primary-expression → key-path-string-expression
 
-primaryExpression = genericIdentifier .
+// `(nonisolated(nonsending) () async -> Void)` — swift-syntax yields
+// TupleExpr(LabeledExpr(TypeExpr(AttributedType(TypeSpecifierList(Nonisolated…), FunctionType)))).
+// Only the PARENTHESISED specifier forms lead it (see `parenthesisedTypeSpecifier`), so plain
+// `(Int)` still belongs to `parenthesizedExpression` and no ambiguity is introduced.
+// Parenthesized function type as a metatype base, e.g. `((inout Int) -> Void).self`,
+// `(() throws -> A).self`. swift-syntax models these as TupleExpr(SequenceExpr) with the pieces
+// as expressions/type-exprs, but our expression grammar can't reach the type-only pieces
+// (`inout`/parameter-modifier args, `throws`/`async` arrows), so this rule is the sole route for
+// them. For SIMPLE arrows (`(() -> A)`) the parenthesizedExpression + `->`-operator route ALSO
+// matches — that overlap is resolved by @prefer on parenthesizedExpression (above).
+// `@longest` on an LHS applies to the whole nonterminal in APUS. This is the
+// primary-expression extent policy used for numeric maximal munch, generic
+// identifiers, key-path extents, and boxed protocol types.
+// swift-syntax parsePrimaryExpression `any` case (Expressions.swift:580-586): when the
+// current token is `any` and the lookahead suggests a type-prefixed expression, the
+// whole `any T` is parsed via parseType and wrapped in RawTypeExprSyntax.
+// `@longest`: `[any P & Q]` is ONE boxed protocol type, not `any P` followed by an infix `&`.
+// Both parse; APUS keeps the longer TypeExpr-compatible reading.
+// operator-as-value reference, e.g. (/), (+), (Swift::+) per SE-0491
+// Single `attribute`, not `attributes`: a multi-attribute run nests through
+// `type = attribute type`, avoiding duplicate split points.
+// swift-syntax parsePrimaryExpression `.Any` case (Expressions.swift:1346): bare `Any` in
+// expression position is a type-expr, enabling `Any.self`, `Any.Type`, etc.
+// swift-syntax parses #selector/#keyPath/object literals as MacroExpansionExpr.
+// NOT here — a key path is a postfix ISLAND (see `postfixExpression`). `parseKeyPathExpression`
+// consumes every `.`/`.?`/`.!`/`.[`/`?`/`!`/`[` suffix as a key-path COMPONENT and never returns to
+// outer postfix parsing, so no postfix operation may wrap an unparenthesized key path — not a
+// member access, not a call, not a subscript, and not a `?`/`!`. Reaching key paths through
+// `primaryExpression` made every one of those derivable, and an `@cannotParse` guard cannot fix it:
+// that predicate is an ORACLE prune (tree choice), so the yields — i.e. ACCEPTANCE — survived it.
+// Measured over-acceptances it caused: `\Foo.m()` (call on `\Foo.m`) and the whole
+// `\Foo?.?.[0]` family (`\Foo?` = optionalChaining over `\Foo`, then a `.?.` operator).
+// So the island is expressed STRUCTURALLY, at `prefixExpression`, which is where every context
+// that may legitimately contain a key path reaches it.
+// primaryExpression = keyPathExpression .
+// @prefer over `"(" functionType ")"` (below): a simple parenthesized arrow `(() -> A)` matches both; swift-syntax's faithful shape is the sequence route (TupleExpr(SequenceExpr), never FunctionType-in-expr), so prefer it. Start-keyed prune fires only where parenthesizedExpression also yields — i.e. the arrow overlap; the functionType route survives for inout/throws/async arrows it can't reach.
+// `@cannotParse( parenthesisedSpecifierType )`: a parenthesised SPECIFIER-LED type is type-only,
+// so the expression reading of the parens must not apply. The gate sits on the `(` — the start of
+// this alternate, which is the only place apus attaches annotations — and asks whether the type
+// form can parse from here, which is how it reaches a discriminator that is one token IN.
+// swift-syntax keeps the parens as a TupleExpr and makes the CONTENT a TypeExpr; see
+// `parenthesisedSpecifierType`.
+// swift-syntax parseAnonymousClosureArgument (Expressions.swift:1348-1349): `.dollarIdentifier`
+// ($0/$1/…) is a distinct primary-expression form representing an implicit closure parameter,
+// not a generic identifier reference.
+// SE-0491 module-qualified reference. After `::` any keyword is a name (Names.swift:218), so the
+// qualified name is `identifier` (covers Swift::foo, Swift::nil, Swift::self, Swift::Self,
+// Swift::Any, Swift::super, Swift::init, Swift::do, …). Subsumes `moduleSelector identifier`.
+
+@longest
+primaryExpression =
+    | genericIdentifier
+    | moduleGenericIdentifier
+    | moduleSelector propertyWrapperProjection
+    | compoundNameBase "(" argumentNames ")"
+    | implicitParameterName
+    | literalExpression
+    | selfExpression
+    | superclassExpression
+    | closureExpression
+    | @prefer @cannotParse( parenthesisedSpecifierType ) parenthesizedExpression
+    | tupleExpression
+    | implicitMemberExpression
+    | wildcardExpression
+    | macroExpansionExpression
+    | selfType
+    | anyType
+    | "(" moduleSelector? operator ")"
+    | attribute type
+    | inlineArrayType
+    | boxedProtocolType
+    | "(" functionType ")"
+    | parenthesisedSpecifierType
+    .
+
 // `identifierToken` minus the contextual keywords that are OPERATORS in expression position, i.e.
 // `await`: `let await = 1` is clean in swift-syntax (a legal declaration name), but in expression
 // position swift always reads `await` as the await operator, so `let y = await` is an error. The
@@ -1025,15 +1101,10 @@ expressionIdentifier =
     .
 genericIdentifier = expressionIdentifier genericArgumentClause? .
 
-// SE-0491 module-qualified reference. After `::` any keyword is a name (Names.swift:218), so the
-// qualified name is `identifier` (covers Swift::foo, Swift::nil, Swift::self, Swift::Self,
-// Swift::Any, Swift::super, Swift::init, Swift::do, …). Subsumes `moduleSelector identifier`.
-primaryExpression = moduleGenericIdentifier .
-
 moduleGenericIdentifier = moduleSelector identifier ---( "_" ) genericArgumentClause? .
 // `$foo` (property-wrapper projection) lexes as `.identifier` in swift-syntax (Cursor.swift:2343-2346),
 // so it's a valid qualified name too: `Swift::$foo`.
-primaryExpression = moduleSelector propertyWrapperProjection .
+
 // swift-syntax parseIdentifierExpression (Expressions.swift:1436) uses `.compoundNames`: a bare
 // identifier reference can carry an argument-label list, e.g. `greet(name:)` — an unapplied
 // reference to a function by its full compound name. The labels are part of the name, distinct
@@ -1041,68 +1112,7 @@ primaryExpression = moduleSelector propertyWrapperProjection .
 // swift-syntax `parseDeclReferenceBase` (Names.swift): identifier, `init`, `self` or `Self` —
 // `f(a:)`, `init(a:)`, `self(a:)` — while `await` stays the operator.
 compoundNameBase = expressionIdentifier | "init" | "self" | "Self" .
-primaryExpression = compoundNameBase "(" argumentNames ")" .
-// swift-syntax parseAnonymousClosureArgument (Expressions.swift:1348-1349): `.dollarIdentifier`
-// ($0/$1/…) is a distinct primary-expression form representing an implicit closure parameter,
-// not a generic identifier reference.
-primaryExpression = implicitParameterName .
-primaryExpression = literalExpression .
-primaryExpression = selfExpression .
-primaryExpression = superclassExpression .
-primaryExpression = closureExpression .
-// `@cannotParse( parenthesisedSpecifierType )`: a parenthesised SPECIFIER-LED type is type-only,
-// so the expression reading of the parens must not apply. The gate sits on the `(` — the start of
-// this alternate, which is the only place apus attaches annotations — and asks whether the type
-// form can parse from here, which is how it reaches a discriminator that is one token IN.
-// swift-syntax keeps the parens as a TupleExpr and makes the CONTENT a TypeExpr; see
-// `parenthesisedSpecifierType`.
-primaryExpression = @prefer @cannotParse( parenthesisedSpecifierType ) parenthesizedExpression .   // @prefer over `"(" functionType ")"` (below): a simple parenthesized arrow `(() -> A)` matches both; swift-syntax's faithful shape is the sequence route (TupleExpr(SequenceExpr), never FunctionType-in-expr), so prefer it. Start-keyed prune fires only where parenthesizedExpression also yields — i.e. the arrow overlap; the functionType route survives for inout/throws/async arrows it can't reach.
-primaryExpression = tupleExpression .
-primaryExpression = implicitMemberExpression .
-primaryExpression = wildcardExpression .
-primaryExpression = macroExpansionExpression .   // swift-syntax parses #selector/#keyPath/object literals as MacroExpansionExpr.
-// NOT here — a key path is a postfix ISLAND (see `postfixExpression`). `parseKeyPathExpression`
-// consumes every `.`/`.?`/`.!`/`.[`/`?`/`!`/`[` suffix as a key-path COMPONENT and never returns to
-// outer postfix parsing, so no postfix operation may wrap an unparenthesized key path — not a
-// member access, not a call, not a subscript, and not a `?`/`!`. Reaching key paths through
-// `primaryExpression` made every one of those derivable, and an `@cannotParse` guard cannot fix it:
-// that predicate is an ORACLE prune (tree choice), so the yields — i.e. ACCEPTANCE — survived it.
-// Measured over-acceptances it caused: `\Foo.m()` (call on `\Foo.m`) and the whole
-// `\Foo?.?.[0]` family (`\Foo?` = optionalChaining over `\Foo`, then a `.?.` operator).
-// So the island is expressed STRUCTURALLY, at `prefixExpression`, which is where every context
-// that may legitimately contain a key path reaches it.
-// primaryExpression = keyPathExpression .
-primaryExpression = selfType .
-// swift-syntax parsePrimaryExpression `.Any` case (Expressions.swift:1346): bare `Any` in
-// expression position is a type-expr, enabling `Any.self`, `Any.Type`, etc.
-primaryExpression = anyType .
-primaryExpression = "(" moduleSelector? operator ")" .  // operator-as-value reference, e.g. (/), (+), (Swift::+) per SE-0491
-// Single `attribute`, not `attributes`: a multi-attribute run nests through
-// `type = attribute type`, avoiding duplicate split points.
-primaryExpression = attribute type .
-primaryExpression = inlineArrayType .
-// `@longest` on an LHS applies to the whole nonterminal in APUS. This is the
-// primary-expression extent policy used for numeric maximal munch, generic
-// identifiers, key-path extents, and boxed protocol types.
-// swift-syntax parsePrimaryExpression `any` case (Expressions.swift:580-586): when the
-// current token is `any` and the lookahead suggests a type-prefixed expression, the
-// whole `any T` is parsed via parseType and wrapped in RawTypeExprSyntax.
-// `@longest`: `[any P & Q]` is ONE boxed protocol type, not `any P` followed by an infix `&`.
-// Both parse; APUS keeps the longer TypeExpr-compatible reading.
-@longest
-primaryExpression = boxedProtocolType .
-// Parenthesized function type as a metatype base, e.g. `((inout Int) -> Void).self`,
-// `(() throws -> A).self`. swift-syntax models these as TupleExpr(SequenceExpr) with the pieces
-// as expressions/type-exprs, but our expression grammar can't reach the type-only pieces
-// (`inout`/parameter-modifier args, `throws`/`async` arrows), so this rule is the sole route for
-// them. For SIMPLE arrows (`(() -> A)`) the parenthesizedExpression + `->`-operator route ALSO
-// matches — that overlap is resolved by @prefer on parenthesizedExpression (above).
-primaryExpression = "(" functionType ")" .
-// `(nonisolated(nonsending) () async -> Void)` — swift-syntax yields
-// TupleExpr(LabeledExpr(TypeExpr(AttributedType(TypeSpecifierList(Nonisolated…), FunctionType)))).
-// Only the PARENTHESISED specifier forms lead it (see `parenthesisedTypeSpecifier`), so plain
-// `(Int)` still belongs to `parenthesizedExpression` and no ambiguity is introduced.
-primaryExpression = parenthesisedSpecifierType .
+
 parenthesisedSpecifierType = "(" parenthesisedTypeSpecifier type ")" .
 
 // All primaryExpression alternatives except literalExpression — used to build nonLiteralPostfix (B1 fix).
@@ -1114,6 +1124,7 @@ nonLiteralPrimary = genericIdentifier | moduleGenericIdentifier | moduleSelector
                   | wildcardExpression | macroExpansionExpression  // no keyPathExpression: postfix island
                   | selfType | anyType | "(" moduleSelector? operator ")"
                   | attribute type | boxedProtocolType | "(" functionType ")" .
+
 
 /// Grammar of a literal expression
 /// literal-expression → literal
@@ -1553,18 +1564,19 @@ postfixExpression =
     | forcedValueExpression
     | optionalChainingExpression
     .
-
 // A postfix expression whose BASE cannot be a bare literal — for restricting trailing-closure-only calls (B1).
 // Two cases:
 //   (a) nonLiteralPrimary — the base itself is not a literal
 //   (b) postfixExpression + any postfix operation — at least one operation was applied, so even a
 //       literal-rooted chain (`1!`, `[1][0]`, `1.description`) is callable (matches swift-syntax)
-nonLiteralPostfix = nonLiteralPrimary
-                  | postfixExpression >s< postfixOperator <s>
-                  | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-                  | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-                  | functionCallExpression | initializerExpression | explicitMemberExpression
-                  | subscriptExpression | forcedValueExpression | optionalChainingExpression .
+nonLiteralPostfix =
+    | nonLiteralPrimary
+    | postfixExpression >s< postfixOperator <s>
+    | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | functionCallExpression | initializerExpression | explicitMemberExpression
+    | subscriptExpression | forcedValueExpression | optionalChainingExpression
+    .
 
 /// Grammar of a function call expression
 /// function-call-expression → postfix-expression function-call-argument-clause
@@ -1582,9 +1594,13 @@ functionCallExpression = postfixExpression >n< functionCallArgumentClause .
 // A trailing closure belongs to the same call as a preceding argument clause:
 // `f() {}` is one call on `f`, not a trailing-closure call on `f()`.
 //
-// NO `>n<` on the closure brace: a trailing closure may start on the NEXT line. swift-syntax's
-// `atValidTrailingClosure` (Expressions.swift) imposes a line constraint only in `.stmtCondition`
-// flavor —
+// The closure brace may start on the NEXT line after an ARGUMENT CLAUSE, but not after a
+// PARENLESS callee. Measured against the reference, which splits exactly there:
+//     let v = f(1) {} ⏎ {}            → ONE statement, chained FunctionCallExpr(FunctionCallExpr(…))
+//     var y = x.map { [$0] } ⏎ {}     → TWO statements, the second an applied ClosureExpr
+// so a trailing closure chains onto a call that has an argument clause and does not chain onto a
+// parenless trailing-closure call. `atValidTrailingClosure` (Expressions.swift) imposes a LINE
+// constraint only in `.stmtCondition` flavor —
 //     // If this is a normal expression (not an expr-basic) then trailing closures
 //     // are allowed, so this is obviously one.
 //     guard case .stmtCondition = flavor else { return true }
@@ -1592,17 +1608,27 @@ functionCallExpression = postfixExpression >n< functionCallArgumentClause .
 //     guard !self.peek().isAtStartOfLine else { return false }
 // — and condition position is already handled by `@excludedFrom(conditionExpression)` on
 // `closureExpression`, which is why `if f(a: 1) { }` still reads the brace as the if-body.
-// With `>n<` here, `f(a: 1) ⏎ { x in }` lost the closure out of the call and re-parsed it as a
-// separate closure STATEMENT: 26 tree differences in the 30k-file crawl, plus 4 underaccepts where
-// a following `b: { … }` left a labelled closure that is not a statement at all.
+//
+// With `>n<` on the argument-clause alternate, `f(a: 1) ⏎ { x in }` lost the closure out of the
+// call and re-parsed it as a separate closure STATEMENT: 26 tree differences in the 30k-file
+// crawl, plus 4 underaccepts where a following `b: { … }` left a labelled closure that is not a
+// statement at all. Keeping `>n<` on the PARENLESS alternate is what stops the chain in the
+// second line above — `ExpressionTests.testClosureLiterals#3` is exactly that shape, and the
+// reference comments that disambiguating it "probably isn't worthwhile".
+// KNOWN DIVERGENCE from that split: `f(1) {} ⏎ {}` chains in the reference but not here, because
+// the chain goes through the parenless alternate (the second closure has no argument clause of its
+// own). Zero occurrences among the 26 corpus files; expressing it exactly needs the callee to know
+// whether ITS closure followed parens, which no gate here can see.
 functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
-                       | nonLiteralPostfix trailingClosures .                                     // f{closure}: literal callees (bare `1{}`, `"s"{}`, `[1]{}`) are rejected (B1)
+                       | nonLiteralPostfix >n< trailingClosures .                                 // f{closure}: literal callees (bare `1{}`, `"s"{}`, `[1]{}`) are rejected (B1)
 functionCallExpression = collectionLiteralCallee trailingClosures .
 collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
 
 functionCallArgumentClause = "(" ")" | "(" functionCallArgumentList ","? ")" .
 functionCallArgumentList = functionCallArgument { "," functionCallArgument } .
 
+// TODO:
+//functionCallArgument = [ argumentLabel ":" ] ( expression | moduleSelector? operator ) .
 functionCallArgument = expression
                      | argumentLabel ":" expression .
 functionCallArgument = operator
@@ -1664,16 +1690,22 @@ initializerExpression = "init" >-> ( "{" ) .
 // `<-<` on the TIGHT dot: `1.0` is ONE float literal in swift-syntax's lexer, never the integer `1`
 // with a tuple member `.0`. Without the gate that split survived and let a literal take a trailing
 // closure (`_ = 1.0 { … }` accepted; the literal-callee ban below did not see a literal).
-explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
-explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName .
 // Unparenthesized key paths are postfix islands; swift-syntax stays inside
 // key-path parsing instead of reinterpreting a shorter key-path prefix as a
 // member-access base.
-explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName genericArgumentClause .   // island is structural — see `postfixExpression`
-explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName "(" argumentNames ")" .
 // A postfix `#if` clause body is a postfix continuation, not statements.
 // swift-syntax `parseIfConfigExpressionSuffix` accepts only a dotted suffix or
 // nested `#if`, then resumes the postfix suffix loop.
+// TODO:
+//explicitMemberExpression = postfixExpression (
+//    | ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits
+//    | ( >s< "." >s< | <s> "." ) moduleSelector? memberName [ genericArgumentClause | "(" argumentNames ")" ]
+//    | postfixConditionalCompilationBlock
+//    .
+explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
+explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName .
+explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName genericArgumentClause .   // island is structural — see `postfixExpression`
+explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName "(" argumentNames ")" .
 explicitMemberExpression = postfixExpression postfixConditionalCompilationBlock .
 
 argumentNames = argumentName argumentNames? .

@@ -668,16 +668,18 @@ _prefix-expression → in-out-expression_
 
 ```apus
 @longest
-prefixExpression    = @shortest [ prefixOperator >s< ] postfixExpression .
-prefixExpression    = "!" >s< postfixExpression .
-prefixExpression    = inOutExpression .
-prefixExpression    = keyPathExpression .
-prefixExpression    = packExpansionExpression .
+prefixExpression =
+    | @shortest [ prefixOperator >s< ] postfixExpression
+    | "!" >s< postfixExpression
+    | inOutExpression
+    | keyPathExpression
+    | packExpansionExpression
+    | "consume" >->( "(" "[" "." "{" ) <s> >n< prefixExpression
+    | "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression
+    | @prefer "unsafe"  <s> >n< prefixExpression
+    .
 packExpansionExpression = "repeat" packElementExpression .
 packElementExpression   = "each" <s> postfixExpression .
-prefixExpression    = "consume" >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
-prefixExpression    = "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
-prefixExpression    = @prefer "unsafe"  <s> >n< prefixExpression .
 ```
 
 
@@ -749,8 +751,7 @@ conditionExpression = tryOperator? awaitOperator? conditionalExpression coercing
 _assignment-operator → **=**_
 
 ```apus
-assignmentOperator = <s> "=" <s>
-                   | >s< "=" >s< .
+assignmentOperator = <s> "=" <s> | >s< "=" >s< .
 ```
 
 
@@ -797,7 +798,32 @@ _primary-expression → selector-expression_
 _primary-expression → key-path-string-expression_
 
 ```apus
-primaryExpression = genericIdentifier .
+@longest
+primaryExpression =
+    | genericIdentifier
+    | moduleGenericIdentifier
+    | moduleSelector propertyWrapperProjection
+    | compoundNameBase "(" argumentNames ")"
+    | implicitParameterName
+    | literalExpression
+    | selfExpression
+    | superclassExpression
+    | closureExpression
+    | @prefer @cannotParse( parenthesisedSpecifierType ) parenthesizedExpression
+    | tupleExpression
+    | implicitMemberExpression
+    | wildcardExpression
+    | macroExpansionExpression
+    | selfType
+    | anyType
+    | "(" moduleSelector? operator ")"
+    | attribute type
+    | inlineArrayType
+    | boxedProtocolType
+    | "(" functionType ")"
+    | parenthesisedSpecifierType
+    .
+
 expressionIdentifier =
     | identifier ---( "_" "await" lexerClassifiedKeyword )
     | escapedIdentifier
@@ -805,31 +831,10 @@ expressionIdentifier =
     .
 genericIdentifier = expressionIdentifier genericArgumentClause? .
 
-primaryExpression = moduleGenericIdentifier .
-
 moduleGenericIdentifier = moduleSelector identifier ---( "_" ) genericArgumentClause? .
-primaryExpression = moduleSelector propertyWrapperProjection .
+
 compoundNameBase = expressionIdentifier | "init" | "self" | "Self" .
-primaryExpression = compoundNameBase "(" argumentNames ")" .
-primaryExpression = implicitParameterName .
-primaryExpression = literalExpression .
-primaryExpression = selfExpression .
-primaryExpression = superclassExpression .
-primaryExpression = closureExpression .
-primaryExpression = @prefer @cannotParse( parenthesisedSpecifierType ) parenthesizedExpression .
-primaryExpression = tupleExpression .
-primaryExpression = implicitMemberExpression .
-primaryExpression = wildcardExpression .
-primaryExpression = macroExpansionExpression .
-primaryExpression = selfType .
-primaryExpression = anyType .
-primaryExpression = "(" moduleSelector? operator ")" .
-primaryExpression = attribute type .
-primaryExpression = inlineArrayType .
-@longest
-primaryExpression = boxedProtocolType .
-primaryExpression = "(" functionType ")" .
-primaryExpression = parenthesisedSpecifierType .
+
 parenthesisedSpecifierType = "(" parenthesisedTypeSpecifier type ")" .
 
 nonLiteralPrimary = genericIdentifier | moduleGenericIdentifier | moduleSelector propertyWrapperProjection
@@ -1154,13 +1159,14 @@ postfixExpression =
     | forcedValueExpression
     | optionalChainingExpression
     .
-
-nonLiteralPostfix = nonLiteralPrimary
-                  | postfixExpression >s< postfixOperator <s>
-                  | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-                  | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-                  | functionCallExpression | initializerExpression | explicitMemberExpression
-                  | subscriptExpression | forcedValueExpression | optionalChainingExpression .
+nonLiteralPostfix =
+    | nonLiteralPrimary
+    | postfixExpression >s< postfixOperator <s>
+    | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | functionCallExpression | initializerExpression | explicitMemberExpression
+    | subscriptExpression | forcedValueExpression | optionalChainingExpression
+    .
 ```
 
 

@@ -27,11 +27,3 @@ Put completed work and historical explanations in design notes or commit message
    `apple__swift-foundation/Sources/FoundationEssentials/Predicate/Archiving/PredicateExpressionConstruction.swift`
    and `apple__swift-testing/Sources/Testing/ExitTests/ExitTest.swift`. Extend the existing
    pack/type-member rules, preserving the recent `packType` consolidation.
-
-4. Fix multiple trailing closure labels after an unlabeled trailing closure. `crawl3` has 4
-   underaccepts and 26 tree differences around calls shaped like
-   `.confirmationDialog(...) { ... } message: { _ in ... }`, for example
-   `coteditor__CotEditor/CotEditor/Sources/Settings Window/Other Views/ThemeView.swift` line 261.
-   ApusApus currently stops before `message:` / `label:` in some cases, and the converter often
-   reports `ClosureExpr != MultipleTrailingClosureElementList`. Acceptance and tree shape should be
-   fixed together.
