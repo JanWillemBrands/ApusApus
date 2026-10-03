@@ -127,6 +127,69 @@ stays.
 
 ---
 
+## Postfix chain as an ITERATION — *tried 2026-10-02, not adopted*
+
+**What it was.** swift-syntax parses postfix suffixes as a loop
+(`parsePostfixExpressionSuffix`) with three exit conditions, one of them a cardinality
+rule:
+
+```swift
+if let implicitCall = self.parsePostfixExpressionTrailingClosureSuffixIfPresent(…) {
+  leadingExpr = implicitCall
+  // We only allow a single trailing closure on a call.  This could be
+  // generalized in the future, but needs further design.
+  if self.at(.leftBrace) { break }
+  continue
+}
+```
+
+We model the same chain as LEFT RECURSION (`postfixExpression` + five
+`postfixExpression <suffix>` rules), and left recursion cannot say "stop iterating".
+Every loop exit therefore has to be re-expressed as something else — the `{`-cardinality
+one became a `>n<` layout gate, which is an invention with no counterpart in the
+reference. The idea: make the chain an iteration, so the cardinality rule becomes a
+restriction on the suffix SEQUENCE and thus plain CFG:
+
+```
+postfixExpression = primaryExpression postfixSuffixes? .
+postfixSuffixes = postfixSuffix postfixSuffixes?
+                | closureSuffix                              // terminal: nothing may follow
+                | closureSuffix postfixSuffix postfixSuffixes? .   // …except a non-closure suffix
+```
+
+**Why it was not adopted.** The analysis is right — "no two closure suffixes adjacent"
+IS expressible this way, with no annotation. But the postfix chain carries several other
+constraints, and the iteration redistributes rather than removes them:
+
+* a call suffix ABSORBS its own trailing closure (`parsePostfixExpressionCallSuffixIfPresent`
+  → Expressions.swift:866), so `callSuffix = functionCallArgumentClause trailingClosures?`
+  overlaps with a following `closureSuffix` — `f(a: 1) { x in }` became
+  `postfixSuffix ambiguous pivot`, measured. Removing the overlap needs TWO call-suffix
+  variants (with/without closure) plus a no-leading-closure suffix list;
+* B1 (a bare literal callee may not take a trailing closure, `1 {}`) lived in
+  `nonLiteralPostfix`; under the iteration it needs its own split of the base;
+* 588 → 594 rules in the prototype, BEFORE fixing either of the above;
+* the converter resolves this family by NAME in 16 places and would become a left FOLD
+  over suffixes instead of recursive descent on nested nonterminals.
+
+**What we kept instead.** `>n<` on the parenless trailing-closure alternate only, chosen
+on measurement: on 400 corpus files containing a `)`/`}` line followed by a `{` line it
+scores 392 `same` against the gateless version's 391, and it keeps
+`ExpressionTests.testClosureLiterals#3` passing. Two known divergences are documented at
+the rule (`f(1) {}⏎{}` does not chain; `x.map⏎{…}` does not attach).
+
+**The general lesson.** When the reference ITERATES with per-suffix break/continue rules,
+left recursion loses exactly the break. `compilationCondition`, `statements`/`members`
+and this all share that shape; the first two were fixed by iterating, this one is the case
+where the surrounding constraints make the trade negative.
+
+**Correction (2026-10-02).** The rule is NOT a cardinality — not "at most one closure
+suffix per chain". `x.map {}.filter {}.sorted {}` has three and is legal; the reference
+`break`s only when the next token is `{`, so a `.` lets the chain continue. It is an
+ADJACENCY rule: no two closure suffixes in a row. An `@once`-style primitive would have
+rejected that line. What the shape really wants is associativity as a FILTER, which is
+what `@left`/`@right` became — see `apus.md`.
+
 ## Shorter obituaries
 
 | Idea | What it was | Why it died / replacement |

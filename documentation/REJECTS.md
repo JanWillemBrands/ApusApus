@@ -54,25 +54,29 @@ placed no restriction on what `postfixExpression` reduces to. A bare integer, bo
 string, regex, array, or dictionary literal is a valid `postfixExpression`, so the grammar
 accepted `1 { }`, `[1] { }`, etc.
 
-**Fix implemented (2026-08-01):** Introduced two new non-terminals:
+**Fix implemented (2026-08-01):** Introduced two new non-terminals, `nonLiteralPrimary`
+(all `primaryExpression` alternatives except `literalExpression`) and `nonLiteralPostfix`
+(`nonLiteralPrimary` plus the 8 postfix-chain alternatives), and used the latter as the
+callee of the parenless alternate.
 
-- `nonLiteralPrimary` — all 20 `primaryExpression` alternatives **except** `literalExpression`
-  (keeps `@prefer parenthesizedExpression` for the `(…)`-vs-functionType disambiguation)
-- `nonLiteralPostfix` — `nonLiteralPrimary` plus all 8 postfix-chain alternatives:
-  postfixOperator, postfixOperatorToken, dotOperator, functionCallExpression,
-  initializerExpression, explicitMemberExpression, subscriptExpression, forcedValueExpression,
-  optionalChainingExpression
+**Replaced (2026-10-03):** the two clones had drifted from `primaryExpression` /
+`postfixExpression` — they were missing `inlineArrayType` and `parenthesisedSpecifierType`,
+and had lost the `@prefer` on the postfix-operator alternate and the
+`@prefer @cannotParse(parenthesisedSpecifierType)` on `parenthesizedExpression`. Both are
+gone; the callee is plain `postfixExpression` again and B1 is one annotation:
 
-Changed `functionCallExpression` to:
 ```
 functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures
-                       | nonLiteralPostfix trailingClosures .
+                       | @right @right( literalExpression ) postfixExpression trailingClosures .
 ```
 
-The second alternative covers trailing-closure-only calls (`f{}`). `nonLiteralPostfix`
-ensures the callee is either a non-literal primary or has at least one postfix operation
-applied (so `1!`, `[1][0]`, `1.description` are all callable — matching swift-syntax's
-`!leadingExpr.raw.kind.isLiteral` check which applies at postfix level, not primary level).
+`@right( literalExpression )` says a `literalExpression` may not be the leftmost child of
+that alternate. It matches on EXTENT, which reproduces the old two-case split for free: the
+callee of `1 {}` spans exactly the literal and is removed, while the callee of `1! {}`,
+`[1][0] {}` or `1.description {}` spans more than any literal and survives — matching
+swift-syntax's `!leadingExpr.raw.kind.isLiteral` check, which applies at postfix level, not
+primary level. All nine cases above and the 1,251-file corpus slice are unchanged by the
+replacement.
 
 **Residual: test #6** — `_ = /foo/ { return /foo/ }` — regex literals are not in
 `literalExpression` in the grammar; they have their own scanner mode and production path.

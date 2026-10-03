@@ -5753,10 +5753,7 @@ struct SwiftSyntaxGenerator {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             return missingExpr(.lookupFailed, "no alternate tiles the span", from: from, to: to)
         }
-        // `nonLiteralPrimary` is `primaryExpression` minus the bare-literal alternates (it exists
-        // so a trailing-closure-only call cannot have a literal callee). Its alternates carry the
-        // same child names, and the converter dispatches by name, so one function serves both.
-        if let primNT = find(firstOf: ["primaryExpression", "nonLiteralPrimary"], in: spans) {
+        if let primNT = find("primaryExpression", in: spans) {
             return convertPrimaryExpression(primNT.nt, from: primNT.from, to: primNT.to)
         }
         // The postfix rules are LEFT-recursive on `postfixExpression`, which maps
@@ -7647,13 +7644,13 @@ struct SwiftSyntaxGenerator {
     private mutating func convertFunctionCallExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
         // functionCallExpression = postfixExpression >n< functionCallArgumentClause .
         // functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures
-        //                        | nonLiteralPostfix trailingClosures
+        //                        | @right @right(literalExpression) postfixExpression trailingClosures
         //                        | collectionLiteralCallee trailingClosures .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             return missingExpr(.lookupFailed, "no alternate tiles the span", from: from, to: to)
         }
         let callee: ExprSyntax
-        if let baseNT = find(firstOf: ["postfixExpression", "nonLiteralPostfix"], in: spans) {
+        if let baseNT = find("postfixExpression", in: spans) {
             callee = convertPostfixExpression(baseNT.nt, from: baseNT.from, to: baseNT.to)
         } else if let collNT = find("collectionLiteralCallee", in: spans),
                   let (_, collSpans) = tileAlternate(collNT.nt, from: collNT.from, to: collNT.to) {

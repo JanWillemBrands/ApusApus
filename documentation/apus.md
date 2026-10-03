@@ -285,22 +285,80 @@ Inside `[ ... ]` and `{ ... }`, `@avoid` also competes with the implicit empty
 branch. That is why `[ @avoid X ]` means "prefer the skip when the skip still
 parses".
 
-`@longest`, `@shortest`, `@left`, and `@right` are node-level only. They may occur
-before a nonterminal definition or before a bracketed group.
+`@longest` and `@shortest` are node-level. They may occur before a nonterminal
+definition or before a bracketed group.
 
 ```swift
 @longest expression = prefixExpression { infixOperator prefixExpression } .
 S = @shortest [ modifier ] name .
 S = @longest { word } .
-S = @left ( E "+" E | atom ) .
 ```
 
 Meaning:
 
 ```text
 @longest/@shortest = choose maximal/minimal extent for this node.
-@left/@right       = for one node span (i,j), choose among competing pivots k.
 ```
+
+`@left` and `@right` are ALTERNATE-level, in the same position as `@prefer`/`@avoid`.
+They say that a production may not be nested directly inside ITSELF:
+
+```swift
+E = @left E "+" E | number .        // `1+2+3` is `(1+2)+3`
+E = ( @right E "+" E | number ) .   // `1+2+3` is `1+(2+3)`
+```
+
+```text
+@left  = this production may not be its own RIGHTMOST child.
+@right = this production may not be its own LEFTMOST child.
+```
+
+Read `@left` as "the left side wins, so the right side may not grow": in `1+2+3`
+the reading `1+(2+3)` puts a `+` inside the right slot of a `+`, and `@left`
+removes it. `@right` is the mirror image.
+
+This is associativity as SDF states it — a per-production attribute (`{left}`,
+`{right}`) that deletes a forbidden parent/child shape — rather than a choice
+between competing pivots of one span. The difference matters when the two readings
+have DIFFERENT spans, i.e. when one instance is nested inside another rather than
+rivalling it:
+
+```swift
+x.map {} {}      // the outer closure-call's left child IS a closure-call → removed
+x.map {}.filter {}.sorted {}   // children are member accesses → all three kept
+```
+
+A pivot choice cannot reach that, because the inner and outer instances start at
+the same place but end differently, so there is no single span with two pivots.
+
+Both take an optional list of nonterminals. The bare form forbids the production
+in that child position; the list form forbids the NAMED nonterminals there:
+
+```swift
+f = @right( literalExpression ) postfixExpression trailingClosures .
+//  ↑ the callee may not be a bare literal, so `1 {}` is not a call
+```
+
+Several may stack on one alternate, so the same child position can forbid both
+the production itself and a listed nonterminal:
+
+```swift
+functionCallExpression = @right @right( literalExpression )
+                         postfixExpression trailingClosures .
+```
+
+The match is on EXTENT: the child is removed when its span is exactly the span of
+one of the named nonterminals. That is usually what you want, because it
+distinguishes a bare construct from one that has grown. The callee of `1 {}`
+spans exactly the literal `1`, so it is removed; the callee of `1! {}` or
+`1.description {}` spans more than any literal, so it survives. Writing the
+exclusion as its own nonterminal (a copy of `postfixExpression` with the literal
+alternates removed) gets the same result but costs a clone that drifts from its
+original.
+
+Associativity across DIFFERENT productions — `+` and `-` of one precedence level
+being mutually left-associative — is a separate mechanism (in SDF, a priority
+relation over a set of productions) and is not expressible with these two.
 
 `@avoid` and `@shortest` are different primitives. They can overlap in simple
 optional-skip cases, but they are not synonyms:
@@ -565,9 +623,10 @@ exclusion   = "---" "(" < literal > ")" .
 
 productionPragma     = terminalPragma | nonterminalPragma .
 terminalPragma       = "@literalMunch" | "@preempt" preemptArgs .
-nonterminalPragma    = "@longest" | "@shortest" | "@left" | "@right" | "@sameLine" .
-groupPragma          = "@longest" | "@shortest" | "@left" | "@right" .
-alternateAnnotation  = "@prefer" | "@avoid" | containment | parsePredicate .
+nonterminalPragma    = "@longest" | "@shortest" | "@sameLine" .
+groupPragma          = "@longest" | "@shortest" .
+alternateAnnotation  = "@prefer" | "@avoid" | childPosition | containment | parsePredicate .
+childPosition        = ( "@left" | "@right" ) [ "(" < identifier > ")" ] .
 containment          = ( "@confinedTo" | "@excludedFrom" ) "(" < identifier > ")" .
 parsePredicate       = ( "@canParse" | "@cannotParse" ) "(" < identifier > ")" .
 preemptArgs          = "(" identifier [ "," identifier ] ")" .

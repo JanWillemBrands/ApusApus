@@ -41,10 +41,17 @@ protocol DisambiguationRule {
 }
 
 extension DisambiguationRule {
-    var isHardConstraint: Bool { false }
+    var isHardConstraint: Bool { true }
 }
 
 struct LongestMatchRule: DisambiguationRule {
+    /// A PREFERENCE, per the protocol doc: extent choice ranks readings that are all legal. It has
+    /// to run after the hard constraints AND after the dead-wood sweep between the passes, or it
+    /// picks a maximal extent that a constraint is about to delete and takes the only legal
+    /// reading with it. Measured 2026-10-03 on `ExpressionTests.testClosureLiterals#3`: with both
+    /// in one pass, this dropped the short `patternInitializer` `y = x.map { [$0] }` in favour of
+    /// the chained one, `AssociativityFilterRule` then removed the chain, and the root died.
+    var isHardConstraint: Bool { false }
     let input: String
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByExtent(yields: &yields, input: input, keepLongest: true)
@@ -52,6 +59,8 @@ struct LongestMatchRule: DisambiguationRule {
 }
 
 struct ShortestMatchRule: DisambiguationRule {
+    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
+    var isHardConstraint: Bool { false }
     let input: String
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByExtent(yields: &yields, input: input, keepLongest: false)
@@ -59,12 +68,16 @@ struct ShortestMatchRule: DisambiguationRule {
 }
 
 struct LeftAssocRule: DisambiguationRule {
+    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
+    var isHardConstraint: Bool { false }
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByPivot(yields: &yields, keep: { $0.max()! })
     }
 }
 
 struct RightAssocRule: DisambiguationRule {
+    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
+    var isHardConstraint: Bool { false }
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByPivot(yields: &yields, keep: { $0.min()! })
     }
@@ -88,6 +101,8 @@ struct RightAssocRule: DisambiguationRule {
 /// exempted. `A`'s same-span removal is `PreferRule`'s job. Single-body `[ @avoid X ]` has no
 /// siblings, so `protectedLast` is empty and this is the classic keep-min-pivot.
 struct AvoidOptionalRule: DisambiguationRule {
+    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
+    var isHardConstraint: Bool { false }
     let protectedLast: [GrammarNode]
     let yieldsOf: (GrammarNode) -> Set<BinarySpan>
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
@@ -116,6 +131,14 @@ struct AvoidOptionalRule: DisambiguationRule {
 /// among alternates that tile the same extent — it is NOT an extent tool. Prefer-the-
 /// longer is `@longest`'s job (see the note in `prune`).
 struct PreferRule: DisambiguationRule {
+    /// A HARD CONSTRAINT, despite being a preference in name. Measured 2026-10-03: moving it to
+    /// the preference pass breaks `f(1) {}`⏎`{}` (`trailing-closure-chained-after-parens`).
+    /// `AssociativityFilterRule` is hard and DEPENDS on this having already run — `f(1) {}` is
+    /// derivable both as the paren alternate and as the parenless one, and `@prefer` removes the
+    /// second. Run later, and the filter treats `f(1) {}` as an instance of itself and kills the
+    /// chain. The other four preferences were moved; this one cannot be until that dependency is
+    /// expressed some other way.
+    var isHardConstraint: Bool { true }
     let preferredLastSymbols: [GrammarNode]
     let yieldsOf: (GrammarNode) -> Set<BinarySpan>
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
@@ -223,6 +246,62 @@ struct ContainmentRule: DisambiguationRule {
         }
         return pruned
     }
+}
+
+/// `@left` / `@right` on an ALTERNATE — associativity as an SDF-style production attribute:
+/// this production may not occur as its own right (`@left`) / own left (`@right`) child.
+///
+/// A body SLOT's BSR triple is `(alternate start i, start of this symbol k, end j)`, measured on
+/// `E = E "+" E | number` over `1 + 2 + 3` (slot numbers from that dump):
+///
+///     #2 N 'E'   first body symbol → (0,0,2) (0,0,6) (4,4,6)
+///     #4 N 'E'   last  body symbol → (0,4,6) (0,4,9) (0,8,9) (4,8,9)
+///     #5 END ''                    → (none)        ← END slots carry no yields
+///
+/// So on the LAST body symbol `[k, j]` is the right child and `[i, j]` is the whole alternate;
+/// on the FIRST, `k == i` and `[i, j]` is the left child. `(0,4,9)` is exactly `1 + (2 + 3)` and
+/// `(0,0,6)` is exactly `(1 + 2) + 3`, which is what each direction has to remove.
+///
+/// `selfExtents` is the set of `[i, j]` from the LAST body symbol — the spans at which THIS
+/// production completed, excluding spans reached through a sibling alternate (`1`, `2`, `3` via
+/// `number` are absent, which is what keeps the correct reading alive).
+///
+/// Snapshotted at registration, like `@canParse`'s `targetStarts`: for `@left` the anchor IS the
+/// slot the extents come from, so reading it live would let the rule consume its own input.
+///
+/// Reaches NESTED instances at different spans, which a pivot preference cannot: in
+/// `x.map {} {}` the inner and outer closure-calls co-start but end differently, so no single
+/// span has two pivots to rank. swift-syntax states the same rule procedurally —
+/// `parsePostfixExpressionSuffix`, "We only allow a single trailing closure on a call".
+struct AssociativityFilterRule: DisambiguationRule {
+    /// NOT a hard constraint. The extents have to be read AFTER same-span preferences settle:
+    /// `f(1) {}` is derivable both as the paren alternate and as the parenless one with callee
+    /// `f(1)`, and `@prefer` removes the second. Reading before that made the filter treat
+    /// `f(1) {}` as an instance of itself and wrongly break `f(1) {} {}`.
+    var isHardConstraint: Bool { true }
+    /// `[i, j]` spans the forbidden child occupies, read when the rule runs. Bare `@left`/`@right`
+    /// passes the spans at which the annotated alternate itself completed; with operands it passes
+    /// the spans of the named nonterminals.
+    let forbiddenExtents: () -> Set<BinarySpanExtent>
+    /// `@left` reads the right child `[k, j]`; `@right` reads the left child `[i, j]`.
+    let childIsRightmost: Bool
+    func prune(_ yields: inout Set<BinarySpan>) -> Int {
+        let extents = forbiddenExtents()
+        guard !extents.isEmpty else { return 0 }
+        var pruned = 0
+        for span in yields {
+            let child = childIsRightmost ? BinarySpanExtent(from: span.k, to: span.j)
+                                         : BinarySpanExtent(from: span.i, to: span.j)
+            if extents.contains(child) { yields.remove(span); pruned += 1 }
+        }
+        return pruned
+    }
+}
+
+/// A plain `[from, to)` span — the extent of a BSR triple with its pivot dropped.
+struct BinarySpanExtent: Hashable {
+    let from: CharPosition
+    let to: CharPosition
 }
 
 /// `@sameLine`. Prunes a yield unless at least one surviving derivation of that yield crosses no
@@ -564,6 +643,39 @@ class Oracle {
                 } else {
                     reportInvariantViolation("containment predicate on an empty alternate", once: true)
                 }
+            }
+            // `@left`/`@right` on this alternate — the child-position FILTER. The ANCHOR is the
+            // slot holding the forbidden child: the last body symbol for `@left`, the first for
+            // `@right`.
+            for filter in node.associativityFilters {
+                let body = node.bodySymbols
+                guard let last = body.last, let first = body.first else {
+                    reportInvariantViolation("child-position filter on an empty alternate", once: true)
+                    continue
+                }
+                let p = parser
+                let extents: () -> Set<BinarySpanExtent>
+                if filter.targets.isEmpty {
+                    // Associativity. Extents come from the LAST body symbol — the only slot
+                    // carrying both the alternate's own extent `[i, j]` and the right child's.
+                    extents = { Set(p.yield(of: last).map { BinarySpanExtent(from: $0.i, to: $0.j) }) }
+                } else {
+                    // Argument-indexed priority. A nonterminal node's triples are `(i, i, j)`,
+                    // so `[i, j]` is that nonterminal's extent.
+                    let targets = filter.targets.compactMap { name -> GrammarNode? in
+                        guard let t = grammar.nonTerminals[name] else {
+                            reportInvariantViolation("child-position filter: unknown nonterminal '\(name)'", once: true)
+                            return nil
+                        }
+                        return t
+                    }
+                    extents = {
+                        Set(targets.flatMap { p.yield(of: $0).map { BinarySpanExtent(from: $0.i, to: $0.j) } })
+                    }
+                }
+                rules.append((filter.direction == .left ? last : first,
+                              AssociativityFilterRule(forbiddenExtents: extents,
+                                                      childIsRightmost: filter.direction == .left)))
             }
             // `@sameLine` is registered per nonterminal, not here — it must
             // anchor on LHS completion yields to get the construct's exact span.

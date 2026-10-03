@@ -894,28 +894,32 @@ awaitOperator =
 // spurious `-> ()` tail to re-parse as infix. Same shape as `@longest genericIdentifier` (`A` vs
 // `A<B>`). No-op for ordinary operator chains: each infixExpression is one operator + one operand,
 // so it has a single extent and shares no start with a longer sibling.
-
 // TIGHT infix (`>s< … >s<`) may not use an operator BEGINNING with `!`/`?`. When left-bound, swift
 // lexes `!`/`?` as single-character postfix tokens and never munches a second
 // one. Spaced `foo ?? bar` is still a binary operator, so only the tight rule
 // has the restriction.
 // `postfixOperatorToken` already means exactly "operator body not starting with `!`/`?`", so it is
 // reused here rather than cloned; `dotOperator` (`a...b`) and `"&"` (`a&b`) stay reachable.
-@longest
 // `>-> ( "." )`: a left-bound operator directly followed by `.` is POSTFIX, never binary (swift-syntax
 // `isRightBound`: for a following `.` it returns `!isLeftBound`). `LOOK()*!*. // c⏎exclaim()` is
 // `(LOOK()*!*)` + a dot with whitespace after it (an error), not `LOOK() *!* .exclaim()`.
-infixExpression = @cannotParse( genericArgumentClause ) >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression .
 // The two hand-written mark-ending dot operators that used to live here are GONE. `dotOperator`
 // now keeps a trailing `?`/`!` run (see the regex library), so the tight-infix alternate above
 // covers `\Foo.?.?[0]`'s `binaryOperator(".?")` directly, and maximal munch — not a `>-> ( "." )`
 // lookahead — is what keeps `.?.name` as the single token `.?.` rather than `.?` + `.name`.
-infixExpression = <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression .
-infixExpression = arrowExpr tryOperator? awaitOperator? prefixExpression .
-infixExpression = assignmentOperator expression .     // RHS may be an if/switch expression; `expression` already carries try/await.
-infixExpression = conditionalOperator expression .     // false-branch of ternary may be an if/switch expression (try/await via `expression`)
-infixExpression = typeCastingOperator .
+
+@longest
+infixExpression =
+    | <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression
+    | arrowExpr tryOperator? awaitOperator? prefixExpression
+    | assignmentOperator expression
+    | conditionalOperator expression
+    | typeCastingOperator
+    | @cannotParse( genericArgumentClause )
+      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression
+    .
 infixExpressions = infixExpression infixExpressions? .
+// TODO: infixExpressions = < infixExpression > .
 
 // `arrowExpr` — swift-syntax `ExprNodes.swift:71`:
 //     Node(kind: .arrowExpr, base: .expr,
@@ -950,17 +954,23 @@ typeEffectSpecifiers = "async" | "async" throwsClause | throwsClause .
 // `if a ? b : c && d { }` was the 9-file `conditionInfixExpression ambiguous pivot` cluster of the
 // 30k-file crawl. The families are meant to be identical bar assignment (see below), and this was
 // the one place they were not.
-@longest
 // Tight form mirrors the tight `infixExpression` exactly (operator set, generic-argument predicate,
 // `.` gate); the families differ only by the absence of assignment. With plain `infixOperator` a
 // tight `??` was a binary operator in conditions only: `if rhs??b {}` accepted, swift rejects.
-conditionInfixExpression = @cannotParse( genericArgumentClause ) >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression .
-conditionInfixExpression = <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression .
 // No explicit try/await here: `expression` already starts with those optionals,
 // and repeating them gives the ternary false branch two attachment points.
-conditionInfixExpression = conditionalOperator expression .     // false-branch of ternary may be an if/switch expression
-conditionInfixExpression = typeCastingOperator .
+@longest
+conditionInfixExpression =
+    | <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression
+    | conditionalOperator expression
+    | typeCastingOperator
+    | @cannotParse( genericArgumentClause )
+      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression
+    .
+
+
 conditionInfixExpressions = conditionInfixExpression conditionInfixExpressions? .
+// TODO: conditionInfixExpressions = < conditionInfixExpression > .
 
 // conditionExpression: like expression but without assignmentOperator — assignment returns Void and
 // is never valid as a boolean condition (if/while/guard condition lists, repeat-while, where clauses).
@@ -1115,16 +1125,6 @@ compoundNameBase = expressionIdentifier | "init" | "self" | "Self" .
 
 parenthesisedSpecifierType = "(" parenthesisedTypeSpecifier type ")" .
 
-// All primaryExpression alternatives except literalExpression — used to build nonLiteralPostfix (B1 fix).
-// The `(…)`-vs-functionType choice is resolved at `primaryExpression = parenthesizedExpression`.
-nonLiteralPrimary = genericIdentifier | moduleGenericIdentifier | moduleSelector propertyWrapperProjection
-                  | compoundNameBase "(" argumentNames ")" | implicitParameterName
-                  | selfExpression | superclassExpression | closureExpression
-                  | parenthesizedExpression | tupleExpression | implicitMemberExpression
-                  | wildcardExpression | macroExpansionExpression  // no keyPathExpression: postfix island
-                  | selfType | anyType | "(" moduleSelector? operator ")"
-                  | attribute type | boxedProtocolType | "(" functionType ")" .
-
 
 /// Grammar of a literal expression
 /// literal-expression → literal
@@ -1139,11 +1139,10 @@ nonLiteralPrimary = genericIdentifier | moduleGenericIdentifier | moduleSelector
 /// playground-literal → #fileLiteral ( resourceName : expression )
 /// playground-literal → #imageLiteral ( resourceName : expression )
 
-literalExpression   = literal | arrayLiteral | dictionaryLiteral .
+literalExpression = literal | arrayLiteral | dictionaryLiteral .
 
-arrayLiteral        = "[" arrayLiteralItems? ","? "]" .
-arrayLiteralItems   = arrayLiteralItem { "," arrayLiteralItem } .
-
+arrayLiteral = "[" arrayLiteralItems? ","? "]" .
+arrayLiteralItems = arrayLiteralItem { "," arrayLiteralItem } .
 // `@cannotParse( parameterModifier )`: a TYPE-SPECIFIER-led element is type-only, so the
 // expression route must not apply there — `[nonisolated(nonsending) () async -> Void]` otherwise
 // reads `nonisolated(nonsending)` as a function CALL and yields a SequenceExpr where swift-syntax
@@ -1161,14 +1160,15 @@ arrayLiteralItem    = @prefer @cannotParse( parenthesisedTypeSpecifier ) express
 // whose element is a type_expr. `@prefer expression` above keeps the literal
 // reading for `[Int]`/`[X & Y]` where both parse; the type reading survives only where
 // the expression route fails.
-arrayLiteralItem    = typeExpression .
-typeExpression      = type .   // swift-syntax TypeExprSyntax: a type used in expression position
+arrayLiteralItem = typeExpression .
+typeExpression = type .
+// swift-syntax TypeExprSyntax: a type used in expression position
 
-dictionaryLiteral           = "[" dictionaryLiteralItems ","? "]" | "[" ":" "]" .
-dictionaryLiteralItems      = dictionaryLiteralItem { "," dictionaryLiteralItem } .
-dictionaryLiteralItem       = dictionaryLiteralElement ":" dictionaryLiteralElement .
-dictionaryLiteralElement    = @prefer expression .   // @prefer over typeExpression, same rationale as arrayLiteralItem
-dictionaryLiteralElement    = typeExpression .        // TypeExpr key/value, e.g. `[String: (nonisolated(nonsending) () async -> Void)?]`
+dictionaryLiteral        = "[" dictionaryLiteralItems ","? "]" | "[" ":" "]" .
+dictionaryLiteralItems   = dictionaryLiteralItem { "," dictionaryLiteralItem } .
+dictionaryLiteralItem    = dictionaryLiteralElement ":" dictionaryLiteralElement .
+dictionaryLiteralElement = @prefer expression .   // @prefer over typeExpression, same rationale as arrayLiteralItem
+dictionaryLiteralElement = typeExpression .        // TypeExpr key/value, e.g. `[String: (nonisolated(nonsending) () async -> Void)?]`
 
 // swift-syntax has no object-literal node; object literals are MacroExpansionExpr.
 
@@ -1203,7 +1203,7 @@ superclassExpression    = "super" .
 /// switch-expression-case → case-label statement
 /// switch-expression-case → default-label statement
 
-conditionalExpression   = ifExpression | switchExpression .
+conditionalExpression = ifExpression | switchExpression .
 
 // swift-syntax models `if`/`switch` as EXPRESSIONS everywhere (IfExprSyntax/SwitchExprSyntax);
 // at statement position they surface as ExpressionStmt(IfExpr/SwitchExpr). There
@@ -1212,29 +1212,31 @@ conditionalExpression   = ifExpression | switchExpression .
 
 // `>-> ( "{" )` (B2 discriminator 2): a condition may never open with `{` — a leading brace is the
 // statement body, so `if {x}() {}` is a reject (swift-syntax: condition = MissingExpr). See REJECTS §B2.
-ifExpression        = "if" >-> ( "{" ) conditionList codeBlock elseClause? .
-elseClause          = "else" codeBlock | "else" ifExpression .
+ifExpression = "if" >-> ( "{" ) conditionList codeBlock elseClause? .
+elseClause = "else" codeBlock | "else" ifExpression .
 
 // B2 discriminator 2: subject may not open with `{` (`switch { 42 } {…}` is a reject)
 switchExpression    = "switch" >-> ( "{" ) expression "{" switchCases? "}" .
-
-switchCases         = switchCase switchCases? .
-switchCase          = caseLabel statements? .
-switchCase          = defaultLabel statements? .
-switchCase          = conditionalSwitchCase .
+// TODO: switchCases = < switchCase > .
+switchCases = switchCase switchCases? .
+switchCase =
+    | caseLabel statements?
+    | defaultLabel statements?
+    | conditionalSwitchCase
+    .
 
 // swift-syntax `atStartOfSwitchCase` accepts at most one bare attribute before
 // `case`/`default`; the `@unknown`-only rule is semantic.
 
-caseLabel           = switchCaseAttribute? "case" caseItemList ":" .
-caseItemList        = matchPattern whereClause? { "," matchPattern whereClause? } .
+caseLabel = switchCaseAttribute? "case" caseItemList ":" .
+caseItemList = matchPattern whereClause? { "," matchPattern whereClause? } .
 
-defaultLabel        = switchCaseAttribute? "default" ":" .
+defaultLabel = switchCaseAttribute? "default" ":" .
 
 switchCaseAttribute = "@" >s< attributeName .
 
-whereClause         = "where" whereExpression .
-whereExpression     = conditionExpression .
+whereClause = "where" whereExpression .
+whereExpression = conditionExpression .
 
 conditionalSwitchCase = switchIfDirectiveClause switchElseifDirectiveClauses? switchElseDirectiveClause? endifDirective .
 switchIfDirectiveClause = ifDirective compilationCondition switchCases? .
@@ -1263,11 +1265,9 @@ switchElseDirectiveClause = elseDirective switchCases? .
 // trailing closure in statement-condition position, where the brace starts the
 // statement body. APUS partitions closure openings by newline and uses
 // `@excludedFrom` only for that condition/trailing-closure overlap.
-closureExpression       = samelineOpenedClosure
-                        | @excludedFrom(conditionExpression) @excludedFrom(trailingClosures)
-                          newlineOpenedClosure .
-samelineOpenedClosure   = "{" >n< closureSignature? statements? "}" .
-newlineOpenedClosure    = "{" <n> closureSignature? statements? "}" .
+closureExpression = samelineOpenedClosure | @excludedFrom(conditionExpression) @excludedFrom(trailingClosures) newlineOpenedClosure .
+samelineOpenedClosure = "{" >n< closureSignature? statements? "}" .
+newlineOpenedClosure  = "{" <n> closureSignature? statements? "}" .
 
 // swift-syntax ClosureSignatureSyntax carries `attributes` INSIDE the signature (before the
 // optional capture clause), and a signature always ends in `in`. So closure attributes require
@@ -1564,19 +1564,6 @@ postfixExpression =
     | forcedValueExpression
     | optionalChainingExpression
     .
-// A postfix expression whose BASE cannot be a bare literal — for restricting trailing-closure-only calls (B1).
-// Two cases:
-//   (a) nonLiteralPrimary — the base itself is not a literal
-//   (b) postfixExpression + any postfix operation — at least one operation was applied, so even a
-//       literal-rooted chain (`1!`, `[1][0]`, `1.description`) is callable (matches swift-syntax)
-nonLiteralPostfix =
-    | nonLiteralPrimary
-    | postfixExpression >s< postfixOperator <s>
-    | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-    | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-    | functionCallExpression | initializerExpression | explicitMemberExpression
-    | subscriptExpression | forcedValueExpression | optionalChainingExpression
-    .
 
 /// Grammar of a function call expression
 /// function-call-expression → postfix-expression function-call-argument-clause
@@ -1594,33 +1581,41 @@ functionCallExpression = postfixExpression >n< functionCallArgumentClause .
 // A trailing closure belongs to the same call as a preceding argument clause:
 // `f() {}` is one call on `f`, not a trailing-closure call on `f()`.
 //
-// The closure brace may start on the NEXT line after an ARGUMENT CLAUSE, but not after a
-// PARENLESS callee. Measured against the reference, which splits exactly there:
-//     let v = f(1) {} ⏎ {}            → ONE statement, chained FunctionCallExpr(FunctionCallExpr(…))
-//     var y = x.map { [$0] } ⏎ {}     → TWO statements, the second an applied ClosureExpr
-// so a trailing closure chains onto a call that has an argument clause and does not chain onto a
-// parenless trailing-closure call. `atValidTrailingClosure` (Expressions.swift) imposes a LINE
-// constraint only in `.stmtCondition` flavor —
+// NO layout gate on the closure brace: a trailing closure may start on the NEXT line.
+// `atValidTrailingClosure` (Expressions.swift) imposes a line constraint only in `.stmtCondition`
+// flavor —
 //     // If this is a normal expression (not an expr-basic) then trailing closures
 //     // are allowed, so this is obviously one.
 //     guard case .stmtCondition = flavor else { return true }
 //     …
 //     guard !self.peek().isAtStartOfLine else { return false }
-// — and condition position is already handled by `@excludedFrom(conditionExpression)` on
+// — and condition position is already covered by `@excludedFrom(conditionExpression)` on
 // `closureExpression`, which is why `if f(a: 1) { }` still reads the brace as the if-body.
 //
-// With `>n<` on the argument-clause alternate, `f(a: 1) ⏎ { x in }` lost the closure out of the
-// call and re-parsed it as a separate closure STATEMENT: 26 tree differences in the 30k-file
-// crawl, plus 4 underaccepts where a following `b: { … }` left a labelled closure that is not a
-// statement at all. Keeping `>n<` on the PARENLESS alternate is what stops the chain in the
-// second line above — `ExpressionTests.testClosureLiterals#3` is exactly that shape, and the
-// reference comments that disambiguating it "probably isn't worthwhile".
-// KNOWN DIVERGENCE from that split: `f(1) {} ⏎ {}` chains in the reference but not here, because
-// the chain goes through the parenless alternate (the second closure has no argument clause of its
-// own). Zero occurrences among the 26 corpus files; expressing it exactly needs the callee to know
-// whether ITS closure followed parens, which no gate here can see.
+// `@right` on the parenless alternate is the real rule: ONE trailing closure per call. The
+// reference says it procedurally, in the `parsePostfixExpressionSuffix` loop —
+//     // We only allow a single trailing closure on a call.  This could be
+//     // generalized in the future, but needs further design.
+//     if self.at(.leftBrace) { break }
+// — i.e. after a PARENLESS trailing closure, a following `{` ends the postfix chain. As a
+// production attribute that is exactly "this alternate may not be its own LEFTMOST child":
+//     var y = x.map { [$0] } ⏎ { … }(&y[0])   → TWO statements   (chain forbidden)
+//     let v = f(1) {} ⏎ {}                    → ONE chained call (callee has an argument clause,
+//                                               so it is the OTHER alternate, not this one)
+//     let v = x.map {}.filter {}.sorted {}    → all three attach (children are member accesses)
+// Note it is ADJACENCY, not a count: three closure suffixes in one chain are fine, two in a row
+// are not. A `>n<` layout gate used to stand in for this and cost two tree differences —
+// `x.map ⏎ { $0 }` did not attach and `f(1) {} ⏎ {}` did not chain.
+// The second alternate carries TWO child-position filters on the same (leftmost) child:
+//   @right                     — the alternate may not be its own leftmost child  (the chain rule above)
+//   @right( literalExpression ) — nor may a BARE literal be, so `1 {}`, `"s" {}`, `[1] {}` are
+//     rejected (B1). It is extent-based, which gives the bare-vs-rooted split for free: the callee
+//     of `1 {}` spans exactly the `literalExpression` `1`, while the callee of `1! {}`, `[1][0] {}`
+//     or `1.description {}` spans MORE than any literal, so those stay callable (matches
+//     swift-syntax). This replaced a `nonLiteralPostfix`/`nonLiteralPrimary` clone of
+//     `postfixExpression`/`primaryExpression` (21 alternates) that had drifted from its originals.
 functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
-                       | nonLiteralPostfix >n< trailingClosures .                                 // f{closure}: literal callees (bare `1{}`, `"s"{}`, `[1]{}`) are rejected (B1)
+                       | @right @right( literalExpression ) postfixExpression trailingClosures .
 functionCallExpression = collectionLiteralCallee trailingClosures .
 collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
 

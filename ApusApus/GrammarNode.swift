@@ -36,6 +36,14 @@ enum GrammarNodeKind { case EOS, T, TI, C, B, EPS, N, ALT, END, DO, OPT, POS, KL
 
 enum Disambiguation: String { case shortest, longest, left, right }
 
+/// One `@left` / `@right` on an alternate. `targets` empty means "this production itself"
+/// (associativity); non-empty names the nonterminals forbidden in that child position
+/// (argument-indexed priority). See `GrammarNode.associativityFilters`.
+struct ChildPositionFilter {
+    let direction: Disambiguation   // .left = forbid as the RIGHTMOST child, .right = LEFTMOST
+    let targets: [String]
+}
+
 /// One leading `@cannotParse(N)` / `@canParse(N)` predicate on an alternate, `N` a NONTERMINAL.
 /// See `GrammarNode.forwardPredicates`.
 struct ForwardPredicate {
@@ -196,6 +204,23 @@ final class GrammarNode {
     /// `Ambiguity.md`.
     var confinedToContainers: [[String]] = []
     var excludedFromContainers: [[String]] = []
+
+    /// `@left` / `@right` on an ALTERNATE — a child-position filter in the SDF sense.
+    ///
+    /// With no operand it is associativity: this production may not occur as its own right
+    /// (`@left`) / own left (`@right`) child. With operands it is SDF's argument-indexed
+    /// PRIORITY: none of the named nonterminals may occur as that child.
+    ///
+    ///     E = @left E "+" E | number .                   // `1+2+3` is `(1+2)+3`
+    ///     f = @right(literalExpression) p trailingClosures .   // `1 {}` has a literal callee
+    ///
+    /// Several may stack on one alternate, so an alternate can forbid both itself and a listed
+    /// nonterminal in the same child position. Alternate-level only, like
+    /// `@prefer`/`@avoid`/`@confinedTo`.
+    ///
+    /// Unlike a pivot preference this reaches NESTED instances at DIFFERENT spans, where there is
+    /// no single span with two pivots to rank. See `AssociativityFilterRule`.
+    var associativityFilters: [ChildPositionFilter] = []
 
     /// `@sameLine` — this nonterminal's span may not cross a newline consumed as trivia.
     /// Newlines inside a committed token (nested multiline string, block comment) are permitted.

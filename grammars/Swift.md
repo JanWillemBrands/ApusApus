@@ -657,8 +657,10 @@ classRestrictionType = "class" .
 _expression → try-operator? await-operator? prefix-expression infix-expressions?_
 
 ```apus
-expression = tryOperator? awaitOperator? conditionalExpression coercingOperator? .
-expression = tryOperator? awaitOperator? prefixExpression infixExpressions? .
+expression =
+    | tryOperator? awaitOperator? prefixExpression infixExpressions?
+    | tryOperator? awaitOperator? conditionalExpression coercingOperator?
+    .
 ```
 
 
@@ -724,12 +726,15 @@ _infix-expressions → infix-expression infix-expressions?_
 
 ```apus
 @longest
-infixExpression = @cannotParse( genericArgumentClause ) >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression .
-infixExpression = <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression .
-infixExpression = arrowExpr tryOperator? awaitOperator? prefixExpression .
-infixExpression = assignmentOperator expression .
-infixExpression = conditionalOperator expression .
-infixExpression = typeCastingOperator .
+infixExpression =
+    | <s> infixOperator <s> tryOperator? awaitOperator? prefixExpression
+    | arrowExpr tryOperator? awaitOperator? prefixExpression
+    | assignmentOperator expression
+    | conditionalOperator expression
+    | typeCastingOperator
+    | @cannotParse( genericArgumentClause )
+      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< tryOperator? awaitOperator? prefixExpression
+    .
 infixExpressions = infixExpression infixExpressions? .
 
 arrowExpr = typeEffectSpecifiers? "->" >->( "async" "throws" "rethrows" ) .
@@ -837,13 +842,6 @@ compoundNameBase = expressionIdentifier | "init" | "self" | "Self" .
 
 parenthesisedSpecifierType = "(" parenthesisedTypeSpecifier type ")" .
 
-nonLiteralPrimary = genericIdentifier | moduleGenericIdentifier | moduleSelector propertyWrapperProjection
-                  | compoundNameBase "(" argumentNames ")" | implicitParameterName
-                  | selfExpression | superclassExpression | closureExpression
-                  | parenthesizedExpression | tupleExpression | implicitMemberExpression
-                  | wildcardExpression | macroExpansionExpression
-                  | selfType | anyType | "(" moduleSelector? operator ")"
-                  | attribute type | boxedProtocolType | "(" functionType ")" .
 ```
 
 
@@ -1159,14 +1157,6 @@ postfixExpression =
     | forcedValueExpression
     | optionalChainingExpression
     .
-nonLiteralPostfix =
-    | nonLiteralPrimary
-    | postfixExpression >s< postfixOperator <s>
-    | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-    | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
-    | functionCallExpression | initializerExpression | explicitMemberExpression
-    | subscriptExpression | forcedValueExpression | optionalChainingExpression
-    .
 ```
 
 
@@ -1184,7 +1174,7 @@ _labeled-trailing-closure → identifier **:** closure-expression_
 ```apus
 functionCallExpression = postfixExpression >n< functionCallArgumentClause .
 functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures
-                       | nonLiteralPostfix trailingClosures .
+                       | @right @right( literalExpression ) postfixExpression trailingClosures .
 functionCallExpression = collectionLiteralCallee trailingClosures .
 collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
 

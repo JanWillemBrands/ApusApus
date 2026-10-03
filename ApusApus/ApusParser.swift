@@ -177,6 +177,11 @@ class ApusParser {
     func production() throws {
         var disambiguationAnnotation: Disambiguation?
         if token.kind == "pragma", let d = Disambiguation(rawValue: token.stripped) {
+            guard d == .longest || d == .shortest else {
+                throw ApusParserError.unexpectedToken(
+                    explanation: "@\(d.rawValue) is an alternate-level associativity filter; "
+                               + "write it after the `=` or `|`, on the alternate it governs")
+            }
             disambiguationAnnotation = d
             cI += 1
         }
@@ -438,9 +443,9 @@ class ApusParser {
         // the prune on the alternate's first body symbol (yield start = alternate start).
         // Symbolic `>->`/`>+>` stays reserved for token lookaround.
         //
-        // Node-level extent/associativity (`@longest`/`@shortest`/`@left`/`@right`) are
-        // NOT here — they attach to the whole group, parsed before the LHS
-        // (`production()`) or before the bracket (`factor()`).
+        // Node-level EXTENT (`@longest`/`@shortest`) is NOT here — it attaches to the whole
+        // group, parsed before the LHS (`production()`) or before the bracket (`factor()`).
+        // Associativity (`@left`/`@right`) IS here: it is a per-production attribute.
         annotationLoop: while token.kind == "pragma" {
             switch token.stripped {
             case "prefer":
@@ -449,6 +454,25 @@ class ApusParser {
             case "avoid":
                 startOfSequence.isAvoided = true
                 cI += 1
+            case "left", "right":
+                // A child-position filter. Bare, it is associativity as a per-production
+                // attribute (SDF `{left}`/`{right}`): this alternate may not be its own right
+                // (`@left`) / own left (`@right`) child. With an operand list it is SDF's
+                // argument-indexed priority: none of the NAMED nonterminals may be that child.
+                let direction: Disambiguation = token.stripped == "left" ? .left : .right
+                cI += 1
+                var targets: [String] = []
+                if token.kind == "(" {
+                    cI += 1
+                    repeat {
+                        try expect(["identifier"])
+                        targets.append(String(token.image))
+                        cI += 1
+                    } while token.kind == "identifier"
+                    try expect([")"]); cI += 1
+                }
+                startOfSequence.associativityFilters
+                    .append(ChildPositionFilter(direction: direction, targets: targets))
             case "confinedTo", "excludedFrom":
                 let negated = token.stripped == "excludedFrom"
                 cI += 1
@@ -702,6 +726,11 @@ class ApusParser {
         // bracket/nonterminal nodes only, so a stray prefix elsewhere is inert.
         var groupDisambiguation: Disambiguation? = nil
         if token.kind == "pragma", let d = Disambiguation(rawValue: token.stripped) {
+            guard d == .longest || d == .shortest else {
+                throw ApusParserError.unexpectedToken(
+                    explanation: "@\(d.rawValue) is an alternate-level associativity filter; "
+                               + "write it after the `=` or `|`, on the alternate it governs")
+            }
             groupDisambiguation = d
             cI += 1
         }

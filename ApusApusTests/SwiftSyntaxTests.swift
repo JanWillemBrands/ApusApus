@@ -2115,7 +2115,20 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     // applied ClosureExpr) while `f(1) {} ⏎ {}` is one chained call.
     // `ExpressionTests.testClosureLiterals#3` is this shape; keep it here too, since that suite
     // asserts acceptance and this asserts the TREE.
+    // 2026-10-03: the two shapes the old `>n<` gate got wrong, now handled by `@right` on the
+    // parenless alternate ("one trailing closure per call", the reference's loop `break`).
+    SwiftSnippet(label: "trailing-closure-next-line-parenless", source: "let v = x.map\n{ $0 }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "trailing-closure-chained-after-parens", source: "let v = f(1) {}\n{}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "three-non-adjacent-closure-suffixes", source: "let v = x.map {}.filter {}.sorted {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "no-chain-onto-parenless-trailing-closure", source: "func f(x: [Void]) {\n  var y: [[Void]] = x.map { [$0] }\n  {\n    $0.reserveCapacity(1)\n  } (&y[0])\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // B1's ACCEPT side. `SwiftSyntaxRejects` covers the bare literals (`1 {}`, `"foo" {}`,
+    // `[1] {}`); these are the literal-ROOTED chains, which stay callable because the callee
+    // spans more than the literal does. Before 2026-10-03 that split was spelled out as a
+    // `nonLiteralPostfix` clone of `postfixExpression`; it now falls out of
+    // `@right( literalExpression )` matching on extent, so these pin the mechanism.
+    SwiftSnippet(label: "trailing-closure-on-forced-literal", source: "let v = 1! {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "trailing-closure-on-subscripted-literal", source: "let v = [1][0] {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "trailing-closure-on-literal-member", source: "let v = 1.description {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),

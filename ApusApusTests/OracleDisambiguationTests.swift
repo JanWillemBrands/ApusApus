@@ -42,7 +42,7 @@ struct OracleDisambiguationTests {
         @Test("@left prunes ambiguous expression")
         func leftAssocPrunes() throws {
             let (matches, pruned) = try parseAndDisambiguate(
-                grammar: #"number - /[0-9]+/ . @left E = E "+" E | number ."#,
+                grammar: #"number - /[0-9]+/ . E = @left E "+" E | number ."#,
                 message: "1 + 2 + 3"
             )
             #expect(matches, "1 + 2 + 3 should parse")
@@ -52,7 +52,7 @@ struct OracleDisambiguationTests {
         @Test("@right prunes ambiguous expression")
         func rightAssocPrunes() throws {
             let (matches, pruned) = try parseAndDisambiguate(
-                grammar: #"number - /[0-9]+/ . @right E = E "+" E | number ."#,
+                grammar: #"number - /[0-9]+/ . E = @right E "+" E | number ."#,
                 message: "1 + 2 + 3"
             )
             #expect(matches, "1 + 2 + 3 should parse")
@@ -72,7 +72,7 @@ struct OracleDisambiguationTests {
         @Test("unambiguous input needs no pruning")
         func unambiguousNoPrune() throws {
             let (matches, pruned) = try parseAndDisambiguate(
-                grammar: #"number - /[0-9]+/ . @left E = E "+" E | number ."#,
+                grammar: #"number - /[0-9]+/ . E = @left E "+" E | number ."#,
                 message: "1 + 2"
             )
             #expect(matches, "1 + 2 should parse")
@@ -82,7 +82,7 @@ struct OracleDisambiguationTests {
         @Test("@left with four operands")
         func leftAssocFourOperands() throws {
             let (matches, pruned) = try parseAndDisambiguate(
-                grammar: #"number - /[0-9]+/ . @left E = E "+" E | number ."#,
+                grammar: #"number - /[0-9]+/ . E = @left E "+" E | number ."#,
                 message: "1 + 2 + 3 + 4"
             )
             #expect(matches, "1 + 2 + 3 + 4 should parse")
@@ -191,7 +191,7 @@ struct OracleDisambiguationTests {
         // `leftAssocPrunes` on "1 + 2 + 3".
         @Test("@left on a ( … ) cluster prunes to left-associative")
         func leftOnCluster() throws {
-            let g = #"n - /[0-9]+/ . S = E . E = @left ( E "+" E | n ) ."#
+            let g = #"n - /[0-9]+/ . S = E . E = ( @left E "+" E | n ) ."#
             let r = try parseOracleAmbiguity(grammar: g, message: "1 + 2 + 3")
             #expect(r.postMatch)
             #expect(r.isUnambiguous, "@left on the cluster should leave a single left-assoc tree")
@@ -207,7 +207,7 @@ struct OracleDisambiguationTests {
         // `rightAssocPrunes` assertion (matches && pruned > 0).
         @Test("@right on a ( … ) cluster prunes right-associative (parity with top level)")
         func rightOnCluster() throws {
-            let g = #"n - /[0-9]+/ . S = E . E = @right ( E "+" E | n ) ."#
+            let g = #"n - /[0-9]+/ . S = E . E = ( @right E "+" E | n ) ."#
             let r = try parseOracleAmbiguity(grammar: g, message: "1 + 2 + 3")
             #expect(r.postMatch)
             #expect(r.pruned > 0, "@right on the cluster should prune the non-right-assoc pivot(s)")

@@ -253,7 +253,7 @@ three properties. Each preference controls one property.
 | Property | What is different | Annotation | Rule |
 |---|---|---|---|
 | Extent | the length, from the same start | `@longest` / `@shortest` | Keep the longest / shortest span. |
-| Pivot | the pivot `k`, for the same span `(i, j)` | `@left` / `@right` | Keep the largest / smallest pivot. |
+| Nesting | a production, or a named nonterminal, sits directly inside this one | `@left` / `@right` | Delete the forbidden parent/child shape. |
 | Alternate | the alternate, for the same span `(i, j)` | `@prefer` / `@avoid` | Keep the preferred alternate. |
 
 #### Extent: `@longest` and `@shortest`
@@ -276,15 +276,52 @@ Here `@longest` applies to `prefixExpression`, and `@shortest` applies to the br
 
 The rule compares the length `j − k`, not the end `j`.
 
-#### Pivot: `@left` and `@right`
+#### Nesting: `@left` and `@right`
 
-Put the annotation before a nonterminal definition or before a group:
+Put the annotation on the ALTERNATE, in the same place as `@prefer`:
 
 ```apus
-S = @left ( E "+" E | atom ) .
+E = @left E "+" E | number .        // `1+2+3` is `(1+2)+3`
+E = ( @right E "+" E | number ) .   // `1+2+3` is `1+(2+3)`
 ```
 
-`@left` keeps the largest pivot for each span. `@right` keeps the smallest pivot for each span.
+`@left` means this production may not be its own RIGHTMOST child. `@right` means it may
+not be its own LEFTMOST child. Read `@left` as "the left side wins, so the right side may
+not grow": `1+(2+3)` puts a `+` inside the right slot of a `+`, so `@left` deletes it.
+
+This is associativity the way SDF states it — a per-production attribute that removes a
+forbidden parent/child shape. It is NOT a choice between competing pivots of one span,
+and that difference matters whenever the two readings have different spans, i.e. when one
+instance is NESTED in another rather than rivalling it:
+
+```swift
+x.map {} {}                    // outer closure-call's left child is a closure-call → removed
+x.map {}.filter {}.sorted {}   // children are member accesses → all three kept
+```
+
+The inner and outer instances start at the same place and end differently, so there is no
+single span with two pivots for a preference to rank.
+
+With an operand list the forbidden child is not the production itself but the NAMED
+nonterminals — SDF's argument-indexed priority ("`N` may not be argument 1 of this
+production"). Both forms may stack on one alternate:
+
+```apus
+functionCallExpression = @right @right( literalExpression )
+                         postfixExpression trailingClosures .
+```
+
+The first `@right` is the chain rule (no trailing closure directly on a trailing-closure
+call); the second says the callee may not be a bare literal, so `1 {}` is not a call. The
+match is on EXTENT — the child goes only when its span is exactly that of a named
+nonterminal — which separates a bare construct from a grown one for free: the callee of
+`1 {}` spans exactly the literal, while the callee of `1! {}` or `1.description {}` spans
+more than any literal and survives. The alternative is a hand-written clone of the child
+nonterminal with the unwanted alternates removed; that works, but the clone drifts.
+
+Associativity across DIFFERENT productions (`+` and `-` of one precedence level, mutually
+left-associative) is a separate mechanism — in SDF a priority relation over a set — and is
+not expressible with these two.
 
 #### Alternate: `@prefer` and `@avoid`
 
@@ -358,7 +395,8 @@ In a left-recursive grammar (`E = E "+" E | …`), precedence is an ambiguity. U
 | a swift-syntax `atStartOfX` or `canParseX` decision | `@canParse` / `@cannotParse`, or token lookaround |
 | the same span, two alternates | `@prefer` / `@avoid` |
 | the same start, two lengths | `@longest` / `@shortest` |
-| the same span, two pivots | `@left` / `@right` |
+| a production nested directly in itself | `@left` / `@right` |
+| a named nonterminal forbidden as the first/last child | `@left( N … )` / `@right( N … )` |
 | a span that must stay on one line | `@sameLine` |
 
 ## 8. Categories of ambiguity
@@ -373,6 +411,8 @@ problem.
 | one alternate must always win | the same span, a fixed winner | `@prefer` |
 | alternate is too wide | for example, `expression` against `type` | Make the alternate smaller or add a context rule. |
 | pivot | two pivots for the same span | Examine the boundary. The cause is often a terminal, a `>s<` or a lookaround. |
+| self-nesting | one instance of a production sits directly inside another, different spans | `@left` / `@right` on that alternate. |
+| forbidden child | a named nonterminal may not be the first/last child of this alternate | `@left( N … )` / `@right( N … )` on that alternate, matched on extent. |
 
 ## 9. Procedure: fix an ambiguity
 
