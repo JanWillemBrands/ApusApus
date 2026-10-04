@@ -197,20 +197,18 @@ struct OracleDisambiguationTests {
             #expect(r.isUnambiguous, "@left on the cluster should leave a single left-assoc tree")
         }
 
-        // NOTE the asymmetry with `leftOnCluster`: we assert `pruned > 0`, not
-        // `isUnambiguous`. `@right` (RightAssocRule, keep-min-pivot) under-prunes on
-        // 3+ operands and leaves a residual ambiguity — verified to be PRE-EXISTING
-        // and level-independent: the top-level `@right E = E "+" E | n` on "1 + 2 + 3"
-        // gives the same `isUnambiguous: false` (probe, 2026-08-09). This test asserts
-        // the cluster path reaches parity with the top-level path (the rule fires),
-        // not that it fixes that separate Oracle limitation. Mirrors the top-level
-        // `rightAssocPrunes` assertion (matches && pruned > 0).
-        @Test("@right on a ( … ) cluster prunes right-associative (parity with top level)")
+        // Used to assert only `pruned > 0`: the old node-level `RightAssocRule` (keep-min-pivot)
+        // under-pruned on 3+ operands and left a residual ambiguity. `@right` is now the
+        // alternate-level child-position filter ("this production may not be its own leftmost
+        // child"), which removes every left-nested reading, so it must leave ONE tree, exactly like
+        // `leftOnCluster`.
+        @Test("@right on a ( … ) cluster leaves one right-associative tree")
         func rightOnCluster() throws {
             let g = #"n - /[0-9]+/ . S = E . E = ( @right E "+" E | n ) ."#
             let r = try parseOracleAmbiguity(grammar: g, message: "1 + 2 + 3")
             #expect(r.postMatch)
             #expect(r.pruned > 0, "@right on the cluster should prune the non-right-assoc pivot(s)")
+            #expect(r.isUnambiguous, "@right on the cluster should leave a single right-assoc tree")
         }
 
         // `@longest` on a POS closure `< … >`. Faithful nested analogue of the
@@ -249,6 +247,20 @@ struct OracleDisambiguationTests {
     // spells ε as `""` (empty) or `ε`.
     @Suite("Epsilon & @avoid model", .serialized)
     struct EpsilonAndAvoidModel {
+
+        // A group alternate that is ONLY a lookaround consumes nothing. The reachability walk used
+        // to skip every zero-width bracket span, so the gate's yield was swept and the parse died —
+        // which, in `typeIdentifier`, made every Swift type underaccept (2026-10-04).
+        @Test("zero-width lookaround-only group alternate survives the Oracle")
+        func lookaroundOnlyAlternate() throws {
+            let g = #"S = "a" ( "b" | >-> ( "c" ) ) T . T = "d" | "c" "e" ."#
+            let (plain, _) = try parseAndDisambiguate(grammar: g, message: "a d")
+            #expect(plain, "the gate passes before `d`, so 'a d' must parse")
+            let (taken, _) = try parseAndDisambiguate(grammar: g, message: "a b d")
+            #expect(taken, "the consuming alternate must still parse 'a b d'")
+            let (blocked, _) = try parseAndDisambiguate(grammar: g, message: "a c e")
+            #expect(!blocked, "the gate rejects a following `c`, so 'a c e' must not parse")
+        }
 
         // A) Same-span `@prefer` where the PREFERRED alternate ends in a nonterminal
         // that derived ε. Its last-symbol BSR yield is the degenerate (i,i) element,

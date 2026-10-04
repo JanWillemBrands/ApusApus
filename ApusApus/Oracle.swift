@@ -10,8 +10,8 @@
 // Two phases:
 //   1. Prune unproductive yields — walk BSR top-down from root, remove
 //      yields not on any complete derivation path.
-//   2. Disambiguate — apply grammar-annotated rules (shortest/longest match)
-//      to choose among genuinely ambiguous alternatives.
+//   2. Disambiguate — apply the grammar-annotated rules, one `OraclePass` at a time
+//      (filter → sameSpan → structure → extent), with a dead-wood sweep after each.
 //
 // After phase 1, every surviving yield participates in at least one
 // complete derivation, so phase 2 can prune without risk of
@@ -23,35 +23,53 @@ import Foundation
 
 protocol DisambiguationRule {
     func prune(_ yields: inout Set<BinarySpan>) -> Int
-    /// HARD CONSTRAINT (`true`) vs PREFERENCE (`false`) — decides the pass this rule runs in.
-    ///
-    /// Hard constraints say what the LANGUAGE permits: a lookahead/containment predicate or a
-    /// trivia-mode span rule removes a reading swift-syntax would never construct. Preferences
-    /// (`@longest`/`@shortest`/`@prefer`/`@avoid`, associativity) merely choose among readings that
-    /// are all legal.
-    ///
-    /// Order matters because prunes are irreversible. Running them interleaved let a PREFERENCE
-    /// delete a reading that a hard constraint was about to make the only legal one:
-    /// `var x: Int = foo()⏎{ didSet {} }` — `LongestMatchRule` dropped the short `prefixExpression`
-    /// `foo()` in favour of the maximal `foo() { … }`, and the accessor-block reading needs exactly
-    /// that short one. The lookahead predicate then removed the trailing closure, leaving nothing
-    /// and turning valid input into a reject. Constraints first, then preferences over the
-    /// survivors, with a dead-wood sweep between so the cascade is visible to the second pass.
-    var isHardConstraint: Bool { get }
+    /// The pass this rule runs in. Deliberately has NO default: a default (`isHardConstraint =
+    /// true`) once filed five preferences into the wrong pass without anyone noticing.
+    var pass: OraclePass { get }
 }
 
-extension DisambiguationRule {
-    var isHardConstraint: Bool { true }
+/// The Oracle's rule passes, in run order. Each pass runs to a fixpoint and is followed by a
+/// dead-wood sweep, so the next pass sees the previous one's kills propagated.
+///
+/// The order follows from ONE property of each rule — what happens to its decision if OTHER
+/// yields disappear later:
+///
+/// - MONOTONE rules keep a yield only if some witness EXISTS (a same-line derivation, an
+///   enclosing container, a raw-forest parse). Losing other yields can only make them stricter,
+///   never invalidate a prune, so they are order-free. They go first.
+/// - ANTI-MONOTONE rules prune a yield BECAUSE a rival exists (a preferred sibling, a longer
+///   extent, "production p completed at this child's span"). If that rival is removed later the
+///   prune was wrong, and prunes are irreversible. Such a rule must run after everything that can
+///   still remove its rivals.
+///
+/// That gives a dependency order, and every edge in it was a measured bug:
+///
+///     filter → sameSpan      `var x: Int = foo()⏎{ didSet {} }`: a preference ran interleaved
+///                            with the lookahead predicate and deleted the only legal reading.
+///     sameSpan → structure   `f(1) {}⏎{}`: `@prefer` removes the parenless reading of `f(1) {}`;
+///                            before it does, the `@right` filter takes `f(1) {}` for an
+///                            instance of itself and kills the chain.
+///     structure → extent     `x.map { [$0] }⏎{…}(&y[0])`: `@longest` chose the chained
+///                            initializer, the filter then removed the chain, and nothing was
+///                            left.
+enum OraclePass: Int, CaseIterable {
+    /// Monotone language constraints: `@canParse`/`@cannotParse`, `@confinedTo`, `@sameLine`.
+    /// `@excludedFrom` is filed here too although it is anti-monotone in principle (it prunes
+    /// because a container EXISTS); its containers are enclosing constructs, not rivals, and no
+    /// case has shown it reading a container a later pass removes.
+    case filter
+    /// Same-span choice among sibling alternates: `@prefer`, `@avoid` (explicit siblings).
+    case sameSpan
+    /// Parent/child-shape filters that ask WHICH production occupies a span: `@left`/`@right`.
+    /// That question only has an answer once `sameSpan` has settled each span's alternate.
+    case structure
+    /// Different-extent choice: `@longest`, `@shortest`, `@avoid` against an optional's skip.
+    /// Last, because it ranks the extents that the passes before it remove.
+    case extent
 }
 
 struct LongestMatchRule: DisambiguationRule {
-    /// A PREFERENCE, per the protocol doc: extent choice ranks readings that are all legal. It has
-    /// to run after the hard constraints AND after the dead-wood sweep between the passes, or it
-    /// picks a maximal extent that a constraint is about to delete and takes the only legal
-    /// reading with it. Measured 2026-10-03 on `ExpressionTests.testClosureLiterals#3`: with both
-    /// in one pass, this dropped the short `patternInitializer` `y = x.map { [$0] }` in favour of
-    /// the chained one, `AssociativityFilterRule` then removed the chain, and the root died.
-    var isHardConstraint: Bool { false }
+    var pass: OraclePass { .extent }
     let input: String
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByExtent(yields: &yields, input: input, keepLongest: true)
@@ -59,27 +77,10 @@ struct LongestMatchRule: DisambiguationRule {
 }
 
 struct ShortestMatchRule: DisambiguationRule {
-    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
-    var isHardConstraint: Bool { false }
+    var pass: OraclePass { .extent }
     let input: String
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByExtent(yields: &yields, input: input, keepLongest: false)
-    }
-}
-
-struct LeftAssocRule: DisambiguationRule {
-    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
-    var isHardConstraint: Bool { false }
-    func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        pruneByPivot(yields: &yields, keep: { $0.max()! })
-    }
-}
-
-struct RightAssocRule: DisambiguationRule {
-    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
-    var isHardConstraint: Bool { false }
-    func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        pruneByPivot(yields: &yields, keep: { $0.min()! })
     }
 }
 
@@ -101,8 +102,9 @@ struct RightAssocRule: DisambiguationRule {
 /// exempted. `A`'s same-span removal is `PreferRule`'s job. Single-body `[ @avoid X ]` has no
 /// siblings, so `protectedLast` is empty and this is the classic keep-min-pivot.
 struct AvoidOptionalRule: DisambiguationRule {
-    /// A PREFERENCE, not a hard constraint — see the pass-order note on `LongestMatchRule`.
-    var isHardConstraint: Bool { false }
+    /// Extent, not same-span: the rivals share `(i, j)` but differ in how much the optional
+    /// consumed, which is the inner bracket's extent.
+    var pass: OraclePass { .extent }
     let protectedLast: [GrammarNode]
     let yieldsOf: (GrammarNode) -> Set<BinarySpan>
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
@@ -131,14 +133,7 @@ struct AvoidOptionalRule: DisambiguationRule {
 /// among alternates that tile the same extent — it is NOT an extent tool. Prefer-the-
 /// longer is `@longest`'s job (see the note in `prune`).
 struct PreferRule: DisambiguationRule {
-    /// A HARD CONSTRAINT, despite being a preference in name. Measured 2026-10-03: moving it to
-    /// the preference pass breaks `f(1) {}`⏎`{}` (`trailing-closure-chained-after-parens`).
-    /// `AssociativityFilterRule` is hard and DEPENDS on this having already run — `f(1) {}` is
-    /// derivable both as the paren alternate and as the parenless one, and `@prefer` removes the
-    /// second. Run later, and the filter treats `f(1) {}` as an instance of itself and kills the
-    /// chain. The other four preferences were moved; this one cannot be until that dependency is
-    /// expressed some other way.
-    var isHardConstraint: Bool { true }
+    var pass: OraclePass { .sameSpan }
     let preferredLastSymbols: [GrammarNode]
     let yieldsOf: (GrammarNode) -> Set<BinarySpan>
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
@@ -201,7 +196,7 @@ private struct SpanKey: Hashable {
 /// (`@canParse`) fails where it does NOT. Removal cascades to the whole alternate via the
 /// dead-wood sweep.
 struct LookaheadPredicateRule: DisambiguationRule {
-    var isHardConstraint: Bool { true }
+    var pass: OraclePass { .filter }
     let negated: Bool
     /// Start positions where the target derives, SNAPSHOT from the RAW forest at Oracle registration
     /// (before dead-wood). This is swift-syntax's `canParseAsXxx`: a SPECULATIVE "could N parse here?",
@@ -230,7 +225,7 @@ struct LookaheadPredicateRule: DisambiguationRule {
 /// EVERY group (annotation), inside at least ONE of that group's containers. With one container per
 /// annotation this is exactly the original all-containers conjunction. See `Ambiguity.md`.
 struct ContainmentRule: DisambiguationRule {
-    var isHardConstraint: Bool { true }
+    var pass: OraclePass { .filter }
     /// One entry per annotation; the containers inside an entry are alternatives.
     let groups: [[() -> Set<BinarySpan>]]
     let negated: Bool
@@ -262,23 +257,24 @@ struct ContainmentRule: DisambiguationRule {
 /// on the FIRST, `k == i` and `[i, j]` is the left child. `(0,4,9)` is exactly `1 + (2 + 3)` and
 /// `(0,0,6)` is exactly `(1 + 2) + 3`, which is what each direction has to remove.
 ///
-/// `selfExtents` is the set of `[i, j]` from the LAST body symbol — the spans at which THIS
-/// production completed, excluding spans reached through a sibling alternate (`1`, `2`, `3` via
-/// `number` are absent, which is what keeps the correct reading alive).
+/// For bare `@left`/`@right` the forbidden extents are the `[i, j]` of the LAST body symbol — the
+/// spans at which THIS production completed, excluding spans reached through a sibling
+/// alternate (`1`, `2`, `3` via `number` are absent, which is what keeps the correct reading
+/// alive). With operands they are the named nonterminals' extents.
 ///
-/// Snapshotted at registration, like `@canParse`'s `targetStarts`: for `@left` the anchor IS the
-/// slot the extents come from, so reading it live would let the rule consume its own input.
+/// They are read LIVE, once per `prune` call, never snapshotted. The question "does production p
+/// occupy this span?" only has an answer after same-span ambiguity is settled, which is why this
+/// rule runs in `.structure`, after `.sameSpan` (see `OraclePass`).
 ///
 /// Reaches NESTED instances at different spans, which a pivot preference cannot: in
 /// `x.map {} {}` the inner and outer closure-calls co-start but end differently, so no single
 /// span has two pivots to rank. swift-syntax states the same rule procedurally —
 /// `parsePostfixExpressionSuffix`, "We only allow a single trailing closure on a call".
 struct AssociativityFilterRule: DisambiguationRule {
-    /// NOT a hard constraint. The extents have to be read AFTER same-span preferences settle:
-    /// `f(1) {}` is derivable both as the paren alternate and as the parenless one with callee
-    /// `f(1)`, and `@prefer` removes the second. Reading before that made the filter treat
-    /// `f(1) {}` as an instance of itself and wrongly break `f(1) {} {}`.
-    var isHardConstraint: Bool { true }
+    /// A language constraint, but an anti-monotone one: it prunes because a witness EXISTS. Run
+    /// before `@prefer` settles `f(1) {}` (paren alternate vs. parenless with callee `f(1)`), it
+    /// takes `f(1) {}` for an instance of itself and wrongly breaks `f(1) {}`⏎`{}`.
+    var pass: OraclePass { .structure }
     /// `[i, j]` spans the forbidden child occupies, read when the rule runs. Bare `@left`/`@right`
     /// passes the spans at which the annotated alternate itself completed; with operands it passes
     /// the spans of the named nonterminals.
@@ -320,7 +316,7 @@ struct BinarySpanExtent: Hashable {
 /// ended at this cursor?" globally, so dead or competing derivations cannot make a live same-line
 /// derivation look as if it crossed a newline.
 struct SameLineSpanRule: DisambiguationRule {
-    var isHardConstraint: Bool { true }
+    var pass: OraclePass { .filter }
     private struct NodeSpanMode: Hashable {
         let id: ObjectIdentifier
         let from: CharPosition
@@ -475,24 +471,6 @@ struct SameLineSpanRule: DisambiguationRule {
     }
 }
 
-private func pruneByPivot(
-    yields: inout Set<BinarySpan>,
-    keep: ([CharPosition]) -> CharPosition
-) -> Int {
-    let grouped = Dictionary(grouping: yields) { SpanKey(i: $0.i, j: $0.j) }
-    var pruned = 0
-    for (_, spans) in grouped where spans.count > 1 {
-        let ks = spans.map(\.k)
-        guard Set(ks).count > 1 else { continue }
-        let target = keep(ks)
-        for span in spans where span.k != target {
-            yields.remove(span)
-            pruned += 1
-        }
-    }
-    return pruned
-}
-
 // MARK: - Oracle
 
 class Oracle {
@@ -577,7 +555,7 @@ class Oracle {
         self.grammar = parser.grammar
         self.input = input
         for (_, nt) in grammar.nonTerminals {
-            // Node-level extent/associativity (@longest/@shortest/@left/@right),
+            // Node-level extent (@longest/@shortest),
             // read off the owner node — for a nonterminal that is the production-start
             // form `@longest X = …` stored on `nt.disambiguation`.
             registerNodeDisambiguation(owner: nt)
@@ -685,7 +663,7 @@ class Oracle {
         for nt in grammar.nonTerminals.values { walk(nt) }
     }
 
-    /// Register node-level extent/associativity for an ALT-bearing `owner` (a
+    /// Register node-level extent for an ALT-bearing `owner` (a
     /// nonterminal LHS or an inline `( )`/`[ ]`/`{ }`/`< >` cluster), reading the pragma
     /// off `owner.disambiguation` (set before the LHS in `production()` or before the
     /// bracket in `factor()`):
@@ -695,8 +673,6 @@ class Oracle {
     ///     through both the phase-1 cascade and the DerivationBuilder. (Closures still
     ///     recompute their transitive extent from the body, so extent on a `{ }`/`< >`
     ///     closure is not yet honored — a separate carrier problem.)
-    ///   - associativity (`@left`/`@right`): register a pivot rule on every alternate's
-    ///     body symbols (associativity governs the whole node's self-ambiguity).
     private func registerNodeDisambiguation(owner: GrammarNode) {
         guard let d = owner.disambiguation else { return }
         switch d {
@@ -708,12 +684,9 @@ class Oracle {
                 rules.append((owner, d == .shortest ? ShortestMatchRule(input: input) : LongestMatchRule(input: input)))
             }
         case .left, .right:
-            let rule: DisambiguationRule = d == .left ? LeftAssocRule() : RightAssocRule()
-            var alt = owner.alt
-            while let a = alt {
-                for sym in a.bodySymbols { rules.append((sym, rule)) }
-                alt = a.alt
-            }
+            // Unreachable: `production()`/`factor()` reject node-level `@left`/`@right`; they are
+            // alternate-level child-position filters (`associativityFilters`).
+            reportInvariantViolation("node-level @\(d.rawValue) reached the Oracle", once: true)
         }
     }
 
@@ -795,12 +768,12 @@ class Oracle {
             if pruned == 0 { break }
         }
         logRootStatus("phase 1 dead-wood")
-        // Two passes: HARD CONSTRAINTS first, then PREFERENCES over the survivors (see
-        // `DisambiguationRule.isHardConstraint`). Prunes are irreversible, so a preference must
-        // never get to delete a reading that a constraint is about to make the only legal one.
-        // The dead-wood sweep between the passes propagates each constraint's kill, so the
-        // preference pass sees the reduced forest rather than the raw one.
+        // One pass per `OraclePass`, in order, each followed by a dead-wood sweep so the next pass
+        // sees the previous one's kills propagated. Prunes are irreversible, so a rule that prunes
+        // BECAUSE a rival exists must run after every pass that can still remove that rival — see
+        // `OraclePass` for the order and the measured case behind each edge.
         var disambiguated = 0
+        var interDead = 0
         func runPass(_ selected: [(node: GrammarNode, rule: DisambiguationRule)]) {
             var changed = true
             while changed {
@@ -822,31 +795,25 @@ class Oracle {
                 }
             }
         }
-
-        runPass(rules.filter { $0.rule.isHardConstraint })
-        logRootStatus("hard-constraint pass")
-        var interDead = 0
-        while true {
-            let pruned = pruneUnsupported() + pruneUnproductive(endPosition: n)
-            interDead += pruned
-            if pruned == 0 { break }
+        for pass in OraclePass.allCases {
+            let selected = rules.filter { $0.rule.pass == pass }
+            guard !selected.isEmpty else { continue }
+            let before = disambiguated
+            runPass(selected)
+            logRootStatus("\(pass) pass")
+            // A pass that pruned nothing left the forest as the last sweep found it, so its sweep
+            // would be a full-forest no-op. Skipping it is what keeps four passes at the cost of two.
+            guard disambiguated > before else { continue }
+            while true {
+                let pruned = pruneUnsupported() + pruneUnproductive(endPosition: n)
+                interDead += pruned
+                if pruned == 0 { break }
+            }
+            logRootStatus("\(pass) dead-wood")
         }
-        logRootStatus("inter-pass dead-wood")
-        runPass(rules.filter { !$0.rule.isHardConstraint })
-        logRootStatus("rule pass")
-        // Second dead-wood sweep: rules may have pruned body-symbol yields whose
-        // parent .N yields are now unreachable. Cascade to a fixed point.
-        var secondDead = 0
-        while true {
-            let pruned = pruneUnsupported() + pruneUnproductive(endPosition: n)
-            secondDead += pruned
-            if pruned == 0 { break }
-        }
-
-        logRootStatus("phase 2 dead-wood")
-        let total = deadYields + interDead + secondDead + disambiguated
+        let total = deadYields + interDead + disambiguated
         if total > 0, parseReports {
-            print("oracle: removed \(deadYields)+\(secondDead) dead + \(disambiguated) disambiguated yields")
+            print("oracle: removed \(deadYields)+\(interDead) dead + \(disambiguated) disambiguated yields")
         }
         checkInvariant(isUnambiguous(endPosition: n), "Oracle postcondition violated: residual ambiguity remains")
         return total
@@ -1220,8 +1187,18 @@ private struct IJPair: Hashable {
         }
 
         func visitBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition) {
-            if from == to { return }
             let key = NodeSpan(id: ObjectIdentifier(bracket), from: from, to: to)
+            if from == to {
+                // A zero-width span. For a closure it is the skip: there is no iteration to walk.
+                // A `( … )` / `[ … ]` is one pass, and that pass may legitimately consume nothing
+                // through a zero-width alternate — `( clause | >-> ( openAngle ) )`. Returning
+                // early here (as it once did for every bracket) left that alternate's gate yield
+                // unmarked, the sweep deleted it, and `pruneUnsupported` cascaded the loss to the
+                // root: every type in the grammar underaccepted (2026-10-04).
+                guard !bracket.kind.isClosure, visitedBrackets.insert(key).inserted else { return }
+                if visitAlternates(bracket, from: from, to: to) { reachable.insert(key) }
+                return
+            }
             guard visitedBrackets.insert(key).inserted else { return }
             // For a non-closure bracket, iterate the bracket's OWN (Oracle-pruned) end
             // positions — so an extent prune on the bracket is honored by the reachability

@@ -182,16 +182,45 @@ The Oracle (`Oracle.disambiguate`) does these steps:
 
 1. Remove dead yields. A dead yield is not part of a complete derivation. Repeat until no yield
    changes.
-2. Apply the hard constraints. Repeat until no yield changes.
-3. Remove dead yields again.
-4. Apply the preferences. Repeat until no yield changes.
-5. Remove dead yields again.
+2. Run the rules in four passes, in this order. Each pass repeats until no yield changes. After
+   each pass that removed something, remove dead yields again.
+
+| Pass | Rules | What the rule needs to know |
+|---|---|---|
+| filter | `@canParse` `@cannotParse` `@confinedTo` `@excludedFrom` `@sameLine` | only that some witness exists |
+| sameSpan | `@prefer`, `@avoid` between siblings | the legal rivals at the SAME span |
+| structure | `@left` `@right` | which production occupies a span |
+| extent | `@longest` `@shortest`, `@avoid` against an optional's skip | the legal rivals at DIFFERENT extents |
 
 Step 1 makes sure that each remaining yield is part of a complete derivation. Thus a later
 rule cannot remove the only complete derivation by accident.
 
-The hard constraints come before the preferences because a removal is permanent. A preference
-must not remove a reading that a constraint makes the only legal reading.
+**Why this order.** A removal is permanent, so the order follows from one question per rule: if
+OTHER yields disappear later, can this rule's decision become wrong?
+
+- A **filter** keeps a yield only if a witness exists: a same-line derivation, an enclosing
+  container, a parse of `N` here. If other yields disappear, a filter can only become stricter.
+  It is never wrong too early, so filters go first and their order does not matter.
+- Every other rule removes a yield **because a rival exists**: a preferred sibling, a longer
+  extent, "production p already occupies this span". If that rival is removed later, the removal
+  was wrong and cannot be undone. Such a rule must wait until every pass that can still remove
+  its rival has run.
+
+Each edge in the order was a real bug:
+
+| Edge | Input | What went wrong when the two ran together |
+|---|---|---|
+| filter → sameSpan | `var x: Int = foo()⏎{ didSet {} }` | `@longest` deleted the short `foo()`; the lookahead then deleted the closure; nothing was left |
+| sameSpan → structure | `f(1) {}⏎{}` | `f(1) {}` has two readings, and `@prefer` deletes the parenless one. Before it did, `@right` took `f(1) {}` for an instance of itself and broke the chain |
+| structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
+
+`@excludedFrom` is in the filter pass, but strictly it removes a yield because a container
+EXISTS, so it is order-sensitive in principle. Its containers are enclosing constructs, not
+rivals, and no input has shown it reading a container that a later pass removes.
+
+`@confinedTo` and `@excludedFrom` test the extent of the alternate's FIRST body symbol, not of
+the whole alternate. An alternate that starts inside a container and ends outside it therefore
+counts as contained. No input is known to hit this.
 
 ### 5.3 Hard constraints
 
@@ -609,6 +638,6 @@ the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (se
 |---|---|
 | `Lexer.swift` | `OnDemandLiteralLexer.lex`: `@literalMunch`, the `@preempt` split points |
 | `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround |
-| `Oracle.swift` | `disambiguate`; the rules `LongestMatchRule`, `ShortestMatchRule`, `LeftAssocRule`, `RightAssocRule`, `PreferRule`, `AvoidOptionalRule`, `LookaheadPredicateRule`, `ContainmentRule`, `SameLineSpanRule` |
+| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `ContainmentRule`, `SameLineSpanRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
 | `DerivationBuilder.swift` | builds the tree and reports residual ambiguity with a fingerprint |
 | `ApusApusTests/OracleDisambiguationTests.swift` | tests for each Oracle rule |

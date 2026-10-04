@@ -471,6 +471,31 @@ silently eat spaces in string content (`"a\(b) c"` loses its space).
 LIMITATION: only the single-interpolation form. A non-empty `{ Part args }` returns nil and falls back
 to the old one-segment tree. Extending it needs iteration over the KLN bracket.
 
+### String literal converter boundary: the middle path (2026-10-04)
+
+The Swift grammar already distinguishes the important string-literal families:
+single-line, multiline, raw single-line, raw multiline, and their interpolated variants. The
+converter should use that matched grammar knowledge as the authority for the literal *kind* and
+should not rediscover the kind by sniffing raw text.
+
+At the same time, SwiftSyntax's `StringLiteralExprSyntax` exposes structure below APUS's current
+string terminals: opening pounds, quote token, string/expression segments, closing quote, and closing
+pounds. Until the scanner exposes sub-token segment spans, `SwiftSyntaxGenerator` still has to
+translate one matched string terminal into that SwiftSyntax shape.
+
+So the intended split is:
+
+- grammar/scanner: identify the whole literal and which string-literal form matched;
+- converter: dispatch from that matched form, derive only the delimiter/body geometry needed for
+  SwiftSyntax, and split segments with the shared escape-sensitive helpers;
+- delimiter/body slicing must be scalar/span based, not Swift `Character` based. Syntax delimiters
+  are ASCII scalars, and extended grapheme clusters can combine a quote with content such as the
+  emoji modifier in `"🏿"`, making `dropFirst()`/`dropLast()` the wrong tool.
+
+This is deliberately short of a scanner refactor. It preserves the idea that the grammar owns the
+syntax classification, while keeping SwiftSyntax's finer tree-shape reconstruction local to the
+converter.
+
 ### Latent bug found on the way: bare identifiers never converted
 
 `convertPrimaryExpression` had a `find("identifier", …)` branch that could NEVER fire. The path is

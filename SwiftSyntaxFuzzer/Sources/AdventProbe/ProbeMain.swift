@@ -150,7 +150,17 @@ struct AdventProbe {
     private static func run(source: String, grammar: Grammar, includeDumps: Bool, skipCompiler: Bool = false) throws -> ProbeOutput {
         parseReports = false
 
-        let reference = Parser.parse(source: source)
+        let referenceFeatures = swiftSyntaxExperimentalFeatures(for: source)
+        let reference: SourceFileSyntax
+        if referenceFeatures.isEmpty {
+            reference = Parser.parse(source: source)
+        } else {
+            var contiguousSource = source
+            contiguousSource.makeContiguousUTF8()
+            reference = contiguousSource.withUTF8 { buffer in
+                Parser.parse(source: buffer, experimentalFeatures: referenceFeatures)
+            }
+        }
         let referenceHasError = Syntax(reference).hasError
         let referenceDump = renderSwiftSyntaxNode(Syntax(reference), indent: 0)
 
@@ -273,6 +283,19 @@ struct AdventProbe {
             metrics: metrics,
             error: nil
         )
+    }
+
+    private static func swiftSyntaxExperimentalFeatures(for source: String) -> Parser.ExperimentalFeatures {
+        var features: Parser.ExperimentalFeatures = []
+
+        if source.contains("read {") || source.contains("modify {") {
+            features.insert(.coroutineAccessors)
+        }
+        if source.contains("borrow {") || source.contains("mutate {") {
+            features.insert(.borrowAndMutateAccessors)
+        }
+
+        return features
     }
 
     private struct CompilerResult {

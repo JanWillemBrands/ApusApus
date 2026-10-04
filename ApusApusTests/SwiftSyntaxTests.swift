@@ -1447,6 +1447,182 @@ struct RegexLookbehindIntegration {
 // Phase 1 of `SwiftSyntax Mapping.md`: literals and simple `let`/`var`
 // declarations. Unlike the extracted SwiftSyntax suites — where `trees match`
 // is an aspirational frontier — every row here is expected to match exactly.
+@Suite("SwiftSyntax - crawl3 grammar simplifications")
+struct Crawl3GrammarSimplificationTests {
+    static let snippets: [String] = [
+        """
+        struct S {
+            @_lifetime(self: copy self)
+            public mutating func f() -> Bool { true }
+        }
+        """,
+        """
+        @_lifetime(eOut: borrow e)
+        func f(e: E) -> S {}
+        """,
+        """
+        protocol P {
+            associatedtype Buffer: RangeReplaceableContainer<ReadElement> & ~Copyable
+        }
+        """,
+        """
+        struct NonCopyableTests: ~Copyable & ~Escapable {}
+        """,
+        """
+        struct S: A & B {}
+        """,
+        """
+        func f<each Input>() {
+            var inputTypes = [Any.Type]()
+            repeat inputTypes.append((each Input).self)
+        }
+        """,
+        """
+        func f<each T>() {
+            _ = Array(repeat (each T).self)
+        }
+        """,
+        """
+        func f<each T>(lhs: (repeat each T), rhs: (repeat each T)) {
+            for (left, right) in repeat (each lhs.values, each rhs.values) {}
+        }
+        """,
+        """
+        func f<each Input>() -> Predicate<repeat (each Input).Output> {}
+        """,
+        """
+        struct S {
+            subscript(position: [any Markup].Index) -> any Markup { fatalError() }
+        }
+        """,
+        """
+        struct S {
+            let x: A.B
+        }
+        """,
+        """
+        struct S {
+            let x: A<T>.B<U>
+        }
+        """,
+        """
+        struct S {
+            let x: A.B.Type
+        }
+        """,
+        """
+        extension A.B {}
+        """,
+        """
+        extension A<T>.B<U> {}
+        """,
+    ]
+
+    @Test("Advent accepts", arguments: snippets)
+    func adventAccepts(_ source: String) throws {
+        #expect(swiftSyntaxParsesCleanly(source), "swift-syntax rejects regression snippet: \(source)")
+        #expect(try adventParse(source) != nil, "Advent failed to parse: \(source)")
+    }
+
+    @Test("no residual ambiguity", arguments: snippets)
+    func unambiguous(_ source: String) throws {
+        guard let result = try adventParse(source) else { return }
+        #expect(result.isUnambiguous, "Residual ambiguity: \(source)\n\(result.builder.diagnostics)")
+    }
+}
+
+@Suite("SwiftSyntax - tree difference regressions")
+struct TreeDifferenceRegressionTests {
+    static let snippets: [SwiftSnippet] = [
+        SwiftSnippet(
+            label: "enum-case-self-syntax",
+            source: "switch token {\ncase .self(let syntax): break\ndefault: break\n}",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "enum-case-self-marker",
+            source: "switch token {\ncase .self(let marker): break\ndefault: break\n}",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "binding-cast-self",
+            source: "func f() { do {} catch let self as Range<Int> {} }",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "binding-cast-name",
+            source: "func f() { do {} catch let copy as Range<Int> {} }",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "binding-cast-tuple",
+            source: "func f(nsDict: NSDictionary) { for case let (key, val) as (String, Any) in nsDict {} }",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "indirect-case-node",
+            source: "enum BinarySearchTree {\nindirect case node(BinarySearchTree, Int, BinarySearchTree)\n}",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "indirect-case-dictionary",
+            source: "enum UserInfoValue {\nindirect case dictionary([String: UserInfoValue])\n}",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "indirect-case-coding-path",
+            source: "enum _CodingPathNode {\nindirect case node(CodingKey, _CodingPathNode)\n}",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "qualified-case-one-hop",
+            source: "func f() { switch x { case E.a(let y): g(y); default: h() } }",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "qualified-case-two-hop",
+            source: "func f() { switch x { case Foo.Bar.baz(let y): g(y); default: h() } }",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+        SwiftSnippet(
+            label: "qualified-catch-case",
+            source: "func f() { do {} catch ParserOptionList.Error.unknownOption(let key, _) {} }",
+            origin: "Crawl3",
+            syntaxVersion: "603.0.1"
+        ),
+    ]
+
+    @Test("trees match", arguments: snippets)
+    func treesMatch(_ snippet: SwiftSnippet) throws {
+        let refDump = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: snippet.source)), indent: 0)
+        guard let adventTree = try adventSwiftSyntaxTree(snippet) else {
+            Issue.record("Advent produced no SwiftSyntax tree for: \(snippet.source)")
+            return
+        }
+        let adventDump = dumpSwiftSyntaxNode(Syntax(adventTree), indent: 0)
+        let why = adventGeneratorDiagnostics(snippet)
+        #expect(refDump == adventDump, """
+            Trees differ for '\(snippet.diagnosticID)' — \(snippet.source)
+            --- swift-syntax ---
+            \(refDump)
+            --- advent ---
+            \(adventDump)
+            --- converter fallbacks ---
+            \(why.isEmpty ? "(none)" : why.map(\.description).joined(separator: "\n"))
+            """)
+    }
+}
+
 // A failure is a regression in `GenerateSwiftSyntaxAST.swift`.
 let phase1Snippets: [SwiftSnippet] = [
     // constantDeclaration / variableDeclaration
@@ -2129,10 +2305,59 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "trailing-closure-on-forced-literal", source: "let v = 1! {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "trailing-closure-on-subscripted-literal", source: "let v = [1][0] {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "trailing-closure-on-literal-member", source: "let v = 1.description {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Capture items are `specifier? name initializer?` with name = identifier | `self`, so `self`
+    // takes an initializer like any name (crawl: NetNewsWire, apple/containerization, exelban/stats).
+    SwiftSnippet(label: "capture-weak-self-initialized", source: "let f = { [weak self = self] in _ = self }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "capture-self-initialized", source: "let f = { [self = x] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "capture-mixed-list", source: "let f = { [weak self = self, x, unowned y = z] (a: Int) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `weak` FIRST in an item is always the specifier, but a second `weak` is a name.
+    SwiftSnippet(label: "capture-named-weak", source: "let f = { [weak weak] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Effect markers (`try`, `await`, `unsafe`) each wrap the next sequence element, in any order
+    // and to any depth (swift-syntax `parseSequenceExpressionElement`). The crawl had
+    // `return unsafe try body(...)` failing because `try` lived one level above `unsafe`.
+    SwiftSnippet(label: "effect-unsafe-try", source: "func f() throws { return unsafe try body(1) }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "effect-unsafe-try-trailing-closure", source: "func f() throws { unsafe try self.withUnsafe { $0 } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "effect-unsafe-await", source: "func f() async { _ = unsafe await g() }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "effect-await-try", source: "func f() async throws { _ = await try g() }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "effect-try-try", source: "_ = try try f()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "effect-try-on-if-expression", source: "func f() throws -> Int { return try if c { g() } else { 0 } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Operator NAME positions take any operator token, dot-led included, plus lone `!` and `&`
+    // (swift-syntax `parseFuncDeclaration`).
+    SwiftSnippet(label: "func-name-bang", source: "struct S { static prefix func ! (rhs: S) -> S { rhs } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "func-name-dot-operator", source: "struct S { static func ..<(lhs: S, rhs: S) -> S { lhs } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "operator-decl-bang", source: "prefix operator !", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `_` is a simple-type BASE (swift-syntax `TypeBaseStart.wildcard`), so it takes the postfixes.
+    SwiftSnippet(label: "placeholder-iuo", source: "var iterator: _! = merge.makeAsyncIterator()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "placeholder-optional", source: "let x: _? = y", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "placeholder-metatype", source: "let t: _.Type = Int.self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Body-less coroutine accessors as a protocol requirement (crawl: apple/swift-collections).
+    SwiftSnippet(label: "accessor-requirement-borrow-mutate", source: "protocol P { subscript(index: Int) -> Int { borrow mutate } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // An implicit member may be a compound name, exactly like an explicit one (`T.f(_:)`).
+    SwiftSnippet(label: "implicit-member-compound-case", source: "func f(e: E) { switch e { case .compare, .compareString(_:): break } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "implicit-member-compound-expr", source: "let g: (Int) -> E = .x(_:)", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // An empty generic argument clause (swift-syntax `parseGenericArguments` allows zero arguments).
+    // In an expression the tight `A<>` is a postfix OPERATOR, so only the spaced form is a clause.
+    SwiftSnippet(label: "generic-args-empty-spaced-expr", source: "_ = A< >.self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-args-tight-postfix-operator", source: "_ = A<>.self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-args-empty-type", source: "let x: A<> = y", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-args-trailing-comma", source: "let x: A<Int,> = y", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `#/…/#` is lexed confidently at a `#` — no previous-token gate (swift-syntax `lexRegexLiteral`),
+    // so it may start a statement right after a line that ends in an operand.
+    SwiftSnippet(label: "extended-regex-after-call-line", source: "let x = Regex {\n  c(.w)\n  #/$/#\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extended-regex-after-identifier-line", source: "c\n#/a/#", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-self",       source: "struct S<T: Self> {}",                origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `[weak]` is a specifier with no name (`parseClosureCaptureSpecifiers` consumes `weak`
+    // unconditionally); it used to be accepted as a capture NAMED `weak`.
+    SwiftSnippet(label: "capture-specifier-without-name", source: "let f = { [weak] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Lone `->`, `=` and `?` are not function names.
+    SwiftSnippet(label: "func-name-arrow", source: "func ->(a: Int, b: Int) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "func-name-equal", source: "func = (a: Int, b: Int) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "func-name-question", source: "func ? (a: Int) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Two expressions on one line still need a separator, regex or not.
+    SwiftSnippet(label: "extended-regex-same-line-after-operand", source: "a #/b/#", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-wildcard",   source: "struct S<T: _> {}",                   origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-tuple",      source: "struct S<T: (A)> {}",                 origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-09-27: rejects that the Oracle used to reach only through dead readings it kept alive by
@@ -2864,9 +3089,12 @@ let phase4StringSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "raw-double",    source: "let a = ##\"abc\"##",             origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "raw-quote",     source: "let a = #\"say \\\"hi\\\"\"#", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "raw-empty",     source: "let a = #\"\"#",                  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "emoji-only",    source: "let a = \"🏿\"",                 origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-emoji-only", source: "let a = #\"🏿\"#",              origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "multiline",     source: "let a = \"\"\"\nabc\n\"\"\"",   origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "multiline-indent", source: "let a = \"\"\"\n    abc\n    \"\"\"", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "raw-multiline", source: "let a = #\"\"\"\nabc\n\"\"\"#",  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-multiline-indent", source: "let a = #\"\"\"\n    abc\n    \"\"\"#", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "multiline-2line", source: "let a = \"\"\"\nabc\ndef\n\"\"\"", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "multiline-3line", source: "let a = \"\"\"\nabc\ndef\nghi\n\"\"\"", origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "multiline-2line-indent", source: "let a = \"\"\"\n    abc\n    def\n    \"\"\"", origin: "Phase4", syntaxVersion: "603.0.1"),

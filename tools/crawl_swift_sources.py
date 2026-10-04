@@ -35,7 +35,8 @@ import time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PROBE = ROOT / "SwiftSyntaxFuzzer/.build/advent-fuzz-probe"
-GRAMMAR = ROOT / "grammars/Swift.apus"
+# APUS_GRAMMAR lets an A/B run point at a grammar snapshot without touching the shared file.
+GRAMMAR = pathlib.Path(os.environ.get("APUS_GRAMMAR", ROOT / "grammars/Swift.apus"))
 SKIP_DIRS = {".build", ".git", "DerivedData", "Pods", "Carthage", "node_modules"}
 
 
@@ -85,8 +86,11 @@ class Probe:
         """CPU time the probe has burned, to tell a working probe from a stuck one."""
         if self.proc is None:
             return None
-        result = subprocess.run(["ps", "-o", "cputime=", "-p", str(self.proc.pid)],
-                                capture_output=True, text=True)
+        try:
+            result = subprocess.run(["ps", "-o", "cputime=", "-p", str(self.proc.pid)],
+                                    capture_output=True, text=True)
+        except PermissionError:
+            return None
         field = result.stdout.strip()             # [[dd-]hh:]mm:ss
         if not field:
             return None

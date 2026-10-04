@@ -1244,6 +1244,9 @@ a fixpoint first, then a dead-wood sweep propagates their kills, then PREFERENCE
 legal) run over the survivors. Now the constraint removes the closure, dead-wood removes the long
 `prefixExpression`, and `LongestMatchRule` correctly keeps `foo()`.
 
+*Superseded 2026-10-03:* the two passes are now the four `OraclePass` passes (filter → sameSpan →
+structure → extent), and the pass is declared per rule with no default. See `Ambiguity.md` §5.2.
+
 This also retires several wrong claims previously recorded here: the accessor tiling was never
 "absent from the forest", and the `>->` anchor granularity was never too coarse (anchors are
 per-reference-site and `span.i` is already the alternate start). Both were inferences that
