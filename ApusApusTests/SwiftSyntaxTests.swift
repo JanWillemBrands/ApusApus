@@ -2345,6 +2345,26 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     // so it may start a statement right after a line that ends in an operand.
     SwiftSnippet(label: "extended-regex-after-call-line", source: "let x = Regex {\n  c(.w)\n  #/$/#\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "extended-regex-after-identifier-line", source: "c\n#/a/#", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `X.Type` is always a metatype (swift-syntax tests `.Type`/`.Protocol` before a member name), so
+    // a metatype under a postfix is unambiguous; names that merely START with `Type` stay members.
+    SwiftSnippet(label: "metatype-optional", source: "let t: P.Type? = nil", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "metatype-iuo", source: "var t: Any.Type! = nil", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "protocol-metatype-optional", source: "let t: P.Protocol? = nil", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "metatype-of-metatype", source: "let t: X.Type.Type = x", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "member-type-named-types", source: "let x: A.Types = y", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "member-type-named-typex", source: "let x: A.TypeX = y", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // A macro name may be any identifier token, escaped included (swift-testing `#\`expect\`(…)`).
+    SwiftSnippet(label: "macro-escaped-name", source: "#`expect`(Bool(true))", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "macro-escaped-keyword-name", source: "let v = #`if`(1)", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "macro-escaped-name-decl", source: "struct S { #`m`(1) }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // One selector-name rule for the bare name and every piece; escaped names included.
+    SwiftSnippet(label: "objc-escaped-bare-selector", source: "@objc(`testExplicitNameWithBackticks`) func f() {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "objc-escaped-selector-piece", source: "@objc(`x`:) func f(_ a: Int) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // A member type's name is a full `typeName` (`Self`, module-qualified), and the tilde of a
+    // suppressed type may be spaced (swift-syntax takes any operator token spelled `~`).
+    SwiftSnippet(label: "member-type-self", source: "let a: Foo.Self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "member-type-module-selector", source: "func fn(_: Foo.Swift::Bar) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "suppressed-type-spaced-tilde", source: "struct S: ~ Copyable {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),

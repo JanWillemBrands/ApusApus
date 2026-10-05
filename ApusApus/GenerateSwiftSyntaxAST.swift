@@ -3416,9 +3416,10 @@ struct SwiftSyntaxGenerator {
         }
     }
 
-    /// objcSelector       = identifier | objcSelectorPieces .
+    /// objcSelector       = objcSelectorName | objcSelectorPieces .
     /// objcSelectorPieces = objcSelectorPiece objcSelectorPieces? .
-    /// objcSelectorPiece  = identifier? ":" .
+    /// objcSelectorPiece  = objcSelectorName? ":" .
+    /// objcSelectorName   = identifier | escapedIdentifier .
     ///
     /// A zero-argument selector is one piece carrying only a name; every other piece carries a
     /// colon and MAY carry a name, so `:::x::` is five pieces.
@@ -3439,8 +3440,8 @@ struct SwiftSyntaxGenerator {
                 if let pieceNT = find("objcSelectorPiece", in: levelSpans),
                    let (_, pieceSpans) = tileAlternate(pieceNT.nt, from: pieceNT.from, to: pieceNT.to) {
                     var name: TokenSyntax? = nil
-                    if let idNT = findTerminal(named: "identifier", in: pieceSpans) {
-                        name = .identifier(collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to))
+                    if let nameNT = find("objcSelectorName", in: pieceSpans) {
+                        name = .identifier(collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to))
                     }
                     pieces.append(ObjCSelectorPieceSyntax(name: name, colon: .colonToken()))
                 }
@@ -3448,9 +3449,9 @@ struct SwiftSyntaxGenerator {
             }
             return
         }
-        if let idNT = findTerminal(named: "identifier", in: spans) {
+        if let nameNT = find("objcSelectorName", in: spans) {
             pieces.append(ObjCSelectorPieceSyntax(
-                name: .identifier(collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to))
+                name: .identifier(collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to))
             ))
             return
         }
@@ -9013,14 +9014,24 @@ struct SwiftSyntaxGenerator {
            let (_, sSpans) = tileAlternate(d.nt, from: d.from, to: d.to),
            let baseNT = find("simpleType", in: sSpans),
            let nameNT = find("typeMemberName", in: sSpans) {
-            let nameText = collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to)
+            var nameText = collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to)
+            // `Foo.Swift::Bar`: the selector is its own child of MemberType, not part of the name.
+            var selector: ModuleSelectorSyntax? = nil
+            if nameText.contains("::"),
+               let (_, mSpans) = tileAlternate(nameNT.nt, from: nameNT.from, to: nameNT.to),
+               let typeNameNT = find("typeName", in: mSpans),
+               let (_, tnSpans) = tileAlternate(typeNameNT.nt, from: typeNameNT.from, to: typeNameNT.to) {
+                selector = moduleSelector(in: tnSpans)
+                if let cut = nameText.range(of: "::") { nameText = String(nameText[cut.upperBound...]) }
+            }
             let generics = find(firstOf: ["typeGenericArgumentClause", "genericArgumentClause"], in: sSpans).map {
                 convertGenericArgumentClause($0.nt, from: $0.from, to: $0.to)
             }
             return TypeSyntax(MemberTypeSyntax(
                 baseType: convertType(baseNT.nt, from: baseNT.from, to: baseNT.to),
                 period: .periodToken(),
-                name: nameText == "self" ? .keyword(.`self`) : .identifier(nameText),
+                moduleSelector: selector,
+                name: nameText == "self" && selector == nil ? .keyword(.`self`) : .identifier(nameText),
                 genericArgumentClause: generics
             ))
         }

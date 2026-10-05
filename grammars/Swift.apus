@@ -548,7 +548,7 @@ type =
     | protocolCompositionType
     | opaqueType
     | boxedProtocolType
-    | @prefer metatypeType      // swift-syntax `parseSimpleType`recognizes `.Type`/`.Protocol` before member-type continuation.
+    | metatypeType              // `.Type`/`.Protocol` never reach `memberType` (see `typeMemberName`), so no preference is needed.
     | packType                  // SE-0393 `repeat each T`, `repeat (each A, each B)`, `each T`
     | memberType                // `Foo.self`, `[any Markup].Index`, `(each T).Output`
     | anyType                   // `Self` reaches `type` through `typeIdentifier`.
@@ -558,8 +558,10 @@ type =
     | attribute type
     .
 
-// SE-0390 suppressed/inverse type. swift-syntax accepts `~` only when it lexes
-// as a prefix operator, so APUS spells both not-left-bound cases explicitly.
+// SE-0390 suppressed/inverse type. swift-syntax `parseSimpleType` takes the tilde with
+// `consumeIfContextualPunctuator("~")`, which accepts ANY operator token spelled `~` — prefix,
+// infix or postfix — so the spacing AFTER it is free: `~Copyable` and `~ Copyable` are both
+// suppressed types. What precedes it still matters (below).
 // A `~` only introduces a type where it lexes as a STANDALONE prefix, which is either after
 // whitespace or immediately after one of these openers/separators. Without that gate `a~b` would
 // read as `a` followed by the type `~b`.
@@ -576,8 +578,8 @@ type =
 // unsuppressed simple type, so `~Copyable & P` is a composition of `~Copyable` and `P` (via
 // `protocolCompositionElement`), never `~(Copyable & P)` — with `type` here both readings existed.
 suppressedType =
-    | <s> "~" >s< simpleType
-    | <+< ( "(" "[" "{" "," ";" ":" "as" "is" forceMark optionalMark ) >s< "~" >s< simpleType
+    | <s> "~" simpleType
+    | <+< ( "(" "[" "{" "," ";" ":" "as" "is" forceMark optionalMark ) >s< "~" simpleType
     .
 
 
@@ -741,7 +743,14 @@ packElementType = "each" type .
 // `A<B>?.self`, `[any Markup].Index`, `(each Input).Output`.
 memberType = simpleType "." >n< typeMemberName typeGenericArgumentClause .
 memberType = simpleType "." >n< typeMemberName >->( openAngle ) .
-typeMemberName = identifierToken | "self" .
+// swift-syntax's member loop tests `.Type`/`.Protocol` FIRST (`parseSimpleType`), so `X.Type` is
+// always a metatype, never a member named `Type`. Without this guard `X.Type` derived both ways,
+// and every `X.Type?` / `X.Type!` / `X.Type.Type` was ambiguous (a top-level `@prefer` on `type`
+// only hid the bare case).
+// The member name is a full `typeName` — identifier, `Self` (`Foo.Self`) or module-qualified
+// (`Foo.Swift::Bar`) — exactly what the dotted `typeIdentifier` form took before `memberType`
+// replaced it; narrowing it to `identifierToken` made those underaccept (2026-10-03).
+typeMemberName = >-> ( "Type" "Protocol" ) typeName | "self" .
 
 /// Grammar of an Any type
 /// any-type → Any
@@ -2303,7 +2312,10 @@ freestandingMacroExpansionDeclaration = macroHead genericArgumentClause? [ >n< f
 // same span and can be excluded by `---`.
 poundName - @builder .   // `#` + identifier (N1518 ranges); `_` included in identifierHead. Bare `#_` excluded at macroHead below.
 macroHead = poundName ---( "#_" "#available" "#unavailable" "#if" "#elseif" "#else" "#endif" "#sourceLocation" ) .
-macroHead = "#" >s< propertyWrapperProjection .                       // 604 accepts dollar-prefixed unknown directives (`#$UnknownDirective`)
+// `#` + any other identifier TOKEN: a dollar-prefixed name (604 accepts `#$UnknownDirective`) or a
+// backtick-escaped one (`#\`expect\`(…)`, swift-testing). swift-syntax lexes both as identifiers,
+// so neither needs `poundName`'s directive exclusions — `#\`if\`` is a macro, not a directive.
+macroHead = "#" >s< ( propertyWrapperProjection | escapedIdentifier ) .
 macroHead = "#" >s< moduleSelector identifier ---( "_" ) .   // SE-0491 #Module::macro (rare; keeps the module-qualified form)
 
 usingModifier = identifier ---( "_" lexerClassifiedKeyword ) | escapedIdentifier .
@@ -2974,10 +2986,14 @@ conventionValue = identifierToken | staticStringLiteral .
 // below takes it out of the general attribute rule — and bare `@objc` is the common case.
 attribute = "@" >s< "objc" .
 attribute = "@" >s< "objc" >s< "(" objcSelector ")" .
-objcSelector = identifier .
+objcSelector = objcSelectorName .
 objcSelector = objcSelectorPieces .
 objcSelectorPieces = objcSelectorPiece objcSelectorPieces? .
-objcSelectorPiece = identifier? ":" .
+objcSelectorPiece = objcSelectorName? ":" .
+// One name rule for the bare selector and every piece, as in swift-syntax `parseObjectiveCSelector`:
+// an identifier token — backtick-escaped included (swift-testing `@objc(\`name\`)`) — `_`, or a
+// keyword (the raw `identifier` terminal already matches those two).
+objcSelectorName = identifier | escapedIdentifier .
 
 // `@derivative(of: foo)` / `@transpose(of: Float.-, wrt: (0, 1))` / `@derivative(of: Swift::A.b())`
 // — swift-syntax DerivativeAttributeArguments. `originalDeclName` is an EXPRESSION, but it is
