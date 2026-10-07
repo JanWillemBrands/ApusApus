@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00007493-advent-overaccept-3aee562adc168748.json",
+    "durationSeconds" : 0.3422640562057495,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:duplicate+block-comment:real:Syntax+StringInterpolation:348",
+    "index" : 7493,
+    "seed" : 10372684134641896787,
+    "signalHash" : "876647edb50c59f9",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "3aee562adc168748",
+    "sourceLength" : 214,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\nextension Array: ExpressibleByLiteralSyntax where Element: ExpressibleByLiteralSyntax {\n  public\n  public func makeLiteralSyntax() -> ArrayExprSyntax {\n    self[...].\/*c*\/makeLiteralSyntax()\n  }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                ArrowExpr\n                  arrow \"->\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      SequenceExpr\n                        ExprList\n                          SubscriptCallExpr\n                            DeclReferenceExpr\n                              keyword(SwiftSyntax.Keyword.self) \"self\"\n                            leftSquare \"[\"\n                            LabeledExprList\n                            rightSquare \"]\"\n                            MultipleTrailingClosureElementList\n                          BinaryOperatorExpr\n                            binaryOperator(\".\/*\") \".\/*\"\n                          TupleExpr\n                            leftParen \"(\"\n                            LabeledExprList\n                            rightParen \")\"\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { () -> {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 |     self[].\/*()\n3 |   }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:2:11: error: expected member name following '.'\n1 |  { () -> {\n2 |     self[].\/*()\n  |           `- error: expected member name following '.'\n3 |   }\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:4:2: error: unterminated '\/*' comment\n1 |  { () -> {\n2 |     self[].\/*()\n  |            `- note: comment started here\n3 |   }\n4 | }\n  |  `- error: unterminated '\/*' comment\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:4:2: error: expected '}' at end of closure\n1 |  { () -> {\n  |          `- note: to match this opening '{'\n2 |     self[].\/*()\n3 |   }\n4 | }\n  |  `- error: expected '}' at end of closure\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:4:2: error: expected '}' at end of closure\n1 |  { () -> {\n  |  `- note: to match this opening '{'\n2 |     self[].\/*()\n3 |   }\n4 | }\n  |  `- error: expected '}' at end of closure\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[dotOperator]",
+      "infixExpression\t[>s<  >->(\".\") >s< prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "subscriptArgumentClause\t[\"[\" \"]\"]",
+      "selfExpression\t[\"self\"]",
+      "primaryExpression\t[selfExpression]",
+      "subscriptExpression\t[postfixExpression >n< subscriptArgumentClause]",
+      "postfixExpression\t[subscriptExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr prefixExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 137,
+      "descriptorCount" : 312,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 128,
+      "parseSeconds" : 0.007259011268615723,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 13,
+      "yieldCount" : 251
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                ArrowExpr\n                  arrow \"->\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      MemberAccessExpr\n                        SubscriptCallExpr\n                          DeclReferenceExpr\n                            keyword(SwiftSyntax.Keyword.self) \"self\"\n                          leftSquare \"[\"\n                          LabeledExprList\n                          rightSquare \"]\"\n                          MultipleTrailingClosureElementList\n                        UnexpectedNodes\n                          period \".\"\n                        DeclReferenceExpr\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { () -> {\n    self[].\/*()\n  }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      SequenceExpr\\n                        ExprList\\n                          SubscriptCallExpr\\n                            DeclReferenceExpr\\n                              keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                            leftSquare \\\"[\\\"\\n                            LabeledExprList\\n                            rightSquare \\\"]\\\"\\n                            MultipleTrailingClosureElementList\\n                          BinaryOperatorExpr\\n                            binaryOperator(\\\".\\\/*\\\") \\\".\\\/*\\\"\\n                          TupleExpr\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                            rightParen \\\")\\\"\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { () -> {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 |     self[].\\\/*()\\n3 |   }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:2:11: error: expected member name following '.'\\n1 |  { () -> {\\n2 |     self[].\\\/*()\\n  |           `- error: expected member name following '.'\\n3 |   }\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:4:2: error: unterminated '\\\/*' comment\\n1 |  { () -> {\\n2 |     self[].\\\/*()\\n  |            `- note: comment started here\\n3 |   }\\n4 | }\\n  |  `- error: unterminated '\\\/*' comment\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:4:2: error: expected '}' at end of closure\\n1 |  { () -> {\\n  |          `- note: to match this opening '{'\\n2 |     self[].\\\/*()\\n3 |   }\\n4 | }\\n  |  `- error: expected '}' at end of closure\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3F1D18E7-E128-48DF-88DB-9B932F8755F9.swift:4:2: error: expected '}' at end of closure\\n1 |  { () -> {\\n  |  `- note: to match this opening '{'\\n2 |     self[].\\\/*()\\n3 |   }\\n4 | }\\n  |  `- error: expected '}' at end of closure\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[dotOperator]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s< prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"subscriptArgumentClause\\t[\\\"[\\\" \\\"]\\\"]\",\"selfExpression\\t[\\\"self\\\"]\",\"primaryExpression\\t[selfExpression]\",\"subscriptExpression\\t[postfixExpression >n< subscriptArgumentClause]\",\"postfixExpression\\t[subscriptExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr prefixExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":137,\"descriptorCount\":312,\"duplicateDescriptorCount\":0,\"oraclePruned\":128,\"parseSeconds\":0.007259011268615723,\"sourceLength\":32,\"suppressedDescriptorCount\":46,\"tokenCount\":13,\"yieldCount\":251},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                ArrowExpr\\n                  arrow \\\"->\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      MemberAccessExpr\\n                        SubscriptCallExpr\\n                          DeclReferenceExpr\\n                            keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                          leftSquare \\\"[\\\"\\n                          LabeledExprList\\n                          rightSquare \\\"]\\\"\\n                          MultipleTrailingClosureElementList\\n                        UnexpectedNodes\\n                          period \\\".\\\"\\n                        DeclReferenceExpr\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

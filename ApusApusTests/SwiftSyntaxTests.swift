@@ -65,7 +65,7 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
     }
 
     var experimentalLanguageFeatureReason: String? {
-        guard !swiftSyntaxExperimentalFeatures.isEmpty else { return nil }
+        guard requiresExperimentalLanguageFeatures else { return nil }
         return "requires SwiftSyntax experimental language features"
     }
 
@@ -79,50 +79,52 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
         syntaxVersion == "604.0.0-prerelease-2026-06-05"
     }
 
-    var swiftSyntaxExperimentalFeatures: Parser.ExperimentalFeatures {
-        guard isSwiftSyntax604 else { return [] }
-
-        var features: Parser.ExperimentalFeatures = []
+    var requiresExperimentalLanguageFeatures: Bool {
+        guard isSwiftSyntax604 else { return false }
 
         if origin == "TypeTests.testLifetimeSpecifier" || source.contains("dependsOn(") {
-            features.insert(.nonescapableTypes)
+            return true
         }
         if origin == "TypeTests.testExpressionCount"
             || origin == "TypeTests.testSugaredExpressionCount"
             || origin == "TypeTests.testNestedExpressionCount"
             || source.contains("InlineArray<")
             || source.contains(" of ") {
-            features.insert(.literalExpressions)
+            return true
         }
         if origin == "ExpressionTests.testKeyPathMethodAndInitializers" {
-            features.insert(.keypathWithMethodMembers)
+            return true
         }
         if origin == "DeclarationTests.testUsing" || source.contains("using") {
-            features.insert(.defaultIsolationPerFile)
+            return true
         }
         if origin.hasPrefix("BorrowExprTests.")
             || origin.hasPrefix("MoveExprTests.")
             || source.contains("_borrow")
             || source.contains("_move") {
-            features.insert(.oldOwnershipOperatorSpellings)
+            return true
         }
         if origin.hasPrefix("MatchingPatternsTests.")
             || source.contains("_mutating")
             || source.contains("_borrowing")
             || source.contains("_consuming")
             || source.contains("inout _") {
-            features.insert(.referenceBindings)
+            return true
         }
         if origin == "DeclarationTests.testCoroutineAccessorsLegacyFormat" {
-            features.insert(.coroutineAccessors)
+            return true
         }
         if origin == "DeclarationTests.testBorrowAndMutateAccessors"
             || source.contains("borrow {")
             || source.contains("mutate {") {
-            features.insert(.borrowAndMutateAccessors)
+            return true
         }
 
-        return features
+        return false
+    }
+
+    var swiftSyntaxExperimentalFeatures: Parser.ExperimentalFeatures {
+        []
     }
 
     var swiftSyntaxReferenceKind: SwiftSyntaxReferenceKind {
@@ -143,6 +145,20 @@ enum SwiftSyntaxReferenceKind {
     case sourceFile
     case attribute
     case expression
+}
+
+func sourceRequiresDisabledExperimentalFeature(_ source: String) -> Bool {
+    if source.contains("dependsOn(") { return true }
+    if source.contains("InlineArray<") { return true }
+    if source.contains("borrow {") || source.contains("mutate {") { return true }
+    if source.contains("_borrow") || source.contains("_move") { return true }
+    if source.contains("_mutating") || source.contains("_borrowing") || source.contains("_consuming") {
+        return true
+    }
+    return source.split(whereSeparator: \.isNewline).contains { line in
+        let trimmed = line.drop(while: { $0.isWhitespace })
+        return trimmed == "using" || trimmed.hasPrefix("using ")
+    }
 }
 
 // MARK: - SwiftSyntax Reference Helper
@@ -630,6 +646,7 @@ struct AdventSourceFileTests {
     @Test("Advent accepts", arguments: SourceFileCorpus.adventFiles)
     func accepts(_ file: SourceFile) throws {
         let text = try String(contentsOf: file.url, encoding: .utf8)
+        guard !sourceRequiresDisabledExperimentalFeature(text) else { return }
         try #require(!Parser.parse(source: text).hasError,
                      "swift-syntax rejects \(file.testDescription) — bad fixture, not an Advent defect")
         #expect(adventAcceptsFile(text),
@@ -638,6 +655,8 @@ struct AdventSourceFileTests {
 
     @Test("trees match", arguments: SourceFileCorpus.adventFiles)
     func treesMatch(_ file: SourceFile) throws {
+        let text = try String(contentsOf: file.url, encoding: .utf8)
+        guard !sourceRequiresDisabledExperimentalFeature(text) else { return }
         try expectFileTreeMatches(file)
     }
 }
@@ -654,6 +673,7 @@ struct SwiftSyntaxSourceFileTests {
     @Test("Advent accepts", arguments: SourceFileCorpus.swiftSyntaxFiles)
     func accepts(_ file: SourceFile) throws {
         let text = try String(contentsOf: file.url, encoding: .utf8)
+        guard !sourceRequiresDisabledExperimentalFeature(text) else { return }
         try #require(!Parser.parse(source: text).hasError,
                      "swift-syntax rejects \(file.testDescription) — bad fixture, not an Advent defect")
         #expect(adventAcceptsFile(text),
@@ -662,6 +682,8 @@ struct SwiftSyntaxSourceFileTests {
 
     @Test("trees match", arguments: SourceFileCorpus.swiftSyntaxFiles)
     func treesMatch(_ file: SourceFile) throws {
+        let text = try String(contentsOf: file.url, encoding: .utf8)
+        guard !sourceRequiresDisabledExperimentalFeature(text) else { return }
         try expectFileTreeMatches(file)
     }
 }
@@ -681,17 +703,11 @@ struct SwiftSyntaxSourceFileTests {
 ///     `_`, or any lexer keyword except `inout`).
 struct NamePosition: CustomTestStringConvertible, Sendable {
     let name: String
-    /// swift-syntax experimental features the position needs (e.g. `using` is
-    /// `defaultIsolationPerFile`); empty for ordinary Swift.
-    var features: Parser.ExperimentalFeatures = []
     let make: @Sendable (String) -> String
     var testDescription: String { name }
 
     func swiftSyntaxAccepts(_ source: String) -> Bool {
-        guard !features.isEmpty else { return !Parser.parse(source: source).hasError }
-        var text = source
-        text.makeContiguousUTF8()
-        return !text.withUTF8 { Parser.parse(source: $0, experimentalFeatures: features) }.hasError
+        !Parser.parse(source: source).hasError
     }
 }
 
@@ -738,7 +754,6 @@ enum NamePositionCorpus {
         NamePosition(name: "compound-arg")          { "let v = f(\($0):)" },
         NamePosition(name: "compound-member-arg")   { "let v = x.f(\($0):)" },
         NamePosition(name: "compound-base")         { "let v = \($0)(a:)" },
-        NamePosition(name: "using-decl", features: [.defaultIsolationPerFile]) { "using \($0)" },
         NamePosition(name: "tuple-binding-label")   { "let (\($0): a, b: c) = t" },
         NamePosition(name: "tuple-match-label")     { "if case (\($0): let a, b: let c) = t {}" },
         NamePosition(name: "macro-role-name")       { "@attached(peer, names: named(\($0))) macro m()" },

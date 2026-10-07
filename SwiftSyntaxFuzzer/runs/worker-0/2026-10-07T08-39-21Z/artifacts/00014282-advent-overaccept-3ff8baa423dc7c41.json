@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00014282-advent-overaccept-3ff8baa423dc7c41.json",
+    "durationSeconds" : 0.5060570240020752,
+    "exitCode" : 1,
+    "generator" : "wide:top:newline+block-comment:translated:testTypeExpr30#1",
+    "index" : 14282,
+    "seed" : 11400602419948498427,
+    "signalHash" : "c4c2289c202a25cd",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "3ff8baa423dc7c41",
+    "sourceLength" : 248,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func testMissingSelf() {\n  \/\/ None of these were not caught in Swift 3.\n  \/\/ See test\/Compatibility\/type_expr.swift.\n  takesOneArg(Int)\n  takesOneArg(\nSwift.Int)\n  takesTwoArgs(Int, 0)\n  takesTwoArgs(Swift.Int, 0)\n  Swift.\/*\n*\/Int\n  _ = Swift.Int\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            PrefixOperatorExpr\n              prefixOperator(\"*\/\") \"*\/\"\n              DeclReferenceExpr\n                identifier(\"Int\") \"Int\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8851D7C8-B5D2-4B69-948D-3F2D76BFDE2C.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | *\/Int\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8851D7C8-B5D2-4B69-948D-3F2D76BFDE2C.swift:2:1: error: unexpected end of block comment\n1 |  {\n2 | *\/Int\n  | `- error: unexpected end of block comment\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 50,
+      "descriptorCount" : 118,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 28,
+      "parseSeconds" : 0.004086017608642578,
+      "sourceLength" : 10,
+      "suppressedDescriptorCount" : 16,
+      "tokenCount" : 4,
+      "yieldCount" : 84
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                unknown(\"*\/\") \"*\/\"\n                identifier(\"Int\") \"Int\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 23,
+  "source" : " {\n*\/Int\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"Int\\\") \\\"Int\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8851D7C8-B5D2-4B69-948D-3F2D76BFDE2C.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | *\\\/Int\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8851D7C8-B5D2-4B69-948D-3F2D76BFDE2C.swift:2:1: error: unexpected end of block comment\\n1 |  {\\n2 | *\\\/Int\\n  | `- error: unexpected end of block comment\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":50,\"descriptorCount\":118,\"duplicateDescriptorCount\":0,\"oraclePruned\":28,\"parseSeconds\":0.004086017608642578,\"sourceLength\":10,\"suppressedDescriptorCount\":16,\"tokenCount\":4,\"yieldCount\":84},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                unknown(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                identifier(\\\"Int\\\") \\\"Int\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

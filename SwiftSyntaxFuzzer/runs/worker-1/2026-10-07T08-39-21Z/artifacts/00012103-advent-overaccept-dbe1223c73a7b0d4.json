@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00012103-advent-overaccept-dbe1223c73a7b0d4.json",
+    "durationSeconds" : 0.3426409959793091,
+    "exitCode" : 1,
+    "generator" : "wide:closure:keyword:statement:testTrailingClosureInIfCondition#2",
+    "index" : 12103,
+    "seed" : 4354586892308818372,
+    "signalHash" : "29decd388ad71bd4",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "dbe1223c73a7b0d4",
+    "sourceLength" : 41,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nif test { init\n} {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              IfExpr\n                keyword(SwiftSyntax.Keyword.if) \"if\"\n                ConditionElementList\n                  ConditionElement\n                    FunctionCallExpr\n                      DeclReferenceExpr\n                        identifier(\"test\") \"test\"\n                      LabeledExprList\n                      ClosureExpr\n                        leftBrace \"{\"\n                        CodeBlockItemList\n                          CodeBlockItem\n                            DeclReferenceExpr\n                              keyword(SwiftSyntax.Keyword.init) \"init\"\n                        rightBrace \"}\"\n                      MultipleTrailingClosureElementList\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | if test { init\n3 | } {}\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:3:1: error: initializers may only be declared within a type\n1 |  {\n2 | if test { init\n3 | } {}\n  | `- error: initializers may only be declared within a type\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:2:15: error: expected '(' for initializer parameters\n1 |  {\n2 | if test { init\n  |               `- error: expected '(' for initializer parameters\n3 | } {}\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:3:2: error: consecutive statements on a line must be separated by ';'\n1 |  {\n2 | if test { init\n3 | } {}\n  |  `- error: consecutive statements on a line must be separated by ';'\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "conditionExpression\t[prefixExpression ]",
+      "condition\t[conditionExpression]",
+      "conditionList\t[condition ]",
+      "ifExpression\t[\"if\" >->(\"{\") conditionList codeBlock ]",
+      "conditionalExpression\t[ifExpression]",
+      "effectfulConditional\t[conditionalExpression]",
+      "expression\t[effectfulConditional ]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 147,
+      "descriptorCount" : 342,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 125,
+      "parseSeconds" : 0.009716033935546875,
+      "sourceLength" : 24,
+      "suppressedDescriptorCount" : 52,
+      "tokenCount" : 9,
+      "yieldCount" : 231
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ExpressionStmt\n              IfExpr\n                keyword(SwiftSyntax.Keyword.if) \"if\"\n                ConditionElementList\n                  ConditionElement\n                    DeclReferenceExpr\n                      identifier(\"test\") \"test\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      InitializerDecl\n                        AttributeList\n                        DeclModifierList\n                        keyword(SwiftSyntax.Keyword.init) \"init\"\n                        FunctionSignature\n                          FunctionParameterClause\n                            FunctionParameterList\n                  rightBrace \"}\"\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 22,
+  "source" : " {\nif test { init\n} {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              IfExpr\\n                keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                ConditionElementList\\n                  ConditionElement\\n                    FunctionCallExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"test\\\") \\\"test\\\"\\n                      LabeledExprList\\n                      ClosureExpr\\n                        leftBrace \\\"{\\\"\\n                        CodeBlockItemList\\n                          CodeBlockItem\\n                            DeclReferenceExpr\\n                              keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                        rightBrace \\\"}\\\"\\n                      MultipleTrailingClosureElementList\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | if test { init\\n3 | } {}\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:3:1: error: initializers may only be declared within a type\\n1 |  {\\n2 | if test { init\\n3 | } {}\\n  | `- error: initializers may only be declared within a type\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:2:15: error: expected '(' for initializer parameters\\n1 |  {\\n2 | if test { init\\n  |               `- error: expected '(' for initializer parameters\\n3 | } {}\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-606265E1-3469-41B0-9744-BDA6CFB546B8.swift:3:2: error: consecutive statements on a line must be separated by ';'\\n1 |  {\\n2 | if test { init\\n3 | } {}\\n  |  `- error: consecutive statements on a line must be separated by ';'\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"conditionExpression\\t[prefixExpression ]\",\"condition\\t[conditionExpression]\",\"conditionList\\t[condition ]\",\"ifExpression\\t[\\\"if\\\" >->(\\\"{\\\") conditionList codeBlock ]\",\"conditionalExpression\\t[ifExpression]\",\"effectfulConditional\\t[conditionalExpression]\",\"expression\\t[effectfulConditional ]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":147,\"descriptorCount\":342,\"duplicateDescriptorCount\":0,\"oraclePruned\":125,\"parseSeconds\":0.009716033935546875,\"sourceLength\":24,\"suppressedDescriptorCount\":52,\"tokenCount\":9,\"yieldCount\":231},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ExpressionStmt\\n              IfExpr\\n                keyword(SwiftSyntax.Keyword.if) \\\"if\\\"\\n                ConditionElementList\\n                  ConditionElement\\n                    DeclReferenceExpr\\n                      identifier(\\\"test\\\") \\\"test\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      InitializerDecl\\n                        AttributeList\\n                        DeclModifierList\\n                        keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                        FunctionSignature\\n                          FunctionParameterClause\\n                            FunctionParameterList\\n                  rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00016918-advent-overaccept-6764a086db5b7eca.json",
+    "durationSeconds" : 0.3632509708404541,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline:reject:testOperatorDecl4#1",
+    "index" : 16918,
+    "seed" : 17418699662346727750,
+    "signalHash" : "45a152e7165071c5",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "6764a086db5b7eca",
+    "sourceLength" : 46,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\npostfix operator ++*+* : A\n{ }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.postfix) \"postfix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"++*+*\") \"++*+*\"\n                OperatorPrecedenceAndTypes\n                  colon \":\"\n                  identifier(\"A\") \"A\"\n                  DesignatedTypeList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:1:4: error: consecutive statements on a line must be separated by ';'\n1 |  () {\n  |    `- error: consecutive statements on a line must be separated by ';'\n2 | postfix operator ++*+* : A\n3 | { }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:1:5: error: top-level statement cannot begin with a closure expression\n1 |  () {\n  |     `- error: top-level statement cannot begin with a closure expression\n2 | postfix operator ++*+* : A\n3 | { }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:2:24: error: only infix operators may declare a precedence\n1 |  () {\n2 | postfix operator ++*+* : A\n  |                        `- error: only infix operators may declare a precedence\n3 | { }\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:3:1: error: operator should no longer be declared with body\n1 |  () {\n2 | postfix operator ++*+* : A\n3 | { }\n  | `- error: operator should no longer be declared with body\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:2:9: error: 'operator' may only be declared at file scope\n1 |  () {\n2 | postfix operator ++*+* : A\n  |         `- error: 'operator' may only be declared at file scope\n3 | { }\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"postfix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 171,
+      "descriptorCount" : 351,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 157,
+      "parseSeconds" : 0.010113954544067383,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 54,
+      "tokenCount" : 11,
+      "yieldCount" : 246
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.postfix) \"postfix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"++*+*\") \"++*+*\"\n                OperatorPrecedenceAndTypes\n                  colon \":\"\n                  identifier(\"A\") \"A\"\n                  DesignatedTypeList\n                UnexpectedNodes\n                  leftBrace \"{\"\n                  PrecedenceGroupAttributeList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : " () {\npostfix operator ++*+* : A\n{ }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.postfix) \\\"postfix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"++*+*\\\") \\\"++*+*\\\"\\n                OperatorPrecedenceAndTypes\\n                  colon \\\":\\\"\\n                  identifier(\\\"A\\\") \\\"A\\\"\\n                  DesignatedTypeList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:1:4: error: consecutive statements on a line must be separated by ';'\\n1 |  () {\\n  |    `- error: consecutive statements on a line must be separated by ';'\\n2 | postfix operator ++*+* : A\\n3 | { }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:1:5: error: top-level statement cannot begin with a closure expression\\n1 |  () {\\n  |     `- error: top-level statement cannot begin with a closure expression\\n2 | postfix operator ++*+* : A\\n3 | { }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:2:24: error: only infix operators may declare a precedence\\n1 |  () {\\n2 | postfix operator ++*+* : A\\n  |                        `- error: only infix operators may declare a precedence\\n3 | { }\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:3:1: error: operator should no longer be declared with body\\n1 |  () {\\n2 | postfix operator ++*+* : A\\n3 | { }\\n  | `- error: operator should no longer be declared with body\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7D704B1F-5FA9-4784-84D9-E2A7A77EA172.swift:2:9: error: 'operator' may only be declared at file scope\\n1 |  () {\\n2 | postfix operator ++*+* : A\\n  |         `- error: 'operator' may only be declared at file scope\\n3 | { }\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"postfix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":171,\"descriptorCount\":351,\"duplicateDescriptorCount\":0,\"oraclePruned\":157,\"parseSeconds\":0.010113954544067383,\"sourceLength\":38,\"suppressedDescriptorCount\":54,\"tokenCount\":11,\"yieldCount\":246},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.postfix) \\\"postfix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"++*+*\\\") \\\"++*+*\\\"\\n                OperatorPrecedenceAndTypes\\n                  colon \\\":\\\"\\n                  identifier(\\\"A\\\") \\\"A\\\"\\n                  DesignatedTypeList\\n                UnexpectedNodes\\n                  leftBrace \\\"{\\\"\\n                  PrecedenceGroupAttributeList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

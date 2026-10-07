@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00006317-advent-overaccept-468fa3e83485eefd.json",
+    "durationSeconds" : 0.37921202182769775,
+    "exitCode" : 1,
+    "generator" : "wide:closure:splice+duplicate:translated:testMatchingPatterns21#1+translated:testOperatorDeclDesignatedTypes14#1",
+    "index" : 6317,
+    "seed" : 6018004084445820285,
+    "signalHash" : "c79918dcf8819df4",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "468fa3e83485eefd",
+    "sourceLength" : 154,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n\/\/ Check that single-element tuple payloads work sensibly in patterns.\nprefix operator **>> : Struct\nprefix\nprefix operator *>*> : x\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"prefix\") \"prefix\"\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"*>*>\") \"*>*>\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-798E8FB8-5DA6-42E8-886C-D38817665F20.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | prefix\n3 | prefix operator *>*>\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-798E8FB8-5DA6-42E8-886C-D38817665F20.swift:3:1: error: duplicate modifier\n1 |  {\n2 | prefix\n  | `- note: modifier already specified here\n3 | prefix operator *>*>\n  | `- error: duplicate modifier\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-798E8FB8-5DA6-42E8-886C-D38817665F20.swift:3:8: error: 'operator' may only be declared at file scope\n1 |  {\n2 | prefix\n3 | prefix operator *>*>\n  |        `- error: 'operator' may only be declared at file scope\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"prefix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 218,
+      "descriptorCount" : 441,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 184,
+      "parseSeconds" : 0.007538914680480957,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 88,
+      "tokenCount" : 6,
+      "yieldCount" : 250
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            OperatorDecl\n              keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n              UnexpectedNodes\n                DeclModifier\n                  keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n              keyword(SwiftSyntax.Keyword.operator) \"operator\"\n              binaryOperator(\"*>*>\") \"*>*>\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : " {\nprefix\nprefix operator *>*>\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"prefix\\\") \\\"prefix\\\"\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"*>*>\\\") \\\"*>*>\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-798E8FB8-5DA6-42E8-886C-D38817665F20.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | prefix\\n3 | prefix operator *>*>\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-798E8FB8-5DA6-42E8-886C-D38817665F20.swift:3:1: error: duplicate modifier\\n1 |  {\\n2 | prefix\\n  | `- note: modifier already specified here\\n3 | prefix operator *>*>\\n  | `- error: duplicate modifier\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-798E8FB8-5DA6-42E8-886C-D38817665F20.swift:3:8: error: 'operator' may only be declared at file scope\\n1 |  {\\n2 | prefix\\n3 | prefix operator *>*>\\n  |        `- error: 'operator' may only be declared at file scope\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"prefix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":218,\"descriptorCount\":441,\"duplicateDescriptorCount\":0,\"oraclePruned\":184,\"parseSeconds\":0.007538914680480957,\"sourceLength\":32,\"suppressedDescriptorCount\":88,\"tokenCount\":6,\"yieldCount\":250},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            OperatorDecl\\n              keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n              UnexpectedNodes\\n                DeclModifier\\n                  keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n              keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n              binaryOperator(\\\"*>*>\\\") \\\"*>*>\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

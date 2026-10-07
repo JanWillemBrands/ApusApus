@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00005875-advent-overaccept-0b81b784f168418b.json",
+    "durationSeconds" : 0.3004659414291382,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:keyword+block-comment:declaration:testUsing#11",
+    "index" : 5875,
+    "seed" : 3326660360666057020,
+    "signalHash" : "1ab1a220f10a5a1b",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/DoStmt\/keyword(",
+    "sourceHash" : "0b81b784f168418b",
+    "sourceLength" : 45,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\ndo  \/* c *\/ {\n  using @yield\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  UsingDecl\n                    keyword(SwiftSyntax.Keyword.using) \"using\"\n                    identifier(\"yield\") \"yield\"\n              rightBrace \"}\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2A893C69-8064-4E6F-8DD2-7852112574F5.swift:1:6: error: 'using' is an experimental feature that is currently disabled\n1 | #if {\n  |      `- error: 'using' is an experimental feature that is currently disabled\n2 | using yield\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2A893C69-8064-4E6F-8DD2-7852112574F5.swift:2:7: error: default isolation can only be set to '@MainActor' or 'nonisolated'\n1 | #if {\n2 | using yield\n  |       `- error: default isolation can only be set to '@MainActor' or 'nonisolated'\n3 | }\n4 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "usingModifier\t[identifier]",
+      ".DO\t[usingModifier]",
+      "usingDeclaration\t[\"using\" >n< ]",
+      "declaration\t[usingDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 151,
+      "descriptorCount" : 297,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 72,
+      "parseSeconds" : 0.0041970014572143555,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 7,
+      "yieldCount" : 137
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  DeclReferenceExpr\n                    identifier(\"using\") \"using\"\n                CodeBlockItem\n                  DeclReferenceExpr\n                    identifier(\"yield\") \"yield\"\n              rightBrace \"}\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 41,
+  "source" : "#if {\nusing yield\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  UsingDecl\\n                    keyword(SwiftSyntax.Keyword.using) \\\"using\\\"\\n                    identifier(\\\"yield\\\") \\\"yield\\\"\\n              rightBrace \\\"}\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2A893C69-8064-4E6F-8DD2-7852112574F5.swift:1:6: error: 'using' is an experimental feature that is currently disabled\\n1 | #if {\\n  |      `- error: 'using' is an experimental feature that is currently disabled\\n2 | using yield\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2A893C69-8064-4E6F-8DD2-7852112574F5.swift:2:7: error: default isolation can only be set to '@MainActor' or 'nonisolated'\\n1 | #if {\\n2 | using yield\\n  |       `- error: default isolation can only be set to '@MainActor' or 'nonisolated'\\n3 | }\\n4 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"usingModifier\\t[identifier]\",\".DO\\t[usingModifier]\",\"usingDeclaration\\t[\\\"using\\\" >n< ]\",\"declaration\\t[usingDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":151,\"descriptorCount\":297,\"duplicateDescriptorCount\":0,\"oraclePruned\":72,\"parseSeconds\":0.0041970014572143555,\"sourceLength\":26,\"suppressedDescriptorCount\":21,\"tokenCount\":7,\"yieldCount\":137},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  DeclReferenceExpr\\n                    identifier(\\\"using\\\") \\\"using\\\"\\n                CodeBlockItem\\n                  DeclReferenceExpr\\n                    identifier(\\\"yield\\\") \\\"yield\\\"\\n              rightBrace \\\"}\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

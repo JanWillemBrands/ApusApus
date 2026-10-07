@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00029425-advent-overaccept-265b798bb6e88169.json",
+    "durationSeconds" : 0.35587191581726074,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:glue:phase4-string:multiline-blank+fuzz-harvest:constraint-suppressed",
+    "index" : 29425,
+    "seed" : 17418699662346727750,
+    "signalHash" : "54618700b777bdff",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "265b798bb6e88169",
+    "sourceLength" : 71,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let a = \"\"\"\nabc\n\ndef\n\"\"\"\nstruct S<T: ~Copyable &P> {}\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"S\") \"S\"\n        GenericParameterClause\n          leftAngle \"<\"\n          GenericParameterList\n            GenericParameter\n              AttributeList\n              identifier(\"T\") \"T\"\n              colon \":\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"Copyable\") \"Copyable\"\n                    binaryOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"P\") \"P\"\n          rightAngle \">\"\n        MemberBlock\n          leftBrace \"{\"\n          MemberBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-20F5D347-DEF5-4F9F-B775-7E87E295D0DE.swift:2:22: error: expected '>' to complete generic parameter list\n1 | \n2 | struct S<T: Copyable &P> {}\n  |         |            `- error: expected '>' to complete generic parameter list\n  |         `- note: to match this opening '<'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "simpleType\t[typeIdentifier]",
+      "protocolCompositionElement\t[simpleType]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[ >->(\"each\") genericParameterName \":\" >+>(\"Any\" \"protocol\" \"~\" escapedIdentifier identifier) >->(\"Self\" \"_\" \"repeat\") type]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    \"{\"  \"}\"]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 67,
+      "descriptorCount" : 141,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 23,
+      "parseSeconds" : 0.0053910017013549805,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 12,
+      "tokenCount" : 11,
+      "yieldCount" : 108
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      StructDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.struct) \"struct\"\n        identifier(\"S\") \"S\"\n        GenericParameterClause\n          leftAngle \"<\"\n          GenericParameterList\n            GenericParameter\n              AttributeList\n              identifier(\"T\") \"T\"\n              colon \":\"\n              IdentifierType\n                identifier(\"Copyable\") \"Copyable\"\n        MemberBlock\n          UnexpectedNodes\n            prefixAmpersand \"&\"\n            identifier(\"P\") \"P\"\n            postfixOperator(\">\") \">\"\n          leftBrace \"{\"\n          MemberBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 48,
+  "source" : "\nstruct S<T: Copyable &P> {}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"S\\\") \\\"S\\\"\\n        GenericParameterClause\\n          leftAngle \\\"<\\\"\\n          GenericParameterList\\n            GenericParameter\\n              AttributeList\\n              identifier(\\\"T\\\") \\\"T\\\"\\n              colon \\\":\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"P\\\") \\\"P\\\"\\n          rightAngle \\\">\\\"\\n        MemberBlock\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-20F5D347-DEF5-4F9F-B775-7E87E295D0DE.swift:2:22: error: expected '>' to complete generic parameter list\\n1 | \\n2 | struct S<T: Copyable &P> {}\\n  |         |            `- error: expected '>' to complete generic parameter list\\n  |         `- note: to match this opening '<'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"simpleType\\t[typeIdentifier]\",\"protocolCompositionElement\\t[simpleType]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[ >->(\\\"each\\\") genericParameterName \\\":\\\" >+>(\\\"Any\\\" \\\"protocol\\\" \\\"~\\\" escapedIdentifier identifier) >->(\\\"Self\\\" \\\"_\\\" \\\"repeat\\\") type]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":67,\"descriptorCount\":141,\"duplicateDescriptorCount\":0,\"oraclePruned\":23,\"parseSeconds\":0.0053910017013549805,\"sourceLength\":28,\"suppressedDescriptorCount\":12,\"tokenCount\":11,\"yieldCount\":108},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      StructDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n        identifier(\\\"S\\\") \\\"S\\\"\\n        GenericParameterClause\\n          leftAngle \\\"<\\\"\\n          GenericParameterList\\n            GenericParameter\\n              AttributeList\\n              identifier(\\\"T\\\") \\\"T\\\"\\n              colon \\\":\\\"\\n              IdentifierType\\n                identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n        MemberBlock\\n          UnexpectedNodes\\n            prefixAmpersand \\\"&\\\"\\n            identifier(\\\"P\\\") \\\"P\\\"\\n            postfixOperator(\\\">\\\") \\\">\\\"\\n          leftBrace \\\"{\\\"\\n          MemberBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

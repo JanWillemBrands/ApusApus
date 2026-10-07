@@ -287,16 +287,7 @@ struct AdventProbe {
     }
 
     private static func swiftSyntaxExperimentalFeatures(for source: String) -> Parser.ExperimentalFeatures {
-        var features: Parser.ExperimentalFeatures = []
-
-        if source.contains("read {") || source.contains("modify {") {
-            features.insert(.coroutineAccessors)
-        }
-        if source.contains("borrow {") || source.contains("mutate {") {
-            features.insert(.borrowAndMutateAccessors)
-        }
-
-        return features
+        []
     }
 
     private struct CompilerResult {

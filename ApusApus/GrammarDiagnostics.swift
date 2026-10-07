@@ -217,7 +217,8 @@ extension Grammar {
                 referenced.insert(symbol.name)
             }
             if node.kind != .END { walk(node.seq, owner: owner) }
-            walk(node.alt, owner: owner)
+            // Every production is a root below; an RHS reference (`.alt` → its LHS) is not followed.
+            if !node.isRHS { walk(node.alt, owner: owner) }
         }
         for (name, nt) in nonTerminals { walk(nt, owner: name) }
 

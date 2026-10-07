@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00002217-advent-overaccept-4dc8760ebbcc68bd.json",
+    "durationSeconds" : 0.28478288650512695,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:raw:phase4-coroutine:op-trailing-comma",
+    "index" : 2217,
+    "seed" : 6018004084445820285,
+    "signalHash" : "8a15ae218640619c",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/OperatorDecl\/ke",
+    "sourceHash" : "4dc8760ebbcc68bd",
+    "sourceLength" : 55,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"+++\") \"+++\"\n                  OperatorPrecedenceAndTypes\n                    colon \":\"\n                    identifier(\"AdditionPrecedence\") \"AdditionPrecedence\"\n                    DesignatedTypeList\n                      DesignatedType\n                        comma \",\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-086C8568-F789-4599-94ED-C09C42D20C03.swift:2:40: error: consecutive statements on a line must be separated by ';'\n1 | #if FOO\n2 | infix operator +++ : AdditionPrecedence,\n  |                                        `- error: consecutive statements on a line must be separated by ';'\n3 | #endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-086C8568-F789-4599-94ED-C09C42D20C03.swift:2:40: error: expected expression\n1 | #if FOO\n2 | infix operator +++ : AdditionPrecedence,\n  |                                        `- error: expected expression\n3 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "designatedTypes\t[\",\"]",
+      ".OPT\t[designatedTypes]",
+      "identifierToken\t[identifier]",
+      "precedenceGroupName\t[identifierToken]",
+      "infixOperatorGroup\t[\":\" precedenceGroupName ]",
+      ".OPT\t[infixOperatorGroup]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 227,
+      "descriptorCount" : 467,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 203,
+      "parseSeconds" : 0.007893919944763184,
+      "sourceLength" : 55,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 10,
+      "yieldCount" : 280
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"+++\") \"+++\"\n                  OperatorPrecedenceAndTypes\n                    colon \":\"\n                    identifier(\"AdditionPrecedence\") \"AdditionPrecedence\"\n                    DesignatedTypeList\n                      DesignatedType\n                        comma \",\"\n                        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 20,
+  "source" : "#if FOO\ninfix operator +++ : AdditionPrecedence,\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n                  OperatorPrecedenceAndTypes\\n                    colon \\\":\\\"\\n                    identifier(\\\"AdditionPrecedence\\\") \\\"AdditionPrecedence\\\"\\n                    DesignatedTypeList\\n                      DesignatedType\\n                        comma \\\",\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-086C8568-F789-4599-94ED-C09C42D20C03.swift:2:40: error: consecutive statements on a line must be separated by ';'\\n1 | #if FOO\\n2 | infix operator +++ : AdditionPrecedence,\\n  |                                        `- error: consecutive statements on a line must be separated by ';'\\n3 | #endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-086C8568-F789-4599-94ED-C09C42D20C03.swift:2:40: error: expected expression\\n1 | #if FOO\\n2 | infix operator +++ : AdditionPrecedence,\\n  |                                        `- error: expected expression\\n3 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"designatedTypes\\t[\\\",\\\"]\",\".OPT\\t[designatedTypes]\",\"identifierToken\\t[identifier]\",\"precedenceGroupName\\t[identifierToken]\",\"infixOperatorGroup\\t[\\\":\\\" precedenceGroupName ]\",\".OPT\\t[infixOperatorGroup]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":227,\"descriptorCount\":467,\"duplicateDescriptorCount\":0,\"oraclePruned\":203,\"parseSeconds\":0.007893919944763184,\"sourceLength\":55,\"suppressedDescriptorCount\":46,\"tokenCount\":10,\"yieldCount\":280},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n                  OperatorPrecedenceAndTypes\\n                    colon \\\":\\\"\\n                    identifier(\\\"AdditionPrecedence\\\") \\\"AdditionPrecedence\\\"\\n                    DesignatedTypeList\\n                      DesignatedType\\n                        comma \\\",\\\"\\n                        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

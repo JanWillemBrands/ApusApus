@@ -191,13 +191,21 @@ final class GrammarNode {
     /// not an attribute" (see `statement` in `Swift.apus`).
     var forwardPredicates: [ForwardPredicate] = []
 
-    /// Scoped parser-mode annotations. These are inherited context bits carried
-    /// by descriptors and CRF edges, not mutable scanner-style state.
+    /// Scoped parser-mode annotations (`@setMode`/`@clearMode`/`@requiresMode`/`@rejectsMode`).
+    /// Compiled away at grammar load by `Grammar.specializeParserModes()`: the parser never
+    /// reads them. See `Parser Modes Specialization.md`.
     var modeAdd: UInt64 = 0
     var modeRemove: UInt64 = 0
     var requiredModes: UInt64 = 0
     var rejectedModes: UInt64 = 0
-    var hasModeAnnotation: Bool = false
+
+    /// On a specialized LHS copy `X⟨m⟩`: the original production `X` and the mode `m`
+    /// (already projected onto the bits relevant to `X`). `nil`/`0` on original nodes.
+    var origin: GrammarNode?
+    var instanceMode: UInt64 = 0
+    /// `@carries(m …)` on an LHS: the parser modes in scope for this nonterminal. An occurrence
+    /// passes only these bits of its mode into the nonterminal; every other bit is dropped.
+    var carriedModes: UInt64 = 0
 
     /// `@left` / `@right` on an ALTERNATE — a child-position filter in the SDF sense.
     ///
@@ -323,6 +331,45 @@ extension GrammarNode: CustomStringConvertible {
 }
 
 extension GrammarNode {
+    /// Deep copy of a production subtree, for parser-mode specialization. Only valid BEFORE
+    /// `resolveGrammarNodeLinks`, while every production is still a tree: it follows `.seq` and
+    /// the `.alt` of LHS/ALT/bracket nodes, but an RHS nonterminal's `.alt` is a reference to
+    /// another production and is copied as a pointer. `number`/`nameID` are assigned later.
+    /// Every stored property must be copied here; a new property added to `GrammarNode` needs
+    /// a line below.
+    func copySubtree() -> GrammarNode {
+        let copy = GrammarNode(kind: kind, name: name)
+        copy.isTrivia = isTrivia
+        copy.actions = actions
+        copy.signature = signature
+        copy.locals = locals
+        copy.first = first
+        copy.follow = follow
+        copy.ambiguous = ambiguous
+        copy.exclude = exclude
+        copy.excludeSetReferences = excludeSetReferences
+        copy.boundaryPredicate = boundaryPredicate
+        copy.isPreferred = isPreferred
+        copy.isAvoided = isAvoided
+        copy.forwardPredicates = forwardPredicates
+        copy.modeAdd = modeAdd
+        copy.modeRemove = modeRemove
+        copy.requiredModes = requiredModes
+        copy.rejectedModes = rejectedModes
+        copy.origin = origin
+        copy.instanceMode = instanceMode
+        copy.carriedModes = carriedModes
+        copy.associativityFilters = associativityFilters
+        copy.requiresSameLine = requiresSameLine
+        copy.sameLineOutsideBrackets = sameLineOutsideBrackets
+        copy.suppressesLeadingTrivia = suppressesLeadingTrivia
+        copy.isLexicalToken = isLexicalToken
+        copy.disambiguation = disambiguation
+        copy.seq = seq?.copySubtree()
+        copy.alt = isRHS ? alt : alt?.copySubtree()
+        return copy
+    }
+
     // sets the .seq and .alt links for END nodes
     func resolveGrammarNodeLinks(parent: GrammarNode?, alternate: GrammarNode?, build: GrammarBuild) {
         number = build.nodeCounter

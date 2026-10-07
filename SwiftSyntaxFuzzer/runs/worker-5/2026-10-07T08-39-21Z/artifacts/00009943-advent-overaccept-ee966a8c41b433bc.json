@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00009943-advent-overaccept-ee966a8c41b433bc.json",
+    "durationSeconds" : 0.3357490301132202,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:glue+block-comment+glue:type:testNonisolatedSpecifier#8",
+    "index" : 9943,
+    "seed" : 13064010816016726416,
+    "signalHash" : "39cb61b1edfcdeae",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "ee966a8c41b433bc",
+    "sourceLength" : 96,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\ntest(S<nonisolated\/*c*\/(nonsending)()async -> Void>(), type(of: concurrentTest))\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          identifier(\"S\") \"S\"\n                        BinaryOperatorExpr\n                          binaryOperator(\"<\") \"<\"\n                        FunctionCallExpr\n                          FunctionCallExpr\n                            DeclReferenceExpr\n                              identifier(\"nonisolated\") \"nonisolated\"\n                            leftParen \"(\"\n                            LabeledExprList\n                              LabeledExpr\n                                DeclReferenceExpr\n                                  identifier(\"nonsending\") \"nonsending\"\n                            rightParen \")\"\n                            MultipleTrailingClosureElementList\n                          leftParen \"(\"\n                          LabeledExprList\n                          rightParen \")\"\n                          MultipleTrailingClosureElementList\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:1:4: error: consecutive statements on a line must be separated by ';'\n1 |  () {\n  |    `- error: consecutive statements on a line must be separated by ';'\n2 | (S<nonisolated (nonsending)())\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:1:5: error: top-level statement cannot begin with a closure expression\n1 |  () {\n  |     `- error: top-level statement cannot begin with a closure expression\n2 | (S<nonisolated (nonsending)())\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:2:16: error: expected '(' following 'nonisolated'\n1 |  () {\n2 | (S<nonisolated (nonsending)())\n  |                `- error: expected '(' following 'nonisolated'\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:2:28: error: expected ',' separator\n1 |  () {\n2 | (S<nonisolated (nonsending)())\n  |                            `- error: expected ',' separator\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "functionCallArgument\t[expression]",
+      "functionCallArgumentList\t[functionCallArgument ]",
+      "functionCallArgumentClause\t[\"(\" functionCallArgumentList  \")\"]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s< prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 180,
+      "descriptorCount" : 427,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 222,
+      "parseSeconds" : 0.01133108139038086,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 86,
+      "tokenCount" : 14,
+      "yieldCount" : 360
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          identifier(\"S\") \"S\"\n                        BinaryOperatorExpr\n                          binaryOperator(\"<\") \"<\"\n                        TypeExpr\n                          AttributedType\n                            TypeSpecifierList\n                              NonisolatedTypeSpecifier\n                                keyword(SwiftSyntax.Keyword.nonisolated) \"nonisolated\"\n                                NonisolatedSpecifierArgument\n                            AttributeList\n                            TypeSpecifierList\n                            TupleType\n                              leftParen \"(\"\n                              TupleTypeElementList\n                                TupleTypeElement\n                                  IdentifierType\n                                    identifier(\"nonsending\") \"nonsending\"\n                              rightParen \")\"\n                UnexpectedNodes\n                  leftParen \"(\"\n                  rightParen \")\"\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " () {\n(S<nonisolated (nonsending)())\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          identifier(\\\"S\\\") \\\"S\\\"\\n                        BinaryOperatorExpr\\n                          binaryOperator(\\\"<\\\") \\\"<\\\"\\n                        FunctionCallExpr\\n                          FunctionCallExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"nonisolated\\\") \\\"nonisolated\\\"\\n                            leftParen \\\"(\\\"\\n                            LabeledExprList\\n                              LabeledExpr\\n                                DeclReferenceExpr\\n                                  identifier(\\\"nonsending\\\") \\\"nonsending\\\"\\n                            rightParen \\\")\\\"\\n                            MultipleTrailingClosureElementList\\n                          leftParen \\\"(\\\"\\n                          LabeledExprList\\n                          rightParen \\\")\\\"\\n                          MultipleTrailingClosureElementList\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:1:4: error: consecutive statements on a line must be separated by ';'\\n1 |  () {\\n  |    `- error: consecutive statements on a line must be separated by ';'\\n2 | (S<nonisolated (nonsending)())\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:1:5: error: top-level statement cannot begin with a closure expression\\n1 |  () {\\n  |     `- error: top-level statement cannot begin with a closure expression\\n2 | (S<nonisolated (nonsending)())\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:2:16: error: expected '(' following 'nonisolated'\\n1 |  () {\\n2 | (S<nonisolated (nonsending)())\\n  |                `- error: expected '(' following 'nonisolated'\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E7F482A9-9AB0-4527-B4DE-50C889C1E02E.swift:2:28: error: expected ',' separator\\n1 |  () {\\n2 | (S<nonisolated (nonsending)())\\n  |                            `- error: expected ',' separator\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"functionCallArgument\\t[expression]\",\"functionCallArgumentList\\t[functionCallArgument ]\",\"functionCallArgumentClause\\t[\\\"(\\\" functionCallArgumentList  \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s< prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":180,\"descriptorCount\":427,\"duplicateDescriptorCount\":0,\"oraclePruned\":222,\"parseSeconds\":0.01133108139038086,\"sourceLength\":38,\"suppressedDescriptorCount\":86,\"tokenCount\":14,\"yieldCount\":360},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          identifier(\\\"S\\\") \\\"S\\\"\\n                        BinaryOperatorExpr\\n                          binaryOperator(\\\"<\\\") \\\"<\\\"\\n                        TypeExpr\\n                          AttributedType\\n                            TypeSpecifierList\\n                              NonisolatedTypeSpecifier\\n                                keyword(SwiftSyntax.Keyword.nonisolated) \\\"nonisolated\\\"\\n                                NonisolatedSpecifierArgument\\n                            AttributeList\\n                            TypeSpecifierList\\n                            TupleType\\n                              leftParen \\\"(\\\"\\n                              TupleTypeElementList\\n                                TupleTypeElement\\n                                  IdentifierType\\n                                    identifier(\\\"nonsending\\\") \\\"nonsending\\\"\\n                              rightParen \\\")\\\"\\n                UnexpectedNodes\\n                  leftParen \\\"(\\\"\\n                  rightParen \\\")\\\"\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

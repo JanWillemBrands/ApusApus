@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00022410-advent-overaccept-16e6e8bd5bfb331c.json",
+    "durationSeconds" : 0.2928420305252075,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:block-comment+block-comment:expression:probeParenKeyPathMember#1+real:Lexer:44",
+    "index" : 22410,
+    "seed" : 4354586892308818372,
+    "signalHash" : "8a767bdb16d9184e",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/MemberAccessExp",
+    "sourceHash" : "16e6e8bd5bfb331c",
+    "sourceLength" : 118,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n(\\Foo).\/*\n*\/bar\nstruct LexCacheKey: Hashable {\n    let \/*\n*\/pos: CharPosition\n    let terminalID: Int\n}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                PrefixOperatorExpr\n                  prefixOperator(\"*\/\") \"*\/\"\n                  DeclReferenceExpr\n                    identifier(\"bar\") \"bar\"\n              CodeBlockItem\n                StructDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                  identifier(\"LexCacheKey\") \"LexCacheKey\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E157532B-9C1E-4D02-8CB4-D5725F6ECADC.swift:2:1: error: unexpected end of block comment\n1 | #if FOO\n2 | *\/bar\n  | `- error: unexpected end of block comment\n3 | struct LexCacheKey {\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    \"{\"  \"}\"]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 163,
+      "descriptorCount" : 335,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 58,
+      "parseSeconds" : 0.005013108253479004,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 10,
+      "yieldCount" : 157
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                UnexpectedCodeDecl\n                  UnexpectedNodes\n                    unknown(\"*\/\") \"*\/\"\n                    identifier(\"bar\") \"bar\"\n              CodeBlockItem\n                StructDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                  identifier(\"LexCacheKey\") \"LexCacheKey\"\n                  MemberBlock\n                    leftBrace \"{\"\n                    MemberBlockItemList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : "#if FOO\n*\/bar\nstruct LexCacheKey {\n}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"bar\\\") \\\"bar\\\"\\n              CodeBlockItem\\n                StructDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                  identifier(\\\"LexCacheKey\\\") \\\"LexCacheKey\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E157532B-9C1E-4D02-8CB4-D5725F6ECADC.swift:2:1: error: unexpected end of block comment\\n1 | #if FOO\\n2 | *\\\/bar\\n  | `- error: unexpected end of block comment\\n3 | struct LexCacheKey {\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":163,\"descriptorCount\":335,\"duplicateDescriptorCount\":0,\"oraclePruned\":58,\"parseSeconds\":0.005013108253479004,\"sourceLength\":43,\"suppressedDescriptorCount\":22,\"tokenCount\":10,\"yieldCount\":157},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                UnexpectedCodeDecl\\n                  UnexpectedNodes\\n                    unknown(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                    identifier(\\\"bar\\\") \\\"bar\\\"\\n              CodeBlockItem\\n                StructDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                  identifier(\\\"LexCacheKey\\\") \\\"LexCacheKey\\\"\\n                  MemberBlock\\n                    leftBrace \\\"{\\\"\\n                    MemberBlockItemList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

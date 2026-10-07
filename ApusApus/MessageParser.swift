@@ -214,7 +214,6 @@ class MessageParser {
     // MARK: - Descriptor management (Paper: R, U)
     var remaining: [Descriptor] = []
     var unique: Set<Descriptor> = []
-    var cMode: UInt64 = 0
 
     // MARK: - Parse statistics
     var failedParses = 0
@@ -560,7 +559,7 @@ class MessageParser {
         commitsByStart.removeAll(keepingCapacity: true)
         commitsByEnd.removeAll(keepingCapacity: true)
         let origin = start
-        cL = nil; cI = origin; cU = origin; cMode = 0
+        cL = nil; cI = origin; cU = origin
         unique = []; remaining = []
         failedParses = 0; successfullParses = 0
         descriptorCount = 0; duplicateDescriptorCount = 0; suppressedDescriptorCount = 0
@@ -582,10 +581,10 @@ class MessageParser {
 
         // Set up root cluster (root may be a structured-token non-terminal for a sub-parse)
         let rootNode = currentParseRoot!
-        crf[ParsePosition(slot: rootNode, index: origin, mode: 0)] = ParseCluster()
+        crf[ParsePosition(slot: rootNode, index: origin)] = ParseCluster()
 
         // Seed initial descriptors (Paper: ntAdd for start symbol)
-        addDescriptorsForAlternates(X: rootNode, k: origin, i: origin, mode: 0)
+        addDescriptorsForAlternates(X: rootNode, k: origin, i: origin)
 
         // Run GLL algorithm
         var progressCounter = 0
@@ -600,13 +599,6 @@ class MessageParser {
 
 //                trace = false
 //                trace("slot: \(String(format: "%2d", cL.number)) \(cL.ebnfDot()) first \(cL.first) follow \(cL.follow) at: \(input.linePosition(of: cI))")
-
-                if cL.hasModeAnnotation {
-                    let occurrenceMode = modeForOccurrence(cL, from: cMode)
-                    guard modeAllows(cL, in: occurrenceMode) else {
-                        continue nextDescriptor
-                    }
-                }
 
                 switch cL.kind {
                 case .EPS:
@@ -664,7 +656,7 @@ class MessageParser {
                     // OPT/KLN: also offer skip-past-bracket path (they're nullable).
                     // Use the same viability predicate as return replay so an optional
                     // at the end of a production can skip to END.
-                    if continuationViable(continuation: cL.seq!, at: cI, mode: cMode) {
+                    if continuationViable(continuation: cL.seq!, at: cI) {
                         addDescriptor(L: cL.seq!, k: cU, i: cI)
                         addYield(L: cL, i: cU, k: cI, j: cI)  // empty bracket BSR
                     } else {
@@ -835,9 +827,9 @@ class MessageParser {
             print("lex-trace:   no commit starts here")
         }
         var covering: [String] = []
-        for (name, nt) in grammar.nonTerminals {
+        for nt in grammar.allProductions {
             for y in yield(of: nt) where y.i <= pos && pos < y.j {
-                covering.append("\(name)[\(input.distance(from: input.startIndex, to: y.i))..\(input.distance(from: input.startIndex, to: y.j))]")
+                covering.append("\(Grammar.instanceName(nt, modes: grammar.modeNameToBit))[\(input.distance(from: input.startIndex, to: y.i))..\(input.distance(from: input.startIndex, to: y.j))]")
                 break
             }
         }
@@ -1147,22 +1139,6 @@ class MessageParser {
         return false
     }
 
-    func modeForOccurrence(_ node: GrammarNode, from parentMode: UInt64) -> UInt64 {
-        guard node.hasModeAnnotation else { return parentMode }
-        return (parentMode | node.modeAdd) & ~node.modeRemove
-    }
-
-    func modeAllows(_ node: GrammarNode, in mode: UInt64) -> Bool {
-        guard node.hasModeAnnotation else { return true }
-        if node.requiredModes != 0, (mode & node.requiredModes) != node.requiredModes {
-            return false
-        }
-        if node.rejectedModes != 0, (mode & node.rejectedModes) == node.rejectedModes {
-            return false
-        }
-        return true
-    }
-
     /// Match the current terminal against the input at cI.
     ///
     /// Asks the memoizing lex cache for matches of `cL.nameID` at `cI`, then
@@ -1233,11 +1209,7 @@ class MessageParser {
     /// given position. Used to suppress descriptors in rtn/bracketRtn/pop replay
     /// when the continuation cannot match. Conservative: returns true for
     /// nullable, END, EPS, and zero-width boundaries to avoid false rejections.
-    func continuationViable(continuation: GrammarNode, at position: CharPosition, mode: UInt64) -> Bool {
-        if continuation.hasModeAnnotation {
-            let occurrenceMode = modeForOccurrence(continuation, from: mode)
-            guard modeAllows(continuation, in: occurrenceMode) else { return false }
-        }
+    func continuationViable(continuation: GrammarNode, at position: CharPosition) -> Bool {
         // Structural nodes that don't consume input are always viable
         if continuation.kind == .END || continuation.kind == .EPS || continuation.kind == .B { return true }
         // Nullable continuation: can't determine without enclosing FOLLOW context

@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00009756-advent-overaccept-26cedfd0722e226f.json",
+    "durationSeconds" : 0.3174029588699341,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline+glue+splice:translated:testOperatorDecl19#1",
+    "index" : 9756,
+    "seed" : 17418699662346727750,
+    "signalHash" : "300c727e52192b48",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/ClassDecl\/Attri",
+    "sourceHash" : "26cedfd0722e226f",
+    "sourceLength" : 48,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\nclass def {\n  infix operator\n|||}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  OperatorDecl\n                    keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                    keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                    binaryOperator(\"|||\") \"|||\"\n              rightBrace \"}\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3A6122D9-5FA5-454B-89B4-A4243AC0DCE1.swift:3:4: error: '}' is not allowed in operator names\n1 | #if {\n2 | infix operator\n3 | |||}\n  |    `- error: '}' is not allowed in operator names\n4 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"infix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 214,
+      "descriptorCount" : 401,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 113,
+      "parseSeconds" : 0.004935026168823242,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 40,
+      "tokenCount" : 8,
+      "yieldCount" : 179
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  OperatorDecl\n                    keyword(SwiftSyntax.Keyword.infix) \"infix\"\n                    keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                    binaryOperator(\"|||\") \"|||\"\n                    UnexpectedNodes\n                      rightBrace \"}\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 32,
+  "source" : "#if {\ninfix operator\n|||}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  OperatorDecl\\n                    keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                    keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                    binaryOperator(\\\"|||\\\") \\\"|||\\\"\\n              rightBrace \\\"}\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3A6122D9-5FA5-454B-89B4-A4243AC0DCE1.swift:3:4: error: '}' is not allowed in operator names\\n1 | #if {\\n2 | infix operator\\n3 | |||}\\n  |    `- error: '}' is not allowed in operator names\\n4 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"infix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":214,\"descriptorCount\":401,\"duplicateDescriptorCount\":0,\"oraclePruned\":113,\"parseSeconds\":0.004935026168823242,\"sourceLength\":32,\"suppressedDescriptorCount\":40,\"tokenCount\":8,\"yieldCount\":179},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  OperatorDecl\\n                    keyword(SwiftSyntax.Keyword.infix) \\\"infix\\\"\\n                    keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                    binaryOperator(\\\"|||\\\") \\\"|||\\\"\\n                    UnexpectedNodes\\n                      rightBrace \\\"}\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

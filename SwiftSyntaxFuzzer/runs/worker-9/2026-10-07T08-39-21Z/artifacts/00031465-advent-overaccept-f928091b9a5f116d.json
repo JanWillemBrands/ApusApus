@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00031465-advent-overaccept-f928091b9a5f116d.json",
+    "durationSeconds" : 0.49249207973480225,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:newline+space:type:testLifetimeSpecifier#3",
+    "index" : 31465,
+    "seed" : 3326660360666057020,
+    "signalHash" : "16ee40a91ea2b760",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "f928091b9a5f116d",
+    "sourceLength" : 67,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func foo()  -> dependsOn(x) dependsOn(scoped y)\nX\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"foo\") \"foo\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            AttributedType\n              TypeSpecifierList\n                SimpleTypeSpecifier\n                  identifier(\"dependsOn(x)\") \"dependsOn(x)\"\n              AttributeList\n              TypeSpecifierList\n              TupleType\n                leftParen \"(\"\n                TupleTypeElementList\n                rightParen \")\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-AC2BAB82-6F62-4DE5-837F-420496177D80.swift:1:25: error: consecutive statements on a line must be separated by ';'\n1 | func foo()  -> dependsOn(x) ( )\n  |                         `- error: consecutive statements on a line must be separated by ';'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(x) »"
+    ],
+    "grammarCoverage" : [
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "identifierToken\t[identifier]",
+      "lifetimeSpecifierArgument\t[identifierToken]",
+      "parenthesisedTypeSpecifier\t[\"dependsOn\" >s< \"(\"  lifetimeSpecifierArgument  \")\"]",
+      "parameterModifier\t[parenthesisedTypeSpecifier]",
+      "type\t[parameterModifier type]",
+      "resultType\t[type]",
+      "functionResult\t[\"->\" resultType]",
+      ".OPT\t[functionResult]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 77,
+      "descriptorCount" : 169,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 77,
+      "parseSeconds" : 0.00397801399230957,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 11,
+      "yieldCount" : 140
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"foo\") \"foo\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            IdentifierType\n              identifier(\"dependsOn\") \"dependsOn\"\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n            LabeledExpr\n              DeclReferenceExpr\n                identifier(\"x\") \"x\"\n          rightParen \")\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "func foo()  -> dependsOn(x) ( )",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"foo\\\") \\\"foo\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            AttributedType\\n              TypeSpecifierList\\n                SimpleTypeSpecifier\\n                  identifier(\\\"dependsOn(x)\\\") \\\"dependsOn(x)\\\"\\n              AttributeList\\n              TypeSpecifierList\\n              TupleType\\n                leftParen \\\"(\\\"\\n                TupleTypeElementList\\n                rightParen \\\")\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-AC2BAB82-6F62-4DE5-837F-420496177D80.swift:1:25: error: consecutive statements on a line must be separated by ';'\\n1 | func foo()  -> dependsOn(x) ( )\\n  |                         `- error: consecutive statements on a line must be separated by ';'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(x) »\"],\"grammarCoverage\":[\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"identifierToken\\t[identifier]\",\"lifetimeSpecifierArgument\\t[identifierToken]\",\"parenthesisedTypeSpecifier\\t[\\\"dependsOn\\\" >s< \\\"(\\\"  lifetimeSpecifierArgument  \\\")\\\"]\",\"parameterModifier\\t[parenthesisedTypeSpecifier]\",\"type\\t[parameterModifier type]\",\"resultType\\t[type]\",\"functionResult\\t[\\\"->\\\" resultType]\",\".OPT\\t[functionResult]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":77,\"descriptorCount\":169,\"duplicateDescriptorCount\":0,\"oraclePruned\":77,\"parseSeconds\":0.00397801399230957,\"sourceLength\":31,\"suppressedDescriptorCount\":10,\"tokenCount\":11,\"yieldCount\":140},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"foo\\\") \\\"foo\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            IdentifierType\\n              identifier(\\\"dependsOn\\\") \\\"dependsOn\\\"\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n            LabeledExpr\\n              DeclReferenceExpr\\n                identifier(\\\"x\\\") \\\"x\\\"\\n          rightParen \\\")\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

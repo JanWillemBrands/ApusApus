@@ -575,7 +575,7 @@ class Oracle {
         self.parser = parser
         self.grammar = parser.grammar
         self.input = input
-        for (_, nt) in grammar.nonTerminals {
+        for nt in grammar.allProductions {
             // Node-level extent (@longest/@shortest),
             // read off the owner node — for a nonterminal that is the production-start
             // form `@longest X = …` stored on `nt.disambiguation`.
@@ -612,9 +612,12 @@ class Oracle {
             // Repeatable: each predicate becomes its own rule on the same anchor, so they compose as
             // a CONJUNCTION (every rule prunes independently).
             for predicate in node.forwardPredicates {
-                if let target = grammar.nonTerminals[predicate.targetName], let anchor = node.bodySymbols.first {
+                let targets = grammar.instances(of: predicate.targetName)
+                if !targets.isEmpty, let anchor = node.bodySymbols.first {
                     // Snapshot RAW target starts NOW (Oracle init runs before dead-wood) — canParseAsXxx.
-                    let targetStarts = Set(parser.yield(of: target).map(\.i))
+                    // Every parser-mode instance of the target counts: the question is whether `N`
+                    // derives here at all, in whatever mode the parse reached it.
+                    let targetStarts = Set(targets.flatMap { parser.yield(of: $0).map(\.i) })
                     rules.append((anchor, LookaheadPredicateRule(negated: predicate.negated,
                                                                  targetStarts: targetStarts)))
                 } else {
@@ -639,12 +642,12 @@ class Oracle {
                 } else {
                     // Argument-indexed priority. A nonterminal node's triples are `(i, i, j)`,
                     // so `[i, j]` is that nonterminal's extent.
-                    let targets = filter.targets.compactMap { name -> GrammarNode? in
-                        guard let t = grammar.nonTerminals[name] else {
+                    let targets = filter.targets.flatMap { name -> [GrammarNode] in
+                        let instances = grammar.instances(of: name)
+                        if instances.isEmpty {
                             reportInvariantViolation("child-position filter: unknown nonterminal '\(name)'", once: true)
-                            return nil
                         }
-                        return t
+                        return instances
                     }
                     extents = {
                         Set(targets.flatMap { p.yield(of: $0).map { BinarySpanExtent(from: $0.i, to: $0.j) } })
@@ -656,10 +659,12 @@ class Oracle {
             }
             // `@sameLine` is registered per nonterminal, not here — it must
             // anchor on LHS completion yields to get the construct's exact span.
+            // Every production is a root below, so an RHS reference (`.alt` → its LHS) is not
+            // followed: that would make the recursion as deep as the whole grammar graph.
             if node.kind != .END { walk(node.seq) }
-            walk(node.alt)
+            if !node.isRHS { walk(node.alt) }
         }
-        for nt in grammar.nonTerminals.values { walk(nt) }
+        for nt in grammar.allProductions { walk(nt) }
     }
 
     /// Register node-level extent for an ALT-bearing `owner` (a
@@ -839,9 +844,9 @@ class Oracle {
             guard let node, seen.insert(node.number).inserted else { return }
             allYieldNodes.append(node)
             if node.kind != .END { collect(node.seq) }
-            collect(node.alt)
+            if !node.isRHS { collect(node.alt) }    // productions are all roots below
         }
-        for nt in grammar.nonTerminals.values { collect(nt) }
+        for nt in grammar.allProductions { collect(nt) }
         collect(grammar.root)
 
         // A definition is a node that OWNS alternates: an LHS nonterminal or a bracket.
@@ -1247,10 +1252,10 @@ private struct IJPair: Hashable {
             if node.kind != .END {
                 collect(node.seq)
             }
-            collect(node.alt)
+            if !node.isRHS { collect(node.alt) }    // productions are all roots below
         }
 
-        for nt in grammar.nonTerminals.values {
+        for nt in grammar.allProductions {
             collect(nt)
         }
 

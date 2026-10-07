@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00025772-advent-overaccept-b004eb2d0b5d9de3.json",
+    "durationSeconds" : 0.39062607288360596,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword+keyword:translated:testDiagnoseAvailabilityWindows1#1",
+    "index" : 25772,
+    "seed" : 17418699662346727750,
+    "signalHash" : "b6a9d729b66ec6d4",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/At",
+    "sourceHash" : "b004eb2d0b5d9de3",
+    "sourceLength" : 84,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n@available(Windows, some, nonmutating: \"unsupported\")\nfunc unavailable() {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"available\") \"available\"\n                  leftParen \"(\"\n                  AvailabilityArgumentList\n                    AvailabilityArgument\n                      AvailabilityLabeledArgument\n                        identifier(\"Windows\") \"Windows\"\n                        colon \":\"\n                        SimpleStringLiteralExpr\n                          stringQuote \"\"\"\n                          SimpleStringLiteralSegmentList\n                            StringSegment\n                              stringSegment(\"unsupported\") \"unsupported\"\n                          stringQuote \"\"\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"unavailable\") \"unavailable\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | @available(Windows: \"unsupported\")\n3 | func unavailable() {}\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:2:19: error: expected ',' in 'available' attribute\n1 |  {\n2 | @available(Windows: \"unsupported\")\n  |                   `- error: expected ',' in 'available' attribute\n3 | func unavailable() {}\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:2:19: error: expected ')' in 'available' attribute\n1 |  {\n2 | @available(Windows: \"unsupported\")\n  |                   `- error: expected ')' in 'available' attribute\n3 | func unavailable() {}\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:2:19: error: expected declaration\n1 |  {\n2 | @available(Windows: \"unsupported\")\n  |                   `- error: expected declaration\n3 | func unavailable() {}\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "availabilityStringLiteral\t[singleLineStringLiteral]",
+      "availabilityValue\t[availabilityStringLiteral]",
+      "availabilityLabel\t[identifierToken]",
+      "availabilityAttributeArgument\t[availabilityLabel \":\" availabilityValue]",
+      "availabilityAttributeArguments\t[availabilityAttributeArgument ]",
+      "availableAttribute\t[\"@\" >s< \"available\" >s< \"(\" availabilityAttributeArguments \")\"]",
+      "attribute\t[availableAttribute]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 131,
+      "descriptorCount" : 288,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 108,
+      "parseSeconds" : 0.011534929275512695,
+      "sourceLength" : 61,
+      "suppressedDescriptorCount" : 30,
+      "tokenCount" : 15,
+      "yieldCount" : 204
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            FunctionDecl\n              AttributeList\n                Attribute\n                  atSign \"@\"\n                  IdentifierType\n                    identifier(\"available\") \"available\"\n                  leftParen \"(\"\n                  AvailabilityArgumentList\n                    AvailabilityArgument\n                      PlatformVersion\n                        identifier(\"Windows\") \"Windows\"\n                  UnexpectedNodes\n                    colon \":\"\n                    stringQuote \"\"\"\n                    stringSegment(\"unsupported\") \"unsupported\"\n                    stringQuote \"\"\"\n                  rightParen \")\"\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.func) \"func\"\n              identifier(\"unavailable\") \"unavailable\"\n              FunctionSignature\n                FunctionParameterClause\n                  leftParen \"(\"\n                  FunctionParameterList\n                  rightParen \")\"\n              CodeBlock\n                leftBrace \"{\"\n                CodeBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n@available(Windows: \"unsupported\")\nfunc unavailable() {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"available\\\") \\\"available\\\"\\n                  leftParen \\\"(\\\"\\n                  AvailabilityArgumentList\\n                    AvailabilityArgument\\n                      AvailabilityLabeledArgument\\n                        identifier(\\\"Windows\\\") \\\"Windows\\\"\\n                        colon \\\":\\\"\\n                        SimpleStringLiteralExpr\\n                          stringQuote \\\"\\\"\\\"\\n                          SimpleStringLiteralSegmentList\\n                            StringSegment\\n                              stringSegment(\\\"unsupported\\\") \\\"unsupported\\\"\\n                          stringQuote \\\"\\\"\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"unavailable\\\") \\\"unavailable\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | @available(Windows: \\\"unsupported\\\")\\n3 | func unavailable() {}\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:2:19: error: expected ',' in 'available' attribute\\n1 |  {\\n2 | @available(Windows: \\\"unsupported\\\")\\n  |                   `- error: expected ',' in 'available' attribute\\n3 | func unavailable() {}\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:2:19: error: expected ')' in 'available' attribute\\n1 |  {\\n2 | @available(Windows: \\\"unsupported\\\")\\n  |                   `- error: expected ')' in 'available' attribute\\n3 | func unavailable() {}\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-206CDAA7-47AA-4E6A-9D84-03FD5CDBAD27.swift:2:19: error: expected declaration\\n1 |  {\\n2 | @available(Windows: \\\"unsupported\\\")\\n  |                   `- error: expected declaration\\n3 | func unavailable() {}\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"availabilityStringLiteral\\t[singleLineStringLiteral]\",\"availabilityValue\\t[availabilityStringLiteral]\",\"availabilityLabel\\t[identifierToken]\",\"availabilityAttributeArgument\\t[availabilityLabel \\\":\\\" availabilityValue]\",\"availabilityAttributeArguments\\t[availabilityAttributeArgument ]\",\"availableAttribute\\t[\\\"@\\\" >s< \\\"available\\\" >s< \\\"(\\\" availabilityAttributeArguments \\\")\\\"]\",\"attribute\\t[availableAttribute]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":131,\"descriptorCount\":288,\"duplicateDescriptorCount\":0,\"oraclePruned\":108,\"parseSeconds\":0.011534929275512695,\"sourceLength\":61,\"suppressedDescriptorCount\":30,\"tokenCount\":15,\"yieldCount\":204},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            FunctionDecl\\n              AttributeList\\n                Attribute\\n                  atSign \\\"@\\\"\\n                  IdentifierType\\n                    identifier(\\\"available\\\") \\\"available\\\"\\n                  leftParen \\\"(\\\"\\n                  AvailabilityArgumentList\\n                    AvailabilityArgument\\n                      PlatformVersion\\n                        identifier(\\\"Windows\\\") \\\"Windows\\\"\\n                  UnexpectedNodes\\n                    colon \\\":\\\"\\n                    stringQuote \\\"\\\"\\\"\\n                    stringSegment(\\\"unsupported\\\") \\\"unsupported\\\"\\n                    stringQuote \\\"\\\"\\\"\\n                  rightParen \\\")\\\"\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n              identifier(\\\"unavailable\\\") \\\"unavailable\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  leftParen \\\"(\\\"\\n                  FunctionParameterList\\n                  rightParen \\\")\\\"\\n              CodeBlock\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

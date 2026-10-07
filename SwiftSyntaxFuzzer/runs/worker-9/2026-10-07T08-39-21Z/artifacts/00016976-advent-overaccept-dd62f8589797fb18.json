@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00016976-advent-overaccept-dd62f8589797fb18.json",
+    "durationSeconds" : 0.3940579891204834,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:newline+keyword+newline:translated:testSuper2c#1",
+    "index" : 16976,
+    "seed" : 3326660360666057020,
+    "signalHash" : "eb57a587c6cdd419",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/ClassDecl\/Attri",
+    "sourceHash" : "dd62f8589797fb18",
+    "sourceLength" : 83,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nclass D : B {\n  sending\ninit(y:Int)\n{\n    let _: () -> D = self.init\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                      DeclModifier\n                        identifier(\"sending\") \"sending\"\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                          FunctionParameter\n                            AttributeList\n                            DeclModifierList\n                            identifier(\"y\") \"y\"\n                            colon \":\"\n                            IdentifierType\n                              identifier(\"Int\") \"Int\"\n                        rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B6FC876F-8C8E-4C9A-8088-9D9B092EE8FE.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 |   sending\n3 | init(y:Int)\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B6FC876F-8C8E-4C9A-8088-9D9B092EE8FE.swift:3:5: error: initializers may only be declared within a type\n1 |  { {\n2 |   sending\n3 | init(y:Int)\n  |     `- error: initializers may only be declared within a type\n4 | }\n5 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "type\t[typeIdentifier]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      "argumentLabel\t[identifier]",
+      "localParameterName\t[argumentLabel]",
+      "parameterNames\t[localParameterName]",
+      "parameter\t[  parameterNames typeAnnotation ]",
+      "parameterList\t[parameter ]",
+      "parameterClause\t[\"(\" parameterList  \")\"]",
+      "declarationModifier\t[\"sending\"]",
+      "declarationModifiers\t[declarationModifier ]",
+      ".OPT\t[declarationModifiers]",
+      "initializerHead\t[  \"init\"]",
+      "bodylessInitializerDeclaration\t[initializerHead  parameterClause    ]",
+      "declaration\t[bodylessInitializerDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 261,
+      "descriptorCount" : 578,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 300,
+      "parseSeconds" : 0.012573957443237305,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 86,
+      "tokenCount" : 11,
+      "yieldCount" : 416
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  InitializerDecl\n                    AttributeList\n                    DeclModifierList\n                    UnexpectedNodes\n                      identifier(\"sending\") \"sending\"\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                    FunctionSignature\n                      FunctionParameterClause\n                        leftParen \"(\"\n                        FunctionParameterList\n                          FunctionParameter\n                            AttributeList\n                            DeclModifierList\n                            identifier(\"y\") \"y\"\n                            colon \":\"\n                            IdentifierType\n                              identifier(\"Int\") \"Int\"\n                        rightParen \")\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  sending\ninit(y:Int)\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                      DeclModifier\\n                        identifier(\\\"sending\\\") \\\"sending\\\"\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                          FunctionParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            identifier(\\\"y\\\") \\\"y\\\"\\n                            colon \\\":\\\"\\n                            IdentifierType\\n                              identifier(\\\"Int\\\") \\\"Int\\\"\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B6FC876F-8C8E-4C9A-8088-9D9B092EE8FE.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 |   sending\\n3 | init(y:Int)\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B6FC876F-8C8E-4C9A-8088-9D9B092EE8FE.swift:3:5: error: initializers may only be declared within a type\\n1 |  { {\\n2 |   sending\\n3 | init(y:Int)\\n  |     `- error: initializers may only be declared within a type\\n4 | }\\n5 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"type\\t[typeIdentifier]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\"argumentLabel\\t[identifier]\",\"localParameterName\\t[argumentLabel]\",\"parameterNames\\t[localParameterName]\",\"parameter\\t[  parameterNames typeAnnotation ]\",\"parameterList\\t[parameter ]\",\"parameterClause\\t[\\\"(\\\" parameterList  \\\")\\\"]\",\"declarationModifier\\t[\\\"sending\\\"]\",\"declarationModifiers\\t[declarationModifier ]\",\".OPT\\t[declarationModifiers]\",\"initializerHead\\t[  \\\"init\\\"]\",\"bodylessInitializerDeclaration\\t[initializerHead  parameterClause    ]\",\"declaration\\t[bodylessInitializerDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":261,\"descriptorCount\":578,\"duplicateDescriptorCount\":1,\"oraclePruned\":300,\"parseSeconds\":0.012573957443237305,\"sourceLength\":30,\"suppressedDescriptorCount\":86,\"tokenCount\":11,\"yieldCount\":416},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  InitializerDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    UnexpectedNodes\\n                      identifier(\\\"sending\\\") \\\"sending\\\"\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                    FunctionSignature\\n                      FunctionParameterClause\\n                        leftParen \\\"(\\\"\\n                        FunctionParameterList\\n                          FunctionParameter\\n                            AttributeList\\n                            DeclModifierList\\n                            identifier(\\\"y\\\") \\\"y\\\"\\n                            colon \\\":\\\"\\n                            IdentifierType\\n                              identifier(\\\"Int\\\") \\\"Int\\\"\\n                        rightParen \\\")\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

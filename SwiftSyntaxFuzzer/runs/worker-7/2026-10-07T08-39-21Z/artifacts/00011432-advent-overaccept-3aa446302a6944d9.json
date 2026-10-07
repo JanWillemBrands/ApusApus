@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00011432-advent-overaccept-3aa446302a6944d9.json",
+    "durationSeconds" : 0.3399209976196289,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:glue+line-comment+newline:reject:testMacroDecl#2",
+    "index" : 11432,
+    "seed" : 17418699662346727750,
+    "signalHash" : "8bc8156da4900193",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/MacroDecl\/Attri",
+    "sourceHash" : "3aa446302a6944d9",
+    "sourceLength" : 33,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n\nmacro \/\/ c\nm1 = A\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"macro\") \"macro\"\n              CodeBlockItem\n                SequenceExpr\n                  ExprList\n                    DeclReferenceExpr\n                      identifier(\"m1\") \"m1\"\n                    AssignmentExpr\n                      equal \"=\"\n                    DeclReferenceExpr\n                      identifier(\"A\") \"A\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8B1DE476-D43F-40CC-BF0F-BB24135FA764.swift:3:4: error: expected '(' for macro parameters or ':' for a value-like macro\n1 | #if FOO\n2 | macro\n3 | m1 = A\n  |    `- error: expected '(' for macro parameters or ':' for a value-like macro\n4 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "statement\t[expression]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 192,
+      "descriptorCount" : 419,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 93,
+      "parseSeconds" : 0.004903912544250488,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 44,
+      "tokenCount" : 8,
+      "yieldCount" : 216
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                MacroDecl\n                  AttributeList\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.macro) \"macro\"\n                  identifier(\"m1\") \"m1\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      FunctionParameterList\n                  InitializerClause\n                    equal \"=\"\n                    DeclReferenceExpr\n                      identifier(\"A\") \"A\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 24,
+  "source" : "#if FOO\nmacro\nm1 = A\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"macro\\\") \\\"macro\\\"\\n              CodeBlockItem\\n                SequenceExpr\\n                  ExprList\\n                    DeclReferenceExpr\\n                      identifier(\\\"m1\\\") \\\"m1\\\"\\n                    AssignmentExpr\\n                      equal \\\"=\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"A\\\") \\\"A\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8B1DE476-D43F-40CC-BF0F-BB24135FA764.swift:3:4: error: expected '(' for macro parameters or ':' for a value-like macro\\n1 | #if FOO\\n2 | macro\\n3 | m1 = A\\n  |    `- error: expected '(' for macro parameters or ':' for a value-like macro\\n4 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"statement\\t[expression]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":192,\"descriptorCount\":419,\"duplicateDescriptorCount\":0,\"oraclePruned\":93,\"parseSeconds\":0.004903912544250488,\"sourceLength\":27,\"suppressedDescriptorCount\":44,\"tokenCount\":8,\"yieldCount\":216},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                MacroDecl\\n                  AttributeList\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n                  identifier(\\\"m1\\\") \\\"m1\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      FunctionParameterList\\n                  InitializerClause\\n                    equal \\\"=\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"A\\\") \\\"A\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

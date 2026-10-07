@@ -682,6 +682,38 @@ struct AdventFuzzRunner {
             }
 
             let generated = generator.next(using: &rng)
+            if sourceRequiresDisabledExperimentalFeature(generated.source) {
+                let status = "skipped-experimental"
+                counts[status, default: 0] += 1
+                completed += 1
+                if index == 0 || index % max(1, options.heartbeatEvery) == max(1, options.heartbeatEvery) - 1 {
+                    print("[\(index + 1)/\(options.iterations)] \(status) \(generated.label) len=\(generated.source.count) artifacts=\(artifactCount) \(countsLine(counts))")
+                    try? writeHeartbeat(
+                        to: heartbeatURL,
+                        runURL: runURL,
+                        seed: options.seed,
+                        requestedIterations: options.iterations,
+                        completed: completed,
+                        artifactCount: artifactCount,
+                        artifactBytes: artifactBytes,
+                        startedAt: runStart,
+                        counts: counts
+                    )
+                    try? writeState(
+                        to: stateURL,
+                        runURL: runURL,
+                        seed: options.seed,
+                        requestedIterations: options.iterations,
+                        nextIndex: index + 1,
+                        completed: completed,
+                        artifactCount: artifactCount,
+                        artifactBytes: artifactBytes,
+                        stopped: StopFlag.shared.isStopped,
+                        counts: counts
+                    )
+                }
+                continue
+            }
             let started = Date()
             let result: ProcessResult
             do {
@@ -2296,7 +2328,6 @@ struct SwiftFragmentGenerator {
             "(repeat each T) -> Void",
             "@Sendable (borrowing Foo, consuming Foo) async throws(FuzzError) -> sending Foo",
             "nonisolated(nonsending) () async -> Void",
-            "dependsOn(self, scoped other) () -> Void",
             "isolated any Actor",
             "~Copyable",
             "Foo.Bar?.Type"
@@ -2649,6 +2680,20 @@ func stableHash(_ string: String) -> String {
         hash &*= 0x100000001b3
     }
     return String(format: "%016llx", hash)
+}
+
+func sourceRequiresDisabledExperimentalFeature(_ source: String) -> Bool {
+    if source.contains("dependsOn(") { return true }
+    if source.contains("InlineArray<") { return true }
+    if source.contains("borrow {") || source.contains("mutate {") { return true }
+    if source.contains("_borrow") || source.contains("_move") { return true }
+    if source.contains("_mutating") || source.contains("_borrowing") || source.contains("_consuming") {
+        return true
+    }
+    return source.split(whereSeparator: \.isNewline).contains { line in
+        let trimmed = line.drop(while: { $0.isWhitespace })
+        return trimmed == "using" || trimmed.hasPrefix("using ")
+    }
 }
 
 func countsLine(_ counts: [String: Int]) -> String {

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00000260-advent-overaccept-37d3bd96baa0ce2a.json",
+    "durationSeconds" : 0.3217480182647705,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+swap:declaration:testVariableDeclarations#6",
+    "index" : 260,
+    "seed" : 6018004084445820285,
+    "signalHash" : "53dea630006bfa51",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "37d3bd96baa0ce2a",
+    "sourceLength" : 52,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nvar a = Array\n< >?Int(from: decoder)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                DeclReferenceExpr\n                  identifier(\"Array\") \"Array\"\n                BinaryOperatorExpr\n                  binaryOperator(\"<\") \"<\"\n                PrefixOperatorExpr\n                  prefixOperator(\">?\") \">?\"\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      identifier(\"Int\") \"Int\"\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n                    MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D4C482EA-4AF3-4B5C-AB7D-02DC352B4C06.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { a = Array\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | < >?Int()\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D4C482EA-4AF3-4B5C-AB7D-02DC352B4C06.swift:2:5: error: consecutive statements on a line must be separated by ';'\n1 |  { a = Array\n2 | < >?Int()\n  |     `- error: consecutive statements on a line must be separated by ';'\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s> prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 144,
+      "descriptorCount" : 368,
+      "duplicateDescriptorCount" : 2,
+      "oraclePruned" : 225,
+      "parseSeconds" : 0.008461952209472656,
+      "sourceLength" : 24,
+      "suppressedDescriptorCount" : 61,
+      "tokenCount" : 11,
+      "yieldCount" : 341
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                OptionalChainingExpr\n                  GenericSpecializationExpr\n                    DeclReferenceExpr\n                      identifier(\"Array\") \"Array\"\n                    GenericArgumentClause\n                      leftAngle \"<\"\n                      GenericArgumentList\n                      rightAngle \">\"\n                  postfixQuestionMark \"?\"\n          CodeBlockItem\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"Int\") \"Int\"\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n              MultipleTrailingClosureElementList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 43,
+  "source" : " { a = Array\n< >?Int()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Array\\\") \\\"Array\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"<\\\") \\\"<\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\">?\\\") \\\">?\\\"\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Int\\\") \\\"Int\\\"\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n                    MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D4C482EA-4AF3-4B5C-AB7D-02DC352B4C06.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { a = Array\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | < >?Int()\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D4C482EA-4AF3-4B5C-AB7D-02DC352B4C06.swift:2:5: error: consecutive statements on a line must be separated by ';'\\n1 |  { a = Array\\n2 | < >?Int()\\n  |     `- error: consecutive statements on a line must be separated by ';'\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s> prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":144,\"descriptorCount\":368,\"duplicateDescriptorCount\":2,\"oraclePruned\":225,\"parseSeconds\":0.008461952209472656,\"sourceLength\":24,\"suppressedDescriptorCount\":61,\"tokenCount\":11,\"yieldCount\":341},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                OptionalChainingExpr\\n                  GenericSpecializationExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"Array\\\") \\\"Array\\\"\\n                    GenericArgumentClause\\n                      leftAngle \\\"<\\\"\\n                      GenericArgumentList\\n                      rightAngle \\\">\\\"\\n                  postfixQuestionMark \\\"?\\\"\\n          CodeBlockItem\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"Int\\\") \\\"Int\\\"\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n              MultipleTrailingClosureElementList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

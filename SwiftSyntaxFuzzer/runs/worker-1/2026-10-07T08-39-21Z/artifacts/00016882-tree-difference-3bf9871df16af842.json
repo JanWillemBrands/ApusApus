@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00016882-tree-difference-3bf9871df16af842.json",
+    "durationSeconds" : 0.32221806049346924,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+line-comment+duplicate:type:testInverseTypesAsExpr#3",
+    "index" : 16882,
+    "seed" : 4354586892308818372,
+    "signalHash" : "9b2641435c9895ae",
+    "signalSummary" : "tree-difference|line=22|ref=SequenceExpr|advent=TypeExpr",
+    "sourceHash" : "3bf9871df16af842",
+    "sourceLength" : 47,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n(any any ~ \/\/ c\nCopyable\n).self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MemberAccessExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      TypeExpr\n                        SomeOrAnyType\n                          keyword(SwiftSyntax.Keyword.any) \"any\"\n                          SomeOrAnyType\n                            keyword(SwiftSyntax.Keyword.any) \"any\"\n                            SuppressedType\n                              prefixOperator(\"~\") \"~\"\n                              IdentifierType\n                                identifier(\"Copyable\") \"Copyable\"\n                  rightParen \")\"\n                period \".\"\n                DeclReferenceExpr\n                  keyword(SwiftSyntax.Keyword.self) \"self\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "regexSafeLexerKeyword\t[\"self\"]",
+      "memberName\t[regexSafeLexerKeyword]",
+      ".DO\t[>s< \".\" >s<]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "simpleType\t[typeIdentifier]",
+      "suppressedType\t[<s> \"~\" simpleType]",
+      "type\t[suppressedType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"dependsOn\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "type\t[boxedProtocolType]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "primaryExpression\t[parenthesizedExpression]",
+      "explicitMemberExpression\t[postfixExpression   memberName]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 156,
+      "descriptorCount" : 376,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 217,
+      "parseSeconds" : 0.009037017822265625,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 68,
+      "tokenCount" : 13,
+      "yieldCount" : 334
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MemberAccessExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      SequenceExpr\n                        ExprList\n                          TypeExpr\n                            SomeOrAnyType\n                              keyword(SwiftSyntax.Keyword.any) \"any\"\n                              IdentifierType\n                                identifier(\"any\") \"any\"\n                          BinaryOperatorExpr\n                            binaryOperator(\"~\") \"~\"\n                          DeclReferenceExpr\n                            identifier(\"Copyable\") \"Copyable\"\n                  rightParen \")\"\n                period \".\"\n                DeclReferenceExpr\n                  keyword(SwiftSyntax.Keyword.self) \"self\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 44,
+  "source" : " fuzz() {\n(any any ~\nCopyable\n).self\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MemberAccessExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      TypeExpr\\n                        SomeOrAnyType\\n                          keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                          SomeOrAnyType\\n                            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                            SuppressedType\\n                              prefixOperator(\\\"~\\\") \\\"~\\\"\\n                              IdentifierType\\n                                identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                  rightParen \\\")\\\"\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"regexSafeLexerKeyword\\t[\\\"self\\\"]\",\"memberName\\t[regexSafeLexerKeyword]\",\".DO\\t[>s< \\\".\\\" >s<]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"simpleType\\t[typeIdentifier]\",\"suppressedType\\t[<s> \\\"~\\\" simpleType]\",\"type\\t[suppressedType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"dependsOn\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"type\\t[boxedProtocolType]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"primaryExpression\\t[parenthesizedExpression]\",\"explicitMemberExpression\\t[postfixExpression   memberName]\",\"postfixExpression\\t[explicitMemberExpression]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":156,\"descriptorCount\":376,\"duplicateDescriptorCount\":0,\"oraclePruned\":217,\"parseSeconds\":0.009037017822265625,\"sourceLength\":38,\"suppressedDescriptorCount\":68,\"tokenCount\":13,\"yieldCount\":334},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MemberAccessExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      SequenceExpr\\n                        ExprList\\n                          TypeExpr\\n                            SomeOrAnyType\\n                              keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                              IdentifierType\\n                                identifier(\\\"any\\\") \\\"any\\\"\\n                          BinaryOperatorExpr\\n                            binaryOperator(\\\"~\\\") \\\"~\\\"\\n                          DeclReferenceExpr\\n                            identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                  rightParen \\\")\\\"\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

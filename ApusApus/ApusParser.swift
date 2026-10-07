@@ -92,6 +92,8 @@ class ApusParser {
         grammar.startSymbol = explicitStartSymbol
         try parseApusGrammar()
         try expandExclusionSetReferences()
+        // Compile parser modes into grammar copies while productions are still trees.
+        try grammar.specializeParserModes()
         
         let DUMP = false
         if DUMP {
@@ -121,6 +123,9 @@ class ApusParser {
             if DUMP { print("Processing END nodes for:", name) }
             node.resolveGrammarNodeLinks(parent: node, alternate: node.alt, build: build)
         }
+        for node in grammar.specializations {
+            node.resolveGrammarNodeLinks(parent: node, alternate: node.alt, build: build)
+        }
         grammar.nodeCount = build.nodeCounter
         
         grammar.root.follow.insert("○")
@@ -134,7 +139,7 @@ class ApusParser {
         repeat {
             oldSize = newSize
             newSize = 0
-            for (_, node) in grammar.nonTerminals {
+            for node in grammar.allProductions {
                 if DUMP { print("nonterminalcount", grammar.nonTerminals.count) }
                 GrammarNode.sizeofSets = 0
                 try grammar.populateFirstFollowSets(for: node)
@@ -149,8 +154,8 @@ class ApusParser {
         GrammarNode.grammar = grammar
         
         var isLL1 = true
-        for (name, node) in grammar.nonTerminals {
-            if DUMP { print("Detecting ambiguity for:", name) }
+        for node in grammar.allProductions {
+            if DUMP { print("Detecting ambiguity for:", node.name) }
             if !node.verifyLL1() { isLL1 = false }
             node.detectSchrödingerConflict()
         }
@@ -186,57 +191,90 @@ class ApusParser {
     }
     
     func production() throws {
+        // Production-start pragmas, in ANY order. They are independent properties of the
+        // production, so their order carries no meaning:
+        //   `@carries(m …)` — the parser modes this nonterminal is in scope for: an inherited mode
+        //       bit passes into an occurrence of this nonterminal only if it is listed here; anywhere
+        //       else the bit is dropped on entry (a swift-syntax parameter that a function does not
+        //       forward). May repeat; lists union, also across several definitions of one
+        //       nonterminal. See `Parser Modes Specialization.md`.
+        //   `@longest` / `@shortest` — node-level extent of this nonterminal.
+        //   `@sameLine` — a whole-nonterminal span property: the Oracle prunes this nonterminal's
+        //       LHS completion yields; not an alternate-level notion. `@sameLineOutsideBrackets` is
+        //       the shallow variant: line breaks inside brackets are free.
+        //   `@literalMunch` — a regex terminal participating in literal-suppression maximal munch
+        //       (TODO #0).
+        //   `@preempt(X)` / `@preempt(X, N)` — this terminal's maximal munch must not swallow
+        //       something of higher priority. Both regex literals and generics were bolted onto an
+        //       already-mature Swift, so its lexer has to pre-empt operator munching for them.
+        //       X — the terminal whose start positions define the SPLIT POINTS. It names a specific
+        //           token shape rather than deriving split points from `FIRST(N)`, whose members may
+        //           differ in spelling and boundary behavior.
+        //       N — OPTIONAL: the construct that must actually PARSE at a split point for the
+        //           shorter reading to win. Without it the split is merely offered.
+        // Every pragma except `@carries` may appear once; `@longest`/`@shortest` and the two
+        // `@sameLine` forms are one property each. An unknown pragma here is an error.
+        var carriedModes: UInt64 = 0
         var disambiguationAnnotation: Disambiguation?
-        if token.kind == "pragma", let d = Disambiguation(rawValue: token.stripped) {
-            guard d == .longest || d == .shortest else {
-                throw ApusParserError.unexpectedToken(
-                    explanation: "@\(d.rawValue) is an alternate-level associativity filter; "
-                               + "write it after the `=` or `|`, on the alternate it governs")
-            }
-            disambiguationAnnotation = d
-            cI += 1
-        }
-        // `@sameLine` — a whole-nonterminal span property, so it sits at the
-        // production start next to `@longest`/`@shortest`. The Oracle prunes this
-        // nonterminal's LHS completion yields; it is not an alternate-level notion.
-        // `@sameLineOutsideBrackets` is the shallow variant: line breaks inside brackets are free.
         var sameLineAnnotation = false
         var sameLineOutsideBrackets = false
-        if token.kind == "pragma", token.stripped == "sameLine" || token.stripped == "sameLineOutsideBrackets" {
-            sameLineAnnotation = true
-            sameLineOutsideBrackets = token.stripped == "sameLineOutsideBrackets"
-            cI += 1
-        }
-        // `@literalMunch` — marks a regex terminal as participating in
-        // literal-suppression maximal munch. See TODO #0.
         var isLiteralMunchAnnotation = false
-        if token.kind == "pragma", token.stripped == "literalMunch" {
-            isLiteralMunchAnnotation = true
-            cI += 1
-        }
-        // `@preempt(X)` / `@preempt(X, N)` — this terminal's maximal munch must not swallow something
-        // of higher priority. Both regex literals and generics were bolted onto an already-mature
-        // Swift, so its lexer has to pre-empt operator munching for them; this states that directly.
-        //   X — the terminal whose start positions define the SPLIT POINTS. It names a specific
-        //       token shape rather than deriving split points from `FIRST(N)`, whose members may
-        //       differ in spelling and boundary behavior.
-        //   N — OPTIONAL: the construct that must actually PARSE at a split point for the shorter
-        //       reading to win. Without it the split is merely offered (today's generics use).
         var preemptStartName: String? = nil
         var preemptConstructName: String? = nil
-        if token.kind == "pragma", token.stripped == "preempt" {
-            cI += 1
-            try expect(["("]); cI += 1
-            try expect(["identifier"])
-            preemptStartName = String(token.image)
-            cI += 1
-            if token.kind == "," {
-                cI += 1
-                try expect(["identifier"])
-                preemptConstructName = String(token.image)
-                cI += 1
+        var seenProperties = Set<String>()
+        func once(_ property: String) throws {
+            guard seenProperties.insert(property).inserted else {
+                throw ApusParserError.unexpectedToken(
+                    explanation: "@\(token.stripped): the production already has a \(property) pragma")
             }
-            try expect([")"]); cI += 1
+        }
+        while token.kind == "pragma" {
+            switch token.stripped {
+            case "carries":
+                cI += 1
+                try expect(["("]); cI += 1
+                repeat {
+                    try expect(["identifier"])
+                    carriedModes |= try grammar.parserModeBit(named: String(token.image))
+                    cI += 1
+                } while token.kind == "identifier"
+                try expect([")"]); cI += 1
+            case "longest", "shortest":
+                try once("extent (@longest/@shortest)")
+                disambiguationAnnotation = Disambiguation(rawValue: token.stripped)
+                cI += 1
+            case "left", "right":
+                throw ApusParserError.unexpectedToken(
+                    explanation: "@\(token.stripped) is an alternate-level associativity filter; "
+                               + "write it after the `=` or `|`, on the alternate it governs")
+            case "sameLine", "sameLineOutsideBrackets":
+                try once("@sameLine")
+                sameLineAnnotation = true
+                sameLineOutsideBrackets = token.stripped == "sameLineOutsideBrackets"
+                cI += 1
+            case "literalMunch":
+                try once("@literalMunch")
+                isLiteralMunchAnnotation = true
+                cI += 1
+            case "preempt":
+                try once("@preempt")
+                cI += 1
+                try expect(["("]); cI += 1
+                try expect(["identifier"])
+                preemptStartName = String(token.image)
+                cI += 1
+                if token.kind == "," {
+                    cI += 1
+                    try expect(["identifier"])
+                    preemptConstructName = String(token.image)
+                    cI += 1
+                }
+                try expect([")"]); cI += 1
+            default:
+                throw ApusParserError.unexpectedToken(
+                    explanation: "@\(token.stripped) is not a production pragma "
+                               + "(@carries @longest @shortest @sameLine @sameLineOutsideBrackets @literalMunch @preempt)")
+            }
         }
         try expect(["identifier"])
         let nonTerminalName = String(token.image)
@@ -344,6 +382,7 @@ class ApusParser {
             if let d = disambiguationAnnotation {
                 lhsNode.disambiguation = d
             }
+            lhsNode.carriedModes |= carriedModes
             if sameLineAnnotation {
                 lhsNode.requiresSameLine = true
                 lhsNode.sameLineOutsideBrackets = sameLineOutsideBrackets
@@ -602,7 +641,6 @@ class ApusParser {
         node.modeRemove |= annotation.remove
         node.requiredModes |= annotation.require
         node.rejectedModes |= annotation.reject
-        node.hasModeAnnotation = true
     }
     
     func layout() -> GrammarNode {

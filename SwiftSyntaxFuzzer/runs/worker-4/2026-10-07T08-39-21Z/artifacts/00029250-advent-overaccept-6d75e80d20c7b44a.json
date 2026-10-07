@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00029250-advent-overaccept-6d75e80d20c7b44a.json",
+    "durationSeconds" : 0.3842179775238037,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:glue+newline:statement:testSwitch#3",
+    "index" : 29250,
+    "seed" : 1663247016786083207,
+    "signalHash" : "d6c8c4a051c0c377",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/ExpressionStmt\/SwitchExpr\/keyword()\/DeclReferenceExpr\/identifier()\/leftBrace\/SwitchCaseList\/SwitchCase\/SwitchCaseLabel\/keyword()\/Swit",
+    "sourceHash" : "6d75e80d20c7b44a",
+    "sourceLength" : 115,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "switch x {\ncase .A:\n  break\ncase .B:\n  break\n#if NEVER\n#elseif ENABLE_C case .C:\n  break\n#endif\n}\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          DeclReferenceExpr\n            identifier(\"x\") \"x\"\n          leftBrace \"{\"\n          SwitchCaseList\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  DeclReferenceExpr\n                    identifier(\"NEVER\") \"NEVER\"\n                  SwitchCaseList\n                IfConfigClause\n                  poundElseif \"#elseif\"\n                  DeclReferenceExpr\n                    identifier(\"ENABLE_C\") \"ENABLE_C\"\n                  SwitchCaseList\n                    SwitchCase\n                      SwitchCaseLabel\n                        keyword(SwiftSyntax.Keyword.case) \"case\"\n                        SwitchCaseItemList\n                          SwitchCaseItem\n                            ExpressionPattern\n                              DeclReferenceExpr\n                                identifier(\"C\") \"C\"\n                        colon \":\"\n                      CodeBlockItemList\n              poundEndif \"#endif\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-80844ABF-E010-4DC4-92E8-75EC61F89219.swift:3:18: error: extra tokens following conditional compilation directive\n1 | switch x {\n2 | #if NEVER\n3 | #elseif ENABLE_C case C:\n  |                  `- error: extra tokens following conditional compilation directive\n4 | #endif\n5 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseItemList\t[matchPattern  ]",
+      "caseLabel\t[ \"case\" caseItemList \":\"]",
+      "switchCase\t[caseLabel ]",
+      "switchCases\t[switchCase ]",
+      ".OPT\t[switchCases]",
+      "compilationCondition\t[>n< expression]",
+      "elseifDirective\t[\"#elseif\"]",
+      "switchElseifDirectiveClause\t[elseifDirective compilationCondition ]",
+      "switchElseifDirectiveClauses\t[switchElseifDirectiveClause ]",
+      ".OPT\t[switchElseifDirectiveClauses]",
+      "ifDirective\t[\"#if\"]",
+      "switchIfDirectiveClause\t[ifDirective compilationCondition ]",
+      "conditionalSwitchCase\t[switchIfDirectiveClause   endifDirective]",
+      "switchCase\t[conditionalSwitchCase]",
+      "switchExpression\t[\"switch\" >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "effectfulConditional\t[conditionalExpression]",
+      "expression\t[effectfulConditional ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 310,
+      "descriptorCount" : 650,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 135,
+      "parseSeconds" : 0.008967995643615723,
+      "sourceLength" : 54,
+      "suppressedDescriptorCount" : 62,
+      "tokenCount" : 14,
+      "yieldCount" : 275
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          DeclReferenceExpr\n            identifier(\"x\") \"x\"\n          leftBrace \"{\"\n          SwitchCaseList\n            IfConfigDecl\n              IfConfigClauseList\n                IfConfigClause\n                  poundIf \"#if\"\n                  DeclReferenceExpr\n                    identifier(\"NEVER\") \"NEVER\"\n                  SwitchCaseList\n                IfConfigClause\n                  poundElseif \"#elseif\"\n                  DeclReferenceExpr\n                    identifier(\"ENABLE_C\") \"ENABLE_C\"\n                  UnexpectedNodes\n                    keyword(SwiftSyntax.Keyword.case) \"case\"\n                    identifier(\"C\") \"C\"\n                    colon \":\"\n                  SwitchCaseList\n              poundEndif \"#endif\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "switch x {\n#if NEVER\n#elseif ENABLE_C case C:\n#endif\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"x\\\") \\\"x\\\"\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"NEVER\\\") \\\"NEVER\\\"\\n                  SwitchCaseList\\n                IfConfigClause\\n                  poundElseif \\\"#elseif\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"ENABLE_C\\\") \\\"ENABLE_C\\\"\\n                  SwitchCaseList\\n                    SwitchCase\\n                      SwitchCaseLabel\\n                        keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                        SwitchCaseItemList\\n                          SwitchCaseItem\\n                            ExpressionPattern\\n                              DeclReferenceExpr\\n                                identifier(\\\"C\\\") \\\"C\\\"\\n                        colon \\\":\\\"\\n                      CodeBlockItemList\\n              poundEndif \\\"#endif\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-80844ABF-E010-4DC4-92E8-75EC61F89219.swift:3:18: error: extra tokens following conditional compilation directive\\n1 | switch x {\\n2 | #if NEVER\\n3 | #elseif ENABLE_C case C:\\n  |                  `- error: extra tokens following conditional compilation directive\\n4 | #endif\\n5 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseItemList\\t[matchPattern  ]\",\"caseLabel\\t[ \\\"case\\\" caseItemList \\\":\\\"]\",\"switchCase\\t[caseLabel ]\",\"switchCases\\t[switchCase ]\",\".OPT\\t[switchCases]\",\"compilationCondition\\t[>n< expression]\",\"elseifDirective\\t[\\\"#elseif\\\"]\",\"switchElseifDirectiveClause\\t[elseifDirective compilationCondition ]\",\"switchElseifDirectiveClauses\\t[switchElseifDirectiveClause ]\",\".OPT\\t[switchElseifDirectiveClauses]\",\"ifDirective\\t[\\\"#if\\\"]\",\"switchIfDirectiveClause\\t[ifDirective compilationCondition ]\",\"conditionalSwitchCase\\t[switchIfDirectiveClause   endifDirective]\",\"switchCase\\t[conditionalSwitchCase]\",\"switchExpression\\t[\\\"switch\\\" >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"effectfulConditional\\t[conditionalExpression]\",\"expression\\t[effectfulConditional ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":310,\"descriptorCount\":650,\"duplicateDescriptorCount\":0,\"oraclePruned\":135,\"parseSeconds\":0.008967995643615723,\"sourceLength\":54,\"suppressedDescriptorCount\":62,\"tokenCount\":14,\"yieldCount\":275},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"x\\\") \\\"x\\\"\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n            IfConfigDecl\\n              IfConfigClauseList\\n                IfConfigClause\\n                  poundIf \\\"#if\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"NEVER\\\") \\\"NEVER\\\"\\n                  SwitchCaseList\\n                IfConfigClause\\n                  poundElseif \\\"#elseif\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"ENABLE_C\\\") \\\"ENABLE_C\\\"\\n                  UnexpectedNodes\\n                    keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                    identifier(\\\"C\\\") \\\"C\\\"\\n                    colon \\\":\\\"\\n                  SwitchCaseList\\n              poundEndif \\\"#endif\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

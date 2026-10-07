@@ -2,70 +2,9 @@
 
 This file is the canonical active TODO list for the project.
 It holds actionable items only.
-Put completed work and historical explanations in design notes or commit messages.
+Put completed work and historical explanations in design notes or commit messages.   
 
-1. Reduce parser-mode performance overhead in the zero-mode hot path. The parser-mode migration
-    widened `Descriptor` and CRF `ParsePosition` with a `UInt64 mode`, so every descriptor/CRF hash
-    now pays for mode even though almost all descriptors run with mode `0`. A first fast path
-    (`GrammarNode.hasModeAnnotation`) recovered some full-suite wall time, but the runnable Xcode
-    suite still drifted from the expected ~110s to ~151s. Investigate a principled zero-mode
-    specialization for descriptors/CRF keys, or another representation that preserves scoped mode
-    semantics without taxing grammars/regions that do not use modes.  Remove previous optimizations that bring more complexity than speedup.
-
-2. DONE (2026-10-06). `compilationCondition = >n< expression` under the new shallow
-    `@sameLineOutsideBrackets` (swift-syntax `.poundIfDirective` flavor); `@sameLine` walk fixes
-    (zero-width suffix keeps the trailing allowance; cycle-cut `false` no longer memoised); one-element
-    tuple `(A,)`; postfix `#if` body head must be `.`; `ifConfigBody` mode cleared after the first
-    statement and made disjoint from the lookbehind alternates. Replay: 16/34 artifacts fixed, the
-    rest belong elsewhere. Residuals: (a) after a POSTFIX block's `#endif`, a following leading-dot
-    `#if` is postfix in swift-syntax, but `<+<( "#endif" )` takes it as statement-level
-    (`baseExpr⏎#if C⏎.m()⏎#endif⏎#if C⏎.m()⏎return⏎#endif` overaccepts); (b) tuple TYPE `(Int,)`
-    underaccepts; (c) non-`#if` artifacts seen in the replay: `@⏎unknown default`, `get get throws`,
-    `while () -> Int { }`, `[any~Copyable]()` tree-difference, `*/()`, `@available(…, consuming:`.
-    Original text: Triage the 2026-10-06 fuzzer conditional-compilation context clusters. Strong underaccepts include
-    nested `#if` bodies in functions/closures, for example `#if CONDITION_2 .methodOne()` inside a
-    function and `fuzz { #if (A, ) #endif }`. Strong overaccepts include leading-dot or malformed
-    `#if` bodies that swiftc and SwiftSyntax both reject, such as a closure containing `v = x` then
-    `#if FOO .borrowing #else b #endif`, `#if` followed by a newline expression, and malformed
-    `#if (macOS)` wrappers around leading-dot expression fragments. Keep this separate from the
-    earlier fixed statement/member `#if` cases; the likely boundary is still postfix-vs-statement
-    context, but these artifacts mix valid recovery and invalid overaccepts.
-
-3. Triage the 2026-10-06 fuzzer declaration/specifier overaccept clusters. Repeated strong
-    overaccepts include invalid `dependsOn` result specifiers (`func foo() -> dependsOn(x, y) X`),
-    `using` declarations in invalid positions or spellings (`using nonisolated`, `using test`,
-    `using MainActor` in closure/top-level mutation contexts), malformed operator declarations
-    (`infix operator <*<>*> : AdditionPrecedence,`, `postfix operator +++ {}`), and initializer
-    declarations with return types (`init(ptr: Array< >) -> dependsOn(a) Self`). Reduce by family and
-    check whether the fix belongs in specifier grammar, declaration placement, or feature-gated
-    `using` handling.
-
-4. DONE (2026-10-07). The raw regex/interpolation timeout cluster was stale fuzzer plumbing, not
-    scanner backtracking or parser descriptor explosion. Replay with
-    `APUS_COMPILER_TIMEOUT_SECONDS=1` shows malformed interpolation regex samples classify as
-    `compiler-timeout` while APUS finishes cheaply (`_ = "a\\(_ = /)b"`: 173 descriptors,
-    ~0.004s parse; raw interpolation seed: 112 descriptors, ~0.003s parse). Valid controls such as
-    `_ = "a\\( /x/ )b"` still return `same`. `SwiftSyntaxFuzzer/bin/run-night.sh` already exported
-    the compiler timeout, but `AdventFuzzRunner` replaced the probe child environment and dropped it;
-    the runner now forwards `APUS_COMPILER_TIMEOUT_SECONDS` to both persistent and one-shot probes.
-
-5. DONE (2026-10-07). Replayed the 2026-10-05 crawl residues against the current grammar. The old
-    bucket is stale: the named CodexBar close-bracket/subscript underaccept cluster now mostly
-    returns `same` (`StatusItemController+MemoryPressure.swift`,
-    `OpenRouterProviderDescriptor.swift`, `CodexCompactSubagentAccountingTests.swift`,
-    `CodexPATTests.swift`, `CopilotAllowanceCacheTests.swift`), and the Kingfisher/Fluent
-    underaccepts from shorthand `self` closure names or trailing closures are fixed or have moved to
-    tree-difference territory. Several old string tree-differences also replay as `same`
-    (`SnippetResolverTests.swift`, `OutOfProcessReferenceResolverV2Tests.swift`). Current survivors
-    should be tracked as fresh, narrower work if they matter: SPM `InitPackage.swift` still
-    underaccepts near a nested raw multiline string fragment (`"""#` inside `##"""` context);
-    `CommandParser.swift`, `PredicateExpressionConstruction.swift`, and `ChannelOption.swift` still
-    produce tree differences; `MultilineErrorsTests.swift` now reports residual ambiguity; the large
-    `AISettingsView+AIConfiguration.swift` and original 600s timeout files need a separate
-    performance replay with a rebuilt/current probe. Full 60-file replay was stopped at the repo's
-    120s command limit, so these are representative targeted results rather than a fresh crawl.
-
-6. Fix condition-list closure-call underaccept. Reduced current fuzzer replay still reports
+1. Fix condition-list closure-call underaccept. Reduced current fuzzer replay still reports
     `advent-underaccept` for:
     ```
     fuzz {
@@ -77,7 +16,7 @@ Put completed work and historical explanations in design notes or commit message
     immediate call, expecting `>n<`; likely boundary is closure expressions/calls inside
     `conditionList` after the parser-mode condition work.
 
-7. Fix line-broken `@unknown case` underaccept. Reduced current fuzzer replay still reports
+2. Fix line-broken `@unknown case` underaccept. Reduced current fuzzer replay still reports
     `advent-underaccept` for:
     ```
     switch Thing {
@@ -89,7 +28,7 @@ Put completed work and historical explanations in design notes or commit message
     `unknown`, expecting `>s<`. Check attribute/`@unknown` spelling rules in switch cases without
     broadening ordinary attributes incorrectly.
 
-8. Resolve residual ambiguity for newline metatype continuation after a typealias assignment. Reduced
+3. Resolve residual ambiguity for newline metatype continuation after a typealias assignment. Reduced
     current fuzzer replay still reports `residual-ambiguity` (`statement` ambiguous pivot) for:
     ```
     typealias
@@ -99,7 +38,7 @@ Put completed work and historical explanations in design notes or commit message
     Determine whether SwiftSyntax treats `.Type` as a same-statement metatype continuation here and
     adjust statement separation or metatype/member-type disambiguation accordingly.
 
-9. Resolve residual ambiguity for initialized property followed by observer/accessor-looking block.
+4. Resolve residual ambiguity for initialized property followed by observer/accessor-looking block.
     Reduced current fuzzer replay still reports `residual-ambiguity` (`statement` ambiguous pivot) for:
     ```
     var x = 0
@@ -108,7 +47,7 @@ Put completed work and historical explanations in design notes or commit message
     Decide whether this should be one variable declaration with an accessor/observer block or two
     statements under SwiftSyntax, then constrain the competing `statement` derivation.
 
-10. Reduce and fix remaining whole-file tree differences from the October crawl survivors. Current
+5. Reduce and fix remaining whole-file tree differences from the October crawl survivors. Current
     replay still produces tree mismatches in:
     - `apple__swift-argument-parser/Sources/ArgumentParser/Parsing/CommandParser.swift`:
       `GenericSpecializationExpr` vs `DeclReferenceExpr`.
@@ -118,8 +57,100 @@ Put completed work and historical explanations in design notes or commit message
     Reduce these before editing grammar/converter code; they are likely real shape bugs but not yet
     small enough to assign to one grammar rule.
 
-11. Reduce and fix multiline string residual ambiguity from `MultilineErrorsTests.swift`. Current
+6. Reduce and fix multiline string residual ambiguity from `MultilineErrorsTests.swift`. Current
     whole-file replay reports `residual-ambiguity` in `stringLiteral` with competing
     `[interpolatedStringLiteral] | [staticStringLiteral]` readings. Minimize the source before
     changing string literal rules, because several October string tree-differences have already gone
     stale on the current grammar.
+
+7. Fix comment/trivia being lexed as operators around member access, subscripts, and postfix calls.
+    The 2026-10-07 fuzzer run (`SwiftSyntaxFuzzer/runs/worker-*/2026-10-07T08-39-21Z`) produced
+    repeated tree differences and over/underaccepts where APUS reads comment delimiters as operator
+    tokens instead of trivia. Representative reduced artifacts:
+    ```
+    ./*c*/init()
+    x
+    ./*
+    */f< >()
+    text[.../*c*/]
+    ```
+    SwiftSyntax treats these as member access/subscript/call through trivia, while APUS produces
+    `./*`, `.../*`, or `*/` prefix/binary/postfix operators. This is the strongest new signal from
+    the run and likely explains several scattered tree-difference clusters.
+
+8. Fix slash/regex/operator boundary underaccepts around `/)/`. The same fuzzer run wrote many
+    reduced underaccepts in this family, including:
+    ```
+    /)/
+    _ = /)/
+    something() { _ = ^^/)/ }
+    ```
+    SwiftSyntax and `swiftc -parse` accept these, but APUS rejects them. Keep this separate from the
+    comment-as-operator bug unless reduction shows the same scanner boundary is responsible.
+
+9. Decide and fix top-level closure-expression overaccept policy. The largest normalized
+    overaccept bucket from the 2026-10-07 run is `top-level statement cannot begin with a closure
+    expression` (about 188 artifacts), with reduced shapes like:
+    ```
+    { [@Sendable Sendable -> Void]() }
+    { func expansion(context: some MacroExpansionContext) throws -> [CodeBlockItemSyntax] }
+    ```
+    SwiftSyntax/`swiftc -parse` reject these as top-level closure-expression starts, while APUS
+    accepts them. Determine whether this belongs in the top-level statement grammar or in a
+    recovery/statement-start filter.
+
+10. Treat experimental Swift features consistently in SwiftSyntax tests and fuzzer probes. The
+    2026-10-07 run still reports `using` overaccepts such as:
+    ```
+    using Test
+    using nonisolated
+    using borrowing
+    ```
+    because SwiftSyntax/compiler reference parsing runs with the relevant experimental feature
+    disabled while APUS grammar accepts the syntax. Decide whether test corpora should exclude
+    disabled experimental samples by default, or whether the probe/test harness should enable the
+    same experimental features for both references and APUS expectations. Do not solve this with
+    ad hoc grammar churn for disabled feature syntax.
+
+11. Reduce and fix small valid-looking underaccepts from the 2026-10-07 run that are not part of the
+    `/)/` family. Good first candidates:
+    ```
+    struct Fuzz { open(set) var openProp = 0 }
+    prefix operator =
+    nonOptional
+    !
+    x
+    ```
+    Recheck each against `Parser.parse(source:).hasError` and `swiftc -parse` before editing; some
+    fuzzer reductions in this bucket are malformed real-source fragments, but these three look small
+    enough to be actionable.
+
+12. Resolve residual ambiguities found by the 2026-10-07 run. Three artifacts survived reduction:
+    ```
+    typealias Z = A
+    .C
+
+    each
+    {
+    }
+
+    fuzz() {
+    _ = /x(()/
+    }
+    ```
+    The first is a statement/member-type continuation ambiguity, the second is
+    `postfixExpression` vs `packElementExpression`, and the third is a regex iteration extent
+    ambiguity. Reduce/verify each independently; do not mix these with tree-shape frontier work.
+
+13. Reduce tree-shape differences for generic/macro calls split by newlines or comments. The
+    2026-10-07 run repeatedly produced SwiftSyntax `SequenceExpr` shapes where APUS commits to
+    generic specialization or macro/function call, for example:
+    ```
+    A<() -> D>/*
+    */()
+
+    let a = #foo<Int>
+    ()
+    ```
+    This may overlap with existing generic-specialization tree differences, but the newline/comment
+    boundary makes this a narrower, reproducible family.

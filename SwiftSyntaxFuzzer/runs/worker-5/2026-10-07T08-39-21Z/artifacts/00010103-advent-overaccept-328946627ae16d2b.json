@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00010103-advent-overaccept-328946627ae16d2b.json",
+    "durationSeconds" : 0.351315975189209,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:raw:type:testLifetimeSpecifier#5",
+    "index" : 10103,
+    "seed" : 13064010816016726416,
+    "signalHash" : "17e0ca894fb736a2",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "328946627ae16d2b",
+    "sourceLength" : 49,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func foo() -> dependsOn(self) X\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"foo\") \"foo\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            AttributedType\n              TypeSpecifierList\n                SimpleTypeSpecifier\n                  identifier(\"dependsOn(self)\") \"dependsOn(self)\"\n              AttributeList\n              TypeSpecifierList\n              IdentifierType\n                identifier(\"X\") \"X\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1E390468-8B61-48C5-A3AB-8B606C24BA7E.swift:1:24: error: consecutive statements on a line must be separated by ';'\n1 | func foo() -> dependsOn(self) X\n  |                        `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1E390468-8B61-48C5-A3AB-8B606C24BA7E.swift:1:30: error: consecutive statements on a line must be separated by ';'\n1 | func foo() -> dependsOn(self) X\n  |                              `- error: consecutive statements on a line must be separated by ';'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(self) »"
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "type\t[typeIdentifier]",
+      "lifetimeSpecifierArgument\t[\"self\"]",
+      "parenthesisedTypeSpecifier\t[\"dependsOn\" >s< \"(\"  lifetimeSpecifierArgument  \")\"]",
+      "parameterModifier\t[parenthesisedTypeSpecifier]",
+      "type\t[parameterModifier type]",
+      "resultType\t[type]",
+      "functionResult\t[\"->\" resultType]",
+      ".OPT\t[functionResult]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   ]",
+      "functionName\t[identifierToken]",
+      "functionHead\t[  \"func\"]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 76,
+      "descriptorCount" : 168,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 70,
+      "parseSeconds" : 0.004559993743896484,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 10,
+      "yieldCount" : 137
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"foo\") \"foo\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n          ReturnClause\n            arrow \"->\"\n            IdentifierType\n              identifier(\"dependsOn\") \"dependsOn\"\n    CodeBlockItem\n      TupleExpr\n        leftParen \"(\"\n        LabeledExprList\n          LabeledExpr\n            DeclReferenceExpr\n              keyword(SwiftSyntax.Keyword.self) \"self\"\n        rightParen \")\"\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"X\") \"X\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 20,
+  "source" : "func foo() -> dependsOn(self) X",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"foo\\\") \\\"foo\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            AttributedType\\n              TypeSpecifierList\\n                SimpleTypeSpecifier\\n                  identifier(\\\"dependsOn(self)\\\") \\\"dependsOn(self)\\\"\\n              AttributeList\\n              TypeSpecifierList\\n              IdentifierType\\n                identifier(\\\"X\\\") \\\"X\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1E390468-8B61-48C5-A3AB-8B606C24BA7E.swift:1:24: error: consecutive statements on a line must be separated by ';'\\n1 | func foo() -> dependsOn(self) X\\n  |                        `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1E390468-8B61-48C5-A3AB-8B606C24BA7E.swift:1:30: error: consecutive statements on a line must be separated by ';'\\n1 | func foo() -> dependsOn(self) X\\n  |                              `- error: consecutive statements on a line must be separated by ';'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in typeSpecifier(_:from:to:): dependsOn lifetime type specifier not converted — «dependsOn(self) »\"],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"type\\t[typeIdentifier]\",\"lifetimeSpecifierArgument\\t[\\\"self\\\"]\",\"parenthesisedTypeSpecifier\\t[\\\"dependsOn\\\" >s< \\\"(\\\"  lifetimeSpecifierArgument  \\\")\\\"]\",\"parameterModifier\\t[parenthesisedTypeSpecifier]\",\"type\\t[parameterModifier type]\",\"resultType\\t[type]\",\"functionResult\\t[\\\"->\\\" resultType]\",\".OPT\\t[functionResult]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   ]\",\"functionName\\t[identifierToken]\",\"functionHead\\t[  \\\"func\\\"]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":76,\"descriptorCount\":168,\"duplicateDescriptorCount\":0,\"oraclePruned\":70,\"parseSeconds\":0.004559993743896484,\"sourceLength\":31,\"suppressedDescriptorCount\":10,\"tokenCount\":10,\"yieldCount\":137},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"foo\\\") \\\"foo\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n          ReturnClause\\n            arrow \\\"->\\\"\\n            IdentifierType\\n              identifier(\\\"dependsOn\\\") \\\"dependsOn\\\"\\n    CodeBlockItem\\n      TupleExpr\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n          LabeledExpr\\n            DeclReferenceExpr\\n              keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n        rightParen \\\")\\\"\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"X\\\") \\\"X\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

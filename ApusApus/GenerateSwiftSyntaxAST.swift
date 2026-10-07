@@ -2583,8 +2583,9 @@ struct SwiftSyntaxGenerator {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return AccessorBlockSyntax(accessors: .getter([]))
         }
-        if let braceNode = grammar.nonTerminals["accessorBlockBrace"],
-           parser.yield(of: braceNode).contains(where: { $0.i == from && $0.j == to }),
+        if let braceNode = grammar.instances(of: "accessorBlockBrace").first(where: { instance in
+               parser.yield(of: instance).contains(where: { $0.i == from && $0.j == to })
+           }),
            let (_, braceSpans) = tileAlternate(braceNode, from: from, to: to) {
             var accessors: [AccessorDeclSyntax] = []
             if let listNT = find("accessorClauseList", in: braceSpans) {
@@ -7493,8 +7494,9 @@ struct SwiftSyntaxGenerator {
     }
 
     private func fullSpanBoxedProtocolType(from: CharPosition, to: CharPosition) -> GrammarNode? {
-        guard let boxed = grammar.nonTerminals["boxedProtocolType"] else { return nil }
-        return parser.yield(of: boxed).contains { $0.i == from && $0.j == to } ? boxed : nil
+        grammar.instances(of: "boxedProtocolType").first { instance in
+            parser.yield(of: instance).contains { $0.i == from && $0.j == to }
+        }
     }
 
     /// The token inside an `IdentifierPattern`. `if let self = self` binds `self`, and

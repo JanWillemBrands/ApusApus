@@ -370,9 +370,10 @@ optional-skip cases, but they are not synonyms:
 
 ## Parser Modes
 
-Parser modes are sequence-position predicates over inherited parser context.
-They are scoped to the annotated occurrence: a child entered with a changed mode
-returns to the caller's original mode.
+Parser modes are inherited parser context: the flavor or state parameters a handwritten
+parser passes down (swift-syntax `ExprFlavor`, `allowInitDecl`, pattern context). An
+occurrence annotation changes or tests the mode for that occurrence only; the caller's
+continuation keeps the caller's mode.
 
 ```swift
 @setMode(foo bar) X       // parse X with foo and bar active
@@ -382,13 +383,51 @@ returns to the caller's original mode.
 ```
 
 `@setMode` and `@clearMode` are set operations. Modes not named by the annotation
-are preserved.
+are preserved. Tests see the occurrence's mode after its own `@setMode`/`@clearMode`.
+
+### Scopes: `@carries`
+
+Every mode is scoped. `@carries(m …)` at the start of a production declares that the
+modes `m …` pass into that nonterminal. An inherited bit enters an occurrence of `Y` only
+if `Y` carries it; entering any other nonterminal drops the bit, the way a swift-syntax
+parameter disappears when a function does not forward it. Production pragmas may appear in
+any order; `@carries` may repeat, and when a nonterminal is defined in several places, the
+lists union.
 
 ```swift
-condition         = @setMode(stmtCondition) expression .
-closureExpression = @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
-argument          = @clearMode(stmtCondition) expression .
+@carries(stmtCondition) conditionExpression = effectfulConditional coercingOperator? .
+@carries(stmtCondition) postfixExpression = … .
+@carries(stmtCondition trailingClosure) closureExpression =
+    samelineOpenedClosure | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
+
+condition = @setMode(stmtCondition) conditionExpression | … .
 ```
+
+Nothing has to clear `stmtCondition` at call arguments or closure bodies:
+`functionCallArgument` and the closure productions do not carry it, so the mode stops there.
+Keep `@clearMode` for a boundary INSIDE a scope (`statements` clears `ifConfigBody` after
+the first statement).
+
+Grammar load checks the declarations and fails on:
+
+- a mode used in an annotation that no production `@carries`;
+- `@setMode(m) Y` where `Y` does not carry `m`;
+- a `@requiresMode`/`@rejectsMode` test on a mode that can never be present there.
+
+It reports (in `Grammar.parserModeReport` and the grammar log) the copies each mode costs,
+`@clearMode`s with no effect, and every SCOPE EXIT: an edge where a carried mode is dropped
+although the callee could still reach a test of it. Exits are expected at intended
+boundaries; an unexpected one means a scope that is too small.
+
+### How modes run
+
+Modes cost nothing at parse time. `Grammar.specializeParserModes()` compiles them into the
+grammar at load: each nonterminal reached under a mode that matters to it gets a copy
+`X⟨m⟩`, mode tests are decided statically in each copy, and the parser sees an ordinary
+grammar (no mode in descriptors, CRF keys or BSR yields). Copies keep their `name`, so
+converter and builder lookups are unaffected; code that looks a nonterminal up BY NAME to
+read its yields uses `grammar.instances(of:)`. The cost is proportional to the declared
+scopes (Swift: 94 copies of 465 productions). See `Parser Modes Specialization.md`.
 
 Use modes for occurrence-local context that a handwritten parser would carry as a
 flavor or state parameter. Do not use them as a replacement for ordinary grammar
@@ -626,7 +665,8 @@ exclusion   = "---" "(" < literal > ")" .
 
 productionPragma     = terminalPragma | nonterminalPragma .
 terminalPragma       = "@literalMunch" | "@preempt" preemptArgs .
-nonterminalPragma    = "@longest" | "@shortest" | "@sameLine" .
+nonterminalPragma    = "@longest" | "@shortest" | "@sameLine" | carriesPragma .
+carriesPragma        = "@carries" "(" < identifier > ")" .
 groupPragma          = "@longest" | "@shortest" .
 alternateAnnotation  = "@prefer" | "@avoid" | childPosition | parsePredicate .
 modeAnnotation       = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" ) "(" < identifier > ")" .

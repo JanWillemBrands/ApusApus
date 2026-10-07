@@ -214,8 +214,9 @@ Each edge in the order was a real bug:
 | sameSpan → structure | `f(1) {}⏎{}` | `f(1) {}` has two readings, and `@prefer` deletes the parenless one. Before it did, `@right` took `f(1) {}` for an instance of itself and broke the chain |
 | structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
 
-Parser modes replaced the old span-containment filters. They are enforced before descriptors
-enter the forest, so they do not depend on later Oracle pruning.
+Parser modes replaced the old span-containment filters. They are compiled into the grammar at
+load (each mode-relevant nonterminal gets a copy per scoped mode, `@carries`), so they act before
+anything enters the forest and do not depend on later Oracle pruning. See `apus.md` § Parser Modes.
 
 ### 5.3 Hard constraints
 
@@ -230,6 +231,7 @@ A hard constraint removes a reading that the language does not permit.
 | `@clearMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` inactive. |
 | `@requiresMode(N)` | before a sequence item | Schedule that occurrence only when mode `N` is active. |
 | `@rejectsMode(N)` | before a sequence item | Reject that occurrence when mode `N` is active. |
+| `@carries(N)` | before a production | Mode `N` passes into this nonterminal; elsewhere it is dropped. |
 
 Details:
 

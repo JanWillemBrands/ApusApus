@@ -23,6 +23,13 @@ class Grammar {
     var preamble: [String] = []
     var epilogue: [String] = []
     var modeNameToBit: [String: UInt64] = [:]
+    /// Parser-mode copies `X⟨m⟩` made by `specializeParserModes()`; `nonTerminals` keeps only
+    /// the originals, so by-name lookups see `X⟨0⟩`. See `instances(of:)` / `allProductions`.
+    var specializations: [GrammarNode] = []
+    var specializationsByName: [String: [GrammarNode]] = [:]
+    /// Notices from `specializeParserModes()`: per-mode copy counts, scope exits, annotations with
+    /// no effect. Also logged; kept here so tests and tools can inspect them.
+    var parserModeReport: [String] = []
 
     var root: GrammarNode = GrammarNode(kind: .EOS, name: "○")
     var isLL1: Bool = true
@@ -101,7 +108,7 @@ class Grammar {
     /// compared against tokens — only terminal nodes need to match token kinds.
     func assignNameIDs() {
         root.nameID = symbolToID["○"]!
-        for (_, node) in nonTerminals {
+        for node in allProductions {
             assignNameIDsRecursive(node)
         }
     }
@@ -189,7 +196,7 @@ class Grammar {
     /// is order-independent by construction.
     func propagateExcludeSets() {
         var universe: Set<String> = []
-        for (_, nt) in nonTerminals {
+        for nt in allProductions {
             collectExcludedTerminals(nt, into: &universe)
         }
         guard !universe.isEmpty else { return }
@@ -203,6 +210,7 @@ class Grammar {
             walkChildren(n) { gather($0) }
         }
         for (_, nt) in nonTerminals.sorted(by: { $0.key < $1.key }) { gather(nt) }
+        for nt in specializations { gather(nt) }
 
         // Computed exclude for non-terminal nodes; terminals read their `---` seed.
         // Unresolved non-terminals default to TOP (`universe`) — the greatest-fixpoint
@@ -325,7 +333,7 @@ class Grammar {
     /// using `symbolToID` for the mapping.
     /// Call after the first/follow fixpoint has converged and after `verifyLL1`.
     func populateBitSets() throws {
-        for (_, node) in nonTerminals {
+        for node in allProductions {
             try populateBitSetsRecursive(node)
         }
     }
@@ -424,7 +432,8 @@ extension Grammar {
         if let seq = node.seq {
             try populateFirstFollowSets(for: seq)
             updateFollow(for: node)
-            if let production = nonTerminals[node.name] {
+            // `specializeParserModes()` pre-binds occurrences to their mode instance.
+            if let production = node.alt ?? nonTerminals[node.name] {
                 if production.isLexicalToken {
                     let error = """
                     grammar parse error: '\(node.name)' was used as a nonterminal before it was defined as a structured lexical terminal

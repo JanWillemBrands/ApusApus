@@ -20,8 +20,7 @@ struct Descriptor: Hashable {
     let L: GrammarNode          // grammar slot
     let k: CharPosition         // cluster index
     let i: CharPosition         // input index
-    let mode: UInt64            // inherited parser mode bitset
-}   // this is four 64-bit words (32 bytes)
+}   // this is three 64-bit words (24 bytes)
 
 // MARK: - MessageParser Descriptor Operations
 
@@ -29,11 +28,7 @@ extension MessageParser {
 
     // Paper: dscAdd(L, k, i)
     func addDescriptor(L: GrammarNode, k: CharPosition, i: CharPosition) {
-        addDescriptor(L: L, k: k, i: i, mode: cMode)
-    }
-
-    func addDescriptor(L: GrammarNode, k: CharPosition, i: CharPosition, mode: UInt64) {
-        let d = Descriptor(L: L, k: k, i: i, mode: mode)
+        let d = Descriptor(L: L, k: k, i: i)
         if unique.insert(d).inserted {
             remaining.append(d)
             descriptorCount += 1
@@ -51,7 +46,6 @@ extension MessageParser {
             cL = d.L
             cU = d.k
             cI = d.i
-            cMode = d.mode
             return true
         }
     }
