@@ -22,6 +22,7 @@ class Grammar {
     var messages: [String] = []
     var preamble: [String] = []
     var epilogue: [String] = []
+    var modeNameToBit: [String: UInt64] = [:]
 
     var root: GrammarNode = GrammarNode(kind: .EOS, name: "○")
     var isLL1: Bool = true
@@ -31,6 +32,16 @@ class Grammar {
     var nodeCount: Int = 0
     /// True when unquoted synthetic layout terminals (>>| / |<<) are used in productions.
     var usesInjectedLayoutTokens: Bool = false
+
+    func parserModeBit(named name: String) throws -> UInt64 {
+        if let bit = modeNameToBit[name] { return bit }
+        guard modeNameToBit.count < UInt64.bitWidth else {
+            throw ApusParserError.unexpectedToken(explanation: "too many parser modes; APUS supports at most 64")
+        }
+        let bit = UInt64(1) << UInt64(modeNameToBit.count)
+        modeNameToBit[name] = bit
+        return bit
+    }
     
     // MARK: - Integer Symbol Table
     //

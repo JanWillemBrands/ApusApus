@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00000192-advent-overaccept-4a6fe813935407a3.json",
+    "durationSeconds" : 0.3832899332046509,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:duplicate:declaration:testBorrowingGetAccessor#1",
+    "index" : 192,
+    "seed" : 15755289045502625508,
+    "signalHash" : "a4453bf7f7afe639",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "4a6fe813935407a3",
+    "sourceLength" : 74,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nstruct Foo {\n  var x: Int {\n    borrowing get get {}\n  }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"x\") \"x\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          AccessorDeclList\n                            AccessorDecl\n                              AttributeList\n                              DeclModifierList\n                              keyword(SwiftSyntax.Keyword.get) \"get\"\n                            AccessorDecl\n                              AttributeList\n                              DeclModifierList\n                              keyword(SwiftSyntax.Keyword.get) \"get\"\n                              CodeBlock\n                                leftBrace \"{\"\n                                CodeBlockItemList\n                                rightBrace \"}\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3DFCE9F9-93D4-4DF6-B0FD-3582B8F27A79.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 |   var x { get get {}\n3 |   }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3DFCE9F9-93D4-4DF6-B0FD-3582B8F27A79.swift:2:15: error: expected '{' to start getter definition\n1 |  { {\n2 |   var x { get get {}\n  |               `- error: expected '{' to start getter definition\n3 |   }\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3DFCE9F9-93D4-4DF6-B0FD-3582B8F27A79.swift:2:7: error: computed property must have an explicit type\n1 |  { {\n2 |   var x { get get {}\n  |       `- error: computed property must have an explicit type\n3 |   }\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      ".OPT\t[codeBlock]",
+      "getterClause\t[  \"get\"  ]",
+      "accessorClauseEntryNoInit\t[getterClause]",
+      "accessorClauseListNoInit\t[accessorClauseEntryNoInit ]",
+      ".OPT\t[accessorClauseListNoInit]",
+      "initializedAccessorBlock\t[\"{\" accessorClauseListNoInit \"}\"]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern  initializedAccessorBlock]",
+      "patternInitializerList\t[patternInitializer ]",
+      "variableDeclarationHead\t[  \"var\"]",
+      "variableDeclaration\t[variableDeclarationHead patternInitializerList]",
+      "declaration\t[variableDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 138,
+      "descriptorCount" : 307,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 124,
+      "parseSeconds" : 0.005445003509521484,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 12,
+      "yieldCount" : 239
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  VariableDecl\n                    AttributeList\n                    DeclModifierList\n                    keyword(SwiftSyntax.Keyword.var) \"var\"\n                    PatternBindingList\n                      PatternBinding\n                        IdentifierPattern\n                          identifier(\"x\") \"x\"\n                        AccessorBlock\n                          leftBrace \"{\"\n                          AccessorDeclList\n                            AccessorDecl\n                              AttributeList\n                              DeclModifierList\n                              keyword(SwiftSyntax.Keyword.get) \"get\"\n                              CodeBlock\n                                UnexpectedNodes\n                                  identifier(\"get\") \"get\"\n                                leftBrace \"{\"\n                                CodeBlockItemList\n                                rightBrace \"}\"\n                          rightBrace \"}\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n  var x { get get {}\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          AccessorDeclList\\n                            AccessorDecl\\n                              AttributeList\\n                              DeclModifierList\\n                              keyword(SwiftSyntax.Keyword.get) \\\"get\\\"\\n                            AccessorDecl\\n                              AttributeList\\n                              DeclModifierList\\n                              keyword(SwiftSyntax.Keyword.get) \\\"get\\\"\\n                              CodeBlock\\n                                leftBrace \\\"{\\\"\\n                                CodeBlockItemList\\n                                rightBrace \\\"}\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3DFCE9F9-93D4-4DF6-B0FD-3582B8F27A79.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 |   var x { get get {}\\n3 |   }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3DFCE9F9-93D4-4DF6-B0FD-3582B8F27A79.swift:2:15: error: expected '{' to start getter definition\\n1 |  { {\\n2 |   var x { get get {}\\n  |               `- error: expected '{' to start getter definition\\n3 |   }\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3DFCE9F9-93D4-4DF6-B0FD-3582B8F27A79.swift:2:7: error: computed property must have an explicit type\\n1 |  { {\\n2 |   var x { get get {}\\n  |       `- error: computed property must have an explicit type\\n3 |   }\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\".OPT\\t[codeBlock]\",\"getterClause\\t[  \\\"get\\\"  ]\",\"accessorClauseEntryNoInit\\t[getterClause]\",\"accessorClauseListNoInit\\t[accessorClauseEntryNoInit ]\",\".OPT\\t[accessorClauseListNoInit]\",\"initializedAccessorBlock\\t[\\\"{\\\" accessorClauseListNoInit \\\"}\\\"]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern  initializedAccessorBlock]\",\"patternInitializerList\\t[patternInitializer ]\",\"variableDeclarationHead\\t[  \\\"var\\\"]\",\"variableDeclaration\\t[variableDeclarationHead patternInitializerList]\",\"declaration\\t[variableDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":138,\"descriptorCount\":307,\"duplicateDescriptorCount\":0,\"oraclePruned\":124,\"parseSeconds\":0.005445003509521484,\"sourceLength\":33,\"suppressedDescriptorCount\":32,\"tokenCount\":12,\"yieldCount\":239},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  VariableDecl\\n                    AttributeList\\n                    DeclModifierList\\n                    keyword(SwiftSyntax.Keyword.var) \\\"var\\\"\\n                    PatternBindingList\\n                      PatternBinding\\n                        IdentifierPattern\\n                          identifier(\\\"x\\\") \\\"x\\\"\\n                        AccessorBlock\\n                          leftBrace \\\"{\\\"\\n                          AccessorDeclList\\n                            AccessorDecl\\n                              AttributeList\\n                              DeclModifierList\\n                              keyword(SwiftSyntax.Keyword.get) \\\"get\\\"\\n                              CodeBlock\\n                                UnexpectedNodes\\n                                  identifier(\\\"get\\\") \\\"get\\\"\\n                                leftBrace \\\"{\\\"\\n                                CodeBlockItemList\\n                                rightBrace \\\"}\\\"\\n                          rightBrace \\\"}\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

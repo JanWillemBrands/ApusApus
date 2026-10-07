@@ -368,43 +368,46 @@ optional-skip cases, but they are not synonyms:
 @shortest [ X ]   // the optional node minimizes its consumed extent
 ```
 
-## Oracle Constraints
+## Parser Modes
 
-`@confinedTo(...)` and `@excludedFrom(...)` are alternate-level hard constraints.
-They occur at the start of an alternate, in the same position class as `@prefer`.
-
-```swift
-declaration = @confinedTo(memberDeclaration) enumCaseDeclaration .
-expression  = @excludedFrom(conditionExpression) assignmentExpression .
-```
-
-Meaning:
-
-```text
-@confinedTo(N)   = keep this alternate only when its span is contained in an N span.
-@excludedFrom(N) = prune this alternate when its span is contained in an N span.
-```
-
-These are span-containment predicates, not direct-parent predicates. If a grammar
-needs "directly inside N" or "co-started with N", that should be a separate
-primitive rather than a reinterpretation of `@confinedTo`.
-
-### Sentinel rules
-
-A containment predicate can only name a position that HAS a name, so a one-line
-alias is sometimes the point of a rule:
+Parser modes are sequence-position predicates over inherited parser context.
+They are scoped to the annotated occurrence: a child entered with a changed mode
+returns to the caller's original mode.
 
 ```swift
-ifConfigStatements = statements .    // sentinel: the name is what `@confinedTo` refers to
-initializerBody    = codeBlock .    // sentinel: `@confinedTo(initializerBody)`
+@setMode(foo bar) X       // parse X with foo and bar active
+@clearMode(foo bar) X     // parse X with foo and bar inactive
+@requiresMode(foo bar) X  // keep this path only when all listed modes are active
+@rejectsMode(foo bar) X   // reject this path when all listed modes are active
 ```
 
-`@confinedTo(statements)` or `@confinedTo(codeBlock)` would be vacuous — nearly every
-statement sits inside both — so the alias is what makes the constraint say something.
-Do not "simplify" such a rule away by inlining it; it is not duplication, it is a
-named position. The same holds for names the AST converter resolves by lookup
-(`structName`, `argumentLabel`, `tupleMatchLabel`, …): re-pointing one is invisible to
-the parser and silently drops a child from the tree.
+`@setMode` and `@clearMode` are set operations. Modes not named by the annotation
+are preserved.
+
+```swift
+condition         = @setMode(stmtCondition) expression .
+closureExpression = @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
+argument          = @clearMode(stmtCondition) expression .
+```
+
+Use modes for occurrence-local context that a handwritten parser would carry as a
+flavor or state parameter. Do not use them as a replacement for ordinary grammar
+structure when a separate nonterminal is clearer.
+
+### Named Positions
+
+A short alias can still be the cleanest way to name a grammar position or attach
+a mode to a reused shape:
+
+```swift
+ifConfigStatements = @setMode(ifConfigBody) statements .
+initializerBody    = @setMode(initializerBodyMode) codeBlock .
+```
+
+Do not "simplify" such a rule away by inlining it when anything depends on the
+name or the annotated occurrence. The same holds for names the AST converter
+resolves by lookup (`structName`, `argumentLabel`, `tupleMatchLabel`, …):
+re-pointing one is invisible to the parser and silently drops a child from the tree.
 
 The test for whether an identical-bodied rule is a sentinel or real duplication is
 whether anything depends on the NAME. If nothing does, delete it and repoint the uses
@@ -625,9 +628,9 @@ productionPragma     = terminalPragma | nonterminalPragma .
 terminalPragma       = "@literalMunch" | "@preempt" preemptArgs .
 nonterminalPragma    = "@longest" | "@shortest" | "@sameLine" .
 groupPragma          = "@longest" | "@shortest" .
-alternateAnnotation  = "@prefer" | "@avoid" | childPosition | containment | parsePredicate .
+alternateAnnotation  = "@prefer" | "@avoid" | childPosition | parsePredicate .
+modeAnnotation       = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" ) "(" < identifier > ")" .
 childPosition        = ( "@left" | "@right" ) [ "(" < identifier > ")" ] .
-containment          = ( "@confinedTo" | "@excludedFrom" ) "(" < identifier > ")" .
 parsePredicate       = ( "@canParse" | "@cannotParse" ) "(" < identifier > ")" .
 preemptArgs          = "(" identifier [ "," identifier ] ")" .
 ```

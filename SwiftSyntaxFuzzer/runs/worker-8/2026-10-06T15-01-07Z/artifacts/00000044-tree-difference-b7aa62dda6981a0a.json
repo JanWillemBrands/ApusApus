@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00000044-tree-difference-b7aa62dda6981a0a.json",
+    "durationSeconds" : 0.3753880262374878,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:splice+block-comment:translated:testGenericDisambiguation6d#1",
+    "index" : 44,
+    "seed" : 10372684121623093736,
+    "signalHash" : "1e7b39a0fdbc5f11",
+    "signalSummary" : "tree-difference|line=21|ref=FunctionCallExpr|advent=SequenceExpr",
+    "sourceHash" : "b7aa62dda6981a0a",
+    "sourceLength" : 36,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n(init<b, c>(\/*\n*\/d))\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    SequenceExpr\n                      ExprList\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.init) \"init\"\n                        BinaryOperatorExpr\n                          binaryOperator(\"<\") \"<\"\n                        DeclReferenceExpr\n                          identifier(\"b\") \"b\"\n                    comma \",\"\n                  LabeledExpr\n                    PrefixOperatorExpr\n                      prefixOperator(\">\") \">\"\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                        rightParen \")\"\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "tupleElement\t[expression]",
+      "tupleElementList\t[tupleElement ]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s< prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "tupleExpression\t[\"(\" tupleElement \",\" tupleElementList  \")\"]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "functionCallExpression\t[postfixExpression functionCallArgumentClause trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 155,
+      "descriptorCount" : 353,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 170,
+      "parseSeconds" : 0.007692098617553711,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 59,
+      "tokenCount" : 14,
+      "yieldCount" : 299
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    FunctionCallExpr\n                      GenericSpecializationExpr\n                        DeclReferenceExpr\n                          keyword(SwiftSyntax.Keyword.init) \"init\"\n                        GenericArgumentClause\n                          leftAngle \"<\"\n                          GenericArgumentList\n                            GenericArgument\n                              IdentifierType\n                                identifier(\"b\") \"b\"\n                              comma \",\"\n                          rightAngle \">\"\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                      MultipleTrailingClosureElementList\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " fuzz() {\n(init<b, >(\/*\n*\/))\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    SequenceExpr\\n                      ExprList\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                        BinaryOperatorExpr\\n                          binaryOperator(\\\"<\\\") \\\"<\\\"\\n                        DeclReferenceExpr\\n                          identifier(\\\"b\\\") \\\"b\\\"\\n                    comma \\\",\\\"\\n                  LabeledExpr\\n                    PrefixOperatorExpr\\n                      prefixOperator(\\\">\\\") \\\">\\\"\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                        rightParen \\\")\\\"\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"tupleElement\\t[expression]\",\"tupleElementList\\t[tupleElement ]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s< prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"tupleExpression\\t[\\\"(\\\" tupleElement \\\",\\\" tupleElementList  \\\")\\\"]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression functionCallArgumentClause trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":155,\"descriptorCount\":353,\"duplicateDescriptorCount\":0,\"oraclePruned\":170,\"parseSeconds\":0.007692098617553711,\"sourceLength\":30,\"suppressedDescriptorCount\":59,\"tokenCount\":14,\"yieldCount\":299},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    FunctionCallExpr\\n                      GenericSpecializationExpr\\n                        DeclReferenceExpr\\n                          keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                        GenericArgumentClause\\n                          leftAngle \\\"<\\\"\\n                          GenericArgumentList\\n                            GenericArgument\\n                              IdentifierType\\n                                identifier(\\\"b\\\") \\\"b\\\"\\n                              comma \\\",\\\"\\n                          rightAngle \\\">\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                      MultipleTrailingClosureElementList\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

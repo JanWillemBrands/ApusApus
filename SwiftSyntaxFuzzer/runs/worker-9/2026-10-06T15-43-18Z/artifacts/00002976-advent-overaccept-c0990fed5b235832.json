@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00002976-advent-overaccept-c0990fed5b235832.json",
+    "durationSeconds" : 0.5043759346008301,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment:translated:testTypeExpr8#1",
+    "index" : 2976,
+    "seed" : 3326660373318085129,
+    "signalHash" : "c5fa2338be0ff4b1",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/At",
+    "sourceHash" : "c0990fed5b235832",
+    "sourceLength" : 276,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nfunc qualifiedType() {\n  _ = Foo.Bar.self\n  let _ : Foo.Bar.Type = Foo.Bar.self\n  let _ : Foo.Protocol = Foo.self\n  _ = Foo.Bar()\n  _ = Foo.Bar.prop\n  _ = Foo.Bar.meth\n  let _ : () = Foo.Bar.meth()\n  _ = Foo.Bar.\/*c*\/instMeth\n  _ = Foo.Bar\n  _ = Foo.Bar.dynamicType\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  PrefixOperatorExpr\n                    prefixOperator(\"*\/\") \"*\/\"\n                    DeclReferenceExpr\n                      identifier(\"instMeth\") \"instMeth\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-30D3992A-570B-4178-919B-75137AF22480.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { { *\/instMeth\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | }\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-30D3992A-570B-4178-919B-75137AF22480.swift:1:6: error: unexpected end of block comment\n1 |  { { *\/instMeth\n  |      `- error: unexpected end of block comment\n2 | }\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 70,
+      "descriptorCount" : 170,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 36,
+      "parseSeconds" : 0.004739999771118164,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 23,
+      "tokenCount" : 6,
+      "yieldCount" : 117
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  UnexpectedCodeDecl\n                    UnexpectedNodes\n                      unknown(\"*\/\") \"*\/\"\n                      identifier(\"instMeth\") \"instMeth\"\n              rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { { *\/instMeth\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"instMeth\\\") \\\"instMeth\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-30D3992A-570B-4178-919B-75137AF22480.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { { *\\\/instMeth\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | }\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-30D3992A-570B-4178-919B-75137AF22480.swift:1:6: error: unexpected end of block comment\\n1 |  { { *\\\/instMeth\\n  |      `- error: unexpected end of block comment\\n2 | }\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":70,\"descriptorCount\":170,\"duplicateDescriptorCount\":0,\"oraclePruned\":36,\"parseSeconds\":0.004739999771118164,\"sourceLength\":19,\"suppressedDescriptorCount\":23,\"tokenCount\":6,\"yieldCount\":117},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  UnexpectedCodeDecl\\n                    UnexpectedNodes\\n                      unknown(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                      identifier(\\\"instMeth\\\") \\\"instMeth\\\"\\n              rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

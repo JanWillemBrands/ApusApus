@@ -191,19 +191,13 @@ final class GrammarNode {
     /// not an attribute" (see `statement` in `Swift.apus`).
     var forwardPredicates: [ForwardPredicate] = []
 
-    /// Containment predicate on an alternate — leading `@within(N)` (repeatable, conjunction).
-    /// Captured on the `.ALT` node. The Oracle keeps the alternate's reading only where its
-    /// span is CONTAINED in a yield of EACH named container `N` (BSR containment = the GLL
-    /// substitute for an inherited context/flavor), pruning otherwise. The declarative
-    /// replacement for the procedural `@within` filter. See `Ambiguity.md`.
-    /// `@confinedTo(A B …)` — positive containment: keep this alternate only where its span is
-    /// contained in a yield of ANY of the listed nonterminals. `@excludedFrom(A B …)` — negative:
-    /// prune where contained in ANY of them. One annotation = one group (disjunction inside);
-    /// several annotations of one kind must all hold together (conjunction across groups), so
-    /// `@excludedFrom(A) @excludedFrom(B)` prunes only where inside both. See
-    /// `Ambiguity.md`.
-    var confinedToContainers: [[String]] = []
-    var excludedFromContainers: [[String]] = []
+    /// Scoped parser-mode annotations. These are inherited context bits carried
+    /// by descriptors and CRF edges, not mutable scanner-style state.
+    var modeAdd: UInt64 = 0
+    var modeRemove: UInt64 = 0
+    var requiredModes: UInt64 = 0
+    var rejectedModes: UInt64 = 0
+    var hasModeAnnotation: Bool = false
 
     /// `@left` / `@right` on an ALTERNATE — a child-position filter in the SDF sense.
     ///
@@ -216,7 +210,7 @@ final class GrammarNode {
     ///
     /// Several may stack on one alternate, so an alternate can forbid both itself and a listed
     /// nonterminal in the same child position. Alternate-level only, like
-    /// `@prefer`/`@avoid`/`@confinedTo`.
+    /// `@prefer`/`@avoid`.
     ///
     /// Unlike a pivot preference this reaches NESTED instances at DIFFERENT spans, where there is
     /// no single span with two pivots to rank. See `AssociativityFilterRule`.
@@ -225,6 +219,9 @@ final class GrammarNode {
     /// `@sameLine` — this nonterminal's span may not cross a newline consumed as trivia.
     /// Newlines inside a committed token (nested multiline string, block comment) are permitted.
     var requiresSameLine: Bool = false
+    /// `@sameLineOutsideBrackets` — `requiresSameLine`, but gaps inside a `(…)`/`[…]`/`{…}` body are
+    /// free (swift-syntax's `#if` condition flavor). See `SameLineSpanRule`.
+    var sameLineOutsideBrackets: Bool = false
 
     /// Terminal occurrence belongs directly to a structured `:` / `-` recognizer body and should
     /// match at the exact parser cursor instead of skipping leading trivia first. Normal `=`

@@ -474,7 +474,12 @@ enum ApusRegexLibrary {
         ")"
         ZeroOrMore(.reluctant) {
             ChoiceOf {
-                CharacterClass.anyOf("\\\r\n").inverted
+                // `"` is content unless it begins the closer (`"` + pound run); see the multiline Part.
+                CharacterClass.anyOf("\"\\\r\n").inverted
+                Regex {
+                    "\""
+                    NegativeLookahead { OneOrMore { "#" } }
+                }
                 Regex {
                     "\\"
                     NegativeLookahead {
@@ -803,7 +808,17 @@ enum ApusRegexLibrary {
         ")"
         ZeroOrMore(.reluctant) {
             ChoiceOf {
-                CharacterClass.anyOf("\\").inverted
+                // `"` is content unless it begins the literal's CLOSER (`"""` + pound run), exactly
+                // as in the Head and Tail below/above. Without this a Part ran from one literal's
+                // `)` past its `"""#`, across the code between, to the NEXT raw literal's `\#(`.
+                CharacterClass.anyOf("\"\\").inverted
+                Regex {
+                    "\""
+                    NegativeLookahead {
+                        "\"\""
+                        OneOrMore { "#" }
+                    }
+                }
                 Regex {
                     "\\"
                     NegativeLookahead {

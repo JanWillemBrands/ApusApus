@@ -20,6 +20,17 @@ enum ApusParserError: Error {
 }
 
 class ApusParser {
+    private struct ModeAnnotation {
+        var add: UInt64 = 0
+        var remove: UInt64 = 0
+        var require: UInt64 = 0
+        var reject: UInt64 = 0
+
+        var isEmpty: Bool {
+            add == 0 && remove == 0 && require == 0 && reject == 0
+        }
+    }
+
     
     let grammar = Grammar()
     var scanner: Scanner
@@ -188,9 +199,12 @@ class ApusParser {
         // `@sameLine` — a whole-nonterminal span property, so it sits at the
         // production start next to `@longest`/`@shortest`. The Oracle prunes this
         // nonterminal's LHS completion yields; it is not an alternate-level notion.
+        // `@sameLineOutsideBrackets` is the shallow variant: line breaks inside brackets are free.
         var sameLineAnnotation = false
-        if token.kind == "pragma", token.stripped == "sameLine" {
+        var sameLineOutsideBrackets = false
+        if token.kind == "pragma", token.stripped == "sameLine" || token.stripped == "sameLineOutsideBrackets" {
             sameLineAnnotation = true
+            sameLineOutsideBrackets = token.stripped == "sameLineOutsideBrackets"
             cI += 1
         }
         // `@literalMunch` — marks a regex terminal as participating in
@@ -332,6 +346,7 @@ class ApusParser {
             }
             if sameLineAnnotation {
                 lhsNode.requiresSameLine = true
+                lhsNode.sameLineOutsideBrackets = sameLineOutsideBrackets
             }
             try expect(["."])
             cI += 1
@@ -435,9 +450,6 @@ class ApusParser {
         // for non-empty siblings; follower-pivot for the epsilon skip) — see
         // `registerPrefer` / the OPT/KLN walk.
         //
-        // `@confinedTo(N)` / `@excludedFrom(N)` are containment predicates on this
-        // alternate's span.
-        //
         // `@cannotParse(N)` / `@canParse(N)` are parse predicates with NONTERMINAL
         // operands at this alternate start. Captured on this ALT node; the Oracle anchors
         // the prune on the alternate's first body symbol (yield start = alternate start).
@@ -473,20 +485,6 @@ class ApusParser {
                 }
                 startOfSequence.associativityFilters
                     .append(ChildPositionFilter(direction: direction, targets: targets))
-            case "confinedTo", "excludedFrom":
-                let negated = token.stripped == "excludedFrom"
-                cI += 1
-                try expect(["("]); cI += 1
-                // One annotation lists a GROUP of containers, matched as "any of these".
-                var group: [String] = []
-                repeat {
-                    try expect(["identifier"])
-                    group.append(String(token.image))
-                    cI += 1
-                } while token.kind == "identifier"
-                if negated { startOfSequence.excludedFromContainers.append(group) }
-                else       { startOfSequence.confinedToContainers.append(group) }
-                try expect([")"]); cI += 1
             case "cannotParse", "canParse":
                 let negated = token.stripped == "cannotParse"
                 cI += 1
@@ -508,14 +506,17 @@ class ApusParser {
         termNode.actions = collectActions(at: cI)
         
         repeat {
+            let modeAnnotation = try parseModeAnnotations()
             switch token.kind {
             case "<n>", "<s>", ">>|", ">n<", ">s<", "|<<":
                 let layoutNode = layout()
+                apply(modeAnnotation, to: layoutNode)
                 termNode.seq = layoutNode
                 termNode = layoutNode
                 termNode.actions = collectActions(at: cI)
             case ">+>", ">->", "<+<", "<-<":
                 let lookaroundNode = try tokenLookaround(after: termNode)
+                apply(modeAnnotation, to: lookaroundNode)
                 termNode.seq = lookaroundNode
                 termNode = lookaroundNode
                 termNode.actions = collectActions(at: cI)
@@ -550,6 +551,7 @@ class ApusParser {
                 default:
                     break
                 }
+                apply(modeAnnotation, to: factorNode)
                 
                 termNode.seq = factorNode
                 termNode = factorNode
@@ -563,6 +565,44 @@ class ApusParser {
         termNode.seq = GrammarNode(kind: .END, name: "")
         // the .alt and .seq links of an END node are set in resolveEndNodeLinks()
         return startOfSequence
+    }
+
+    private func parseModeAnnotations() throws -> ModeAnnotation {
+        var annotation = ModeAnnotation()
+        while token.kind == "pragma" {
+            let target: WritableKeyPath<ModeAnnotation, UInt64>
+            switch token.stripped {
+            case "setMode":
+                target = \.add
+            case "clearMode":
+                target = \.remove
+            case "requiresMode":
+                target = \.require
+            case "rejectsMode":
+                target = \.reject
+            default:
+                return annotation
+            }
+
+            cI += 1
+            try expect(["("]); cI += 1
+            repeat {
+                try expect(["identifier"])
+                annotation[keyPath: target] |= try grammar.parserModeBit(named: String(token.image))
+                cI += 1
+            } while token.kind == "identifier"
+            try expect([")"]); cI += 1
+        }
+        return annotation
+    }
+
+    private func apply(_ annotation: ModeAnnotation, to node: GrammarNode) {
+        guard !annotation.isEmpty else { return }
+        node.modeAdd |= annotation.add
+        node.modeRemove |= annotation.remove
+        node.requiredModes |= annotation.require
+        node.rejectedModes |= annotation.reject
+        node.hasModeAnnotation = true
     }
     
     func layout() -> GrammarNode {

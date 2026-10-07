@@ -611,13 +611,14 @@ boxedProtocolType =
 _metatype-type → type **.** **Type** | type **.** **Protocol**_
 
 ```apus
-metatypeType = simpleType "." >n< ( "Type" | "Protocol" ) .
+metatypeType = simpleType ( >s< "." >s< | <s> "." ) ( "Type" | "Protocol" ) .
 
 packType = packExpansionType | packElementType .
 packExpansionType = "repeat" type .
 packElementType = "each" type .
 
-selfMemberType = simpleType "." >n< "self" .
+memberType = simpleType ( >s< "." >s< | <s> "." ) typeMemberName typeGenericArgumentClause .
+memberType = simpleType ( >s< "." >s< | <s> "." ) typeMemberName >->( openAngle ) .
 ```
 
 
@@ -974,13 +975,14 @@ closureParameterClause      = "(" ")"
                             | "(" closureParameterList ","? ")"
                             | closureShorthandNameList .
 
-closureShorthandNameList    = closureParameterName { "," closureParameterName } .
+closureShorthandNameList    = closureShorthandName { "," closureShorthandName } .
+closureShorthandName        = identifierToken | "_" .
 closureParameterList        = closureParameter { "," closureParameter } .
 
 closureParameter            = attributes? @shortest [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation? .
 closureParameter            = attributes? [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation "..." .
 closureParameterNames       = externalParameterName closureParameterName | closureParameterName .
-closureParameterName        = identifierToken | "_" .
+closureParameterName        = identifierToken | "self" | "_" .
 
 captureList         = "[" "]"
                     | "[" captureListItems ","? "]" .
@@ -1050,6 +1052,7 @@ _key-path-postfix → **?** | **!** | **self** | **[** function-call-argument-li
 
 ```apus
 keyPathDot                  - /\./ .
+keyPathDotOperatorStart     - /\.(?=[-+*%<>=&|^~.])/ .
 keyPathMarkRunStart         - /[?!](?=[?!])/ .
 keyPathMarkRunOptional      - /\?(?=[?!])/ .
 keyPathMarkRunForce         - /!(?=[?!])/ .
@@ -1059,6 +1062,7 @@ keyPathMetatypeStart        - /\.(?=[ \t]*(?:Type|Protocol)(?!\w))/ .
 keyPathExpression =
     | @prefer "\\" keyPathRootType keyPathComponents
     | @prefer "\\" keyPathRootType keyPathExpressionStop
+    |         "\\" >+> ( keyPathDotOperatorStart )
     |         "\\" >+> ( keyPathDot ) keyPathComponents
     .
 
@@ -1104,9 +1108,9 @@ keyPathProperty = ( >s< "." >s< | <s> "." ) keyPathMemberName .
 keyPathPivotFirst = keyPathDot >s< optionalMark .
 keyPathPivotFirst = keyPathDot >s< forceMark .
 keyPathPivotFirst = "." >n< "[" functionCallArgumentList? "]" .
-keyPathPivotFirst = "[" functionCallArgumentList? "]" .
+keyPathPivotFirst = >n< "[" functionCallArgumentList? "]" .
 keyPathPivotFirst = keyPathMarkRunOperator .
-keyPathPivotFirst = <s> forceMark .
+keyPathPivotFirst = <s> "!" .
 keyPathPivot = keyPathPivotFirst .
 keyPathPivot = >s< optionalMark .
 keyPathPivot = >s< forceMark .
@@ -1119,8 +1123,8 @@ keyPathBareComponent = keyPathProperty .
 keyPathBareComponent = >s< optionalMark .
 keyPathBareComponent = keyPathMarkRunOperator .
 keyPathBareComponent = >s< forceMark .
-keyPathBareComponent = <s> forceMark .
-keyPathBareComponent = "[" functionCallArgumentList? "]" .
+keyPathBareComponent = <s> "!" .
+keyPathBareComponent = >n< "[" functionCallArgumentList? "]" .
 ```
 
 
@@ -2014,13 +2018,13 @@ deinitializerDeclaration = attributes? declarationModifiers? "deinit" "async"? c
 
 
 ### Grammar of an extension declaration
-_extension-declaration → attributes? access-level-modifier? **extension** type-identifier type-inheritance-clause? generic-where-clause? extension-body_  
+_extension-declaration → attributes? access-level-modifier? **extension** type type-inheritance-clause? generic-where-clause? extension-body_  
 _extension-body → **{** extension-members? **}**_  
 _extension-members → extension-member extension-members?_  
 _extension-member → declaration | compiler-control-statement_
 
 ```apus
-extensionDeclaration = attributes? declarationModifiers? "extension" ( typeIdentifier | arrayType | dictionaryType | optionalType | implicitlyUnwrappedOptionalType | packExpansionType ) typeInheritanceClause? genericWhereClause? "{" members? "}" .
+extensionDeclaration = attributes? declarationModifiers? "extension" type typeInheritanceClause? genericWhereClause? "{" members? "}" .
 ```
 
 

@@ -26,8 +26,8 @@ APUS resolves ambiguity in four layers. Each layer has a different job.
 | Layer | When | What it decides | Tools |
 |---|---|---|---|
 | Lexer | during the parse, per terminal | the extent of a token | `@literalMunch`, munch-exempt terminals, `@preempt` |
-| Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()` |
-| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@confinedTo`, `@sameLine`, `@prefer`, `@longest`, `@left`, … |
+| Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()`, parser modes |
+| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@sameLine`, `@prefer`, `@longest`, `@left`, … |
 | AST generator | after the Oracle | the operator precedence tree | precedence metadata on the operator alternates |
 
 Obey these rules:
@@ -187,7 +187,7 @@ The Oracle (`Oracle.disambiguate`) does these steps:
 
 | Pass | Rules | What the rule needs to know |
 |---|---|---|
-| filter | `@canParse` `@cannotParse` `@confinedTo` `@excludedFrom` `@sameLine` | only that some witness exists |
+| filter | `@canParse` `@cannotParse` `@sameLine` | only that some witness exists |
 | sameSpan | `@prefer`, `@avoid` between siblings | the legal rivals at the SAME span |
 | structure | `@left` `@right` | which production occupies a span |
 | extent | `@longest` `@shortest`, `@avoid` against an optional's skip | the legal rivals at DIFFERENT extents |
@@ -198,8 +198,8 @@ rule cannot remove the only complete derivation by accident.
 **Why this order.** A removal is permanent, so the order follows from one question per rule: if
 OTHER yields disappear later, can this rule's decision become wrong?
 
-- A **filter** keeps a yield only if a witness exists: a same-line derivation, an enclosing
-  container, a parse of `N` here. If other yields disappear, a filter can only become stricter.
+- A **filter** keeps a yield only if a witness exists: a same-line derivation or a parse of `N`
+  here. If other yields disappear, a filter can only become stricter.
   It is never wrong too early, so filters go first and their order does not matter.
 - Every other rule removes a yield **because a rival exists**: a preferred sibling, a longer
   extent, "production p already occupies this span". If that rival is removed later, the removal
@@ -214,13 +214,8 @@ Each edge in the order was a real bug:
 | sameSpan → structure | `f(1) {}⏎{}` | `f(1) {}` has two readings, and `@prefer` deletes the parenless one. Before it did, `@right` took `f(1) {}` for an instance of itself and broke the chain |
 | structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
 
-`@excludedFrom` is in the filter pass, but strictly it removes a yield because a container
-EXISTS, so it is order-sensitive in principle. Its containers are enclosing constructs, not
-rivals, and no input has shown it reading a container that a later pass removes.
-
-`@confinedTo` and `@excludedFrom` test the extent of the alternate's FIRST body symbol, not of
-the whole alternate. An alternate that starts inside a container and ends outside it therefore
-counts as contained. No input is known to hit this.
+Parser modes replaced the old span-containment filters. They are enforced before descriptors
+enter the forest, so they do not depend on later Oracle pruning.
 
 ### 5.3 Hard constraints
 
@@ -230,9 +225,11 @@ A hard constraint removes a reading that the language does not permit.
 |---|---|---|
 | `@cannotParse(N)` | start of an alternate | Remove the alternate where a yield of `N` starts at the same position. |
 | `@canParse(N)` | start of an alternate | Remove the alternate where no yield of `N` starts at the same position. |
-| `@confinedTo(N)` | start of an alternate | Keep the alternate only where a yield of `N` contains its span. |
-| `@excludedFrom(N)` | start of an alternate | Remove the alternate where a yield of `N` contains its span. |
 | `@sameLine` | before a nonterminal | Keep the yield only if a surviving derivation crosses no newline trivia. |
+| `@setMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` active. |
+| `@clearMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` inactive. |
+| `@requiresMode(N)` | before a sequence item | Schedule that occurrence only when mode `N` is active. |
+| `@rejectsMode(N)` | before a sequence item | Reject that occurrence when mode `N` is active. |
 
 Details:
 
@@ -242,8 +239,8 @@ Details:
   `canParseX` test in swift-syntax.
 - `@cannotParse(A B)` means: neither `A` nor `B` starts here. `@canParse(A B)` means: both start
   here.
-- In `@confinedTo(A B)` the containers are alternatives: `A` or `B` must contain the span. Two
-  annotations on one alternate must both be true.
+- In `@requiresMode(A B)`, all listed modes must be active. In `@rejectsMode(A B)`, the
+  occurrence is rejected only when all listed modes are active.
 - `@sameLine` is derivation-local. It tiles the candidate yield through the current BSR and inspects
   the exact terminal commits used by that tiling. Commits from dead or competing derivations do not
   count.
@@ -259,17 +256,15 @@ Examples:
 
 ```apus
 statement      = @cannotParse(declaration attributes) expression .
-declaration    = @confinedTo(enumMember structMember classMember actorMember protocolMember extensionMember) enumCaseDeclaration .
-moduleSelector = @excludedFrom(valueBindingPattern) identifierToken "::" >n< .
+moduleSelector = @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
 ```
 
-To use a token or layout fact with a containment rule, put the gate in a nonterminal. The
-parser then checks the gate, and the Oracle queries only the yields:
+To combine a context fact with a token or layout fact, put the layout gate in a nonterminal and
+the mode gate on the occurrence that needs it:
 
 ```apus
 closureExpression     = samelineOpenedClosure
-                      | @excludedFrom(conditionExpression) @excludedFrom(trailingClosures)
-                        newlineOpenedClosure .
+                      | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
 samelineOpenedClosure = "{" >n< closureSignature? statements? "}" .
 newlineOpenedClosure  = "{" <n> closureSignature? statements? "}" .
 ```
@@ -420,7 +415,7 @@ In a left-recursive grammar (`E = E "+" E | …`), precedence is an ambiguity. U
 | prefix, infix or postfix operator; newline continuation; call at line start | boundary predicate |
 | regex or division; generic-argument follow set | token lookaround |
 | keyword in an identifier position | `---(…)` |
-| a construct that is valid only in a context (swift-syntax `ExprFlavor`) | `@confinedTo` / `@excludedFrom` |
+| a construct that is valid only in a context (swift-syntax `ExprFlavor`) | parser modes |
 | a swift-syntax `atStartOfX` or `canParseX` decision | `@canParse` / `@cannotParse`, or token lookaround |
 | the same span, two alternates | `@prefer` / `@avoid` |
 | the same start, two lengths | `@longest` / `@shortest` |
@@ -637,7 +632,7 @@ the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (se
 | File | Contents |
 |---|---|
 | `Lexer.swift` | `OnDemandLiteralLexer.lex`: `@literalMunch`, the `@preempt` split points |
-| `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround |
-| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `ContainmentRule`, `SameLineSpanRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
+| `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround; parser mode gates |
+| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `SameLineSpanRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
 | `DerivationBuilder.swift` | builds the tree and reports residual ambiguity with a fingerprint |
 | `ApusApusTests/OracleDisambiguationTests.swift` | tests for each Oracle rule |

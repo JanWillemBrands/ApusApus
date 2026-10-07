@@ -21,9 +21,10 @@ import Foundation
 struct ParsePosition: Hashable, Comparable, CustomStringConvertible {
     let slot: GrammarNode
     let index: CharPosition
+    let mode: UInt64
 
-    var description: String { "\(slot).\(index)" }
-    var ebnfDot: String { "\(slot.ebnfDot()),\(index)" }
+    var description: String { "\(slot).\(index).m\(mode)" }
+    var ebnfDot: String { "\(slot.ebnfDot()),\(index),m\(mode)" }
 
     static func < (lhs: ParsePosition, rhs: ParsePosition) -> Bool {
         lhs.description < rhs.description
@@ -45,7 +46,7 @@ final class ParseCluster {
 extension MessageParser {
 
     // Paper: ntAdd(X, j) — add descriptors for all alternates of a bracket/nonterminal
-    func addDescriptorsForAlternates(X: GrammarNode, k: CharPosition, i: CharPosition) {
+    func addDescriptorsForAlternates(X: GrammarNode, k: CharPosition, i: CharPosition, mode: UInt64) {
         // Hot path: a `switch`, not `[…].contains`, so the always-on check allocates nothing.
         let isBracket: Bool
         switch X.kind {
@@ -56,9 +57,9 @@ extension MessageParser {
         var selectedAlternate = false
         var current = X.alt
         while let alt = current {
-            if testSelect(slot: alt, bracket: X) {
+            if (!alt.hasModeAnnotation || modeAllows(alt, in: mode)), testSelect(slot: alt, bracket: X) {
                 selectedAlternate = true
-                addDescriptor(L: alt.seq!, k: k, i: i)
+                addDescriptor(L: alt.seq!, k: k, i: i, mode: mode)
             }
             current = alt.alt
         }
@@ -85,16 +86,20 @@ extension MessageParser {
         // cL.alt points to the LHS nonterminal node
 
         // Create the return edge: (L=cL, i=cU)
-        let returnEdge = ParsePosition(slot: cL, index: cU)
+        let callerMode = cMode
+        let calleeMode = modeForOccurrence(cL, from: callerMode)
+        guard modeAllows(cL, in: calleeMode) else { return }
+
+        let returnEdge = ParsePosition(slot: cL, index: cU, mode: callerMode)
 
         // Find or create the cluster node for (X=cL.alt!, k=cI)
-        let clusterKey = ParsePosition(slot: cL.alt!, index: cI)
+        let clusterKey = ParsePosition(slot: cL.alt!, index: cI, mode: calleeMode)
 
         if let existingCluster = crf[clusterKey] {
             if existingCluster.returns.insert(returnEdge).inserted {
                 for pop in existingCluster.pops {
-                    if continuationViable(continuation: cL.seq!, at: pop) {
-                        addDescriptor(L: cL.seq!, k: cU, i: pop)
+                    if continuationViable(continuation: cL.seq!, at: pop, mode: returnEdge.mode) {
+                        addDescriptor(L: cL.seq!, k: cU, i: pop, mode: returnEdge.mode)
                         addYield(L: cL, i: cU, k: cI, j: pop)
                     } else {
                         recordSuppressedContinuation(cL.seq!, at: pop)
@@ -106,19 +111,19 @@ extension MessageParser {
             let newCluster = ParseCluster()
             crf[clusterKey] = newCluster
             newCluster.returns.insert(returnEdge)
-            addDescriptorsForAlternates(X: cL.alt!, k: cI, i: cI)
+            addDescriptorsForAlternates(X: cL.alt!, k: cI, i: cI, mode: calleeMode)
         }
     }
 
     // Paper: rtn(X, k, j) — return from a nonterminal
     func rtn(X: GrammarNode) {
-        let clusterKey = ParsePosition(slot: X, index: cU)
+        let clusterKey = ParsePosition(slot: X, index: cU, mode: cMode)
         guard let cluster = crf[clusterKey] else { return }
 
         if cluster.pops.insert(cI).inserted {
             for returnEdge in cluster.returns {
-                if continuationViable(continuation: returnEdge.slot.seq!, at: cI) {
-                    addDescriptor(L: returnEdge.slot.seq!, k: returnEdge.index, i: cI)
+                if continuationViable(continuation: returnEdge.slot.seq!, at: cI, mode: returnEdge.mode) {
+                    addDescriptor(L: returnEdge.slot.seq!, k: returnEdge.index, i: cI, mode: returnEdge.mode)
                     addYield(L: returnEdge.slot, i: returnEdge.index, k: cU, j: cI)
                 } else {
                     recordSuppressedContinuation(returnEdge.slot.seq!, at: cI)
@@ -131,14 +136,18 @@ extension MessageParser {
     // bracketCall — enter a bracket (DO, OPT, KLN, POS)
     // Similar to call() but the bracket node IS the "nonterminal" — no indirection through .alt
     func bracketCall(bracket: GrammarNode) {
-        let returnEdge = ParsePosition(slot: bracket, index: cU)
-        let clusterKey = ParsePosition(slot: bracket, index: cI)
+        let callerMode = cMode
+        let bracketMode = modeForOccurrence(bracket, from: callerMode)
+        guard modeAllows(bracket, in: bracketMode) else { return }
+
+        let returnEdge = ParsePosition(slot: bracket, index: cU, mode: callerMode)
+        let clusterKey = ParsePosition(slot: bracket, index: cI, mode: bracketMode)
 
         if let existingCluster = crf[clusterKey] {
             if existingCluster.returns.insert(returnEdge).inserted {
                 for pop in existingCluster.pops {
-                    if continuationViable(continuation: bracket.seq!, at: pop) {
-                        addDescriptor(L: bracket.seq!, k: cU, i: pop)
+                    if continuationViable(continuation: bracket.seq!, at: pop, mode: returnEdge.mode) {
+                        addDescriptor(L: bracket.seq!, k: cU, i: pop, mode: returnEdge.mode)
                         addYield(L: bracket, i: cU, k: cI, j: pop)
                     } else {
                         recordSuppressedContinuation(bracket.seq!, at: pop)
@@ -150,21 +159,21 @@ extension MessageParser {
             let newCluster = ParseCluster()
             crf[clusterKey] = newCluster
             newCluster.returns.insert(returnEdge)
-            addDescriptorsForAlternates(X: bracket, k: cI, i: cI)
+            addDescriptorsForAlternates(X: bracket, k: cI, i: cI, mode: bracketMode)
         }
     }
 
     // bracketRtn — return from a bracket
     // Similar to rtn() but also handles KLN/POS re-entry
     func bracketRtn(bracket: GrammarNode) {
-        let clusterKey = ParsePosition(slot: bracket, index: cU)
+        let clusterKey = ParsePosition(slot: bracket, index: cU, mode: cMode)
         guard let cluster = crf[clusterKey] else { return }
 
         if cluster.pops.insert(cI).inserted {
             for returnEdge in cluster.returns {
-                if continuationViable(continuation: returnEdge.slot.seq!, at: cI) {
+                if continuationViable(continuation: returnEdge.slot.seq!, at: cI, mode: returnEdge.mode) {
                     addYield(L: returnEdge.slot, i: returnEdge.index, k: cU, j: cI)
-                    addDescriptor(L: returnEdge.slot.seq!, k: returnEdge.index, i: cI)
+                    addDescriptor(L: returnEdge.slot.seq!, k: returnEdge.index, i: cI, mode: returnEdge.mode)
                 } else {
                     recordSuppressedContinuation(returnEdge.slot.seq!, at: cI)
                     suppressedDescriptorCount += 1
@@ -181,7 +190,7 @@ extension MessageParser {
                 // that arrived after it). The DerivationBuilder reconstructs iteration
                 // boundaries by re-tiling the BODY yields, so it never reads the
                 // closure node's own yields — this change is tree-invariant.
-                addDescriptorsForAlternates(X: bracket, k: cU, i: cI)
+                addDescriptorsForAlternates(X: bracket, k: cU, i: cI, mode: cMode)
             }
         }
     }

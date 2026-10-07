@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00004324-advent-overaccept-bcd4c49d2f766b1d.json",
+    "durationSeconds" : 0.49841904640197754,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:splice+splice+newline:declaration:testVariableDeclarations#6",
+    "index" : 4324,
+    "seed" : 6018004097026725448,
+    "signalHash" : "5b5f0d04cbb20de2",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "bcd4c49d2f766b1d",
+    "sourceLength" : 47,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nvar a\n= Array<try>?(_: decoder)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                TryExpr\n                  keyword(SwiftSyntax.Keyword.try) \"try\"\n                  PrefixOperatorExpr\n                    prefixOperator(\">?\") \">?\"\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1F47BD1F-913E-4B5B-A147-1579528CF48B.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { a\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | = try>?()\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1F47BD1F-913E-4B5B-A147-1579528CF48B.swift:2:6: error: expected expression after unary operator\n1 |  { a\n2 | = try>?()\n  |      `- error: expected expression after unary operator\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "tryOperator\t[\"try\" >s< >->(forceMark optionalMark)]",
+      "effectMarker\t[tryOperator]",
+      "prefixExpression\t[effectMarker prefixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 98,
+      "descriptorCount" : 229,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 67,
+      "parseSeconds" : 0.00590205192565918,
+      "sourceLength" : 16,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 8,
+      "yieldCount" : 156
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            SequenceExpr\n              ExprList\n                DeclReferenceExpr\n                  identifier(\"a\") \"a\"\n                AssignmentExpr\n                  equal \"=\"\n                TryExpr\n                  keyword(SwiftSyntax.Keyword.try) \"try\"\n                  MissingExpr\n                BinaryOperatorExpr\n                  binaryOperator(\">?\") \">?\"\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : " { a\n= try>?()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                TryExpr\\n                  keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\">?\\\") \\\">?\\\"\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1F47BD1F-913E-4B5B-A147-1579528CF48B.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { a\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | = try>?()\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1F47BD1F-913E-4B5B-A147-1579528CF48B.swift:2:6: error: expected expression after unary operator\\n1 |  { a\\n2 | = try>?()\\n  |      `- error: expected expression after unary operator\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"tryOperator\\t[\\\"try\\\" >s< >->(forceMark optionalMark)]\",\"effectMarker\\t[tryOperator]\",\"prefixExpression\\t[effectMarker prefixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":98,\"descriptorCount\":229,\"duplicateDescriptorCount\":0,\"oraclePruned\":67,\"parseSeconds\":0.00590205192565918,\"sourceLength\":16,\"suppressedDescriptorCount\":27,\"tokenCount\":8,\"yieldCount\":156},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            SequenceExpr\\n              ExprList\\n                DeclReferenceExpr\\n                  identifier(\\\"a\\\") \\\"a\\\"\\n                AssignmentExpr\\n                  equal \\\"=\\\"\\n                TryExpr\\n                  keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n                  MissingExpr\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\">?\\\") \\\">?\\\"\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

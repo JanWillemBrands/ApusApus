@@ -2365,6 +2365,59 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "member-type-self", source: "let a: Foo.Self", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "member-type-module-selector", source: "func fn(_: Foo.Swift::Bar) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "suppressed-type-spaced-tilde", source: "struct S: ~ Copyable {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Extension subjects are parsed as full types by swift-syntax (`parseExtensionDeclaration` -> `parseType`).
+    SwiftSnippet(label: "extension-metatype-tuple", source: "extension ().Type { func fuzz() {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-placeholder-inherits", source: "extension _: HasTrailingCodeBlock { init() }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-dotted-newline", source: "extension BooleanLiteralExprSyntax .\nExpressibleByBooleanLiteral {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-function-type", source: "extension (Int) -> Void {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-any-type", source: "extension any P {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-attributed-type", source: "extension @MainActor Foo {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // SwiftSyntax treats dot-operator starts after a rootless key path as the following expression,
+    // and bare subscript key-path components cannot start a new line.
+    SwiftSnippet(label: "keypath-rootless-double-dot-operator", source: "fuzzValue = \\..foo", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-root-newline-bare-subscript-empty", source: "_ = \\Foo\n[]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-root-newline-bare-subscript-multiline", source: "_ = \\ABCProtocol\n[\n]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-root-newline-dotted-subscript", source: "_ = \\Foo\n.[0]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // SE-0439: trailing commas are accepted in subscript argument lists, as in calls.
+    SwiftSnippet(label: "subscript-trailing-comma-single", source: "let v = a[x,]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "subscript-trailing-comma-assignment", source: "a[x,] = 1", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "subscript-trailing-comma-multiple", source: "let v = a[x, y,]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "subscript-trailing-comma-multiline", source: "a[\n  x,\n] = 1", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Parenthesized closure parameter names may be `self`; swift-syntax keeps it as a keyword token.
+    SwiftSnippet(label: "closure-parenthesized-self-and-value", source: "_ = { (self, value) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "closure-parenthesized-self-only", source: "_ = { (self) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "closure-parenthesized-self-typed", source: "_ = { (self: Int) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `@sameLine` walk: a qualified generic member used as a BASE inside a single-line interpolation
+    // (swift-distributed-actors). The walk used to memoise a cycle-guard `false` for the base.
+    SwiftSnippet(label: "sameline-qualified-generic-member", source: "let s = \"\\(A.B<C>.d)\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "sameline-generic-member-self", source: "let s = \"\\(a.b<C>.self) x\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Interpolation and scoped condition/trailing-closure regressions from the 2026-10 crawl.
+    SwiftSnippet(label: "interpolation-generic-member-chain", source: #"let s = "\(A.B<C>.d)""#, origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "condition-nested-trailing-closure-while", source: "func f() {\n  while g(x: {\n    d.h {\n    }\n  }) {}\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "condition-nested-trailing-closure-guard", source: "func f() throws {\n  guard a.allSatisfy({ x in\n    b.allSatisfy {\n      $0 == x\n    }\n  }) else { throw E.x }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "condition-nested-trailing-closure-if", source: "func f() {\n  if a.contains(where: { x in b.contains {\n    $0 == x\n  } }) { continue }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-infix-not-equal-nonfirst-argument", source: #"_ = f(a, \S.n != x)"#, origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Multiline interpolated strings: indentation stripping is line-stateful across string pieces,
+    // and raw tail tokens may overmatch under longest-token scanning.
+    SwiftSnippet(label: "multiline-interpolation-midline-indent", source: "let n = 0\nlet s = \"\"\"\n            | \\(String(repeating: \" \", count: n))               end\n            \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-multiline-interpolation-tail-delimiter", source: "let field = \"\"\nlet body = #\"\"\"\n{\"usage\":\\#(field)}\n\"\"\"#\nlet x = 1", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-multiline-interpolation-paired-parts", source: "let a = ##\"\"\"\nx \\##(m)\n\"\"\"##\nlet b = ##\"\"\"\ny \\##(m)\n\"\"\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-singleline-interpolation-tail-delimiter", source: "let id = x\nlet a = #\"\\#(id.uuidString)\"#\nlet b = #\"\\#(id.uuidString)\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-06 `#if` clusters (TODO #2). The condition is a general expression; line breaks are
+    // free inside brackets (`@sameLineOutsideBrackets`).
+    SwiftSnippet(label: "ifconfig-condition-wildcard", source: "#if _\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-empty-tuple", source: "fuzz {\n#if ()\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-tuple-trailing-comma", source: "fuzz {\n#if (A, )\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-init", source: "#if FOO\n#if init\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-call-newline-in-parens", source: "#if os(\nmacOS)\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-operator-newline-in-parens", source: "#if (A\n|| B)\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-call-args-newline", source: " Fuzz {\n#if () (\n)\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-canimport-version", source: "#if canImport(A, _version: 2.2) && !B || compiler(>=5)\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "tuple-single-element-trailing-comma", source: "let x = (A, )", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "tuple-single-labeled-trailing-comma", source: "let x = (a: 1,)", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "postfix-ifconfig-member-chain-clauses", source: "let v = base\n#if FOO\n.a\n#elseif B\n.b()\n#else\n.c[0]\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-body-nested-block-leading-dot", source: "#if A\nfunc f() {\n#if FOO\n.x\n#endif\n}\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-body-first-nested-leading-dot", source: "#if A\n#if FOO\n.methodOne\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2398,6 +2451,14 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "member-ifconfig-leading-dot-warning", source: "struct Fuzz {\n#if FOO\n.member\n#endif\n#warning(\"seed\")\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-condition-newline-call-overaccept", source: "struct Fuzz {\n#if A\n(if let x = value as? T ?? nil { _ = x })\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "enum-case-payload-newline", source: "switch bar {\ncase .payload // c\n(borrowing x):\n  break\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-06 `#if` clusters (TODO #2): the condition may not start, or continue, on a new line
+    // outside brackets; a postfix `#if` body is a member chain only.
+    SwiftSnippet(label: "ifconfig-condition-next-line", source: "#if\nA\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-next-line-in-closure", source: "{\n#if\nDEBUG\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-operator-next-line", source: "#if A\n|| B\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-operand-next-line", source: "#if A ||\nB\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "postfix-ifconfig-else-non-member", source: " { v = x\n#if FOO\n.borrowing\n#else\nb\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "postfix-ifconfig-binary-tail-in-ifconfig-body", source: "#if A\nlet fuzzValue = base\n#if FOO\n.methodOne + 12\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - fuzz harvest fixes")

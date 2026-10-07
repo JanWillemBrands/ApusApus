@@ -146,6 +146,15 @@ you never have to reconstruct them by hand. It:
 - exits non-zero only on crashes or correctness failures — `Trees differ` (the
   frontier, §2) is reported but never fails the run.
 
+When running from the sandboxed Xcode assistant environment, invoking the script
+through a shell can fail before tests start with `xcodebuild` exit code 74 because
+SwiftPM cannot write diagnostics under `~/Library/Caches/org.swift.swiftpm`.
+If the script prints zero parsed failures but ends with "xcodebuild failed before
+producing parsed test failures", read the saved log. Cache-permission errors are
+an environment failure, not a grammar result. In that environment, validate builds
+with the Xcode `BuildProject` tool and use Xcode's test runner where possible, or
+have the script run from an unsandboxed user shell for the authoritative counts.
+
 It runs the `ApusApusTests` scheme in **Release** by default, as Advent's scheme did
 (`CONFIGURATION=Debug tools/run_tests.sh …` for `-Onone`). xcodebuild's own output no longer
 carries Swift Testing issue text, so the script writes a result bundle and counts the failure

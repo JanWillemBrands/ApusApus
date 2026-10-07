@@ -613,10 +613,9 @@ struct SwiftSyntaxGenerator {
 
     /// The items of a statement list, each carrying the `;` that terminates IT.
     ///
-    /// Serves `statements` and `ifConfigStatements`. The latter is the sentinel
-    /// `ifConfigStatements = statements .`, whose only job is to give `@confinedTo` a name for
-    /// "inside an `#if` clause body", so its caller passes BOTH names and the hop walk descends
-    /// through the sentinel into the list itself.
+    /// Serves `statements` and `ifConfigStatements`. The latter is the mode-bearing alias
+    /// `ifConfigStatements = @setMode(ifConfigBody) statements .`, so its caller passes BOTH names
+    /// and the hop walk descends through the alias into the list itself.
     ///
     /// A HOP walk, because the `;` hangs on the LIST while swift-syntax hangs it on the item it
     /// terminates (`CodeBlockItem.semicolon`). It is NOT in the hop of the item that owns it: the
@@ -1066,7 +1065,6 @@ struct SwiftSyntaxGenerator {
                 // initializedAccessorBlock = @cannotParse(accessorBlockBrace) codeBlock
                 //                          | "{" accessorClauseListNoInit "}"
                 //                          | "{" initAccessorClause accessorClauseList? "}"
-                //                          | @excludedFrom(variableDeclaration) accessorBlockBrace .
                 // This is an ACCESSOR block (get/set/init), NOT a willSet/didSet one — routing it
                 // to the observer converter found no observers and produced an empty list.
                 accessorBlock = convertInitializedAccessorBlock(iabNT.nt, from: iabNT.from, to: iabNT.to)
@@ -1210,17 +1208,13 @@ struct SwiftSyntaxGenerator {
             attributes = convertAttributes(attrNT.nt, from: attrNT.from, to: attrNT.to)
         }
 
-        // The extended type is one of `typeIdentifier | arrayType | dictionaryType | optionalType |
-        // implicitlyUnwrappedOptionalType`, and those are DIRECT children here rather than being
-        // wrapped in a `type` node. `convertType` dispatches on exactly those names, and no other
-        // child of `extensionDeclaration` (attributes, accessLevelModifier, typeInheritanceClause,
-        // genericWhereClause, extensionBody) collides with one, so handing it this node picks the
-        // extended type and nothing else. Previously only `typeIdentifier` was handled, so
-        // `extension [Int] {}` — legal since fix 2 — silently produced a MissingType.
-        var extended: TypeSyntax = convertType(nt, from: from, to: to)
-        if extended.is(MissingTypeSyntax.self) {
+        // SwiftSyntax parses an extension subject with parseType(), so the grammar carries a direct
+        // `type` child here.
+        var extended: TypeSyntax = TypeSyntax(MissingTypeSyntax())
+        if let typeNT = find("type", in: spans) {
+            extended = convertType(typeNT.nt, from: typeNT.from, to: typeNT.to)
+        } else {
             record(.lookupFailed, "no extended type child", from: from, to: to)
-            extended = TypeSyntax(MissingTypeSyntax())
         }
 
         var inheritance: InheritanceClauseSyntax? = nil
@@ -6339,7 +6333,7 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertIfConfigStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        // `ifConfigStatements = statements .` is a sentinel for `@confinedTo`; walk THROUGH it.
+        // `ifConfigStatements = @setMode(ifConfigBody) statements .`; walk THROUGH the alias.
         convertStatementList(["ifConfigStatements", "statements"], nt, from: from, to: to)
     }
 
@@ -6428,97 +6422,18 @@ struct SwiftSyntaxGenerator {
         return DeclSyntax(result)
     }
 
-    /// compilationCondition = identifierToken | booleanLiteral | "(" c ")" | "!" >s< c
-    ///                      | c "&&" c | c "||" c | identifierToken functionCallArgumentClause .
+    /// compilationCondition = >n< expression .   (`@sameLine`)
     ///
-    /// swift-syntax parses the condition as an ORDINARY expression, so `a && b && c` is one FLAT
-    /// SequenceExpr — the same splice as the infix operators, not nested binary nodes.
-    /// compilationCondition = compilationConditionOperand { ( "&&" | "||" ) compilationConditionOperand } .
-    ///
-    /// swift-syntax parses an `#if` condition as a general expression and emits ONE flat
-    /// SequenceExpr — no nesting, precedence left to the type checker — so the operands and the
-    /// operators between them are spliced out in source order. `collectListElements` stops at each
-    /// operand instead of descending into it, and is blind to whether the list is spelled as a
-    /// closure or as right recursion.
+    /// The condition IS an expression — swift-syntax parses it with `parseSequenceExpression` — so
+    /// it converts exactly like one: a flat SequenceExpr when operators are present, the single
+    /// element otherwise. The callers decide whether to wrap.
     private mutating func flattenCompilationCondition(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into elements: inout [ExprSyntax]) {
-        let operands = collectListElements(namedAny: ["compilationConditionOperand"],
-                                           in: NTSpan(nt: nt, from: from, to: to),
-                                           recursiveListNames: [])
-        guard !operands.isEmpty else {
-            record(.lookupFailed, "compilation condition without an operand", from: from, to: to)
+        guard let (_, spans) = tileAlternate(nt, from: from, to: to),
+              let exprNT = find("expression", in: spans) else {
+            record(.lookupFailed, "compilation condition without an expression", from: from, to: to)
             return
         }
-        for (index, operand) in operands.enumerated() {
-            if index > 0 {
-                // The gap between two operands is the operator; read it rather than guessing, so a
-                // comment or line break between them cannot change the token.
-                let text = String(parser.contentText(from: operands[index - 1].to, to: operand.from))
-                elements.append(ExprSyntax(BinaryOperatorExprSyntax(operator: .binaryOperator(text))))
-            }
-            flattenCompilationConditionOperand(operand.nt, from: operand.from, to: operand.to, into: &elements)
-        }
-    }
-
-    /// One operand of an `#if` condition: `(cond)`, a prefix-operator run, `true`/`false`, a bare
-    /// name, or a platform call such as `os(macOS)` / `swift(>=5)`.
-    private mutating func flattenCompilationConditionOperand(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into elements: inout [ExprSyntax]) {
-        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
-            record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
-            return
-        }
-        // `( cond )` — swift-syntax gives a one-element TupleExpr.
-        if let innerNT = spans.compactMap({ findNonterminal(named: "compilationCondition", sym: $0.0, from: $0.1, to: $0.2) }).first {
-            var inner: [ExprSyntax] = []
-            flattenCompilationCondition(innerNT.nt, from: innerNT.from, to: innerNT.to, into: &inner)
-            let innerExpr: ExprSyntax = inner.count == 1
-                ? inner[0] : ExprSyntax(SequenceExprSyntax(elements: ExprListSyntax(inner)))
-            elements.append(ExprSyntax(TupleExprSyntax(
-                elements: LabeledExprListSyntax([LabeledExprSyntax(expression: innerExpr)])
-            )))
-            return
-        }
-        // Prefix operator. Whatever sits before the inner operand IS the operator, so an `!`-RUN
-        // arrives as the single token swift-syntax produces (`#if !!FOO` -> `prefixOperator("!!")`).
-        if let innerNT = spans.compactMap({ findNonterminal(named: "compilationConditionOperand", sym: $0.0, from: $0.1, to: $0.2) }).first {
-            var inner: [ExprSyntax] = []
-            flattenCompilationConditionOperand(innerNT.nt, from: innerNT.from, to: innerNT.to, into: &inner)
-            let innerExpr: ExprSyntax = inner.count == 1
-                ? inner[0] : ExprSyntax(SequenceExprSyntax(elements: ExprListSyntax(inner)))
-            let opText = String(parser.contentText(from: from, to: innerNT.from))
-            elements.append(ExprSyntax(PrefixOperatorExprSyntax(
-                operator: .prefixOperator(opText), expression: innerExpr
-            )))
-            return
-        }
-        if let boolNT = find("booleanLiteral", in: spans) {
-            let value = collectTerminalText(boolNT.nt, from: boolNT.from, to: boolNT.to)
-            elements.append(ExprSyntax(BooleanLiteralExprSyntax(literal: .keyword(value == "true" ? .true : .false))))
-            return
-        }
-        if let idNT = find("identifierToken", in: spans) {
-            let name = collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to)
-            let reference = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
-            if let clauseNT = find("functionCallArgumentClause", in: spans),
-               let (_, clauseSpans) = tileAlternate(clauseNT.nt, from: clauseNT.from, to: clauseNT.to) {
-                var args = LabeledExprListSyntax([])
-                if let listNT = find("functionCallArgumentList", in: clauseSpans) {
-                    args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
-                    if hasTrailingComma(clauseSpans, afterList: "functionCallArgumentList"),
-                       var last = args.last {
-                        last.trailingComma = .commaToken()
-                        args = LabeledExprListSyntax(args.dropLast() + [last])
-                    }
-                }
-                elements.append(ExprSyntax(FunctionCallExprSyntax(
-                    calledExpression: reference,
-                    leftParen: .leftParenToken(), arguments: args, rightParen: .rightParenToken()
-                )))
-            } else {
-                elements.append(reference)
-            }
-            return
-        }
-        record(.unhandled, "compilation condition form has no converter: \(alternateKind(spans))", from: from, to: to)
+        flattenExpression(exprNT.nt, from: exprNT.from, to: exprNT.to, into: &elements)
     }
 
     // MARK: - Key paths
@@ -6755,8 +6670,7 @@ struct SwiftSyntaxGenerator {
     // MARK: - Closures
 
     /// closureExpression       = samelineOpenedClosure
-    ///                         | @excludedFrom(conditionExpression) @excludedFrom(trailingClosures)
-    ///                           newlineOpenedClosure .
+    ///                         | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
     /// samelineOpenedClosure   = "{" >n< closureSignature? statements? "}" .
     /// newlineOpenedClosure    = "{" <n> closureSignature? statements? "}" .
     private mutating func convertClosureExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ClosureExprSyntax {
@@ -6765,7 +6679,7 @@ struct SwiftSyntaxGenerator {
             return ClosureExprSyntax(statements: [])
         }
         // BOTH alternates are now a single nonterminal wrapping the same shape one level down —
-        // they exist only to carry the open-brace layout partition and its `@excludedFrom`s. `find`
+        // they exist only to carry the open-brace layout partition and parser-mode gate. `find`
         // does not descend through a nonterminal, so unwrap whichever one tiles here before looking
         // for `closureSignature` / `statements`. (When `samelineOpenedClosure` was spelled inline
         // this only had to unwrap the newline one; missing the new wrapper cost 54 labels — every
@@ -6841,7 +6755,7 @@ struct SwiftSyntaxGenerator {
         )
     }
 
-    /// closureParameterClause = "(" ")" | "(" closureParameterList ","? ")" | identifierList .
+    /// closureParameterClause = "(" ")" | "(" closureParameterList ","? ")" | closureShorthandNameList .
     ///
     /// swift-syntax has TWO shapes here: the shorthand `{ x, y in }` is a
     /// `ClosureShorthandParameterList`, while the parenthesised form is a
@@ -6879,7 +6793,7 @@ struct SwiftSyntaxGenerator {
 
     private mutating func collectShorthandClosureParameters(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into names: inout [ClosureShorthandParameterSyntax]) {
         let list = NTSpan(nt: nt, from: from, to: to)
-        for nameNT in collectListElements(named: "closureParameterName", in: list, recursiveListName: "closureShorthandNameList") {
+        for nameNT in collectListElements(named: "closureShorthandName", in: list, recursiveListName: "closureShorthandNameList") {
             let text = collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to)
             names.append(ClosureShorthandParameterSyntax(
                 name: argumentLabelToken(text)
@@ -7127,7 +7041,8 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertTupleExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
-        // tupleExpression = "(" ")" | "(" argumentLabel ":" expression ","? ")" | "(" tupleElement "," tupleElementList ","? ")" .
+        // tupleExpression = "(" ")" | "(" argumentLabel ":" expression ")" | "(" tupleElement "," ")"
+        //                 | "(" tupleElement "," tupleElementList ","? ")" .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             return missingExpr(.lookupFailed, "no alternate tiles the span", from: from, to: to)
         }
@@ -7135,7 +7050,8 @@ struct SwiftSyntaxGenerator {
         if let firstNT = find("tupleElement", in: spans) {
             appendTupleElement(firstNT, into: &elements)
         }
-        if let listNT = find("tupleElementList", in: spans) {
+        let listNT = find("tupleElementList", in: spans)
+        if let listNT {
             collectTupleElements(listNT.nt, from: listNT.from, to: listNT.to, into: &elements)
         }
         if elements.isEmpty,
@@ -7152,8 +7068,10 @@ struct SwiftSyntaxGenerator {
                 elements[i] = elements[i].with(\.trailingComma, .commaToken())
             }
         }
-        // `(String,)` — SE-0470 trailing comma, which swift-syntax keeps on the LAST element.
-        if hasTrailingComma(spans, afterList: "tupleElementList"), !elements.isEmpty {
+        // `(String,)` — SE-0470 trailing comma, which swift-syntax keeps on the LAST element. With no
+        // list, the comma follows the single `tupleElement` (`(A,)`).
+        if hasTrailingComma(spans, afterList: listNT == nil ? "tupleElement" : "tupleElementList"),
+           !elements.isEmpty {
             elements[elements.count - 1] = elements[elements.count - 1]
                 .with(\.trailingComma, .commaToken())
         }
@@ -7424,7 +7342,7 @@ struct SwiftSyntaxGenerator {
         return member
     }
 
-    /// moduleSelector = @excludedFrom(valueBindingPattern) identifierToken "::" >n< .
+    /// moduleSelector = @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
     ///
     /// SE-0491 `Module::name`. swift-syntax does NOT model this as a member access: the selector
     /// hangs off the referring node itself (`DeclReferenceExpr`, `IdentifierType`, `MemberType`,
@@ -7851,7 +7769,8 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertSubscriptExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
-        // subscriptExpression = postfixExpression >n< "[" functionCallArgumentList? "]" .
+        // subscriptExpression = postfixExpression >n< subscriptArgumentClause .
+        // subscriptArgumentClause = "[" "]" | "[" functionCallArgumentList ","? "]" .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             return missingExpr(.lookupFailed, "no alternate tiles the span", from: from, to: to)
         }
@@ -7860,8 +7779,15 @@ struct SwiftSyntaxGenerator {
         }
         let base = convertPostfixExpression(baseNT.nt, from: baseNT.from, to: baseNT.to)
         var args = LabeledExprListSyntax([])
-        if let listNT = find("functionCallArgumentList", in: spans) {
+        if let clauseNT = find("subscriptArgumentClause", in: spans),
+           let (_, clauseSpans) = tileAlternate(clauseNT.nt, from: clauseNT.from, to: clauseNT.to),
+           let listNT = find("functionCallArgumentList", in: clauseSpans) {
             args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
+            if hasTrailingComma(clauseSpans, afterList: "functionCallArgumentList"),
+               var last = args.last {
+                last.trailingComma = .commaToken()
+                args = LabeledExprListSyntax(args.dropLast() + [last])
+            }
         }
         return ExprSyntax(SubscriptCallExprSyntax(
             calledExpression: base,
@@ -8011,12 +7937,13 @@ struct SwiftSyntaxGenerator {
                 )
             ))
         }
-        // primaryExpression = parenthesisedSpecifierType .
-        // parenthesisedSpecifierType = "(" parenthesisedTypeSpecifier type ")" .
-        // swift-syntax keeps the parens as a TupleExpr and makes the CONTENT a TypeExpr.
-        if let pstNT = find("parenthesisedSpecifierType", in: spans),
+        // primaryExpression = parenthesisedExpressionSpecifierType .
+        // parenthesisedExpressionSpecifierType = "(" expressionParenthesisedTypeSpecifier type ")" .
+        // SwiftSyntax has this expression route for `nonisolated(nonsending)`, but not for
+        // `dependsOn(...)`, which remains type-position-only.
+        if let pstNT = find("parenthesisedExpressionSpecifierType", in: spans),
            let (_, pstSpans) = tileAlternate(pstNT.nt, from: pstNT.from, to: pstNT.to),
-           let modNT = find("parenthesisedTypeSpecifier", in: pstSpans),
+           let modNT = find("expressionParenthesisedTypeSpecifier", in: pstSpans),
            let typeNT = find("type", in: pstSpans) {
             var specifiers = [typeSpecifier(modNT.nt, from: modNT.from, to: modNT.to)]
             var base = convertType(typeNT.nt, from: typeNT.from, to: typeNT.to)
@@ -8473,10 +8400,8 @@ struct SwiftSyntaxGenerator {
     /// so a text sniff can — and did — reach the opposite conclusion from the scanner.
     ///
     /// staticStringLiteral = singleLineStringLiteral | multilineStringLiteral .
-    /// staticStringLiteral = @excludedFrom(availableAttribute) extendedSinglelineStringLiteral .
-    /// staticStringLiteral = @excludedFrom(availableAttribute) extendedMultilineStringLiteral .
-    /// interpolatedStringLiteral = @excludedFrom(availableAttribute) singleLineInterpolatedStringLiteral .
-    /// interpolatedStringLiteral = @excludedFrom(availableAttribute) multilineInterpolatedStringLiteral .
+    /// staticStringLiteral = @rejectsMode(availableAttributeMode) extendedSinglelineStringLiteral .
+    /// staticStringLiteral = @rejectsMode(availableAttributeMode) extendedMultilineStringLiteral .
     ///
     /// The four static forms are `-` TERMINALS, so they need `findTerminal`; the two interpolated
     /// forms are nonterminals assembled from Head/Part/Tail terminals, so they need `find`.
@@ -8516,8 +8441,6 @@ struct SwiftSyntaxGenerator {
 
     private mutating func convertStringLiteral(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
         // stringLiteral = staticStringLiteral | interpolatedStringLiteral .
-        // interpolatedStringLiteral = @excludedFrom(availableAttribute) singleLineInterpolatedStringLiteral .
-        // interpolatedStringLiteral = @excludedFrom(availableAttribute) multilineInterpolatedStringLiteral .
         // `find` digs through brackets but not through nonterminals, so descend both levels.
         if let (_, spans) = tileAlternate(nt, from: from, to: to),
            let interp = find("interpolatedStringLiteral", in: spans),
@@ -8707,19 +8630,62 @@ struct SwiftSyntaxGenerator {
         let opener = poundText + quote
         let interpolationMarker = "\\" + poundText + "("
         let closer = quote + poundText
+        func closingDelimiterRange(in text: String) -> Range<String.Index>? {
+            let start = text.hasPrefix(")") ? text.index(after: text.startIndex) : text.startIndex
+            let searchRange = start..<text.endIndex
+            // Raw strings cannot contain their exact delimiter as content. If the scanner offers a
+            // too-long tail token, later delimiters belong to following source.
+            if raw { return text.range(of: closer, range: searchRange) }
+            return text.range(of: closer, options: .backwards, range: searchRange)
+        }
         // The closer's INDENTATION is stripped from every content line, and it is only visible in
         // the tail, so it has to be read before any piece is split.
         var indent = ""
         if multiline, let tail = pieces.last {
             let tailText = collectTerminalText(tail.nt, from: tail.from, to: tail.to)
-            if let close = tailText.range(of: closer, options: .backwards) {
+            if let close = closingDelimiterRange(in: tailText) {
                 let beforeClose = tailText[tailText.startIndex..<close.lowerBound]
                 if let lastNewline = beforeClose.lastIndex(of: "\n") {
                     indent = String(beforeClose[beforeClose.index(after: lastNewline)...])
                 }
             }
         }
-        /// Strip the closer's indentation from each line, then split on the multiline segment rules.
+        var nextStringPieceStartsLine = true
+
+        /// Strip the closer's indentation from real content-line starts. Interpolated literals
+        /// arrive as separate head/part/tail tokens, so this state has to cross expression
+        /// segments: the text after `\(expr)` in the middle of a line is not indented text.
+        func stripIndent(_ body: String) -> String {
+            guard multiline, !indent.isEmpty else { return body }
+            var result = ""
+            var i = body.startIndex
+            var atLineStart = nextStringPieceStartsLine
+            while i < body.endIndex {
+                if atLineStart, body[i...].hasPrefix(indent) {
+                    i = body.index(i, offsetBy: indent.count)
+                    atLineStart = false
+                    continue
+                }
+                if body[i] == "\r" {
+                    result.append(body[i])
+                    i = body.index(after: i)
+                    if i < body.endIndex, body[i] == "\n" {
+                        result.append(body[i])
+                        i = body.index(after: i)
+                    }
+                    atLineStart = true
+                    continue
+                }
+                result.append(body[i])
+                atLineStart = body[i] == "\n"
+                i = body.index(after: i)
+            }
+            nextStringPieceStartsLine = atLineStart
+            return result
+        }
+
+        /// Strip the closer's indentation from each source line, then split on the multiline
+        /// segment rules.
         func segments(of body: String) -> [StringLiteralSegmentListSyntax.Element] {
             guard multiline else {
                 // Single-line pieces split at newline escapes too — `"\\(x)a\\nb"` ends a segment
@@ -8728,12 +8694,7 @@ struct SwiftSyntaxGenerator {
                     .stringSegment(StringSegmentSyntax(content: .stringSegment($0)))
                 }
             }
-            var text = body
-            if !indent.isEmpty {
-                text = text.split(separator: "\n", omittingEmptySubsequences: false)
-                    .map { $0.hasPrefix(indent) ? String($0.dropFirst(indent.count)) : String($0) }
-                    .joined(separator: "\n")
-            }
+            let text = stripIndent(body)
             return multilineSegmentTexts(text, pounds: poundCount).map {
                 .stringSegment(StringSegmentSyntax(content: .stringSegment($0)))
             }
@@ -8749,6 +8710,7 @@ struct SwiftSyntaxGenerator {
                 expressions: LabeledExprListSyntax([]),
                 rightParen: .rightParenToken()
             )))
+            nextStringPieceStartsLine = false
         }
         for piece in pieces {
             // Only the three delimiter terminals are read as text; the interpolation pieces are
@@ -8784,9 +8746,10 @@ struct SwiftSyntaxGenerator {
                     appendEmptyInterpolation()
                     pendingInterpolation = false
                 }
-                // Cut at the LAST delimiter rather than requiring it to end the text: the raw form
-                // ends `"""#`, so `closer` is a proper prefix of the tail's own ending.
-                guard text.hasPrefix(")"), let close = text.range(of: closer, options: .backwards) else {
+                // Cut at the delimiter rather than requiring it to end the text: terminal spans can
+                // carry trailing trivia, and raw tail tokens may overmatch under longest-token
+                // scanning. `closingDelimiterRange` chooses the real delimiter for each form.
+                guard text.hasPrefix(")"), let close = closingDelimiterRange(in: text) else {
                     record(.unhandled, "interpolated tail has an unexpected shape: \(text.debugDescription)", from: piece.from, to: piece.to)
                     return nil
                 }
@@ -8805,6 +8768,7 @@ struct SwiftSyntaxGenerator {
                     expressions: convertArgumentList(piece.nt, from: piece.from, to: piece.to),
                     rightParen: .rightParenToken()
                 )))
+                nextStringPieceStartsLine = false
                 pendingInterpolation = false
             }
         }

@@ -23,6 +23,7 @@ struct RunnerOptions {
     var seedCorpusPath = "SwiftSyntaxFuzzer/seeds/known-problems.txt"
     var wideCorpusPaths = ["SwiftSyntaxFuzzer/seeds/swift-syntax-corpus.txt", "SwiftSyntaxFuzzer/seeds/real-source.txt"]
     var widePercent = 50
+    var frontierPercent = 20
     var interestingCorpusPaths: [String] = []
     var interestingPercent = 15
     var includePassingEvents = true
@@ -62,6 +63,8 @@ struct RunnerOptions {
                     .split(separator: ",").map(String.init)
             case "--wide-percent":
                 options.widePercent = try parseValue(iterator.next(), as: Int.self, name: arg)
+            case "--frontier-percent":
+                options.frontierPercent = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--interesting-corpus":
                 options.interestingCorpusPaths = try parsePathList(iterator.next(), name: arg)
             case "--interesting-percent":
@@ -458,6 +461,17 @@ final class LineBuffer: @unchecked Sendable {
     }
 }
 
+private func probeEnvironment() -> [String: String] {
+    var environment = [
+        "SWIFT_DETERMINISTIC_HASHING": "1",
+        "OS_ACTIVITY_MODE": "disable"
+    ]
+    if let compilerTimeout = ProcessInfo.processInfo.environment["APUS_COMPILER_TIMEOUT_SECONDS"] {
+        environment["APUS_COMPILER_TIMEOUT_SECONDS"] = compilerTimeout
+    }
+    return environment
+}
+
 final class PersistentProbe {
     private let process: Process
     private let stdinHandle: FileHandle
@@ -470,10 +484,7 @@ final class PersistentProbe {
         process = Process()
         process.executableURL = probeURL
         process.arguments = ["--grammar", grammarURL.path, "--server"]
-        process.environment = [
-            "SWIFT_DETERMINISTIC_HASHING": "1",
-            "OS_ACTIVITY_MODE": "disable"
-        ]
+        process.environment = probeEnvironment()
 
         let stdinPipe = Pipe()
         let stdoutPipe = Pipe()
@@ -610,10 +621,12 @@ struct AdventFuzzRunner {
             seedCorpus: seedCorpus.entries,
             wideCorpus: wideCorpus,
             widePercent: options.widePercent,
+            frontierPercent: options.frontierPercent,
             interestingCorpus: interestingCorpus.entries,
             interestingPercent: options.interestingPercent
         )
         print("wide corpus: \(wideCorpus.count) entries, \(options.widePercent)% of inputs")
+        print("frontier lanes: \(options.frontierPercent)% of inputs")
         print("interesting corpus: \(interestingCorpus.entries.count) entries, \(interestingCorpus.entries.isEmpty ? 0 : options.interestingPercent)% of inputs")
         var counts: [String: Int] = [:]
         var seenArtifacts = Set<String>()
@@ -1025,10 +1038,7 @@ struct AdventFuzzRunner {
             let process = Process()
             process.executableURL = probeURL
             process.arguments = ["--grammar", grammarURL.path]
-            process.environment = [
-                "SWIFT_DETERMINISTIC_HASHING": "1",
-                "OS_ACTIVITY_MODE": "disable"
-            ]
+            process.environment = probeEnvironment()
 
             let stdinPipe = Pipe()
             let stdoutPipe = Pipe()
@@ -1158,6 +1168,7 @@ struct SwiftFragmentGenerator {
 
     private let wideCorpus: [SeedEntry]
     private let widePercent: Int
+    private let frontierPercent: Int
     private let tokenMutator: TokenMutator
     private let interestingCorpus: [SeedEntry]
     private let interestingPercent: Int
@@ -1166,12 +1177,14 @@ struct SwiftFragmentGenerator {
         seedCorpus: [SeedEntry] = [],
         wideCorpus: [SeedEntry] = [],
         widePercent: Int = 0,
+        frontierPercent: Int = 0,
         interestingCorpus: [SeedEntry] = [],
         interestingPercent: Int = 0
     ) {
         self.seedCorpus = seedCorpus
         self.wideCorpus = wideCorpus
         self.widePercent = wideCorpus.isEmpty ? 0 : widePercent
+        self.frontierPercent = max(0, frontierPercent)
         self.tokenMutator = TokenMutator(corpus: wideCorpus)
         self.interestingCorpus = interestingCorpus
         self.interestingPercent = interestingCorpus.isEmpty ? 0 : interestingPercent
@@ -1278,6 +1291,9 @@ struct SwiftFragmentGenerator {
     mutating func next(using rng: inout SplitMix64) -> GeneratedSource {
         if interestingPercent > 0, rng.nextInt(upperBound: 100) < interestingPercent {
             return interestingCorpusSource(using: &rng)
+        }
+        if frontierPercent > 0, rng.nextInt(upperBound: 100) < frontierPercent {
+            return recentFrontierSource(using: &rng)
         }
         if widePercent > 0, rng.nextInt(upperBound: 100) < widePercent {
             return wideSource(using: &rng)
@@ -1426,6 +1442,23 @@ struct SwiftFragmentGenerator {
         }
     }
 
+    private func recentFrontierSource(using rng: inout SplitMix64) -> GeneratedSource {
+        switch rng.nextInt(upperBound: 6) {
+        case 0:
+            return GeneratedSource(label: "frontier:interpolation-delimiter", source: interpolationDelimiterFrontier(using: &rng))
+        case 1:
+            return GeneratedSource(label: "frontier:condition-trailing-closure-scope", source: functionBody(conditionTrailingClosureFrontier(using: &rng)))
+        case 2:
+            return GeneratedSource(label: "frontier:parser-mode-scope", source: parserModeScopeFrontier(using: &rng))
+        case 3:
+            return GeneratedSource(label: "frontier:statement-member-context", source: statementMemberContextFrontier(using: &rng))
+        case 4:
+            return GeneratedSource(label: "frontier:generic-member-type-shape", source: genericMemberTypeFrontier(using: &rng))
+        default:
+            return GeneratedSource(label: "frontier:protocol-accessor-shape", source: protocolAccessorFrontier(using: &rng))
+        }
+    }
+
     private func functionBody(_ body: String) -> String {
         """
         struct Foo { var bar: Int = 0 }
@@ -1438,6 +1471,211 @@ struct SwiftFragmentGenerator {
         func fuzz<T>(items: [T], triples: [(T, T, T)], value: Optional<T>, pair: (T, T)) {
         let stream = AsyncStream<T> { continuation in continuation.finish() }
         \(body)
+        }
+        """
+    }
+
+    private func interpolationDelimiterFrontier(using rng: inout SplitMix64) -> String {
+        let hole = [
+            "A.B<C>.d",
+            "DistributedReception.Key<ServiceActor>.aggressiveNodeReplacementService",
+            "Foo<Bar<Baz>>.Qux.value",
+            "Foo.Bar<Baz>.self",
+            "items.map { $0 }.filter { _ in true }"
+        ].random(using: &rng)
+        let trailer = ["", ".count", " + \"tail\"", "\nlet other = fuzzValue"].random(using: &rng)
+        let prelude = """
+        struct A { struct B<T> { static var d: Int { 1 } } }
+        struct C {}
+        struct Foo { struct Bar<T> { struct Qux { static var value: Int { 1 } } } }
+        struct Baz {}
+        enum DistributedReception { struct Key<T> { static var aggressiveNodeReplacementService: Int { 1 } } }
+        struct ServiceActor {}
+        let items = [1]
+        """
+        switch rng.nextInt(upperBound: 4) {
+        case 0:
+            return "\(prelude)\nlet fuzzValue = \"prefix \\(\(hole)) suffix\"\(trailer)"
+        case 1:
+            return "\(prelude)\nlet fuzzValue = #\"prefix \\#(\(hole)) suffix\"#\(trailer)"
+        case 2:
+            return """
+            \(prelude)
+            let fuzzValue = \"\"\"
+            prefix \\(\(hole))
+            suffix
+            \"\"\"\(trailer)
+            """
+        default:
+            return "\(prelude)\nlet fuzzValue = \"\\(\(hole)) \\(try? f(1))\""
+        }
+    }
+
+    private func conditionTrailingClosureFrontier(using rng: inout SplitMix64) -> String {
+        [
+            """
+            while g(x: {
+              d.h {
+              }
+            }) {}
+            """,
+            """
+            guard a.allSatisfy({ x in
+              b.allSatisfy {
+                $0 == x
+              }
+            }) else { return }
+            """,
+            """
+            if a.contains(where: { x in b.contains {
+              $0 == x
+            } }) { continue }
+            """,
+            """
+            if g(x: value) {
+            } else if h(y: {
+              d.h {
+              }
+            }) {
+            }
+            """,
+            """
+            repeat {
+              _ = value
+            } while g(x: {
+              d.h {
+              }
+            })
+            """
+        ].random(using: &rng)
+    }
+
+    private func parserModeScopeFrontier(using rng: inout SplitMix64) -> String {
+        [
+            """
+            @available(*, deprecated, message: "plain")
+            func fuzz() {}
+            """,
+            """
+            @available(*, deprecated, message: #"raw"#)
+            func fuzz() {}
+            """,
+            """
+            struct Fuzz {
+              init() {
+                init
+                init(value)
+              }
+            }
+            """,
+            """
+            func fuzz() {
+              if let self = Optional(Self.self) { _ = self }
+              if let value = Optional(1) { _ = value }
+            }
+            """,
+            """
+            func fuzz() {
+              let value = Foo()
+              let result = value
+              #if A
+              .bar
+              #else
+              .bar
+              #endif
+            }
+            """
+        ].random(using: &rng)
+    }
+
+    private func statementMemberContextFrontier(using rng: inout SplitMix64) -> String {
+        [
+            """
+            struct Fuzz {
+              #if A
+              @available(*, deprecated)
+              var value: Int { 1 }
+              #elseif B
+              subscript(index: Int) -> Int { index }
+              #else
+              typealias Value = Int
+              #endif
+            }
+            """,
+            """
+            enum Fuzz {
+              #if A
+              case value(Int)
+              #elseif B
+              case other
+              #endif
+            }
+            """,
+            """
+            let base = Foo()
+            let fuzzValue = base
+            #if A
+            .bar
+            #else
+            .bar
+            #endif
+            """,
+            """
+            func fuzz() {
+              #if A
+              let value = 1
+              #elseif B
+              return
+              #else
+              let other = 2
+              #endif
+            }
+            """
+        ].random(using: &rng)
+    }
+
+    private func genericMemberTypeFrontier(using rng: inout SplitMix64) -> String {
+        let type = [
+            "P.Type?",
+            "P.Protocol!",
+            "Foo.Bar<Baz>.Qux.Type",
+            "(any P & Sendable).Type?",
+            "Array<(repeat each T)>",
+            "Dictionary<String, Foo.Bar<Baz>.Qux?>"
+        ].random(using: &rng)
+        let expression = [
+            "Foo.Bar<Baz>.Qux.value",
+            "Foo.Bar<Baz>.self",
+            "A.B<C>.d",
+            "(Foo.Bar<Baz>.Qux.self).self"
+        ].random(using: &rng)
+        return """
+        protocol P {}
+        struct A { struct B<T> { static var d: Int { 1 } } }
+        struct C {}
+        struct Foo { struct Bar<T> { struct Qux { static var value: Int { 1 } } } }
+        struct Baz {}
+        struct Fuzz<each T> {
+          let typeValue: \(type) = placeholder()
+          let exprValue = \(expression)
+        }
+        """
+    }
+
+    private func protocolAccessorFrontier(using rng: inout SplitMix64) -> String {
+        let member = [
+            "var value: Int { get async throws }",
+            "subscript<T>(dynamicMember keyPath: KeyPath<Self, T>) -> T { get }",
+            "associatedtype Element: Sequence where Element.Element == Int",
+            "static func make() -> Self",
+            "init(value: Int)",
+            "struct Nested { var value: Int }",
+            "enum NestedEnum { case value(Int) }"
+        ].random(using: &rng)
+        return """
+        protocol FuzzProtocol {
+          associatedtype Value
+          \(member)
         }
         """
     }
@@ -2433,6 +2671,7 @@ func printHelp() {
       --seed-corpus PATH   Labeled seed corpus (default: SwiftSyntaxFuzzer/seeds/known-problems.txt)
       --wide-corpus PATHS  Comma-separated real-code seed files for the wide lanes (default: seeds/swift-syntax-corpus.txt,seeds/real-source.txt; "" disables)
       --wide-percent N     Share of inputs from the wide lanes (default: 50)
+      --frontier-percent N Share of inputs from recent high-signal frontier lanes (default: 20)
       --interesting-corpus PATHS
                            Comma-separated interesting.jsonl files to feed back as a coverage corpus
       --interesting-percent N

@@ -1,0 +1,51 @@
+{
+  "event" : {
+    "artifact" : "00000591-advent-underaccept-8f9a7babf81ad961.json",
+    "durationSeconds" : 0.5583280324935913,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+space+block-comment:translated:testIfconfigExpr11#1",
+    "index" : 591,
+    "seed" : 8709271327401247375,
+    "signalHash" : "e7bf83e3822a05fe",
+    "signalSummary" : "advent-underaccept|compiler=true|swiftSyntaxHasError=false|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParam",
+    "sourceHash" : "8f9a7babf81ad961",
+    "sourceLength" : 262,
+    "status" : "advent-underaccept"
+  },
+  "originalSource" : "func fuzz() {\nfunc nestedIfConfig(baseExpr: MyStruct) {\n   \/* c *\/ baseExpr\n#if CONDITION_1\n  #if CONDITION_2 .methodOne()\n   #endif\n  #if CONDITION_1\n    .methodTwo()\n  #endif\n#else\n  .unknownMethod1()\n  #if CONDITION_2\n    .unknownMethod2()\n  #endif\n#endif\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : false,
+    "adventGeneratedSwiftSyntax" : false,
+    "adventMatched" : false,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+
+    ],
+    "metrics" : {
+      "crfCount" : 250,
+      "descriptorCount" : 441,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 0,
+      "parseSeconds" : 0.007146000862121582,
+      "sourceLength" : 150,
+      "suppressedDescriptorCount" : 11,
+      "tokenCount" : 17,
+      "yieldCount" : 169
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"fuzz\") \"fuzz\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.func) \"func\"\n                identifier(\"nestedIfConfig\") \"nestedIfConfig\"\n                FunctionSignature\n                  FunctionParameterClause\n                    leftParen \"(\"\n                    FunctionParameterList\n                      FunctionParameter\n                        AttributeList\n                        DeclModifierList\n                        identifier(\"baseExpr\") \"baseExpr\"\n                        colon \":\"\n                        IdentifierType\n                          identifier(\"MyStruct\") \"MyStruct\"\n                    rightParen \")\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      IfConfigDecl\n                        IfConfigClauseList\n                          IfConfigClause\n                            poundIf \"#if\"\n                            DeclReferenceExpr\n                              identifier(\"CONDITION_1\") \"CONDITION_1\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                IfConfigDecl\n                                  IfConfigClauseList\n                                    IfConfigClause\n                                      poundIf \"#if\"\n                                      FunctionCallExpr\n                                        MemberAccessExpr\n                                          DeclReferenceExpr\n                                            identifier(\"CONDITION_2\") \"CONDITION_2\"\n                                          period \".\"\n                                          DeclReferenceExpr\n                                            identifier(\"methodOne\") \"methodOne\"\n                                        leftParen \"(\"\n                                        LabeledExprList\n                                        rightParen \")\"\n                                        MultipleTrailingClosureElementList\n                                      CodeBlockItemList\n                                  poundEndif \"#endif\"\n                              CodeBlockItem\n                                IfConfigDecl\n                                  IfConfigClauseList\n                                    IfConfigClause\n                                      poundIf \"#if\"\n                                      DeclReferenceExpr\n                                        identifier(\"CONDITION_1\") \"CONDITION_1\"\n                                      CodeBlockItemList\n                                  poundEndif \"#endif\"\n                        poundEndif \"#endif\"\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-underaccept",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "func fuzz() {\nfunc nestedIfConfig(baseExpr: MyStruct) {\n#if CONDITION_1\n  #if CONDITION_2 .methodOne()\n   #endif\n  #if CONDITION_1\n  #endif\n#endif\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":false,\"adventGeneratedSwiftSyntax\":false,\"adventMatched\":false,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckChecked\":false,\"failureContext\":\"CONDITION_1⏎  #if CONDITION_2 <HERE>.methodOne()⏎   #endif⏎  #if C\",\"failureExpected\":[\"\\\"#if\\\"\",\"\\\"(\\\"\",\"\\\"@\\\"\",\"<n>\",\">->(\\\".\\\")\"],\"failureLine\":4,\"failureOffset\":90,\"generatorDiagnostics\":[],\"grammarCoverage\":[],\"metrics\":{\"crfCount\":250,\"descriptorCount\":441,\"duplicateDescriptorCount\":0,\"oraclePruned\":0,\"parseSeconds\":0.007146000862121582,\"sourceLength\":150,\"suppressedDescriptorCount\":11,\"tokenCount\":17,\"yieldCount\":169},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n                identifier(\\\"nestedIfConfig\\\") \\\"nestedIfConfig\\\"\\n                FunctionSignature\\n                  FunctionParameterClause\\n                    leftParen \\\"(\\\"\\n                    FunctionParameterList\\n                      FunctionParameter\\n                        AttributeList\\n                        DeclModifierList\\n                        identifier(\\\"baseExpr\\\") \\\"baseExpr\\\"\\n                        colon \\\":\\\"\\n                        IdentifierType\\n                          identifier(\\\"MyStruct\\\") \\\"MyStruct\\\"\\n                    rightParen \\\")\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      IfConfigDecl\\n                        IfConfigClauseList\\n                          IfConfigClause\\n                            poundIf \\\"#if\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"CONDITION_1\\\") \\\"CONDITION_1\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                IfConfigDecl\\n                                  IfConfigClauseList\\n                                    IfConfigClause\\n                                      poundIf \\\"#if\\\"\\n                                      FunctionCallExpr\\n                                        MemberAccessExpr\\n                                          DeclReferenceExpr\\n                                            identifier(\\\"CONDITION_2\\\") \\\"CONDITION_2\\\"\\n                                          period \\\".\\\"\\n                                          DeclReferenceExpr\\n                                            identifier(\\\"methodOne\\\") \\\"methodOne\\\"\\n                                        leftParen \\\"(\\\"\\n                                        LabeledExprList\\n                                        rightParen \\\")\\\"\\n                                        MultipleTrailingClosureElementList\\n                                      CodeBlockItemList\\n                                  poundEndif \\\"#endif\\\"\\n                              CodeBlockItem\\n                                IfConfigDecl\\n                                  IfConfigClauseList\\n                                    IfConfigClause\\n                                      poundIf \\\"#if\\\"\\n                                      DeclReferenceExpr\\n                                        identifier(\\\"CONDITION_1\\\") \\\"CONDITION_1\\\"\\n                                      CodeBlockItemList\\n                                  poundEndif \\\"#endif\\\"\\n                        poundEndif \\\"#endif\\\"\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-underaccept\",\"swiftSyntaxHasError\":false}"
+}

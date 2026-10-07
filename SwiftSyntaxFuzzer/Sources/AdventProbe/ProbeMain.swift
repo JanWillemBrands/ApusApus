@@ -227,11 +227,12 @@ struct AdventProbe {
         let compilerResult = runCompilerParse(source: source)
         let compilerTypecheckResult: CompilerResult? = nil
         let swiftSyntaxAccepted = !referenceHasError
-        let referencesAgree = compilerResult.accepted == swiftSyntaxAccepted
         let status: String
-        if !referencesAgree {
+        if compilerResult.timedOut {
+            status = "compiler-timeout"
+        } else if compilerResult.accepted != swiftSyntaxAccepted {
             status = "reference-disagreement"
-        } else if compilerResult.accepted {
+        } else if compilerResult.accepted == true {
             if !adventAccepted {
                 status = "advent-underaccept"
             } else if !ambiguityDiagnostics.isEmpty {
@@ -299,9 +300,55 @@ struct AdventProbe {
     }
 
     private struct CompilerResult {
-        let accepted: Bool
+        let accepted: Bool?
         let stderr: String
+        let timedOut: Bool
     }
+
+    private final class PipeCapture: @unchecked Sendable {
+        private let lock = NSLock()
+        private var data = Data()
+
+        func append(_ chunk: Data) {
+            guard !chunk.isEmpty else { return }
+            lock.lock()
+            data.append(chunk)
+            lock.unlock()
+        }
+
+        var string: String {
+            lock.lock()
+            let snapshot = data
+            lock.unlock()
+            return String(data: snapshot, encoding: .utf8) ?? ""
+        }
+    }
+
+    private static var compilerTimeoutSeconds: TimeInterval {
+        let raw = ProcessInfo.processInfo.environment["APUS_COMPILER_TIMEOUT_SECONDS"]
+        guard let raw, let value = TimeInterval(raw), value > 0 else { return 30 }
+        return value
+    }
+
+    private static let swiftcURL: URL = {
+        let fallback = URL(fileURLWithPath: "/usr/bin/swiftc")
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+        process.arguments = ["--find", "swiftc"]
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = Pipe()
+        do {
+            try process.run()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return fallback }
+            let data = output.fileHandleForReading.readDataToEndOfFile()
+            let path = (String(data: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            return path.isEmpty ? fallback : URL(fileURLWithPath: path)
+        } catch {
+            return fallback
+        }
+    }()
 
     private static func runCompilerParse(source: String) -> CompilerResult {
         runCompiler(source: source, arguments: ["swiftc", "-swift-version", "6", "-parse"], description: "compiler parse")
@@ -342,18 +389,59 @@ struct AdventProbe {
             defer { try? fileManager.removeItem(at: tempURL) }
 
             let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
-            process.arguments = arguments + [tempURL.path]
+            if arguments.first == "swiftc" {
+                process.executableURL = swiftcURL
+                process.arguments = Array(arguments.dropFirst()) + [tempURL.path]
+            } else {
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+                process.arguments = arguments + [tempURL.path]
+            }
             process.environment = ["OS_ACTIVITY_MODE": "disable"]
+            let stdoutPipe = Pipe()
             let stderrPipe = Pipe()
-            process.standardOutput = Pipe()
+            let stdout = PipeCapture()
+            let stderr = PipeCapture()
+            process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
+            stdoutPipe.fileHandleForReading.readabilityHandler = { stdout.append($0.availableData) }
+            stderrPipe.fileHandleForReading.readabilityHandler = { stderr.append($0.availableData) }
             try process.run()
+
+            let deadline = Date().addingTimeInterval(compilerTimeoutSeconds)
+            var timedOut = false
+            while process.isRunning {
+                if Date() >= deadline {
+                    timedOut = true
+                    process.terminate()
+                    Thread.sleep(forTimeInterval: 0.1)
+                    if process.isRunning {
+                        kill(pid_t(process.processIdentifier), SIGKILL)
+                    }
+                    break
+                }
+                Thread.sleep(forTimeInterval: 0.01)
+            }
             process.waitUntilExit()
-            let stderr = String(data: stderrPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            return CompilerResult(accepted: process.terminationStatus == 0, stderr: stderr)
+
+            stdoutPipe.fileHandleForReading.readabilityHandler = nil
+            stderrPipe.fileHandleForReading.readabilityHandler = nil
+            if timedOut {
+                try? stdoutPipe.fileHandleForReading.close()
+                try? stderrPipe.fileHandleForReading.close()
+                return CompilerResult(
+                    accepted: nil,
+                    stderr: "\(description) timed out after \(compilerTimeoutSeconds) seconds",
+                    timedOut: true
+                )
+            }
+            stdout.append(stdoutPipe.fileHandleForReading.readDataToEndOfFile())
+            stderr.append(stderrPipe.fileHandleForReading.readDataToEndOfFile())
+            try? stdoutPipe.fileHandleForReading.close()
+            try? stderrPipe.fileHandleForReading.close()
+
+            return CompilerResult(accepted: process.terminationStatus == 0, stderr: stderr.string, timedOut: false)
         } catch {
-            return CompilerResult(accepted: false, stderr: "\(description) probe failed: \(error)")
+            return CompilerResult(accepted: false, stderr: "\(description) probe failed: \(error)", timedOut: false)
         }
     }
 

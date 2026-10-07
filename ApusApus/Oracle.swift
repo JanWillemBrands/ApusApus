@@ -53,10 +53,7 @@ protocol DisambiguationRule {
 ///                            initializer, the filter then removed the chain, and nothing was
 ///                            left.
 enum OraclePass: Int, CaseIterable {
-    /// Monotone language constraints: `@canParse`/`@cannotParse`, `@confinedTo`, `@sameLine`.
-    /// `@excludedFrom` is filed here too although it is anti-monotone in principle (it prunes
-    /// because a container EXISTS); its containers are enclosing constructs, not rivals, and no
-    /// case has shown it reading a container a later pass removes.
+    /// Monotone language constraints: `@canParse`/`@cannotParse`, `@sameLine`.
     case filter
     /// Same-span choice among sibling alternates: `@prefer`, `@avoid` (explicit siblings).
     case sameSpan
@@ -215,34 +212,6 @@ struct LookaheadPredicateRule: DisambiguationRule {
 }
 
 /// Containment predicate `@within(N…)` on an alternate (see `Ambiguity.md`). Anchored on the alternate's first body symbol: keep a yield `[i,j]` only where
-/// it is CONTAINED in a yield of ANY container `N` of the annotation (`∃` an N-yield `[a,b]` with
-/// `a ≤ i` and `j ≤ b`); prune otherwise. Several annotations of one kind must all hold together. If a container has no yields
-/// at all, nothing is contained in it → the alternate is pruned everywhere (positive semantics —
-/// the reading is valid ONLY inside `N`). This is the declarative form of the retired procedural
-/// `@within` filter (`WithinRule`): the context is read off the BSR, not a hand-rolled scan.
-/// Containment predicate. `negated == false` = `@confinedTo` (keep only where contained → prune
-/// where not); `negated == true` = `@excludedFrom` (prune where contained). "Contained" means: in
-/// EVERY group (annotation), inside at least ONE of that group's containers. With one container per
-/// annotation this is exactly the original all-containers conjunction. See `Ambiguity.md`.
-struct ContainmentRule: DisambiguationRule {
-    var pass: OraclePass { .filter }
-    /// One entry per annotation; the containers inside an entry are alternatives.
-    let groups: [[() -> Set<BinarySpan>]]
-    let negated: Bool
-    func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        let gys = groups.map { $0.map { $0() } }
-        var pruned = 0
-        for span in yields {
-            // Every group must contain the span in at least one of its containers.
-            let contained = gys.allSatisfy { group in
-                group.contains { cy in cy.contains { $0.i <= span.i && span.j <= $0.j } }
-            }
-            if contained == negated { yields.remove(span); pruned += 1 }   // confinedTo prunes ¬contained; excludedFrom prunes contained
-        }
-        return pruned
-    }
-}
-
 /// `@left` / `@right` on an ALTERNATE — associativity as an SDF-style production attribute:
 /// this production may not occur as its own right (`@left`) / own left (`@right`) child.
 ///
@@ -315,17 +284,44 @@ struct BinarySpanExtent: Hashable {
 /// each terminal tile, reads that exact commit's trailing-trivia facts. It never asks "what commits
 /// ended at this cursor?" globally, so dead or competing derivations cannot make a live same-line
 /// derivation look as if it crossed a newline.
+///
+/// `@sameLineOutsideBrackets` is the SHALLOW variant, for swift-syntax's `ExprFlavor.poundIfDirective`.
+/// That flavor checks `atStartOfLine` only along the expression spine — before a binary operator,
+/// its right operand and a postfix suffix (`Expressions.swift` 160/181/201/780) — and every
+/// delimited form re-parses its contents as `.basic` (1439, 2840). So `#if os(⏎macOS)` is clean and
+/// `#if A⏎|| B` is not. The rule models it on the derivation: inside a body that opens with `(`,
+/// `[` or `{` and closes with the matching token, every gap up to the closer may break the line.
 struct SameLineSpanRule: DisambiguationRule {
     var pass: OraclePass { .filter }
+    /// Which token-to-token gaps of a sub-derivation may hold a line break.
+    private enum Gaps: Hashable {
+        case none       // no gap, not even the trailing one
+        case trailing   // only the gap after the sub-derivation's last token
+        case any        // every gap (inside brackets, `@sameLineOutsideBrackets` only)
+    }
     private struct NodeSpanMode: Hashable {
         let id: ObjectIdentifier
         let from: CharPosition
         let to: CharPosition
-        let allowTrailingLineBreak: Bool
+        let gaps: Gaps
     }
 
     let parser: MessageParser
     let node: GrammarNode
+    let outsideBrackets: Bool
+
+    /// Literal terminal names keep their quotes: the `"("` terminal is named `"("`.
+    private static let closers: [String: String] = [#""(""#: #"")""#, #""[""#: #""]""#, #""{""#: #""}""#]
+
+    /// The number of leading body symbols whose gaps are free: an opener up to (excluding) its
+    /// matching closer. The closer and anything after it keep the enclosing policy.
+    private func bracketedPrefix(_ body: [GrammarNode]) -> Int {
+        guard outsideBrackets, let open = body.first, open.kind.isTerminal,
+              let close = Self.closers[open.name],
+              let c = body.lastIndex(where: { $0.kind.isTerminal && $0.name == close }), c > 0
+        else { return 0 }
+        return c
+    }
 
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         let navigator = YieldNavigator(parser: parser)
@@ -333,17 +329,29 @@ struct SameLineSpanRule: DisambiguationRule {
         var nodeStack = Set<NodeSpanMode>()
         var symbolMemo: [NodeSpanMode: Bool] = [:]
         var closureMemo: [NodeSpanMode: Bool] = [:]
+        // Cycle cuts. Re-entering an in-progress `(node, span)` answers `false` PROVISIONALLY: the
+        // outer frame may still find a derivation. A `false` computed beneath such a cut is not a
+        // fact and must not be memoised, or a same-span unit chain (`expression → … →
+        // postfixExpression → … → expression`) caches "no derivation" for every node on the chain.
+        // `true` is always a fact. So: memoise `false` only when no cut happened while computing it.
+        var cycleCuts = 0
+        func memoise(_ memo: inout [NodeSpanMode: Bool], _ key: NodeSpanMode, _ result: Bool, cutsBefore: Int) {
+            if result || cycleCuts == cutsBefore { memo[key] = result }
+        }
 
-        func validNode(_ nt: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
-            let key = NodeSpanMode(id: ObjectIdentifier(nt), from: from, to: to,
-                                   allowTrailingLineBreak: allowTrailingLineBreak)
+        func validNode(_ nt: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
+            let key = NodeSpanMode(id: ObjectIdentifier(nt), from: from, to: to, gaps: gaps)
             if let cached = nodeMemo[key] { return cached }
-            guard nodeStack.insert(key).inserted else { return false }
+            guard nodeStack.insert(key).inserted else {
+                cycleCuts += 1
+                return false
+            }
             defer { nodeStack.remove(key) }
             guard navigator.hasSpan(nt, i: from, j: to) else {
                 nodeMemo[key] = false
                 return false
             }
+            let cutsBefore = cycleCuts
             var alt = nt.alt
             while let a = alt {
                 defer { alt = a.alt }
@@ -353,19 +361,19 @@ struct SameLineSpanRule: DisambiguationRule {
                         nodeMemo[key] = true
                         return true
                     }
-                } else if validBody(body, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak) {
+                } else if validBody(body[...], from: from, to: to, gaps: gaps, freeCount: bracketedPrefix(body)) {
                     nodeMemo[key] = true
                     return true
                 }
             }
-            nodeMemo[key] = false
+            memoise(&nodeMemo, key, false, cutsBefore: cutsBefore)
             return false
         }
 
-        func validSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
-            let key = NodeSpanMode(id: ObjectIdentifier(sym), from: from, to: to,
-                                   allowTrailingLineBreak: allowTrailingLineBreak)
+        func validSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
+            let key = NodeSpanMode(id: ObjectIdentifier(sym), from: from, to: to, gaps: gaps)
             if let cached = symbolMemo[key] { return cached }
+            let cutsBefore = cycleCuts
             let result: Bool
             switch sym.kind {
             case .T, .TI, .C:
@@ -373,7 +381,7 @@ struct SameLineSpanRule: DisambiguationRule {
                     result = false
                     break
                 }
-                guard !allowTrailingLineBreak,
+                guard gaps == .none,
                       let id = sym.nameID,
                       let gap = parser.terminalGapFacts(terminalID: id, triviaStart: from, triviaEnd: to) else {
                     result = true
@@ -389,60 +397,73 @@ struct SameLineSpanRule: DisambiguationRule {
                     result = false
                     break
                 }
-                result = validNode(lhs, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak)
+                result = validNode(lhs, from: from, to: to, gaps: gaps)
             case .DO, .OPT:
                 if from == to, sym.kind == .OPT {
                     result = true
                 } else {
-                    result = validBracket(sym, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak)
+                    result = validBracket(sym, from: from, to: to, gaps: gaps)
                 }
             case .KLN, .POS:
                 if from == to, sym.kind == .KLN {
                     result = true
                 } else {
-                    result = validClosure(sym, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak)
+                    result = validClosure(sym, from: from, to: to, gaps: gaps)
                 }
             default:
                 result = true
             }
-            symbolMemo[key] = result
+            memoise(&symbolMemo, key, result, cutsBefore: cutsBefore)
             return result
         }
 
-        func validBody(_ symbols: [GrammarNode], from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+        /// `freeCount`: how many leading symbols lie inside a bracket pair (`bracketedPrefix`) and so
+        /// may break the line anywhere.
+        func validBody(_ symbols: ArraySlice<GrammarNode>, from: CharPosition, to: CharPosition, gaps: Gaps,
+                       freeCount: Int = 0) -> Bool {
             guard let first = symbols.first else { return from == to }
-            let rest = Array(symbols.dropFirst())
+            let rest = symbols.dropFirst()
+            let restFree = max(freeCount - 1, 0)
             for mid in navigator.endPositions(first, from: from).sorted() where mid <= to {
-                let firstIsLast = rest.isEmpty
-                let allowHeadTrailing = firstIsLast ? allowTrailingLineBreak : false
-                guard validSymbol(first, from: from, to: mid, allowTrailingLineBreak: allowHeadTrailing) else {
+                // The head's trailing gap IS the span's trailing gap whenever the rest matches zero
+                // width — not only when the head is syntactically last. `A⏎` in `expression` is
+                // followed by empty `{ postfixSuffix }` etc.; no token follows, so nothing is crossed.
+                let headGaps: Gaps = gaps == .any || freeCount > 0 ? .any : (mid == to ? gaps : .none)
+                // SUFFIX FIRST. Validating the head before knowing the rest fits made a left-recursive
+                // alternate visit its head over the WHOLE span — `explicitMemberExpression [a..b]`
+                // checked `postfixExpression [a..b]`, which recursed straight back into the
+                // in-progress `explicitMemberExpression [a..b]`. The cycle guard answered `false`, that
+                // answer was MEMOISED for `postfixExpression [a..b]`, and the real derivation that
+                // needed it later (`a.b<C>` as the base of `.d` in `"\(a.b<C>.d)"`) was pruned.
+                // A split whose suffix cannot tile is never part of a derivation, so skip it before
+                // recursing into the head.
+                guard validBody(rest, from: mid, to: to, gaps: gaps, freeCount: restFree),
+                      validSymbol(first, from: from, to: mid, gaps: headGaps) else {
                     continue
                 }
-                if validBody(rest, from: mid, to: to, allowTrailingLineBreak: allowTrailingLineBreak) {
-                    return true
-                }
+                return true
             }
             return false
         }
 
-        func validBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
+        func validBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
             var alt = bracket.alt
             while let a = alt {
                 defer { alt = a.alt }
                 let body = a.bodySymbols.filter { $0.kind != .EPS }
                 if body.isEmpty {
                     if from == to { return true }
-                } else if validBody(body, from: from, to: to, allowTrailingLineBreak: allowTrailingLineBreak) {
+                } else if validBody(body[...], from: from, to: to, gaps: gaps, freeCount: bracketedPrefix(body)) {
                     return true
                 }
             }
             return false
         }
 
-        func validClosure(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, allowTrailingLineBreak: Bool) -> Bool {
-            let key = NodeSpanMode(id: ObjectIdentifier(bracket), from: from, to: to,
-                                   allowTrailingLineBreak: allowTrailingLineBreak)
+        func validClosure(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
+            let key = NodeSpanMode(id: ObjectIdentifier(bracket), from: from, to: to, gaps: gaps)
             if let cached = closureMemo[key] { return cached }
+            let cutsBefore = cycleCuts
             if from == to {
                 let result = bracket.kind == .KLN
                 closureMemo[key] = result
@@ -451,19 +472,18 @@ struct SameLineSpanRule: DisambiguationRule {
             for end in navigator.iterationEndPositions(bracket, from: from).sorted() where end > from && end <= to {
                 let isLast = end == to
                 if validBracket(bracket, from: from, to: end,
-                                allowTrailingLineBreak: isLast ? allowTrailingLineBreak : false),
-                   (isLast || validClosure(bracket, from: end, to: to,
-                                           allowTrailingLineBreak: allowTrailingLineBreak)) {
+                                gaps: isLast || gaps == .any ? gaps : .none),
+                   (isLast || validClosure(bracket, from: end, to: to, gaps: gaps)) {
                     closureMemo[key] = true
                     return true
                 }
             }
-            closureMemo[key] = false
+            memoise(&closureMemo, key, false, cutsBefore: cutsBefore)
             return false
         }
 
         var pruned = 0
-        for span in yields where !validNode(node, from: span.i, to: span.j, allowTrailingLineBreak: true) {
+        for span in yields where !validNode(node, from: span.i, to: span.j, gaps: .trailing) {
             yields.remove(span)
             pruned += 1
         }
@@ -508,7 +528,7 @@ class Oracle {
     ///
     /// This used to be asserted as an invariant ("pruning may reduce the number of derivations,
     /// never to zero"). That premise is false for this grammar: rejecting invalid input by removing
-    /// its LAST reading is a deliberate mechanism — hard constraints (`@cannotParse`, `@confinedTo`,
+    /// its LAST reading is a deliberate mechanism — hard constraints (`@cannotParse`,
     /// `@sameLine`, …) and preferences such as literal munch do exactly that for every reject
     /// fixture. Once the assert ran in every configuration (2026-09-25) it fired on ~60 correct
     /// rejections per run. It is now a TRACE only: with `APUS_TRACE_ORACLE=1` the phase that
@@ -534,7 +554,8 @@ class Oracle {
     /// (An earlier "exactly one alternate" assertion was a proxy for this and is gone.)
     private func registerSameLine(nonTerminal nt: GrammarNode) {
         guard nt.requiresSameLine else { return }
-        rules.append((nt, SameLineSpanRule(parser: parser, node: nt)))
+        rules.append((nt, SameLineSpanRule(parser: parser, node: nt,
+                                           outsideBrackets: nt.sameLineOutsideBrackets)))
     }
 
     private struct NodeSpan: Hashable { let id: ObjectIdentifier; let from, to: CharPosition }
@@ -598,28 +619,6 @@ class Oracle {
                                                                  targetStarts: targetStarts)))
                 } else {
                     reportInvariantViolation("lookahead predicate: unresolved target '\(predicate.targetName)' or empty alternate", once: true)
-                }
-            }
-            // Leading containment predicate(s) on an ALT node — `@confinedTo(N…)` (keep only where
-            // contained) / `@excludedFrom(N…)` (prune where contained). Anchor on the first body symbol.
-            // Containment: ONE rule per kind. Each annotation is a GROUP matched as "inside any of
-            // these"; the groups of one kind must all match together (`@excludedFrom(A)
-            // @excludedFrom(B)` prunes only where inside BOTH, as it always has).
-            for (groups, negated) in [(node.confinedToContainers, false), (node.excludedFromContainers, true)]
-            where !groups.isEmpty {
-                let p = parser
-                if let anchor = node.bodySymbols.first {
-                    let resolved = groups.map { names in
-                        names.compactMap { name -> (() -> Set<BinarySpan>)? in
-                            guard let c = grammar.nonTerminals[name] else {
-                                reportInvariantViolation("containment: unknown container nonterminal '\(name)'", once: true); return nil
-                            }
-                            return { p.yield(of: c) }
-                        }
-                    }
-                    rules.append((anchor, ContainmentRule(groups: resolved, negated: negated)))
-                } else {
-                    reportInvariantViolation("containment predicate on an empty alternate", once: true)
                 }
             }
             // `@left`/`@right` on this alternate — the child-position FILTER. The ANCHOR is the

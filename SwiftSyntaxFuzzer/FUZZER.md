@@ -66,6 +66,7 @@ FOREGROUND=1 \
 WORKERS=10 \
 ITERATIONS=1000000 \
 TIMEOUT=10 \
+COMPILER_TIMEOUT=5 \
 HEARTBEAT_EVERY=250 \
 MAX_ARTIFACTS_PER_STATUS=500 \
 DEDUPE_BY_SIGNAL=1 \
@@ -76,12 +77,17 @@ SwiftSyntaxFuzzer/bin/run-night.sh
 Use `FOREGROUND=1` here. Detached `nohup` workers have been unreliable in this managed Xcode
 environment.
 
+Keep `COMPILER_TIMEOUT` lower than `TIMEOUT`: this lets a stuck `swiftc` child report
+`compiler-timeout` before the runner has to kill the whole probe as a generic timeout.
+
 ## Important Runner Options
 
 - `--wide-corpus PATHS`: comma-separated labeled corpora for the wide real-source lanes.
   Default: `SwiftSyntaxFuzzer/seeds/swift-syntax-corpus.txt,SwiftSyntaxFuzzer/seeds/real-source.txt`.
   Pass `--wide-corpus ""` to disable.
 - `--wide-percent N`: percentage of generated inputs drawn from wide real-code lanes. Default: `50`.
+- `--frontier-percent N`: percentage of generated inputs drawn from recent high-signal frontier
+  lanes. Default: `20`.
 - `--seed-corpus PATH`: labeled known-problem corpus. Default:
   `SwiftSyntaxFuzzer/seeds/known-problems.txt`.
 - `--interesting-corpus PATHS`: comma-separated `interesting.jsonl` files from earlier runs. These
@@ -154,6 +160,11 @@ disagreement space.
 
 Current lanes are:
 
+- Recent-frontier lanes for the boundaries that produced useful bugs in the last week:
+  interpolation expression delimiters, nested trailing closures inside statement conditions,
+  parser-mode scope transitions, statement/member conditional-compilation context, generic-member
+  expression-vs-type shapes, and protocol/accessor shapes. These are selected by
+  `--frontier-percent` and are cheap targeted generation, not extra probing.
 - Curated fragment lanes for known sharp edges: generics, regex, key paths, conditional
   compilation, attributes, interpolation, member lists, declarations, statements, operators, and
   contextual keywords.

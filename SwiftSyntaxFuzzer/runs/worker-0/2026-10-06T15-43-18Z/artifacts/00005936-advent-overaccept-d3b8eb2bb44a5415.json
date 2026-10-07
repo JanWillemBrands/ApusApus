@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00005936-advent-overaccept-d3b8eb2bb44a5415.json",
+    "durationSeconds" : 0.5074859857559204,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:raw:translated:testSelfRebinding9#1+declaration:testUsing#3",
+    "index" : 5936,
+    "seed" : 11400602406759468750,
+    "signalHash" : "209fd53a80ee13f0",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/EnumDecl\/Attrib",
+    "sourceHash" : "d3b8eb2bb44a5415",
+    "sourceLength" : 184,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nenum EnumCaseNamedSelf {\n    case `self`\n    init() {\n        self = .self \/\/ OK\n        self = .`self` \/\/ OK\n        self = EnumCaseNamedSelf.`self` \/\/ OK\n    }\n}\nusing @Test\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n          CodeBlockItem\n            UsingDecl\n              keyword(SwiftSyntax.Keyword.using) \"using\"\n              identifier(\"Test\") \"Test\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  { {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 |     () {\n3 |     }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:2:7: error: consecutive statements on a line must be separated by ';'\n1 |  { {\n2 |     () {\n  |       `- error: consecutive statements on a line must be separated by ';'\n3 |     }\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:4:2: error: 'using' is an experimental feature that is currently disabled\n2 |     () {\n3 |     }\n4 | }\n  |  `- error: 'using' is an experimental feature that is currently disabled\n5 | using Test\n6 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:5:7: error: default isolation can only be set to '@MainActor' or 'nonisolated'\n3 |     }\n4 | }\n5 | using Test\n  |       `- error: default isolation can only be set to '@MainActor' or 'nonisolated'\n6 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "usingModifier\t[identifier]",
+      ".DO\t[usingModifier]",
+      "usingDeclaration\t[\"using\" >n< ]",
+      "declaration\t[usingDeclaration]",
+      "statement\t[declaration]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 119,
+      "descriptorCount" : 277,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 107,
+      "parseSeconds" : 0.012423992156982422,
+      "sourceLength" : 34,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 10,
+      "yieldCount" : 211
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n                CodeBlockItem\n                  FunctionCallExpr\n                    TupleExpr\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                    LabeledExprList\n                    ClosureExpr\n                      leftBrace \"{\"\n                      CodeBlockItemList\n                      rightBrace \"}\"\n                    MultipleTrailingClosureElementList\n              rightBrace \"}\"\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"using\") \"using\"\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"Test\") \"Test\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " { {\n    () {\n    }\n}\nusing Test\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            UsingDecl\\n              keyword(SwiftSyntax.Keyword.using) \\\"using\\\"\\n              identifier(\\\"Test\\\") \\\"Test\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  { {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 |     () {\\n3 |     }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:2:7: error: consecutive statements on a line must be separated by ';'\\n1 |  { {\\n2 |     () {\\n  |       `- error: consecutive statements on a line must be separated by ';'\\n3 |     }\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:4:2: error: 'using' is an experimental feature that is currently disabled\\n2 |     () {\\n3 |     }\\n4 | }\\n  |  `- error: 'using' is an experimental feature that is currently disabled\\n5 | using Test\\n6 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-73EBA10A-73EB-44EA-B2BE-19579DB38D1F.swift:5:7: error: default isolation can only be set to '@MainActor' or 'nonisolated'\\n3 |     }\\n4 | }\\n5 | using Test\\n  |       `- error: default isolation can only be set to '@MainActor' or 'nonisolated'\\n6 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"usingModifier\\t[identifier]\",\".DO\\t[usingModifier]\",\"usingDeclaration\\t[\\\"using\\\" >n< ]\",\"declaration\\t[usingDeclaration]\",\"statement\\t[declaration]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":119,\"descriptorCount\":277,\"duplicateDescriptorCount\":0,\"oraclePruned\":107,\"parseSeconds\":0.012423992156982422,\"sourceLength\":34,\"suppressedDescriptorCount\":42,\"tokenCount\":10,\"yieldCount\":211},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  FunctionCallExpr\\n                    TupleExpr\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                    LabeledExprList\\n                    ClosureExpr\\n                      leftBrace \\\"{\\\"\\n                      CodeBlockItemList\\n                      rightBrace \\\"}\\\"\\n                    MultipleTrailingClosureElementList\\n              rightBrace \\\"}\\\"\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"using\\\") \\\"using\\\"\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"Test\\\") \\\"Test\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

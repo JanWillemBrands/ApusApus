@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00000407-advent-overaccept-06df6cdc5d3beb94.json",
+    "durationSeconds" : 0.6026109457015991,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:newline:reject:testConflictMarkers12#1",
+    "index" : 407,
+    "seed" : 8709271327499504897,
+    "signalHash" : "fc189937a12f47b8",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "06df6cdc5d3beb94",
+    "sourceLength" : 146,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\n_ = {\n\/\/ Conflict marker.\nlet a = \"a\", b\n= \"b\"\na\n<<<<<<< b\na\n>>>>>>> b\n\/\/ Not a conflict marker.\na\n  <<<<<<< b\na\n  >>>>>>> b\n}()",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"a\") \"a\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"<<<<<<<\") \"<<<<<<<\"\n                  DeclReferenceExpr\n                    identifier(\"b\") \"b\"\n                  BinaryOperatorExpr\n                    binaryOperator(\">>>>>>>\") \">>>>>>>\"\n                  DeclReferenceExpr\n                    identifier(\"b\") \"b\"\n          rightBrace \"}\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-30B1B19C-4E50-4120-9251-A430E48F2ECA.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | a\n3 | <<<<<<< b\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-30B1B19C-4E50-4120-9251-A430E48F2ECA.swift:3:2: error: source control conflict marker in source file\n1 |  {\n2 | a\n3 | <<<<<<< b\n  |  `- error: source control conflict marker in source file\n4 | >>>>>>> b\n5 | }()\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s> prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 126,
+      "descriptorCount" : 305,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 123,
+      "parseSeconds" : 0.005815029144287109,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 9,
+      "yieldCount" : 232
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeclReferenceExpr\n                identifier(\"a\") \"a\"\n          rightBrace \"}\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 50,
+  "source" : " {\na\n<<<<<<< b\n>>>>>>> b\n}()",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"a\\\") \\\"a\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"<<<<<<<\\\") \\\"<<<<<<<\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"b\\\") \\\"b\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\">>>>>>>\\\") \\\">>>>>>>\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"b\\\") \\\"b\\\"\\n          rightBrace \\\"}\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-30B1B19C-4E50-4120-9251-A430E48F2ECA.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | a\\n3 | <<<<<<< b\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-30B1B19C-4E50-4120-9251-A430E48F2ECA.swift:3:2: error: source control conflict marker in source file\\n1 |  {\\n2 | a\\n3 | <<<<<<< b\\n  |  `- error: source control conflict marker in source file\\n4 | >>>>>>> b\\n5 | }()\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s> prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":126,\"descriptorCount\":305,\"duplicateDescriptorCount\":0,\"oraclePruned\":123,\"parseSeconds\":0.005815029144287109,\"sourceLength\":28,\"suppressedDescriptorCount\":45,\"tokenCount\":9,\"yieldCount\":232},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeclReferenceExpr\\n                identifier(\\\"a\\\") \\\"a\\\"\\n          rightBrace \\\"}\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

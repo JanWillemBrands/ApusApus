@@ -6,6 +6,7 @@ cd "$ROOT"
 
 ITERATIONS="${ITERATIONS:-1000000}"
 TIMEOUT="${TIMEOUT:-10}"
+COMPILER_TIMEOUT="${COMPILER_TIMEOUT:-5}"
 if [[ -z "${SEED:-}" ]]; then
   SEED="$(( ( $(date +%s) << 16 ) ^ $$ ))"
 fi
@@ -32,6 +33,7 @@ PID_FILE="$RUNS_DIR/latest.pid"
 echo "Starting $WORKERS ApusApus fuzzer workers"
 echo "Base seed: $SEED"
 echo "Iterations: $ITERATIONS total target, $ITERATIONS_PER_WORKER per worker"
+echo "Probe timeout: $TIMEOUT s; compiler child timeout: $COMPILER_TIMEOUT s"
 
 for ((worker = 0; worker < WORKERS; worker++)); do
   worker_dir="$RUNS_DIR/worker-$worker"
@@ -73,10 +75,10 @@ PY
   fi
 
   if [[ "$FOREGROUND" == "1" ]]; then
-    "${command[@]}" >"$log" 2>&1 &
+    APUS_COMPILER_TIMEOUT_SECONDS="$COMPILER_TIMEOUT" "${command[@]}" >"$log" 2>&1 &
     pid="$!"
   else
-    nohup "${command[@]}" >"$log" 2>&1 &
+    APUS_COMPILER_TIMEOUT_SECONDS="$COMPILER_TIMEOUT" nohup "${command[@]}" >"$log" 2>&1 &
     pid="$!"
   fi
   echo "$pid worker-$worker seed=$worker_seed log=$ROOT/$log" >> "$PID_FILE"

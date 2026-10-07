@@ -4,121 +4,122 @@ This file is the canonical active TODO list for the project.
 It holds actionable items only.
 Put completed work and historical explanations in design notes or commit messages.
 
-1. DONE 2026-10-05 — `macroHead = "#" >s< ( propertyWrapperProjection | escapedIdentifier )`: the
-    dollar-name alternate now also takes a backtick-escaped name, since swift-syntax lexes both as
-    ordinary identifier tokens after `#` (so `#\`if\`` is a macro, not a directive, and needs none of
-    `poundName`'s exclusions). No converter change: the head text minus `#` is already swift-syntax's
-    token text. 11/11 focused shapes `same` (generic args, trailing closure, declaration position,
-    spaced `# \`x\`` still rejected); `MiscellaneousTests.swift` underaccept → `same`; slice 0
-    changes; fixtures `macro-escaped-*`. Original item follows.
-    Accept escaped macro names such as `#\`expect\`(...)`. The crawl rejects
-    apple/swift-testing's `#\`expect\`(Bool(true))`, expecting `::` after the escaped identifier.
-    `macroHead` uses `poundName` plus exclusions and a module-selector form; it likely needs an
-    escaped-identifier macro-head path rather than treating `#` + escaped identifier as a module
-    selector start.
+1. Reduce parser-mode performance overhead in the zero-mode hot path. The parser-mode migration
+    widened `Descriptor` and CRF `ParsePosition` with a `UInt64 mode`, so every descriptor/CRF hash
+    now pays for mode even though almost all descriptors run with mode `0`. A first fast path
+    (`GrammarNode.hasModeAnnotation`) recovered some full-suite wall time, but the runnable Xcode
+    suite still drifted from the expected ~110s to ~151s. Investigate a principled zero-mode
+    specialization for descriptors/CRF keys, or another representation that preserves scoped mode
+    semantics without taxing grammars/regions that do not use modes.  Remove previous optimizations that bring more complexity than speedup.
 
-2. DONE 2026-10-05 — one `objcSelectorName = identifier | escapedIdentifier` now serves both the
-    bare selector and every piece, as swift-syntax `parseObjectiveCSelector` does (keywords and `_`
-    already came through the raw `identifier` terminal). The escaped PIECE form `@objc(\`x\`:)`
-    failed too, not just the bare one. The converter reads the shared rule instead of the
-    `identifier` terminal at both sites. 13/13 focused shapes `same` (two rejects kept);
-    `ObjCInteropTests.swift` underaccept → `same`; 60 `@objc(…)` files `same`; slice 0 changes;
-    fixtures `objc-escaped-*`. Original item follows.
-    Accept escaped bare ObjC selector names in `@objc(...)`. The crawl rejects
-    `@objc(\`testExplicitNameWithBackticks\`)` in apple/swift-testing. `objcSelector = identifier`
-    covers bare unescaped names, and `objcSelectorPiece = identifier? ":"` covers colon pieces; add
-    the escaped bare-name case without broadening selector pieces more than SwiftSyntax does.
+2. DONE (2026-10-06). `compilationCondition = >n< expression` under the new shallow
+    `@sameLineOutsideBrackets` (swift-syntax `.poundIfDirective` flavor); `@sameLine` walk fixes
+    (zero-width suffix keeps the trailing allowance; cycle-cut `false` no longer memoised); one-element
+    tuple `(A,)`; postfix `#if` body head must be `.`; `ifConfigBody` mode cleared after the first
+    statement and made disjoint from the lookbehind alternates. Replay: 16/34 artifacts fixed, the
+    rest belong elsewhere. Residuals: (a) after a POSTFIX block's `#endif`, a following leading-dot
+    `#if` is postfix in swift-syntax, but `<+<( "#endif" )` takes it as statement-level
+    (`baseExpr⏎#if C⏎.m()⏎#endif⏎#if C⏎.m()⏎return⏎#endif` overaccepts); (b) tuple TYPE `(Int,)`
+    underaccepts; (c) non-`#if` artifacts seen in the replay: `@⏎unknown default`, `get get throws`,
+    `while () -> Int { }`, `[any~Copyable]()` tree-difference, `*/()`, `@available(…, consuming:`.
+    Original text: Triage the 2026-10-06 fuzzer conditional-compilation context clusters. Strong underaccepts include
+    nested `#if` bodies in functions/closures, for example `#if CONDITION_2 .methodOne()` inside a
+    function and `fuzz { #if (A, ) #endif }`. Strong overaccepts include leading-dot or malformed
+    `#if` bodies that swiftc and SwiftSyntax both reject, such as a closure containing `v = x` then
+    `#if FOO .borrowing #else b #endif`, `#if` followed by a newline expression, and malformed
+    `#if (macOS)` wrappers around leading-dot expression fragments. Keep this separate from the
+    earlier fixed statement/member `#if` cases; the likely boundary is still postfix-vs-statement
+    context, but these artifacts mix valid recovery and invalid overaccepts.
 
-3. Fix interpolated-string parsing for qualified generic member expressions. The
-    swift-distributed-actors close-brace failure from the 2026-10-03 crawl reduced to the standalone
-    compiler/swift-syntax-accepted snippet `let s = "\(A.B<C>.d)"`, which APUS underaccepts at EOF.
-    Controls: `let s = "\(A.B<C>)"`, `let s = "\(A.B.d)"`, and `let x = A.B<C>.d` are all `same`.
-    The original late failure in `AggressiveNodeReplacementClusteredTests.swift` came from
-    `"Registering actor with \(DistributedReception.Key<ServiceActor>.aggressiveNodeReplacementService)!"`
-    poisoning the parse until the following member body. This is separate from the statement-condition
-    newline-closure mode leak tracked in #5.
+3. Triage the 2026-10-06 fuzzer declaration/specifier overaccept clusters. Repeated strong
+    overaccepts include invalid `dependsOn` result specifiers (`func foo() -> dependsOn(x, y) X`),
+    `using` declarations in invalid positions or spellings (`using nonisolated`, `using test`,
+    `using MainActor` in closure/top-level mutation contexts), malformed operator declarations
+    (`infix operator <*<>*> : AdditionPrecedence,`, `postfix operator +++ {}`), and initializer
+    declarations with return types (`init(ptr: Array< >) -> dependsOn(a) Self`). Reduce by family and
+    check whether the fix belongs in specifier grammar, declaration placement, or feature-gated
+    `using` handling.
 
-4. DONE 2026-10-05 — applied: `typeMemberName = >-> ( "Type" "Protocol" ) identifierToken | "self"`,
-    and `@prefer` dropped from `type`'s `metatypeType` alternate. 4/4 crawl files `same`; slice: the
-    one ambiguity → `same`, 0 other changes; suite 47 → 45 failures (both
-    `testSuppressedImplicitConformance#3` ambiguity assertions resolved); six `metatype-*` /
-    `member-type-*` fixtures. Original analysis follows.
-    Remove the metatype/member-type ambiguity under a postfix. Found by the 2026-10-04 partial
-    crawl (all 4 of its residual ambiguities: IBAnimatable, LiveContainer, 2× SwiftUIX), fingerprint
-    `simpleType ambiguous alternate [memberType] | [metatypeType]`. Minimal: `let t: P.Type? = nil`.
-    Every `X.Type?`, `X.Type!`, `X.Protocol?` and `X.Type.Type` is ambiguous; a bare `X.Type` is
-    not. Cause: `X.Type` derives both as `metatypeType = simpleType "." ( "Type" | "Protocol" )` and
-    as `memberType = simpleType "." typeMemberName`, because `typeMemberName = identifierToken |
-    "self"` and `Type`/`Protocol` lex as identifiers. At top level `type`'s `@prefer metatypeType`
-    hides it; once the metatype is the BASE of `?`/`!`/`.Type` it sits in `simpleType`, which lists
-    both alternates with no preference. swift-syntax's member loop tests `.Type`/`.Protocol` FIRST,
-    so `X.Type` is never a member type. Principled fix: exclude `Type`/`Protocol` from
-    `typeMemberName`; the `@prefer metatypeType` on `type` should then be redundant and removable.
-    TESTED 2026-10-05 on a scratch copy only (not applied — Codex owns the change):
-    `typeMemberName = >-> ( "Type" "Protocol" ) identifierToken | "self" .` makes all 4 crawl files
-    and 4/4 minimal shapes `same`, with 8 neighbours unchanged (`A.B`, `A.B.C?`, `A.Types`,
-    `A.TypeX`, `[any Markup].Index`, `(each T).Output`, `Foo.Type.self`, bare `P.Type`); 1,593-file
-    slice: 1 change, the slice's only ambiguity → `same`. Dropping `@prefer` from
-    `| @prefer metatypeType` on top of that gives byte-identical results, so it is redundant.
+4. DONE (2026-10-07). The raw regex/interpolation timeout cluster was stale fuzzer plumbing, not
+    scanner backtracking or parser descriptor explosion. Replay with
+    `APUS_COMPILER_TIMEOUT_SECONDS=1` shows malformed interpolation regex samples classify as
+    `compiler-timeout` while APUS finishes cheaply (`_ = "a\\(_ = /)b"`: 173 descriptors,
+    ~0.004s parse; raw interpolation seed: 112 descriptors, ~0.003s parse). Valid controls such as
+    `_ = "a\\( /x/ )b"` still return `same`. `SwiftSyntaxFuzzer/bin/run-night.sh` already exported
+    the compiler timeout, but `AdventFuzzRunner` replaced the probe child environment and dropped it;
+    the runner now forwards `APUS_COMPILER_TIMEOUT_SECONDS` to both persistent and one-shot probes.
 
-5. Scope the "no newline-opened closure in a statement condition" rule to the condition itself.
-    OpenEmu `FileManager+Hashing.swift` reduces to
-        while g(x: {
-          d.h {
-          }
-        }) {}
-    which swiftc and swift-syntax accept, and APUS rejects at the final `}`. The same holds for `if`
-    and `guard`; the one-line form `while g(x: { d.h { } }) {}` passes. Cause:
-    `closureExpression = samelineOpenedClosure | @excludedFrom(conditionExpression) … newlineOpenedClosure`
-    models swift-syntax's `.stmtCondition` flavor (a brace opening a new line is the statement
-    body, not a trailing closure), but `@excludedFrom` is SPAN CONTAINMENT and applies at any
-    depth. The two annotations are a CONJUNCTION (prune only where inside both), so the rule really
-    reads "a newline-opened closure that is a trailing closure, anywhere inside a condition".
-    Measured 2026-10-05 on the unmodified grammar: multi-line closure ARGUMENTS in conditions are
-    fine (`if g(x: {⏎1⏎}) {}`, unlabeled, in an array, in parens, `guard`, `while let` — all
-    `same`), and condition-LEVEL trailing closures are fine; the only failure is a trailing closure
-    NESTED inside an argument or closure body within the condition. It is the only
-    `@excludedFrom(conditionExpression)` in the grammar. In swift-syntax the flavor resets inside nested contexts — argument lists and closure
-    bodies are parsed with `.basic` flavor — so a trailing closure nested in a call argument inside
-    the condition is legal. What is needed is "excluded only while the NEAREST enclosing context
-    is the condition", which plain containment cannot say. Current design direction: replace
-    containment with scoped parser modes, as detailed in `documentation/Parser Modes Migration Plan.md`.
-    The remaining close-brace/EOF bucket from TODO #3 also mostly collapses into this issue:
-      - `AutomaticDictionaryTrainingSession.swift`:
-            func f() {
-              a {
-                guard x,
-                      b.contains(where: {
-                        $0 == y
-                      }) else { return }
-              }
-            }
-      - `PronunciationDictionaryStore.swift`:
-            func f() throws {
-              guard a.allSatisfy({ x in
-                b.allSatisfy {
-                  $0 == x
-                }
-              }) else { throw E.x }
-            }
-      - `GitHubCopilotModelPicker.swift` / `SuggestionSettingsGeneralSectionView.swift`:
-            func f() {
-              Form {
-                Picker(content: {
-                  if !models.contains(where: {
-                    $0.id == x
-                  }) {
-                    Text("x")
-                  }
-                })
-              }
-            }
-      - `TestReducerRunner.swift`:
-            func f() {
-              if a.contains(where: { x in b.contains {
-                $0 == x
-              } }) { continue }
-            }
-    In all four shapes, the same construct passes when parsed outside statement-condition context;
-    the failure appears only when a nested unlabeled/labeled trailing closure remains inside the
-    condition by BSR span containment.
+5. DONE (2026-10-07). Replayed the 2026-10-05 crawl residues against the current grammar. The old
+    bucket is stale: the named CodexBar close-bracket/subscript underaccept cluster now mostly
+    returns `same` (`StatusItemController+MemoryPressure.swift`,
+    `OpenRouterProviderDescriptor.swift`, `CodexCompactSubagentAccountingTests.swift`,
+    `CodexPATTests.swift`, `CopilotAllowanceCacheTests.swift`), and the Kingfisher/Fluent
+    underaccepts from shorthand `self` closure names or trailing closures are fixed or have moved to
+    tree-difference territory. Several old string tree-differences also replay as `same`
+    (`SnippetResolverTests.swift`, `OutOfProcessReferenceResolverV2Tests.swift`). Current survivors
+    should be tracked as fresh, narrower work if they matter: SPM `InitPackage.swift` still
+    underaccepts near a nested raw multiline string fragment (`"""#` inside `##"""` context);
+    `CommandParser.swift`, `PredicateExpressionConstruction.swift`, and `ChannelOption.swift` still
+    produce tree differences; `MultilineErrorsTests.swift` now reports residual ambiguity; the large
+    `AISettingsView+AIConfiguration.swift` and original 600s timeout files need a separate
+    performance replay with a rebuilt/current probe. Full 60-file replay was stopped at the repo's
+    120s command limit, so these are representative targeted results rather than a fresh crawl.
+
+6. Fix condition-list closure-call underaccept. Reduced current fuzzer replay still reports
+    `advent-underaccept` for:
+    ```
+    fuzz {
+    if true, {
+    }() {}
+    }
+    ```
+    SwiftSyntax and `swiftc -parse` accept it. APUS fails at the closure close brace before the
+    immediate call, expecting `>n<`; likely boundary is closure expressions/calls inside
+    `conditionList` after the parser-mode condition work.
+
+7. Fix line-broken `@unknown case` underaccept. Reduced current fuzzer replay still reports
+    `advent-underaccept` for:
+    ```
+    switch Thing {
+    @
+    unknown case ():break
+    }
+    ```
+    SwiftSyntax and `swiftc -parse` accept the trivia split between `@` and `unknown`; APUS fails at
+    `unknown`, expecting `>s<`. Check attribute/`@unknown` spelling rules in switch cases without
+    broadening ordinary attributes incorrectly.
+
+8. Resolve residual ambiguity for newline metatype continuation after a typealias assignment. Reduced
+    current fuzzer replay still reports `residual-ambiguity` (`statement` ambiguous pivot) for:
+    ```
+    typealias
+    Z = Copyable
+    .Type
+    ```
+    Determine whether SwiftSyntax treats `.Type` as a same-statement metatype continuation here and
+    adjust statement separation or metatype/member-type disambiguation accordingly.
+
+9. Resolve residual ambiguity for initialized property followed by observer/accessor-looking block.
+    Reduced current fuzzer replay still reports `residual-ambiguity` (`statement` ambiguous pivot) for:
+    ```
+    var x = 0
+    { willSet {} }
+    ```
+    Decide whether this should be one variable declaration with an accessor/observer block or two
+    statements under SwiftSyntax, then constrain the competing `statement` derivation.
+
+10. Reduce and fix remaining whole-file tree differences from the October crawl survivors. Current
+    replay still produces tree mismatches in:
+    - `apple__swift-argument-parser/Sources/ArgumentParser/Parsing/CommandParser.swift`:
+      `GenericSpecializationExpr` vs `DeclReferenceExpr`.
+    - `apple__swift-foundation/Sources/FoundationEssentials/Predicate/Archiving/PredicateExpressionConstruction.swift`:
+      `FunctionCallExpr` vs `SequenceExpr`.
+    - `apple__swift-nio/Sources/NIOCore/ChannelOption.swift`: `TupleExpr` vs `PatternExpr`.
+    Reduce these before editing grammar/converter code; they are likely real shape bugs but not yet
+    small enough to assign to one grammar rule.
+
+11. Reduce and fix multiline string residual ambiguity from `MultilineErrorsTests.swift`. Current
+    whole-file replay reports `residual-ambiguity` in `stringLiteral` with competing
+    `[interpolatedStringLiteral] | [staticStringLiteral]` readings. Minimize the source before
+    changing string literal rules, because several October string tree-differences have already gone
+    stale on the current grammar.

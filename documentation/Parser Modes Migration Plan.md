@@ -38,13 +38,13 @@ Parser modes make this context explicit on grammar edges.
 Start with four scoped annotations:
 
 ```apus
-@mode(foo bar) X          // parse X with foo and bar added
+@setMode(foo bar) X       // parse X with foo and bar added
 @clearMode(foo bar) X     // parse X with foo and bar removed
 @requiresMode(foo bar) X  // valid only if all listed flags are active
 @rejectsMode(foo bar) X   // invalid if all listed flags are active
 ```
 
-`@mode` and `@clearMode` are set operations. Unnamed flags remain unchanged:
+`@setMode` and `@clearMode` are set operations. Unnamed flags remain unchanged:
 
 ```text
 childMode = parentMode | addedBits
@@ -166,7 +166,7 @@ Teach `grammars/apus.apus` to parse:
 
 ```apus
 modeAnnotation =
-    | "@mode" "(" < identifier > ")"
+    | "@setMode" "(" < identifier > ")"
     | "@clearMode" "(" < identifier > ")"
     | "@requiresMode" "(" < identifier > ")"
     | "@rejectsMode" "(" < identifier > ")" .
@@ -176,8 +176,8 @@ Allow mode annotations in sequence position before a factor. Support
 `@requiresMode` / `@rejectsMode` at alternate start too if that falls out
 naturally, but sequence-position support is enough for the initial migration.
 
-Keep `@confinedTo` / `@excludedFrom` during implementation and early migration.
-Remove them only after all grammar uses have been replaced.
+Implementation note: the initial migration replaced all live grammar uses, then
+removed `@confinedTo` / `@excludedFrom` from the parser and Oracle.
 
 ## Migration Step 1: TODO #5
 
@@ -205,26 +205,26 @@ Set condition mode:
 
 ```apus
 condition =
-    | @mode(stmtCondition) expression
+    | @setMode(stmtCondition) expression
     | availabilityCondition
     | caseCondition
     | missingIntroducerWildcardCondition
     | optionalBindingCondition
     .
 
-whereExpression = @mode(stmtCondition) expression .
+whereExpression = @setMode(stmtCondition) expression .
 
 repeatWhileStatement =
-    "repeat" codeBlock "while" >-> ( "{" ) @mode(stmtCondition) expression .
+    "repeat" codeBlock "while" >-> ( "{" ) @setMode(stmtCondition) expression .
 ```
 
 Set trailing-closure mode:
 
 ```apus
 trailingClosures =
-    | @mode(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
+    | @setMode(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
       closureExpression labeledTrailingClosures
-    | @mode(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
+    | @setMode(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
       closureExpression >-> ( "else" )
     .
 ```
@@ -261,7 +261,7 @@ Mode replacement:
 ```apus
 attribute =
     "@" >s< "available" >s< "("
-    @mode(availableAttributeMode) availabilityAttributeArguments
+    @setMode(availableAttributeMode) availabilityAttributeArguments
     ")" .
 
 staticStringLiteral =
@@ -304,7 +304,7 @@ statement =
 Mode replacement:
 
 ```apus
-initializerBody = @mode(initializerBodyMode) codeBlock .
+initializerBody = @setMode(initializerBodyMode) codeBlock .
 
 statement =
     @prefer @requiresMode(initializerBodyMode) >+> ( "init" ) expression .
@@ -328,7 +328,7 @@ ifDirectiveClause =
 Mode replacement:
 
 ```apus
-ifConfigStatements = @mode(ifConfigBody) statements .
+ifConfigStatements = @setMode(ifConfigBody) statements .
 
 ifDirectiveClause =
     @requiresMode(ifConfigBody)
@@ -350,7 +350,7 @@ Mode replacement:
 
 ```apus
 optionalBindingCondition =
-    ( "let" | "var" ) @mode(optionalBinding) pattern initializer? .
+    ( "let" | "var" ) @setMode(optionalBinding) pattern initializer? .
 
 identifierPattern =
     | identifierToken
@@ -362,7 +362,7 @@ Check whether the mode should be even narrower than the whole pattern.
 
 ## Removing Containment
 
-After all grammar uses are gone:
+Completed as part of the migration:
 
 1. Remove `confinedToContainers` and `excludedFromContainers` from `GrammarNode`.
 2. Remove parsing of `@confinedTo` / `@excludedFrom` from `ApusParser`.

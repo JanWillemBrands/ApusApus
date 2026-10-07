@@ -66,11 +66,12 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //    appears at most once and THE ORDER IS FIXED — `@sameLine @longest X = …` does not
 //    parse.
 //
-//    production   = extent? "@sameLine"? identifier "=" alternates "." .
-//    production   = extent? "@sameLine"? "@literalMunch"? preempt?
+//    production   = extent? sameLine? identifier "=" alternates "." .
+//    production   = extent? sameLine? "@literalMunch"? preempt?
 //                   identifier ( "-" | ":" ) terminalBody "." .
 //
 //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
+//    sameLine     = "@sameLine" | "@sameLineOutsideBrackets" .
 //    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
 //
 //    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
@@ -88,14 +89,15 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //    these predicates on the alternate's first body symbol, relying on
 //    yield-start == alternate-start, and mid-body there is no anchor.
 //
-//    sequence     = { altPragma } < factor [ "?" | "*" | "+" ]
+//    sequence     = { altPragma } < { modePragma } factor [ "?" | "*" | "+" ]
 //                                 | spacing
 //                                 | lookaround
 //                                 > .
 //
 //    altPragma    = "@prefer" | "@avoid"
-//                 | ( "@confinedTo" | "@excludedFrom" ) "(" identifier ")"
 //                 | ( "@cannotParse" | "@canParse" ) "(" < identifier > ")" .
+//    modePragma   = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" )
+//                   "(" < identifier > ")" .
 //
 // 4. GROUP PREFIX, immediately before a bracket — `extent` again, and only there.
 //    This is why extent is barred from position 3: an extent pragma at an alternate
@@ -179,11 +181,12 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //    appears at most once and THE ORDER IS FIXED — `@sameLine @longest X = …` does not
 //    parse.
 //
-//    production   = extent? "@sameLine"? identifier "=" alternates "." .
-//    production   = extent? "@sameLine"? "@literalMunch"? preempt?
+//    production   = extent? sameLine? identifier "=" alternates "." .
+//    production   = extent? sameLine? "@literalMunch"? preempt?
 //                   identifier ( "-" | ":" ) terminalBody "." .
 //
 //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
+//    sameLine     = "@sameLine" | "@sameLineOutsideBrackets" .
 //    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
 //
 //    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
@@ -201,14 +204,15 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //    these predicates on the alternate's first body symbol, relying on
 //    yield-start == alternate-start, and mid-body there is no anchor.
 //
-//    sequence     = { altPragma } < factor [ "?" | "*" | "+" ]
+//    sequence     = { altPragma } < { modePragma } factor [ "?" | "*" | "+" ]
 //                                 | spacing
 //                                 | lookaround
 //                                 > .
 //
 //    altPragma    = "@prefer" | "@avoid"
-//                 | ( "@confinedTo" | "@excludedFrom" ) "(" identifier ")"
 //                 | ( "@cannotParse" | "@canParse" ) "(" < identifier > ")" .
+//    modePragma   = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" )
+//                   "(" < identifier > ")" .
 //
 // 4. GROUP PREFIX, immediately before a bracket — `extent` again, and only there.
 //    This is why extent is barred from position 3: an extent pragma at an alternate
@@ -221,5 +225,4 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //                 | extent? "<" alternates ">"
 //                 | extent? "(" alternates ")"
 //                 .
-
 

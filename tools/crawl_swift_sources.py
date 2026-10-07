@@ -16,9 +16,9 @@ The crawl harness for TODO.md / Make whole-file parsing crash-free and crawlable
     tools/crawl_swift_sources.py --out /tmp/crawl DIR [DIR …]
     tools/crawl_swift_sources.py --workers 8 --timeout 120 --out /tmp/crawl ~/src/some-repos
 
-Statuses are the probe's. By default the probe runs NO compiler checks (`skipCompiler`), so a
-swift-syntax-accepts/Advent-rejects file reads `advent-underaccept`; pass `--compiler` to let the
-probe consult `swiftc` for those (slow). Rebuild the probe after engine changes:
+Statuses are the probe's. The probe uses the compiler-first reference policy: `swiftc -parse`
+and swift-syntax must agree before Advent/APUS mismatches are reported. Rebuild the probe after
+engine changes:
     ADVENT_FUZZER_SKIP_XCODEBUILD=1 bash SwiftSyntaxFuzzer/bin/build.sh
 """
 import argparse
@@ -103,8 +103,7 @@ class Probe:
     def run(self, source, timeout, compiler):
         if self.proc is None or self.proc.poll() is not None:
             self.start()
-        request = json.dumps({"source": source, "includeDumps": False,
-                              "skipCompiler": not compiler}) + "\n"
+        request = json.dumps({"source": source, "includeDumps": False}) + "\n"
         broken = []
 
         def send():
@@ -219,7 +218,7 @@ def main():
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 2))
     ap.add_argument("--timeout", type=float, default=300, help="seconds per file")
     ap.add_argument("--max-bytes", type=int, default=1_000_000, help="skip larger files")
-    ap.add_argument("--compiler", action="store_true", help="let the probe consult swiftc")
+    ap.add_argument("--compiler", action="store_true", help=argparse.SUPPRESS)
     args = ap.parse_args()
 
     out = pathlib.Path(args.out)
