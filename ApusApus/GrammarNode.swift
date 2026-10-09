@@ -203,9 +203,9 @@ final class GrammarNode {
     /// (already projected onto the bits relevant to `X`). `nil`/`0` on original nodes.
     var origin: GrammarNode?
     var instanceMode: UInt64 = 0
-    /// `@carries(m …)` on an LHS: the parser modes in scope for this nonterminal. An occurrence
+    /// `@modeScope(m …)` on an LHS: the parser modes in scope for this nonterminal. An occurrence
     /// passes only these bits of its mode into the nonterminal; every other bit is dropped.
-    var carriedModes: UInt64 = 0
+    var modeScope: UInt64 = 0
 
     /// `@left` / `@right` on an ALTERNATE — a child-position filter in the SDF sense.
     ///
@@ -224,11 +224,10 @@ final class GrammarNode {
     /// no single span with two pivots to rank. See `AssociativityFilterRule`.
     var associativityFilters: [ChildPositionFilter] = []
 
-    /// `@sameLine` — this nonterminal's span may not cross a newline consumed as trivia.
-    /// Newlines inside a committed token (nested multiline string, block comment) are permitted.
-    var requiresSameLine: Bool = false
-    /// `@sameLineOutsideBrackets` — `requiresSameLine`, but gaps inside a `(…)`/`[…]`/`{…}` body are
-    /// free (swift-syntax's `#if` condition flavor). See `SameLineSpanRule`.
+    /// `@sameLineOutsideBrackets` — this nonterminal's span may not cross a newline consumed as
+    /// trivia, except in gaps inside a `(…)`/`[…]`/`{…}` body (swift-syntax's `#if` condition
+    /// flavor). Newlines inside a committed token (multiline string, block comment) are permitted.
+    /// See `SameLineSpanRule`.
     var sameLineOutsideBrackets: Bool = false
 
     /// Terminal occurrence belongs directly to a structured `:` / `-` recognizer body and should
@@ -358,9 +357,8 @@ extension GrammarNode {
         copy.rejectedModes = rejectedModes
         copy.origin = origin
         copy.instanceMode = instanceMode
-        copy.carriedModes = carriedModes
+        copy.modeScope = modeScope
         copy.associativityFilters = associativityFilters
-        copy.requiresSameLine = requiresSameLine
         copy.sameLineOutsideBrackets = sameLineOutsideBrackets
         copy.suppressesLeadingTrivia = suppressesLeadingTrivia
         copy.isLexicalToken = isLexicalToken

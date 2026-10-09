@@ -222,15 +222,15 @@ struct SwiftSyntaxGenerator {
     // MARK: - Statements
 
     private mutating func convertTopLevelDeclaration(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        // topLevelDeclaration = shebang? statements? .
+        // topLevelDeclaration = shebang? topLevelStatements? .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return []
         }
-        guard let stmtsNT = find("statements", in: spans) else {
-            // An empty source (or comment-only source) legitimately has no `statements`.
+        guard let stmtsNT = find("topLevelStatements", in: spans) ?? find("statements", in: spans) else {
+            // An empty source (or comment-only source) legitimately has no statement list.
             if !parser.isTriviaOnly(from..<to) {
-                record(.lookupFailed, "no statements child", from: from, to: to)
+                record(.lookupFailed, "no statement-list child", from: from, to: to)
             }
             return []
         }
@@ -608,7 +608,7 @@ struct SwiftSyntaxGenerator {
     /// Returns whole `CodeBlockItem`s, not bare items, because an explicit `;` belongs to the
     /// item it terminates (`CodeBlockItem.semicolon`) and is otherwise dropped.
     private mutating func convertStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        convertStatementList(["statements"], nt, from: from, to: to)
+        convertStatementList(["statements", "topLevelStatements"], nt, from: from, to: to)
     }
 
     /// The items of a statement list, each carrying the `;` that terminates IT.
@@ -628,9 +628,13 @@ struct SwiftSyntaxGenerator {
         var semicolons: [CharPosition] = []
         for hop in listHops(of: listNames, nt, from: from, to: to) {
             semicolons.append(contentsOf: semicolonPositions(in: hop))
-            if let stmtNT = find("statement", in: hop),
-               let item = convertStatement(stmtNT.nt, from: stmtNT.from, to: stmtNT.to) {
-                items.append((item, stmtNT.to))
+            let statement = find("statement", in: hop) ?? find("topLevelStatement", in: hop).flatMap { top -> NTSpan? in
+                guard let (_, spans) = tileAlternate(top.nt, from: top.from, to: top.to) else { return nil }
+                return find("statement", in: spans)
+            }
+            if let statement,
+               let item = convertStatement(statement.nt, from: statement.from, to: statement.to) {
+                items.append((item, statement.to))
             } else if let ccNT = find("compilerControlStatement", in: hop),
                       let decl = convertCompilerControlDeclaration(ccNT.nt, from: ccNT.from, to: ccNT.to) {
                 items.append((.decl(decl), ccNT.to))
@@ -1531,7 +1535,7 @@ struct SwiftSyntaxGenerator {
     private mutating func collectSwitchCases(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into cases: inout [SwitchCaseListSyntax.Element]) {
         for scNT in listElements("switchCase", of: "switchCases", nt, from: from, to: to) {
             guard let (_, scSpans) = tileAlternate(scNT.nt, from: scNT.from, to: scNT.to) else { continue }
-            // switchCaseAttribute = "@" >s< attributeName .  It lives inside caseLabel /
+            // switchCaseAttribute = "@" attributeName .  It lives inside caseLabel /
             // defaultLabel, NOT directly under switchCase — which is why looking for it here
             // found nothing and the mismatch was SILENT. swift-syntax hangs it on the
             // SwitchCase itself, before the label.
@@ -1584,7 +1588,7 @@ struct SwiftSyntaxGenerator {
         }
     }
 
-    /// `switchCaseAttribute = "@" >s< attributeName .` — `@unknown default:` and friends.
+    /// `switchCaseAttribute = "@" attributeName .` — `@unknown default:` and friends.
     /// swift-syntax models this as a SINGLE optional `unknownAttr`, not an AttributeList —
     /// the position exists for `@unknown default:` specifically.
     private mutating func switchCaseAttributes(in spans: [(GrammarNode, CharPosition, CharPosition)]) -> AttributeSyntax? {
@@ -2020,10 +2024,17 @@ struct SwiftSyntaxGenerator {
                     name = String(name[cut.upperBound...])
                 }
             }
-            return ExprSyntax(DeclReferenceExprSyntax(
+            let reference = ExprSyntax(DeclReferenceExprSyntax(
                 moduleSelector: selector,
                 baseName: name == "Self" ? .keyword(.Self) : .identifier(name)
             ))
+            if let gcNT = find("typeGenericArgumentClause", in: spans) {
+                return ExprSyntax(GenericSpecializationExprSyntax(
+                    expression: reference,
+                    genericArgumentClause: convertGenericArgumentClause(gcNT.nt, from: gcNT.from, to: gcNT.to)
+                ))
+            }
+            return reference
         default:
             return ExprSyntax(TypeExprSyntax(type: convertType(nt, from: from, to: to)))
         }
@@ -2081,6 +2092,9 @@ struct SwiftSyntaxGenerator {
         if let exprPattern = pattern.as(ExpressionPatternSyntax.self) {
             return exprPattern.expression
         }
+        if let tuple = pattern.as(TuplePatternSyntax.self) {
+            return tuplePatternExpression(tuple)
+        }
         return ExprSyntax(PatternExprSyntax(pattern: pattern))
     }
 
@@ -2088,6 +2102,10 @@ struct SwiftSyntaxGenerator {
     /// swift-syntax, not a `TuplePattern` — `if let (a, _) = p`. Same context-sensitivity as the
     /// bare `_` case just below: identical source spelling, different node by position.
     private static func tuplePatternAsExpressionPattern(_ tuple: TuplePatternSyntax) -> PatternSyntax {
+        return PatternSyntax(ExpressionPatternSyntax(expression: tuplePatternExpression(tuple)))
+    }
+
+    private static func tuplePatternExpression(_ tuple: TuplePatternSyntax) -> ExprSyntax {
         let elements = Array(tuple.elements)
         let args = elements.enumerated().map { index, element in
             LabeledExprSyntax(
@@ -2097,11 +2115,11 @@ struct SwiftSyntaxGenerator {
                 trailingComma: index == elements.count - 1 ? nil : .commaToken()
             )
         }
-        return PatternSyntax(ExpressionPatternSyntax(expression: TupleExprSyntax(
+        return ExprSyntax(TupleExprSyntax(
             leftParen: .leftParenToken(),
             elements: LabeledExprListSyntax(args),
             rightParen: .rightParenToken()
-        )))
+        ))
     }
 
     /// conditionList = condition { "," condition } .
@@ -4109,9 +4127,7 @@ struct SwiftSyntaxGenerator {
     }
 
     /// availabilityValue = platformVersion | availabilityStringLiteral | identifierToken .
-    /// availabilityStringLiteral = singleLineStringLiteral | multilineStringLiteral .
-    /// (Copied from Swift.apus, not paraphrased — this comment previously said `staticStringLiteral`
-    /// and `tookMultilineStringForm` was written to match the comment rather than the grammar.)
+    /// availabilityStringLiteral = plainStringLiteralToken .
     private mutating func availabilityValue(_ span: NTSpan) -> AvailabilityLabeledArgumentSyntax.Value? {
         guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to) else {
             record(.lookupFailed, "no alternate tiles the span", from: span.from, to: span.to)
@@ -4126,7 +4142,7 @@ struct SwiftSyntaxGenerator {
             // contain interpolation, and swift-syntax gives it the restricted node type.
             // The message may itself be MULTILINE (`message: \"\"\"…\"\"\"`), which needs the
             // multiline quote token and three characters trimmed from each end.
-            let isMultiline = tookMultilineStringForm(span.nt, from: span.from, to: span.to) == true
+            let isMultiline = stringLiteralLayout(from: span.from, to: span.to)?.isMultiline == true
             let quote: TokenSyntax = isMultiline ? .multilineStringQuoteToken() : .stringQuoteToken()
             let delimiter = isMultiline ? 3 : 1
             var content = String(text.dropFirst(delimiter).dropLast(delimiter))
@@ -4135,19 +4151,9 @@ struct SwiftSyntaxGenerator {
                 // Same boundary rule as swift-syntax's `parseSimpleString` path: the opener's
                 // line break and the closer's indentation are delimiters; the closing indentation
                 // column is stripped from content lines, but content is not otherwise trimmed.
-                if content.hasPrefix("\r\n") { content.removeFirst(2) }
-                else if content.hasPrefix("\n") { content.removeFirst() }
-                var indent = ""
-                if let lastNewline = content.lastIndex(of: "\n") {
-                    indent = String(content[content.index(after: lastNewline)...])
-                    content = String(content[content.startIndex..<lastNewline])
-                    if content.hasSuffix("\r") { content.removeLast() }
+                if let lines = multilineContentText(content) {
+                    content = lines
                     hasContentLine = true
-                }
-                if !indent.isEmpty {
-                    content = content.split(separator: "\n", omittingEmptySubsequences: false)
-                        .map { $0.hasPrefix(indent) ? String($0.dropFirst(indent.count)) : String($0) }
-                        .joined(separator: "\n")
                 }
             }
             let segments = hasContentLine ? multilineSegmentTexts(content, pounds: 0) : []
@@ -5812,7 +5818,14 @@ struct SwiftSyntaxGenerator {
         // `primaryExpression`, because it is a postfix island — see the note in `Swift.apus`. So it
         // is converted here, one level above the postfix chain.
         if let kpNT = find("keyPathExpression", in: spans) {
-            return convertKeyPathExpression(kpNT.nt, from: kpNT.from, to: kpNT.to)
+            let operand = convertKeyPathExpression(kpNT.nt, from: kpNT.from, to: kpNT.to)
+            if let op = prefixOp {
+                return ExprSyntax(PrefixOperatorExprSyntax(
+                    operator: .prefixOperator(op),
+                    expression: operand
+                ))
+            }
+            return operand
         }
         // prefixExpression = @prefer effectMarker prefixExpression .
         if let markerNT = find("effectMarker", in: spans),
@@ -6848,20 +6861,25 @@ struct SwiftSyntaxGenerator {
     /// captureList     = "[" "]" | "[" captureListItems ","? "]" .
     /// captureListItem = captureHead | captureHead assignmentOperator expression .
     /// captureHead     = captureSpecifier captureName | >-> ( "weak" "unowned" ) captureName .
-    /// captureName     = identifierToken | selfExpression .
+    /// captureName     = identifierToken | "self" .
     private mutating func convertCaptureList(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ClosureCaptureClauseSyntax {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return ClosureCaptureClauseSyntax(items: [])
         }
         var items: [ClosureCaptureSyntax] = []
+        var hasTrailingComma = false
         if let listNT = find("captureListItems", in: spans) {
             collectCaptureItems(listNT.nt, from: listNT.from, to: listNT.to, into: &items)
+            hasTrailingComma = input[listNT.to..<to].contains(",")
         }
         if items.count > 1 {
             for i in 0..<items.count - 1 {
                 items[i] = items[i].with(\.trailingComma, .commaToken())
             }
+        }
+        if hasTrailingComma, !items.isEmpty {
+            items[items.count - 1] = items[items.count - 1].with(\.trailingComma, .commaToken())
         }
         return ClosureCaptureClauseSyntax(
             leftSquare: .leftSquareToken(),
@@ -6907,7 +6925,7 @@ struct SwiftSyntaxGenerator {
             // wrapped DeclReferenceExpr — the `expression:` initializer is the legacy shape and
             // produces a visibly different tree.
             let name: TokenSyntax
-            if find("selfExpression", in: nSpans) != nil {
+            if collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to) == "self" {
                 name = .keyword(.self)
             } else if let idNT = find("identifierToken", in: nSpans) {
                 name = .identifier(collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to))
@@ -7092,13 +7110,12 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func appendTupleElement(_ span: NTSpan, into elements: inout [LabeledExprSyntax]) {
-        // tupleElement = expression | argumentLabel ":" expression .
+        // tupleElement = expression | argumentLabel ":" expression | operator | argumentLabel ":" operator .
         guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to),
-              let exprNT = find("expression", in: spans) else {
-            record(.lookupFailed, "tuple element without expression", from: span.from, to: span.to)
+              let expr = tupleElementExpression(from: spans) else {
+            record(.lookupFailed, "tuple element without expression/operator", from: span.from, to: span.to)
             return
         }
-        let expr = convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
         if let labelNT = find(firstOf: ["argumentLabel"] + identifierNameSpellings, in: spans) {
             elements.append(LabeledExprSyntax(
                 label: argumentLabelToken(collectTerminalText(labelNT.nt, from: labelNT.from, to: labelNT.to)),
@@ -7108,6 +7125,18 @@ struct SwiftSyntaxGenerator {
         } else {
             elements.append(LabeledExprSyntax(expression: expr))
         }
+    }
+
+    private mutating func tupleElementExpression(from spans: [(GrammarNode, CharPosition, CharPosition)]) -> ExprSyntax? {
+        if let exprNT = find("expression", in: spans) {
+            return convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
+        }
+        if let opNT = find("operator", in: spans) {
+            return ExprSyntax(DeclReferenceExprSyntax(
+                baseName: .binaryOperator(collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to))
+            ))
+        }
+        return nil
     }
 
     /// A label spelled `_` is swift-syntax's wildcard token, not an identifier named `_`.
@@ -7809,8 +7838,17 @@ struct SwiftSyntaxGenerator {
         if let litNT = find("literalExpression", in: spans) {
             return convertLiteralExpression(litNT.nt, from: litNT.from, to: litNT.to)
         }
-        // selfExpression = "self" .  superclassExpression = "super" … — swift-syntax
-        // models `self` as a DeclReferenceExpr but `super` as its own SuperExpr node.
+        // selfExpression = "self" | selfType genericArgumentClause .
+        // swift-syntax models bare `self` as a DeclReferenceExpr; expression-position
+        // `Self<T>` is a generic specialization of the `Self` keyword reference.
+        if let selfNT = find("selfExpression", in: spans),
+           let (_, selfSpans) = tileAlternate(selfNT.nt, from: selfNT.from, to: selfNT.to),
+           let gcNT = find("genericArgumentClause", in: selfSpans) {
+            return ExprSyntax(GenericSpecializationExprSyntax(
+                expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .keyword(.Self))),
+                genericArgumentClause: convertGenericArgumentClause(gcNT.nt, from: gcNT.from, to: gcNT.to)
+            ))
+        }
         if find("selfExpression", in: spans) != nil {
             return ExprSyntax(DeclReferenceExprSyntax(baseName: .keyword(.self)))
         }
@@ -8113,16 +8151,15 @@ struct SwiftSyntaxGenerator {
             return convertStringLiteral(strNT.nt, from: strNT.from, to: strNT.to)
         }
         // regularExpressionLiteral = plainRegularExpressionLiteral | extendedRegularExpressionLiteral .
-        // swift-syntax keeps the whole literal as one `regexLiteralPattern` between slash
+        // SwiftSyntax keeps the whole literal as one `regexLiteralPattern` between slash
         // tokens; the `#…#` extended form additionally carries pound delimiters.
         if let reNT = find("regularExpressionLiteral", in: spans) {
             // The text comes from the SOURCE SPAN, not from `collectTerminalText`. A plain regex
-            // body is a sequence of TOKENS (`regexBody = regexItem { … regexItem }`), so rebuilding
-            // it from the committed children silently drops every interior space and tab: ApusApus
-            // produced `regexLiteralPattern("ab")` where swift-syntax has `("a b")`. That one
-            // reconstruction bug was 36 of the fuzzer's tree-difference artifacts. A literal's text
-            // IS its source extent, so read it directly; only leading TRIVIA has to come off,
-            // since the span may start before the opening delimiter.
+            // body used to be a sequence of grammar tokens, so rebuilding it from the committed
+            // children silently dropped every interior space and tab: ApusApus produced
+            // `regexLiteralPattern("ab")` where swift-syntax has `("a b")`. A literal's text is
+            // its source extent, so read it directly; only leading trivia has to come off, since
+            // the span may start before the opening delimiter.
             // The span carries trailing TRIVIA (`"/([)])/ "`, `"#/abc/#\n"`, or a comment), because a
             // normal token owns its trailing trivia. `contentText` returns the exact source from the
             // first token's content start to the last token's content end — interior spaces kept,
@@ -8238,6 +8275,43 @@ struct SwiftSyntaxGenerator {
         return (body.index(after: j), value == 0x0A || value == 0x0D)
     }
 
+    /// Swift's line breaks as `Character`s. `"\r\n"` is ONE `Character`, so a test for `"\n"` or
+    /// `"\r"` alone never sees a CRLF line break.
+    private static let lineBreakCharacters: Set<Character> = ["\n", "\r", "\r\n"]
+
+    /// A multiline literal's content (between the quotes) → the text of its content lines: the
+    /// opener's line break and the closer's line are delimiters, and the closer's indentation is
+    /// stripped from every line. nil when there is no content line (`"""⏎    """`).
+    private func multilineContentText(_ content: String) -> String? {
+        var body = Substring(content)
+        if let first = body.first, Self.lineBreakCharacters.contains(first) { body = body.dropFirst() }
+        guard let lastBreak = body.lastIndex(where: { Self.lineBreakCharacters.contains($0) }) else { return nil }
+        let indent = String(body[body.index(after: lastBreak)...])
+        return strippingIndent(indent, from: String(body[..<lastBreak]))
+    }
+
+    /// Remove `indent` from the start of every line of `body` that has it.
+    private func strippingIndent(_ indent: String, from body: String) -> String {
+        guard !indent.isEmpty else { return body }
+        var result = ""
+        var lineStart = body.startIndex
+        func appendLine(upTo end: String.Index) {
+            let line = body[lineStart..<end]
+            result += line.hasPrefix(indent) ? line.dropFirst(indent.count) : line
+        }
+        var i = body.startIndex
+        while i < body.endIndex {
+            if Self.lineBreakCharacters.contains(body[i]) {
+                appendLine(upTo: i)
+                result.append(body[i])
+                lineStart = body.index(after: i)
+            }
+            i = body.index(after: i)
+        }
+        appendLine(upTo: body.endIndex)
+        return result
+    }
+
     private func multilineSegmentTexts(_ body: String, pounds: Int) -> [String] {
         let intro = "\\" + String(repeating: "#", count: pounds)
         var out: [String] = []
@@ -8245,14 +8319,10 @@ struct SwiftSyntaxGenerator {
         var i = body.startIndex
         var endedOnElidedContinuation = false
 
-        /// Consume a line break at `j`, treating CRLF as one. Returns nil if there is none.
+        /// Consume a line break at `j` (CRLF is one `Character`). Returns nil if there is none.
         func lineBreakEnd(at j: String.Index) -> String.Index? {
-            guard j < body.endIndex else { return nil }
-            if body[j] == "\r" {
-                let k = body.index(after: j)
-                return (k < body.endIndex && body[k] == "\n") ? body.index(after: k) : k
-            }
-            return body[j] == "\n" ? body.index(after: j) : nil
+            guard j < body.endIndex, Self.lineBreakCharacters.contains(body[j]) else { return nil }
+            return body.index(after: j)
         }
 
         while i < body.endIndex {
@@ -8397,66 +8467,26 @@ struct SwiftSyntaxGenerator {
         return .simpleTypeSpecifier(SimpleTypeSpecifierSyntax(specifier: typeSpecifierToken(text)))
     }
 
-    /// Did the parse take a MULTILINE string form? Read the ALTERNATE rather than re-deriving the
-    /// classification from the characters (TODO 29): four grammar terminals share the `"` prefix,
-    /// so a text sniff can — and did — reach the opposite conclusion from the scanner.
-    ///
-    /// staticStringLiteral = singleLineStringLiteral | multilineStringLiteral .
-    /// staticStringLiteral = @rejectsMode(availableAttributeMode) extendedSinglelineStringLiteral .
-    /// staticStringLiteral = @rejectsMode(availableAttributeMode) extendedMultilineStringLiteral .
-    ///
-    /// The four static forms are `-` TERMINALS, so they need `findTerminal`; the two interpolated
-    /// forms are nonterminals assembled from Head/Part/Tail terminals, so they need `find`.
-    /// `nil` means neither level identified a form — the caller decides what to do about that.
-    private mutating func tookMultilineStringForm(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> Bool? {
-        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else { return nil }
-        // Callers may hand us the `staticStringLiteral` node itself (e.g. a `@convention` cType),
-        // in which case the four terminals are already at this level.
-        for (name, multiline) in [("multilineStringLiteral", true), ("extendedMultilineStringLiteral", true),
-                                  ("singleLineStringLiteral", false), ("extendedSinglelineStringLiteral", false)] {
-            if findTerminal(named: name, in: spans) != nil { return multiline }
-        }
-        // One level down, through whichever wrapper nonterminal the caller's rule actually names.
-        // `availabilityStringLiteral` belongs here: `availabilityValue = platformVersion |
-        // availabilityStringLiteral | identifierToken`, NOT `staticStringLiteral` as the comment on
-        // `availabilityValue` used to claim. Only `staticStringLiteral` was descended, so a
-        // multiline `@available(… message: """…""")` fell through to `return nil`, `isMultiline`
-        // came out false, and the message was rebuilt as a SINGLE-line literal with a 1-character
-        // delimiter — leaving stray quotes in the segments (testDiagnoseAvailability18#1).
-        for wrapper in ["staticStringLiteral", "availabilityStringLiteral"] {
-            guard let wrapNT = find(wrapper, in: spans),
-                  let (_, wrapSpans) = tileAlternate(wrapNT.nt, from: wrapNT.from, to: wrapNT.to)
-            else { continue }
-            if findTerminal(named: "multilineStringLiteral", in: wrapSpans) != nil { return true }
-            if findTerminal(named: "extendedMultilineStringLiteral", in: wrapSpans) != nil { return true }
-            if findTerminal(named: "singleLineStringLiteral", in: wrapSpans) != nil { return false }
-            if findTerminal(named: "extendedSinglelineStringLiteral", in: wrapSpans) != nil { return false }
-            return nil
-        }
-        if let interpNT = find("interpolatedStringLiteral", in: spans),
-           let (_, interpSpans) = tileAlternate(interpNT.nt, from: interpNT.from, to: interpNT.to) {
-            if find("multilineInterpolatedStringLiteral", in: interpSpans) != nil { return true }
-            if find("singleLineInterpolatedStringLiteral", in: interpSpans) != nil { return false }
-        }
-        return nil
+    /// The scanner layout of the string literal in the span: the same function the lexer used
+    /// (`SwiftStringLiteralScanner`), so the converter sees the form, the `#` count and the closer
+    /// indentation that the parse saw. Never sniff these from the text: `#""""#` is a single-line
+    /// raw literal whose content is `""` (testFalseMultilineDelimiters).
+    private func stringLiteralLayout(from: CharPosition, to: CharPosition) -> SwiftStringLiteralLayout? {
+        let u = input.unicodeScalars
+        var p = from
+        while p < to, u[p] != "#", u[p] != "\"" { p = u.index(after: p) }
+        guard p < to else { return nil }
+        return SwiftStringLiteralScanner.layout(in: input, at: p)
     }
 
     private mutating func convertStringLiteral(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
         // stringLiteral = staticStringLiteral | interpolatedStringLiteral .
-        // `find` digs through brackets but not through nonterminals, so descend both levels.
-        if let (_, spans) = tileAlternate(nt, from: from, to: to),
+        let layout = stringLiteralLayout(from: from, to: to)
+        if let layout, !layout.interpolations.isEmpty,
+           let (_, spans) = tileAlternate(nt, from: from, to: to),
            let interp = find("interpolatedStringLiteral", in: spans),
-           let (_, interpSpans) = tileAlternate(interp.nt, from: interp.from, to: interp.to) {
-            if let single = find("singleLineInterpolatedStringLiteral", in: interpSpans),
-               let expr = convertInterpolatedStringLiteral(single.nt, from: single.from, to: single.to,
-                                                           multiline: false) {
-                return expr
-            }
-            if let multi = find("multilineInterpolatedStringLiteral", in: interpSpans),
-               let expr = convertInterpolatedStringLiteral(multi.nt, from: multi.from, to: multi.to,
-                                                           multiline: true) {
-                return expr
-            }
+           let expr = convertInterpolatedStringLiteral(interp.nt, from: interp.from, to: interp.to, layout: layout) {
+            return expr
         }
         // Collect all text between quotes
         let fullText = collectTerminalText(nt, from: from, to: to)
@@ -8468,17 +8498,14 @@ struct SwiftSyntaxGenerator {
         let poundCount = fullText.unicodeScalars.prefix(while: { $0 == "#" }).count
         let pounds = String(repeating: "#", count: poundCount)
         let afterPounds = dropScalarDelimiters(fullText, leading: poundCount, trailing: 0)
-        // Single/multiline comes from the ALTERNATE the parse took, never from the characters:
-        // four terminals share the `"` prefix, and a text sniff read `#""""#` — a SINGLE-LINE raw
-        // string whose content is `""` — as an empty multiline one, synthesising delimiters the
-        // source never had (testFalseMultilineDelimiters). If the form cannot be identified that
-        // is a converter bug, not an unhandled form, so say so loudly and fall back to the old
-        // sniff only to keep the rest of the tree usable.
+        // Single/multiline comes from the scanner layout, never from the characters (see
+        // `stringLiteralLayout`). No layout is a converter bug, not an unhandled form, so say so
+        // loudly and fall back to the old sniff only to keep the rest of the tree usable.
         let isMultiline: Bool
-        if let took = tookMultilineStringForm(nt, from: from, to: to) {
-            isMultiline = took
+        if let layout {
+            isMultiline = layout.isMultiline
         } else {
-            record(.lookupFailed, "string literal matched no known form", from: from, to: to)
+            record(.lookupFailed, "string literal has no scanner layout", from: from, to: to)
             isMultiline = afterPounds.hasPrefix("\"\"\"")
                 && afterPounds.dropFirst(3).first.map { $0.isNewline } == true
         }
@@ -8493,19 +8520,10 @@ struct SwiftSyntaxGenerator {
                 // The newline after the opener is a delimiter, and so is the final newline plus
                 // whatever indentation precedes the closer. That indentation is ALSO stripped
                 // from every content line — `\"\"\"⏎    abc⏎    \"\"\"` has the segment `abc`,
-                // not `    abc` — so it must be captured before it is discarded.
-                if body.hasPrefix("\r\n") { body.removeFirst(2) } else if body.hasPrefix("\n") { body.removeFirst() }
-                var indent = ""
-                if let lastNewline = body.lastIndex(of: "\n") {
-                    indent = String(body[body.index(after: lastNewline)...])
-                    body = String(body[body.startIndex..<lastNewline])
-                    if body.hasSuffix("\r") { body.removeLast() }
+                // not `    abc`.
+                if let lines = multilineContentText(body) {
+                    body = lines
                     hasContentLine = true
-                }
-                if !indent.isEmpty {
-                    body = body.split(separator: "\n", omittingEmptySubsequences: false)
-                        .map { $0.hasPrefix(indent) ? String($0.dropFirst(indent.count)) : String($0) }
-                        .joined(separator: "\n")
                 }
             }
             let poundToken: TokenSyntax? = pounds.isEmpty ? nil : .rawStringPoundDelimiter(String(pounds))
@@ -8574,49 +8592,36 @@ struct SwiftSyntaxGenerator {
     /// would need a trivia-suppression mechanism, because `Lexer.lex` skips trivia
     /// unconditionally and would silently eat spaces inside string content (`"a\(b) c"`).
     ///
-    /// LIMITED to the single-interpolation form: a non-empty `{ Part args }` returns nil and the
-    /// caller falls back to the old one-segment tree. Extending this needs iteration over the KLN
-    /// bracket, which is the obvious next step.
-    /// singleLineInterpolatedStringLiteral = interpolatedStringLiteralHead functionCallArgumentList
-    ///     { interpolatedStringLiteralPart functionCallArgumentList } interpolatedStringLiteralTail .
-    /// multilineInterpolatedStringLiteral  = the same shape over the `multiline…` terminals.
+    /// interpolatedStringLiteral = stringHead functionCallArgumentList?
+    ///     { stringPart functionCallArgumentList? } stringTail .
     ///
     /// Head is `"abc\(`, each Part is `)mid\(`, Tail is `)ghi"` — so literal text and
     /// interpolations strictly alternate, and walking the pieces in SOURCE ORDER handles any
-    /// number of interpolations. The MULTILINE form differs only in its delimiters and in needing
+    /// number of interpolations. The form, the `#` count and the closer's indentation come from
+    /// the scanner `layout`. The MULTILINE form differs only in its delimiters and in needing
     /// the opener's line break, the closer's indentation, and escape-sensitive segment splitting —
     /// exactly the rules `multilineSegmentTexts` already encodes for the static form.
     private mutating func convertInterpolatedStringLiteral(
-        _ nt: GrammarNode, from: CharPosition, to: CharPosition, multiline: Bool
+        _ nt: GrammarNode, from: CharPosition, to: CharPosition, layout: SwiftStringLiteralLayout
     ) -> ExprSyntax? {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "interpolated literal: no alternate tiles the span", from: from, to: to)
             return nil
         }
-        let plainHeadName = multiline ? "multilineInterpolatedStringLiteralHead" : "interpolatedStringLiteralHead"
-        let plainPartName = multiline ? "multilineInterpolatedStringLiteralPart" : "interpolatedStringLiteralPart"
-        let plainTailName = multiline ? "multilineInterpolatedStringLiteralTail" : "interpolatedStringLiteralTail"
-        let rawHeadName = multiline ? "extendedMultilineInterpolatedStringLiteralHead" : "extendedInterpolatedStringLiteralHead"
-        let rawPartName = multiline ? "extendedMultilineInterpolatedStringLiteralPart" : "extendedInterpolatedStringLiteralPart"
-        let rawTailName = multiline ? "extendedMultilineInterpolatedStringLiteralTail" : "extendedInterpolatedStringLiteralTail"
-        let headNames = [plainHeadName, rawHeadName]
-        let partNames = [plainPartName, rawPartName]
-        let tailNames = [plainTailName, rawTailName]
+        let headName = "stringHead", partName = "stringPart", tailName = "stringTail"
         var pieces: [NTSpan] = []
         var visitedInterpolationPieceSearch: Set<String> = []
-        collectInterpolationPieces(spans, names: Set(headNames + partNames + tailNames + ["functionCallArgumentList"]),
+        collectInterpolationPieces(spans, names: [headName, partName, tailName, "functionCallArgumentList"],
                                    into: &pieces, visited: &visitedInterpolationPieceSearch)
         pieces.sort { $0.from < $1.from }
-        guard let headPiece = pieces.first, headNames.contains(headPiece.nt.name),
-              let tailPiece = pieces.last, tailNames.contains(tailPiece.nt.name) else {
+        guard let headPiece = pieces.first, headPiece.nt.name == headName,
+              let tailPiece = pieces.last, tailPiece.nt.name == tailName else {
             record(.unhandled, "interpolated literal pieces: \(pieces.map(\.nt.name).joined(separator: "+"))",
                    from: from, to: to)
             return nil
         }
-        let raw = headPiece.nt.name == rawHeadName
-        let headName = raw ? rawHeadName : plainHeadName
-        let partName = raw ? rawPartName : plainPartName
-        let tailName = raw ? rawTailName : plainTailName
+        let multiline = layout.isMultiline
+        let raw = layout.poundCount > 0
         let quote = multiline ? "\"\"\"" : "\""
         // Read each piece through `collectTerminalText`, NOT as a raw `input[from..<to]`
         // slice. A piece's SPAN runs to the start of the next token, so it carries that
@@ -8625,33 +8630,19 @@ struct SwiftSyntaxGenerator {
         // held for every interpolation until one arrived with a block comment between the
         // head's `\(` and the next token (`testMultilineString46`: a comment containing
         // `"""` — the comment is what breaks it, not the delimiter inside it).
-        let headText = collectTerminalText(headPiece.nt, from: headPiece.from, to: headPiece.to)
-        let poundCount = raw ? headText.prefix(while: { $0 == "#" }).count : 0
+        let poundCount = layout.poundCount
         let poundText = String(repeating: "#", count: poundCount)
         let poundToken: TokenSyntax? = raw ? .rawStringPoundDelimiter(poundText) : nil
         let opener = poundText + quote
         let interpolationMarker = "\\" + poundText + "("
         let closer = quote + poundText
+        // The tail token ends exactly at the closer (the scanner owns its extent).
         func closingDelimiterRange(in text: String) -> Range<String.Index>? {
             let start = text.hasPrefix(")") ? text.index(after: text.startIndex) : text.startIndex
-            let searchRange = start..<text.endIndex
-            // Raw strings cannot contain their exact delimiter as content. If the scanner offers a
-            // too-long tail token, later delimiters belong to following source.
-            if raw { return text.range(of: closer, range: searchRange) }
-            return text.range(of: closer, options: .backwards, range: searchRange)
+            return text.range(of: closer, options: .backwards, range: start..<text.endIndex)
         }
-        // The closer's INDENTATION is stripped from every content line, and it is only visible in
-        // the tail, so it has to be read before any piece is split.
-        var indent = ""
-        if multiline, let tail = pieces.last {
-            let tailText = collectTerminalText(tail.nt, from: tail.from, to: tail.to)
-            if let close = closingDelimiterRange(in: tailText) {
-                let beforeClose = tailText[tailText.startIndex..<close.lowerBound]
-                if let lastNewline = beforeClose.lastIndex(of: "\n") {
-                    indent = String(beforeClose[beforeClose.index(after: lastNewline)...])
-                }
-            }
-        }
+        // The closer's INDENTATION is stripped from every content line.
+        let indent = String(input.unicodeScalars[layout.closerIndent])
         var nextStringPieceStartsLine = true
 
         /// Strip the closer's indentation from real content-line starts. Interpolated literals
@@ -8668,18 +8659,8 @@ struct SwiftSyntaxGenerator {
                     atLineStart = false
                     continue
                 }
-                if body[i] == "\r" {
-                    result.append(body[i])
-                    i = body.index(after: i)
-                    if i < body.endIndex, body[i] == "\n" {
-                        result.append(body[i])
-                        i = body.index(after: i)
-                    }
-                    atLineStart = true
-                    continue
-                }
                 result.append(body[i])
-                atLineStart = body[i] == "\n"
+                atLineStart = Self.lineBreakCharacters.contains(body[i])
                 i = body.index(after: i)
             }
             nextStringPieceStartsLine = atLineStart
@@ -8728,8 +8709,8 @@ struct SwiftSyntaxGenerator {
                 }
                 var body = String(text.dropFirst(opener.count).dropLast(interpolationMarker.count))
                 // The line break after a multiline opener is a delimiter, not content.
-                if multiline {
-                    if body.hasPrefix("\r\n") { body.removeFirst(2) } else if body.hasPrefix("\n") { body.removeFirst() }
+                if multiline, let first = body.first, Self.lineBreakCharacters.contains(first) {
+                    body.removeFirst()
                 }
                 elements += segments(of: body)
                 pendingInterpolation = true
@@ -8748,18 +8729,14 @@ struct SwiftSyntaxGenerator {
                     appendEmptyInterpolation()
                     pendingInterpolation = false
                 }
-                // Cut at the delimiter rather than requiring it to end the text: terminal spans can
-                // carry trailing trivia, and raw tail tokens may overmatch under longest-token
-                // scanning. `closingDelimiterRange` chooses the real delimiter for each form.
                 guard text.hasPrefix(")"), let close = closingDelimiterRange(in: text) else {
                     record(.unhandled, "interpolated tail has an unexpected shape: \(text.debugDescription)", from: piece.from, to: piece.to)
                     return nil
                 }
                 var body = String(text[text.index(after: text.startIndex)..<close.lowerBound])
                 // The final line break plus the closer's indentation are delimiters too.
-                if multiline, let lastNewline = body.lastIndex(of: "\n") {
-                    body = String(body[body.startIndex..<lastNewline])
-                    if body.hasSuffix("\r") { body.removeLast() }
+                if multiline, let lastBreak = body.lastIndex(where: { Self.lineBreakCharacters.contains($0) }) {
+                    body = String(body[body.startIndex..<lastBreak])
                 }
                 elements += segments(of: body)
             default:
@@ -9292,8 +9269,11 @@ struct SwiftSyntaxGenerator {
                 elements[i] = elements[i].with(\.trailingComma, .commaToken())
             }
         }
-        // SE-0470 trailing comma, kept on the LAST element.
-        if hasTrailingComma(spans, afterList: "tupleTypeElementList"), !elements.isEmpty {
+        // SE-0470 trailing comma, kept on the LAST element. With a one-element tuple type
+        // (`(Int,)`), the comma follows the single `tupleTypeElement`; with two or more elements it
+        // follows the list.
+        let trailingCommaList = find("tupleTypeElementList", in: spans) == nil ? "tupleTypeElement" : "tupleTypeElementList"
+        if hasTrailingComma(spans, afterList: trailingCommaList), !elements.isEmpty {
             elements[elements.count - 1] = elements[elements.count - 1]
                 .with(\.trailingComma, .commaToken())
         }

@@ -49,6 +49,10 @@ struct TokenPattern {
     /// is computed by a GLL sub-parse of the same-named nonterminal (see `GrammarNode.isLexicalToken`
     /// and `MessageParser` lexicalTokenRecognisers). Skipped when building regexByID/literalSourceByID.
     var isLexicalToken: Bool = false
+    /// Parse-scoped `@builder` terminal: matched by a per-parse `ApusTokenScanner` made from
+    /// `ApusRegexLibrary.scannerFactories[scannerKey]`, not by `regex` (which never matches).
+    /// Terminals with the same key share one scanner instance per parse.
+    var scannerKey: String? = nil
 
     // Accept any RegexComponent (e.g. Swift literal `/foo/` typed as Regex<Substring>) and wrap
     // to Regex<AnyRegexOutput> so the storage can also hold regexes that include capturing

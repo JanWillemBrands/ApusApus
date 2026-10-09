@@ -1,7 +1,7 @@
 # Parser Modes as Grammar Specialization
 
 Design note for TODO #1 (parser-mode overhead). Status: implemented 2026-10-07 (specialization +
-declared scopes with `@carries`); see Findings and Decision below.
+declared scopes with `@modeScope`); see Findings and Decision below.
 Follows `Parser Modes Migration Plan.md`, which introduced the runtime mode bitset.
 
 ## The question
@@ -309,7 +309,7 @@ SwiftSyntax tests pass. But the grammar blows up:
 | Runtime modes (baseline) | 0 | — | < 1s | 67s |
 | Specialization, grammar as is | 17,001 | 266,894 | 35s | 265s |
 | + `@resetModes` on `codeBlock` and both closure productions | 7,857 | 128,572 | 16s | 294s |
-| **Declared scopes (`@carries`), final** | **94** | **8,296** | **0.84s** | **43s** |
+| **Declared scopes (`@modeScope`), final** | **94** | **8,296** | **0.84s** | **43s** |
 
 Full scheme (all suites, warm build): 177s with runtime modes → 111s with declared scopes, all
 23,823 tests passing.
@@ -338,9 +338,9 @@ The runtime design has the same leaks. It just pays for them per descriptor and 
 `@resetModes` (a production-level "fresh context" boundary) was an intermediate step. Declared
 scopes made it unnecessary and it was removed.
 
-### Decision: declared scope per production (`@carries`)
+### Decision: declared scope per production (`@modeScope`)
 
-Option A, in the scope-per-production form. `@carries(m …)` at the start of a production declares
+Option A, in the scope-per-production form. `@modeScope(m …)` at the start of a production declares
 that `m` passes into that nonterminal; entering any other nonterminal drops it (swift-syntax
 parameter semantics: a context exists only on the functions that forward it). The pass passes
 `childMode & carries(callee)` to each callee, and relevance is computed within scopes. Grammar
@@ -383,7 +383,7 @@ The two "context in disguise" candidates from "Point (2) revisited" do not fit m
 checks its LEADING gap (`>n<` at its cursor), which is exactly swift-syntax's `.noNewlines`
 leading-trivia lexing mode. The region's opener is placed outside the mode. That fits the shallow
 `@sameLineOutsideBrackets` on `compilationCondition`. Its scope is the expression spine, and its
-first gap is already `>n<`. Bracket openers would still need `@carries` with `@clearMode` on
+first gap is already `>n<`. Bracket openers would still need `@modeScope` with `@clearMode` on
 contents and closer. It does not fit the deep `@sameLine` on
 `singleLineInterpolatedStringLiteral`:
 

@@ -63,16 +63,16 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 // There are exactly FOUR pragma positions, and every pragma belongs to just one.
 //
 // 1. PRODUCTION START, before the LHS name. ANY ORDER: the pragmas are independent
-//    properties of the production. Each appears at most once, except `@carries`, which may
+//    properties of the production. Each appears at most once, except `@modeScope`, which may
 //    repeat (its mode lists union); an unknown pragma here is an error.
 //
-//    production   = { carries | extent | sameLine } identifier "=" alternates "." .
+//    production   = { modeScope | extent | sameLine } identifier "=" alternates "." .
 //    production   = { extent | sameLine | "@literalMunch" | preempt }
 //                   identifier ( "-" | ":" ) terminalBody "." .
 //
-//    carries      = "@carries" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
+//    modeScope    = "@modeScope" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
 //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
-//    sameLine     = "@sameLine" | "@sameLineOutsideBrackets" .
+//    sameLine     = "@sameLineOutsideBrackets" .
 //    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
 //
 //    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
@@ -179,16 +179,16 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 // There are exactly FOUR pragma positions, and every pragma belongs to just one.
 //
 // 1. PRODUCTION START, before the LHS name. ANY ORDER: the pragmas are independent
-//    properties of the production. Each appears at most once, except `@carries`, which may
+//    properties of the production. Each appears at most once, except `@modeScope`, which may
 //    repeat (its mode lists union); an unknown pragma here is an error.
 //
-//    production   = { carries | extent | sameLine } identifier "=" alternates "." .
+//    production   = { modeScope | extent | sameLine } identifier "=" alternates "." .
 //    production   = { extent | sameLine | "@literalMunch" | preempt }
 //                   identifier ( "-" | ":" ) terminalBody "." .
 //
-//    carries      = "@carries" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
+//    modeScope    = "@modeScope" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
 //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
-//    sameLine     = "@sameLine" | "@sameLineOutsideBrackets" .
+//    sameLine     = "@sameLineOutsideBrackets" .
 //    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
 //
 //    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
@@ -227,4 +227,3 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //                 | extent? "<" alternates ">"
 //                 | extent? "(" alternates ")"
 //                 .
-

@@ -27,7 +27,7 @@ APUS resolves ambiguity in four layers. Each layer has a different job.
 |---|---|---|---|
 | Lexer | during the parse, per terminal | the extent of a token | `@literalMunch`, munch-exempt terminals, `@preempt` |
 | Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()`, parser modes |
-| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@sameLine`, `@prefer`, `@longest`, `@left`, … |
+| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@sameLineOutsideBrackets`, `@prefer`, `@longest`, `@left`, … |
 | AST generator | after the Oracle | the operator precedence tree | precedence metadata on the operator alternates |
 
 Obey these rules:
@@ -187,7 +187,7 @@ The Oracle (`Oracle.disambiguate`) does these steps:
 
 | Pass | Rules | What the rule needs to know |
 |---|---|---|
-| filter | `@canParse` `@cannotParse` `@sameLine` | only that some witness exists |
+| filter | `@canParse` `@cannotParse` `@sameLineOutsideBrackets` | only that some witness exists |
 | sameSpan | `@prefer`, `@avoid` between siblings | the legal rivals at the SAME span |
 | structure | `@left` `@right` | which production occupies a span |
 | extent | `@longest` `@shortest`, `@avoid` against an optional's skip | the legal rivals at DIFFERENT extents |
@@ -215,7 +215,7 @@ Each edge in the order was a real bug:
 | structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
 
 Parser modes replaced the old span-containment filters. They are compiled into the grammar at
-load (each mode-relevant nonterminal gets a copy per scoped mode, `@carries`), so they act before
+load (each mode-relevant nonterminal gets a copy per scoped mode, `@modeScope`), so they act before
 anything enters the forest and do not depend on later Oracle pruning. See `apus.md` § Parser Modes.
 
 ### 5.3 Hard constraints
@@ -226,12 +226,12 @@ A hard constraint removes a reading that the language does not permit.
 |---|---|---|
 | `@cannotParse(N)` | start of an alternate | Remove the alternate where a yield of `N` starts at the same position. |
 | `@canParse(N)` | start of an alternate | Remove the alternate where no yield of `N` starts at the same position. |
-| `@sameLine` | before a nonterminal | Keep the yield only if a surviving derivation crosses no newline trivia. |
+| `@sameLineOutsideBrackets` | before a nonterminal | Keep the yield only if a surviving derivation crosses no newline trivia outside brackets. |
 | `@setMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` active. |
 | `@clearMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` inactive. |
 | `@requiresMode(N)` | before a sequence item | Schedule that occurrence only when mode `N` is active. |
 | `@rejectsMode(N)` | before a sequence item | Reject that occurrence when mode `N` is active. |
-| `@carries(N)` | before a production | Mode `N` passes into this nonterminal; elsewhere it is dropped. |
+| `@modeScope(N)` | before a production | Mode `N` passes into this nonterminal; elsewhere it is dropped. |
 
 Details:
 
@@ -243,10 +243,10 @@ Details:
   here.
 - In `@requiresMode(A B)`, all listed modes must be active. In `@rejectsMode(A B)`, the
   occurrence is rejected only when all listed modes are active.
-- `@sameLine` is derivation-local. It tiles the candidate yield through the current BSR and inspects
+- `@sameLineOutsideBrackets` is derivation-local. It tiles the candidate yield through the current BSR and inspects
   the exact terminal commits used by that tiling. Commits from dead or competing derivations do not
   count.
-- For `@sameLine`, only token-to-token trivia gaps count. A newline inside a token (for example, a
+- For `@sameLineOutsideBrackets`, only token-to-token trivia gaps count. A newline inside a token (for example, a
   multiline string) does not count. A newline in the annotated construct's trailing trivia does not
   count either, because the construct did not cross it to reach another token.
 - The parser must try `N` at the anchor position of `@canParse(N)` or `@cannotParse(N)`. If the
@@ -423,7 +423,7 @@ In a left-recursive grammar (`E = E "+" E | …`), precedence is an ambiguity. U
 | the same start, two lengths | `@longest` / `@shortest` |
 | a production nested directly in itself | `@left` / `@right` |
 | a named nonterminal forbidden as the first/last child | `@left( N … )` / `@right( N … )` |
-| a span that must stay on one line | `@sameLine` |
+| a span that must stay on one line | `@sameLineOutsideBrackets` |
 
 ## 8. Categories of ambiguity
 

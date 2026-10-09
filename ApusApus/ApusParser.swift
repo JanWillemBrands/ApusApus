@@ -193,15 +193,15 @@ class ApusParser {
     func production() throws {
         // Production-start pragmas, in ANY order. They are independent properties of the
         // production, so their order carries no meaning:
-        //   `@carries(m …)` — the parser modes this nonterminal is in scope for: an inherited mode
+        //   `@modeScope(m …)` — the parser modes this nonterminal is in scope for: an inherited mode
         //       bit passes into an occurrence of this nonterminal only if it is listed here; anywhere
         //       else the bit is dropped on entry (a swift-syntax parameter that a function does not
         //       forward). May repeat; lists union, also across several definitions of one
         //       nonterminal. See `Parser Modes Specialization.md`.
         //   `@longest` / `@shortest` — node-level extent of this nonterminal.
-        //   `@sameLine` — a whole-nonterminal span property: the Oracle prunes this nonterminal's
-        //       LHS completion yields; not an alternate-level notion. `@sameLineOutsideBrackets` is
-        //       the shallow variant: line breaks inside brackets are free.
+        //   `@sameLineOutsideBrackets` — a whole-nonterminal span property: the Oracle prunes this
+        //       nonterminal's LHS completion yields; not an alternate-level notion. Line breaks
+        //       inside brackets are free.
         //   `@literalMunch` — a regex terminal participating in literal-suppression maximal munch
         //       (TODO #0).
         //   `@preempt(X)` / `@preempt(X, N)` — this terminal's maximal munch must not swallow
@@ -212,11 +212,10 @@ class ApusParser {
         //           differ in spelling and boundary behavior.
         //       N — OPTIONAL: the construct that must actually PARSE at a split point for the
         //           shorter reading to win. Without it the split is merely offered.
-        // Every pragma except `@carries` may appear once; `@longest`/`@shortest` and the two
-        // `@sameLine` forms are one property each. An unknown pragma here is an error.
-        var carriedModes: UInt64 = 0
+        // Every pragma except `@modeScope` may appear once; `@longest`/`@shortest` are one property;
+        // an unknown pragma here is an error.
+        var modeScope: UInt64 = 0
         var disambiguationAnnotation: Disambiguation?
-        var sameLineAnnotation = false
         var sameLineOutsideBrackets = false
         var isLiteralMunchAnnotation = false
         var preemptStartName: String? = nil
@@ -230,12 +229,12 @@ class ApusParser {
         }
         while token.kind == "pragma" {
             switch token.stripped {
-            case "carries":
+            case "modeScope":
                 cI += 1
                 try expect(["("]); cI += 1
                 repeat {
                     try expect(["identifier"])
-                    carriedModes |= try grammar.parserModeBit(named: String(token.image))
+                    modeScope |= try grammar.parserModeBit(named: String(token.image))
                     cI += 1
                 } while token.kind == "identifier"
                 try expect([")"]); cI += 1
@@ -247,10 +246,9 @@ class ApusParser {
                 throw ApusParserError.unexpectedToken(
                     explanation: "@\(token.stripped) is an alternate-level associativity filter; "
                                + "write it after the `=` or `|`, on the alternate it governs")
-            case "sameLine", "sameLineOutsideBrackets":
-                try once("@sameLine")
-                sameLineAnnotation = true
-                sameLineOutsideBrackets = token.stripped == "sameLineOutsideBrackets"
+            case "sameLineOutsideBrackets":
+                try once("@sameLineOutsideBrackets")
+                sameLineOutsideBrackets = true
                 cI += 1
             case "literalMunch":
                 try once("@literalMunch")
@@ -273,7 +271,7 @@ class ApusParser {
             default:
                 throw ApusParserError.unexpectedToken(
                     explanation: "@\(token.stripped) is not a production pragma "
-                               + "(@carries @longest @shortest @sameLine @sameLineOutsideBrackets @literalMunch @preempt)")
+                               + "(@modeScope @longest @shortest @sameLineOutsideBrackets @literalMunch @preempt)")
             }
         }
         try expect(["identifier"])
@@ -382,10 +380,9 @@ class ApusParser {
             if let d = disambiguationAnnotation {
                 lhsNode.disambiguation = d
             }
-            lhsNode.carriedModes |= carriedModes
-            if sameLineAnnotation {
-                lhsNode.requiresSameLine = true
-                lhsNode.sameLineOutsideBrackets = sameLineOutsideBrackets
+            lhsNode.modeScope |= modeScope
+            if sameLineOutsideBrackets {
+                lhsNode.sameLineOutsideBrackets = true
             }
             try expect(["."])
             cI += 1
@@ -754,6 +751,14 @@ class ApusParser {
             }
             cI += 1
             try expect([")"]); cI += 1
+        }
+        if let scannerKey = ApusRegexLibrary.scannedTerminals[key] {
+            // Parse-scoped scanner: the lexer asks a per-parse scanner object, not a regex.
+            var pattern = TokenPattern(name, Regex<AnyRegexOutput>(Regex { NegativeLookahead { "" } }), false, skip)
+            pattern.scannerKey = scannerKey
+            grammar.terminals[name] = pattern
+            grammar.registerTerminal(name)
+            return GrammarNode(kind: .T, name: name)
         }
         guard let regex = ApusRegexLibrary.patterns[key] else {
             Logger.parse.error("@builder terminal \(name, privacy: .public) references unknown RegexBuilder '\(key, privacy: .public)' in ApusRegexLibrary.patterns")

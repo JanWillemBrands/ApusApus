@@ -53,7 +53,7 @@ protocol DisambiguationRule {
 ///                            initializer, the filter then removed the chain, and nothing was
 ///                            left.
 enum OraclePass: Int, CaseIterable {
-    /// Monotone language constraints: `@canParse`/`@cannotParse`, `@sameLine`.
+    /// Monotone language constraints: `@canParse`/`@cannotParse`, `@sameLineOutsideBrackets`.
     case filter
     /// Same-span choice among sibling alternates: `@prefer`, `@avoid` (explicit siblings).
     case sameSpan
@@ -269,35 +269,29 @@ struct BinarySpanExtent: Hashable {
     let to: CharPosition
 }
 
-/// `@sameLine`. Prunes a yield unless at least one surviving derivation of that yield crosses no
-/// line break in token-to-token trivia. Newlines INSIDE token content (a nested multiline string)
-/// are never in a gap, which is what keeps `"a\("""⏎x⏎""")"` legal. A trailing newline after the
-/// annotated span is also legal: only gaps before another token in the same span are crossed.
+/// `@sameLineOutsideBrackets`. Prunes a yield unless at least one surviving derivation of that
+/// yield crosses no line break in token-to-token trivia outside brackets: inside a body that opens
+/// with `(`, `[` or `{` and closes with the matching token, every gap up to the closer may break the
+/// line. Newlines INSIDE token content (a multiline string, a block comment) are never in a gap. A
+/// trailing newline after the annotated span is also legal: only gaps before another token in the
+/// same span are crossed.
 ///
-/// Models swift-syntax's per-lexer-state trivia mode rather than a check: `Cursor.swift`
-/// `leadingTriviaLexingMode` returns `.noNewlines` while `inStringInterpolation` for a single-line
-/// literal, and `lexInStringInterpolation` pops the state on `\r`/`\n`. The state persists at any
-/// paren depth, which is why a `>n<` gate on the owned boundaries cannot cover every case and this
-/// SPAN-level rule can.
+/// Models swift-syntax's `ExprFlavor.poundIfDirective`. That flavor checks `atStartOfLine` only
+/// along the expression spine — before a binary operator, its right operand and a postfix suffix
+/// (`Expressions.swift` 160/181/201/780) — and every delimited form re-parses its contents as
+/// `.basic` (1439, 2840). So `#if os(⏎macOS)` is clean and `#if A⏎|| B` is not.
 ///
 /// The check is derivation-local. It tiles the candidate yield over the current BSR forest and, for
 /// each terminal tile, reads that exact commit's trailing-trivia facts. It never asks "what commits
 /// ended at this cursor?" globally, so dead or competing derivations cannot make a live same-line
 /// derivation look as if it crossed a newline.
-///
-/// `@sameLineOutsideBrackets` is the SHALLOW variant, for swift-syntax's `ExprFlavor.poundIfDirective`.
-/// That flavor checks `atStartOfLine` only along the expression spine — before a binary operator,
-/// its right operand and a postfix suffix (`Expressions.swift` 160/181/201/780) — and every
-/// delimited form re-parses its contents as `.basic` (1439, 2840). So `#if os(⏎macOS)` is clean and
-/// `#if A⏎|| B` is not. The rule models it on the derivation: inside a body that opens with `(`,
-/// `[` or `{` and closes with the matching token, every gap up to the closer may break the line.
 struct SameLineSpanRule: DisambiguationRule {
     var pass: OraclePass { .filter }
     /// Which token-to-token gaps of a sub-derivation may hold a line break.
     private enum Gaps: Hashable {
         case none       // no gap, not even the trailing one
         case trailing   // only the gap after the sub-derivation's last token
-        case any        // every gap (inside brackets, `@sameLineOutsideBrackets` only)
+        case any        // every gap (inside brackets)
     }
     private struct NodeSpanMode: Hashable {
         let id: ObjectIdentifier
@@ -308,7 +302,6 @@ struct SameLineSpanRule: DisambiguationRule {
 
     let parser: MessageParser
     let node: GrammarNode
-    let outsideBrackets: Bool
 
     /// Literal terminal names keep their quotes: the `"("` terminal is named `"("`.
     private static let closers: [String: String] = [#""(""#: #"")""#, #""[""#: #""]""#, #""{""#: #""}""#]
@@ -316,7 +309,7 @@ struct SameLineSpanRule: DisambiguationRule {
     /// The number of leading body symbols whose gaps are free: an opener up to (excluding) its
     /// matching closer. The closer and anything after it keep the enclosing policy.
     private func bracketedPrefix(_ body: [GrammarNode]) -> Int {
-        guard outsideBrackets, let open = body.first, open.kind.isTerminal,
+        guard let open = body.first, open.kind.isTerminal,
               let close = Self.closers[open.name],
               let c = body.lastIndex(where: { $0.kind.isTerminal && $0.name == close }), c > 0
         else { return 0 }
@@ -529,7 +522,7 @@ class Oracle {
     /// This used to be asserted as an invariant ("pruning may reduce the number of derivations,
     /// never to zero"). That premise is false for this grammar: rejecting invalid input by removing
     /// its LAST reading is a deliberate mechanism — hard constraints (`@cannotParse`,
-    /// `@sameLine`, …) and preferences such as literal munch do exactly that for every reject
+    /// `@sameLineOutsideBrackets`, …) and preferences such as literal munch do exactly that for every reject
     /// fixture. Once the assert ran in every configuration (2026-09-25) it fired on ~60 correct
     /// rejections per run. It is now a TRACE only: with `APUS_TRACE_ORACLE=1` the phase that
     /// removed the root is printed, which is what localises a genuine over-prune on VALID input
@@ -542,20 +535,17 @@ class Oracle {
         print("oracle-trace: after \(phase): root full-span yield \(alive ? "ALIVE" : "*** GONE ***")")
     }
 
-    /// `@sameLine` — anchored on the LHS, whose completion yields have `i == k` and `j` =
+    /// `@sameLineOutsideBrackets` — anchored on the LHS, whose completion yields have `i == k` and `j` =
     /// the true end, i.e. the exact span of the construct. A body-symbol anchor cannot work: its yield is
     /// `(i = production start, k = symbol start, j = SYMBOL end)`, so the first symbol gives too
     /// little and the last gives an extent that measured wrong in practice (6 valid inputs pruned).
     ///
     /// The prune removes LHS yields, so it applies to EVERY alternate of the annotated nonterminal.
-    /// Put `@sameLine` only on a nonterminal whose alternates all need the rule. That is why the
-    /// grammar splits `interpolatedStringLiteral` into a single-line and a multiline nonterminal;
-    /// the single-line one has two alternates (plain and extended/raw), and both are single-line.
+    /// Put `@sameLineOutsideBrackets` only on a nonterminal whose alternates all need the rule.
     /// (An earlier "exactly one alternate" assertion was a proxy for this and is gone.)
     private func registerSameLine(nonTerminal nt: GrammarNode) {
-        guard nt.requiresSameLine else { return }
-        rules.append((nt, SameLineSpanRule(parser: parser, node: nt,
-                                           outsideBrackets: nt.sameLineOutsideBrackets)))
+        guard nt.sameLineOutsideBrackets else { return }
+        rules.append((nt, SameLineSpanRule(parser: parser, node: nt)))
     }
 
     private struct NodeSpan: Hashable { let id: ObjectIdentifier; let from, to: CharPosition }
@@ -582,7 +572,7 @@ class Oracle {
             registerNodeDisambiguation(owner: nt)
             // Alternate-level @prefer / @avoid on the nonterminal's own alt chain.
             registerPrefer(altChainHead: nt.alt)
-            // `@sameLine` — anchored on the LHS, see below.
+            // `@sameLineOutsideBrackets` — anchored on the LHS, see below.
             registerSameLine(nonTerminal: nt)
         }
 
@@ -657,7 +647,7 @@ class Oracle {
                               AssociativityFilterRule(forbiddenExtents: extents,
                                                       childIsRightmost: filter.direction == .left)))
             }
-            // `@sameLine` is registered per nonterminal, not here — it must
+            // `@sameLineOutsideBrackets` is registered per nonterminal, not here — it must
             // anchor on LHS completion yields to get the construct's exact span.
             // Every production is a root below, so an RHS reference (`.alt` → its LHS) is not
             // followed: that would make the recursion as deep as the whole grammar graph.

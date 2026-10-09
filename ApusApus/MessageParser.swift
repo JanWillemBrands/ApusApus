@@ -422,7 +422,7 @@ class MessageParser {
             guard let id = grammar.symbolToID[name] else { continue }
             // Structured `-` lexical nonterminal — its match extent is computed by a GLL sub-parse
             // below, not by a regex/literal, so skip ONLY that registration.
-            if !pat.isLexicalToken {
+            if !pat.isLexicalToken, pat.scannerKey == nil {
                 if pat.isLiteral {
                     literalSourceByID[id] = pat.source
                 } else if !pat.isSkip {
@@ -471,6 +471,19 @@ class MessageParser {
                     sub.runGLL(root: nt, start: pos)
                     return sub.yield(of: nt).lazy.filter { $0.i == pos }.map(\.j).max()
                 }
+            }
+        }
+        // Parse-scoped `@builder` terminals (`ApusRegexLibrary.scannedTerminals`): one scanner per
+        // factory key for this input, shared by the terminals with that key. Served through the same
+        // one-token recogniser slot. Sub-parsers get their own instances.
+        var scanners: [String: any ApusTokenScanner] = [:]
+        for (name, pat) in grammar.terminals {
+            guard let key = pat.scannerKey, let id = grammar.symbolToID[name],
+                  let make = ApusRegexLibrary.scannerFactories[key] else { continue }
+            let scanner = scanners[key] ?? make()
+            scanners[key] = scanner
+            lexicalTokenRecognisers[id] = { [input] pos in
+                scanner.match(terminal: name, in: input, at: pos)
             }
         }
         // `@preempt(X, N)` viability recognisers, keyed by the ID of the terminal carrying the

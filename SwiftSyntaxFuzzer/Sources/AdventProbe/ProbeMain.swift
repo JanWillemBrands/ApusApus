@@ -379,40 +379,53 @@ struct AdventProbe {
             try source.write(to: tempURL, atomically: true, encoding: .utf8)
             defer { try? fileManager.removeItem(at: tempURL) }
 
-            let process = Process()
+            let executable: URL
+            let processArguments: [String]
             if arguments.first == "swiftc" {
-                process.executableURL = swiftcURL
-                process.arguments = Array(arguments.dropFirst()) + [tempURL.path]
+                executable = swiftcURL
+                processArguments = Array(arguments.dropFirst()) + [tempURL.path]
             } else {
-                process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
-                process.arguments = arguments + [tempURL.path]
+                executable = URL(fileURLWithPath: "/usr/bin/xcrun")
+                processArguments = arguments + [tempURL.path]
             }
-            process.environment = ["OS_ACTIVITY_MODE": "disable"]
+
             let stdoutPipe = Pipe()
             let stderrPipe = Pipe()
             let stdout = PipeCapture()
             let stderr = PipeCapture()
-            process.standardOutput = stdoutPipe
-            process.standardError = stderrPipe
             stdoutPipe.fileHandleForReading.readabilityHandler = { stdout.append($0.availableData) }
             stderrPipe.fileHandleForReading.readabilityHandler = { stderr.append($0.availableData) }
-            try process.run()
+            let pid = try spawnProcessGroup(
+                executable: executable,
+                arguments: processArguments,
+                stdout: stdoutPipe,
+                stderr: stderrPipe
+            )
+            try? stdoutPipe.fileHandleForWriting.close()
+            try? stderrPipe.fileHandleForWriting.close()
 
             let deadline = Date().addingTimeInterval(compilerTimeoutSeconds)
             var timedOut = false
-            while process.isRunning {
+            var status: Int32 = 0
+            var exited = false
+            while !exited {
+                let waited = waitpid(pid, &status, WNOHANG)
+                if waited == pid {
+                    exited = true
+                    break
+                }
                 if Date() >= deadline {
                     timedOut = true
-                    process.terminate()
+                    kill(-pid, SIGTERM)
                     Thread.sleep(forTimeInterval: 0.1)
-                    if process.isRunning {
-                        kill(pid_t(process.processIdentifier), SIGKILL)
+                    if waitpid(pid, &status, WNOHANG) != pid {
+                        kill(-pid, SIGKILL)
+                        waitpid(pid, &status, 0)
                     }
                     break
                 }
                 Thread.sleep(forTimeInterval: 0.01)
             }
-            process.waitUntilExit()
 
             stdoutPipe.fileHandleForReading.readabilityHandler = nil
             stderrPipe.fileHandleForReading.readabilityHandler = nil
@@ -430,10 +443,54 @@ struct AdventProbe {
             try? stdoutPipe.fileHandleForReading.close()
             try? stderrPipe.fileHandleForReading.close()
 
-            return CompilerResult(accepted: process.terminationStatus == 0, stderr: stderr.string, timedOut: false)
+            return CompilerResult(accepted: exitCode(fromWaitStatus: status) == 0, stderr: stderr.string, timedOut: false)
         } catch {
             return CompilerResult(accepted: false, stderr: "\(description) probe failed: \(error)", timedOut: false)
         }
+    }
+
+    private static func spawnProcessGroup(executable: URL, arguments: [String], stdout: Pipe, stderr: Pipe) throws -> pid_t {
+        var fileActions: posix_spawn_file_actions_t?
+        var attributes: posix_spawnattr_t?
+        posix_spawn_file_actions_init(&fileActions)
+        posix_spawnattr_init(&attributes)
+        defer {
+            posix_spawn_file_actions_destroy(&fileActions)
+            posix_spawnattr_destroy(&attributes)
+        }
+
+        posix_spawn_file_actions_adddup2(&fileActions, stdout.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
+        posix_spawn_file_actions_adddup2(&fileActions, stderr.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
+        posix_spawn_file_actions_addclose(&fileActions, stdout.fileHandleForReading.fileDescriptor)
+        posix_spawn_file_actions_addclose(&fileActions, stderr.fileHandleForReading.fileDescriptor)
+
+        posix_spawnattr_setflags(&attributes, Int16(POSIX_SPAWN_SETPGROUP))
+        posix_spawnattr_setpgroup(&attributes, 0)
+
+        let argv = [executable.path] + arguments
+        let env = ProcessInfo.processInfo.environment
+            .merging(["OS_ACTIVITY_MODE": "disable"]) { _, new in new }
+            .map { "\($0.key)=\($0.value)" }
+
+        return try executable.path.withCString { executablePath in
+            try argv.withCStringArray { argvPointer in
+                try env.withCStringArray { envPointer in
+                    var pid = pid_t()
+                    let result = posix_spawn(&pid, executablePath, &fileActions, &attributes, argvPointer, envPointer)
+                    guard result == 0 else {
+                        throw POSIXError(POSIXErrorCode(rawValue: result) ?? .EIO)
+                    }
+                    return pid
+                }
+            }
+        }
+    }
+
+    private static func exitCode(fromWaitStatus status: Int32) -> Int32 {
+        if status & 0x7f == 0 {
+            return (status >> 8) & 0xff
+        }
+        return 128 + (status & 0x7f)
     }
 
     private static func renderSwiftSyntaxNode(_ node: Syntax, indent: Int) -> String {
@@ -486,6 +543,22 @@ struct AdventProbe {
             metrics: nil,
             error: error
         )
+    }
+}
+
+private extension Array where Element == String {
+    func withCStringArray<Result>(_ body: (UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) throws -> Result) rethrows -> Result {
+        let cStrings = map { strdup($0) }
+        defer {
+            for pointer in cStrings {
+                free(pointer)
+            }
+        }
+        var argv: [UnsafeMutablePointer<CChar>?] = cStrings
+        argv.append(nil)
+        return try argv.withUnsafeMutableBufferPointer { buffer in
+            try body(buffer.baseAddress!)
+        }
     }
 }
 

@@ -1,0 +1,3238 @@
+diff --git a/ApusApus/ApusParser.swift b/ApusApus/ApusParser.swift
+index 054d29aa..e7c362d0 100644
+--- a/ApusApus/ApusParser.swift
++++ b/ApusApus/ApusParser.swift
+@@ -192,35 +192,33 @@ class ApusParser {
+     
+     func production() throws {
+         // Production-start pragmas, in ANY order. They are independent properties of the
+-        // production, so their order carries no meaning:
+-        //   `@carries(m …)` — the parser modes this nonterminal is in scope for: an inherited mode
++        // production, so their order has no meaning:
++        //   `@modeScope(m …)` — the parser modes this nonterminal is in scope for: an inherited mode
+         //       bit passes into an occurrence of this nonterminal only if it is listed here; anywhere
+         //       else the bit is dropped on entry (a swift-syntax parameter that a function does not
+         //       forward). May repeat; lists union, also across several definitions of one
+-        //       nonterminal. See `Parser Modes Specialization.md`.
++        //       nonterminal. See `apus.md` § Parser Modes.
+         //   `@longest` / `@shortest` — node-level extent of this nonterminal.
+         //   `@sameLine` — a whole-nonterminal span property: the Oracle prunes this nonterminal's
+         //       LHS completion yields; not an alternate-level notion. `@sameLineOutsideBrackets` is
+         //       the shallow variant: line breaks inside brackets are free.
+         //   `@literalMunch` — a regex terminal participating in literal-suppression maximal munch
+         //       (TODO #0).
+-        //   `@preempt(X)` / `@preempt(X, N)` — this terminal's maximal munch must not swallow
+-        //       something of higher priority. Both regex literals and generics were bolted onto an
+-        //       already-mature Swift, so its lexer has to pre-empt operator munching for them.
+-        //       X — the terminal whose start positions define the SPLIT POINTS. It names a specific
+-        //           token shape rather than deriving split points from `FIRST(N)`, whose members may
+-        //           differ in spelling and boundary behavior.
+-        //       N — OPTIONAL: the construct that must actually PARSE at a split point for the
+-        //           shorter reading to win. Without it the split is merely offered.
+-        // Every pragma except `@carries` may appear once; `@longest`/`@shortest` and the two
++        //   `@forkBefore(X)` — the lexer forks before an inner terminal `X`: this terminal ends
++        //       there AND at its maximal end; the parse decides (`func %%%%<T>` vs `func <<<(…)`).
++        //   `@yieldsTo(X)` — this terminal gives way to terminal `X`: it ends before the first inner
++        //       position where `X` can be scanned (an operator before a regex: `!/x/`).
++        //       Both exist because regex literals and generics were bolted onto an already-mature
++        //       Swift, so its lexer has to stop operator munching for them. See `TokenPattern`.
++        // Every pragma except `@modeScope` may appear once; `@longest`/`@shortest` and the two
+         // `@sameLine` forms are one property each. An unknown pragma here is an error.
+-        var carriedModes: UInt64 = 0
++        var modeScope: UInt64 = 0
+         var disambiguationAnnotation: Disambiguation?
+         var sameLineAnnotation = false
+         var sameLineOutsideBrackets = false
+         var isLiteralMunchAnnotation = false
+-        var preemptStartName: String? = nil
+-        var preemptConstructName: String? = nil
++        var forkBeforeName: String? = nil
++        var yieldsToName: String? = nil
+         var seenProperties = Set<String>()
+         func once(_ property: String) throws {
+             guard seenProperties.insert(property).inserted else {
+@@ -230,12 +228,12 @@ class ApusParser {
+         }
+         while token.kind == "pragma" {
+             switch token.stripped {
+-            case "carries":
++            case "modeScope":
+                 cI += 1
+                 try expect(["("]); cI += 1
+                 repeat {
+                     try expect(["identifier"])
+-                    carriedModes |= try grammar.parserModeBit(named: String(token.image))
++                    modeScope |= try grammar.parserModeBit(named: String(token.image))
+                     cI += 1
+                 } while token.kind == "identifier"
+                 try expect([")"]); cI += 1
+@@ -256,24 +254,20 @@ class ApusParser {
+                 try once("@literalMunch")
+                 isLiteralMunchAnnotation = true
+                 cI += 1
+-            case "preempt":
+-                try once("@preempt")
++            case "forkBefore", "yieldsTo":
++                let pragma = token.stripped
++                try once("@\(pragma)")
+                 cI += 1
+                 try expect(["("]); cI += 1
+                 try expect(["identifier"])
+-                preemptStartName = String(token.image)
++                if pragma == "forkBefore" { forkBeforeName = String(token.image) }
++                else { yieldsToName = String(token.image) }
+                 cI += 1
+-                if token.kind == "," {
+-                    cI += 1
+-                    try expect(["identifier"])
+-                    preemptConstructName = String(token.image)
+-                    cI += 1
+-                }
+                 try expect([")"]); cI += 1
+             default:
+                 throw ApusParserError.unexpectedToken(
+                     explanation: "@\(token.stripped) is not a production pragma "
+-                               + "(@carries @longest @shortest @sameLine @sameLineOutsideBrackets @literalMunch @preempt)")
++                               + "(@modeScope @longest @shortest @sameLine @sameLineOutsideBrackets @literalMunch @forkBefore @yieldsTo)")
+             }
+         }
+         try expect(["identifier"])
+@@ -295,8 +289,8 @@ class ApusParser {
+                 terminalAlias = nonTerminalName
+                 _ = try regex()
+                 if isLiteralMunchAnnotation { grammar.terminals[nonTerminalName]?.isLiteralMunch = true }
+-                if let ps = preemptStartName { grammar.terminals[nonTerminalName]?.preemptStart = ps }
+-                if let pc = preemptConstructName { grammar.terminals[nonTerminalName]?.preemptConstruct = pc }
++                grammar.terminals[nonTerminalName]?.forkBefore = forkBeforeName
++                grammar.terminals[nonTerminalName]?.yieldsTo = yieldsToName
+             case "literal":
+                 // A named literal terminal gets its OWN kind, named by the LHS — the same rule the
+                 // regex branch applies via `terminalAlias`. It used to register kind `"…"` (the
+@@ -310,8 +304,8 @@ class ApusParser {
+                 //   name - @builder(key) .     → ApusRegexLibrary.patterns["key"]
+                 _ = try regexBuilder(name: nonTerminalName)
+                 if isLiteralMunchAnnotation { grammar.terminals[nonTerminalName]?.isLiteralMunch = true }
+-                if let ps = preemptStartName { grammar.terminals[nonTerminalName]?.preemptStart = ps }
+-                if let pc = preemptConstructName { grammar.terminals[nonTerminalName]?.preemptConstruct = pc }
++                grammar.terminals[nonTerminalName]?.forkBefore = forkBeforeName
++                grammar.terminals[nonTerminalName]?.yieldsTo = yieldsToName
+             default:
+                 try expect(["regex", "literal", "pragma"])
+             }
+@@ -382,7 +376,7 @@ class ApusParser {
+             if let d = disambiguationAnnotation {
+                 lhsNode.disambiguation = d
+             }
+-            lhsNode.carriedModes |= carriedModes
++            lhsNode.modeScope |= modeScope
+             if sameLineAnnotation {
+                 lhsNode.requiresSameLine = true
+                 lhsNode.sameLineOutsideBrackets = sameLineOutsideBrackets
+diff --git a/ApusApus/ApusToHTML.swift b/ApusApus/ApusToHTML.swift
+index 84104bae..e334079c 100644
+--- a/ApusApus/ApusToHTML.swift
++++ b/ApusApus/ApusToHTML.swift
+@@ -334,7 +334,7 @@ private final class ApusHTMLConverter {
+         let startLine = curLine
+         var pragmas: [String] = []
+ 
+-        // leading pragmas: @longest / @literalMunch / @preempt(X, N) / …
++        // leading pragmas: @longest / @literalMunch / @yieldsTo(X) / …
+         while k == "pragma" {
+             pragmas.append(t)
+             pos += 1
+diff --git a/ApusApus/GenerateSwiftSyntaxAST.swift b/ApusApus/GenerateSwiftSyntaxAST.swift
+index 9d62be51..57885e9e 100644
+--- a/ApusApus/GenerateSwiftSyntaxAST.swift
++++ b/ApusApus/GenerateSwiftSyntaxAST.swift
+@@ -222,18 +222,21 @@ struct SwiftSyntaxGenerator {
+     // MARK: - Statements
+ 
+     private mutating func convertTopLevelDeclaration(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
+-        // topLevelDeclaration = shebang? statements? .
++        // topLevelDeclaration = shebang? topLevelStatements? .
+         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
+             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
+             return []
+         }
+-        guard let stmtsNT = find("statements", in: spans) else {
++        guard let stmtsNT = find(firstOf: ["topLevelStatements", "statements"], in: spans) else {
+             // An empty source (or comment-only source) legitimately has no `statements`.
+             if !parser.isTriviaOnly(from..<to) {
+                 record(.lookupFailed, "no statements child", from: from, to: to)
+             }
+             return []
+         }
++        if (lhs(stmtsNT.nt) ?? stmtsNT.nt).name == "topLevelStatements" {
++            return convertStatementList(["topLevelStatements"], stmtsNT.nt, from: stmtsNT.from, to: stmtsNT.to)
++        }
+         return convertStatements(stmtsNT.nt, from: stmtsNT.from, to: stmtsNT.to)
+     }
+ 
+@@ -1061,7 +1064,7 @@ struct SwiftSyntaxGenerator {
+                 accessorBlock = convertGetterSetterBlock(gsNT.nt, from: gsNT.from, to: gsNT.to)
+             } else if let wsNT = find("willSetDidSetBlock", in: spans) {
+                 accessorBlock = convertWillSetDidSetBlock(wsNT.nt, from: wsNT.from, to: wsNT.to)
+-            } else if let iabNT = find("initializedAccessorBlock", in: spans) {
++            } else if let iabNT = find("initializedAccessorBlock", in: spans) ?? find("initializedInitAccessorBlock", in: spans) {
+                 // initializedAccessorBlock = @cannotParse(accessorBlockBrace) codeBlock
+                 //                          | "{" accessorClauseListNoInit "}"
+                 //                          | "{" initAccessorClause accessorClauseList? "}"
+@@ -2020,10 +2023,17 @@ struct SwiftSyntaxGenerator {
+                     name = String(name[cut.upperBound...])
+                 }
+             }
+-            return ExprSyntax(DeclReferenceExprSyntax(
++            let reference = ExprSyntax(DeclReferenceExprSyntax(
+                 moduleSelector: selector,
+                 baseName: name == "Self" ? .keyword(.Self) : .identifier(name)
+             ))
++            if let gcNT = find("typeGenericArgumentClause", in: spans) {
++                return ExprSyntax(GenericSpecializationExprSyntax(
++                    expression: reference,
++                    genericArgumentClause: convertGenericArgumentClause(gcNT.nt, from: gcNT.from, to: gcNT.to)
++                ))
++            }
++            return reference
+         default:
+             return ExprSyntax(TypeExprSyntax(type: convertType(nt, from: from, to: to)))
+         }
+@@ -2081,6 +2091,9 @@ struct SwiftSyntaxGenerator {
+         if let exprPattern = pattern.as(ExpressionPatternSyntax.self) {
+             return exprPattern.expression
+         }
++        if let tuple = pattern.as(TuplePatternSyntax.self) {
++            return tuplePatternExpression(tuple)
++        }
+         return ExprSyntax(PatternExprSyntax(pattern: pattern))
+     }
+ 
+@@ -2088,6 +2101,10 @@ struct SwiftSyntaxGenerator {
+     /// swift-syntax, not a `TuplePattern` — `if let (a, _) = p`. Same context-sensitivity as the
+     /// bare `_` case just below: identical source spelling, different node by position.
+     private static func tuplePatternAsExpressionPattern(_ tuple: TuplePatternSyntax) -> PatternSyntax {
++        return PatternSyntax(ExpressionPatternSyntax(expression: tuplePatternExpression(tuple)))
++    }
++
++    private static func tuplePatternExpression(_ tuple: TuplePatternSyntax) -> ExprSyntax {
+         let elements = Array(tuple.elements)
+         let args = elements.enumerated().map { index, element in
+             LabeledExprSyntax(
+@@ -2097,11 +2114,11 @@ struct SwiftSyntaxGenerator {
+                 trailingComma: index == elements.count - 1 ? nil : .commaToken()
+             )
+         }
+-        return PatternSyntax(ExpressionPatternSyntax(expression: TupleExprSyntax(
++        return ExprSyntax(TupleExprSyntax(
+             leftParen: .leftParenToken(),
+             elements: LabeledExprListSyntax(args),
+             rightParen: .rightParenToken()
+-        )))
++        ))
+     }
+ 
+     /// conditionList = condition { "," condition } .
+@@ -2223,7 +2240,7 @@ struct SwiftSyntaxGenerator {
+             record(.lookupFailed, "no bindingPattern child", from: from, to: to)
+         }
+         var initializer: InitializerClauseSyntax? = nil
+-        if let initNT = find("initializer", in: spans) {
++        if let initNT = find("initializer", in: spans) ?? find("initializerBeforeAccessorBlock", in: spans) {
+             initializer = convertInitializer(initNT.nt, from: initNT.from, to: initNT.to)
+         }
+         return OptionalBindingConditionSyntax(
+@@ -2792,9 +2809,12 @@ struct SwiftSyntaxGenerator {
+                 ))
+             } else if let coNT = find("coroutineAccessorClause", in: eSpans),
+                       let (_, cSpans) = tileAlternate(coNT.nt, from: coNT.from, to: coNT.to),
+-                      let specNT = find("coroutineSpecifier", in: cSpans) {
++                      let specNT = find(firstOf: ["coroutineSpecifier",
++                                                  "borrowMutateAccessorRequirementSpecifier"], in: cSpans) {
+                 // coroutineAccessorClause = attributes? accessorModifier? coroutineSpecifier
+-                //                           accessorEffects? codeBlock .   (SE-0443)
++                //                           accessorEffects? codeBlock? .
++                // coroutineAccessorClause = attributes? accessorModifier?
++                //                           borrowMutateAccessorRequirementSpecifier accessorEffects? .
+                 var attributes = AttributeListSyntax([])
+                 if let attrNT = find("attributes", in: cSpans) {
+                     attributes = convertAttributes(attrNT.nt, from: attrNT.from, to: attrNT.to)
+@@ -2838,17 +2858,13 @@ struct SwiftSyntaxGenerator {
+         return DeclModifierListSyntax(modifiers)
+     }
+ 
+-    /// coroutineSpecifier = "_read" | "read" | "_modify" | "modify" | "borrow" | "mutate" | "unsafeAddress" | "unsafeMutableAddress" .
++    /// coroutineSpecifier = "_read" | "_modify" | "unsafeAddress" | "unsafeMutableAddress" .
++    /// borrowMutateAccessorRequirementSpecifier = "borrow" | "mutate" .
+     /// A fourth distinct keyword set — see the note on `typeSpecifierToken`.
+-    ///
+-    /// `read`, `modify`, and `mutate` are modern coroutine accessor spellings exposed through the
+-    /// SwiftSyntax experimental SPI imported at the top of this file.
+     private func coroutineSpecifierToken(_ name: String) -> TokenSyntax? {
+         switch name {
+         case "_read":               return .keyword(._read)
+-        case "read":                return .keyword(.read)
+         case "_modify":             return .keyword(._modify)
+-        case "modify":              return .keyword(.modify)
+         case "borrow":              return .keyword(.borrow)
+         case "mutate":              return .keyword(.mutate)
+         case "unsafeAddress":        return .keyword(.unsafeAddress)
+@@ -5333,11 +5349,11 @@ struct SwiftSyntaxGenerator {
+         } else {
+             pattern = missingPattern(.lookupFailed, "no bindingPattern child", from: from, to: to)
+         }
+-        if let initNT = find("initializer", in: spans) {
++        if let initNT = find("initializer", in: spans) ?? find("initializerBeforeAccessorBlock", in: spans) {
+             initializer = convertInitializer(initNT.nt, from: initNT.from, to: initNT.to)
+         }
+         var accessorBlock: AccessorBlockSyntax? = nil
+-        if let iabNT = find("initializedAccessorBlock", in: spans) {
++        if let iabNT = find("initializedAccessorBlock", in: spans) ?? find("initializedInitAccessorBlock", in: spans) {
+             accessorBlock = convertInitializedAccessorBlock(iabNT.nt, from: iabNT.from, to: iabNT.to)
+         }
+         return PatternBindingSyntax(
+@@ -5779,6 +5795,10 @@ struct SwiftSyntaxGenerator {
+                 if !text.isEmpty { prefixOp = text }
+             }
+         }
++        if prefixOp == nil, let opNT = find("prefixOperator", in: spans) {
++            let text = collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to)
++            if !text.isEmpty { prefixOp = text }
++        }
+ 
+         // inOutExpression = "&" >s< postfixExpression .
+         if let ioNT = find("inOutExpression", in: spans),
+@@ -5812,7 +5832,14 @@ struct SwiftSyntaxGenerator {
+         // `primaryExpression`, because it is a postfix island — see the note in `Swift.apus`. So it
+         // is converted here, one level above the postfix chain.
+         if let kpNT = find("keyPathExpression", in: spans) {
+-            return convertKeyPathExpression(kpNT.nt, from: kpNT.from, to: kpNT.to)
++            let operand = convertKeyPathExpression(kpNT.nt, from: kpNT.from, to: kpNT.to)
++            if let op = prefixOp {
++                return ExprSyntax(PrefixOperatorExprSyntax(
++                    operator: .prefixOperator(op),
++                    expression: operand
++                ))
++            }
++            return operand
+         }
+         // prefixExpression = @prefer effectMarker prefixExpression .
+         if let markerNT = find("effectMarker", in: spans),
+@@ -6848,21 +6875,26 @@ struct SwiftSyntaxGenerator {
+     /// captureList     = "[" "]" | "[" captureListItems ","? "]" .
+     /// captureListItem = captureHead | captureHead assignmentOperator expression .
+     /// captureHead     = captureSpecifier captureName | >-> ( "weak" "unowned" ) captureName .
+-    /// captureName     = identifierToken | selfExpression .
++    /// captureName     = identifierToken | "self" .
+     private mutating func convertCaptureList(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ClosureCaptureClauseSyntax {
+         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
+             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
+             return ClosureCaptureClauseSyntax(items: [])
+         }
+         var items: [ClosureCaptureSyntax] = []
++        var hasTrailingComma = false
+         if let listNT = find("captureListItems", in: spans) {
+             collectCaptureItems(listNT.nt, from: listNT.from, to: listNT.to, into: &items)
++            hasTrailingComma = input[listNT.to..<to].contains(",")
+         }
+         if items.count > 1 {
+             for i in 0..<items.count - 1 {
+                 items[i] = items[i].with(\.trailingComma, .commaToken())
+             }
+         }
++        if hasTrailingComma, !items.isEmpty {
++            items[items.count - 1] = items[items.count - 1].with(\.trailingComma, .commaToken())
++        }
+         return ClosureCaptureClauseSyntax(
+             leftSquare: .leftSquareToken(),
+             items: ClosureCaptureListSyntax(items),
+@@ -6907,7 +6939,7 @@ struct SwiftSyntaxGenerator {
+             // wrapped DeclReferenceExpr — the `expression:` initializer is the legacy shape and
+             // produces a visibly different tree.
+             let name: TokenSyntax
+-            if find("selfExpression", in: nSpans) != nil {
++            if collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to) == "self" {
+                 name = .keyword(.self)
+             } else if let idNT = find("identifierToken", in: nSpans) {
+                 name = .identifier(collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to))
+@@ -7092,13 +7124,12 @@ struct SwiftSyntaxGenerator {
+     }
+ 
+     private mutating func appendTupleElement(_ span: NTSpan, into elements: inout [LabeledExprSyntax]) {
+-        // tupleElement = expression | argumentLabel ":" expression .
++        // tupleElement = expression | argumentLabel ":" expression | operator | argumentLabel ":" operator .
+         guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to),
+-              let exprNT = find("expression", in: spans) else {
+-            record(.lookupFailed, "tuple element without expression", from: span.from, to: span.to)
++              let expr = tupleElementExpression(from: spans) else {
++            record(.lookupFailed, "tuple element without expression/operator", from: span.from, to: span.to)
+             return
+         }
+-        let expr = convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
+         if let labelNT = find(firstOf: ["argumentLabel"] + identifierNameSpellings, in: spans) {
+             elements.append(LabeledExprSyntax(
+                 label: argumentLabelToken(collectTerminalText(labelNT.nt, from: labelNT.from, to: labelNT.to)),
+@@ -7110,6 +7141,18 @@ struct SwiftSyntaxGenerator {
+         }
+     }
+ 
++    private mutating func tupleElementExpression(from spans: [(GrammarNode, CharPosition, CharPosition)]) -> ExprSyntax? {
++        if let exprNT = find("expression", in: spans) {
++            return convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
++        }
++        if let opNT = find("operator", in: spans) {
++            return ExprSyntax(DeclReferenceExprSyntax(
++                baseName: .binaryOperator(collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to))
++            ))
++        }
++        return nil
++    }
++
+     /// A label spelled `_` is swift-syntax's wildcard token, not an identifier named `_`.
+     private func argumentLabelToken(_ text: String) -> TokenSyntax {
+         text == "_" ? .wildcardToken() : .identifier(text)
+@@ -7809,8 +7852,17 @@ struct SwiftSyntaxGenerator {
+         if let litNT = find("literalExpression", in: spans) {
+             return convertLiteralExpression(litNT.nt, from: litNT.from, to: litNT.to)
+         }
+-        // selfExpression = "self" .  superclassExpression = "super" … — swift-syntax
+-        // models `self` as a DeclReferenceExpr but `super` as its own SuperExpr node.
++        // selfExpression = "self" | selfType genericArgumentClause .
++        // swift-syntax models bare `self` as a DeclReferenceExpr; expression-position
++        // `Self<T>` is a generic specialization of the `Self` keyword reference.
++        if let selfNT = find("selfExpression", in: spans),
++           let (_, selfSpans) = tileAlternate(selfNT.nt, from: selfNT.from, to: selfNT.to),
++           let gcNT = find("genericArgumentClause", in: selfSpans) {
++            return ExprSyntax(GenericSpecializationExprSyntax(
++                expression: ExprSyntax(DeclReferenceExprSyntax(baseName: .keyword(.Self))),
++                genericArgumentClause: convertGenericArgumentClause(gcNT.nt, from: gcNT.from, to: gcNT.to)
++            ))
++        }
+         if find("selfExpression", in: spans) != nil {
+             return ExprSyntax(DeclReferenceExprSyntax(baseName: .keyword(.self)))
+         }
+@@ -8112,27 +8164,12 @@ struct SwiftSyntaxGenerator {
+         if let strNT = find("stringLiteral", in: spans) {
+             return convertStringLiteral(strNT.nt, from: strNT.from, to: strNT.to)
+         }
+-        // regularExpressionLiteral = plainRegularExpressionLiteral | extendedRegularExpressionLiteral .
+-        // swift-syntax keeps the whole literal as one `regexLiteralPattern` between slash
+-        // tokens; the `#…#` extended form additionally carries pound delimiters.
++        // regularExpressionLiteral = regexLiteralToken .
++        // ONE token (`SwiftRegexLiteralScanner`). swift-syntax keeps the body as one
++        // `regexLiteralPattern` between slash tokens; the `#…#` form also carries pound delimiters.
+         if let reNT = find("regularExpressionLiteral", in: spans) {
+-            // The text comes from the SOURCE SPAN, not from `collectTerminalText`. A plain regex
+-            // body is a sequence of TOKENS (`regexBody = regexItem { … regexItem }`), so rebuilding
+-            // it from the committed children silently drops every interior space and tab: ApusApus
+-            // produced `regexLiteralPattern("ab")` where swift-syntax has `("a b")`. That one
+-            // reconstruction bug was 36 of the fuzzer's tree-difference artifacts. A literal's text
+-            // IS its source extent, so read it directly; only leading TRIVIA has to come off,
+-            // since the span may start before the opening delimiter.
+-            // The span carries trailing TRIVIA (`"/([)])/ "`, `"#/abc/#\n"`, or a comment), because a
+-            // normal token owns its trailing trivia. `contentText` returns the exact source from the
+-            // first token's content start to the last token's content end — interior spaces kept,
+-            // trailing whitespace AND comments dropped. The delimiter check below is a safety net
+-            // that falls back to the token-accurate text (right shape, interior spaces lost).
+-            let trimmed = String(parser.contentText(from: reNT.from, to: reNT.to))
+-            let delimited = (trimmed.hasPrefix("/") || trimmed.hasPrefix("#"))
+-                && (trimmed.hasSuffix("/") || trimmed.hasSuffix("#"))
+-            let text = delimited ? trimmed
+-                                 : collectTerminalText(reNT.nt, from: reNT.from, to: reNT.to)
++            // `contentText` is the token's exact source, without its trailing trivia.
++            let text = String(parser.contentText(from: reNT.from, to: reNT.to))
+             if text.hasPrefix("/") && text.hasSuffix("/") && text.count >= 2 {
+                 return ExprSyntax(RegexLiteralExprSyntax(
+                     openingSlash: .regexSlashToken(),
+@@ -8140,8 +8177,7 @@ struct SwiftSyntaxGenerator {
+                     closingSlash: .regexSlashToken()
+                 ))
+             }
+-            // extendedRegularExpressionLiteral - @builder .  `#/…/#`, with the pound
+-            // delimiters as their own tokens either side of the slashes.
++            // `#/…/#`, with the pound delimiters as their own tokens either side of the slashes.
+             let pounds = text.prefix(while: { $0 == "#" })
+             let inner = text.dropFirst(pounds.count)
+             if !pounds.isEmpty, inner.hasPrefix("/"), text.hasSuffix(String(pounds)) {
+@@ -9292,8 +9328,11 @@ struct SwiftSyntaxGenerator {
+                 elements[i] = elements[i].with(\.trailingComma, .commaToken())
+             }
+         }
+-        // SE-0470 trailing comma, kept on the LAST element.
+-        if hasTrailingComma(spans, afterList: "tupleTypeElementList"), !elements.isEmpty {
++        // SE-0470 trailing comma, kept on the LAST element. With a one-element tuple type
++        // (`(Int,)`), the comma follows the single `tupleTypeElement`; with two or more elements it
++        // follows the list.
++        let trailingCommaList = find("tupleTypeElementList", in: spans) == nil ? "tupleTypeElement" : "tupleTypeElementList"
++        if hasTrailingComma(spans, afterList: trailingCommaList), !elements.isEmpty {
+             elements[elements.count - 1] = elements[elements.count - 1]
+                 .with(\.trailingComma, .commaToken())
+         }
+@@ -9440,7 +9479,8 @@ struct SwiftSyntaxGenerator {
+             return GenericArgumentClauseSyntax(arguments: [])
+         }
+         var args: [GenericArgumentSyntax] = []
+-        if let listNT = find("genericArgumentList", in: spans) {
++        let listName = find("expressionGenericArgumentList", in: spans) == nil ? "genericArgumentList" : "expressionGenericArgumentList"
++        if let listNT = find(listName, in: spans) {
+             collectGenericArguments(listNT.nt, from: listNT.from, to: listNT.to, into: &args)
+         }
+         if args.count > 1 {
+@@ -9448,7 +9488,7 @@ struct SwiftSyntaxGenerator {
+                 args[i] = args[i].with(\.trailingComma, .commaToken())
+             }
+         }
+-        if hasTrailingComma(spans, afterList: "genericArgumentList"), !args.isEmpty {
++        if hasTrailingComma(spans, afterList: listName), !args.isEmpty {
+             args[args.count - 1] = args[args.count - 1].with(\.trailingComma, .commaToken())
+         }
+         return GenericArgumentClauseSyntax(
+@@ -9467,6 +9507,11 @@ struct SwiftSyntaxGenerator {
+             record(.lookupFailed, "no alternate tiles the span", from: span.from, to: span.to)
+             return nil
+         }
++        if let typeNT = find("expressionGenericType", in: spans) {
++            return GenericArgumentSyntax(
++                argument: .type(convertExpressionGenericType(typeNT.nt, from: typeNT.from, to: typeNT.to))
++            )
++        }
+         if let typeNT = find("type", in: spans) {
+             return GenericArgumentSyntax(
+                 argument: .type(convertType(typeNT.nt, from: typeNT.from, to: typeNT.to))
+@@ -9482,9 +9527,78 @@ struct SwiftSyntaxGenerator {
+         return nil
+     }
+ 
++    private mutating func convertExpressionGenericType(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> TypeSyntax {
++        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
++            return TypeSyntax(MissingTypeSyntax())
++        }
++        if find("expressionGenericType", in: spans) != nil,
++           find(firstOf: ["expressionParameterModifier", "attribute"], in: spans) != nil {
++            var specifierItems: [TypeSpecifierListSyntax.Element] = []
++            var attributeItems: [AttributeListSyntax.Element] = []
++            var cursor: NTSpan? = NTSpan(nt: nt, from: from, to: to)
++            var baseType: TypeSyntax? = nil
++            while let level = cursor {
++                guard let (_, levelSpans) = tileAlternate(level.nt, from: level.from, to: level.to),
++                      let innerNT = find("expressionGenericType", in: levelSpans),
++                      find(firstOf: ["expressionParameterModifier", "attribute"], in: levelSpans) != nil else {
++                    baseType = convertExpressionGenericType(level.nt, from: level.from, to: level.to)
++                    break
++                }
++                if let modNT = find("expressionParameterModifier", in: levelSpans) {
++                    specifierItems.append(typeSpecifier(modNT.nt, from: modNT.from, to: modNT.to))
++                }
++                if let attrNT = find("attribute", in: levelSpans),
++                   let attribute = convertAttribute(attrNT.nt, from: attrNT.from, to: attrNT.to) {
++                    attributeItems.append(.attribute(attribute))
++                }
++                cursor = innerNT
++            }
++            return TypeSyntax(AttributedTypeSyntax(
++                specifiers: TypeSpecifierListSyntax(specifierItems),
++                attributes: AttributeListSyntax(attributeItems),
++                baseType: baseType ?? TypeSyntax(MissingTypeSyntax())
++            ))
++        }
++        for name in [
++            "functionType", "arrayType", "inlineArrayType", "dictionaryType", "placeholderType",
++            "typeIdentifier", "tupleType", "optionalType", "implicitlyUnwrappedOptionalType",
++            "protocolCompositionType", "opaqueType", "boxedProtocolType", "metatypeType",
++            "packType", "memberType", "anyType", "tupleTypeElement", "suppressedType"
++        ] {
++            if let child = find(name, in: spans) {
++                if name == "tupleTypeElement" {
++                    var elements: [TupleTypeElementSyntax] = []
++                    appendTupleTypeElement(child, into: &elements)
++                    return TypeSyntax(TupleTypeSyntax(
++                        leftParen: .leftParenToken(),
++                        elements: TupleTypeElementListSyntax(elements),
++                        rightParen: .rightParenToken()
++                    ))
++                }
++                if name == "functionType" {
++                    return convertFunctionType(child.nt, from: child.from, to: child.to)
++                }
++                if name == "typeIdentifier" {
++                    return convertTypeIdentifier(child.nt, from: child.from, to: child.to)
++                }
++                if name == "tupleType" {
++                    return convertTupleType(child.nt, from: child.from, to: child.to)
++                }
++                if name == "optionalType" {
++                    return convertOptionalType(child.nt, from: child.from, to: child.to)
++                }
++                return convertType(child.nt, from: child.from, to: child.to)
++            }
++        }
++        record(.unhandled, "expression generic type form has no converter: \(alternateKind(spans))", from: from, to: to)
++        return TypeSyntax(MissingTypeSyntax())
++    }
++
+     private mutating func collectGenericArguments(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into args: inout [GenericArgumentSyntax]) {
+         let list = NTSpan(nt: nt, from: from, to: to)
+-        for gaNT in collectListElements(named: "genericArgument", in: list, recursiveListName: "genericArgumentList") {
++        let elementName = nt.name == "expressionGenericArgumentList" ? "expressionGenericArgument" : "genericArgument"
++        let listName = nt.name == "expressionGenericArgumentList" ? "expressionGenericArgumentList" : "genericArgumentList"
++        for gaNT in collectListElements(named: elementName, in: list, recursiveListName: listName) {
+             if let argument = genericArgument(gaNT) {
+                 args.append(argument)
+             }
+diff --git a/ApusApus/GrammarNode.swift b/ApusApus/GrammarNode.swift
+index 4082f0c8..d3942d28 100644
+--- a/ApusApus/GrammarNode.swift
++++ b/ApusApus/GrammarNode.swift
+@@ -193,7 +193,7 @@ final class GrammarNode {
+ 
+     /// Scoped parser-mode annotations (`@setMode`/`@clearMode`/`@requiresMode`/`@rejectsMode`).
+     /// Compiled away at grammar load by `Grammar.specializeParserModes()`: the parser never
+-    /// reads them. See `Parser Modes Specialization.md`.
++    /// reads them. See `apus.md` § Parser Modes.
+     var modeAdd: UInt64 = 0
+     var modeRemove: UInt64 = 0
+     var requiredModes: UInt64 = 0
+@@ -203,9 +203,9 @@ final class GrammarNode {
+     /// (already projected onto the bits relevant to `X`). `nil`/`0` on original nodes.
+     var origin: GrammarNode?
+     var instanceMode: UInt64 = 0
+-    /// `@carries(m …)` on an LHS: the parser modes in scope for this nonterminal. An occurrence
++    /// `@modeScope(m …)` on an LHS: the parser modes in scope for this nonterminal. An occurrence
+     /// passes only these bits of its mode into the nonterminal; every other bit is dropped.
+-    var carriedModes: UInt64 = 0
++    var modeScope: UInt64 = 0
+ 
+     /// `@left` / `@right` on an ALTERNATE — a child-position filter in the SDF sense.
+     ///
+@@ -358,7 +358,7 @@ extension GrammarNode {
+         copy.rejectedModes = rejectedModes
+         copy.origin = origin
+         copy.instanceMode = instanceMode
+-        copy.carriedModes = carriedModes
++        copy.modeScope = modeScope
+         copy.associativityFilters = associativityFilters
+         copy.requiresSameLine = requiresSameLine
+         copy.sameLineOutsideBrackets = sameLineOutsideBrackets
+diff --git a/ApusApus/Lexer.swift b/ApusApus/Lexer.swift
+index a01b8c0d..24bbe668 100644
+--- a/ApusApus/Lexer.swift
++++ b/ApusApus/Lexer.swift
+@@ -83,11 +83,9 @@ struct OnDemandLiteralLexer {
+     /// `terminalID → compiled regex` for every regex terminal (non-literal,
+     /// non-skip). Answered from `input` directly via `prefixMatch`.
+     let regexByID: [Int: Regex<AnyRegexOutput>]
+-    /// `@preempt(X, …)` per terminal: besides the maximal match, also offer the
+-    /// prefix ending before each internal position where terminal `X` (the value)
+-    /// begins a non-empty match. Ports swift-syntax's operator regex-scan
+-    /// (`^^/regex/` → `^^` + `/regex/`, keyed on `regexOpenSlash`).
+-    let preemptStartByID: [Int: Int]
++    /// `@forkBefore(X)` / `@yieldsTo(X)` per terminal: the terminals at whose inner start positions
++    /// it also ends. See `lex`.
++    let innerEndsByID: [Int: InnerEnds]
+     /// Terminal IDs of `@literalMunch` regex terminals (identifier, operator, …).
+     /// Maximal-munch (default, longest-across): a literal match is suppressed when
+     /// any literal-munch terminal has a strictly longer match at the same start
+@@ -168,8 +166,11 @@ struct OnDemandLiteralLexer {
+                 // extraction, no probes). TODO #0.
+                 for classID in literalMunchIDs where classID != terminalID {
+                     guard let rx = regexByID[classID] else { continue }
+-                    if let rm = remaining.prefixMatch(of: rx), rm.range.upperBound > literalEnd {
+-                        return []
++                    if let rm = remaining.prefixMatch(of: rx) {
++                        let effectiveEnd = yieldedEnd(for: classID, from: scanStart, maxEnd: rm.range.upperBound) ?? rm.range.upperBound
++                        if effectiveEnd > literalEnd {
++                            return []
++                        }
+                     }
+                 }
+             }
+@@ -185,17 +186,23 @@ struct OnDemandLiteralLexer {
+             let maxEnd = m.range.upperBound
+             let cursorEnd = consumesTrailingTrivia ? skipTrivia(from: maxEnd) : maxEnd
+             var results = [LexMatch(terminalID: terminalID, start: scanStart, end: maxEnd, triviaEnd: cursorEnd)]
+-            // @preempt(X, …): besides the maximal match, offer the prefix ending
+-            // before each internal position where terminal `X` begins — ports
+-            // swift-syntax lexOperatorIdentifier's regex-scan (Cursor.swift:2275),
+-            // letting `^^/regex/` split into `^^` + `/regex/` (X = regexOpenSlash).
+-            // A leading match position is not a split point. No trivia sits before
+-            // the split, so end == triviaEnd. Whether the split survives is
+-            // decided by `@preempt` construct viability in `MessageParser.tokenMatch`.
+-            if let splitID = preemptStartByID[terminalID] {
++            // Inner end points, at each position inside the maximal match (not the first). No trivia
++            // sits there, so end == triviaEnd.
++            //   • `@yieldsTo(X)`: at the first position where `X` can be scanned, the token ENDS
++            //     there; longer readings are dropped (`!/x/` → `!` + regex).
++            //   • `@forkBefore(X)`: where `X` begins, the lexer FORKS — the token ends there too, every
++            //     reading stays and the parse decides (`func %%%%<T>` vs `func <<<(…)`).
++            if let ends = innerEndsByID[terminalID] {
+                 var i = input.index(after: scanStart)
+                 while i < maxEnd {
+-                    if splitTerminalMatches(splitID, at: i) {
++                    if let yieldID = ends.yieldsTo,
++                       terminalMatches(yieldID, at: i) {
++                        if terminalMatches(terminalID, from: scanStart, exactlyTo: i) {
++                            results.append(LexMatch(terminalID: terminalID, start: scanStart, end: i, triviaEnd: i))
++                        }
++                        return results.filter { $0.end <= i }
++                    }
++                    if let forkID = ends.forkBefore, terminalMatches(forkID, at: i) {
+                         results.append(LexMatch(terminalID: terminalID, start: scanStart, end: i, triviaEnd: i))
+                     }
+                     i = input.index(after: i)
+@@ -206,12 +213,22 @@ struct OnDemandLiteralLexer {
+         return []
+     }
+ 
+-    /// Does the `@preempt` start terminal `terminalID` begin a non-empty match
+-    /// exactly at `pos` — no trivia skip (split points sit mid-token)? Used by the
+-    /// `@preempt` split loop to offer an operator prefix ending where terminal `X`
+-    /// can start. `X` is a single-char delimiter in practice (`regexOpenSlash`,
+-    /// `openAngle`), so this is cheap.
+-    private func splitTerminalMatches(_ terminalID: Int, at pos: CharPosition) -> Bool {
++    private func yieldedEnd(for terminalID: Int, from scanStart: CharPosition, maxEnd: CharPosition) -> CharPosition? {
++        guard let yieldID = innerEndsByID[terminalID]?.yieldsTo else { return nil }
++        var i = input.index(after: scanStart)
++        while i < maxEnd {
++            if terminalMatches(yieldID, at: i) {
++                return i
++            }
++            i = input.index(after: i)
++        }
++        return nil
++    }
++
++    /// Does terminal `terminalID` match non-empty exactly at `pos` (no trivia skip: inner end points
++    /// sit mid-token)? Cheap in practice: `openAngle` is one character, and the regex-literal scanner
++    /// returns at once unless it sees `/` or `#`.
++    private func terminalMatches(_ terminalID: Int, at pos: CharPosition) -> Bool {
+         if let literal = literalSourceByID[terminalID] {
+             return input[pos...].hasPrefix(literal)
+         }
+@@ -222,6 +239,24 @@ struct OnDemandLiteralLexer {
+         return false
+     }
+ 
++    /// Does terminal `terminalID` match exactly `start..<end` without consuming less or more?
++    /// Used by `@yieldsTo`: an inner terminal may shorten the outer token only when the offered
++    /// prefix is itself a legal token of the outer kind.
++    private func terminalMatches(_ terminalID: Int, from start: CharPosition, exactlyTo end: CharPosition) -> Bool {
++        guard start < end else { return false }
++        if let literal = literalSourceByID[terminalID] {
++            return input[start..<end] == literal
++        }
++        if let regex = regexByID[terminalID],
++           let m = input[start..<end].prefixMatch(of: regex) {
++            return m.range.lowerBound == start && m.range.upperBound == end
++        }
++        if let recognise = lexicalTokenRecognisers[terminalID] {
++            return recognise(start) == end
++        }
++        return false
++    }
++
+     /// Advance past any sequence of trivia matches starting at `pos`. Tries
+     /// regex trivia first (fast path), then structured `:` non-terminal recognisers
+     /// (heavier, for nested constructs that regex can't express). Stops as
+@@ -268,3 +303,9 @@ extension CharPosition {
+         return lo
+     }
+ }
++
++/// A terminal's inner end points: `@forkBefore(X)` (both readings) and `@yieldsTo(X)` (shorter only).
++struct InnerEnds {
++    let forkBefore: Int?
++    let yieldsTo: Int?
++}
+diff --git a/ApusApus/MessageParser.swift b/ApusApus/MessageParser.swift
+index b6545088..303415ae 100644
+--- a/ApusApus/MessageParser.swift
++++ b/ApusApus/MessageParser.swift
+@@ -105,11 +105,6 @@ class MessageParser {
+     /// non-terminal recognisers) via `skipTrivia`.
+     var lexer: OnDemandLiteralLexer!
+ 
+-    /// `@preempt(X, N)` viability queries, keyed by the ID of the terminal carrying the annotation:
+-    /// "can `N` parse starting here?", answered by a memoised speculative recogniser sub-parse.
+-    /// Built in `prepareInput`; empty for sub-parsers. Consumed by the commit rule in `tokenMatch`.
+-    var preemptViable: [Int: (CharPosition) -> Bool] = [:]
+-
+     /// True when this parser instance is a recogniser sub-parser (structured `:` trivia or
+     /// structured `-` lexical nonterminal, prepared with `isSubParser: true`). Such a root is a RECOGNISER: it may
+     /// complete at any position (the outer parser supplies the "next token" context). Since the
+@@ -120,8 +115,7 @@ class MessageParser {
+     /// island: direct body terminals can suppress leading trivia, normal `=` payloads may skip
+     /// trivia, token commits return at content end so the surrounding recognizer owns following
+     /// trivia, and outer-tokenization literal munch is disabled so a delimiter like `*/` is not
+-    /// swallowed by a longer Swift operator token. Speculative recognizers such as `@preempt` keep
+-    /// the normal lex policy.
++    /// swallowed by a longer Swift operator token.
+     var usesRecognizerLexBoundaries = false
+ 
+     // MARK: - Lex memoization
+@@ -473,32 +467,6 @@ class MessageParser {
+                 }
+             }
+         }
+-        // `@preempt(X, N)` viability recognisers, keyed by the ID of the terminal carrying the
+-        // annotation: "can `N` parse starting at `pos`?" A SPECULATIVE recogniser sub-parse — an
+-        // `isSubParser` root is not FOLLOW/EOF-gated, so this answers the purely
+-        // LEXICAL question independently of whether the enclosing parse can continue afterwards. That
+-        // is the whole point: in `_ = ^/"/"` the regex `/"/` is perfectly well-formed, yet the main
+-        // parse can never complete it because the trailing `"` leaves nothing legal to follow.
+-        // Mirrors swift's `scanRegexLiteral`. Memoised per position, so the cost is one sub-parse per
+-        // distinct candidate split point. Skipped for sub-parsers (would recurse).
+-        preemptViable.removeAll(keepingCapacity: true)
+-        if !isSubParser {
+-            for (name, pat) in grammar.terminals {
+-                guard let tid = grammar.symbolToID[name],
+-                      let targetName = pat.preemptConstruct,
+-                      let target = grammar.nonTerminals[targetName] else { continue }
+-                let sub = MessageParser(grammar: grammar)
+-                sub.prepareInput(input: input, isSubParser: true)
+-                var memo: [CharPosition: Bool] = [:]
+-                preemptViable[tid] = { pos in
+-                    if let hit = memo[pos] { return hit }
+-                    sub.runGLL(root: target, start: pos)
+-                    let viable = sub.yield(of: target).contains { $0.i == pos }
+-                    memo[pos] = viable
+-                    return viable
+-                }
+-            }
+-        }
+         // Phase G: synthetic layout tokens (Python INDENT/DEDENT, etc.) are
+         // resolved by `OnDemandLiteralLexer` from a precomputed source-position
+         // table instead of being injected into `tokens[]`. Gated on
+@@ -523,23 +491,22 @@ class MessageParser {
+         // IDs; the runtime prefix-match lives in `OnDemandLiteralLexer.lex`.
+         var literalMunchIDs: [Int] = []
+         
+-        // `@preempt(X, …)`: terminal ID → the ID of the terminal `X` whose start
+-        // positions define the split points. Terminal-keyed (not char-keyed) so
+-        // split discovery still follows the grammar's token definitions; parser
+-        // viability decides which offered split points survive.
+-        var preemptStartByID: [Int: Int] = [:]
++        // `@forkBefore(X)` / `@yieldsTo(X)`: terminal ID → the IDs of the terminals whose start
++        // positions are its inner end points. Terminal-keyed (not char-keyed), so the end points
++        // follow the grammar's token definitions.
++        var innerEndsByID: [Int: InnerEnds] = [:]
+         for (name, pat) in grammar.terminals {
+             guard let id = grammar.symbolToID[name] else { continue }
+             if pat.isLiteralMunch { literalMunchIDs.append(id) }
+-            if let st = pat.preemptStart, let stID = grammar.symbolToID[st] {
+-                preemptStartByID[id] = stID
+-            }
++            let ends = InnerEnds(forkBefore: pat.forkBefore.flatMap { grammar.symbolToID[$0] },
++                                 yieldsTo: pat.yieldsTo.flatMap { grammar.symbolToID[$0] })
++            if ends.forkBefore != nil || ends.yieldsTo != nil { innerEndsByID[id] = ends }
+         }
+         lexer = OnDemandLiteralLexer(
+             input: input,
+             literalSourceByID: literalSourceByID,
+             regexByID: regexByID,
+-            preemptStartByID: preemptStartByID,
++            innerEndsByID: innerEndsByID,
+             literalMunchIDs: literalMunchIDs,
+             triviaRegexes: triviaRegexes,
+             triviaRecognisers: triviaRecognisers,
+@@ -1160,20 +1127,7 @@ class MessageParser {
+             suppressesLeadingTrivia: cL.suppressesLeadingTrivia
+         )
+         guard !matches.isEmpty else { return [] }
+-
+-        // `@preempt(X, N)` COMMIT. The first operand only OFFERS shorter
+-        // readings; this keeps the earliest one whose construct `N` genuinely
+-        // parses and discards non-viable offers. If no offered split is viable,
+-        // maximal munch keeps only the longest match.
+-        if matches.count > 1, let viable = preemptViable[cL.nameID] {
+-            let maxEnd = matches.map(\.end).max()!
+-            let splitEnds = Set(matches.map(\.end)).filter { $0 < maxEnd }.sorted()
+-            if let commitEnd = splitEnds.first(where: viable) {
+-                matches = matches.filter { $0.end <= commitEnd }
+-            } else {
+-                matches = matches.filter { $0.end == maxEnd }
+-            }
+-        }
++        // (`@preempt` splits and their commit are decided in the lexer, `OnDemandLiteralLexer.lex`.)
+ 
+         // Exclude: `---(…)` — for each candidate end, if any excluded terminal
+         // also lexes at this position with the same end, suppress the match.
+diff --git a/ApusApus/ModeSpecialization.swift b/ApusApus/ModeSpecialization.swift
+index 223c93a8..47a7e7bf 100644
+--- a/ApusApus/ModeSpecialization.swift
++++ b/ApusApus/ModeSpecialization.swift
+@@ -2,22 +2,22 @@
+ //  ModeSpecialization.swift
+ //  ApusApus
+ //
+-//  Parser modes compiled into the grammar. See `documentation/Parser Modes Specialization.md`.
++//  Parser modes compiled into the grammar. See `documentation/apus.md` § Parser Modes.
+ //
+ 
+ import OSLog
+ 
+ // A parser mode is a finite inherited attribute: `@setMode`/`@clearMode` fix a child
+ // occurrence's mode as `(m | add) & ~remove`, and `@requiresMode`/`@rejectsMode` are fixed tests
+-// on that mode. Modes are SCOPED: `@carries(m)` on a production declares that `m` passes into it;
++// on that mode. Modes are SCOPED: `@modeScope(m)` on a production declares that `m` passes into it;
+ // entering any other nonterminal drops `m` (a swift-syntax parameter that is not forwarded). A CFG
+ // with finitely many inherited attribute values is a plain CFG over indexed nonterminals `X⟨m⟩`,
+ // so instead of carrying `m` in every descriptor, CRF key and BSR yield, this pass builds that
+ // CFG once at grammar load:
+ //
+-//   0. validation: every mode is declared by some `@carries`, set into a production that carries
+-//      it, and tested only where it can be present;
+-//   1. relevance: `rel(X)` = the carried mode bits that can change the language of `X`;
++//   0. validation: every mode is declared by some `@modeScope`, set into a production whose scope
++//      includes it, and tested only where it can be present;
++//   1. relevance: `rel(X)` = the scoped mode bits that can change the language of `X`;
+ //   2. expansion: every original production is its own `X⟨0⟩` instance; an occurrence reached
+ //      under a mode that projects onto a non-empty subset of `rel(Y)` links to a copy `Y⟨m⟩`
+ //      (memoized, so recursion closes into a cycle between copies);
+@@ -69,9 +69,9 @@ extension Grammar {
+         }
+     }
+ 
+-    /// The bits of `name`'s scope (`@carries`); 0 for undefined names.
+-    private func carried(_ name: String) -> UInt64 {
+-        nonTerminals[name]?.carriedModes ?? 0
++    /// The bits of `name`'s scope (`@modeScope`); 0 for undefined names.
++    private func modeScopeOf(_ name: String) -> UInt64 {
++        nonTerminals[name]?.modeScope ?? 0
+     }
+ 
+     private func modeNames(_ bits: UInt64) -> String {
+@@ -84,24 +84,24 @@ extension Grammar {
+         var problems: [String] = []
+         var declared: UInt64 = 0
+         var setSomewhere: UInt64 = 0
+-        for lhs in originals { declared |= lhs.carriedModes }
++        for lhs in originals { declared |= lhs.modeScope }
+ 
+         // `possible`: the bits that can be present at this point of `owner`'s body.
+         func check(_ owner: GrammarNode, in production: GrammarNode, possible: UInt64) {
+             Self.forEachElement(of: owner) { e in
+                 let used = e.modeAdd | e.modeRemove | Self.tests(e)
+                 if used & ~declared != 0 {
+-                    problems.append("mode '\(modeNames(used & ~declared))' is used in '\(production.name)' but no production @carries it")
++                    problems.append("mode '\(modeNames(used & ~declared))' is used in '\(production.name)' but no production declares it with @modeScope")
+                 }
+                 setSomewhere |= e.modeAdd
+                 let child = (possible | e.modeAdd) & ~e.modeRemove
+                 if Self.tests(e) & ~child & declared != 0 {
+-                    problems.append("'\(production.name)' tests mode '\(modeNames(Self.tests(e) & ~child))', which can never be present there; add it to '\(production.name)'s @carries or remove the test")
++                    problems.append("'\(production.name)' tests mode '\(modeNames(Self.tests(e) & ~child))', which can never be present there; add it to '\(production.name)'s @modeScope or remove the test")
+                 }
+                 if e.kind == .N, nonTerminals[e.name] != nil {
+-                    let target = carried(e.name)
++                    let target = modeScopeOf(e.name)
+                     if e.modeAdd & ~target != 0 {
+-                        problems.append("'\(production.name)' sets mode '\(modeNames(e.modeAdd & ~target))' on '\(e.name)', which does not @carries it")
++                        problems.append("'\(production.name)' sets mode '\(modeNames(e.modeAdd & ~target))' on '\(e.name)', whose @modeScope does not include it")
+                     }
+                     if e.modeRemove != 0, Self.tests(e) == 0, e.modeRemove & possible & target == 0 {
+                         report("'\(production.name)' clears '\(modeNames(e.modeRemove))' on '\(e.name)', but that mode can never reach it there; the @clearMode has no effect")
+@@ -111,10 +111,10 @@ extension Grammar {
+                 }
+             }
+         }
+-        for lhs in originals { check(lhs, in: lhs, possible: lhs.carriedModes) }
++        for lhs in originals { check(lhs, in: lhs, possible: lhs.modeScope) }
+ 
+         for (name, bit) in modeNameToBit where declared & bit != 0 && setSomewhere & bit == 0 {
+-            report("mode '\(name)' is carried but never set; it has no effect")
++            report("mode '\(name)' is scoped but never set; it has no effect")
+         }
+         if !problems.isEmpty {
+             for problem in problems { Logger.grammar.error("parser modes: \(problem, privacy: .public)") }
+@@ -132,10 +132,10 @@ extension Grammar {
+         /// the callee's scope. Tests on the occurrence see the unrestricted child mode, i.e. the
+         /// caller's context.
+         func calleeMode(_ e: GrammarNode, from mode: UInt64) -> UInt64 {
+-            Self.childMode(e, from: mode) & carried(e.name)
++            Self.childMode(e, from: mode) & modeScopeOf(e.name)
+         }
+ 
+-        // 1. Relevance — least fixpoint, `scoped` restricted to each callee's `@carries`. A bit an
++        // 1. Relevance — least fixpoint, `scoped` restricted to each callee's `@modeScope`. A bit an
+         //    occurrence sets or clears is fixed for that child, so it never makes the context
+         //    depend on it. The unscoped variant only feeds the scope-exit lint below.
+         func relevance(scoped: Bool) -> [String: UInt64] {
+@@ -144,7 +144,7 @@ extension Grammar {
+                 var bits: UInt64 = 0
+                 Self.forEachElement(of: owner) { e in
+                     var inner = Self.tests(e)
+-                    if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? carried(e.name) : ~0) }
++                    if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? modeScopeOf(e.name) : ~0) }
+                     if e.kind.isBracket { inner |= ownerRelevance(e) }
+                     bits |= inner & ~(e.modeAdd | e.modeRemove)
+                 }
+@@ -154,7 +154,7 @@ extension Grammar {
+             while changed {
+                 changed = false
+                 for lhs in originals {
+-                    let bits = ownerRelevance(lhs) & (scoped ? lhs.carriedModes : ~0)
++                    let bits = ownerRelevance(lhs) & (scoped ? lhs.modeScope : ~0)
+                     if bits != rel[lhs.name] ?? 0 {
+                         rel[lhs.name] = bits
+                         changed = true
+@@ -165,7 +165,7 @@ extension Grammar {
+         }
+         let rel = relevance(scoped: true)
+ 
+-        // Scope exits that may matter: a carried bit dropped on entering a nonterminal that could
++        // Scope exits that may matter: a scoped bit dropped on entering a nonterminal that could
+         // still reach a test of it. Expected at intended boundaries; anything else is a scope
+         // that is too small. Informational.
+         let reach = relevance(scoped: false)
+@@ -173,8 +173,8 @@ extension Grammar {
+             var exits = Set<String>()
+             func collectExits(_ owner: GrammarNode, from production: GrammarNode) {
+                 Self.forEachElement(of: owner) { e in
+-                    if e.kind == .N, production.carriedModes & bit != 0, e.modeRemove & bit == 0,
+-                       carried(e.name) & bit == 0, (reach[e.name] ?? 0) & bit != 0 {
++                    if e.kind == .N, production.modeScope & bit != 0, e.modeRemove & bit == 0,
++                       modeScopeOf(e.name) & bit == 0, (reach[e.name] ?? 0) & bit != 0 {
+                         exits.insert("\(production.name)→\(e.name)")
+                     } else if e.kind.isBracket {
+                         collectExits(e, from: production)
+diff --git a/ApusApus/Scanner.swift b/ApusApus/Scanner.swift
+index 5a45b023..8fa477a3 100644
+--- a/ApusApus/Scanner.swift
++++ b/ApusApus/Scanner.swift
+@@ -25,26 +25,16 @@ struct TokenPattern {
+     /// (`for` inside `foreach`). Grammar-declared; see TODO #0 / `Multiple
+     /// Lexicalisation` §4.1 (suffix-property longest-across).
+     var isLiteralMunch: Bool = false
+-    /// `@preempt(X, …)` first operand — besides its maximal match, this (regex) terminal also
+-    /// offers the prefix ending before each *internal* position where terminal `X`
+-    /// begins a non-empty match. Ports swift-syntax's `lexOperatorIdentifier`
+-    /// regex-scan (Cursor.swift:2275): an operator token is split before an internal
+-    /// `regexOpenSlash` so a regex literal can follow a prefix operator
+-    /// (`^^/regex/` → `^^` + `/regex/`). A leading match position is not a split
+-    /// point. Keying on a *terminal* (not a raw char) names the construct. The
+-    /// parser keeps only split points where `preemptConstruct` is viable, so
+-    /// production-body lookaround gates live with that construct. Stores the
+-    /// terminal *name*; resolved to an ID at parser build.
+-    var preemptStart: String? = nil
+-    /// `@preempt(X, N)` second operand — the COMMIT half. The first operand only *offers* the split
+-    /// ("give X a chance"); this says the shorter reading WINS where the named construct `N` actually
+-    /// parses. Among the candidate matches at one position (all sharing the start), if `N` is viable at
+-    /// the end of a shorter candidate, every longer candidate is dropped — so the maximal-munch token
+-    /// never swallows the start of a real `N`. Viability is answered by a memoised speculative
+-    /// recogniser sub-parse of `N` (not FOLLOW-gated), mirroring swift's `tryLexOperatorAsRegexLiteral`,
+-    /// which scans an operator for an internal `/`, tries the regex, and COMMITS when it scans — while
+-    /// keeping the whole operator when it does not (`^/x`). Stores the nonterminal *name*.
+-    var preemptConstruct: String? = nil
++    /// `@forkBefore(X)` — at each *internal* position where terminal `X` begins (a leading position is
++    /// not one), the lexer FORKS: this terminal is matched both up to that position and to its
++    /// maximal end. Both readings stay; the parse decides: `func %%%%<T>` ends the name before `<`, `func <<<(…)` keeps `<<<`
++    /// (`X` = `openAngle`). Stores the terminal *name*; resolved to an ID at parser build.
++    var forkBefore: String? = nil
++    /// `@yieldsTo(X)` — this terminal gives way to terminal `X`: at the first internal position
++    /// where `X` can be scanned, it ENDS there, and the longer readings are dropped. The operator
++    /// terminal yields to `regexLiteralToken`, which is the compiler's re-lex of `!/x/` and `^^/)/`;
++    /// the regex scanner itself decides where a regex can start. Stores the terminal *name*.
++    var yieldsTo: String? = nil
+     /// Structured `-` lexical-nonterminal marker. This terminal has no regex/literal source; its match
+     /// is computed by a GLL sub-parse of the same-named nonterminal (see `GrammarNode.isLexicalToken`
+     /// and `MessageParser` lexicalTokenRecognisers). Skipped when building regexByID/literalSourceByID.
+diff --git a/ApusApus/SwiftGrammarRegexLibrary.swift b/ApusApus/SwiftGrammarRegexLibrary.swift
+index 147bc6c2..2074e0b4 100644
+--- a/ApusApus/SwiftGrammarRegexLibrary.swift
++++ b/ApusApus/SwiftGrammarRegexLibrary.swift
+@@ -147,6 +147,16 @@ enum ApusRegexLibrary {
+     /// which includes `!`/`?`. See Swift.apus operator dev 3 for why `?`/`!` are admitted and
+     /// keypath dev 6 / `Ambiguity.md` §3.2 for the keyPathDot coexistence.
+     static let dotOperatorCharacter = CharacterClass(operatorCharacter, .anyOf("."))
++    static let dotOperatorCharacterBeforeComment = Regex {
++        NegativeLookahead {
++            ChoiceOf {
++                "//"
++                "/*"
++                "*/"
++            }
++        }
++        dotOperatorCharacter
++    }
+ 
+     // ── Raw-identifier scalar classes (mirrors swift-syntax UnicodeScalarExtensions) ──
+     // Used to assemble `escapedIdentifier` from named building blocks instead of a
+@@ -206,14 +216,15 @@ enum ApusRegexLibrary {
+         ZeroOrMore { identifierCharacter }
+     }.matchingSemantics(.unicodeScalar)
+ 
+-    /// Operator characters stop before Swift comment openers. `//` and `/*` are trivia starts even
++    /// Operator characters stop before Swift comment delimiters. `//` and `/*` are trivia starts even
+     /// when a previous operator character was already scanned (`x*//` is `x*` + line comment, not a
+-    /// postfix operator named `*//`).
++    /// postfix operator named `*//`); `*/` is an unmatched block-comment closer, not an operator.
+     static let operatorCharacterBeforeComment = Regex {
+         NegativeLookahead {
+             ChoiceOf {
+                 "//"
+                 "/*"
++                "*/"
+             }
+         }
+         operatorCharacter
+@@ -223,6 +234,7 @@ enum ApusRegexLibrary {
+     /// `.unicodeScalar` semantics itself, so every consumer matches per scalar (the
+     /// `⚽️` = U+26BD + U+FE0F case) without having to re-apply it.
+     static let operatorBody = Regex {
++        NegativeLookahead { "*/" }
+         ChoiceOf {
+             Regex {
+                 NegativeLookahead {
+@@ -248,7 +260,7 @@ enum ApusRegexLibrary {
+     /// `postfixOperatorToken` — operator body that may not BEGIN with `!`/`?`
+     /// (Swift.apus operator dev 4: `x!!` is two force-unwraps, not a `!!` operator).
+     static let postfixOperatorToken = Regex {
+-        NegativeLookahead { CharacterClass.anyOf("!?") }
++        NegativeLookahead { CharacterClass.anyOf("=!?") }
+         notExactlyArrow
+         operatorBody
+     }.matchingSemantics(.unicodeScalar)
+@@ -267,15 +279,15 @@ enum ApusRegexLibrary {
+ 
+     /// Operator body that is not exactly `->`. Used for `operator` (prefix and spaced infix).
+     static let nonArrowOperatorToken = Regex {
++        NegativeLookahead { "=" }
+         notExactlyArrow
+         operatorBody
+     }.matchingSemantics(.unicodeScalar)
+ 
+     /// `functionNameOperator` — same body as `nonArrowOperatorToken` (`func ->(a: Int, b: Int) {}`
+-    /// errors: "expected identifier in function"), but a DISTINCT terminal because it needs a
+-    /// different `@preempt`: the function-name position must yield the generic `<` back
+-    /// (`func %%%%<T, U>`), while the expression position must yield to a regex opener.
+-    /// `@preempt` takes ONE (start, construct) pair per terminal, so the two cannot share one.
++    /// errors: "expected identifier in function"), but a DISTINCT terminal because the two positions
++    /// stop munching differently: the function name forks before a generic `<` (`func %%%%<T, U>`),
++    /// while the expression operator yields to a regex literal (`@yieldsTo(regexLiteralToken)`).
+     static let functionNameOperator = Regex {
+         notExactlyArrow
+         operatorBody
+@@ -304,7 +316,7 @@ enum ApusRegexLibrary {
+     /// (`genericArgumentClause`'s follow set).
+     static let dotOperator = Regex {
+         "."
+-        OneOrMore { dotOperatorCharacter }
++        OneOrMore { dotOperatorCharacterBeforeComment }
+     }.matchingSemantics(.unicodeScalar)
+ 
+     /// `poundName` — `#` followed by an identifier (N1518 ranges, same as `identifier`).
+@@ -893,40 +905,12 @@ enum ApusRegexLibrary {
+         tripleQuote
+     }.matchingSemantics(.unicodeScalar)
+ 
+-    // ── Extended regex literal `#/…/#` ──────────────────────────────────────────
+-    // TWO MODES, probe-confirmed (2026-08-30), exactly parallel to the multiline strings:
+-    //   `#/a/#`      → ok          `#/a⏎b/#`   → "expected '/#' to end regex literal"
+-    //   `#/⏎a⏎/#`    → ok          `#/\⏎/#`    → same error  (testRegexParseError17)
+-    //   `#/⏎␠␠a⏎␠␠/#` → ok
+-    // i.e. a line break IMMEDIATELY after `#/` selects the multi-line form (body may span lines);
+-    // otherwise the body may contain no newline at all. The previous flat regex allowed newlines
+-    // unconditionally, so it accepted the single-line form spread over two lines.
+-    //
+-    // Extended regexes do NOT process escapes — `\` is ordinary content and only `/` + the matching
+-    // pound run closes the literal, which is why the single-line body admits a `/` that is not
+-    // followed by the delimiter.
+-    static let extendedRegexPoundDelimiter = Reference(Substring.self)
+-    static let extendedRegularExpressionLiteral = Regex {
+-        Capture(poundRun, as: extendedRegexPoundDelimiter)
+-        "/"
+-        ChoiceOf {
+-            Regex {                                     // multi-line: `#/` then a line break
+-                lineBreak
+-                ZeroOrMore(.reluctant) { CharacterClass.any }
+-            }
+-            ZeroOrMore(.reluctant) {                    // single-line: no newline anywhere
+-                ChoiceOf {
+-                    CharacterClass.anyOf("/\r\n").inverted
+-                    Regex {
+-                        "/"
+-                        NegativeLookahead { extendedRegexPoundDelimiter }
+-                    }
+-                }
+-            }
+-        }
+-        "/"
+-        extendedRegexPoundDelimiter
+-    }.matchingSemantics(.unicodeScalar)
++    // ── Regex literal `/…/`, `#/…/#` ────────────────────────────────────────────
++    // ONE token, scanned the way the Swift compiler scans it (see `SwiftRegexLiteralScanner`).
++    // The grammar asks for it only where the compiler's parser asks for one (a primary expression,
++    // i.e. the start of a unary expression); `@yieldsTo(regexLiteralToken)` on the
++    // operator terminal splits `!/x/` and `^^/)/` at the `/`, as the compiler's re-lex does.
++    static let regexLiteralToken = Regex { SwiftRegexLiteralScanner() }
+ 
+     // ── Registry (key == `.apus` terminal name) ─────────────────────────────────
+     static let patterns: [String: Regex<AnyRegexOutput>] = [
+@@ -949,7 +933,7 @@ enum ApusRegexLibrary {
+         "interpolatedStringLiteralPart":          Regex<AnyRegexOutput>(interpolatedStringLiteralPart.regex),
+         "interpolatedStringLiteralTail":          Regex<AnyRegexOutput>(interpolatedStringLiteralTail.regex),
+ 
+-        "extendedRegularExpressionLiteral":                 Regex<AnyRegexOutput>(extendedRegularExpressionLiteral.regex),
++        "regexLiteralToken":                                Regex<AnyRegexOutput>(regexLiteralToken.regex),
+         "multilineStringLiteral":                           Regex<AnyRegexOutput>(multilineStringLiteral.regex),
+         "extendedMultilineStringLiteral":                   Regex<AnyRegexOutput>(extendedMultilineStringLiteral.regex),
+         "extendedMultilineInterpolatedStringLiteralHead":   Regex<AnyRegexOutput>(extendedMultilineInterpolatedStringLiteralHead.regex),
+@@ -960,3 +944,278 @@ enum ApusRegexLibrary {
+         "multilineInterpolatedStringLiteralTail":           Regex<AnyRegexOutput>(multilineInterpolatedStringLiteralTail.regex),
+     ]
+ }
++
++// MARK: - Regex literal scanner
++
++/// `regexLiteralToken`: a Swift regex literal, scanned as the compiler scans it. Three layers, each a
++/// port of compiler code (`swiftlang/swift` and `swift-experimental-string-processing`):
++///
++/// 1. MODE, for a bare `/`: `Parser::tryLexRegexLiteral` (`ParseExpr.cpp`). The operator token that
++///    contains this `/` decides it. Binary-classified (bound the same on both sides) is a definite
++///    regex; prefix-classified is TENTATIVE, kept only if it passes the checks in (3); postfix-
++///    classified is never a regex. A binary operator directly followed by `,` `)` `]` is an
++///    unapplied operator argument (`reduce(1, /)`, `parseExprListElement`), which is tentative too.
++///    Classification is `isLeftBound` / `isRightBound` (`Lexer.cpp`). The token can start before
++///    this `/` (`^^/)/`, `!/x/`): the scan looks back over the operator run, which is why this is a
++///    custom component (it gets the whole input, not just the slice from the start).
++/// 2. DELIMITERS AND BODY: `DelimiterLexer` (`DelimiterLexing.swift`). `#…#` then `/`; multiline only
++///    with pounds, when the opener is followed by spaces/tabs and a newline, and then the closer must
++///    stand on its own line; otherwise no newline; `\` escapes the next character in every form;
++///    unprintable ASCII is an error except a tab in a multiline literal.
++/// 3. BARE-SLASH CHECKS: `Lexer::tryScanRegexLiteral` (`Lexer.cpp`). No space/tab after the opening
++///    `/`; not ending where a comment starts (`/a//`, `/a/*`); no unescaped space/tab before the
++///    closing `/`; and, tentative only, no unbalanced `)` outside `[…]`.
++///
++/// The compiler reports some of these as ERRORS in definite mode while keeping the token. APUS has no
++/// error recovery, so an error and "not a regex" both mean no token. Regex SYNTAX (groups, classes,
++/// quantifiers) is not checked: `swiftc -parse` does not check it either (the type checker does).
++struct SwiftRegexLiteralScanner: CustomConsumingRegexComponent {
++    typealias RegexOutput = Substring
++
++    func consuming(
++        _ input: String, startingAt start: String.Index, in bounds: Range<String.Index>
++    ) throws -> (upperBound: String.Index, output: Substring)? {
++        let s = input.unicodeScalars
++        let end = bounds.upperBound
++        guard start < end else { return nil }
++
++        // `#…#/`: always a regex. The compiler's lexer lexes it at a `#`, whatever the position.
++        if s[start] == "#" {
++            var slash = start
++            var pounds = 0
++            while slash < end, s[slash] == "#" {
++                pounds += 1
++                slash = s.index(after: slash)
++            }
++            guard slash < end, s[slash] == "/",
++                  let close = Self.lexBody(s, openingSlash: slash, pounds: pounds, end: end)
++            else { return nil }
++            return (close, input[start..<close])
++        }
++
++        guard s[start] == "/" else { return nil }
++        let contentStart = s.index(after: start)
++        // `//` and `/*` start comments, not regexes.
++        if contentStart < end, s[contentStart] == "/" || s[contentStart] == "*" { return nil }
++        guard let definite = Self.mode(s, slash: start, end: end) else { return nil }
++
++        // (3) No space or tab right after the opening `/` (tentative: not a regex; definite: error).
++        if contentStart < end, s[contentStart] == " " || s[contentStart] == "\t" { return nil }
++        // (2)
++        guard let close = Self.lexBody(s, openingSlash: start, pounds: 0, end: end) else { return nil }
++        // (3) Ended where a comment starts: `/a//…` or `/a/*…`. The compiler prefers the comment.
++        if close < end, s[close] == "*" || s[close] == "/" { return nil }
++        // (3) No unescaped space or tab right before the closing `/` (only with two or more content
++        // characters; a single space is caught above).
++        let closingSlash = s.index(before: close)
++        if closingSlash > contentStart {
++            let last = s.index(before: closingSlash)
++            if last > contentStart, s[s.index(before: last)] != "\\", s[last] == " " || s[last] == "\t" {
++                return nil
++            }
++        }
++        // (3) Tentative only: an unbalanced `)` makes it an operator (`(/, x) / 2`, `!/x)/`).
++        if !definite, Self.hasUnbalancedCloseParen(s, from: contentStart, to: closingSlash) { return nil }
++        return (close, input[start..<close])
++    }
++
++    /// (1) `true` for a definite regex, `false` for tentative, `nil` when the `/` cannot start one
++    /// (its operator token is postfix-classified).
++    private static func mode(_ s: String.UnicodeScalarView, slash: String.Index, end: String.Index) -> Bool? {
++        // The operator token the compiler's lexer formed around this `/`. Back over the run of
++        // operator characters (stopping at `.`, which may not appear mid-operator, and at the end of a
++        // `/* */` comment); forward the same way, stopping before `//` and `/*`.
++        var tokenStart = slash
++        while tokenStart > s.startIndex {
++            let previous = s.index(before: tokenStart)
++            let c = s[previous]
++            guard c != ".", isOperatorCharacter(c) else { break }
++            if c == "/", previous > s.startIndex, s[s.index(before: previous)] == "*" { break }
++            tokenStart = previous
++        }
++        var tokenEnd = s.index(after: slash)
++        while tokenEnd < end, s[tokenEnd] != ".", isOperatorCharacter(s[tokenEnd]) {
++            if s[tokenEnd] == "/" {
++                let next = s.index(after: tokenEnd)
++                if next < end, s[next] == "/" || s[next] == "*" { break }
++            }
++            tokenEnd = s.index(after: tokenEnd)
++        }
++
++        let left = isLeftBound(s, tokenStart: tokenStart)
++        let right = isRightBound(s, tokenEnd: tokenEnd, leftBound: left, end: end)
++        if left && !right { return nil }   // postfix: never a regex
++        if !left && right { return false } // prefix: tentative
++        // Binary: definite, unless it is an unapplied operator argument (`f(/, 0)`, `(/, /)`,
++        // `bar(/) + baz(/)`): `parseExprListElement` lexes those tentatively. That is the START of a
++        // list element (after `(`, `[`, `,` or a label `:`) followed by `,` or a list closer. Both
++        // sides matter: `_ = /)/` is followed by `)` but is not a list element, so it stays definite.
++        var next = tokenEnd
++        while next < end, isWhitespace(s[next]) { next = s.index(after: next) }
++        guard next < end, s[next] == "," || s[next] == ")" || s[next] == "]" else { return true }
++        var previous = tokenStart
++        while previous > s.startIndex, isWhitespace(s[s.index(before: previous)]) {
++            previous = s.index(before: previous)
++        }
++        guard previous > s.startIndex else { return true }
++        let opener = s[s.index(before: previous)]
++        return !(opener == "(" || opener == "[" || opener == "," || opener == ":")
++    }
++
++    private static func isWhitespace(_ c: Unicode.Scalar) -> Bool {
++        c == " " || c == "\t" || c == "\n" || c == "\r"
++    }
++
++    /// `isLeftBound` (`Lexer.cpp`).
++    private static func isLeftBound(_ s: String.UnicodeScalarView, tokenStart: String.Index) -> Bool {
++        guard tokenStart > s.startIndex else { return false }
++        let previous = s.index(before: tokenStart)
++        switch s[previous] {
++        case " ", "\r", "\n", "\t", "(", "[", "{", ",", ";", ":", "\0", "\u{A0}":
++            return false
++        case "/":
++            // The end of a `/* */` comment counts as whitespace.
++            return !(previous > s.startIndex && s[s.index(before: previous)] == "*")
++        default:
++            return true
++        }
++    }
++
++    /// `isRightBound` (`Lexer.cpp`).
++    private static func isRightBound(
++        _ s: String.UnicodeScalarView, tokenEnd: String.Index, leftBound: Bool, end: String.Index
++    ) -> Bool {
++        guard tokenEnd < end else { return false }
++        let next = s.index(after: tokenEnd)
++        switch s[tokenEnd] {
++        case ":":
++            return next < end && s[next] == ":"   // `:` is a separator, `::` is not
++        case " ", "\r", "\n", "\t", ")", "]", "}", ",", ";", "\0", "\u{A0}":
++            return false
++        case ".":
++            return !leftBound
++        case "/":
++            // A following comment counts as whitespace.
++            return !(next < end && (s[next] == "/" || s[next] == "*"))
++        default:
++            return true
++        }
++    }
++
++    /// (2) `DelimiterLexer.lex` after the opening `#…#/`: the index after the closing `/#…#`, or `nil`
++    /// for an unterminated or erroneous literal.
++    private static func lexBody(
++        _ s: String.UnicodeScalarView, openingSlash: String.Index, pounds: Int, end: String.Index
++    ) -> String.Index? {
++        let contentStart = s.index(after: openingSlash)
++        var cursor = contentStart
++        var multiline = false
++        // Multiline only with pounds: skip spaces and tabs; a newline there selects multiline mode.
++        if pounds > 0 {
++            while cursor < end, s[cursor] == " " || s[cursor] == "\t" { cursor = s.index(after: cursor) }
++            if cursor < end, s[cursor] == "\n" || s[cursor] == "\r" { multiline = true }
++        }
++        while true {
++            // The closing delimiter: `/` plus exactly `pounds` `#`.
++            if cursor < end, s[cursor] == "/" {
++                var after = s.index(after: cursor)
++                var count = 0
++                while count < pounds, after < end, s[after] == "#" {
++                    count += 1
++                    after = s.index(after: after)
++                }
++                if count == pounds {
++                    // In multiline mode the closer must be alone on its line.
++                    if multiline {
++                        var lineStart = cursor
++                        while lineStart > contentStart {
++                            let previous = s.index(before: lineStart)
++                            if s[previous] == "\n" || s[previous] == "\r" { break }
++                            lineStart = previous
++                        }
++                        guard s[lineStart..<cursor].allSatisfy({ $0 == " " || $0 == "\t" }) else { return nil }
++                    }
++                    return after
++                }
++            }
++            guard let next = advance(s, from: cursor, escaped: false, multiline: multiline, end: end) else {
++                return nil
++            }
++            cursor = next
++        }
++    }
++
++    /// `DelimiterLexer.advance`: one character of the body (an escape takes the next one too).
++    private static func advance(
++        _ s: String.UnicodeScalarView, from cursor: String.Index, escaped: Bool, multiline: Bool,
++        end: String.Index
++    ) -> String.Index? {
++        guard cursor < end else { return nil }   // unterminated
++        let c = s[cursor]
++        let next = s.index(after: cursor)
++        if !c.isASCII { return next }
++        switch c {
++        case "\n", "\r":
++            return multiline ? next : nil        // a single-line literal may not contain a newline
++        case "\0":
++            return next
++        case "\\" where !escaped:
++            return advance(s, from: next, escaped: true, multiline: multiline, end: end)
++        default:
++            let printable = (0x20...0x7E).contains(c.value)
++            if !printable && !(multiline && c == "\t") { return nil }
++            return next
++        }
++    }
++
++    /// (3) The tentative paren scan: escapes skip a character, and `(`/`)` count only outside `[…]`.
++    private static func hasUnbalancedCloseParen(
++        _ s: String.UnicodeScalarView, from start: String.Index, to end: String.Index
++    ) -> Bool {
++        var classDepth = 0
++        var groupDepth = 0
++        var cursor = start
++        while cursor < end {
++            switch s[cursor] {
++            case "\\":
++                cursor = s.index(after: cursor)
++                if cursor == end { return false }
++            case "(":
++                if classDepth == 0 { groupDepth += 1 }
++            case ")":
++                if classDepth == 0 {
++                    if groupDepth == 0 { return true }
++                    groupDepth -= 1
++                }
++            case "[":
++                classDepth += 1
++            case "]":
++                if classDepth > 0 { classDepth -= 1 }
++            default:
++                break
++            }
++            cursor = s.index(after: cursor)
++        }
++        return false
++    }
++
++    private static func isOperatorCharacter(_ c: Unicode.Scalar) -> Bool {
++        operatorCharacterScalars.contains(c)
++    }
++
++    /// The `operatorCharacter` class as a scalar set (TSPL `operator-character`, as in
++    /// `ApusRegexLibrary.operatorCharacter`).
++    private static let operatorCharacterScalars: Set<Unicode.Scalar> = {
++        let ranges: [ClosedRange<UInt32>] = [
++            0x2F...0x2F, 0x3D...0x3D, 0x2D...0x2D, 0x2B...0x2B, 0x21...0x21, 0x2A...0x2A, 0x25...0x25,
++            0x3C...0x3C, 0x3E...0x3E, 0x26...0x26, 0x7C...0x7C, 0x5E...0x5E, 0x7E...0x7E, 0x3F...0x3F,
++            0xA1...0xA7, 0xA9...0xA9, 0xAB...0xAC, 0xAE...0xAE, 0xB0...0xB1, 0xB6...0xB6, 0xBB...0xBB,
++            0xBF...0xBF, 0xD7...0xD7, 0xF7...0xF7, 0x2016...0x2017, 0x2020...0x2027, 0x2030...0x203E,
++            0x2041...0x2053, 0x2055...0x205E, 0x2190...0x23FF, 0x2500...0x2775, 0x2794...0x2BFF,
++            0x2E00...0x2E7F, 0x3001...0x3003, 0x3008...0x3020, 0x3021...0x302F, 0x3030...0x3030,
++            0x0300...0x036F, 0x1DC0...0x1DFF, 0x20D0...0x20FF, 0xFE00...0xFE0F, 0xFE20...0xFE2F,
++            0xE0100...0xE01EF,
++        ]
++        return Set(ranges.flatMap { $0.compactMap(Unicode.Scalar.init) })
++    }()
++}
+diff --git a/ApusApusTests/SwiftSyntaxDeclarations.swift b/ApusApusTests/SwiftSyntaxDeclarations.swift
+index b25fc5c1..457fe333 100644
+--- a/ApusApusTests/SwiftSyntaxDeclarations.swift
++++ b/ApusApusTests/SwiftSyntaxDeclarations.swift
+@@ -2401,7 +2401,7 @@ let declaration604Snippets: [SwiftSnippet] = [
+         origin: "DeclarationTests.testEnumCaseWithGenericParameter",
+         syntaxVersion: "604.0.0-prerelease-2026-06-05"
+     ),
+-    SwiftSnippet(label: "testLiteralInitializerWithTrailingClosure#1", source: "let foo = 1 { return 1 }", origin: "DeclarationTests.testLiteralInitializerWithTrailingClosure", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
++    SwiftSnippet(label: "testLiteralInitializerWithTrailingClosure#1", source: "let foo = 1 { return 1 }", origin: "DeclarationTests.testLiteralInitializerWithTrailingClosure", syntaxVersion: "604.0.0-prerelease-2026-06-05", compilerRejects: "computed property must have an explicit type"),
+     SwiftSnippet(label: "testInitializerWithReturnType#1", source: "init(_ ptr: UnsafeRawBufferPointer, _ a: borrowing Array<Int>) -> dependsOn(a) Self", origin: "DeclarationTests.testInitializerWithReturnType", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+     SwiftSnippet(label: "testInitializerWithReturnType#2", source: "public init() -> Int", origin: "DeclarationTests.testInitializerWithReturnType", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+     SwiftSnippet(label: "testSendingTypeSpecifier#1", source: "func testVarDeclTupleElt() -> (sending String, String) {}", origin: "DeclarationTests.testSendingTypeSpecifier", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+@@ -2423,7 +2423,8 @@ let declaration604Snippets: [SwiftSnippet] = [
+       }
+       """,
+         origin: "DeclarationTests.testCoroutineAccessors",
+-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
++        syntaxVersion: "604.0.0-prerelease-2026-06-05",
++        compilerRejects: "expected '{' to start getter definition"
+     ),
+     SwiftSnippet(
+         label: "testCoroutineAccessorsLegacyFormat#1",
+@@ -2596,7 +2597,8 @@ let declaration604Snippets: [SwiftSnippet] = [
+       }
+       """,
+         origin: "DeclarationTests.testAccessorBlockDisambiguationMarker",
+-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
++        syntaxVersion: "604.0.0-prerelease-2026-06-05",
++        compilerRejects: "expected '{' to start getter definition"
+     ),
+     SwiftSnippet(
+         label: "testAccessorBlockAfterPatternBindingDeclWithAttribute#1",
+diff --git a/ApusApusTests/SwiftSyntaxTests.swift b/ApusApusTests/SwiftSyntaxTests.swift
+index e8880ed8..863e5edc 100644
+--- a/ApusApusTests/SwiftSyntaxTests.swift
++++ b/ApusApusTests/SwiftSyntaxTests.swift
+@@ -106,7 +106,6 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
+         }
+         if origin.hasPrefix("MatchingPatternsTests.")
+             || source.contains("_mutating")
+-            || source.contains("_borrowing")
+             || source.contains("_consuming")
+             || source.contains("inout _") {
+             return true
+@@ -152,7 +151,7 @@ func sourceRequiresDisabledExperimentalFeature(_ source: String) -> Bool {
+     if source.contains("InlineArray<") { return true }
+     if source.contains("borrow {") || source.contains("mutate {") { return true }
+     if source.contains("_borrow") || source.contains("_move") { return true }
+-    if source.contains("_mutating") || source.contains("_borrowing") || source.contains("_consuming") {
++    if source.contains("_mutating") || source.contains("_consuming") {
+         return true
+     }
+     return source.split(whereSeparator: \.isNewline).contains { line in
+@@ -2336,6 +2335,12 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
+     SwiftSnippet(label: "effect-await-try", source: "func f() async throws { _ = await try g() }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "effect-try-try", source: "_ = try try f()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "effect-try-on-if-expression", source: "func f() throws -> Int { return try if c { g() } else { 0 } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // Generic-specialized type qualifiers in enum-case-like catch patterns keep their specialization.
++    SwiftSnippet(label: "catch-generic-qualified-case", source: "do {} catch Tree<ParsableCommand.Type>.InitializationError.recursiveSubcommand(let command) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // `Self` is a keyword token, but swift-syntax still allows expression-position specialization.
++    SwiftSnippet(label: "generic-specialized-Self-call", source: "_ = Self<PredicateArchivingState>()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // Nested tuple binding elements in optional binding are nested TupleExprs, not PatternExpr(TuplePattern).
++    SwiftSnippet(label: "optional-binding-nested-tuple-pattern", source: "guard let (key, (value, applier)) = iterator.next() else { return }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     // Operator NAME positions take any operator token, dot-led included, plus lone `!` and `&`
+     // (swift-syntax `parseFuncDeclaration`).
+     SwiftSnippet(label: "func-name-bang", source: "struct S { static prefix func ! (rhs: S) -> S { rhs } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+@@ -2347,9 +2352,14 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
+     SwiftSnippet(label: "placeholder-metatype", source: "let t: _.Type = Int.self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     // Body-less coroutine accessors as a protocol requirement (crawl: apple/swift-collections).
+     SwiftSnippet(label: "accessor-requirement-borrow-mutate", source: "protocol P { subscript(index: Int) -> Int { borrow mutate } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // After an initializer, observer blocks attach to the variable declaration; plain/get blocks do not.
++    SwiftSnippet(label: "initialized-var-willset-newline", source: "var x = 0\n{ willSet {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     // An implicit member may be a compound name, exactly like an explicit one (`T.f(_:)`).
+     SwiftSnippet(label: "implicit-member-compound-case", source: "func f(e: E) { switch e { case .compare, .compareString(_:): break } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "implicit-member-compound-expr", source: "let g: (Int) -> E = .x(_:)", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // Switch-case attributes are a small special case in swift-syntax: `@` may be line-broken
++    // from the bare attribute name before `case`/`default`.
++    SwiftSnippet(label: "switch-case-attribute-linebreak", source: "switch Thing {\n@\nunknown case ():break\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     // An empty generic argument clause (swift-syntax `parseGenericArguments` allows zero arguments).
+     // In an expression the tight `A<>` is a postfix OPERATOR, so only the spaced form is a clause.
+     SwiftSnippet(label: "generic-args-empty-spaced-expr", source: "_ = A< >.self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+@@ -2380,6 +2390,9 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
+     SwiftSnippet(label: "member-type-self", source: "let a: Foo.Self", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "member-type-module-selector", source: "func fn(_: Foo.Swift::Bar) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "suppressed-type-spaced-tilde", source: "struct S: ~ Copyable {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // Typealias initializers consume newline-separated type continuations greedily.
++    SwiftSnippet(label: "typealias-metatype-newline", source: "typealias\nZ = Copyable\n.Type", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "typealias-member-type-newline", source: "typealias\nZ = A\n.C", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     // Extension subjects are parsed as full types by swift-syntax (`parseExtensionDeclaration` -> `parseType`).
+     SwiftSnippet(label: "extension-metatype-tuple", source: "extension ().Type { func fuzz() {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "extension-placeholder-inherits", source: "extension _: HasTrailingCodeBlock { init() }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+@@ -2411,10 +2424,33 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
+     SwiftSnippet(label: "condition-nested-trailing-closure-while", source: "func f() {\n  while g(x: {\n    d.h {\n    }\n  }) {}\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "condition-nested-trailing-closure-guard", source: "func f() throws {\n  guard a.allSatisfy({ x in\n    b.allSatisfy {\n      $0 == x\n    }\n  }) else { throw E.x }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "condition-nested-trailing-closure-if", source: "func f() {\n  if a.contains(where: { x in b.contains {\n    $0 == x\n  } }) { continue }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "builder-newline-parenthesized-callee-trailing-closure", source: "func f() {\n  VStack(alignment: .leading, spacing: 6) {\n    Text(\"API Key\")\n  }\n\n  (managementLayout ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout(spacing: 8))) {\n    Text(\"Model\")\n  }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "keypath-infix-not-equal-nonfirst-argument", source: #"_ = f(a, \S.n != x)"#, origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // Comment openers terminate dot-operator scanning; swift-syntax treats them as trivia.
++    SwiftSnippet(label: "comment-after-member-dot-init", source: "./*c*/init()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "comment-after-member-dot-call", source: "x\n./*\n*/f< >()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "comment-after-subscript-ellipsis", source: "text[.../*c*/]", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // Small compiler-accepted underaccepts from the 2026-10 crawl.
++    SwiftSnippet(label: "operator-declaration-equal", source: "prefix operator =", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "loose-bang-infix-newlines", source: "nonOptional\n!\nx", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // A newline inside trivia after `>` prevents expression-position generic specialization/call
++    // disambiguation; same-line comments and spaces still allow it.
++    SwiftSnippet(label: "generic-call-newline-after-angle", source: "A<Int>\n()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "generic-call-comment-newline-after-angle", source: "A<() -> D>/*\n*/()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "macro-generic-newline-after-angle", source: "let a = #foo<Int>\n()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "generic-call-same-line-comment-after-angle", source: "A<Int>/*c*/()", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    // With experimental coroutine accessors disabled, bare `read`/`modify` remain ordinary calls.
++    SwiftSnippet(label: "getter-read-trailing-closure-call", source: "struct S { var value: Int { read { $0 } } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     // Multiline interpolated strings: indentation stripping is line-stateful across string pieces,
+     // and raw tail tokens may overmatch under longest-token scanning.
+     SwiftSnippet(label: "multiline-interpolation-midline-indent", source: "let n = 0\nlet s = \"\"\"\n            | \\(String(repeating: \" \", count: n))               end\n            \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "raw-multiline-interpolation-quotes-content", source: ##"""
++let s = #"""
++  """
++  \#(" ")
++  """
++  """#
++"""##, origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "raw-multiline-interpolation-tail-delimiter", source: "let field = \"\"\nlet body = #\"\"\"\n{\"usage\":\\#(field)}\n\"\"\"#\nlet x = 1", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "raw-multiline-interpolation-paired-parts", source: "let a = ##\"\"\"\nx \\##(m)\n\"\"\"##\nlet b = ##\"\"\"\ny \\##(m)\n\"\"\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "raw-singleline-interpolation-tail-delimiter", source: "let id = x\nlet a = #\"\\#(id.uuidString)\"#\nlet b = #\"\\#(id.uuidString)\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
+@@ -2474,6 +2510,7 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
+     SwiftSnippet(label: "ifconfig-condition-operand-next-line", source: "#if A ||\nB\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "postfix-ifconfig-else-non-member", source: " { v = x\n#if FOO\n.borrowing\n#else\nb\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+     SwiftSnippet(label: "postfix-ifconfig-binary-tail-in-ifconfig-body", source: "#if A\nlet fuzzValue = base\n#if FOO\n.methodOne + 12\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
++    SwiftSnippet(label: "source-control-conflict-marker", source: "<<<<<<< b\n=======\n>>>>>>> c\n", origin: "Fuzz", syntaxVersion: "603.0.1"),
+ ]
+ 
+ @Suite("SwiftSyntax - fuzz harvest fixes")
+@@ -3808,7 +3845,7 @@ struct SwiftSyntaxTests {
+         /// The arrow is position-dependent: `->` is punctuation in an expression (reachable
+         /// only via `ArrowExprSyntax`) but a legal NAME in an operator declaration, and is
+         /// rejected in a function name. The generic-`<` peel-off is a separate axis — see
+-        /// `functionNameOperator` / `@preempt(openAngle)` in Swift.apus.
++        /// `functionNameOperator` / `@forkBefore(openAngle)` in Swift.apus.
+         @Test("operator terminals: arrow position and generic peel-off match swift")
+         func operatorTerminalFamilyProbe() throws {
+             // `->` as a DECLARED operator name: legal.
+diff --git a/SwiftSyntaxFuzzer/Sources/AdventFuzzRunner/main.swift b/SwiftSyntaxFuzzer/Sources/AdventFuzzRunner/main.swift
+index b01f1786..62b07994 100644
+--- a/SwiftSyntaxFuzzer/Sources/AdventFuzzRunner/main.swift
++++ b/SwiftSyntaxFuzzer/Sources/AdventFuzzRunner/main.swift
+@@ -2687,7 +2687,7 @@ func sourceRequiresDisabledExperimentalFeature(_ source: String) -> Bool {
+     if source.contains("InlineArray<") { return true }
+     if source.contains("borrow {") || source.contains("mutate {") { return true }
+     if source.contains("_borrow") || source.contains("_move") { return true }
+-    if source.contains("_mutating") || source.contains("_borrowing") || source.contains("_consuming") {
++    if source.contains("_mutating") || source.contains("_consuming") {
+         return true
+     }
+     return source.split(whereSeparator: \.isNewline).contains { line in
+diff --git a/SwiftSyntaxFuzzer/Sources/AdventProbe/ProbeMain.swift b/SwiftSyntaxFuzzer/Sources/AdventProbe/ProbeMain.swift
+index 6ea4ed99..19db0069 100644
+--- a/SwiftSyntaxFuzzer/Sources/AdventProbe/ProbeMain.swift
++++ b/SwiftSyntaxFuzzer/Sources/AdventProbe/ProbeMain.swift
+@@ -375,44 +375,59 @@ struct AdventProbe {
+         let fileManager = FileManager.default
+         let tempURL = URL(fileURLWithPath: NSTemporaryDirectory())
+             .appendingPathComponent("advent-fuzzer-\(UUID().uuidString).swift")
++        var keepTempFile = false
+         do {
+             try source.write(to: tempURL, atomically: true, encoding: .utf8)
+-            defer { try? fileManager.removeItem(at: tempURL) }
++            defer {
++                if !keepTempFile {
++                    try? fileManager.removeItem(at: tempURL)
++                }
++            }
+ 
+-            let process = Process()
++            let executableURL: URL
++            let processArguments: [String]
+             if arguments.first == "swiftc" {
+-                process.executableURL = swiftcURL
+-                process.arguments = Array(arguments.dropFirst()) + [tempURL.path]
++                executableURL = swiftcURL
++                processArguments = Array(arguments.dropFirst()) + [tempURL.path]
+             } else {
+-                process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
+-                process.arguments = arguments + [tempURL.path]
++                executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
++                processArguments = arguments + [tempURL.path]
+             }
+-            process.environment = ["OS_ACTIVITY_MODE": "disable"]
+             let stdoutPipe = Pipe()
+             let stderrPipe = Pipe()
+             let stdout = PipeCapture()
+             let stderr = PipeCapture()
+-            process.standardOutput = stdoutPipe
+-            process.standardError = stderrPipe
+             stdoutPipe.fileHandleForReading.readabilityHandler = { stdout.append($0.availableData) }
+             stderrPipe.fileHandleForReading.readabilityHandler = { stderr.append($0.availableData) }
+-            try process.run()
++            let pid = try spawnCompilerProcess(
++                executableURL: executableURL,
++                arguments: processArguments,
++                stdoutPipe: stdoutPipe,
++                stderrPipe: stderrPipe
++            )
+ 
+             let deadline = Date().addingTimeInterval(compilerTimeoutSeconds)
+             var timedOut = false
+-            while process.isRunning {
++            var status: Int32 = 0
++            while true {
++                let waitResult = waitpid(pid, &status, WNOHANG)
++                if waitResult == pid {
++                    break
++                }
++                if waitResult == -1 {
++                    throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
++                }
+                 if Date() >= deadline {
+                     timedOut = true
+-                    process.terminate()
++                    keepTempFile = true
++                    kill(-pid, SIGTERM)
+                     Thread.sleep(forTimeInterval: 0.1)
+-                    if process.isRunning {
+-                        kill(pid_t(process.processIdentifier), SIGKILL)
+-                    }
++                    kill(-pid, SIGKILL)
++                    waitpid(pid, &status, 0)
+                     break
+                 }
+                 Thread.sleep(forTimeInterval: 0.01)
+             }
+-            process.waitUntilExit()
+ 
+             stdoutPipe.fileHandleForReading.readabilityHandler = nil
+             stderrPipe.fileHandleForReading.readabilityHandler = nil
+@@ -421,7 +436,7 @@ struct AdventProbe {
+                 try? stderrPipe.fileHandleForReading.close()
+                 return CompilerResult(
+                     accepted: nil,
+-                    stderr: "\(description) timed out after \(compilerTimeoutSeconds) seconds",
++                    stderr: "\(description) timed out after \(compilerTimeoutSeconds) seconds; source kept at \(tempURL.path)",
+                     timedOut: true
+                 )
+             }
+@@ -430,12 +445,54 @@ struct AdventProbe {
+             try? stdoutPipe.fileHandleForReading.close()
+             try? stderrPipe.fileHandleForReading.close()
+ 
+-            return CompilerResult(accepted: process.terminationStatus == 0, stderr: stderr.string, timedOut: false)
++            return CompilerResult(accepted: status == 0, stderr: stderr.string, timedOut: false)
+         } catch {
+             return CompilerResult(accepted: false, stderr: "\(description) probe failed: \(error)", timedOut: false)
+         }
+     }
+ 
++    private static func spawnCompilerProcess(
++        executableURL: URL,
++        arguments: [String],
++        stdoutPipe: Pipe,
++        stderrPipe: Pipe
++    ) throws -> pid_t {
++        var fileActions: posix_spawn_file_actions_t? = nil
++        posix_spawn_file_actions_init(&fileActions)
++        defer { posix_spawn_file_actions_destroy(&fileActions) }
++
++        let stdoutWrite = stdoutPipe.fileHandleForWriting.fileDescriptor
++        let stderrWrite = stderrPipe.fileHandleForWriting.fileDescriptor
++        posix_spawn_file_actions_adddup2(&fileActions, stdoutWrite, STDOUT_FILENO)
++        posix_spawn_file_actions_adddup2(&fileActions, stderrWrite, STDERR_FILENO)
++        posix_spawn_file_actions_addclose(&fileActions, stdoutPipe.fileHandleForReading.fileDescriptor)
++        posix_spawn_file_actions_addclose(&fileActions, stderrPipe.fileHandleForReading.fileDescriptor)
++
++        var attributes: posix_spawnattr_t? = nil
++        posix_spawnattr_init(&attributes)
++        defer { posix_spawnattr_destroy(&attributes) }
++        posix_spawnattr_setflags(&attributes, Int16(POSIX_SPAWN_SETPGROUP))
++        posix_spawnattr_setpgroup(&attributes, 0)
++
++        var argv: [UnsafeMutablePointer<CChar>?] = ([executableURL.path] + arguments).map { strdup($0) }
++        argv.append(nil)
++        defer { argv.compactMap { $0 }.forEach { free($0) } }
++
++        let environment = ["OS_ACTIVITY_MODE=disable"]
++        var env: [UnsafeMutablePointer<CChar>?] = environment.map { item in strdup(item) }
++        env.append(nil)
++        defer { env.compactMap { $0 }.forEach { free($0) } }
++
++        var pid: pid_t = 0
++        let result = posix_spawn(&pid, executableURL.path, &fileActions, &attributes, &argv, &env)
++        try stdoutPipe.fileHandleForWriting.close()
++        try stderrPipe.fileHandleForWriting.close()
++        guard result == 0 else {
++            throw POSIXError(POSIXErrorCode(rawValue: result) ?? .EIO)
++        }
++        return pid
++    }
++
+     private static func renderSwiftSyntaxNode(_ node: Syntax, indent: Int) -> String {
+         let pad = String(repeating: "  ", count: indent)
+         var result = ""
+diff --git a/TODO.md b/TODO.md
+index 4110f4b6..1a923179 100644
+--- a/TODO.md
++++ b/TODO.md
+@@ -4,153 +4,33 @@ This file is the canonical active TODO list for the project.
+ It holds actionable items only.
+ Put completed work and historical explanations in design notes or commit messages.   
+ 
+-1. Fix condition-list closure-call underaccept. Reduced current fuzzer replay still reports
+-    `advent-underaccept` for:
+-    ```
+-    fuzz {
+-    if true, {
+-    }() {}
+-    }
+-    ```
+-    SwiftSyntax and `swiftc -parse` accept it. APUS fails at the closure close brace before the
+-    immediate call, expecting `>n<`; likely boundary is closure expressions/calls inside
+-    `conditionList` after the parser-mode condition work.
+-
+-2. Fix line-broken `@unknown case` underaccept. Reduced current fuzzer replay still reports
+-    `advent-underaccept` for:
+-    ```
+-    switch Thing {
+-    @
+-    unknown case ():break
+-    }
+-    ```
+-    SwiftSyntax and `swiftc -parse` accept the trivia split between `@` and `unknown`; APUS fails at
+-    `unknown`, expecting `>s<`. Check attribute/`@unknown` spelling rules in switch cases without
+-    broadening ordinary attributes incorrectly.
+-
+-3. Resolve residual ambiguity for newline metatype continuation after a typealias assignment. Reduced
+-    current fuzzer replay still reports `residual-ambiguity` (`statement` ambiguous pivot) for:
+-    ```
+-    typealias
+-    Z = Copyable
+-    .Type
+-    ```
+-    Determine whether SwiftSyntax treats `.Type` as a same-statement metatype continuation here and
+-    adjust statement separation or metatype/member-type disambiguation accordingly.
+-
+-4. Resolve residual ambiguity for initialized property followed by observer/accessor-looking block.
+-    Reduced current fuzzer replay still reports `residual-ambiguity` (`statement` ambiguous pivot) for:
+-    ```
+-    var x = 0
+-    { willSet {} }
+-    ```
+-    Decide whether this should be one variable declaration with an accessor/observer block or two
+-    statements under SwiftSyntax, then constrain the competing `statement` derivation.
+-
+-5. Reduce and fix remaining whole-file tree differences from the October crawl survivors. Current
+-    replay still produces tree mismatches in:
+-    - `apple__swift-argument-parser/Sources/ArgumentParser/Parsing/CommandParser.swift`:
+-      `GenericSpecializationExpr` vs `DeclReferenceExpr`.
+-    - `apple__swift-foundation/Sources/FoundationEssentials/Predicate/Archiving/PredicateExpressionConstruction.swift`:
+-      `FunctionCallExpr` vs `SequenceExpr`.
+-    - `apple__swift-nio/Sources/NIOCore/ChannelOption.swift`: `TupleExpr` vs `PatternExpr`.
+-    Reduce these before editing grammar/converter code; they are likely real shape bugs but not yet
+-    small enough to assign to one grammar rule.
+-
+-6. Reduce and fix multiline string residual ambiguity from `MultilineErrorsTests.swift`. Current
+-    whole-file replay reports `residual-ambiguity` in `stringLiteral` with competing
+-    `[interpolatedStringLiteral] | [staticStringLiteral]` readings. Minimize the source before
+-    changing string literal rules, because several October string tree-differences have already gone
+-    stale on the current grammar.
+-
+-7. Fix comment/trivia being lexed as operators around member access, subscripts, and postfix calls.
+-    The 2026-10-07 fuzzer run (`SwiftSyntaxFuzzer/runs/worker-*/2026-10-07T08-39-21Z`) produced
+-    repeated tree differences and over/underaccepts where APUS reads comment delimiters as operator
+-    tokens instead of trivia. Representative reduced artifacts:
+-    ```
+-    ./*c*/init()
+-    x
+-    ./*
+-    */f< >()
+-    text[.../*c*/]
+-    ```
+-    SwiftSyntax treats these as member access/subscript/call through trivia, while APUS produces
+-    `./*`, `.../*`, or `*/` prefix/binary/postfix operators. This is the strongest new signal from
+-    the run and likely explains several scattered tree-difference clusters.
++8. DONE (2026-10-08). The listed `/)/` cases match swiftc and swift-syntax after the regex redesign
++    (one `regexLiteralToken` scanner, position from the grammar). Remaining causes in the same
++    family are #19–#24.
+ 
+-8. Fix slash/regex/operator boundary underaccepts around `/)/`. The same fuzzer run wrote many
+-    reduced underaccepts in this family, including:
+-    ```
+-    /)/
+-    _ = /)/
+-    something() { _ = ^^/)/ }
+-    ```
+-    SwiftSyntax and `swiftc -parse` accept these, but APUS rejects them. Keep this separate from the
+-    comment-as-operator bug unless reduction shows the same scanner boundary is responsible.
++12. DONE (2026-10-08). `fuzz() {⏎_ = /x(()/⏎}` is no longer ambiguous: the regex is one token.
+ 
+-9. Decide and fix top-level closure-expression overaccept policy. The largest normalized
+-    overaccept bucket from the 2026-10-07 run is `top-level statement cannot begin with a closure
+-    expression` (about 188 artifacts), with reduced shapes like:
+-    ```
+-    { [@Sendable Sendable -> Void]() }
+-    { func expansion(context: some MacroExpansionContext) throws -> [CodeBlockItemSyntax] }
+-    ```
+-    SwiftSyntax/`swiftc -parse` reject these as top-level closure-expression starts, while APUS
+-    accepts them. Determine whether this belongs in the top-level statement grammar or in a
+-    recovery/statement-start filter.
++17. Fix the raw-string underaccept in
++    `swiftlang__swift-package-manager/Sources/Workspace/InitPackage.swift`, line 868. APUS fails at
++    `"""#<HERE>,`. The failing `#"""…"""#` is TEXT inside an outer `##"""` raw multiline string
++    (line 864 interpolates with `\##(moduleName)`), so the inner delimiters must not open or close
++    anything. Reduce to a small fixture with an outer `##"""` string containing `#"""` / `"""#`
++    lines.
+ 
+-10. Treat experimental Swift features consistently in SwiftSyntax tests and fuzzer probes. The
+-    2026-10-07 run still reports `using` overaccepts such as:
+-    ```
+-    using Test
+-    using nonisolated
+-    using borrowing
+-    ```
+-    because SwiftSyntax/compiler reference parsing runs with the relevant experimental feature
+-    disabled while APUS grammar accepts the syntax. Decide whether test corpora should exclude
+-    disabled experimental samples by default, or whether the probe/test harness should enable the
+-    same experimental features for both references and APUS expectations. Do not solve this with
+-    ad hoc grammar churn for disabled feature syntax.
+-
+-11. Reduce and fix small valid-looking underaccepts from the 2026-10-07 run that are not part of the
+-    `/)/` family. Good first candidates:
+-    ```
+-    struct Fuzz { open(set) var openProp = 0 }
+-    prefix operator =
+-    nonOptional
+-    !
+-    x
+-    ```
+-    Recheck each against `Parser.parse(source:).hasError` and `swiftc -parse` before editing; some
+-    fuzzer reductions in this bucket are malformed real-source fragments, but these three look small
+-    enough to be actionable.
++Items #19–#31 come from replaying the 155 slash/regex artifacts of the 2026-10-07 fuzzer run
++(`SwiftSyntaxFuzzer/runs/worker-*/2026-10-07T08-39-21Z/artifacts`) against `swiftc -swift-version 6
++-parse` and swift-syntax. None of them is a regression: the pre-redesign grammar gives the same results.
+ 
+-12. Resolve residual ambiguities found by the 2026-10-07 run. Three artifacts survived reduction:
++31. Reject statement-start `actor` when swift-syntax/Swift commit to actor-declaration recovery
++    across a newline instead of accepting `actor` as an expression statement:
+     ```
+-    typealias Z = A
+-    .C
+-
+-    each
+-    {
++    f { actor
++    func a1() {}
+     }
+-
+-    fuzz() {
+-    _ = /x(()/
++    f { actor
++    x
+     }
+     ```
+-    The first is a statement/member-type continuation ambiguity, the second is
+-    `postfixExpression` vs `packElementExpression`, and the third is a regex iteration extent
+-    ambiguity. Reduce/verify each independently; do not mix these with tree-shape frontier work.
+-
+-13. Reduce tree-shape differences for generic/macro calls split by newlines or comments. The
+-    2026-10-07 run repeatedly produced SwiftSyntax `SequenceExpr` shapes where APUS commits to
+-    generic specialization or macro/function call, for example:
+-    ```
+-    A<() -> D>/*
+-    */()
+-
+-    let a = #foo<Int>
+-    ()
+-    ```
+-    This may overlap with existing generic-specialization tree differences, but the newline/comment
+-    boundary makes this a narrower, reproducible family.
++    A scanner-level `actorDeclarationRecoveryLineBreak` terminal was tried and rejected as too ugly:
++    this belongs in declaration/statement disambiguation, but a simple `@cannotParse` guard on a
++    recovery prefix did not prune the expression route.
+diff --git a/TestOutput/apus_output.swift b/TestOutput/apus_output.swift
+index 75fe09a7..a7822f8c 100644
+--- a/TestOutput/apus_output.swift
++++ b/TestOutput/apus_output.swift
+@@ -63,44 +63,44 @@ func expect(_ expected: String...) {
+ 
+ // MARK: - start of generated code
+ let tokenPatterns: [String:TokenPattern] = [
++	"identifier":	("/[_\\p{XID_Start}][-\\p{XID_Continue}]*/",	/[_\p{XID_Start}][-\p{XID_Continue}]*/,	false,	false),
+ 	"literal":	("/\\\"(?:[^\\\"\\\\]|\\\\.)+\\\"/",	/\"(?:[^\"\\]|\\.)+\"/,	false,	false),
++	"comment":	("/\\/\\/.*/",	/\/\/.*/,	false,	true),
+ 	"pragma":	("/@\\p{XID_Start}\\p{XID_Continue}*/",	/@\p{XID_Start}\p{XID_Continue}*/,	false,	false),
+ 	"whitespace":	("/\\s+/",	/\s+/,	false,	true),
+ 	"action":	("/\'(?:[^\'\\\\]|\\\\.)*\'/",	/'(?:[^'\\]|\\.)*'/,	false,	true),
+-	"identifier":	("/[_\\p{XID_Start}][-\\p{XID_Continue}]*/",	/[_\p{XID_Start}][-\p{XID_Continue}]*/,	false,	false),
+ 	"regex":	("/\\/(?!\\*)(?:[^\\/\\\\]|\\\\.)+\\//",	/\/(?!\*)(?:[^\/\\]|\\.)+\//,	false,	false),
+ 	"message":	("/\\^\\^\\^(?:(?s).*?)(?=\\^\\^\\^|$)/",	/\^\^\^(?:(?s).*?)(?=\^\^\^|$)/,	false,	false),
+-	"comment":	("/\\/\\/.*/",	/\/\/.*/,	false,	true),
+-	"\">s<\"":	(">s<",	Regex { ">s<" },	true,	false),
+-	"\"EOF\"":	("EOF",	Regex { "EOF" },	true,	false),
+-	"\"|\"":	("|",	Regex { "|" },	true,	false),
+-	"\"{\"":	("{",	Regex { "{" },	true,	false),
+-	"\"]\"":	("]",	Regex { "]" },	true,	false),
+-	"\"?\"":	("?",	Regex { "?" },	true,	false),
+-	"\">+>\"":	(">+>",	Regex { ">+>" },	true,	false),
++	"\"*\"":	("*",	Regex { "*" },	true,	false),
++	"\"-\"":	("-",	Regex { "-" },	true,	false),
++	"\"}\"":	("}",	Regex { "}" },	true,	false),
+ 	"\"<-<\"":	("<-<",	Regex { "<-<" },	true,	false),
+-	"\"<\"":	("<",	Regex { "<" },	true,	false),
+-	"\"ε\"":	("ε",	Regex { "ε" },	true,	false),
++	"\">n<\"":	(">n<",	Regex { ">n<" },	true,	false),
++	"\"<n>\"":	("<n>",	Regex { "<n>" },	true,	false),
++	"\">>|\"":	(">>|",	Regex { ">>|" },	true,	false),
++	"\")\"":	(")",	Regex { ")" },	true,	false),
+ 	"\"\\\"\\\"\"":	("\"\"",	Regex { "\"\"" },	true,	false),
+-	"\".\"":	(".",	Regex { "." },	true,	false),
+ 	"\"+\"":	("+",	Regex { "+" },	true,	false),
++	"\">+>\"":	(">+>",	Regex { ">+>" },	true,	false),
++	"\"[\"":	("[",	Regex { "[" },	true,	false),
++	"\"ε\"":	("ε",	Regex { "ε" },	true,	false),
++	"\"---\"":	("---",	Regex { "---" },	true,	false),
+ 	"\"(\"":	("(",	Regex { "(" },	true,	false),
+-	"\"*\"":	("*",	Regex { "*" },	true,	false),
+-	"\"<s>\"":	("<s>",	Regex { "<s>" },	true,	false),
+-	"\">>|\"":	(">>|",	Regex { ">>|" },	true,	false),
+-	"\"|<<\"":	("|<<",	Regex { "|<<" },	true,	false),
++	"\"]\"":	("]",	Regex { "]" },	true,	false),
++	"\":\"":	(":",	Regex { ":" },	true,	false),
++	"\"|\"":	("|",	Regex { "|" },	true,	false),
++	"\"<+<\"":	("<+<",	Regex { "<+<" },	true,	false),
++	"\"<\"":	("<",	Regex { "<" },	true,	false),
++	"\".\"":	(".",	Regex { "." },	true,	false),
++	"\"{\"":	("{",	Regex { "{" },	true,	false),
++	"\">s<\"":	(">s<",	Regex { ">s<" },	true,	false),
++	"\"?\"":	("?",	Regex { "?" },	true,	false),
+ 	"\">->\"":	(">->",	Regex { ">->" },	true,	false),
+-	"\"=\"":	("=",	Regex { "=" },	true,	false),
+-	"\"}\"":	("}",	Regex { "}" },	true,	false),
++	"\"|<<\"":	("|<<",	Regex { "|<<" },	true,	false),
++	"\"<s>\"":	("<s>",	Regex { "<s>" },	true,	false),
+ 	"\">\"":	(">",	Regex { ">" },	true,	false),
+-	"\"<+<\"":	("<+<",	Regex { "<+<" },	true,	false),
+-	"\">n<\"":	(">n<",	Regex { ">n<" },	true,	false),
+-	"\":\"":	(":",	Regex { ":" },	true,	false),
+-	"\")\"":	(")",	Regex { ")" },	true,	false),
+-	"\"-\"":	("-",	Regex { "-" },	true,	false),
+-	"\"---\"":	("---",	Regex { "---" },	true,	false),
+-	"\"<n>\"":	("<n>",	Regex { "<n>" },	true,	false),
+-	"\"[\"":	("[",	Regex { "[" },	true,	false),
++	"\"=\"":	("=",	Regex { "=" },	true,	false),
++	"\"EOF\"":	("EOF",	Regex { "EOF" },	true,	false),
+ ]
+ func alternates() throws {
+ 	if ["\"|\""].contains(token.kind) {
+diff --git a/TestOutput/apus_validation_test.swift b/TestOutput/apus_validation_test.swift
+index 75fe09a7..22a87c89 100644
+--- a/TestOutput/apus_validation_test.swift
++++ b/TestOutput/apus_validation_test.swift
+@@ -63,44 +63,44 @@ func expect(_ expected: String...) {
+ 
+ // MARK: - start of generated code
+ let tokenPatterns: [String:TokenPattern] = [
+-	"literal":	("/\\\"(?:[^\\\"\\\\]|\\\\.)+\\\"/",	/\"(?:[^\"\\]|\\.)+\"/,	false,	false),
+-	"pragma":	("/@\\p{XID_Start}\\p{XID_Continue}*/",	/@\p{XID_Start}\p{XID_Continue}*/,	false,	false),
++	"comment":	("/\\/\\/.*/",	/\/\/.*/,	false,	true),
+ 	"whitespace":	("/\\s+/",	/\s+/,	false,	true),
+-	"action":	("/\'(?:[^\'\\\\]|\\\\.)*\'/",	/'(?:[^'\\]|\\.)*'/,	false,	true),
++	"pragma":	("/@\\p{XID_Start}\\p{XID_Continue}*/",	/@\p{XID_Start}\p{XID_Continue}*/,	false,	false),
+ 	"identifier":	("/[_\\p{XID_Start}][-\\p{XID_Continue}]*/",	/[_\p{XID_Start}][-\p{XID_Continue}]*/,	false,	false),
++	"literal":	("/\\\"(?:[^\\\"\\\\]|\\\\.)+\\\"/",	/\"(?:[^\"\\]|\\.)+\"/,	false,	false),
+ 	"regex":	("/\\/(?!\\*)(?:[^\\/\\\\]|\\\\.)+\\//",	/\/(?!\*)(?:[^\/\\]|\\.)+\//,	false,	false),
+ 	"message":	("/\\^\\^\\^(?:(?s).*?)(?=\\^\\^\\^|$)/",	/\^\^\^(?:(?s).*?)(?=\^\^\^|$)/,	false,	false),
+-	"comment":	("/\\/\\/.*/",	/\/\/.*/,	false,	true),
+-	"\">s<\"":	(">s<",	Regex { ">s<" },	true,	false),
+-	"\"EOF\"":	("EOF",	Regex { "EOF" },	true,	false),
++	"action":	("/\'(?:[^\'\\\\]|\\\\.)*\'/",	/'(?:[^'\\]|\\.)*'/,	false,	true),
++	"\"<\"":	("<",	Regex { "<" },	true,	false),
++	"\"+\"":	("+",	Regex { "+" },	true,	false),
++	"\":\"":	(":",	Regex { ":" },	true,	false),
++	"\")\"":	(")",	Regex { ")" },	true,	false),
++	"\"-\"":	("-",	Regex { "-" },	true,	false),
++	"\"=\"":	("=",	Regex { "=" },	true,	false),
++	"\"*\"":	("*",	Regex { "*" },	true,	false),
++	"\"<+<\"":	("<+<",	Regex { "<+<" },	true,	false),
++	"\"[\"":	("[",	Regex { "[" },	true,	false),
+ 	"\"|\"":	("|",	Regex { "|" },	true,	false),
+-	"\"{\"":	("{",	Regex { "{" },	true,	false),
+-	"\"]\"":	("]",	Regex { "]" },	true,	false),
+-	"\"?\"":	("?",	Regex { "?" },	true,	false),
++	"\">\"":	(">",	Regex { ">" },	true,	false),
+ 	"\">+>\"":	(">+>",	Regex { ">+>" },	true,	false),
+-	"\"<-<\"":	("<-<",	Regex { "<-<" },	true,	false),
+-	"\"<\"":	("<",	Regex { "<" },	true,	false),
+-	"\"ε\"":	("ε",	Regex { "ε" },	true,	false),
++	"\"}\"":	("}",	Regex { "}" },	true,	false),
++	"\"|<<\"":	("|<<",	Regex { "|<<" },	true,	false),
+ 	"\"\\\"\\\"\"":	("\"\"",	Regex { "\"\"" },	true,	false),
++	"\"<-<\"":	("<-<",	Regex { "<-<" },	true,	false),
++	"\">->\"":	(">->",	Regex { ">->" },	true,	false),
++	"\">s<\"":	(">s<",	Regex { ">s<" },	true,	false),
++	"\"]\"":	("]",	Regex { "]" },	true,	false),
+ 	"\".\"":	(".",	Regex { "." },	true,	false),
+-	"\"+\"":	("+",	Regex { "+" },	true,	false),
+ 	"\"(\"":	("(",	Regex { "(" },	true,	false),
+-	"\"*\"":	("*",	Regex { "*" },	true,	false),
+-	"\"<s>\"":	("<s>",	Regex { "<s>" },	true,	false),
++	"\"?\"":	("?",	Regex { "?" },	true,	false),
++	"\"EOF\"":	("EOF",	Regex { "EOF" },	true,	false),
+ 	"\">>|\"":	(">>|",	Regex { ">>|" },	true,	false),
+-	"\"|<<\"":	("|<<",	Regex { "|<<" },	true,	false),
+-	"\">->\"":	(">->",	Regex { ">->" },	true,	false),
+-	"\"=\"":	("=",	Regex { "=" },	true,	false),
+-	"\"}\"":	("}",	Regex { "}" },	true,	false),
+-	"\">\"":	(">",	Regex { ">" },	true,	false),
+-	"\"<+<\"":	("<+<",	Regex { "<+<" },	true,	false),
++	"\"<n>\"":	("<n>",	Regex { "<n>" },	true,	false),
+ 	"\">n<\"":	(">n<",	Regex { ">n<" },	true,	false),
+-	"\":\"":	(":",	Regex { ":" },	true,	false),
+-	"\")\"":	(")",	Regex { ")" },	true,	false),
+-	"\"-\"":	("-",	Regex { "-" },	true,	false),
++	"\"ε\"":	("ε",	Regex { "ε" },	true,	false),
+ 	"\"---\"":	("---",	Regex { "---" },	true,	false),
+-	"\"<n>\"":	("<n>",	Regex { "<n>" },	true,	false),
+-	"\"[\"":	("[",	Regex { "[" },	true,	false),
++	"\"<s>\"":	("<s>",	Regex { "<s>" },	true,	false),
++	"\"{\"":	("{",	Regex { "{" },	true,	false),
+ ]
+ func alternates() throws {
+ 	if ["\"|\""].contains(token.kind) {
+diff --git a/documentation/Ambiguity.md b/documentation/Ambiguity.md
+index d66a7a85..b8c9dd78 100644
+--- a/documentation/Ambiguity.md
++++ b/documentation/Ambiguity.md
+@@ -215,7 +215,7 @@ Each edge in the order was a real bug:
+ | structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
+ 
+ Parser modes replaced the old span-containment filters. They are compiled into the grammar at
+-load (each mode-relevant nonterminal gets a copy per scoped mode, `@carries`), so they act before
++load (each mode-relevant nonterminal gets a copy per scoped mode, `@modeScope`), so they act before
+ anything enters the forest and do not depend on later Oracle pruning. See `apus.md` § Parser Modes.
+ 
+ ### 5.3 Hard constraints
+@@ -231,7 +231,7 @@ A hard constraint removes a reading that the language does not permit.
+ | `@clearMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` inactive. |
+ | `@requiresMode(N)` | before a sequence item | Schedule that occurrence only when mode `N` is active. |
+ | `@rejectsMode(N)` | before a sequence item | Reject that occurrence when mode `N` is active. |
+-| `@carries(N)` | before a production | Mode `N` passes into this nonterminal; elsewhere it is dropped. |
++| `@modeScope(N)` | before a production | Mode `N` passes into this nonterminal; elsewhere it is dropped. |
+ 
+ Details:
+ 
+diff --git a/documentation/apus.md b/documentation/apus.md
+index 1755fd5a..153718db 100644
+--- a/documentation/apus.md
++++ b/documentation/apus.md
+@@ -222,7 +222,8 @@ An annotation starts with `@`. Its meaning depends on its position. There are fo
+ | Before an item | `@setMode` `@clearMode` `@requiresMode` `@rejectsMode` |
+ | Before a bracket | `@longest` `@shortest` |
+ 
+-An annotation in the wrong position is an error.
++An annotation in the wrong position is an error. Exception: a terminal pragma on a production rule
++(`=`) has no effect.
+ 
+ Three other predicates also sit between items. They consume no input:
+ 
+@@ -308,7 +309,7 @@ predicates cannot run a separate grammar as a lookahead.
+ 
+ ```apus
+ @sameLine
+-interpolation = "\(" expression ")" .
++label = name ":" .
+ ```
+ 
+ `@sameLine` keeps a reading of this nonterminal only if it has no line break between two of its
+@@ -359,7 +360,7 @@ nonterminal, the mode stops.
+ ifStatement = "if" @setMode(cond) expression block .
+ 
+ @modeScope(cond) expression = term { "+" term } .
+-@modeScope(cond) term       = number | name | @rejectsMode(cond) closure .
++@modeScope(cond) term       = number | name | group | @rejectsMode(cond) closure .
+ group                       = "(" expression ")" .
+ ```
+ 
+diff --git a/grammars/Swift.apus b/grammars/Swift.apus
+index 8fb7a077..65afb2e5 100644
+--- a/grammars/Swift.apus
++++ b/grammars/Swift.apus
+@@ -88,18 +88,6 @@ lexerClassifiedKeyword = "Any" | "as" | "associatedtype" | "break" | "case" | "c
+                        | "repeat" | "rethrows" | "return" | "self" | "Self" | "static" | "struct"
+                        | "subscript" | "super" | "switch" | "throw" | "throws" | "true" | "try"
+                        | "typealias" | "var" | "where" | "while" .
+-// Lexer-classified keywords that put a following SPACED `/` in regex position, rather than binary
+-// division position. The excluded words mirror the previous-token allow-list on
+-// `plainRegularExpressionLiteral`.
+-regexForcingLexerKeyword = "as" | "associatedtype" | "break" | "case" | "catch" | "class"
+-                          | "continue" | "default" | "defer" | "deinit" | "do" | "else" | "enum"
+-                          | "extension" | "fallthrough" | "fileprivate" | "for"
+-                          | "guard" | "if" | "import" | "in" | "init" | "inout" | "internal" | "is" | "let"
+-                          | "precedencegroup" | "private" | "protocol" | "public"
+-                          | "repeat" | "rethrows" | "return" | "static" | "struct"
+-                          | "subscript" | "switch" | "throw" | "throws" | "try"
+-                          | "typealias" | "var" | "where" | "while" .
+-regexSafeLexerKeyword = "Any" | "false" | "func" | "nil" | "operator" | "self" | "Self" | "super" | "true" .
+ // swift-syntax's `.identifier` TOKEN: any word the lexer does not classify as a keyword (so every
+ // contextual keyword — `get`, `await`, `each`, …), an escaped name, or `$x`. The name positions that
+ // swift-syntax fills with `expectIdentifier()` / `consume(if: .identifier)` use this. (Formerly
+@@ -133,12 +121,8 @@ argumentLabel =
+ // keyword matrix: `.\`init\``, `.init`, `._borrowing`, `.deinit`, `.subscript` all already agreed,
+ // `.inout` was the lone divergence.
+ //
+-// Do not apply the regex-forcing keyword slash gate here: once a keyword has been consumed as a
+-// dotted member name, a following spaced `/` is after an expression (`x.default / y`,
+-// `\.default / y`) and Swift 6 reads it as division.
+ memberName =
+-    | regexForcingLexerKeyword
+-    | regexSafeLexerKeyword
++    | lexerClassifiedKeyword
+     | identifier ---( "_" lexerClassifiedKeyword )
+     | escapedIdentifier
+     | propertyWrapperProjection
+@@ -278,7 +262,9 @@ extendedMultilineInterpolatedStringLiteralTail  - @builder .
+ 
+ stringLiteral =
+     | staticStringLiteral
+-    | interpolatedStringLiteral
++    // Raw literals containing a matching interpolation delimiter can also be
++    // scanned as one static token; swift-syntax keeps the segmented form.
++    | @prefer interpolatedStringLiteral
+     .
+ // `@available` arguments use swift-syntax `parseSimpleString`
+ // (Availability.swift, StringLiterals.swift). It accepts raw delimiters but
+@@ -315,124 +301,20 @@ multilineInterpolatedStringLiteral =
+ /// regular-expression-literal-closing-delimiter → / extended-regular-expression-literal-delimiter?
+ /// extended-regular-expression-literal-delimiter → # extended-regular-expression-literal-delimiter?
+ 
+-// This is larger than TSPL suggests because swift-syntax commits to regex
+-// tokens in the lexer; APUS must model that commitment to disambiguate `/`
+-// from operators.
+-
+-// One terminal serves opening and closing delimiters. The opening-position
+-// restrictions are production predicates; the terminal itself stays ungated.
+-regexSlash           - /\// .
+-regexEscape          - /\\[^\r\n\u{09}]/ .     // swift-syntax rejects an escaped literal tab too
+-regexNonOperatorAtom - /[^\/\\\[\]\(\)\r\n\u{20}\u{09}\+\-\*%&\|\^~<>=!\?\.#;:,]/ .
+-// Space is body content. Literal tabs are not accepted by swift-syntax in bare slash regex
+-// literals: no body TOKEN matches one (atoms, class atoms and `regexEscape` all exclude U+0009), but
+-// the lexer still skips a tab as TRIVIA between body tokens, so a token gate on
+-// `tabbedPlainRegularExpressionLiteral` rejects that case (see `plainRegularExpressionLiteral`). The escape `\t` still reaches `regexEscape`.
+-//
+-// Lookahead-only: a complete `/…/` whose body (up to the first unescaped `/`) contains a literal tab.
+-tabbedPlainRegularExpressionLiteral - /\/(?:\\[^\r\n]|[^\/\\\r\n])*\u{09}(?:\\[^\r\n]|[^\/\\\r\n])*\// .
+-// Used as a parse-time NEGATIVE TOKEN GATE (`>-> ( tabbedPlainRegularExpressionLiteral )`) right
+-// before the opening `regexSlash`. The 2026-09-23 change used `@cannotParse(…)` instead, which
+-// resolves only NONTERMINAL targets AND only sees targets the parser actually schedules; a terminal
+-// named only there is never lexed, so that predicate was silently dropped.
+-regexSpaceAtom       - /[\u{20}]/ .
+-regexClassAtom       - /[^\\\]\r\n\u{09}]/ .
+-// Operator characters inside a regex body must be regex terminals, not shared
+-// operator literals, or operator maximal-munch can consume body text.
+-regexOperatorChar    - /[-+*%|^~<>=!?&.]/ .
+-
+-extendedRegularExpressionLiteral - @builder .
+-
+-// Slash regexes follow swift-syntax `RegexLiteralLexer`: the opening `/` is
+-// gated by previous-token context; the closing `/` is body-local.
+-// Same-line regex openers use the previous-token gate; a newline before `/`
+-// resets to expression-start position and is accepted ungated.
+-//
+-// The LITERAL `"!"` is deliberately NOT in these lists, only the munch-exempt `forceMark`. The two
+-// are not interchangeable: postfix force-unwrap is `forceMark` (`forcedValueExpression`), whereas
+-// `tryOperator` spells `"try" >s< "!"` with the literal. Listing the literal blocked a regex after
+-// `try!`, so `try! /re/.wholeMatch(in: s)` parsed as `/` prefix + `re` + `/` postfix operators and
+-// built the wrong TREE (it still "parsed", which is why only a tree comparison caught it).
+-// Dropping it keeps `x!/y/` as division, since that `!` is a `forceMark`, which stays listed.
+-// Note the list never contained the literal `"?"` — `try? /re/` was already right, and that
+-// asymmetry was the tell.
+-plainRegularExpressionLiteral =
+-    | >n< <-< ( "true" "false" "nil" "self" "Self" "super" "Any" "func" "operator"
+-                identifier escapedIdentifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral
+-                decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral
+-                regexSlash extendedRegularExpressionLiteral
+-                "_" ")" "]" "}" ">" closeAngle forceMark optionalMark "->" "..." "." "@" )
+-          >-> ( tabbedPlainRegularExpressionLiteral ) regexSlash >s< regexBody >s< regexSlash
+-    | <n> >-> ( tabbedPlainRegularExpressionLiteral ) regexSlash >s< regexBody >s< regexSlash
+-    .
+-
+-// First and last body items are never bare space. Escaped spaces are
+-// `regexEscape` and therefore legal at either boundary.
+-//
+-// The body is a sequence of TOKENS, so the lexer skips trivia between them
+-// unless a boundary forbids it. `>s<` on the delimiters only pins the two ends,
+-// which let a newline inside the body be skipped silently: `_ = /E.e⏎(/E.e)`
+-// lexed `/E.e⏎(/` as one literal, and `@cannotParse(regularExpressionLiteral)`
+-// then pruned the correct prefix-`/` reading (testPrefixSlash4). A plain
+-// `/…/` literal is single-line in swift-syntax's `RegexLiteralLexer`, so every
+-// intra-body junction carries `>n<`. Space stays legal as `regexSpaceAtom`, and as skipped trivia.
+-// Junctions cannot be TIGHT (`>s<`): a token absorbs its trailing trivia, so a following space is
+-// gone before `regexSpaceAtom` could match it, and `/a b/` would be rejected. The flip side is that
+-// a `/*…*/` between body tokens is still skipped as a comment (`/a/*x*/b/` is accepted; swift
+-// rejects) — see TODO.md / Make trivia handling principled.
+-//
+-// 2026-09-25: this replaced a flat single-token body (`regexBodyNoTab`) introduced to reject
+-// literal tabs. The flat token had no group/class structure, so it lost paren/bracket balance:
+-// `/\()/` and `/[x])/` were accepted, and `(/x)/`, `/E.e` prefix-slash cases were rejected
+-// (TODO.md / Fix the regex-literal accept/reject failures).
+-//
+-// Converting this to a tight `-` lexical recognizer (TODO.md / Convert the plain-regex body to a lexical recognizer) was ATTEMPTED and
+-// reverted — see that item for the two measured failure modes.
+-regexBody           = regexItem { >n< regexSpaceAtom? >n< regexItem } .
+-regexItem           = regexEscape
+-                    | regexCharacterClass
+-                    | regexGroup
+-                    | "("
+-                    | regexNonOperatorAtom
+-                    | regexOperatorChar
+-                    | "#" | ":" | ";" | "," | "]" .
+-
+-// Spaces are free inside groups; the outer delimiter-adjacency rule does not apply there.
+-regexGroup          = "(" { >n< ( regexSpaceAtom | regexItem ) } >n< ")" .
+-regexCharacterClass = "[" >n< ( regexEscape | regexClassAtom ) { >n< ( regexEscape | regexClassAtom ) } >n< "]" .   // Swift forbids []
+-// Shared by the forced regex scanner and the operator-internal probe below.
+-regexScannerAtom    - /[^\/\\\r\n\u{20}\u{09}\(\)]/ .
+-
+-tryScanOperatorAsRegexLiteral = >n< <-< ( "true" "false" "nil" "self" "Self" "super" "Any"
+-                                          "func" "operator"
+-                                          identifier escapedIdentifier implicitParameterName propertyWrapperProjection
+-                                          binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral
+-                                          decimalFloatingPointLiteral hexadecimalFloatingPointLiteral
+-                                          regexSlash extendedRegularExpressionLiteral
+-                                          "_" ")" "]" "}"
+-                                          ">" closeAngle
+-                                          forceMark
+-                                          optionalMark
+-                                          "->" "..." "." "@" )
+-                               >-> ( tabbedPlainRegularExpressionLiteral ) regexSlash >s< tryScanOperatorAsRegexLiteralBody >s< regexSlash .
+-// Mirrors `regexBody`, including its single-line `>n<` junctions — and it needs them for the same
+-// reason: a speculative `@preempt` sub-parse uses the NORMAL lex policy (`MessageParser.swift:81`),
+-// so trivia IS skipped between its tokens. Its LEADING `>n< <-<` gate, by contrast, is DEAD: a
+-// `@preempt` sub-parse starts with an empty commit log, so the lookbehind finds nothing and the
+-// negative form returns true. Currently masked by the live gates on `plainRegularExpressionLiteral`
+-// — see TODO.md / Convert the plain-regex body to a lexical recognizer.
+-tryScanOperatorAsRegexLiteralBody   = tryScanOperatorAsRegexLiteralItem { >n< regexSpaceAtom? >n< tryScanOperatorAsRegexLiteralItem } .
+-tryScanOperatorAsRegexLiteralItem   = regexEscape | tryScanOperatorAsRegexLiteralGroup | "(" | regexScannerAtom .
+-tryScanOperatorAsRegexLiteralGroup  = "(" { >n< ( regexSpaceAtom | tryScanOperatorAsRegexLiteralItem ) } >n< ")" .
+-
+-regularExpressionLiteral            = plainRegularExpressionLiteral .
+-// No previous-token gate on the EXTENDED form. The gate on the plain form exists because a bare
+-// `/` may be division; a `#` never is an operator, and swift-syntax lexes `#/…/#` CONFIDENTLY at
+-// a `#` (Cursor.swift: `lexRegexLiteral()`, `mustBeRegex: true`, no `isInRegexLiteralPosition`).
+-// The gate this replaces also lacked the plain form's newline reset, so `f()⏎#/a/#` — a regex
+-// statement after a call, as in a `Regex { … }` builder — was rejected. Same-line `a #/b/#` is
+-// still an error, now where swift-syntax reports it: two expressions without a separator.
+-regularExpressionLiteral            = extendedRegularExpressionLiteral .
++// ONE token, scanned by `SwiftRegexLiteralScanner` (`SwiftGrammarRegexLibrary.swift`). Follows the
++// compiler, not swift-syntax (refs: swiftlang/swift main, 2026-10-08):
++// - Position is grammar: a regex is a primary expression = `parseExprUnary`, and an unapplied
++//   operator argument (`reduce(1, /)`) = `parseExprListElement` — `lib/Parse/ParseExpr.cpp:638,
++//   :3364`, mode choice in `Parser::tryLexRegexLiteral` `:1006`.
++// - Body: `DelimiterLexer.lex` — swift-experimental-string-processing
++//   `Sources/_RegexParser/Regex/Parse/DelimiterLexing.swift:297`.
++// - Bare-slash checks: `Lexer::tryScanRegexLiteral` — `lib/Parse/Lexer.cpp:2123`.
++// - Regex SYNTAX is not checked: `swiftc -parse` accepts `/x(()/`; the type checker parses it.
++// swift-syntax guesses the position from the previous token (`RegexLiteralLexer.swift`
++// `isInRegexLiteralPosition`); where it differs (`_ = /\()/`) the probe reports a reference
++// disagreement.
++regexLiteralToken        - @builder .
++regularExpressionLiteral = regexLiteralToken .
+ 
+ 
+ /// OPERATORS
+@@ -473,46 +355,44 @@ regularExpressionLiteral            = extendedRegularExpressionLiteral .
+ /// postfix-operator → operator
+ 
+ // Operator terminals model swift-syntax maximal munch plus parser-side splits.
+-// Slash preemption uses `tryScanOperatorAsRegexLiteral`, not the forced regex scanner.
++// `@yieldsTo(regexLiteralToken)`: `!/x/` and `^^/)/` are a prefix operator plus a regex — the
++// compiler's operator split in `Parser::tryLexRegexLiteral` (`lib/Parse/ParseExpr.cpp:1006`).
+ 
+-@literalMunch @preempt(regexSlash, tryScanOperatorAsRegexLiteral)
++@literalMunch @yieldsTo(regexLiteralToken)
+ nonArrowOperatorToken   - @builder .
+ 
+ @literalMunch
+ dotOperator             - @builder .
+ 
+-// A `/`-led operator survives only where no complete regex lexes. The
+-// production-body `<-<` gates where a regex may start; this predicate checks
+-// whether one completes. `->` is punctuation in expression position and reaches
+-// expressions only through `arrowExpr`, so `nonArrowOperatorToken` excludes it.
+-operator                = @cannotParse( regularExpressionLiteral ) nonArrowOperatorToken .
++// `->` is punctuation in expression position and reaches expressions only through
++// `arrowExpr`, so `nonArrowOperatorToken` excludes it.
++operator                = nonArrowOperatorToken .
+ operator                = dotOperator .
+ 
+ postfixOperatorToken    - @builder .
+ 
+ // Unrestricted operator body: no arrow exclusion. Used only where swift accepts a bare `->`
+ // as a NAME rather than as punctuation: `infix operator ->` parses, as does `import operator ->`.
+-// No `@preempt(openAngle)`: neither use site can be followed by a generic clause, so there is no
++// No `@forkBefore(openAngle)`: neither use site can be followed by a generic clause, so there is no
+ // `<` to yield back (that need belongs to `functionNameOperator`).
+ operatorName            - @builder .
+ 
+-// Operator body minus the exact `->`, preempting a generic `<` — the function-NAME position.
+-@preempt(openAngle)
++// Operator body minus the exact `->`, forking before a generic `<` — the function-NAME position.
++@forkBefore(openAngle)
+ functionNameOperator    - @builder .
+ 
+-// Munch-exempt single-character terminals. `regexSlash` belongs to this family
+-// but must be defined earlier because the regex productions use it in bodies.
+-// The others appear only in `<-<`
+-// lookbehind lists up to this point, and those are resolved later, so their placement is free.
++// Munch-exempt single-character terminals. They appear only in `<-<` lookbehind lists up to this
++// point, and those are resolved later, so their placement is free.
+ openAngle       - /</ .
+ closeAngle      - />/ .
+ optionalMark    - /\?/ .
+ forceMark       - /!/ .
+ 
+-infixOperator   = operator | "&" .
++infixOperator   = operator | "&" | forceMark .
+ // reserved bitwise-and; bare "&" is not in the overloadable operator set
+-prefixOperator  = operator .
+-// the regex-vs-operator gate lives on `operator` itself (see there)
++// A `/`-led prefix operator survives only where no complete regex lexes. Swift probes for regex
++// literals at unary-expression start, not in binary-operator position.
++prefixOperator  = @cannotParse( regularExpressionLiteral ) operator .
+ postfixOperator = postfixOperatorToken | dotOperator .
+ // postfix ops cannot begin with `!`/`?` (those split into force/optional)
+ // postfix ranges `1...`, `1..<5` AND mark-ending dot operators `x.?`, `x.!`, `x.??` — all measured as `postfixOperator(…)` in swift-syntax
+@@ -618,7 +498,7 @@ typeName =
+ // when the token after `::` starts a new line, so the APUS form requires `>n<`.
+ // `@rejectsMode(bindingIntroducer)` keeps module selectors out of introduced
+ // binding names; `::` qualifies references only.
+-@carries(bindingIntroducer) moduleSelector = @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
++@modeScope(bindingIntroducer) moduleSelector = @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
+ 
+ 
+ /// Grammar of a tuple type
+@@ -628,6 +508,7 @@ typeName =
+ /// element-name → identifier
+ 
+ tupleType               = "(" ")"
++                        | "(" tupleTypeElement "," ")"
+                         | "(" tupleTypeElement "," tupleTypeElementList ","? ")" .
+ tupleTypeElementList    = tupleTypeElement { "," tupleTypeElement } .
+ 
+@@ -787,7 +668,7 @@ classRestrictionType = "class" .
+ 
+ // if/switch expressions may have at most one "as"/"as?"/"as!" coercion but not "is" or any other
+ // infix operator. Mirrors swift-syntax's parseSingleValueStmt path.
+-@carries(stmtCondition bindingIntroducer) expression =
++@modeScope(stmtCondition bindingIntroducer) expression =
+     | prefixExpression infixExpressions?
+     | effectfulConditional coercingOperator?
+     .
+@@ -798,7 +679,7 @@ classRestrictionType = "class" .
+ // them for free. `if`/`switch` expressions are not `prefixExpression`s, so they take the same
+ // chain here.
+ effectMarker         = tryOperator | awaitOperator | "unsafe" <s> >n< .
+-@carries(stmtCondition) effectfulConditional = conditionalExpression | effectMarker effectfulConditional .
++@modeScope(stmtCondition) effectfulConditional = conditionalExpression | effectMarker effectfulConditional .
+ 
+ /// Grammar of a prefix expression
+ /// prefix-expression → prefix-operator? postfix-expression
+@@ -832,10 +713,12 @@ effectMarker         = tryOperator | awaitOperator | "unsafe" <s> >n< .
+ // Both readings are grammatical for us, hence the `@prefer` on the `effectMarker` alternate (for
+ // `try`/`await` it never fires: neither has a call reading). Tight `unsafe(1)` never enters the
+ // keyword rule (<s>), so the call reading survives unchallenged.
+-@carries(stmtCondition bindingIntroducer) @longest
++@modeScope(stmtCondition bindingIntroducer) @longest
+ prefixExpression =
+     | @shortest [ prefixOperator >s< ] postfixExpression
++    | @shortest prefixOperator >s< keyPathExpression
+     | "!" >s< postfixExpression
++    | "!" >s< keyPathExpression
+     | inOutExpression
+     | keyPathExpression
+     | packExpansionExpression
+@@ -844,14 +727,17 @@ prefixExpression =
+     | "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression
+     | @prefer effectMarker prefixExpression
+     .
+-@carries(stmtCondition) packExpansionExpression = "repeat" >->( "{" ) expression .
+-@carries(stmtCondition) packElementExpression   = "each" <s> postfixExpression .
++@modeScope(stmtCondition) packExpansionExpression = "repeat" >->( "{" ) expression .
++// swift-syntax `atContextualKeywordPrefixedSyntax` keeps contextual-keyword operands on the same
++// line unless the caller opts in. `each` does not, so `each x` is a pack element, while `each⏎x`
++// and `each⏎{}` start from an identifier expression.
++@modeScope(stmtCondition) packElementExpression   = "each" <s> >n< postfixExpression .
+ 
+ /// Grammar of an in-out expression
+ /// in-out-expression → & primary-expression
+ 
+ // Inout `&` is right-bound: tight to its operand. Spaced `&` remains available to infix/operator parsing.
+-@carries(stmtCondition) inOutExpression     = "&" >s< postfixExpression .
++@modeScope(stmtCondition) inOutExpression     = "&" >s< postfixExpression .
+ 
+ /// Grammar of a try expression
+ /// try-operator → try | try ? | try !
+@@ -917,7 +803,7 @@ awaitOperator =
+ // covers `\Foo.?.?[0]`'s `binaryOperator(".?")` directly, and maximal munch — not a `>-> ( "." )`
+ // lookahead — is what keeps `.?.name` as the single token `.?.` rather than `.?` + `.name`.
+ 
+-@carries(stmtCondition bindingIntroducer) @longest
++@modeScope(stmtCondition bindingIntroducer) @longest
+ infixExpression =
+     | <s> infixOperator <s> prefixExpression
+     | arrowExpr prefixExpression
+@@ -925,9 +811,9 @@ infixExpression =
+     | conditionalOperator expression
+     | typeCastingOperator
+     | @cannotParse( genericArgumentClause )
+-      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< prefixExpression
++      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." dotOperator ) >s< prefixExpression
+     .
+-@carries(stmtCondition bindingIntroducer) infixExpressions = infixExpression infixExpressions? .
++@modeScope(stmtCondition bindingIntroducer) infixExpressions = infixExpression infixExpressions? .
+ // TODO: infixExpressions = < infixExpression > .
+ 
+ // `arrowExpr` — swift-syntax `ExprNodes.swift:71`:
+@@ -966,22 +852,22 @@ typeEffectSpecifiers = "async" | "async" throwsClause | throwsClause .
+ // Tight form mirrors the tight `infixExpression` exactly (operator set, generic-argument predicate,
+ // `.` gate); the families differ only by the absence of assignment. With plain `infixOperator` a
+ // tight `??` was a binary operator in conditions only: `if rhs??b {}` accepted, swift rejects.
+-@carries(stmtCondition) @longest
++@modeScope(stmtCondition) @longest
+ conditionInfixExpression =
+     | <s> infixOperator <s> prefixExpression
+     | conditionalOperator expression
+     | typeCastingOperator
+     | @cannotParse( genericArgumentClause )
+-      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< prefixExpression
++      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." dotOperator ) >s< prefixExpression
+     .
+ 
+ 
+-@carries(stmtCondition) conditionInfixExpressions = conditionInfixExpression conditionInfixExpressions? .
++@modeScope(stmtCondition) conditionInfixExpressions = conditionInfixExpression conditionInfixExpressions? .
+ // TODO: conditionInfixExpressions = < conditionInfixExpression > .
+ 
+ // conditionExpression: like expression but without assignmentOperator — assignment returns Void and
+ // is never valid as a boolean condition (if/while/guard condition lists, repeat-while, where clauses).
+-@carries(stmtCondition) conditionExpression = effectfulConditional coercingOperator?
++@modeScope(stmtCondition) conditionExpression = effectfulConditional coercingOperator?
+                     | prefixExpression conditionInfixExpressions? .
+ 
+ /// Grammar of an assignment operator
+@@ -995,7 +881,7 @@ assignmentOperator = <s> "=" <s> | >s< "=" >s< .
+ // <s> before `?` only: swift-syntax requires whitespace (space OR newline) BEFORE the ternary `?`.
+ // A tight `a?` is postfix optional-chaining, not ternary.
+ // The char AFTER `?` is free: `a ?b : c` is a valid ternary.
+-@carries(stmtCondition) conditionalOperator = <s> "?" expression ":" .
++@modeScope(stmtCondition) conditionalOperator = <s> "?" expression ":" .
+ 
+ /// Grammar of a type-casting operator
+ /// type-casting-operator → is type
+@@ -1076,7 +962,7 @@ coercingOperator    = "as" type
+ // qualified name is `identifier` (covers Swift::foo, Swift::nil, Swift::self, Swift::Self,
+ // Swift::Any, Swift::super, Swift::init, Swift::do, …). Subsumes `moduleSelector identifier`.
+ 
+-@carries(stmtCondition bindingIntroducer) @longest
++@modeScope(stmtCondition bindingIntroducer) @longest
+ primaryExpression =
+     | genericIdentifier
+     | moduleGenericIdentifier
+@@ -1114,7 +1000,7 @@ expressionIdentifier =
+     .
+ genericIdentifier = expressionIdentifier genericArgumentClause? .
+ 
+-@carries(bindingIntroducer) moduleGenericIdentifier = moduleSelector identifier ---( "_" ) genericArgumentClause? .
++@modeScope(bindingIntroducer) moduleGenericIdentifier = moduleSelector identifier ---( "_" ) genericArgumentClause? .
+ // `$foo` (property-wrapper projection) lexes as `.identifier` in swift-syntax (Cursor.swift:2343-2346),
+ // so it's a valid qualified name too: `Swift::$foo`.
+ 
+@@ -1142,10 +1028,10 @@ parenthesisedExpressionSpecifierType = "(" expressionParenthesisedTypeSpecifier
+ /// playground-literal → #fileLiteral ( resourceName : expression )
+ /// playground-literal → #imageLiteral ( resourceName : expression )
+ 
+-@carries(stmtCondition) literalExpression = literal | arrayLiteral | dictionaryLiteral .
++@modeScope(stmtCondition) literalExpression = literal | arrayLiteral | dictionaryLiteral .
+ 
+-@carries(stmtCondition) arrayLiteral = "[" arrayLiteralItems? ","? "]" .
+-@carries(stmtCondition) arrayLiteralItems = arrayLiteralItem { "," arrayLiteralItem } .
++@modeScope(stmtCondition) arrayLiteral = "[" arrayLiteralItems? ","? "]" .
++@modeScope(stmtCondition) arrayLiteralItems = arrayLiteralItem { "," arrayLiteralItem } .
+ // `@cannotParse( parameterModifier )`: a TYPE-SPECIFIER-led element is type-only, so the
+ // expression route must not apply there — `[nonisolated(nonsending) () async -> Void]` otherwise
+ // reads `nonisolated(nonsending)` as a function CALL and yields a SequenceExpr where swift-syntax
+@@ -1155,7 +1041,7 @@ parenthesisedExpressionSpecifierType = "(" expressionParenthesisedTypeSpecifier
+ // The `@prefer` stays for every OTHER element: swift-syntax parses an arrow element
+ // `(Int,Double) -> Bool` as a SequenceExpr(TupleExpr, `->`, …) — NOT a FunctionType/TypeExpr
+ // No `parameterModifier` parses at an arrow's head, so that route is untouched.
+-@carries(stmtCondition) arrayLiteralItem    = @prefer @cannotParse( parenthesisedTypeSpecifier ) expression .
++@modeScope(stmtCondition) arrayLiteralItem    = @prefer @cannotParse( parenthesisedTypeSpecifier ) expression .
+ // TypeExpr array element (swift-syntax `TypeExprSyntax`). A collection element that is a
+ // TYPE the expression route can't produce — a specifier/attribute-prefixed or arrow function
+ // type (`[() throws -> T]`, `[nonisolated(nonsending) () async -> Void]`, `[@escaping () -> Void]`),
+@@ -1167,10 +1053,10 @@ arrayLiteralItem = typeExpression .
+ typeExpression = type .
+ // swift-syntax TypeExprSyntax: a type used in expression position
+ 
+-@carries(stmtCondition) dictionaryLiteral        = "[" dictionaryLiteralItems ","? "]" | "[" ":" "]" .
+-@carries(stmtCondition) dictionaryLiteralItems   = dictionaryLiteralItem { "," dictionaryLiteralItem } .
+-@carries(stmtCondition) dictionaryLiteralItem    = dictionaryLiteralElement ":" dictionaryLiteralElement .
+-@carries(stmtCondition) dictionaryLiteralElement = @prefer expression .   // @prefer over typeExpression, same rationale as arrayLiteralItem
++@modeScope(stmtCondition) dictionaryLiteral        = "[" dictionaryLiteralItems ","? "]" | "[" ":" "]" .
++@modeScope(stmtCondition) dictionaryLiteralItems   = dictionaryLiteralItem { "," dictionaryLiteralItem } .
++@modeScope(stmtCondition) dictionaryLiteralItem    = dictionaryLiteralElement ":" dictionaryLiteralElement .
++@modeScope(stmtCondition) dictionaryLiteralElement = @prefer expression .   // @prefer over typeExpression, same rationale as arrayLiteralItem
+ dictionaryLiteralElement = typeExpression .        // TypeExpr key/value, e.g. `[String: (nonisolated(nonsending) () async -> Void)?]`
+ 
+ // swift-syntax has no object-literal node; object literals are MacroExpansionExpr.
+@@ -1182,7 +1068,7 @@ dictionaryLiteralElement = typeExpression .        // TypeExpr key/value, e.g. `
+ /// self-initializer-expression → self . init
+ 
+ // `self` is a bare reference; member/subscript suffixes are parsed by postfix rules.
+-selfExpression          = "self" .
++selfExpression = "self" | selfType genericArgumentClause .
+ 
+ /// Grammar of a superclass expression
+ /// superclass-expression → superclass-method-expression | superclass-subscript-expression | superclass-initializer-expression
+@@ -1194,7 +1080,7 @@ selfExpression          = "self" .
+ // attach via the normal postfix machinery (explicitMemberExpression / subscriptExpression), the
+ // same as self. The TSPL-style superclassMethod/Subscript/Initializer productions duplicated
+ // those suffixes and made `super.init` ambiguous (`memberName` also matches `init`).
+-superclassExpression    = "super" .
++superclassExpression = "super" .
+ 
+ /// Grammar of a conditional expression
+ /// conditional-expression → if-expression | switch-expression
+@@ -1206,7 +1092,7 @@ superclassExpression    = "super" .
+ /// switch-expression-case → case-label statement
+ /// switch-expression-case → default-label statement
+ 
+-@carries(stmtCondition) conditionalExpression = ifExpression | switchExpression .
++@modeScope(stmtCondition) conditionalExpression = ifExpression | switchExpression .
+ 
+ // swift-syntax models `if`/`switch` as EXPRESSIONS everywhere (IfExprSyntax/SwitchExprSyntax);
+ // at statement position they surface as ExpressionStmt(IfExpr/SwitchExpr). There
+@@ -1219,7 +1105,7 @@ ifExpression = "if" >-> ( "{" ) conditionList codeBlock elseClause? .
+ elseClause = "else" codeBlock | "else" ifExpression .
+ 
+ // B2 discriminator 2: subject may not open with `{` (`switch { 42 } {…}` is a reject)
+-@carries(stmtCondition) switchExpression    = "switch" >-> ( "{" ) expression "{" switchCases? "}" .
++@modeScope(stmtCondition) switchExpression    = "switch" >-> ( "{" ) expression "{" switchCases? "}" .
+ // TODO: switchCases = < switchCase > .
+ switchCases = switchCase switchCases? .
+ switchCase =
+@@ -1236,7 +1122,7 @@ caseItemList = matchPattern whereClause? { "," matchPattern whereClause? } .
+ 
+ defaultLabel = switchCaseAttribute? "default" ":" .
+ 
+-switchCaseAttribute = "@" >s< attributeName .
++switchCaseAttribute = "@" attributeName .
+ 
+ whereClause = "where" whereExpression .
+ whereExpression = @setMode(stmtCondition) conditionExpression .
+@@ -1268,7 +1154,7 @@ switchElseDirectiveClause = elseDirective switchCases? .
+ // trailing closure in statement-condition position, where the brace starts the
+ // statement body. APUS partitions closure openings by newline and uses
+ // parser modes only for that condition/trailing-closure overlap.
+-@carries(stmtCondition trailingClosure) closureExpression = samelineOpenedClosure | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
++@modeScope(stmtCondition trailingClosure) closureExpression = samelineOpenedClosure | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
+ samelineOpenedClosure = "{" >n< closureSignature? statements? "}" .
+ newlineOpenedClosure  = "{" <n> closureSignature? statements? "}" .
+ 
+@@ -1313,7 +1199,7 @@ captureListItem     = captureHead
+                     | captureHead assignmentOperator expression .
+ captureHead         = captureSpecifier captureName
+                     | >-> ( "weak" "unowned" ) captureName .
+-captureName         = identifierToken | selfExpression .
++captureName         = identifierToken | "self" .
+ captureSpecifier    = "weak" | "unowned" | "unowned" "(" "safe" ")" | "unowned" "(" "unsafe" ")" .
+ 
+ /// Grammar of an implicit member expression
+@@ -1323,7 +1209,7 @@ captureSpecifier    = "weak" | "unowned" | "unowned" "(" "safe" ")" | "unowned"
+ // swift-syntax's primary-expression `.foo` path consumes the period and then
+ // parses the decl-reference name without an at-start-of-line guard, so a newline
+ // between `.` and `some(value)` is accepted in expression and matching-pattern positions.
+-@carries(stmtCondition) implicitMemberExpression = "." moduleSelector? memberName .          // allows e.g. '.public', '.Swift::min' (SE-0491)
++@modeScope(stmtCondition) implicitMemberExpression = "." moduleSelector? memberName .          // allows e.g. '.public', '.Swift::min' (SE-0491)
+ // A compound name, as on an explicit member (`T.f(_:)`): swift-syntax parses both through
+ // `parseDeclReferenceExpr`, whose name is a base name plus optional argument labels — `.f(_:)`.
+ implicitMemberExpression = "." moduleSelector? memberName "(" argumentNames ")" .
+@@ -1334,7 +1220,7 @@ implicitMemberExpression = "." moduleSelector? memberName "." >n< >+> ( identifi
+ /// Grammar of a parenthesized expression
+ /// parenthesized-expression → ( expression )
+ 
+-@carries(stmtCondition bindingIntroducer) parenthesizedExpression = "(" expression ")" .
++@modeScope(stmtCondition bindingIntroducer) parenthesizedExpression = "(" expression ")" .
+ 
+ /// Grammar of a tuple expression
+ /// tuple-expression → ( ) | ( tuple-element , tuple-element-list ,? )
+@@ -1343,12 +1229,15 @@ implicitMemberExpression = "." moduleSelector? memberName "." >n< >+> ( identifi
+ 
+ // One element is a tuple only when labelled or followed by a comma (SE-0470 `(A,)`); a bare
+ // `(A)` is `parenthesizedExpression`. swift-syntax builds a one-element `TupleExpr` for both.
+-@carries(stmtCondition bindingIntroducer) tupleExpression     = "(" ")"
++@modeScope(stmtCondition bindingIntroducer) tupleExpression     = "(" ")"
+                     | "(" argumentLabel ":" expression ")"
+                     | "(" tupleElement "," ")"
+                     | "(" tupleElement "," tupleElementList ","? ")" .
+-@carries(stmtCondition bindingIntroducer) tupleElementList    = tupleElement { "," tupleElement } .
+-@carries(stmtCondition bindingIntroducer) tupleElement        = expression | argumentLabel ":" expression .   // swift-syntax `isArgumentLabel`: `(let: 1)`, `(_: 1)` are clean
++@modeScope(stmtCondition bindingIntroducer) tupleElementList    = tupleElement { "," tupleElement } .
++@modeScope(stmtCondition bindingIntroducer) tupleElement        = expression
++                                                               | argumentLabel ":" expression
++                                                               | operator
++                                                               | argumentLabel ":" operator .   // swift-syntax `isArgumentLabel`: `(let: 1)`, `(_: 1)` are clean
+ 
+ /// Grammar of a wildcard expression
+ /// wildcard-expression → _
+@@ -1360,7 +1249,7 @@ wildcardExpression = "_" .
+ 
+ // swift-syntax takes a same-line `(` as a macro argument clause. `@longest`
+ // prevents an argless macro followed by a call from winning over that parse.
+-@carries(stmtCondition) @longest
++@modeScope(stmtCondition) @longest
+ macroExpansionExpression = macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures? .
+ 
+ 
+@@ -1572,11 +1461,11 @@ keyPathBareComponent = >n< "[" functionCallArgumentList? "]" . // bare [args], n
+ // consumes every `.`/`.?`/`.!`/`.[`/`?`/`!`/`[` suffix as a key-path COMPONENT and never returns to
+ // outer postfix parsing.) The `@cannotParse( keyPathExpression )` guard that used to stand in for
+ // this is gone: it is an ORACLE prune, so it never affected the yields — see `primaryExpression`.
+-@carries(stmtCondition bindingIntroducer) postfixExpression =
++@modeScope(stmtCondition bindingIntroducer) postfixExpression =
+     | primaryExpression
+     | @prefer postfixExpression >s< postfixOperator <s>
+-    | postfixExpression >s< postfixOperatorToken >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+-    | postfixExpression >s< dotOperator          >+> ( "." ")" "]" "}" "," ";" ":" EOF )
++    | postfixExpression >s< postfixOperatorToken >+> ( "." dotOperator ")" "]" "}" "," ";" ":" EOF )
++    | postfixExpression >s< dotOperator          >+> ( "." dotOperator ")" "]" "}" "," ";" ":" EOF )
+     | functionCallExpression
+     | initializerExpression
+     | explicitMemberExpression
+@@ -1596,8 +1485,11 @@ keyPathBareComponent = >n< "[" functionCallArgumentList? "]" . // bare [args], n
+ /// labeled-trailing-closures → labeled-trailing-closure labeled-trailing-closures?
+ /// labeled-trailing-closure → identifier : closure-expression
+ 
+-@carries(stmtCondition bindingIntroducer) functionCallExpression = postfixExpression >n< functionCallArgumentClause .
+-// >n<: a call `(` may not start a new line (swift-syntax `allowAtStartOfLine:false`) — `g()⏎(x)` is two statements, not `g()(x)`
++@modeScope(stmtCondition bindingIntroducer)
++functionCallExpression = postfixExpression >n< functionCallArgumentClause .
++// >n<: a call `(` may not start a new line (swift-syntax `allowAtStartOfLine:false`) — `g()⏎(x)` is two statements,
++// not `g()(x)`, even when the parenthesized expression itself has a trailing closure:
++// `VStack {}⏎(condition ? AnyLayout(...) : AnyLayout(...)) {}` is two builder items, not a chained call.
+ // A trailing closure belongs to the same call as a preceding argument clause:
+ // `f() {}` is one call on `f`, not a trailing-closure call on `f()`.
+ //
+@@ -1634,20 +1526,23 @@ keyPathBareComponent = >n< "[" functionCallArgumentList? "]" . // bare [args], n
+ //     or `1.description {}` spans MORE than any literal, so those stay callable (matches
+ //     swift-syntax). This replaced a `nonLiteralPostfix`/`nonLiteralPrimary` clone of
+ //     `postfixExpression`/`primaryExpression` (21 alternates) that had drifted from its originals.
+-functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
++functionCallExpression = @prefer postfixExpression >n< functionCallArgumentClause trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
+                        | @right @right( literalExpression ) postfixExpression trailingClosures .
+ functionCallExpression = collectionLiteralCallee trailingClosures .
+-@carries(stmtCondition) collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
++@modeScope(stmtCondition)
++collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
+ 
+-@carries(bindingIntroducer) functionCallArgumentClause = "(" ")" | "(" functionCallArgumentList ","? ")" .
+-@carries(bindingIntroducer) functionCallArgumentList = functionCallArgument { "," functionCallArgument } .
++@modeScope(bindingIntroducer) functionCallArgumentClause = "(" ")" | "(" functionCallArgumentList ","? ")" .
++@modeScope(bindingIntroducer) functionCallArgumentList = functionCallArgument { "," functionCallArgument } .
+ 
+ // TODO:
+ //functionCallArgument = [ argumentLabel ":" ] ( expression | moduleSelector? operator ) .
+-// No `@carries`: an argument is an expression island — the condition flavor (`stmtCondition`)
++// No `@modeScope`: an argument is an expression island — the condition flavor (`stmtCondition`)
+ // does not pass into it, as in swift-syntax, which parses arguments with the basic flavor.
+-@carries(bindingIntroducer) functionCallArgument = expression
+-                     | argumentLabel ":" expression .
++@modeScope(bindingIntroducer) functionCallArgument = expression
++                     | argumentLabel ":" expression
++                     | @requiresMode(bindingIntroducer) valueBindingPattern
++                     | @requiresMode(bindingIntroducer) argumentLabel ":" valueBindingPattern .
+ functionCallArgument = operator
+                      | argumentLabel ":" operator .
+ functionCallArgument = moduleSelector operator
+@@ -1662,9 +1557,12 @@ functionCallArgument = moduleSelector operator
+ // so `else:` remains a label, while bare `else { ... }` is still blocked.
+ // A brace that starts an accessor block is also not a trailing closure;
+ // swift-syntax checks this with `atStartOfGetSetAccessor` (Lookahead.swift).
+-@carries(stmtCondition) trailingClosures = @cannotParse(willSetDidSetBlock accessorBlockBrace) @setMode(trailingClosure) closureExpression labeledTrailingClosures
+-                 | @cannotParse(willSetDidSetBlock accessorBlockBrace) @setMode(trailingClosure) closureExpression >-> ( "else" ) .
+-@carries(stmtCondition) labeledTrailingClosures = labeledTrailingClosure labeledTrailingClosures? .
++@modeScope(stmtCondition) trailingClosures =
++    | @cannotParse(accessorBlockStart) accessorBlockStart
++    | @cannotParse(accessorBlockStart) @setMode(trailingClosure) closureExpression labeledTrailingClosures
++    | @cannotParse(accessorBlockStart) @setMode(trailingClosure) closureExpression >-> ( "else" )
++    .
++@modeScope(stmtCondition) labeledTrailingClosures = labeledTrailingClosure labeledTrailingClosures? .
+ // `default` is the only keyword excluded from labeled trailing closure position — swift-syntax's
+ // atStartOfLabelledTrailingClosure() explicitly checks `self.at(.keyword(.default))` and returns
+ // false. All other keywords (including `case`, `return`, `for`, …) are valid trailing closure labels.
+@@ -1672,7 +1570,7 @@ functionCallArgument = moduleSelector operator
+ // (`isArgumentLabel`: any lexer keyword except `inout`) that is not an UNESCAPED `default`, which
+ // would be ambiguous with a switch case.
+ trailingClosureLabel = identifier ---( "_" "inout" "default" ) | escapedIdentifier | "_" .
+-@carries(stmtCondition) labeledTrailingClosure = trailingClosureLabel ":" closureExpression .
++@modeScope(stmtCondition) labeledTrailingClosure = trailingClosureLabel ":" closureExpression .
+ 
+ 
+ /// Grammar of an initializer expression
+@@ -1719,7 +1617,7 @@ initializerExpression = "init" >-> ( "{" ) .
+ //    | ( >s< "." >s< | <s> "." ) moduleSelector? memberName [ genericArgumentClause | "(" argumentNames ")" ]
+ //    | postfixConditionalCompilationBlock
+ //    .
+-@carries(stmtCondition) explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
++@modeScope(stmtCondition) explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
+ explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName .
+ explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName genericArgumentClause .   // island is structural — see `postfixExpression`
+ explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName "(" argumentNames ")" .
+@@ -1737,7 +1635,7 @@ argumentName = argumentLabel ":" .   // swift-syntax `parseArgLabelList`: `isArg
+ /// Grammar of a subscript expression
+ /// subscript-expression → postfix-expression [ function-call-argument-list ]
+ 
+-@carries(stmtCondition) subscriptExpression = postfixExpression >n< subscriptArgumentClause .
++@modeScope(stmtCondition) subscriptExpression = postfixExpression >n< subscriptArgumentClause .
+ subscriptArgumentClause = "[" "]" | "[" functionCallArgumentList ","? "]" .
+ 
+ // >n<: a subscript `[` may not start a new line.
+@@ -1745,12 +1643,12 @@ subscriptArgumentClause = "[" "]" | "[" functionCallArgumentList ","? "]" .
+ /// Grammar of a forced-value expression
+ /// forced-value-expression → postfix-expression !
+ 
+-@carries(stmtCondition bindingIntroducer) forcedValueExpression = postfixExpression >s< forceMark .
++@modeScope(stmtCondition bindingIntroducer) forcedValueExpression = postfixExpression >s< forceMark .
+ 
+ /// Grammar of an optional-chaining expression
+ /// optional-chaining-expression → postfix-expression ?
+ 
+-@carries(stmtCondition bindingIntroducer) optionalChainingExpression = postfixExpression >s< optionalMark .
++@modeScope(stmtCondition bindingIntroducer) optionalChainingExpression = postfixExpression >s< optionalMark .
+ 
+ 
+ /// STATEMENTS
+@@ -1769,7 +1667,7 @@ subscriptArgumentClause = "[" "]" | "[" functionCallArgumentList ","? "]" .
+ // At statement position, swift-syntax tries declarations first, and an
+ // attribute must introduce a declaration. The conjunction blocks expression
+ // statements where either a declaration or an attribute starts here.
+-@carries(initializerBodyMode ifConfigBody) statement = @cannotParse(declaration attributes) expression .
++@modeScope(initializerBodyMode ifConfigBody) statement = @cannotParse(declaration attributes) expression .
+ statement = declaration .
+ 
+ // swift-syntax `allowInitDecl: false`: inside an initializer's OWN body, statement-start `init` is
+@@ -1819,7 +1717,7 @@ discardStatement = "discard" >-> ( "(" "[" "." ) <s> >n< expression .
+ // `@clearMode(ifConfigBody)`: only the FIRST statement of an `#if` body follows the enclosing
+ // condition; any later one follows a statement, so a leading-dot `#if` there is postfix as usual
+ // (`#if A⏎let v = b⏎#if FOO⏎.m + 1⏎#endif⏎#endif` is an error, as at top level).
+-@carries(initializerBodyMode ifConfigBody) statements = statement { statementSeparator @clearMode(ifConfigBody) statement } ";"? .
++@modeScope(initializerBodyMode ifConfigBody) statements = statement { statementSeparator @clearMode(ifConfigBody) statement } ";"? .
+ statementSeparator = <n> | ";" .
+ 
+ /// Grammar of a loop statement
+@@ -2039,7 +1937,7 @@ catchPattern = whereClause .
+ /// compiler-control-statement → line-control-statement
+ /// compiler-control-statement → diagnostic-statement
+ 
+-@carries(initializerBodyMode ifConfigBody) compilerControlStatement = lineControlStatement | conditionalCompilationBlock .
++@modeScope(initializerBodyMode ifConfigBody) compilerControlStatement = lineControlStatement | conditionalCompilationBlock .
+ // `#warning` and `#error` are MacroExpansionExpr in swift-syntax.
+ 
+ memberCompilerControlStatement = lineControlStatement | memberConditionalCompilationBlock .
+@@ -2073,7 +1971,7 @@ memberCompilerControlStatement = lineControlStatement | memberConditionalCompila
+ /// swift-version-continuation → . decimal-digits swift-version-continuation?
+ /// environment → simulator | macCatalyst
+ 
+-@carries(initializerBodyMode ifConfigBody) conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
++@modeScope(initializerBodyMode ifConfigBody) conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
+ 
+ // A clause body IS `statements`. This rule is a SENTINEL: it exists only so that the position
+ // "inside an `#if` clause body" has a mode for the leading-dot alternate of
+@@ -2084,7 +1982,7 @@ memberCompilerControlStatement = lineControlStatement | memberConditionalCompila
+ // (`convertStatementList`) and one semicolon rule. A nested `#if` arrives through `statement` like
+ // any other statement, which is all that used to justify the separate
+ // `ifConfigBodyConditionalCompilationBlock` family.
+-@carries(initializerBodyMode ifConfigBody) ifConfigStatements = @setMode(ifConfigBody) statements .
++@modeScope(initializerBodyMode ifConfigBody) ifConfigStatements = @setMode(ifConfigBody) statements .
+ 
+ memberConditionalCompilationBlock = memberIfDirectiveClause memberElseifDirectiveClauses? memberElseDirectiveClause? endifDirective .
+ memberIfDirectiveClause = ifDirective compilationCondition <n> members? .
+@@ -2126,7 +2024,7 @@ postfixNestedBlocks = postfixConditionalCompilationBlock postfixNestedBlocks? .
+ // token, swift-syntax treats the directive as postfix-ifconfig and diagnoses any non-postfix
+ // tail there. The statement-level route must not shadow that recovery path.
+ 
+-@carries(initializerBodyMode ifConfigBody) ifDirectiveClause =
++@modeScope(initializerBodyMode ifConfigBody) ifDirectiveClause =
+     ifDirective compilationCondition >->( "." ) <n> ifConfigStatements? .
+ 
+ // But at a true statement/declaration boundary, swift-syntax accepts a leading-dot body:
+@@ -2150,12 +2048,12 @@ ifDirectiveClause =
+ ifDirectiveClause =
+     @requiresMode(ifConfigBody) ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+ 
+-@carries(initializerBodyMode ifConfigBody) elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
++@modeScope(initializerBodyMode ifConfigBody) elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
+ // `#elseif`/`#else` bodies are ungated: swift-syntax decides postfix-vs-statement from the `#if`
+ // clause alone (see `postfixIfDirectiveClause`), and when that clause is postfix-shaped the gate on
+ // `ifDirectiveClause` above already kills this route. `x⏎#if FOO⏎#else⏎.b⏎#endif` is statement-level.
+-@carries(initializerBodyMode ifConfigBody) elseifDirectiveClause = elseifDirective compilationCondition <n> ifConfigStatements? .
+-@carries(initializerBodyMode ifConfigBody) elseDirectiveClause = elseDirective ifConfigStatements? .
++@modeScope(initializerBodyMode ifConfigBody) elseifDirectiveClause = elseifDirective compilationCondition <n> ifConfigStatements? .
++@modeScope(initializerBodyMode ifConfigBody) elseDirectiveClause = elseDirective ifConfigStatements? .
+ ifDirective = "#if" .
+ elseifDirective = "#elseif" .
+ elseDirective = "#else" <n> .
+@@ -2323,9 +2221,9 @@ macroHead = "#" >s< moduleSelector identifier ---( "_" ) .   // SE-0491 #Module:
+ /// Grammar of a code block
+ /// code-block → { statements? }
+ 
+-// `@carries(initializerBodyMode)`: an initializer's own code block passes the mode to its
++// `@modeScope(initializerBodyMode)`: an initializer's own code block passes the mode to its
+ // statements; nested `if`/`do`/… bodies are reached through productions outside the scope.
+-@carries(initializerBodyMode) codeBlock = "{" statements? "}" .
++@modeScope(initializerBodyMode) codeBlock = "{" statements? "}" .
+ 
+ /// Grammar of an import declaration
+ /// import-declaration → attributes? import import-kind? import-path
+@@ -2361,11 +2259,16 @@ constantDeclaration = attributes? declarationModifiers? "let" patternInitializer
+ 
+ patternInitializerList = patternInitializer { "," patternInitializer } .
+ 
+-// TODO: patternInitializer = bindingPattern initializer? initializedAccessorBlock? .
++// Default values and accessor blocks do not share one optional tail in swift-syntax.
++// A plain code block or get/set/coroutine block may follow an uninitialized binding;
++// after an initializer, only an init-accessor block is parsed here. Observers with
++// initializers use the dedicated `variableDeclaration ... willSetDidSetBlock` forms.
+ @longest
+ patternInitializer = bindingPattern initializer? .
+-patternInitializer = bindingPattern initializer? initializedAccessorBlock .
++patternInitializer = bindingPattern initializedAccessorBlock .
++patternInitializer = @prefer bindingPattern initializerBeforeAccessorBlock initializedInitAccessorBlock .
+ initializer = assignmentOperator expression .
++initializerBeforeAccessorBlock = assignmentOperator expression .
+ 
+ /// Grammar of a variable declaration
+ /// variable-declaration → variable-declaration-head pattern-initializer-list
+@@ -2398,6 +2301,7 @@ initializer = assignmentOperator expression .
+ // initializer. `parsePatternBinding` consumes it via `parseAccessorBlock` and never reconsiders.
+ // SE-0400: with a default value, an `init` accessor may appear only first.
+ // Without a default value, unrestricted `getterSetterBlock` handles the list.
++@longest
+ variableDeclaration =
+     | variableDeclarationHead patternInitializerList
+     | variableDeclarationHead variableName initializer willSetDidSetBlock
+@@ -2414,6 +2318,8 @@ getterSetterBlock = codeBlock .
+ // derives one token later and never matches a brace-anchored alternate start. `getterSetterBlock`
+ // itself is unusable as a lookahead target because its `codeBlock` alternate matches ANY block.
+ accessorBlockBrace = "{" accessorClauseList "}" .
++accessorBlockStart = "{" attributes? accessorModifiers? accessorIntroducer .
++accessorIntroducer = "get" | "set" | "init" | coroutineSpecifier | borrowMutateAccessorRequirementSpecifier | "willSet" | "didSet" .
+ getterSetterBlock = @prefer accessorBlockBrace .  // swift-syntax AccessorBlock = "{" AccessorDeclList "}"; the accessor-vs-codeBlock commitment is atStartOfGetSetAccessor (Lookahead.swift:252)
+ // With a default value, the block is either a plain code block, an accessor list
+ // without `init`, or an accessor list beginning with `init`. The final
+@@ -2447,6 +2353,7 @@ initializedAccessorBlock =
+     | @prefer "{" initAccessorClause accessorClauseList? "}"
+     | @cannotParse(accessorBlockBrace) accessorBlockBrace
+     .
++initializedInitAccessorBlock = @prefer "{" initAccessorClause accessorClauseList? "}" .
+ accessorClauseListNoInit = accessorClauseEntryNoInit accessorClauseListNoInit? .
+ accessorClauseEntryNoInit = getterClause | setterClause | coroutineAccessorClause .
+ // swift-syntax parseAccessorDecl (Declarations.swift:1736) calls parseAccessorEffectSpecifiers
+@@ -2464,14 +2371,16 @@ accessorClauseList = accessorClauseEntry accessorClauseList? .
+ accessorClauseEntry = getterClause | setterClause | initAccessorClause | coroutineAccessorClause .
+ initAccessorClause = attributes? "init" setterName? accessorEffects? codeBlock .
+ coroutineAccessorClause = attributes? accessorModifiers? coroutineSpecifier accessorEffects? codeBlock? .
+-// SE-0443 coroutine accessors. `read`/`modify`/`mutate` are listed because
+-// swift-syntax knows these spellings, although some are gated behind
+-// experimental features —
++coroutineAccessorClause = attributes? accessorModifiers? borrowMutateAccessorRequirementSpecifier accessorEffects? .
++// Coroutine accessors accepted by the shipping compiler without experimental features.
++// swift-syntax also knows the bare spellings below, but they are feature-gated and should not
++// participate in the default grammar —
+ //     case TokenSpec(.read)   where experimentalFeatures.contains(.coroutineAccessors):
+ //     case TokenSpec(.modify) where experimentalFeatures.contains(.coroutineAccessors):
+ //     case TokenSpec(.mutate) where experimentalFeatures.contains(.borrowAndMutateAccessors):
+-// `_read`/`_modify`/`borrow` are ungated.
+-coroutineSpecifier = "_read" | "read" | "_modify" | "modify" | "borrow" | "mutate" | "unsafeAddress" | "unsafeMutableAddress" .
++// `borrow`/`mutate` remain only in the bodyless requirement spelling (`{ borrow mutate }`).
++coroutineSpecifier = "_read" | "_modify" | "unsafeAddress" | "unsafeMutableAddress" .
++borrowMutateAccessorRequirementSpecifier = "borrow" | "mutate" .
+ 
+ // Accessor-level modifiers use swift-syntax `AccessorModifierSyntax`, distinct
+ // from declaration mutation modifiers.
+@@ -2503,6 +2412,9 @@ accessorEffects = throwsClause | "async" throwsClause? .
+ // same-line form failed too, because the clause had no rule at all.
+ typealiasDeclaration = attributes? declarationModifiers? "typealias" typealiasName genericParameterClause? typealiasAssignment genericWhereClause? .
+ typealiasName = identifierToken .
++// swift-syntax parses the initializer with `parseType()`, so a type postfix/member
++// continuation on the next line belongs to the alias, not to a following statement.
++@longest
+ typealiasAssignment = assignmentOperator type .
+ 
+ /// Grammar of a function declaration
+@@ -2534,7 +2446,7 @@ functionHead = attributes? declarationModifiers? "func" .
+ // position excludes the exact `->` but keeps `!`/`?`-led names. (`operatorName` stays unrestricted
+ // for `operatorDeclaration`, where `infix operator ->` does parse.)
+ // It cannot reuse `nonArrowOperatorToken`: this position needs
+-// `@preempt(openAngle)` so a following generic parameter clause is not swallowed
++// `@forkBefore(openAngle)` so a following generic parameter clause is not swallowed
+ // by operator maximal munch.
+ functionName = identifierToken | functionNameOperator | operatorNameExtra .
+ // The two operator NAME positions — `func` names and `operator` declarations — take what swift-syntax
+@@ -2583,8 +2495,12 @@ parameterModifier =
+ // contextual keywords that are also ordinary identifiers, so gating an expression on them blocks
+ // legitimate code like `(consuming)`. swift-syntax discriminates on the same thing —
+ // `canParseTypeAttributeList` (Types.swift:747) peeks past `nonisolated` for its `(`.
+-parenthesisedTypeSpecifier = expressionParenthesisedTypeSpecifier .
+-expressionParenthesisedTypeSpecifier = "nonisolated" >s< "(" "nonsending" ")" .
++parenthesisedTypeSpecifier = expressionParenthesisedTypeSpecifier | lineBrokenParenthesisedTypeSpecifier .
++expressionParenthesisedTypeSpecifier = "nonisolated" >s< "(" >n< "nonsending" >n< ")" .
++lineBrokenParenthesisedTypeSpecifier =
++    | "nonisolated" >s< "(" <n> "nonsending" ")"
++    | "nonisolated" >s< "(" "nonsending" <n> ")"
++    .
+ // Type-specifier form only: swift-syntax `parseNonisolatedTypeSpecifier`
+ // requires `(nonsending)`. Bare `nonisolated` is a declaration modifier.
+ parameterDeclarationModifiers = parameterDeclarationModifier parameterDeclarationModifiers? .
+@@ -2802,11 +2718,12 @@ macroDefinition = assignmentOperator expression .
+ // `->` is punctuation in expression/function-name position, but it is accepted
+ // as an operator declaration name.
+ // `operatorNameExtra` carries the dot-led names (`prefix operator ..<`: a `.`-led operator has no
+-// `operatorHead`, so the plain body cannot match it) and the lone `!`/`&`.
++// `operatorHead`, so the plain body cannot match it) and lone operator punctuation accepted only in
++// declaration-name position.
+ 
+ operatorDeclaration = ( "prefix" | "postfix" | "infix" ) "operator" declaredOperator infixOperatorGroup? .
+ 
+-declaredOperator = operatorName | operatorNameExtra .   // see `functionName`
++declaredOperator = operatorName | operatorNameExtra | "=" | "?" .   // see `functionName`
+ 
+ infixOperatorGroup = ":" precedenceGroupName designatedTypes? .
+ 
+@@ -2871,12 +2788,11 @@ declarationModifier =
+     | "class" | "convenience" | "dynamic" | "final" | "infix" | "lazy" | "optional" | "override" | "postfix"
+     | "prefix" | "required" | "static" | "unowned" | "unowned" "(" "safe" ")" | "unowned" "(" "unsafe" ")" | "weak"
+     | "async" | "borrowing" | "consuming" | "sending" | "distributed" | "reasync" | "indirect" | "isolated"
+-    | "_const" | "_local" | "__consuming" | "__setter_access"
++    | "_const" | "_local" | "__consuming"
+     | accessLevelModifier
+     | mutationModifier
+     | actorIsolationModifier
+     .
+-// TODO:
+ //accessLevelModifier = "open" | ( "private" | "fileprivate" | "internal" | "package" | "public" ) [ "(" "set" ")" ] .
+ accessLevelModifier =
+     | "private" | "private" "(" "set" ")"
+@@ -3276,17 +3192,17 @@ nonWordToken = "#" >-> ( singleLineStringLiteral multilineStringLiteral ) .
+ /// pattern → expression-pattern
+ 
+ // Binding patterns — let/var declarations, optional binding conditions (if let, guard let)
+-@carries(optionalBinding) bindingPattern = wildcardPattern typeAnnotation?
++@modeScope(optionalBinding) bindingPattern = wildcardPattern typeAnnotation?
+                | identifierPattern typeAnnotation?
+                | tupleBindingPattern typeAnnotation? .
+ 
+-@carries(optionalBinding) tupleBindingPattern = "(" tupleBindingElementList? ")" .
++@modeScope(optionalBinding) tupleBindingPattern = "(" tupleBindingElementList? ")" .
+ 
+-@carries(optionalBinding) tupleBindingElementList = tupleBindingElement { "," tupleBindingElement } .
++@modeScope(optionalBinding) tupleBindingElementList = tupleBindingElement { "," tupleBindingElement } .
+ 
+ // swift-syntax: an `.identifier` label (lexer-classified keywords are rejected, measured).
+ tupleBindingLabel = identifierToken .
+-@carries(optionalBinding) tupleBindingElement = bindingSubpattern | tupleBindingLabel ":" bindingSubpattern .
++@modeScope(optionalBinding) tupleBindingElement = bindingSubpattern | tupleBindingLabel ":" bindingSubpattern .
+ // Tuple sub-patterns carry NO type annotation — swift-syntax forbids typed sub-patterns
+ // (`((x): Int, y)` is rejected; only the top-level binding is annotated). Reusing the annotated
+ // `bindingPattern` here made `x: Int` parse BOTH as label `x` + pattern `Int` AND as pattern `x`
+@@ -3302,7 +3218,7 @@ tupleBindingLabel = identifierToken .
+ // REJECTS it; both were wrong. What was actually broken was the CONVERTER —
+ // `convertBindingSubpattern` had no case for this alternate, so it matched the inner identifier
+ // and dropped the specifier.
+-@carries(optionalBinding) bindingSubpattern =
++@modeScope(optionalBinding) bindingSubpattern =
+     | wildcardPattern | identifierPattern | tupleBindingPattern
+     | ( "var" | "let" ) ( wildcardPattern | identifierPattern | tupleBindingPattern )
+     .
+@@ -3329,7 +3245,7 @@ matchIdentifierPattern =
+ // parser's. `@prefer` keeps the expression reading over structural siblings at the same start;
+ // `let`/`var`/`is` survive (not expressions) and `.foo(let x)` stays on enumCasePattern (an
+ // embedded `let` is not a valid expression, so no expression reading competes there).
+-@carries(bindingIntroducer) matchPattern =
++@modeScope(bindingIntroducer) matchPattern =
+     | wildcardPattern
+     | matchIdentifierPattern
+     | valueBindingPattern
+@@ -3352,7 +3268,7 @@ wildcardPattern = "_" .
+ 
+ // `self` may be introduced only by optional binding conditions. swift-syntax
+ // diagnoses the invalid cases after parsing, so APUS uses containment.
+-@carries(optionalBinding) identifierPattern =
++@modeScope(optionalBinding) identifierPattern =
+     | identifierToken
+     | @requiresMode(optionalBinding) "self"
+     .
+@@ -3361,9 +3277,9 @@ wildcardPattern = "_" .
+ /// value-binding-pattern → var pattern | let pattern
+ 
+ // swift-syntax ValueBindingPatternSyntax.BindingSpecifierOptions (Parser+TokenSpecSet.swift:4112-4142):
+-// let, var, inout, borrowing, plus the experimental reference-binding specifier _borrowing.
+-// Swift 6 rejects _consuming/_mutating in pattern introducer position, even though swift-syntax
+-// has token-set entries for them.
++// let, var, inout, borrowing, plus deprecated-but-parsed _borrowing. Swift 6 rejects
++// _consuming/_mutating in pattern introducer position, even though swift-syntax has token-set
++// entries for them behind the ReferenceBindings feature.
+ 
+ // `>+>(identifier "_")`: port of swift-syntax `shouldParsePatternBinding` (Patterns.swift:274) —
+ // `borrowing`/`_borrowing` introduce a value-binding pattern ONLY when the next token is an identifier
+@@ -3386,10 +3302,10 @@ valueBindingPattern =
+ 
+ // swift-syntax parses a match tuple as an expression tuple, so its labels are ARGUMENT labels
+ // (`isArgumentLabel`: `let`, `var`, `_` included), unlike the binding tuple above.
+-@carries(bindingIntroducer) tupleMatchPattern = "(" tupleMatchElementList? ")" .
+-@carries(bindingIntroducer) tupleMatchElementList = tupleMatchElement { "," tupleMatchElement } .
++@modeScope(bindingIntroducer) tupleMatchPattern = "(" tupleMatchElementList? ")" .
++@modeScope(bindingIntroducer) tupleMatchElementList = tupleMatchElement { "," tupleMatchElement } .
+ tupleMatchLabel = argumentLabel .
+-@carries(bindingIntroducer) tupleMatchElement = matchPattern | tupleMatchLabel ":" matchPattern .
++@modeScope(bindingIntroducer) tupleMatchElement = matchPattern | tupleMatchLabel ":" matchPattern .
+ 
+ /// Grammar of an enumeration case pattern
+ /// enum-case-pattern → type-identifier? . enum-case-name tuple-pattern?
+@@ -3404,7 +3320,7 @@ tupleMatchLabel = argumentLabel .
+ // through `implicitMemberExpression`, which took `memberName` in fix 3. Only the tuple form
+ // has to come through here.
+ // Dot layout as at `explicitMemberExpression`: `case .⏎some(let x)` parses, `case Foo.⏎bar` does not.
+-@carries(bindingIntroducer) enumCasePattern =
++@modeScope(bindingIntroducer) enumCasePattern =
+     | enumCaseName >n< tupleMatchPattern
+     | enumCaseQualifier? ( >s< "." >n< | <s> "." ) memberName [ >n< tupleMatchPattern ]
+     .
+@@ -3423,8 +3339,8 @@ enumCaseQualifier = memberType | typeIdentifier .
+ // swift-syntax accepts and which occurs in this project's own sources. The payload is REQUIRED:
+ // a bare `.a?` already parses through the expression-pattern route, so admitting it here too would
+ // give it two readings.
+-@carries(bindingIntroducer) optionalPattern = ( identifierPattern | tupleMatchPattern | enumCasePayloadPattern ) >s< optionalMark .
+-@carries(bindingIntroducer) enumCasePayloadPattern =
++@modeScope(bindingIntroducer) optionalPattern = ( identifierPattern | tupleMatchPattern | enumCasePayloadPattern ) >s< optionalMark .
++@modeScope(bindingIntroducer) enumCasePayloadPattern =
+     | enumCaseName >n< tupleMatchPattern
+     | enumCaseQualifier? ( >s< "." >n< | <s> "." ) memberName >n< tupleMatchPattern
+     .
+@@ -3442,7 +3358,7 @@ isPattern = "is" type .
+ /// Grammar of an expression pattern
+ /// expression-pattern → expression
+ 
+-@carries(bindingIntroducer) expressionPattern = expression .
++@modeScope(bindingIntroducer) expressionPattern = @setMode(bindingIntroducer) expression .
+ 
+ 
+ /// GENERIC PARAMETERS AND ARGUMENTS
+@@ -3563,20 +3479,50 @@ layoutRequirementArguments = "(" integerLiteral ( "," integerLiteral )? ")" .
+ // no arguments. A lone `,` is not consumed there, so `A<,>` stays an error. In an EXPRESSION a
+ // tight `<>` is not a clause at all: the lexer makes it one postfix operator (`A<>.self` is
+ // PostfixOperatorExpr), so the empty form needs a gap. In a TYPE `A<>` is a clause.
+-genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle
+-                        >+> ( "(" ")" "[" "]" "{" "}" "," ";" ":" "." keyPathDot "?" "!" "&" EOF ) .
++genericArgumentClause = openAngle ( expressionGenericArgumentList ","? | <s> ) closeAngle >n< >+> ( "(" ) .
++genericArgumentClause = openAngle ( expressionGenericArgumentList ","? | <s> ) closeAngle
++                        >+> ( ")" "[" "]" "{" "}" "," ";" ":" "." keyPathDot "?" "!" "&" EOF ) .
+ typeGenericArgumentClause = openAngle [ genericArgumentList ","? ] closeAngle .
+ genericArgumentList = genericArgument { "," genericArgument } .
+-// swift-syntax 604 `parseGenericArgumentType` accepts value generic arguments:
+-// signed integer literals, plus parenthesized expressions when literal
+-// expressions are enabled. That feature is the ONLY way swift-syntax reads a `(…)` argument as an
+-// expression; without it `Array<(Int)>` and `Array<(repeat each T)>` are tuple/paren TYPES. Both
+-// alternates match those, so `@prefer` keeps the feature-off reading; inputs that only parse as
+-// expressions (`InlineArray<(3), Int>`) are unaffected.
++expressionGenericArgumentList = expressionGenericArgument { "," expressionGenericArgument } .
++// swift-syntax 604 `parseGenericArgumentType` accepts integer value generic arguments by default.
++// Parenthesized expressions (`InlineArray<(3), Int>`) require the experimental LiteralExpressions
++// feature, so they stay out of the default grammar; parenthesized TYPES like `Array<(Int)>` still
++// enter through `type`.
+ genericArgument =
+     | @prefer type
+     | signedIntegerLiteral
+-    | parenthesizedExpression
++    .
++expressionGenericArgument =
++    | @prefer expressionGenericType
++    | signedIntegerLiteral
++    .
++expressionGenericType =
++    | functionType
++    | arrayType
++    | inlineArrayType
++    | dictionaryType
++    | placeholderType
++    | typeIdentifier
++    | tupleType
++    | optionalType
++    | implicitlyUnwrappedOptionalType
++    | protocolCompositionType
++    | opaqueType
++    | boxedProtocolType
++    | metatypeType
++    | packType
++    | memberType
++    | anyType
++    | "(" tupleTypeElement ")"
++    | suppressedType
++    | expressionParameterModifier expressionGenericType
++    | attribute expressionGenericType
++    .
++expressionParameterModifier =
++    | "inout" | "borrowing" | "consuming" | "isolated" | "sending"
++    | "_const" | "__shared" | "__owned"
++    | expressionParenthesisedTypeSpecifier
+     .
+ 
+ ^^^
+diff --git a/grammars/apus.apus b/grammars/apus.apus
+index 953c0886..679f1f91 100644
+--- a/grammars/apus.apus
++++ b/grammars/apus.apus
+@@ -63,19 +63,19 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
+ // There are exactly FOUR pragma positions, and every pragma belongs to just one.
+ //
+ // 1. PRODUCTION START, before the LHS name. ANY ORDER: the pragmas are independent
+-//    properties of the production. Each appears at most once, except `@carries`, which may
++//    properties of the production. Each appears at most once, except `@modeScope`, which may
+ //    repeat (its mode lists union); an unknown pragma here is an error.
+ //
+-//    production   = { carries | extent | sameLine } identifier "=" alternates "." .
+-//    production   = { extent | sameLine | "@literalMunch" | preempt }
++//    production   = { modeScope | extent | sameLine } identifier "=" alternates "." .
++//    production   = { extent | sameLine | "@literalMunch" | innerEnd }
+ //                   identifier ( "-" | ":" ) terminalBody "." .
+ //
+-//    carries      = "@carries" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
++//    modeScope    = "@modeScope" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
+ //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
+ //    sameLine     = "@sameLine" | "@sameLineOutsideBrackets" .
+-//    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
++//    innerEnd     = ( "@forkBefore" | "@yieldsTo" ) "(" identifier ")" .
+ //
+-//    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
++//    `@literalMunch`, `@forkBefore` and `@yieldsTo` are terminal-only: the parser reads them at any
+ //    production start but only ever applies them to `grammar.terminals[LHS]`, so on an
+ //    `=` production they are accepted and inert.
+ //
+@@ -179,19 +179,19 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
+ // There are exactly FOUR pragma positions, and every pragma belongs to just one.
+ //
+ // 1. PRODUCTION START, before the LHS name. ANY ORDER: the pragmas are independent
+-//    properties of the production. Each appears at most once, except `@carries`, which may
++//    properties of the production. Each appears at most once, except `@modeScope`, which may
+ //    repeat (its mode lists union); an unknown pragma here is an error.
+ //
+-//    production   = { carries | extent | sameLine } identifier "=" alternates "." .
+-//    production   = { extent | sameLine | "@literalMunch" | preempt }
++//    production   = { modeScope | extent | sameLine } identifier "=" alternates "." .
++//    production   = { extent | sameLine | "@literalMunch" | innerEnd }
+ //                   identifier ( "-" | ":" ) terminalBody "." .
+ //
+-//    carries      = "@carries" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
++//    modeScope    = "@modeScope" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
+ //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
+ //    sameLine     = "@sameLine" | "@sameLineOutsideBrackets" .
+-//    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
++//    innerEnd     = ( "@forkBefore" | "@yieldsTo" ) "(" identifier ")" .
+ //
+-//    `@literalMunch` and `@preempt` are terminal-only: the parser reads them at any
++//    `@literalMunch`, `@forkBefore` and `@yieldsTo` are terminal-only: the parser reads them at any
+ //    production start but only ever applies them to `grammar.terminals[LHS]`, so on an
+ //    `=` production they are accepted and inert.
+ //
+@@ -227,4 +227,3 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
+ //                 | extent? "<" alternates ">"
+ //                 | extent? "(" alternates ")"
+ //                 .
+-

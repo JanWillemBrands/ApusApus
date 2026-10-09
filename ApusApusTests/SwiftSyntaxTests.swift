@@ -69,9 +69,15 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
         return "requires SwiftSyntax experimental language features"
     }
 
+    var sourceFileCompilerPolicyReason: String? {
+        let trimmed = source.drop(while: { $0.isWhitespace })
+        guard trimmed.first == "{" else { return nil }
+        return "compiler rejects top-level closure-expression source-file fragments"
+    }
+
     /// Accept-side tests skip all disabled kinds — only `gapReason` means "known Advent gap".
     /// Experimental-language-feature snippets are parser probes, not normal Swift corpus rows.
-    var disabledReason: String? { gapReason ?? experimentalLanguageFeatureReason ?? compilerRejects }
+    var disabledReason: String? { gapReason ?? experimentalLanguageFeatureReason ?? sourceFileCompilerPolicyReason ?? compilerRejects }
     var testDescription: String { label }
     var diagnosticID: String { "\(origin)/\(label)" }
 
@@ -80,6 +86,9 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
     }
 
     var requiresExperimentalLanguageFeatures: Bool {
+        if sourceRequiresDisabledExperimentalFeature(source) {
+            return true
+        }
         guard isSwiftSyntax604 else { return false }
 
         if origin == "TypeTests.testLifetimeSpecifier" || source.contains("dependsOn(") {
@@ -934,6 +943,12 @@ struct KeyPathGrammarTests {
     @Test("regex literal tab fixtures", arguments: [
         "let r = /a b/",
         "let r = /a  b/",
+        "let r = /)/",
+        "func f() { _ = ^^/)/ }",
+        "func f() {\n_ = /x(()/\n}",
+        "let x = true\nlet r = /x*// / value",
+        "let z = a / b / c",
+        "let r = /a/*x*/b/",
         "let r = /a\tb/",
         "let r = /[a\tb]/",
         "let r = /(a\tb)/",
@@ -1531,6 +1546,36 @@ struct Crawl3GrammarSimplificationTests {
         """
         extension A<T>.B<U> {}
         """,
+        """
+        switch Thing {
+        @
+        unknown case (): break
+        }
+        """,
+        """
+        fuzz {
+            if true, {
+            }() {
+            }
+        }
+        """,
+        """
+        var x = 0
+        { willSet {} }
+        """,
+        """
+        typealias
+        Z = Copyable
+        .Type
+        """,
+        """
+        typealias Z = A
+        .C
+        """,
+        #"let keyPath = !\.isEmpty"#,
+        "typealias One = (Int,)",
+        "let tuple = (+,)",
+        "let value = Self<Int>.self",
     ]
 
     @Test("Advent accepts", arguments: snippets)
@@ -1884,7 +1929,10 @@ let phase4DeclSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "op-infix",        source: "infix operator +++",                    origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "op-prefix",       source: "prefix operator +++",                   origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "op-postfix",      source: "postfix operator +++",                  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "op-prefix-equals", source: "prefix operator =",                    origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "op-prefix-question", source: "prefix operator ?",                  origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "op-precedence",   source: "infix operator +++ : AdditionPrecedence", origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "bang-infix-newlines", source: "nonOptional\n!\nx",                 origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "arrow-in-seq",    source: "let a = (Int) -> Bool",                 origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "arrow-throws",    source: "let a = (Int) throws -> Bool",          origin: "Phase4", syntaxVersion: "603.0.1"),
 ]
@@ -2068,6 +2116,7 @@ let phase3ModifierSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "public-final",    source: "public final class C {}",             origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "final-public",    source: "final public class C {}",             origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "private-set",     source: "struct S { private(set) var x = 1 }", origin: "Phase3", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "open-set",        source: "struct S { open(set) var x = 1 }",    origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "static-let",      source: "struct S { static let x = 1 }",       origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "open-class",      source: "open class C {}",                     origin: "Phase3", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "public-ext",      source: "public extension S {}",               origin: "Phase3", syntaxVersion: "603.0.1"),
@@ -2325,6 +2374,7 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "capture-weak-self-initialized", source: "let f = { [weak self = self] in _ = self }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "capture-self-initialized", source: "let f = { [self = x] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "capture-mixed-list", source: "let f = { [weak self = self, x, unowned y = z] (a: Int) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "capture-list-trailing-comma", source: "let f = { [x,] in x }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // `weak` FIRST in an item is always the specifier, but a second `weak` is a name.
     SwiftSnippet(label: "capture-named-weak", source: "let f = { [weak weak] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // Effect markers (`try`, `await`, `unsafe`) each wrap the next sequence element, in any order
@@ -2345,8 +2395,6 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "placeholder-iuo", source: "var iterator: _! = merge.makeAsyncIterator()", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "placeholder-optional", source: "let x: _? = y", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "placeholder-metatype", source: "let t: _.Type = Int.self", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    // Body-less coroutine accessors as a protocol requirement (crawl: apple/swift-collections).
-    SwiftSnippet(label: "accessor-requirement-borrow-mutate", source: "protocol P { subscript(index: Int) -> Int { borrow mutate } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // An implicit member may be a compound name, exactly like an explicit one (`T.f(_:)`).
     SwiftSnippet(label: "implicit-member-compound-case", source: "func f(e: E) { switch e { case .compare, .compareString(_:): break } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "implicit-member-compound-expr", source: "let g: (Int) -> E = .x(_:)", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2402,7 +2450,7 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "closure-parenthesized-self-and-value", source: "_ = { (self, value) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "closure-parenthesized-self-only", source: "_ = { (self) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "closure-parenthesized-self-typed", source: "_ = { (self: Int) in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    // `@sameLine` walk: a qualified generic member used as a BASE inside a single-line interpolation
+    // A qualified generic member used as a BASE inside a single-line interpolation
     // (swift-distributed-actors). The walk used to memoise a cycle-guard `false` for the base.
     SwiftSnippet(label: "sameline-qualified-generic-member", source: "let s = \"\\(A.B<C>.d)\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "sameline-generic-member-self", source: "let s = \"\\(a.b<C>.self) x\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2433,6 +2481,26 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "postfix-ifconfig-member-chain-clauses", source: "let v = base\n#if FOO\n.a\n#elseif B\n.b()\n#else\n.c[0]\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-body-nested-block-leading-dot", source: "#if A\nfunc f() {\n#if FOO\n.x\n#endif\n}\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-body-first-nested-leading-dot", source: "#if A\n#if FOO\n.methodOne\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Comment openers stop dot-operator tokens; they remain trivia between member/subscript pieces.
+    SwiftSnippet(label: "comment-after-leading-dot-member", source: "./*c*/init()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "comment-after-newline-dot-member-generic", source: "x\n./*\n*/f< >()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "comment-after-dot-operator-in-subscript", source: "text[.../*c*/]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // A following `(` disambiguates expression generic arguments only on the same line.
+    SwiftSnippet(label: "generic-call-newline-after-angle", source: "let a = f<Int>\n()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "macro-generic-call-newline-after-angle", source: "let a = #foo<Int>\n()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-call-block-comment-newline-after-angle", source: "let a = f<Int> /*\n*/ ()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-member-newline-after-angle", source: "let a = f<Int>\n.x", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-function-type-newline-call-after-angle", source: "A<() -> D>/*\n*/()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-09 string literal scanner (TODO #15): the opener's `#` count rules every later token.
+    SwiftSnippet(label: "raw-string-short-closer-is-content", source: "let s = ##\"\\##(x) \"#\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-string-short-interpolation-is-content", source: "let s = ##\"\\##(x)\\#(y)\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-multiline-short-closer-line", source: "let s = ##\"\"\"\n\\##(x)\n\"\"\"#\n\"\"\"##", origin: "InitPackage.swift:868", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-string-triple-quote-single-line", source: "let s = #\"\"\"a\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "string-nested-interpolations", source: "let s = \"\\(f(\"\\(g(\")\"))\"))\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "multiline-interpolation-block-comment", source: "let s = \"\"\"\n  \\(x /* c\n  */)\n  \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // `"\r\n"` is ONE `Character`: line-break tests for `"\n"` alone missed CRLF content lines.
+    SwiftSnippet(label: "multiline-string-crlf", source: "let s = \"\"\"\r\n  a\r\n  b\r\n  \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "multiline-interpolated-string-crlf", source: "let s = \"\"\"\r\n  a\\(x)\r\n  b\r\n  \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2440,6 +2508,8 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     // `[weak]` is a specifier with no name (`parseClosureCaptureSpecifiers` consumes `weak`
     // unconditionally); it used to be accepted as a capture NAMED `weak`.
     SwiftSnippet(label: "capture-specifier-without-name", source: "let f = { [weak] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // Capture names are identifiers or lowercase `self`, not the expression-form `Self<T>`.
+    SwiftSnippet(label: "capture-generic-self-type", source: "let f = { [Self<Int>] in }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // Lone `->`, `=` and `?` are not function names.
     SwiftSnippet(label: "func-name-arrow", source: "func ->(a: Int, b: Int) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "func-name-equal", source: "func = (a: Int, b: Int) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2474,6 +2544,18 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "ifconfig-condition-operand-next-line", source: "#if A ||\nB\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "postfix-ifconfig-else-non-member", source: " { v = x\n#if FOO\n.borrowing\n#else\nb\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "postfix-ifconfig-binary-tail-in-ifconfig-body", source: "#if A\nlet fuzzValue = base\n#if FOO\n.methodOne + 12\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "comment-after-dot-without-member", source: "builder./*\n*/lexemeCount", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-09 string literal scanner (TODO #15): lexical errors swiftc reports.
+    SwiftSnippet(label: "raw-string-closer-too-short", source: "let s = ##\"\\##(x)\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-string-closer-too-long", source: "let s = #\"\\#(x)\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-multiline-closer-too-long", source: "let s = #\"\"\"\n\\#(x)\n\"\"\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "multiline-indent-after-interpolation", source: "let s = \"\"\"\n  a \\(x)\n b\n  \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "multiline-indent-inside-interpolation", source: "let s = \"\"\"\n  \\(\nx\n  )\n  \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "raw-string-invalid-escape", source: "let s = #\"\\#q\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "unicode-escape-out-of-range", source: "let s = \"\\u{110000}\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "unicode-escape-surrogate", source: "let s = \"\\u{D800}\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "unicode-escape-nine-digits", source: "let s = \"\\u{123456789}\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "single-line-string-tab", source: "let s = \"a\tb\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - fuzz harvest fixes")
@@ -3372,6 +3454,9 @@ let phase4MacroSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "consume",        source: "func f() { let a = consume x }",    origin: "Phase4", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "borrow",         source: "func f() { let a = borrow x }",     origin: "Phase4", syntaxVersion: "603.0.1", compilerRejects: "consecutive statements on a line must be separated by ';'"),
     SwiftSnippet(label: "copy",           source: "func f() { let a = copy x }",       origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "each-trailing-closure-call", source: "func f() { each {} }",  origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "each-newline-call", source: "func f() { each\n{} }",          origin: "Phase4", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "each-newline-stmt", source: "func f() { each\nx }",           origin: "Phase4", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - Phase 4 macros, inout, ownership operators")

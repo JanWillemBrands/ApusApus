@@ -1,695 +1,643 @@
 # APUS Language Reference
 
-APUS is grammar language. You write grammar, parser read grammar, parser parse things.
+APUS is a grammar language. You write a grammar in APUS. The APUS parser reads the grammar. Then it
+parses input with that grammar.
 
-APUS describe itself. Grammar file called `apus.apus`. Self-describing. Very elegant. Like snake eating tail.
+APUS describes itself. The file `apus.apus` contains the grammar of APUS.
 
-Name come from *Apus apus* — the common swift. Bird that never land. Parser that never stop.
+The name comes from *Apus apus*, the common swift. This bird does not land. The parser does not
+stop.
+
+The parser is a GLL parser. It tries all alternatives, also when the grammar is ambiguous. The
+annotations in this manual tell the parser which readings to keep.
 
 ## Grammar File
 
-Grammar file have two parts: productions, then messages.
+A grammar file has two parts: productions, then messages.
 
-```swift
+```apus
 grammar = < production > { message } .
 ```
 
-First come productions. One or more. They define terminals and rules. Then come messages — zero or more test inputs, each starting with `^^^`.
+The productions come first. There is one production or more. They define terminals and rules.
+Then the messages come: zero or more test inputs. Each message starts with `^^^`.
 
-Every production end with `.` — the full stop. You forget the dot, parser angry.
+Each production ends with a full stop `.`. If you leave out the full stop, the grammar does not load.
 
 ## Comments
 
-```swift
+```apus
 // this is a comment
 ```
 
-Comments start with `//` and run to end of line. APUS does NOT use `#` for comments. The `#` character not an APUS token. You use `#`, scanner scream.
+A comment starts with `//` and continues to the end of the line. APUS does not use `#` for
+comments. `#` is not an APUS token.
 
 ## Productions
 
-Three kinds of production. All start with a name.
+There are three kinds of production. Each one starts with a name.
 
 ### Silent Terminal (`:`)
 
-```swift
+```apus
 whitespace : /\s+/ .
-comment    : /\/\/.*/  .
+comment    : /\/\/.*/ .
 ```
 
-Colon mean silent terminal. Scanner match it, scanner throw it away. Good for whitespace, comments. Parser never see these tokens.
-
-Right side is regex or literal. Then dot.
+A colon makes a silent terminal. The scanner matches it and then discards it. The parser does not
+see it. Use silent terminals for whitespace and comments (trivia).
 
 ### Visible Terminal (`-`)
 
-```swift
+```apus
 identifier - /\p{XID_Start}\p{XID_Continue}*/ .
-literal    - /\"(?:[^\"\\]|\\.)+\"/ .
 number     - /[0-9]+/ .
+lBrace     - "{" .
 ```
 
-Dash mean visible terminal. Scanner match it, scanner keep it. Parser see these tokens. Use for identifiers, numbers, string literals — things with meaning.
+A dash makes a visible terminal. The scanner matches it and keeps it. The parser sees it. Use
+visible terminals for identifiers, numbers, string literals and other tokens with a meaning.
 
-Right side is regex or literal. Then dot.
+The right side is a regex, a literal or a builder (see "Builder Terminals"). A literal terminal
+gives a name to a fixed text: you can write `lBrace` in a rule instead of `"{"`.
 
-A visible terminal can also be a literal:
+### Structured Terminal
 
-```swift
-fBrace - "{" .
+The right side of `:` or `-` can also be a rule body. The terminal is then recognized with a small
+parse of that body.
+
+```apus
+blockComment : "/*" { /[^*\/]+|\*(?!\/)|\/(?!\*)/ | blockComment } "*/" .
 ```
 
-This give the literal `{` a name. Now you can write `fBrace` in production rules instead of `"{"`.
-
-The name is the token *kind*, not an alias. So `fBrace` and a bare `"{"` written elsewhere are two different kinds that both match `{`. Same rule as for a named regex terminal — see "Token kinds" below.
+This silent terminal accepts nested block comments. A regex cannot do that.
 
 ### Production Rule (`=`)
 
-```swift
+```apus
 S = "hello" "world" .
 ```
 
-Equals sign mean production rule. Left side is nonterminal name. Right side is what it expand to. Then dot.
+An equals sign makes a production rule. The left side is the name of a nonterminal. The right side
+is what the nonterminal expands to.
 
-First production rule in file is the start symbol. Parser start there.
+The first production rule in the file is the start symbol. The parser starts there.
 
-Same nonterminal can have multiple definitions — they merge:
+You can define the same nonterminal more than one time. The definitions merge:
 
-```swift
+```apus
 S = "x" .
 S = "x" "x" .
-S = "x" "x" "x" .
 ```
 
-This make S match one, two, or three x's.
+`S` matches one or two `x`.
 
 ## Terminals in Rules
 
 ### Literals
 
-```swift
+```apus
 S = "hello" "world" .
 ```
 
-Double-quoted strings. Match exact text. Literals use Swift string escape conventions — `"\t"` match a tab, `"\\"` match a backslash, `"\/"` match a single slash.
+A literal is text in double quotes. It matches that text exactly. Literals use Swift string
+escapes: `"\t"` matches a tab, `"\\"` matches a backslash.
 
 ### Regex
 
-```swift
+```apus
 number - /[0-9]+/ .
 ```
 
-Forward-slash delimited. Swift regex syntax inside. Use in terminal definitions (`:` or `-` productions). Can also appear inline in rules, and then the kind is the pattern itself — see "Token kinds" below.
+A regex is text between forward slashes, in Swift regex syntax. Use regexes in terminal
+definitions. You can also write a regex directly in a rule.
 
-### Token kinds
+### Token Kinds
 
-One rule, both shapes:
+Each terminal has a kind. The kind is how the parser tells tokens apart.
 
-- **Named** — define a token with `-` or `:`, and the LHS *is* the kind. `number - /[0-9]+/ .` gives kind `number`; `fBrace - "{" .` gives kind `fBrace`.
-- **Anonymous** — write a literal or regex inline in a rule, and the kind is its own pattern *including the delimiters*: `"while"` gives kind `"while"`, `/[0-9]+/` gives kind `/[0-9]+/`.
+- **Named terminal.** The name on the left side is the kind. `number - /[0-9]+/ .` has the kind
+  `number`.
+- **Anonymous terminal.** A literal or regex in a rule has its own text as its kind, together with
+  the delimiters. `"while"` has the kind `"while"`.
 
-Two consequence follow. Anonymous tokens with the same pattern share one kind, so `"{"` written in ten rules is one terminal. And a named token never merge with an anonymous one, so you can give the same text two kinds on purpose — `regexOpenSlash - /\// .` and `regexCloseSlash - /\// .` are distinct kinds, which is how a grammar tell apart two roles of one character.
+Anonymous terminals with the same text share one kind: `"{"` in ten rules is one terminal. A named
+terminal never merges with an anonymous one. So you can give one text two kinds on purpose:
 
-The delimiters are load-bearing: they keep anonymous kinds in a namespace disjoint from bare names, so a rule referring to `operator` can never collide with the literal `"operator"`.
-
-Named regex terminal can be referenced by name in rules:
-
-```swift
-shift - />>/ .
-S = shift "other" .
+```apus
+openSlash  - "/" .
+closeSlash - "/" .
 ```
 
-Here `shift` in the rule resolve to the regex terminal.
+### Names
 
-### Identifiers
-
-```swift
+```apus
 S = A B .
 A = "a" .
 B = "b" .
 ```
 
-Bare name in a rule is either a nonterminal reference or a terminal reference. If the name was defined as a terminal (`:` or `-`), it resolve as terminal. Otherwise it is a nonterminal. Nonterminal get defined when it appear on the left side of `=`.
+A name in a rule refers to a terminal or to a nonterminal. If the name is defined with `:` or `-`,
+it is a terminal. If not, it is a nonterminal.
 
 ### Epsilon
 
-Two ways to say nothing:
-
-```swift
+```apus
 S = "a" | ε .
 S = "a" | "" .
 ```
 
-The Greek letter `ε` and the empty string literal `""` both mean epsilon — match zero tokens. Good for optional things.
+`ε` and the empty literal `""` both match nothing (zero tokens).
 
-## Selection (Alternation)
+## Alternatives
 
-```swift
-selection = sequence { "|" sequence } .
-```
-
-Vertical bar separate alternatives:
-
-```swift
+```apus
 S = "a" | "b" | "c" .
 ```
 
-S match `a` or `b` or `c`. GLL parser explore all alternatives — even ambiguous ones. This not LL(1) parser. This GLL. All paths explored.
+A vertical bar separates alternatives. `S` matches `a`, `b` or `c`. The parser tries all
+alternatives.
 
 ## Sequence
 
-```swift
-sequence = < factor [ "?" | "*" | "+" ] > .
-```
-
-Things next to each other in a rule match in order:
-
-```swift
+```apus
 S = "a" "b" "c" .
 ```
 
-Match `a` then `b` then `c`.
+Items that follow each other match in that order: `a`, then `b`, then `c`.
 
-## EBNF Brackets
+## Brackets
 
-APUS support four kinds of bracket:
+| Bracket | Meaning | Example | Matches |
+| --- | --- | --- | --- |
+| `( )` | group | `"a" ( "b" \| "c" ) "d"` | `abd`, `acd` |
+| `[ ]` | zero or one | `"a" [ "b" ] "c"` | `ac`, `abc` |
+| `{ }` | zero or more | `"a" { "b" } "c"` | `ac`, `abc`, `abbc`, … |
+| `< >` | one or more | `"a" < "b" > "c"` | `abc`, `abbc`, … |
 
-### Grouping `( )`
+The postfix operators do the same for one item:
 
-```swift
-S = "a" ( "b" | "c" ) "d" .
+```apus
+S = "a" "b"? "c" .   // "b" zero times or one time
+S = "a" "b"* "c" .   // "b" zero or more times
+S = "a" "b"+ "c" .   // "b" one or more times
 ```
-
-Parentheses group alternatives. Match `abd` or `acd`.
-
-### Option `[ ]`
-
-```swift
-S = "a" [ "b" ] "c" .
-```
-
-Square brackets mean zero or one. Match `ac` or `abc`.
-
-### Kleene Closure `{ }`
-
-```swift
-S = "a" { "b" } "c" .
-```
-
-Curly braces mean zero or more. Match `ac`, `abc`, `abbc`, `abbbc`, ...
-
-### Positive Closure `< >`
-
-```swift
-S = "a" < "b" > "c" .
-```
-
-Angle brackets mean one or more. Match `abc`, `abbc`, `abbbc`, ... but NOT `ac`.
-
-## Postfix Repetition Operators
-
-Same three repetition ideas, but postfix style:
-
-```swift
-S = "a" "b"? "c" .     // "b" zero or one time
-S = "a" "b"* "c" .     // "b" zero or more times
-S = "a" "b"+ "c" .     // "b" one or more times
-```
-
-`?` is option, `*` is zero-or-more, `+` is one-or-more. Same as brackets but stick after a single factor. Good for compact rules.
 
 ## Messages (Test Inputs)
 
-```swift
+```apus
 ^^^
 hello world
 ^^^
 goodbye world
 ```
 
-Triple caret `^^^` start a message block. Everything between `^^^` markers (or between `^^^` and end of file) is captured as test input. Parser use these to test the grammar.
+`^^^` starts a message. A message continues to the next `^^^` or to the end of the file. The parser
+uses the messages as test inputs.
 
-Do NOT put comments between `^^^` blocks. Comments become part of message content. Message capture everything.
-
-## Pragmas And Annotations
-
-APUS annotations are position-typed. An `@...` token is not a grammar item by itself;
-its meaning comes from where it appears.
-
-```text
-Lookaround and layout are zero-width sequence predicates.
-They sit between grammar items and consume no input.
-```
-
-```text
-Oracle annotations choose or prune parse-forest alternatives.
-They attach to nonterminals, bracket nodes, or alternates.
-```
-
-```text
-Terminal pragmas configure lexical recognition.
-They belong on terminal definitions, not arbitrary rules.
-```
+Do not put comments between messages. A comment there becomes part of the message.
 
 ## Actions
 
-``` swift
+```apus
 S = 'init' "x" 'process' { "y" 'accumulate' } 'finalize' .
 ```
 
-Single-quote delimited blocks are actions — code fragments attached to grammar positions. They are silent terminals (scanner strips them from the visible token stream) and get stored on grammar nodes for code generation.
+An action is code between single quotes. The scanner removes actions from the tokens. The grammar
+keeps them on the grammar positions for code generation.
 
-Actions can appear before the first production (preamble), between the nonterminal name and `=` (signature), between grammar symbols, and after the last production (epilogue).
+You can put actions before the first production, between a name and `=`, between items, and after
+the last production.
 
 ---
 
-## Oracle Preferences
+## Annotations
 
-`@prefer` and `@avoid` are alternate-level only. They may occur only at the start
-of an alternate, immediately after `=`, `|`, `(`, `[`, `{`, or `<`.
+An annotation starts with `@`. Its meaning depends on its position. There are four positions:
 
-```swift
+| Position | Annotations |
+| --- | --- |
+| Start of a production, before the name | `@longest` `@shortest` `@sameLineOutsideBrackets` `@modeScope` `@literalMunch` `@preempt` |
+| Start of an alternative, after `=` `\|` `(` `[` `{` `<` | `@prefer` `@avoid` `@left` `@right` `@canParse` `@cannotParse` |
+| Before an item | `@setMode` `@clearMode` `@requiresMode` `@rejectsMode` |
+| Before a bracket | `@longest` `@shortest` |
+
+An annotation in the wrong position is an error. Exception: a terminal pragma on a production rule
+(`=`) has no effect.
+
+Three other predicates also sit between items. They consume no input:
+
+- layout boundaries `<s>` `>s<` `<n>` `>n<`,
+- token lookaround `>+>` `>->` `<+<` `<-<`,
+- layout tokens `>>|` `|<<`.
+
+## Choosing Between Readings
+
+When the grammar is ambiguous, the parser finds all readings. These annotations remove readings.
+
+### `@prefer` and `@avoid`
+
+```apus
 S = @prefer A | B .
-S = ( @prefer A | B ) .
 S = [ @avoid modifier ] name .
 ```
 
-Meaning:
+- `@prefer`: this alternative wins over the other alternatives that match the same text.
+- `@avoid`: this alternative loses to the other alternatives that match the same text.
 
-```text
-@prefer = this alternate wins over same-span siblings.
-@avoid  = this alternate loses to same-span siblings.
-```
+In `[ … ]` and `{ … }`, `@avoid` also loses to the empty choice. So `[ @avoid X ]` means: skip `X`
+if the parse still succeeds without it.
 
-Inside `[ ... ]` and `{ ... }`, `@avoid` also competes with the implicit empty
-branch. That is why `[ @avoid X ]` means "prefer the skip when the skip still
-parses".
+### `@longest` and `@shortest`
 
-`@longest` and `@shortest` are node-level. They may occur before a nonterminal
-definition or before a bracketed group.
-
-```swift
-@longest expression = prefixExpression { infixOperator prefixExpression } .
+```apus
+@longest expression = term { "+" term } .
 S = @shortest [ modifier ] name .
-S = @longest { word } .
 ```
 
-Meaning:
+`@longest` keeps the reading in which this node matches the most text. `@shortest` keeps the reading
+in which it matches the least text. Put them at the start of a production or before a bracket.
 
-```text
-@longest/@shortest = choose maximal/minimal extent for this node.
+`@avoid` and `@shortest` are not the same. `[ @avoid X ]` compares the alternatives. `@shortest [ X ]`
+compares how much text the bracket matches.
+
+### `@left` and `@right`
+
+```apus
+E = @left E "+" E | number .     // 1+2+3 is (1+2)+3
+E = @right E "^" E | number .    // 2^3^4 is 2^(3^4)
 ```
 
-`@left` and `@right` are ALTERNATE-level, in the same position as `@prefer`/`@avoid`.
-They say that a production may not be nested directly inside ITSELF:
+- `@left`: this alternative cannot be its own rightmost child.
+- `@right`: this alternative cannot be its own leftmost child.
 
-```swift
-E = @left E "+" E | number .        // `1+2+3` is `(1+2)+3`
-E = ( @right E "+" E | number ) .   // `1+2+3` is `1+(2+3)`
+In `1+2+3`, the reading `1+(2+3)` has a `+` as the right child of a `+`. `@left` removes that
+reading.
+
+You can give a list of nonterminals. Then those nonterminals cannot be in that child position:
+
+```apus
+call = @right( number ) primary "(" ")" .   // 1() is not a call
 ```
 
-```text
-@left  = this production may not be its own RIGHTMOST child.
-@right = this production may not be its own LEFTMOST child.
+The child is removed when it matches exactly the text of a listed nonterminal. In `1()` the callee
+is the number `1`, so this reading is removed. In `x.y()` the callee is longer than a number, so
+it stays.
+
+You can put more than one `@left` or `@right` on one alternative.
+
+`@left` and `@right` apply to one production. They cannot make two different productions (for
+example `+` and `-`) associative with each other.
+
+### `@canParse` and `@cannotParse`
+
+```apus
+statement = @cannotParse( declaration ) expression .
 ```
 
-Read `@left` as "the left side wins, so the right side may not grow": in `1+2+3`
-the reading `1+(2+3)` puts a `+` inside the right slot of a `+`, and `@left`
-removes it. `@right` is the mirror image.
+- `@canParse(N)`: this alternative is valid only where `N` can start at this position.
+- `@cannotParse(N)`: this alternative is not valid where `N` can start at this position.
 
-This is associativity as SDF states it — a per-production attribute (`{left}`,
-`{right}`) that deletes a forbidden parent/child shape — rather than a choice
-between competing pivots of one span. The difference matters when the two readings
-have DIFFERENT spans, i.e. when one instance is nested inside another rather than
-rivalling it:
+"Can start" means that `N` has a parse that starts here. `N` does not have to cover the same text as
+the alternative.
 
-```swift
-x.map {} {}      // the outer closure-call's left child IS a closure-call → removed
-x.map {}.filter {}.sorted {}   // children are member accesses → all three kept
+The parser must try `N` at this position for its own reasons. If no other rule uses `N`, the parser
+never tries it. Then `@canParse(N)` is always false and `@cannotParse(N)` is always true. These
+predicates cannot run a separate grammar as a lookahead.
+
+### `@sameLineOutsideBrackets`
+
+```apus
+@sameLineOutsideBrackets
+condition = expression .
 ```
 
-A pivot choice cannot reach that, because the inner and outer instances start at
-the same place but end differently, so there is no single span with two pivots.
+`@sameLineOutsideBrackets` keeps a reading of this nonterminal only if it has no line break between
+two of its tokens, outside `( )`, `[ ]` and `{ }`. These line breaks do not count:
 
-Both take an optional list of nonterminals. The bare form forbids the production
-in that child position; the list form forbids the NAMED nonterminals there:
+- a line break inside `( )`, `[ ]` or `{ }`,
+- a line break in the text of a token (for example in a multiline string),
+- a line break after the last token of the nonterminal.
 
-```swift
-f = @right( literalExpression ) postfixExpression trailingClosures .
-//  ↑ the callee may not be a bare literal, so `1 {}` is not a call
-```
-
-Several may stack on one alternate, so the same child position can forbid both
-the production itself and a listed nonterminal:
-
-```swift
-functionCallExpression = @right @right( literalExpression )
-                         postfixExpression trailingClosures .
-```
-
-The match is on EXTENT: the child is removed when its span is exactly the span of
-one of the named nonterminals. That is usually what you want, because it
-distinguishes a bare construct from one that has grown. The callee of `1 {}`
-spans exactly the literal `1`, so it is removed; the callee of `1! {}` or
-`1.description {}` spans more than any literal, so it survives. Writing the
-exclusion as its own nonterminal (a copy of `postfixExpression` with the literal
-alternates removed) gets the same result but costs a clone that drifts from its
-original.
-
-Associativity across DIFFERENT productions — `+` and `-` of one precedence level
-being mutually left-associative — is a separate mechanism (in SDF, a priority
-relation over a set of productions) and is not expressible with these two.
-
-`@avoid` and `@shortest` are different primitives. They can overlap in simple
-optional-skip cases, but they are not synonyms:
-
-```swift
-[ @avoid X ]      // alternate X loses to siblings and to the implicit skip
-@shortest [ X ]   // the optional node minimizes its consumed extent
-```
+With this rule, `f(a,⏎b)` is a valid condition, and `a⏎|| b` is not.
 
 ## Parser Modes
 
-Parser modes are inherited parser context: the flavor or state parameters a handwritten
-parser passes down (swift-syntax `ExprFlavor`, `allowInitDecl`, pattern context). An
-occurrence annotation changes or tests the mode for that occurrence only; the caller's
-continuation keeps the caller's mode.
+A parser mode is a flag that a part of the grammar gives to its children. The same text can parse
+differently when the flag is set. For example, in a condition a `{` can start the body, not a
+closure.
 
-```swift
-@setMode(foo bar) X       // parse X with foo and bar active
-@clearMode(foo bar) X     // parse X with foo and bar inactive
-@requiresMode(foo bar) X  // keep this path only when all listed modes are active
-@rejectsMode(foo bar) X   // reject this path when all listed modes are active
+### Mode Annotations
+
+```apus
+@setMode(foo bar) X       // parse X with foo and bar set
+@clearMode(foo bar) X     // parse X with foo and bar not set
+@requiresMode(foo bar) X  // keep this path only if foo and bar are both set
+@rejectsMode(foo bar) X   // remove this path if foo and bar are both set
 ```
 
-`@setMode` and `@clearMode` are set operations. Modes not named by the annotation
-are preserved. Tests see the occurrence's mode after its own `@setMode`/`@clearMode`.
+`@setMode` and `@clearMode` change only the modes that they name. The change applies only to the
+annotated item. After that item, the parser continues with the modes it had before.
 
-### Scopes: `@carries`
+A test (`@requiresMode`, `@rejectsMode`) uses the modes of its item, after `@setMode` and
+`@clearMode` on that same item.
 
-Every mode is scoped. `@carries(m …)` at the start of a production declares that the
-modes `m …` pass into that nonterminal. An inherited bit enters an occurrence of `Y` only
-if `Y` carries it; entering any other nonterminal drops the bit, the way a swift-syntax
-parameter disappears when a function does not forward it. Production pragmas may appear in
-any order; `@carries` may repeat, and when a nonterminal is defined in several places, the
-lists union.
+A grammar can have at most 64 modes.
 
-```swift
-@carries(stmtCondition) conditionExpression = effectfulConditional coercingOperator? .
-@carries(stmtCondition) postfixExpression = … .
-@carries(stmtCondition trailingClosure) closureExpression =
-    samelineOpenedClosure | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
+### Mode Scopes: `@modeScope`
 
-condition = @setMode(stmtCondition) conditionExpression | … .
+Each mode has a scope. `@modeScope(m)` at the start of a production lets the mode `m` go into that
+nonterminal. A mode goes only into nonterminals that have it in their scope. At any other
+nonterminal, the mode stops.
+
+```apus
+ifStatement = "if" @setMode(cond) expression block .
+
+@modeScope(cond) expression = term { "+" term } .
+@modeScope(cond) term       = number | name | group | @rejectsMode(cond) closure .
+group                       = "(" expression ")" .
 ```
 
-Nothing has to clear `stmtCondition` at call arguments or closure bodies:
-`functionCallArgument` and the closure productions do not carry it, so the mode stops there.
-Keep `@clearMode` for a boundary INSIDE a scope (`statements` clears `ifConfigBody` after
-the first statement).
+In the condition of `if`, a term cannot be a closure. `group` does not have `cond` in its scope.
+Thus the mode stops at `group`, and a closure is permitted inside parentheses again.
 
-Grammar load checks the declarations and fails on:
+You do not have to clear a mode where its scope ends. Use `@clearMode` only for a boundary inside a
+scope.
 
-- a mode used in an annotation that no production `@carries`;
-- `@setMode(m) Y` where `Y` does not carry `m`;
-- a `@requiresMode`/`@rejectsMode` test on a mode that can never be present there.
+`@modeScope` can occur more than one time. When a nonterminal has more than one definition, its
+scopes are combined.
 
-It reports (in `Grammar.parserModeReport` and the grammar log) the copies each mode costs,
-`@clearMode`s with no effect, and every SCOPE EXIT: an edge where a carried mode is dropped
-although the callee could still reach a test of it. Exits are expected at intended
-boundaries; an unexpected one means a scope that is too small.
+### Checks
 
-### How modes run
+When the grammar loads, these are errors:
 
-Modes cost nothing at parse time. `Grammar.specializeParserModes()` compiles them into the
-grammar at load: each nonterminal reached under a mode that matters to it gets a copy
-`X⟨m⟩`, mode tests are decided statically in each copy, and the parser sees an ordinary
-grammar (no mode in descriptors, CRF keys or BSR yields). Copies keep their `name`, so
-converter and builder lookups are unaffected; code that looks a nonterminal up BY NAME to
-read its yields uses `grammar.instances(of:)`. The cost is proportional to the declared
-scopes (Swift: 94 copies of 465 productions). See `Parser Modes Specialization.md`.
+- a mode that no production has in its scope,
+- `@setMode(m) Y` where `Y` does not have `m` in its scope,
+- a test on a mode that can never be set at that position.
 
-Use modes for occurrence-local context that a handwritten parser would carry as a
-flavor or state parameter. Do not use them as a replacement for ordinary grammar
-structure when a separate nonterminal is clearer.
+The load log also shows:
 
-### Named Positions
+- the cost of each mode,
+- each `@clearMode` that has no effect,
+- each scope exit: a place where a mode stops, but a test below could still use it.
 
-A short alias can still be the cleanest way to name a grammar position or attach
-a mode to a reused shape:
+A scope exit is correct at a boundary that you want. An unexpected scope exit means that a scope is
+too small. A mode with a cost of zero has no effect.
 
-```swift
-ifConfigStatements = @setMode(ifConfigBody) statements .
-initializerBody    = @setMode(initializerBodyMode) codeBlock .
-```
+### Cost
 
-Do not "simplify" such a rule away by inlining it when anything depends on the
-name or the annotated occurrence. The same holds for names the AST converter
-resolves by lookup (`structName`, `argumentLabel`, `tupleMatchLabel`, …):
-re-pointing one is invisible to the parser and silently drops a child from the tree.
+Modes have no cost at parse time. When the grammar loads, APUS makes a copy of each nonterminal for
+each mode combination that changes its language. Nonterminals outside all scopes are not copied.
+The load log shows the number of copies for each mode. Keep scopes small to keep this number low.
 
-The test for whether an identical-bodied rule is a sentinel or real duplication is
-whether anything depends on the NAME. If nothing does, delete it and repoint the uses
-(the six `<kind>Members` lists and five `<kind>Body` rules went that way on
-2026-09-30); if an annotation or a converter lookup does, keep it and say so in a
-comment.
+### When to Use a Mode
 
-`@canParse(N)` and `@cannotParse(N)` with nonterminal operands are also Oracle constraints:
-
-```swift
-statement = @cannotParse(declaration attributes) expression .
-```
-
-Meaning:
-
-```text
-@canParse(N)    = this alternate is valid only where N can parse here.
-@cannotParse(N) = this alternate is invalid where N can parse here.
-```
-
-This is a parse-forest predicate, not a token lookaround. A coherent grammar should
-keep this separate from token lookaround.
-
-"Can parse HERE" means N has a yield STARTING at this position; it does not require N
-to cover the alternate's span. The target set is `Set(parser.yield(of: N).map(\.i))`,
-snapshotted from the RAW forest before dead-wood pruning.
-
-The target must therefore be REACHABLE from the start symbol. A nonterminal written
-purely as a recogniser for a predicate, referenced by nothing else, is never attempted
-by the parser: its yield set is empty, so `@canParse` is always false and
-`@cannotParse` always true. These predicates can only interrogate parses the grammar
-already attempts for their own sake — they are not a way to run an arbitrary
-side-grammar as a lookahead.
-
-`@sameLine` is a nonterminal-level hard constraint. It occurs before a nonterminal
-definition, in the same production-start position as `@longest`.
-
-```swift
-@sameLine
-singleLineInterpolatedStringLiteral =
-    interpolatedStringLiteralHead expression? interpolatedStringLiteralTail .
-```
-
-Meaning:
-
-```text
-@sameLine = keep a yield only when at least one surviving derivation crosses no newline trivia.
-```
-
-The check is over the actual token path for the yield, not over every token that
-was ever committed in the same source span. This matters in ambiguous parses: a
-dead derivation that crossed a newline must not poison a live same-line derivation.
-
-Only token-to-token trivia gaps count. A newline inside token content, such as a
-nested multiline string literal, does not count. A newline in the annotated
-construct's trailing trivia also does not count, because the construct did not
-cross it to reach another token.
-
-Use `@sameLine` for constructs whose internal parse remains ordinary grammar, but
-whose skipped trivia must stay on one source line. Swift single-line string
-interpolation is the canonical example.
+- Use a mode for a flag that must go through one or more nonterminals. If the flag is necessary at
+  only one place, write a separate rule there.
+- Use a mode to make a reading valid or not valid. To choose between valid readings, use `@prefer`,
+  `@longest` and the other annotations in "Choosing Between Readings".
+- A mode goes from a parent to its children. It cannot go to a sibling. If the context comes from
+  the item to the left, a mode cannot express it.
+- Make a scope as small as the context that it models.
 
 ## Sequence Predicates
 
-### Exclusion Sets `---()`
+### Exclusion Sets `---( )`
 
-```swift
-safeId = identifier ---("if" "while" "for" "return") .
+```apus
+name = identifier ---( "if" "while" "for" ) .
 ```
 
-Problem: scanner see `if` and produce two tokens of same length — keyword `if` and identifier `if`. These are Schrödinger tokens (same text, same length, different kinds). Parser explore both paths.
+A keyword and an identifier can match the same text, for example `if`. The parser then tries both.
+`---( … )` removes the listed texts at this position: here, `if` is not a `name`.
 
-Sometimes you know: in this grammar position, `if` is NOT an identifier. The `---()` annotation say: suppress these specific Schrödinger duals here. Kill the bad branch locally.
+Put `---( … )` after an item. You can also give the name of a rule in which each alternative is one
+literal:
 
-The annotation goes after an identifier, literal, regex, or grouped factor in a
-rule. List the literal values to exclude in parentheses.
-
-### Layout Tokens `>>|` and `|<<`
-
-```swift
-block = >>| < statement > |<< .
+```apus
+keyword = "if" | "while" | "for" .
+name    = identifier ---( keyword ) .
 ```
-
-For indent-sensitive languages (Python, Haskell). These are synthetic tokens injected between scanning and parsing:
-
-- `>>|` — indent (column increased on new line)
-- `|<<` — dedent (column decreased on new line)
-
-They appear unquoted in grammar rules. When the grammar uses them, the layout injection pass activates automatically. It tracks indentation levels and inserts `>>|` or `|<<` tokens into the token stream. Bracket pairs (configurable) suppress indent tracking inside them.
 
 ### Layout Boundaries `<s>` `>s<` `<n>` `>n<`
 
-```swift
-prefixOperatorUse = operator >s< operand .
-binaryOperatorUse = lhs <s> operator <s> rhs .
-sameLine          = lhs >n< rhs .
-nextLine          = lhs <n> rhs .
+```apus
+prefixUse = operator >s< operand .
+lineStart = <n> statement .
 ```
 
-These are zero-width predicates over the trivia gap at the current parse position:
+A layout boundary tests the trivia between the previous token and the current position:
 
-| Predicate | Meaning |
-|---|---|
-| `<s>` | there is a non-empty trivia gap between the previous token and this position |
-| `>s<` | there is no trivia gap between the previous token and this position |
-| `<n>` | the trivia gap contains a line break, so the previous token and this position are on different source lines |
-| `>n<` | the trivia gap contains no line break, so the previous token and this position are on the same source line |
+| Boundary | True when |
+| --- | --- |
+| `<s>` | there is trivia (whitespace or a comment) |
+| `>s<` | there is no trivia |
+| `<n>` | the trivia contains a line break |
+| `>n<` | the trivia contains no line break |
 
-These predicates consume no input. They inspect the trivia gap skipped between the previous
-committed token and the current parse position. A line break inside skipped trivia, including
-inside a block comment, counts for `<n>` / `>n<`.
+A line break in a block comment also counts.
 
 ### Token Lookaround
 
-Token lookaround is also a zero-width sequence predicate, allowed wherever layout
-boundaries are allowed:
-
-```swift
-A = X >+>(")") Y .
-A = X >->("(") Y .
-A = X <+<(identifier) Y .
-A = X <-<(operator) Y .
+```apus
+A = X >+>( ")" ) Y .
+A = X >->( "(" ) Y .
+A = X <+<( identifier ) Y .
+A = X <-<( operator ) Y .
 ```
 
-Meaning at that exact cursor position:
+| Lookaround | True when |
+| --- | --- |
+| `>+>( … )` | a listed terminal can come after this position |
+| `>->( … )` | no listed terminal can come after this position |
+| `<+<( … )` | a listed terminal came before this position |
+| `<-<( … )` | no listed terminal came before this position |
 
-```text
->+>(...) = some listed terminal can occur after this position.
->->(...) = no listed terminal can occur after this position.
-<+<(...) = some listed terminal occurred before this position.
-<-<(...) = no listed terminal occurred before this position.
-```
-
-`EOF` is the explicit end-of-input operand for token lookahead:
+`EOF` means the end of the input:
 
 ```apus
-A = X >+>(")" EOF) .
+A = X >+>( ")" EOF ) .
 ```
 
-This is the implemented model: token lookaround is a zero-width sequence
-boundary. Post-dot terminal-definition `<+<` / `<-<` is not a separate
-annotation class; put lookaround where the production cursor should be tested.
+### Layout Tokens `>>|` and `|<<`
+
+```apus
+block = >>| < statement > |<< .
+```
+
+Use layout tokens for languages that use indentation, for example Python:
+
+- `>>|` (indent): a new line starts in a column to the right.
+- `|<<` (dedent): a new line starts in a column to the left.
+
+When a grammar uses them, APUS adds them to the tokens before it parses. Inside brackets, APUS does
+not track the indentation.
 
 ## Terminal Pragmas
 
-```swift
-@literalMunch operator - /.../ .
-@preempt(regexOpenSlash, regularExpressionLiteral) operator - /.../ .
-regexLiteral - @builder(plainRegularExpressionLiteral) .
+Terminal pragmas control how the scanner matches a terminal. Use them only on terminals.
+
+### `@literalMunch`
+
+```apus
+@literalMunch identifier - /[a-z]+/ .
 ```
 
-Terminal pragmas configure lexical recognition. They should be valid only on
-terminal-like productions. Misplaced terminal pragmas should be grammar errors, not
-inert annotations.
+A literal does not match if a `@literalMunch` terminal has a longer match at the same position.
+For example, the literal `"for"` does not match at the start of `format`, because `identifier`
+matches all of `format`.
+
+### `@preempt`
+
+A terminal usually takes the longest match (maximal munch). `@preempt` lets it also stop before an
+inner terminal `X`.
+
+```apus
+@preempt(openAngle) functionName - /[-+*\/<>]+/ .
+@preempt(slash, regexLiteral) operator - /[-+*\/!^]+/ .
+```
+
+- `@preempt(X)`: the terminal also matches up to each inner position where `X` begins. All matches
+  stay, and the parse chooses. In `func %%<T>`, the name is `%%` and `<T>` follows. In `func <<<()`,
+  the name is `<<<`.
+- `@preempt(X, N)`: the same, but the nonterminal `N` decides. At the first inner position where `N`
+  can parse, the terminal stops, and the longer matches are removed. If `N` cannot parse at any inner
+  position, only the longest match stays. In `!/a/`, the operator is `!` and `/a/` is the regex.
+
+### Builder Terminals
+
+```apus
+identifier - @builder .
+number     - @builder(decimal) .
+```
+
+A builder terminal gets its scanner from the builder library (`SwiftGrammarRegexLibrary.swift`).
+`@builder` uses the scanner with the name of the terminal. `@builder(key)` uses the scanner with the
+name `key`.
+
+Use a builder when a regex in the grammar is too difficult to read, or when a regex cannot do the
+work. A builder can be custom code. It can count brackets, and it can look at the text before its
+start position.
+
+## Writing Grammars
+
+### Context-Dependent Tokens
+
+Some tokens depend on their position. For example, `/` can be a division operator or the start of a
+regex literal. Let the grammar give the position:
+
+```apus
+regex   - @builder .
+primary = number | regex | "(" expr ")" .
+expr    = primary { "/" primary } .
+```
+
+The parser tries a terminal only at positions where the grammar can accept it. Here it tries
+`regex` only where a `primary` can start. In `a / b / c`, each `/` is division. In `x = /ab/`, the
+`/ab/` is a regex.
+
+Do not try to find the position from the previous token in the scanner. The grammar has that
+information already.
+
+### Lists
+
+Write a list with a closure, not with right recursion:
+
+```apus
+list = item { "," item } .        // good
+list = item | item "," list .     // not good
+```
+
+The closure form is shorter and has one alternative.
+
+Do not use a closure for a structure that is not a repetition, for example a prefix chain or an
+operator precedence level. A closure changes their meaning.
+
+The position of a separator can be important. `statement { ";" statement }` attaches each `;` to
+the statement after it. If each `;` must stay with the statement before it, write the list so
+that the `;` follows that statement.
+
+### Rule Names
+
+Keep a rule, also if it is short, when something uses its name:
+
+```apus
+condition = @setMode(cond) expression .
+```
+
+An annotation, a tool or a converter can use a name. If you put the body of such a rule at the
+places that use it, these users lose the name. Remove a rule only if nothing uses its name.
+
+A rule that is used one time can often stay. Its name tells the reader what the part means. Put
+the body of a rule at its place of use only if the rule is a simple wrapper with no meaning of its
+own.
 
 ---
 
 ## Full Grammar
 
-APUS is self-described by `apus.apus`. The shape below is the coherent
-lookaround-boundary grammar.
+`apus.apus` describes APUS. This is its structure:
 
-```swift
+```apus
 whitespace  : /\s+/ .
-comment     : /\/\/.*/  .
+comment     : /\/\/.*/ .
 action      : /'(?:[^'\\]|\\.)*'/ .
 
 identifier  - /\p{XID_Start}\p{XID_Continue}*/ .
 literal     - /\"(?:[^\"\\]|\\.)+\"/ .
 regex       - /\/(?!\*)(?:[^\/\\]|\\.)+\// .
 pragma      - /@\p{XID_Start}\p{XID_Continue}*/ .
-
 message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
 
-grammar     = < production > { message } .
-
-production  = productionPragma* identifier ( ":" | "-" | "=" ) productionBody "." .
-
-// `:` makes the LHS skipped trivia/token, `-` makes it an emitted token, and
-// `=` makes it a grammar node. A direct terminal body uses the scanner fast path;
-// a structured `:` body uses a trivia recognizer sub-parse, and a structured `-`
-// body uses a lexical recognizer sub-parse that emits one token.
+grammar        = < production > { message } .
+production     = productionPragma* identifier ( ":" | "-" | "=" ) productionBody "." .
 productionBody = terminalBody | selection .
+terminalBody   = regex | literal | "@builder" [ "(" identifier ")" ] .
 
-terminalBody = regex | literal | "@builder" builderKey? .
-builderKey   = "(" ( identifier | literal ) ")" .
-
-selection   = sequence { "|" sequence } .
-
-sequence    = alternateAnnotation* < sequenceItem > .
-
+selection    = sequence { "|" sequence } .
+sequence     = alternateAnnotation* < sequenceItem > .
 sequenceItem = layout
              | lookaround
-             | factor [ "?" | "*" | "+" ] [ exclusion ]
+             | modeAnnotation* factor [ "?" | "*" | "+" ] [ exclusion ]
              .
 
-factor      = terminal
-            | groupPragma* "[" selection "]"
-            | groupPragma* "{" selection "}"
-            | groupPragma* "<" selection ">"
-            | groupPragma* "(" selection ")"
-            .
+factor   = terminal
+         | groupPragma* "[" selection "]"
+         | groupPragma* "{" selection "}"
+         | groupPragma* "<" selection ">"
+         | groupPragma* "(" selection ")"
+         .
+terminal = identifier | literal | regex | "ε" | "\"\"" .
 
-terminal    = identifier
-            | literal
-            | regex
-            | epsilon | empty
-            .
+layout     = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
+lookaround = ( ">+>" | ">->" | "<+<" | "<-<" ) "(" < literal | identifier | "EOF" > ")" .
+exclusion  = "---" "(" < literal | identifier > ")" .
 
-epsilon     = "ε" .
-empty       = "\"\"" .
-
-layout      = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
-lookaround  = ( ">+>" | ">->" | "<+<" | "<-<" ) "(" < literal | identifier | "EOF" > ")" .
-exclusion   = "---" "(" < literal > ")" .
-
-productionPragma     = terminalPragma | nonterminalPragma .
-terminalPragma       = "@literalMunch" | "@preempt" preemptArgs .
-nonterminalPragma    = "@longest" | "@shortest" | "@sameLine" | carriesPragma .
-carriesPragma        = "@carries" "(" < identifier > ")" .
-groupPragma          = "@longest" | "@shortest" .
-alternateAnnotation  = "@prefer" | "@avoid" | childPosition | parsePredicate .
-modeAnnotation       = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" ) "(" < identifier > ")" .
-childPosition        = ( "@left" | "@right" ) [ "(" < identifier > ")" ] .
-parsePredicate       = ( "@canParse" | "@cannotParse" ) "(" < identifier > ")" .
-preemptArgs          = "(" identifier [ "," identifier ] ")" .
+productionPragma    = terminalPragma | nonterminalPragma .
+terminalPragma      = "@literalMunch" | "@preempt" "(" identifier [ "," identifier ] ")" .
+nonterminalPragma   = "@longest" | "@shortest" | "@sameLineOutsideBrackets"
+                    | "@modeScope" "(" < identifier > ")" .
+groupPragma         = "@longest" | "@shortest" .
+alternateAnnotation = "@prefer" | "@avoid"
+                    | ( "@left" | "@right" ) [ "(" < identifier > ")" ]
+                    | ( "@canParse" | "@cannotParse" ) "(" < identifier > ")" .
+modeAnnotation      = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" )
+                      "(" < identifier > ")" .
 ```
 
 ## Sample Grammar
 
-A small calculator language:
+A small calculator:
 
-```swift
+```apus
 whitespace : /\s+/ .
-comment    : /\/\/.*/  .
+comment    : /\/\/.*/ .
 
 number - /[0-9]+/ .
 
 expr = term { ( "+" | "-" ) term } .
 term = atom { ( "*" | "/" ) atom } .
-atom = number
-     | "(" expr ")"
-     .
+atom = number | "(" expr ")" .
 
 ^^^
 1 + 2 * (3 + 4)
@@ -698,52 +646,3 @@ atom = number
 ^^^
 (1 + 2) * (3 + 4)
 ```
-
-## List spelling: closures, not right recursion
-
-Lists in a grammar should be spelled with the native closures — `item { "," item }` for
-zero-or-more repetitions of the tail, `< item >` for one-or-more — rather than as right recursion
-(`list = item | item "," list`). As of 2026-09-21 `Swift.apus` has 17 lists in closure form; the
-rules got 22% shorter and every one dropped from two alternates to one.
-
-The AST builder is INDIFFERENT to the choice, but only through the shared helpers.
-`collectListElements` / `listElements` / `listHops` in `GenerateSwiftSyntaxAST.swift` flatten both
-spellings (they handle `.KLN` and `.POS` explicitly). A hand-rolled walker that recurses on
-`find("<listName>")` does NOT: rewrite its rule as a closure and the tail lookup matches nothing,
-so everything past the FIRST element is dropped silently, with no diagnostic. Before converting a
-rule, check its collector routes through the helpers. `collectImportPath` was the one hand-rolled
-holdout and had to be rewritten first.
-
-Two things that do NOT belong in a closure:
-- Prefix chains and operator precedence (`type = attribute type`,
-  `compilationCondition "&&" compilationCondition`). These are right-recursive but not repetitions;
-  `{ }` changes their meaning.
-- A list whose separator carries per-element meaning. `statements = statement ";"? |
-  statement statementSeparator statements` keeps a `;` in the same hop as the statement it
-  terminates; `statement { statementSeparator statement } ";"?` moves it to the next statement's
-  hop instead. Same language, different tree attribution.
-
-## Inlining single-use nonterminals
-
-A nonterminal used exactly once can often be folded into its use site
-(`attribute = … "(" < effectsToken > ")"` instead of a separate `effectsTokens` rule). But the
-mechanical criterion is a poor guide. Of 166 single-use, single-production nonterminals in
-`Swift.apus` (2026-09-21), only two were worth inlining. Three things disqualify the rest:
-
-1. **The converter resolves nonterminals BY NAME.** 153 of the 166 are named in
-   `GenerateSwiftSyntaxAST.swift` (`find("X")`, `recursiveListName: "X"`, …). Inlining one
-   silently changes the tree, or breaks a collector, unless those sites are updated in the same
-   change. `effectsTokens` had two such references and needed a converter edit.
-2. **Mutual recursion makes it impossible.** `regexGroup` is used once by `regexItem` and its own
-   body references `regexItem`; same for `tryScanOperatorAsRegexLiteralGroup`. Expansion does not
-   terminate.
-3. **The name usually IS the documentation.** `mutationModifier`, `actorIsolationModifier`,
-   `floatingPointLiteral`, `optionalPattern`, `missingIntroducerWildcardCondition` and the
-   `*Declaration`/`*Body` rules each name a concept — most mirror a TSPL production, and
-   `missingIntroducerWildcardCondition` records a deliberate error-tolerance case. Folding them
-   into a parent alternation makes the parent longer and the intent invisible: not a
-   simplification.
-
-So inline only single-use rules that are pure PLUMBING — a list or paren wrapper with no
-conceptual content and no converter reference. That was `effectsTokens` and
-`lifetimeSpecifierArgumentList`, and nothing else.

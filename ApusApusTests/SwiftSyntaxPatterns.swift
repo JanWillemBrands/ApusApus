@@ -75,6 +75,26 @@ let patternSnippets: [SwiftSnippet] = [
         origin: "PatternTests.testNonBinding6",
         syntaxVersion: "603.0.1"
     ),
+    SwiftSnippet(
+        label: "enum-case-nested-tuple-expression-pattern",
+        source: """
+      if case .foo((a, b)) = value {}
+      """,
+        origin: "Fuzz",
+        syntaxVersion: "603.0.1"
+    ),
+    SwiftSnippet(
+        label: "enum-case-generic-qualified-catch-pattern",
+        source: """
+      do {
+      } catch Tree<ParsableCommand.Type>.InitializationError
+        .recursiveSubcommand(let command)
+      {
+      }
+      """,
+        origin: "Fuzz",
+        syntaxVersion: "603.0.1"
+    ),
 ]
 
 

@@ -9,13 +9,13 @@ import OSLog
 
 // A parser mode is a finite inherited attribute: `@setMode`/`@clearMode` fix a child
 // occurrence's mode as `(m | add) & ~remove`, and `@requiresMode`/`@rejectsMode` are fixed tests
-// on that mode. Modes are SCOPED: `@carries(m)` on a production declares that `m` passes into it;
+// on that mode. Modes are SCOPED: `@modeScope(m)` on a production declares that `m` passes into it;
 // entering any other nonterminal drops `m` (a swift-syntax parameter that is not forwarded). A CFG
 // with finitely many inherited attribute values is a plain CFG over indexed nonterminals `X⟨m⟩`,
 // so instead of carrying `m` in every descriptor, CRF key and BSR yield, this pass builds that
 // CFG once at grammar load:
 //
-//   0. validation: every mode is declared by some `@carries`, set into a production that carries
+//   0. validation: every mode is declared by some `@modeScope`, set into a production that carries
 //      it, and tested only where it can be present;
 //   1. relevance: `rel(X)` = the carried mode bits that can change the language of `X`;
 //   2. expansion: every original production is its own `X⟨0⟩` instance; an occurrence reached
@@ -69,9 +69,9 @@ extension Grammar {
         }
     }
 
-    /// The bits of `name`'s scope (`@carries`); 0 for undefined names.
-    private func carried(_ name: String) -> UInt64 {
-        nonTerminals[name]?.carriedModes ?? 0
+    /// The bits of `name`'s scope (`@modeScope`); 0 for undefined names.
+    private func modeScopeOf(_ name: String) -> UInt64 {
+        nonTerminals[name]?.modeScope ?? 0
     }
 
     private func modeNames(_ bits: UInt64) -> String {
@@ -84,24 +84,24 @@ extension Grammar {
         var problems: [String] = []
         var declared: UInt64 = 0
         var setSomewhere: UInt64 = 0
-        for lhs in originals { declared |= lhs.carriedModes }
+        for lhs in originals { declared |= lhs.modeScope }
 
         // `possible`: the bits that can be present at this point of `owner`'s body.
         func check(_ owner: GrammarNode, in production: GrammarNode, possible: UInt64) {
             Self.forEachElement(of: owner) { e in
                 let used = e.modeAdd | e.modeRemove | Self.tests(e)
                 if used & ~declared != 0 {
-                    problems.append("mode '\(modeNames(used & ~declared))' is used in '\(production.name)' but no production @carries it")
+                    problems.append("mode '\(modeNames(used & ~declared))' is used in '\(production.name)' but no production declares it with @modeScope")
                 }
                 setSomewhere |= e.modeAdd
                 let child = (possible | e.modeAdd) & ~e.modeRemove
                 if Self.tests(e) & ~child & declared != 0 {
-                    problems.append("'\(production.name)' tests mode '\(modeNames(Self.tests(e) & ~child))', which can never be present there; add it to '\(production.name)'s @carries or remove the test")
+                    problems.append("'\(production.name)' tests mode '\(modeNames(Self.tests(e) & ~child))', which can never be present there; add it to '\(production.name)'s @modeScope or remove the test")
                 }
                 if e.kind == .N, nonTerminals[e.name] != nil {
-                    let target = carried(e.name)
+                    let target = modeScopeOf(e.name)
                     if e.modeAdd & ~target != 0 {
-                        problems.append("'\(production.name)' sets mode '\(modeNames(e.modeAdd & ~target))' on '\(e.name)', which does not @carries it")
+                        problems.append("'\(production.name)' sets mode '\(modeNames(e.modeAdd & ~target))' on '\(e.name)', which does not declare it with @modeScope")
                     }
                     if e.modeRemove != 0, Self.tests(e) == 0, e.modeRemove & possible & target == 0 {
                         report("'\(production.name)' clears '\(modeNames(e.modeRemove))' on '\(e.name)', but that mode can never reach it there; the @clearMode has no effect")
@@ -111,7 +111,7 @@ extension Grammar {
                 }
             }
         }
-        for lhs in originals { check(lhs, in: lhs, possible: lhs.carriedModes) }
+        for lhs in originals { check(lhs, in: lhs, possible: lhs.modeScope) }
 
         for (name, bit) in modeNameToBit where declared & bit != 0 && setSomewhere & bit == 0 {
             report("mode '\(name)' is carried but never set; it has no effect")
@@ -132,10 +132,10 @@ extension Grammar {
         /// the callee's scope. Tests on the occurrence see the unrestricted child mode, i.e. the
         /// caller's context.
         func calleeMode(_ e: GrammarNode, from mode: UInt64) -> UInt64 {
-            Self.childMode(e, from: mode) & carried(e.name)
+            Self.childMode(e, from: mode) & modeScopeOf(e.name)
         }
 
-        // 1. Relevance — least fixpoint, `scoped` restricted to each callee's `@carries`. A bit an
+        // 1. Relevance — least fixpoint, `scoped` restricted to each callee's `@modeScope`. A bit an
         //    occurrence sets or clears is fixed for that child, so it never makes the context
         //    depend on it. The unscoped variant only feeds the scope-exit lint below.
         func relevance(scoped: Bool) -> [String: UInt64] {
@@ -144,7 +144,7 @@ extension Grammar {
                 var bits: UInt64 = 0
                 Self.forEachElement(of: owner) { e in
                     var inner = Self.tests(e)
-                    if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? carried(e.name) : ~0) }
+                    if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? modeScopeOf(e.name) : ~0) }
                     if e.kind.isBracket { inner |= ownerRelevance(e) }
                     bits |= inner & ~(e.modeAdd | e.modeRemove)
                 }
@@ -154,7 +154,7 @@ extension Grammar {
             while changed {
                 changed = false
                 for lhs in originals {
-                    let bits = ownerRelevance(lhs) & (scoped ? lhs.carriedModes : ~0)
+                    let bits = ownerRelevance(lhs) & (scoped ? lhs.modeScope : ~0)
                     if bits != rel[lhs.name] ?? 0 {
                         rel[lhs.name] = bits
                         changed = true
@@ -173,8 +173,8 @@ extension Grammar {
             var exits = Set<String>()
             func collectExits(_ owner: GrammarNode, from production: GrammarNode) {
                 Self.forEachElement(of: owner) { e in
-                    if e.kind == .N, production.carriedModes & bit != 0, e.modeRemove & bit == 0,
-                       carried(e.name) & bit == 0, (reach[e.name] ?? 0) & bit != 0 {
+                    if e.kind == .N, production.modeScope & bit != 0, e.modeRemove & bit == 0,
+                       modeScopeOf(e.name) & bit == 0, (reach[e.name] ?? 0) & bit != 0 {
                         exits.insert("\(production.name)→\(e.name)")
                     } else if e.kind.isBracket {
                         collectExits(e, from: production)
