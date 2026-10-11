@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00011722-advent-overaccept-8f5ce21a4e063ba6.json",
+    "durationSeconds" : 0.22951900959014893,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:space+line-comment:reject:testOperatorDecl1a#1",
+    "index" : 11722,
+    "seed" : 11400602353682807358,
+    "signalHash" : "3623b9771d642466",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/OperatorDecl\/ke",
+    "sourceHash" : "8f5ce21a4e063ba6",
+    "sourceLength" : 44,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\nprefix  operator +++ \/\/ c\n {}\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"+++\") \"+++\"\n              CodeBlockItem\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A517F3ED-B6A5-4DA3-A19F-7073DA23776C.swift:3:1: error: operator should no longer be declared with body\n1 | #if FOO\n2 | prefix operator +++\n3 | {}\n  | `- error: operator should no longer be declared with body\n4 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"prefix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 229,
+      "descriptorCount" : 455,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 136,
+      "parseSeconds" : 0.00801396369934082,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 47,
+      "tokenCount" : 9,
+      "yieldCount" : 228
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                OperatorDecl\n                  keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                  keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                  binaryOperator(\"+++\") \"+++\"\n                  UnexpectedNodes\n                    leftBrace \"{\"\n                    PrecedenceGroupAttributeList\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 23,
+  "source" : "#if FOO\nprefix operator +++\n{}\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n              CodeBlockItem\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A517F3ED-B6A5-4DA3-A19F-7073DA23776C.swift:3:1: error: operator should no longer be declared with body\\n1 | #if FOO\\n2 | prefix operator +++\\n3 | {}\\n  | `- error: operator should no longer be declared with body\\n4 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"prefix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":229,\"descriptorCount\":455,\"duplicateDescriptorCount\":0,\"oraclePruned\":136,\"parseSeconds\":0.00801396369934082,\"sourceLength\":37,\"suppressedDescriptorCount\":47,\"tokenCount\":9,\"yieldCount\":228},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                OperatorDecl\\n                  keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                  keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                  binaryOperator(\\\"+++\\\") \\\"+++\\\"\\n                  UnexpectedNodes\\n                    leftBrace \\\"{\\\"\\n                    PrecedenceGroupAttributeList\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00040361-advent-overaccept-e909b0eded9f6116.json",
+    "durationSeconds" : 0.25911808013916016,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:block-comment+block-comment:type:testInverseTypes#8",
+    "index" : 40361,
+    "seed" : 17418699613126747779,
+    "signalHash" : "57cae3e338389244",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/SequenceExpr\/Ex",
+    "sourceHash" : "e909b0eded9f6116",
+    "sourceLength" : 45,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\nX<any P & ~\/*c*\/Copyable> \/* c *\/ ()\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    CompositionType\n                      CompositionTypeElementList\n                        CompositionTypeElement\n                          IdentifierType\n                            identifier(\"P\") \"P\"\n                          binaryOperator(\"&\") \"&\"\n                        CompositionTypeElement\n                          IdentifierType\n                            identifier(\"Copyable\") \"Copyable\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-BAFB9DCE-9B25-4A91-ABE4-983E31E093DC.swift:2:17: error: consecutive statements on a line must be separated by ';'\n1 | fuzz {\n2 | any P & Copyable ()\n  |                 `- error: consecutive statements on a line must be separated by ';'\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "simpleType\t[typeIdentifier]",
+      "protocolCompositionElement\t[simpleType]",
+      "protocolCompositionContinuation\t[protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement \"&\" protocolCompositionContinuation]",
+      "type\t[protocolCompositionType]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 142,
+      "descriptorCount" : 375,
+      "duplicateDescriptorCount" : 2,
+      "oraclePruned" : 224,
+      "parseSeconds" : 0.0066879987716674805,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 69,
+      "tokenCount" : 9,
+      "yieldCount" : 332
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  CompositionType\n                    CompositionTypeElementList\n                      CompositionTypeElement\n                        IdentifierType\n                          identifier(\"P\") \"P\"\n                        binaryOperator(\"&\") \"&\"\n                      CompositionTypeElement\n                        IdentifierType\n                          identifier(\"Copyable\") \"Copyable\"\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 37,
+  "source" : "fuzz {\nany P & Copyable ()\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    CompositionType\\n                      CompositionTypeElementList\\n                        CompositionTypeElement\\n                          IdentifierType\\n                            identifier(\\\"P\\\") \\\"P\\\"\\n                          binaryOperator(\\\"&\\\") \\\"&\\\"\\n                        CompositionTypeElement\\n                          IdentifierType\\n                            identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-BAFB9DCE-9B25-4A91-ABE4-983E31E093DC.swift:2:17: error: consecutive statements on a line must be separated by ';'\\n1 | fuzz {\\n2 | any P & Copyable ()\\n  |                 `- error: consecutive statements on a line must be separated by ';'\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"simpleType\\t[typeIdentifier]\",\"protocolCompositionElement\\t[simpleType]\",\"protocolCompositionContinuation\\t[protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement \\\"&\\\" protocolCompositionContinuation]\",\"type\\t[protocolCompositionType]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":142,\"descriptorCount\":375,\"duplicateDescriptorCount\":2,\"oraclePruned\":224,\"parseSeconds\":0.0066879987716674805,\"sourceLength\":28,\"suppressedDescriptorCount\":69,\"tokenCount\":9,\"yieldCount\":332},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  CompositionType\\n                    CompositionTypeElementList\\n                      CompositionTypeElement\\n                        IdentifierType\\n                          identifier(\\\"P\\\") \\\"P\\\"\\n                        binaryOperator(\\\"&\\\") \\\"&\\\"\\n                      CompositionTypeElement\\n                        IdentifierType\\n                          identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

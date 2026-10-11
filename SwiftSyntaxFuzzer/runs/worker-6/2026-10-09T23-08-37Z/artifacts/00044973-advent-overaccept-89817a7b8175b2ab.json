@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00044973-advent-overaccept-89817a7b8175b2ab.json",
+    "durationSeconds" : 0.32016098499298096,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:keyword+newline+delete:declaration:testProtocolParsing#2",
+    "index" : 44973,
+    "seed" : 6018004112543441592,
+    "signalHash" : "822fe1ab8b7055aa",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/DeclReferenceEx",
+    "sourceHash" : "89817a7b8175b2ab",
+    "sourceLength" : 29,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\n P { init(\n) }\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            FunctionCallExpr\n              DeclReferenceExpr\n                identifier(\"FOO\") \"FOO\"\n              LabeledExprList\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    InitializerDecl\n                      AttributeList\n                      DeclModifierList\n                      keyword(SwiftSyntax.Keyword.init) \"init\"\n                      FunctionSignature\n                        FunctionParameterClause\n                          leftParen \"(\"\n                          FunctionParameterList\n                          rightParen \")\"\n                rightBrace \"}\"\n              MultipleTrailingClosureElementList\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B3DD631D-9E05-4209-9E3E-F3031F4E38EA.swift:1:9: error: extra tokens following conditional compilation directive\n1 | #if FOO { init(\n  |         `- error: extra tokens following conditional compilation directive\n2 | ) }\n3 | #endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B3DD631D-9E05-4209-9E3E-F3031F4E38EA.swift:1:9: error: expected declaration\n1 | #if FOO { init(\n  |         `- error: expected declaration\n2 | ) }\n3 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "parameterClause\t[\"(\" \")\"]",
+      "initializerHead\t[  \"init\"]",
+      "bodylessInitializerDeclaration\t[initializerHead  parameterClause    ]",
+      "declaration\t[bodylessInitializerDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 168,
+      "descriptorCount" : 337,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 124,
+      "parseSeconds" : 0.007308006286621094,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 32,
+      "tokenCount" : 9,
+      "yieldCount" : 213
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            UnexpectedNodes\n              leftBrace \"{\"\n              keyword(SwiftSyntax.Keyword.init) \"init\"\n              leftParen \"(\"\n            CodeBlockItemList\n              CodeBlockItem\n                UnexpectedCodeDecl\n                  UnexpectedNodes\n                    rightParen \")\"\n                    rightBrace \"}\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 32,
+  "source" : "#if FOO { init(\n) }\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            FunctionCallExpr\\n              DeclReferenceExpr\\n                identifier(\\\"FOO\\\") \\\"FOO\\\"\\n              LabeledExprList\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    InitializerDecl\\n                      AttributeList\\n                      DeclModifierList\\n                      keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                      FunctionSignature\\n                        FunctionParameterClause\\n                          leftParen \\\"(\\\"\\n                          FunctionParameterList\\n                          rightParen \\\")\\\"\\n                rightBrace \\\"}\\\"\\n              MultipleTrailingClosureElementList\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B3DD631D-9E05-4209-9E3E-F3031F4E38EA.swift:1:9: error: extra tokens following conditional compilation directive\\n1 | #if FOO { init(\\n  |         `- error: extra tokens following conditional compilation directive\\n2 | ) }\\n3 | #endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B3DD631D-9E05-4209-9E3E-F3031F4E38EA.swift:1:9: error: expected declaration\\n1 | #if FOO { init(\\n  |         `- error: expected declaration\\n2 | ) }\\n3 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"initializerHead\\t[  \\\"init\\\"]\",\"bodylessInitializerDeclaration\\t[initializerHead  parameterClause    ]\",\"declaration\\t[bodylessInitializerDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":168,\"descriptorCount\":337,\"duplicateDescriptorCount\":0,\"oraclePruned\":124,\"parseSeconds\":0.007308006286621094,\"sourceLength\":26,\"suppressedDescriptorCount\":32,\"tokenCount\":9,\"yieldCount\":213},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            UnexpectedNodes\\n              leftBrace \\\"{\\\"\\n              keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              leftParen \\\"(\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                UnexpectedCodeDecl\\n                  UnexpectedNodes\\n                    rightParen \\\")\\\"\\n                    rightBrace \\\"}\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

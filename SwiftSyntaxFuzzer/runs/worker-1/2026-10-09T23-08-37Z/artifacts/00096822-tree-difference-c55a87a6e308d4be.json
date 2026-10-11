@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00096822-tree-difference-c55a87a6e308d4be.json",
+    "durationSeconds" : 0.2948739528656006,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:delete+splice:translated:testForwardSlashRegex43#1",
+    "index" : 96822,
+    "seed" : 4354586920523693569,
+    "signalHash" : "756b0bcb32a1cdfc",
+    "signalSummary" : "tree-difference|line=23|ref=PostfixOperatorExpr|advent=DeclReferenceExpr",
+    "sourceHash" : "c55a87a6e308d4be",
+    "sourceLength" : 29,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\n_ = x\/...\/y**\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"\/\") \"\/\"\n                  PrefixOperatorExpr\n                    prefixOperator(\"...\/\") \"...\/\"\n                    DeclReferenceExpr\n                      identifier(\"y\") \"y\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[dotOperator]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      ".DO\t[postfixOperatorToken]",
+      "infixExpression\t[>s<  >->(\".\") >s< prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 131,
+      "descriptorCount" : 330,
+      "duplicateDescriptorCount" : 1,
+      "oraclePruned" : 177,
+      "parseSeconds" : 0.008620023727416992,
+      "sourceLength" : 23,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 11,
+      "yieldCount" : 300
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n                  AssignmentExpr\n                    equal \"=\"\n                  PostfixOperatorExpr\n                    DeclReferenceExpr\n                      identifier(\"x\") \"x\"\n                    postfixOperator(\"\/\") \"\/\"\n                  BinaryOperatorExpr\n                    binaryOperator(\"...\/\") \"...\/\"\n                  DeclReferenceExpr\n                    identifier(\"y\") \"y\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 32,
+  "source" : " fuzz() {\n_ = x\/...\/y\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\"...\\\/\\\") \\\"...\\\/\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"y\\\") \\\"y\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[dotOperator]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\".DO\\t[postfixOperatorToken]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s< prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":131,\"descriptorCount\":330,\"duplicateDescriptorCount\":1,\"oraclePruned\":177,\"parseSeconds\":0.008620023727416992,\"sourceLength\":23,\"suppressedDescriptorCount\":45,\"tokenCount\":11,\"yieldCount\":300},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  PostfixOperatorExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n                    postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                  BinaryOperatorExpr\\n                    binaryOperator(\\\"...\\\/\\\") \\\"...\\\/\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"y\\\") \\\"y\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

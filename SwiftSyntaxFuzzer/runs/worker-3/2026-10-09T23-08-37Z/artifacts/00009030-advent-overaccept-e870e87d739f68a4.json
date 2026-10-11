@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00009030-advent-overaccept-e870e87d739f68a4.json",
+    "durationSeconds" : 0.3426879644393921,
+    "exitCode" : 1,
+    "generator" : "wide:closure:delete+keyword+block-comment:translated:testOptionalLvalues11#1",
+    "index" : 9030,
+    "seed" : 8709271377407735423,
+    "signalHash" : "befa3c5ac96c8779",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "e870e87d739f68a4",
+    "sourceLength" : 93,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nvar nonOptional: S = ()\ninit =  \/* c *\/ nonOptional!\n_ = nonOptional!.x\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    keyword(SwiftSyntax.Keyword.init) \"init\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"nonOptional\") \"nonOptional\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:1:13: error: consecutive statements on a line must be separated by ';'\n1 |  fuzzClosure {\n  |             `- error: consecutive statements on a line must be separated by ';'\n2 | init = nonOptional\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:1:14: error: top-level statement cannot begin with a closure expression\n1 |  fuzzClosure {\n  |              `- error: top-level statement cannot begin with a closure expression\n2 | init = nonOptional\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:2:6: error: initializers may only be declared within a type\n1 |  fuzzClosure {\n2 | init = nonOptional\n  |      `- error: initializers may only be declared within a type\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:2:6: error: expected '(' for initializer parameters\n1 |  fuzzClosure {\n2 | init = nonOptional\n  |      `- error: expected '(' for initializer parameters\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 97,
+      "descriptorCount" : 228,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 96,
+      "parseSeconds" : 0.0049430131912231445,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 6,
+      "yieldCount" : 184
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"fuzzClosure\") \"fuzzClosure\"\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            InitializerDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.init) \"init\"\n              FunctionSignature\n                FunctionParameterClause\n                  FunctionParameterList\n          CodeBlockItem\n            UnexpectedCodeDecl\n              UnexpectedNodes\n                equal \"=\"\n                identifier(\"nonOptional\") \"nonOptional\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 36,
+  "source" : " fuzzClosure {\ninit = nonOptional\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"nonOptional\\\") \\\"nonOptional\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:1:13: error: consecutive statements on a line must be separated by ';'\\n1 |  fuzzClosure {\\n  |             `- error: consecutive statements on a line must be separated by ';'\\n2 | init = nonOptional\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:1:14: error: top-level statement cannot begin with a closure expression\\n1 |  fuzzClosure {\\n  |              `- error: top-level statement cannot begin with a closure expression\\n2 | init = nonOptional\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:2:6: error: initializers may only be declared within a type\\n1 |  fuzzClosure {\\n2 | init = nonOptional\\n  |      `- error: initializers may only be declared within a type\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-FB2EDFD6-2037-4E5D-9DB7-E945F9B793E0.swift:2:6: error: expected '(' for initializer parameters\\n1 |  fuzzClosure {\\n2 | init = nonOptional\\n  |      `- error: expected '(' for initializer parameters\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":97,\"descriptorCount\":228,\"duplicateDescriptorCount\":0,\"oraclePruned\":96,\"parseSeconds\":0.0049430131912231445,\"sourceLength\":35,\"suppressedDescriptorCount\":33,\"tokenCount\":6,\"yieldCount\":184},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            InitializerDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  FunctionParameterList\\n          CodeBlockItem\\n            UnexpectedCodeDecl\\n              UnexpectedNodes\\n                equal \\\"=\\\"\\n                identifier(\\\"nonOptional\\\") \\\"nonOptional\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

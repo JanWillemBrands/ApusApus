@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00010245-advent-overaccept-532e31e53e0d1114.json",
+    "durationSeconds" : 0.25348007678985596,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:newline+block-comment:expression:testInterpolatedStringLiterals#2+translated:testBorrowingContextualParsing#3",
+    "index" : 10245,
+    "seed" : 4354586920523693569,
+    "signalHash" : "a755e2594a67b99f",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StringLiteralExpr\/stringQuote\/StringLiteralSegmentList\/StringSegment\/stringSegment()\/ExpressionSegment\/backslash\/leftParen\/LabeledExp",
+    "sourceHash" : "532e31e53e0d1114",
+    "sourceLength" : 145,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "\"text \\(array.map({ \"\\($0)\" }).joined(separator: \",\")) text\"\nswitch 42 {\ncase borrowing \/*\n*\/x\n: \/\/ parses as binding\n  break\n}\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          IntegerLiteralExpr\n            integerLiteral(\"42\") \"42\"\n          leftBrace \"{\"\n          SwitchCaseList\n            SwitchCase\n              SwitchCaseLabel\n                keyword(SwiftSyntax.Keyword.case) \"case\"\n                SwitchCaseItemList\n                  SwitchCaseItem\n                    ValueBindingPattern\n                      keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n                      IdentifierPattern\n                        identifier(\"x\") \"x\"\n                colon \":\"\n              CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-EDEBE662-A395-4207-8916-6DD43807BAAF.swift:2:15: error: expected ':' after 'case'\n1 | switch 42 {\n2 | case borrowing\n  |               `- error: expected ':' after 'case'\n3 | x\n4 | :\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-EDEBE662-A395-4207-8916-6DD43807BAAF.swift:4:1: error: expected expression\n2 | case borrowing\n3 | x\n4 | :\n  | `- error: expected expression\n5 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "valueBindingPattern\t[\"borrowing\" >+>(\"_\" identifier) matchPattern]",
+      "matchPattern\t[valueBindingPattern]",
+      "caseItemList\t[matchPattern  ]",
+      "caseLabel\t[ \"case\" caseItemList \":\"]",
+      "switchCase\t[caseLabel ]",
+      "switchCases\t[switchCase ]",
+      ".OPT\t[switchCases]",
+      "integerLiteral\t[decimalLiteral]",
+      "signedIntegerLiteral\t[ integerLiteral]",
+      "numericLiteral\t[signedIntegerLiteral]",
+      "literal\t[numericLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "switchExpression\t[\"switch\" >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "effectfulConditional\t[conditionalExpression]",
+      "expression\t[effectfulConditional ]",
+      "statement\t[expression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 153,
+      "descriptorCount" : 375,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 130,
+      "parseSeconds" : 0.003931999206542969,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 34,
+      "tokenCount" : 8,
+      "yieldCount" : 219
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          IntegerLiteralExpr\n            integerLiteral(\"42\") \"42\"\n          leftBrace \"{\"\n          SwitchCaseList\n            SwitchCase\n              SwitchCaseLabel\n                keyword(SwiftSyntax.Keyword.case) \"case\"\n                SwitchCaseItemList\n                  SwitchCaseItem\n                    ExpressionPattern\n                      DeclReferenceExpr\n                        identifier(\"borrowing\") \"borrowing\"\n              CodeBlockItemList\n                CodeBlockItem\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                CodeBlockItem\n                  UnexpectedCodeDecl\n                    UnexpectedNodes\n                      colon \":\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 36,
+  "source" : "switch 42 {\ncase borrowing\nx\n:\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          IntegerLiteralExpr\\n            integerLiteral(\\\"42\\\") \\\"42\\\"\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n            SwitchCase\\n              SwitchCaseLabel\\n                keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                SwitchCaseItemList\\n                  SwitchCaseItem\\n                    ValueBindingPattern\\n                      keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n                      IdentifierPattern\\n                        identifier(\\\"x\\\") \\\"x\\\"\\n                colon \\\":\\\"\\n              CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-EDEBE662-A395-4207-8916-6DD43807BAAF.swift:2:15: error: expected ':' after 'case'\\n1 | switch 42 {\\n2 | case borrowing\\n  |               `- error: expected ':' after 'case'\\n3 | x\\n4 | :\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-EDEBE662-A395-4207-8916-6DD43807BAAF.swift:4:1: error: expected expression\\n2 | case borrowing\\n3 | x\\n4 | :\\n  | `- error: expected expression\\n5 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"valueBindingPattern\\t[\\\"borrowing\\\" >+>(\\\"_\\\" identifier) matchPattern]\",\"matchPattern\\t[valueBindingPattern]\",\"caseItemList\\t[matchPattern  ]\",\"caseLabel\\t[ \\\"case\\\" caseItemList \\\":\\\"]\",\"switchCase\\t[caseLabel ]\",\"switchCases\\t[switchCase ]\",\".OPT\\t[switchCases]\",\"integerLiteral\\t[decimalLiteral]\",\"signedIntegerLiteral\\t[ integerLiteral]\",\"numericLiteral\\t[signedIntegerLiteral]\",\"literal\\t[numericLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"switchExpression\\t[\\\"switch\\\" >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"effectfulConditional\\t[conditionalExpression]\",\"expression\\t[effectfulConditional ]\",\"statement\\t[expression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":153,\"descriptorCount\":375,\"duplicateDescriptorCount\":0,\"oraclePruned\":130,\"parseSeconds\":0.003931999206542969,\"sourceLength\":32,\"suppressedDescriptorCount\":34,\"tokenCount\":8,\"yieldCount\":219},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          IntegerLiteralExpr\\n            integerLiteral(\\\"42\\\") \\\"42\\\"\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n            SwitchCase\\n              SwitchCaseLabel\\n                keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n                SwitchCaseItemList\\n                  SwitchCaseItem\\n                    ExpressionPattern\\n                      DeclReferenceExpr\\n                        identifier(\\\"borrowing\\\") \\\"borrowing\\\"\\n              CodeBlockItemList\\n                CodeBlockItem\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                CodeBlockItem\\n                  UnexpectedCodeDecl\\n                    UnexpectedNodes\\n                      colon \\\":\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -5844,7 +5844,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit24",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testInitDeinit25#1",
@@ -5856,7 +5857,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit25",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testInitDeinit26#1",
@@ -5867,7 +5869,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit26",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testInitDeinit27#1",
@@ -7936,7 +7939,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator ^^ : PostfixMagicOperatorProtocol
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes6",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes7#1",
@@ -7962,7 +7966,8 @@ let translatedSnippets: [SwiftSnippet] = [
       infix operator **+> : MediumPrecedence, UndeclaredProtocol
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes9",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes10#1",
@@ -7970,7 +7975,8 @@ let translatedSnippets: [SwiftSnippet] = [
       prefix operator *+*> : MediumPrecedence
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes10",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes11#1",
@@ -7978,7 +7984,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator ++*> : MediumPrecedence
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes11",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes12#1",
@@ -7987,7 +7994,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator +*+> : UndeclaredProtocol
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes12",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes13#1",
@@ -8007,7 +8015,8 @@ let translatedSnippets: [SwiftSnippet] = [
       prefix operator *>*> : Class
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes14",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes15#1",
@@ -8016,7 +8025,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator >>** : Class
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes15",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes16#1",
@@ -8024,7 +8034,8 @@ let translatedSnippets: [SwiftSnippet] = [
       infix operator  <*<<< : MediumPrecedence, &
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes16",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes17#1",
@@ -8046,7 +8057,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator ^^*%% : MediumPrecedence, Class
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes18",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes19#1",
@@ -8054,7 +8066,8 @@ let translatedSnippets: [SwiftSnippet] = [
       infix operator <*<>*> : AdditionPrecedence,
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes19",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDecl3#1",
@@ -8062,7 +8075,8 @@ let translatedSnippets: [SwiftSnippet] = [
       prefix operator ++*++ : A
       """,
         origin: "OperatorDeclTests.testOperatorDecl3",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDecl5#1",
@@ -8070,7 +8084,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator ++**+ : A
       """,
         origin: "OperatorDeclTests.testOperatorDecl5",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDecl11a#1",
@@ -8086,7 +8101,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator ??
       """,
         origin: "OperatorDeclTests.testOperatorDecl11b",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "postfix operator names starting with '?' or '!' are disallowed to avoi"
     ),
     SwiftSnippet(
         label: "testOperatorDecl11c#1",
@@ -8102,7 +8118,8 @@ let translatedSnippets: [SwiftSnippet] = [
       postfix operator !!
       """,
         origin: "OperatorDeclTests.testOperatorDecl11d",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "postfix operator names starting with '?' or '!' are disallowed to avoi"
     ),
     SwiftSnippet(
         label: "testOperatorDecl16#1",
@@ -8161,7 +8178,8 @@ let translatedSnippets: [SwiftSnippet] = [
       infix operator *<*< : F, Proto
       """,
         origin: "OperatorDeclTests.testOperatorDecl21",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDecl22#1",
@@ -18620,7 +18638,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit24",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testInitDeinit25#1",
@@ -18632,7 +18651,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit25",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testInitDeinit26#1",
@@ -18643,7 +18663,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit26",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testInitDeinit27#1",
@@ -20702,7 +20723,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator ^^ : PostfixMagicOperatorProtocol
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes6",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes7#1",
@@ -20728,7 +20750,8 @@ let translated604Snippets: [SwiftSnippet] = [
       infix operator **+> : MediumPrecedence, UndeclaredProtocol
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes9",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes10#1",
@@ -20736,7 +20759,8 @@ let translated604Snippets: [SwiftSnippet] = [
       prefix operator *+*> : MediumPrecedence
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes10",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes11#1",
@@ -20744,7 +20768,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator ++*> : MediumPrecedence
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes11",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes12#1",
@@ -20753,7 +20778,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator +*+> : UndeclaredProtocol
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes12",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes13#1",
@@ -20773,7 +20799,8 @@ let translated604Snippets: [SwiftSnippet] = [
       prefix operator *>*> : Class
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes14",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes15#1",
@@ -20782,7 +20809,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator >>** : Class
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes15",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes16#1",
@@ -20790,7 +20818,8 @@ let translated604Snippets: [SwiftSnippet] = [
       infix operator  <*<<< : MediumPrecedence, &
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes16",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes17#1",
@@ -20812,7 +20841,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator ^^*%% : MediumPrecedence, Class
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes18",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDeclDesignatedTypes19#1",
@@ -20820,7 +20850,8 @@ let translated604Snippets: [SwiftSnippet] = [
       infix operator <*<>*> : AdditionPrecedence,
       """,
         origin: "OperatorDeclDesignatedTypesTests.testOperatorDeclDesignatedTypes19",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDecl3#1",
@@ -20828,7 +20859,8 @@ let translated604Snippets: [SwiftSnippet] = [
       prefix operator ++*++ : A
       """,
         origin: "OperatorDeclTests.testOperatorDecl3",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDecl5#1",
@@ -20836,7 +20868,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator ++**+ : A
       """,
         origin: "OperatorDeclTests.testOperatorDecl5",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only infix operators may declare a precedence"
     ),
     SwiftSnippet(
         label: "testOperatorDecl11a#1",
@@ -20852,7 +20885,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator ??
       """,
         origin: "OperatorDeclTests.testOperatorDecl11b",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "postfix operator names starting with '?' or '!' are disallowed to avoi"
     ),
     SwiftSnippet(
         label: "testOperatorDecl11c#1",
@@ -20868,7 +20902,8 @@ let translated604Snippets: [SwiftSnippet] = [
       postfix operator !!
       """,
         origin: "OperatorDeclTests.testOperatorDecl11d",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "postfix operator names starting with '?' or '!' are disallowed to avoi"
     ),
     SwiftSnippet(
         label: "testOperatorDecl16#1",
@@ -20927,7 +20962,8 @@ let translated604Snippets: [SwiftSnippet] = [
       infix operator *<*< : F, Proto
       """,
         origin: "OperatorDeclTests.testOperatorDecl21",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testOperatorDecl22#1",

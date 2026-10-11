@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00014181-advent-overaccept-b04916a182890adb.json",
+    "durationSeconds" : 0.209617018699646,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:line-comment+keyword:fuzz-harvest:member-compound-name",
+    "index" : 14181,
+    "seed" : 6018004112543441592,
+    "signalHash" : "43e0c200fa0ca1d2",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/MemberBlock\/leftBrace\/MemberBlockItemList\/MemberBlockItem\/VariableDe",
+    "sourceHash" : "b04916a182890adb",
+    "sourceLength" : 44,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "struct Fuzz {\nlet v = x.y \/\/ c\n(a:switch:)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"Fuzz\") \"Fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"v\") \"v\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"y\") \"y\"\n                    DeclNameArguments\n                      leftParen \"(\"\n                      DeclNameArgumentList\n                        DeclNameArgument\n                          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n                          colon \":\"\n                      rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8EB280D8-A9FC-48CD-AC64-45BEC21DF939.swift:2:9: error: expected expression in list of expressions\n1 |  Fuzz { v = y\n2 | (switch:)\n  |         `- error: expected expression in list of expressions\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "argumentLabel\t[identifier]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      "expressionIdentifier\t[identifier]",
+      "compoundNameBase\t[expressionIdentifier]",
+      "primaryExpression\t[compoundNameBase \"(\" argumentNames \")\"]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 145,
+      "descriptorCount" : 342,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 153,
+      "parseSeconds" : 0.0047719478607177734,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 40,
+      "tokenCount" : 10,
+      "yieldCount" : 255
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"Fuzz\") \"Fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"v\") \"v\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"y\") \"y\"\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    identifier(\"switch\") \"switch\"\n                    colon \":\"\n                    MissingExpr\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : " Fuzz { v = y\n(switch:)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"v\\\") \\\"v\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"y\\\") \\\"y\\\"\\n                    DeclNameArguments\\n                      leftParen \\\"(\\\"\\n                      DeclNameArgumentList\\n                        DeclNameArgument\\n                          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n                          colon \\\":\\\"\\n                      rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8EB280D8-A9FC-48CD-AC64-45BEC21DF939.swift:2:9: error: expected expression in list of expressions\\n1 |  Fuzz { v = y\\n2 | (switch:)\\n  |         `- error: expected expression in list of expressions\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"argumentLabel\\t[identifier]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\"expressionIdentifier\\t[identifier]\",\"compoundNameBase\\t[expressionIdentifier]\",\"primaryExpression\\t[compoundNameBase \\\"(\\\" argumentNames \\\")\\\"]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":145,\"descriptorCount\":342,\"duplicateDescriptorCount\":0,\"oraclePruned\":153,\"parseSeconds\":0.0047719478607177734,\"sourceLength\":25,\"suppressedDescriptorCount\":40,\"tokenCount\":10,\"yieldCount\":255},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"v\\\") \\\"v\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"y\\\") \\\"y\\\"\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    identifier(\\\"switch\\\") \\\"switch\\\"\\n                    colon \\\":\\\"\\n                    MissingExpr\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

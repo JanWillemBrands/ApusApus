@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00083906-advent-overaccept-e7fdf5435ff761d2.json",
+    "durationSeconds" : 0.3572190999984741,
+    "exitCode" : 1,
+    "generator" : "wide:closure:block-comment:translated:testForwardSlashRegexSkipping27#1",
+    "index" : 83906,
+    "seed" : 17418699613126747779,
+    "signalHash" : "5c1911c759074097",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "e7fdf5435ff761d2",
+    "sourceLength" : 49,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nfunc s() { _ = \/\/*\n*\/(x)\/ }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    PrefixOperatorExpr\n                      prefixOperator(\"*\") \"*\"\n                      RegexLiteralExpr\n                        regexSlash \"\/\"\n                        regexLiteralPattern(\")\") \")\"\n                        regexSlash \"\/\"\n                rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7FC8CA3C-A2EC-4B70-9E8F-3D01DD19AC95.swift:2:1: error: unexpected end of block comment\n1 |  fuzzClosure { {\n2 | *\/)\/ }\n  | `- error: unexpected end of block comment\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7FC8CA3C-A2EC-4B70-9E8F-3D01DD19AC95.swift:2:3: error: expected expression\n1 |  fuzzClosure { {\n2 | *\/)\/ }\n  |   `- error: expected expression\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "plainRegularExpressionLiteral\t[>n< <-<(\")\" \"->\" \".\" \"...\" \">\" \"@\" \"Any\" \"Self\" \"]\" \"_\" \"false\" \"func\" \"nil\" \"operator\" \"self\" \"super\" \"true\" \"}\" binaryLiteral closeAngle decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection regexSlash) regexLiteralToken]",
+      "regularExpressionLiteral\t[plainRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s<]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 88,
+      "descriptorCount" : 214,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 74,
+      "parseSeconds" : 0.006368041038513184,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 7,
+      "yieldCount" : 176
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ClosureExpr\n                leftBrace \"{\"\n                CodeBlockItemList\n                  CodeBlockItem\n                    UnexpectedCodeDecl\n                      UnexpectedNodes\n                        unknown(\"*\/\") \"*\/\"\n                        rightParen \")\"\n                        postfixOperator(\"\/\") \"\/\"\n                rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " fuzzClosure { {\n*\/)\/ }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    PrefixOperatorExpr\\n                      prefixOperator(\\\"*\\\") \\\"*\\\"\\n                      RegexLiteralExpr\\n                        regexSlash \\\"\\\/\\\"\\n                        regexLiteralPattern(\\\")\\\") \\\")\\\"\\n                        regexSlash \\\"\\\/\\\"\\n                rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7FC8CA3C-A2EC-4B70-9E8F-3D01DD19AC95.swift:2:1: error: unexpected end of block comment\\n1 |  fuzzClosure { {\\n2 | *\\\/)\\\/ }\\n  | `- error: unexpected end of block comment\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7FC8CA3C-A2EC-4B70-9E8F-3D01DD19AC95.swift:2:3: error: expected expression\\n1 |  fuzzClosure { {\\n2 | *\\\/)\\\/ }\\n  |   `- error: expected expression\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"plainRegularExpressionLiteral\\t[>n< <-<(\\\")\\\" \\\"->\\\" \\\".\\\" \\\"...\\\" \\\">\\\" \\\"@\\\" \\\"Any\\\" \\\"Self\\\" \\\"]\\\" \\\"_\\\" \\\"false\\\" \\\"func\\\" \\\"nil\\\" \\\"operator\\\" \\\"self\\\" \\\"super\\\" \\\"true\\\" \\\"}\\\" binaryLiteral closeAngle decimalFloatingPointLiteral decimalLiteral escapedIdentifier extendedRegularExpressionLiteral forceMark hexadecimalFloatingPointLiteral hexadecimalLiteral identifier implicitParameterName octalLiteral optionalMark propertyWrapperProjection regexSlash) regexLiteralToken]\",\"regularExpressionLiteral\\t[plainRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s<]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":88,\"descriptorCount\":214,\"duplicateDescriptorCount\":0,\"oraclePruned\":74,\"parseSeconds\":0.006368041038513184,\"sourceLength\":25,\"suppressedDescriptorCount\":27,\"tokenCount\":7,\"yieldCount\":176},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ClosureExpr\\n                leftBrace \\\"{\\\"\\n                CodeBlockItemList\\n                  CodeBlockItem\\n                    UnexpectedCodeDecl\\n                      UnexpectedNodes\\n                        unknown(\\\"*\\\/\\\") \\\"*\\\/\\\"\\n                        rightParen \\\")\\\"\\n                        postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00055148-advent-overaccept-623d447dab6e5637.json",
+    "durationSeconds" : 0.20745599269866943,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:duplicate:translated:testDeprecatedWhere10#1",
+    "index" : 55148,
+    "seed" : 13064010758198292053,
+    "signalHash" : "85f9d775626b4b96",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/StructDecl\/Attr",
+    "sourceHash" : "623d447dab6e5637",
+    "sourceLength" : 114,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n\/\/ NominalTypeDecl: Choose 3\n\/\/ 1,2,3\nstruct S123<T:: Mashable where T: Womparable> where T: Equatable {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              StructDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                identifier(\"S123\") \"S123\"\n                GenericParameterClause\n                  leftAngle \"<\"\n                  GenericParameterList\n                    GenericParameter\n                      AttributeList\n                      identifier(\"T::Womparable\") \"T::Womparable\"\n                  rightAngle \">\"\n                MemberBlock\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3EB80611-A290-41B4-8D0A-3A0A0DF2DF59.swift:2:14: error: expected '>' to complete generic parameter list\n1 | fuzz {\n2 | struct S123<T:: Womparable> {}\n  |            | `- error: expected '>' to complete generic parameter list\n  |            `- note: to match this opening '<'\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector identifier]",
+      "genericParameterName\t[typeName]",
+      "genericParameter\t[ >->(\"each\") genericParameterName]",
+      "genericParameterList\t[genericParameter ]",
+      "genericParameterClause\t[openAngle genericParameterList   closeAngle]",
+      ".OPT\t[genericParameterClause]",
+      "structName\t[identifierToken]",
+      "structDeclaration\t[  \"struct\" structName    \"{\"  \"}\"]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 81,
+      "descriptorCount" : 175,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 66,
+      "parseSeconds" : 0.008651018142700195,
+      "sourceLength" : 39,
+      "suppressedDescriptorCount" : 17,
+      "tokenCount" : 12,
+      "yieldCount" : 159
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              StructDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.struct) \"struct\"\n                identifier(\"S123\") \"S123\"\n                GenericParameterClause\n                  leftAngle \"<\"\n                  GenericParameterList\n                    GenericParameter\n                      AttributeList\n                      identifier(\"T\") \"T\"\n                MemberBlock\n                  UnexpectedNodes\n                    colonColon \"::\"\n                    identifier(\"Womparable\") \"Womparable\"\n                    postfixOperator(\">\") \">\"\n                  leftBrace \"{\"\n                  MemberBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : "fuzz {\nstruct S123<T:: Womparable> {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              StructDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                identifier(\\\"S123\\\") \\\"S123\\\"\\n                GenericParameterClause\\n                  leftAngle \\\"<\\\"\\n                  GenericParameterList\\n                    GenericParameter\\n                      AttributeList\\n                      identifier(\\\"T::Womparable\\\") \\\"T::Womparable\\\"\\n                  rightAngle \\\">\\\"\\n                MemberBlock\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3EB80611-A290-41B4-8D0A-3A0A0DF2DF59.swift:2:14: error: expected '>' to complete generic parameter list\\n1 | fuzz {\\n2 | struct S123<T:: Womparable> {}\\n  |            | `- error: expected '>' to complete generic parameter list\\n  |            `- note: to match this opening '<'\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector identifier]\",\"genericParameterName\\t[typeName]\",\"genericParameter\\t[ >->(\\\"each\\\") genericParameterName]\",\"genericParameterList\\t[genericParameter ]\",\"genericParameterClause\\t[openAngle genericParameterList   closeAngle]\",\".OPT\\t[genericParameterClause]\",\"structName\\t[identifierToken]\",\"structDeclaration\\t[  \\\"struct\\\" structName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":81,\"descriptorCount\":175,\"duplicateDescriptorCount\":0,\"oraclePruned\":66,\"parseSeconds\":0.008651018142700195,\"sourceLength\":39,\"suppressedDescriptorCount\":17,\"tokenCount\":12,\"yieldCount\":159},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              StructDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n                identifier(\\\"S123\\\") \\\"S123\\\"\\n                GenericParameterClause\\n                  leftAngle \\\"<\\\"\\n                  GenericParameterList\\n                    GenericParameter\\n                      AttributeList\\n                      identifier(\\\"T\\\") \\\"T\\\"\\n                MemberBlock\\n                  UnexpectedNodes\\n                    colonColon \\\"::\\\"\\n                    identifier(\\\"Womparable\\\") \\\"Womparable\\\"\\n                    postfixOperator(\\\">\\\") \\\">\\\"\\n                  leftBrace \\\"{\\\"\\n                  MemberBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

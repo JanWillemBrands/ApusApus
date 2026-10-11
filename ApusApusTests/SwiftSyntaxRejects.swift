@@ -1310,7 +1310,8 @@ let declarationRejectSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testInitAccessorsWithDefaultValues",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        disabledReason: "swiftc 6.4 accepts this (-parse and -typecheck, measured 2026-10-10); only swift-syntax rejects an `init` accessor after other accessors. The compiler is the source of truth."
     ),
     SwiftSnippet(
         label: "testDeclarationsWithPlaceholders#1",
@@ -10832,7 +10833,8 @@ let declaration604RejectSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testInitAccessorsWithDefaultValues",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        disabledReason: "swiftc 6.4 accepts this (-parse and -typecheck, measured 2026-10-10); only swift-syntax rejects an `init` accessor after other accessors. The compiler is the source of truth."
     ),
     SwiftSnippet(
         label: "testDeclarationsWithPlaceholders#1",

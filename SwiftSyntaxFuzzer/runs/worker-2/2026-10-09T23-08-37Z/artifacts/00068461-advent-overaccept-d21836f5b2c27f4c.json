@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00068461-advent-overaccept-d21836f5b2c27f4c.json",
+    "durationSeconds" : 0.30567991733551025,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:swap:reject:testDeinitReasync#1",
+    "index" : 68461,
+    "seed" : 15755289026768925204,
+    "signalHash" : "e71b509a3dac5d7b",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "d21836f5b2c27f4c",
+    "sourceLength" : 70,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\nclass FooClassDeinitializerA {\n  reasync deinit {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"FooClassDeinitializerA\") \"FooClassDeinitializerA\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeinitializerDecl\n                AttributeList\n                DeclModifierList\n                  DeclModifier\n                    identifier(\"reasync\") \"reasync\"\n                keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4487CB8A-DD7C-4E75-A202-80279FF17793.swift:2:8: error: consecutive statements on a line must be separated by ';'\n1 |  FooClassDeinitializerA {\n2 | reasync deinit {}\n  |        `- error: consecutive statements on a line must be separated by ';'\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4487CB8A-DD7C-4E75-A202-80279FF17793.swift:2:9: error: deinitializers may only be declared within a class, actor, or noncopyable type\n1 |  FooClassDeinitializerA {\n2 | reasync deinit {}\n  |         `- error: deinitializers may only be declared within a class, actor, or noncopyable type\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      ".OPT\t[codeBlock]",
+      "declarationModifier\t[\"reasync\"]",
+      "declarationModifiers\t[declarationModifier ]",
+      ".OPT\t[declarationModifiers]",
+      "deinitializerDeclaration\t[  \"deinit\"  ]",
+      "declaration\t[deinitializerDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 151,
+      "descriptorCount" : 304,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 145,
+      "parseSeconds" : 0.005092978477478027,
+      "sourceLength" : 45,
+      "suppressedDescriptorCount" : 45,
+      "tokenCount" : 7,
+      "yieldCount" : 215
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"FooClassDeinitializerA\") \"FooClassDeinitializerA\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeinitializerDecl\n                AttributeList\n                DeclModifierList\n                UnexpectedNodes\n                  identifier(\"reasync\") \"reasync\"\n                keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 32,
+  "source" : " FooClassDeinitializerA {\nreasync deinit {}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"FooClassDeinitializerA\\\") \\\"FooClassDeinitializerA\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeinitializerDecl\\n                AttributeList\\n                DeclModifierList\\n                  DeclModifier\\n                    identifier(\\\"reasync\\\") \\\"reasync\\\"\\n                keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4487CB8A-DD7C-4E75-A202-80279FF17793.swift:2:8: error: consecutive statements on a line must be separated by ';'\\n1 |  FooClassDeinitializerA {\\n2 | reasync deinit {}\\n  |        `- error: consecutive statements on a line must be separated by ';'\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4487CB8A-DD7C-4E75-A202-80279FF17793.swift:2:9: error: deinitializers may only be declared within a class, actor, or noncopyable type\\n1 |  FooClassDeinitializerA {\\n2 | reasync deinit {}\\n  |         `- error: deinitializers may only be declared within a class, actor, or noncopyable type\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\".OPT\\t[codeBlock]\",\"declarationModifier\\t[\\\"reasync\\\"]\",\"declarationModifiers\\t[declarationModifier ]\",\".OPT\\t[declarationModifiers]\",\"deinitializerDeclaration\\t[  \\\"deinit\\\"  ]\",\"declaration\\t[deinitializerDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":151,\"descriptorCount\":304,\"duplicateDescriptorCount\":0,\"oraclePruned\":145,\"parseSeconds\":0.005092978477478027,\"sourceLength\":45,\"suppressedDescriptorCount\":45,\"tokenCount\":7,\"yieldCount\":215},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"FooClassDeinitializerA\\\") \\\"FooClassDeinitializerA\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeinitializerDecl\\n                AttributeList\\n                DeclModifierList\\n                UnexpectedNodes\\n                  identifier(\\\"reasync\\\") \\\"reasync\\\"\\n                keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

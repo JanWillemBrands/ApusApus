@@ -229,10 +229,22 @@ enum ApusRegexLibrary {
         dotOperatorCharacter
     }
 
+    /// swift-syntax Cursor.swift `classifyOperatorToken`: an operator token that contains `*/` is an
+    /// error token ("unexpected end of block comment"), so there is no operator at all, not a
+    /// shorter one. The run is the operator's own extent: it stops before `//` and `/*`.
+    static func withoutBlockCommentEnd<C: RegexComponent>(_ character: C) -> some RegexComponent {
+        NegativeLookahead {
+            ZeroOrMore { character }
+            "*/"
+            NegativeLookahead { CharacterClass.anyOf("*/") }
+        }
+    }
+
     /// Shared operator body — `(headStandalone)(char)* | special(char)+`. Carries
     /// `.unicodeScalar` semantics itself, so every consumer matches per scalar (the
     /// `⚽️` = U+26BD + U+FE0F case) without having to re-apply it.
     static let operatorBody = Regex {
+        withoutBlockCommentEnd(operatorCharacterBeforeComment)
         ChoiceOf {
             Regex {
                 NegativeLookahead {
@@ -275,10 +287,14 @@ enum ApusRegexLibrary {
         NegativeLookahead { operatorCharacter }
     }
 
-    /// Operator body that is not exactly `->`. Used for `operator` (prefix and spaced infix).
+    /// Plain or dot operator body that is not exactly `->`. Used for `operator` (prefix and spaced
+    /// infix). swift-syntax Cursor.swift `lexOperatorIdentifier` lexes both kinds as one lexeme.
     static let nonArrowOperatorToken = Regex {
         notExactlyArrow
-        operatorBody
+        ChoiceOf {
+            operatorBody
+            dotOperator
+        }
     }.matchingSemantics(.unicodeScalar)
 
     /// `functionNameOperator` — same body as `nonArrowOperatorToken` (`func ->(a: Int, b: Int) {}`
@@ -313,6 +329,7 @@ enum ApusRegexLibrary {
     /// munch-exempt regex `keyPathDot` is the antidote and is spelled beside `"."` where it matters
     /// (`genericArgumentClause`'s follow set).
     static let dotOperator = Regex {
+        withoutBlockCommentEnd(dotOperatorCharacterBeforeComment)
         "."
         OneOrMore { dotOperatorCharacterBeforeComment }
     }.matchingSemantics(.unicodeScalar)
@@ -406,16 +423,23 @@ enum ApusRegexLibrary {
         extendedRegexPoundDelimiter
     }.matchingSemantics(.unicodeScalar)
 
-    /// `regexLiteralToken` — a plain slash-delimited regex literal.
+    /// `regexLiteralToken` / `forcedRegexLiteralToken` — plain slash-delimited regex literals.
     ///
     /// The slash/operator decision is still made by the grammar (`plainRegularExpressionLiteral`
-    /// and operator preemption). Once a slash is known to open a regex, the lexer owns the rest of
-    /// the literal: escapes, character classes and the first unescaped closing slash are lexical
-    /// extent rules, not recursive grammar structure. That keeps unmatched regex parentheses such
-    /// as `/)/` out of the parser's ambiguity machinery; the regex engine diagnoses body syntax
-    /// later, just as the Swift compiler does.
+    /// and operator preemption). In must-be-regex positions, the lexer owns the flat extent of the
+    /// literal: escapes and the first unescaped closing slash are lexical rules, not recursive
+    /// grammar structure. In ambiguous slash positions, Swift still aborts the regex scan before a
+    /// depth-zero `)` so grouped operator expressions such as `(/x)` can survive.
     struct PlainRegexLiteral: CustomConsumingRegexComponent {
         typealias RegexOutput = Substring
+
+        let allowUnbalancedClosers: Bool
+        let allowImmediatelyClosedLeadingRightParen: Bool
+
+        init(allowUnbalancedClosers: Bool = false, allowImmediatelyClosedLeadingRightParen: Bool = false) {
+            self.allowUnbalancedClosers = allowUnbalancedClosers
+            self.allowImmediatelyClosedLeadingRightParen = allowImmediatelyClosedLeadingRightParen
+        }
 
         func consuming(_ input: String, startingAt index: String.Index, in bounds: Range<String.Index>) throws -> (upperBound: String.Index, output: Substring)? {
             guard bounds.contains(index), input[index] == "/" else { return nil }
@@ -427,7 +451,9 @@ enum ApusRegexLibrary {
 
             var lastWasSpace = false
             var sawBodyItem = false
-            var parenDepth = 0
+            var bodyStartedWithRightParen = false
+            var groupDepth = 0
+            var characterClassDepth = 0
             while i < bounds.upperBound {
                 switch input[i] {
                 case "/":
@@ -445,29 +471,44 @@ enum ApusRegexLibrary {
                     sawBodyItem = true
 
                 case "[":
-                    let next = input.index(after: i)
-                    guard next < bounds.upperBound, input[next] != "]" else { return nil }
-                    if let end = scanCharacterClass(input, from: i, in: bounds) {
-                        i = end
-                    } else {
-                        i = next
+                    i = input.index(after: i)
+                    characterClassDepth += 1
+                    lastWasSpace = false
+                    sawBodyItem = true
+
+                case "]":
+                    i = input.index(after: i)
+                    if characterClassDepth > 0 {
+                        characterClassDepth -= 1
+                    } else if !sawBodyItem && allowUnbalancedClosers {
+                        bodyStartedWithRightParen = true
                     }
                     lastWasSpace = false
                     sawBodyItem = true
 
                 case "(":
                     i = input.index(after: i)
-                    parenDepth += 1
+                    if characterClassDepth == 0 {
+                        groupDepth += 1
+                    }
                     lastWasSpace = false
                     sawBodyItem = true
 
                 case ")":
-                    if !sawBodyItem {
-                        let next = input.index(after: i)
-                        guard next < bounds.upperBound, input[next] == "/" else { return nil }
-                    } else {
-                        guard parenDepth > 0 else { return nil }
-                        parenDepth -= 1
+                    if characterClassDepth == 0 {
+                        if groupDepth > 0 {
+                            groupDepth -= 1
+                        } else {
+                            if allowImmediatelyClosedLeadingRightParen && !sawBodyItem {
+                                let next = input.index(after: i)
+                                guard next < bounds.upperBound, input[next] == "/" else { return nil }
+                            } else {
+                                guard allowUnbalancedClosers && (!sawBodyItem || bodyStartedWithRightParen) else { return nil }
+                            }
+                            if !sawBodyItem {
+                                bodyStartedWithRightParen = true
+                            }
+                        }
                     }
                     i = input.index(after: i)
                     lastWasSpace = false
@@ -489,35 +530,18 @@ enum ApusRegexLibrary {
             }
             return nil
         }
-
-        private func scanCharacterClass(_ input: String, from start: String.Index, in bounds: Range<String.Index>) -> String.Index? {
-            var i = input.index(after: start)
-            guard i < bounds.upperBound, input[i] != "]" else { return nil }
-
-            while i < bounds.upperBound {
-                switch input[i] {
-                case "]":
-                    return input.index(after: i)
-
-                case "\\":
-                    i = input.index(after: i)
-                    guard i < bounds.upperBound else { return nil }
-                    guard input[i] != "\t", input[i] != "\n", input[i] != "\r" else { return nil }
-                    i = input.index(after: i)
-
-                case "\t", "\n", "\r":
-                    return nil
-
-                default:
-                    i = input.index(after: i)
-                }
-            }
-            return nil
-        }
     }
 
     static let regexLiteralToken = Regex {
         PlainRegexLiteral()
+    }.matchingSemantics(.unicodeScalar)
+
+    static let forcedRegexLiteralToken = Regex {
+        PlainRegexLiteral(allowUnbalancedClosers: true)
+    }.matchingSemantics(.unicodeScalar)
+
+    static let operatorRegexLiteralToken = Regex {
+        PlainRegexLiteral(allowImmediatelyClosedLeadingRightParen: true)
     }.matchingSemantics(.unicodeScalar)
 
     // ── Parse-scoped scanners ───────────────────────────────────────────────────
@@ -552,6 +576,8 @@ enum ApusRegexLibrary {
         "propertyWrapperProjection":   Regex<AnyRegexOutput>(propertyWrapperProjection.regex),
         "escapedIdentifier":           Regex<AnyRegexOutput>(escapedIdentifier.regex),
         "regexLiteralToken":           Regex<AnyRegexOutput>(regexLiteralToken.regex),
+        "forcedRegexLiteralToken":     Regex<AnyRegexOutput>(forcedRegexLiteralToken.regex),
+        "operatorRegexLiteralToken":   Regex<AnyRegexOutput>(operatorRegexLiteralToken.regex),
         "extendedRegularExpressionLiteral": Regex<AnyRegexOutput>(extendedRegularExpressionLiteral.regex),
     ]
 }

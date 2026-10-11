@@ -167,7 +167,10 @@ token cannot end an operand.
 ### 4.3 Exclusion sets
 
 `identifier ---("if" "while")` removes a match when a listed terminal matches the same text at
-the same position. Use it to exclude a keyword from an identifier position.
+the same position. Use it to exclude a keyword from an identifier position. The test is on the
+text, so `@literalMunch` does not apply to the listed terminals: a `@preempt` split piece is shorter
+than the maximal match that would otherwise suppress the literal (`---( reservedOperatorPiece )` on
+`operator`, and the `=` from `=/0/`).
 
 ## 5. The Oracle
 

@@ -1138,7 +1138,8 @@ let expressionSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "ExpressionTests.testInitCallInPoundIf",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testClosureParameterWithModifier#1",
@@ -2512,7 +2513,8 @@ let expression604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "ExpressionTests.testInitCallInPoundIf",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "typecheck: initializer expression requires explicit access; did you mean to prepend it with 'self.'?"
     ),
     SwiftSnippet(
         label: "testClosureParameterWithModifier#1",

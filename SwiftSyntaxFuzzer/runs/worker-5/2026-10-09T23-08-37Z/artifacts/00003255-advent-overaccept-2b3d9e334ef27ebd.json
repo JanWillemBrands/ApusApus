@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00003255-advent-overaccept-2b3d9e334ef27ebd.json",
+    "durationSeconds" : 0.2471160888671875,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:duplicate:translated:testForwardSlashRegex1#1",
+    "index" : 3255,
+    "seed" : 13064010758198292053,
+    "signalHash" : "7946a0306e0dd746",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "2b3d9e334ef27ebd",
+    "sourceLength" : 79,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nprefix operator \/\nprefix operator ^\/\nprefix\nprefix operator \/^\/\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeclReferenceExpr\n                identifier(\"prefix\") \"prefix\"\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"\/^\/\") \"\/^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:1:3: error: consecutive statements on a line must be separated by ';'\n1 | () {\n  |   `- error: consecutive statements on a line must be separated by ';'\n2 | prefix\n3 | prefix operator \/^\/\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:1:4: error: top-level statement cannot begin with a closure expression\n1 | () {\n  |    `- error: top-level statement cannot begin with a closure expression\n2 | prefix\n3 | prefix operator \/^\/\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:3:1: error: duplicate modifier\n1 | () {\n2 | prefix\n  | `- note: modifier already specified here\n3 | prefix operator \/^\/\n  | `- error: duplicate modifier\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:3:8: error: 'operator' may only be declared at file scope\n1 | () {\n2 | prefix\n3 | prefix operator \/^\/\n  |        `- error: 'operator' may only be declared at file scope\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"prefix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 235,
+      "descriptorCount" : 479,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 223,
+      "parseSeconds" : 0.007339000701904297,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 91,
+      "tokenCount" : 8,
+      "yieldCount" : 303
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                UnexpectedNodes\n                  DeclModifier\n                    keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"\/^\/\") \"\/^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 28,
+  "source" : "() {\nprefix\nprefix operator \/^\/\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeclReferenceExpr\\n                identifier(\\\"prefix\\\") \\\"prefix\\\"\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"\\\/^\\\/\\\") \\\"\\\/^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:1:3: error: consecutive statements on a line must be separated by ';'\\n1 | () {\\n  |   `- error: consecutive statements on a line must be separated by ';'\\n2 | prefix\\n3 | prefix operator \\\/^\\\/\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:1:4: error: top-level statement cannot begin with a closure expression\\n1 | () {\\n  |    `- error: top-level statement cannot begin with a closure expression\\n2 | prefix\\n3 | prefix operator \\\/^\\\/\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:3:1: error: duplicate modifier\\n1 | () {\\n2 | prefix\\n  | `- note: modifier already specified here\\n3 | prefix operator \\\/^\\\/\\n  | `- error: duplicate modifier\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-11CA3CFB-C60E-4DA1-94ED-965E667B23AE.swift:3:8: error: 'operator' may only be declared at file scope\\n1 | () {\\n2 | prefix\\n3 | prefix operator \\\/^\\\/\\n  |        `- error: 'operator' may only be declared at file scope\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"prefix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":235,\"descriptorCount\":479,\"duplicateDescriptorCount\":0,\"oraclePruned\":223,\"parseSeconds\":0.007339000701904297,\"sourceLength\":33,\"suppressedDescriptorCount\":91,\"tokenCount\":8,\"yieldCount\":303},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                UnexpectedNodes\\n                  DeclModifier\\n                    keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"\\\/^\\\/\\\") \\\"\\\/^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00064808-advent-overaccept-7883ad9a92d3e159.json",
+    "durationSeconds" : 0.3546680212020874,
+    "exitCode" : 1,
+    "generator" : "wide:closure:duplicate:translated:testForwardSlashRegex1#1+phase3-function:func-throws",
+    "index" : 64808,
+    "seed" : 3326660354445696761,
+    "signalHash" : "12b9a67a40bf1ea6",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "7883ad9a92d3e159",
+    "sourceLength" : 104,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nprefix operator \/\nprefix\nprefix operator ^\/\nprefix operator \/^\/\nfunc f() throws {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeclReferenceExpr\n                identifier(\"prefix\") \"prefix\"\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"\/^\/\") \"\/^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8CC1B816-EB2F-4ECF-8407-D104EADEE867.swift:3:1: error: duplicate modifier\n1 |  fuzzClosure {\n2 | prefix\n  | `- note: modifier already specified here\n3 | prefix operator \/^\/\n  | `- error: duplicate modifier\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8CC1B816-EB2F-4ECF-8407-D104EADEE867.swift:3:8: error: 'operator' may only be declared at file scope\n1 |  fuzzClosure {\n2 | prefix\n3 | prefix operator \/^\/\n  |        `- error: 'operator' may only be declared at file scope\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "declaredOperator\t[operatorName]",
+      ".DO\t[\"prefix\"]",
+      "operatorDeclaration\t[ \"operator\" declaredOperator ]",
+      "declaration\t[operatorDeclaration]",
+      "statement\t[declaration]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 236,
+      "descriptorCount" : 487,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 222,
+      "parseSeconds" : 0.007099032402038574,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 94,
+      "tokenCount" : 7,
+      "yieldCount" : 304
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              OperatorDecl\n                keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                UnexpectedNodes\n                  DeclModifier\n                    keyword(SwiftSyntax.Keyword.prefix) \"prefix\"\n                keyword(SwiftSyntax.Keyword.operator) \"operator\"\n                binaryOperator(\"\/^\/\") \"\/^\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 39,
+  "source" : " fuzzClosure {\nprefix\nprefix operator \/^\/\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeclReferenceExpr\\n                identifier(\\\"prefix\\\") \\\"prefix\\\"\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"\\\/^\\\/\\\") \\\"\\\/^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8CC1B816-EB2F-4ECF-8407-D104EADEE867.swift:3:1: error: duplicate modifier\\n1 |  fuzzClosure {\\n2 | prefix\\n  | `- note: modifier already specified here\\n3 | prefix operator \\\/^\\\/\\n  | `- error: duplicate modifier\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8CC1B816-EB2F-4ECF-8407-D104EADEE867.swift:3:8: error: 'operator' may only be declared at file scope\\n1 |  fuzzClosure {\\n2 | prefix\\n3 | prefix operator \\\/^\\\/\\n  |        `- error: 'operator' may only be declared at file scope\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"declaredOperator\\t[operatorName]\",\".DO\\t[\\\"prefix\\\"]\",\"operatorDeclaration\\t[ \\\"operator\\\" declaredOperator ]\",\"declaration\\t[operatorDeclaration]\",\"statement\\t[declaration]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":236,\"descriptorCount\":487,\"duplicateDescriptorCount\":0,\"oraclePruned\":222,\"parseSeconds\":0.007099032402038574,\"sourceLength\":43,\"suppressedDescriptorCount\":94,\"tokenCount\":7,\"yieldCount\":304},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              OperatorDecl\\n                keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                UnexpectedNodes\\n                  DeclModifier\\n                    keyword(SwiftSyntax.Keyword.prefix) \\\"prefix\\\"\\n                keyword(SwiftSyntax.Keyword.operator) \\\"operator\\\"\\n                binaryOperator(\\\"\\\/^\\\/\\\") \\\"\\\/^\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

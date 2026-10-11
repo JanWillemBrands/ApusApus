@@ -1192,11 +1192,19 @@ class MessageParser {
         // also lexes at this position with the same end, suppress the match.
         // Phase D Step 2: per-end LCNP query. Relies on the lexer's
         // keyword-boundary guard so e.g.
-        // literal "let" doesn't over-match "letx".
+        // literal "let" doesn't over-match "letx". The question is about the candidate's TEXT, so
+        // `@literalMunch` is not applied: a `@preempt` split piece (`=` from `=/0/`) is shorter
+        // than the operator's maximal match, which would otherwise hide the excluded literal.
         if !cL.excludeBS.isEmpty {
             matches = matches.filter { m in
                 for eID in cL.excludeBS where eID != cL.nameID && eID != grammar.epsilonID {
-                    for em in cachedLex(at: cI, terminalID: eID) where em.triviaEnd == m.triviaEnd {
+                    let excluded = lexer.lex(
+                        at: cI,
+                        terminalID: eID,
+                        suppressesLeadingTrivia: cL.suppressesLeadingTrivia,
+                        appliesLiteralMunch: false
+                    )
+                    for em in excluded where em.start == m.start && em.end == m.end {
                         return false
                     }
                 }

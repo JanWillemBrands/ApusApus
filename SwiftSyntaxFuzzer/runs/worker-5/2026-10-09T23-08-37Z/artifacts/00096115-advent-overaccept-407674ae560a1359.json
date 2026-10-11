@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00096115-advent-overaccept-407674ae560a1359.json",
+    "durationSeconds" : 0.3100259304046631,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline:reject:testRecovery146#1",
+    "index" : 96115,
+    "seed" : 13064010758198292053,
+    "signalHash" : "b0fa7ce7f94c13eb",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "407674ae560a1359",
+    "sourceLength" : 34,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\ninit\ne<T>(f: T) {}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.init) \"init\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:1:4: error: consecutive statements on a line must be separated by ';'\n1 |  () {\n  |    `- error: consecutive statements on a line must be separated by ';'\n2 | init\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:1:5: error: top-level statement cannot begin with a closure expression\n1 |  () {\n  |     `- error: top-level statement cannot begin with a closure expression\n2 | init\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:3:1: error: initializers may only be declared within a type\n1 |  () {\n2 | init\n3 | }\n  | `- error: initializers may only be declared within a type\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:2:5: error: expected '(' for initializer parameters\n1 |  () {\n2 | init\n  |     `- error: expected '(' for initializer parameters\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "initializerExpression\t[\"init\" >->(\"{\")]",
+      "postfixExpression\t[initializerExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 70,
+      "descriptorCount" : 155,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 73,
+      "parseSeconds" : 0.004690051078796387,
+      "sourceLength" : 12,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 5,
+      "yieldCount" : 133
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      TupleExpr\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            InitializerDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.init) \"init\"\n              FunctionSignature\n                FunctionParameterClause\n                  FunctionParameterList\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 25,
+  "source" : " () {\ninit\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:1:4: error: consecutive statements on a line must be separated by ';'\\n1 |  () {\\n  |    `- error: consecutive statements on a line must be separated by ';'\\n2 | init\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:1:5: error: top-level statement cannot begin with a closure expression\\n1 |  () {\\n  |     `- error: top-level statement cannot begin with a closure expression\\n2 | init\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:3:1: error: initializers may only be declared within a type\\n1 |  () {\\n2 | init\\n3 | }\\n  | `- error: initializers may only be declared within a type\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-20CB4F84-C1C4-491E-8C37-C962A47A8E37.swift:2:5: error: expected '(' for initializer parameters\\n1 |  () {\\n2 | init\\n  |     `- error: expected '(' for initializer parameters\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"initializerExpression\\t[\\\"init\\\" >->(\\\"{\\\")]\",\"postfixExpression\\t[initializerExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":70,\"descriptorCount\":155,\"duplicateDescriptorCount\":0,\"oraclePruned\":73,\"parseSeconds\":0.004690051078796387,\"sourceLength\":12,\"suppressedDescriptorCount\":21,\"tokenCount\":5,\"yieldCount\":133},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      TupleExpr\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            InitializerDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              FunctionSignature\\n                FunctionParameterClause\\n                  FunctionParameterList\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

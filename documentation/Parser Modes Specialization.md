@@ -39,8 +39,7 @@ Mode is part of descriptor identity and CRF identity, but `addYield(L:i:k:j:)` s
 yields under `L.number` without the mode (`BinarySubtreeRepresentation.swift:28`).
 Suppose the same `(X, i, j)` is derived under two modes, and a gated alternative is valid
 in only one of them (`@requiresMode(ifConfigBody)` on `ifDirectiveClause`,
-`@requiresMode(optionalBinding) "self"`, `@requiresMode(initializerBodyMode)` on
-`statement`). Then the yields merge. The DerivationBuilder, the Oracle and the converter
+`@requiresMode(optionalBinding) "self"`). Then the yields merge. The DerivationBuilder, the Oracle and the converter
 can attach the gated reading under a parent from the other mode. The possible symptoms are
 spurious residual ambiguity or a wrong tree. No concrete reproducer is known yet. The
 hazard comes from the representation itself. Closing it at runtime means widening the BSR
@@ -327,7 +326,6 @@ The leaks are visible in intent too. Each mode is meant for a narrow region:
 | --- | --- | --- |
 | `stmtCondition` | expression chain from `conditionExpression` to `closureExpression` | everything |
 | `trailingClosure` | the `closureExpression` directly under `trailingClosures` | fixed by `@resetModes` (2 copies) |
-| `initializerBodyMode` | `statement`s directly in an initializer body, incl. statement-level `#if` | everything |
 | `ifConfigBody` | first `statement` of an `#if` body | everything |
 | `bindingIntroducer` | introduced binding *names* in `matchPattern` | everything, incl. type annotations |
 | `optionalBinding` | the binding name of `if let`/`guard let` | everything, incl. types |
@@ -354,13 +352,11 @@ Scopes in `Swift.apus`:
 | --- | --- | --- |
 | `stmtCondition` | the expression chain from `conditionExpression` to `closureExpression` (40 productions, incl. parens, tuples, collection literals, member/call/subscript suffixes, `switch` expressions) | 41 |
 | `trailingClosure` | `closureExpression` | 2 |
-| `initializerBodyMode` | `codeBlock`, `statements`, `statement`, statement-level `#if` productions | 15 |
 | `ifConfigBody` | `statements`, `statement`, statement-level `#if` productions | 10 |
 | `bindingIntroducer` | match patterns plus the expression chain they parse through, including call arguments and tuples (swift-syntax forwards its `pattern:` context there) | 26 |
 | `optionalBinding` | `bindingPattern` and its tuple/subpattern productions | 6 |
 
-The only overlap is ⟨initializerBodyMode ifConfigBody⟩: an `#if` directly inside an initializer
-body. Grammar changes that came with it:
+Grammar changes that came with it:
 
 - `@clearMode(stmtCondition)` on `functionCallArgument` and in the closure bodies: removed; those
   productions do not carry the mode.
@@ -371,9 +367,13 @@ body. Grammar changes that came with it:
   `case let Optional.some(Swift::decl1j)` (reject test). Extending the scope to call argument
   clauses, tuples and the infix chain fixed it.
 
-Behavior change to keep in mind: the leaks are gone. `initializerBodyMode` no longer reaches nested
-`if`/`do` bodies of an initializer (swift-syntax rejects `init(…)` there), and binding/optional-binding
-modes no longer reach type annotations or enum-case qualifier types.
+Behavior change to keep in mind: the leaks are gone. Binding/optional-binding modes no longer reach
+type annotations or enum-case qualifier types.
+
+`initializerBodyMode` (removed 2026-10-11) let a bare `init(…)` call stand as a statement in an
+initializer body. swiftc ParseDecl.cpp `isStartOfSwiftDecl` reads it that way only to diagnose a
+missing `self.`, and the type checker always rejects it, so `Swift.apus` now treats a statement-start
+`init` as a declaration everywhere and needs no mode for it.
 
 ## Follow-up candidates, examined and set aside (2026-10-07)
 

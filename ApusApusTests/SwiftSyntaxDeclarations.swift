@@ -211,7 +211,8 @@ let declarationSnippets: [SwiftSnippet] = [
       infix operator ^^ : PostfixMagicOperatorProtocol, Class, Struct
       """,
         origin: "DeclarationTests.testOperators",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testObjCAttribute#1",
@@ -1532,7 +1533,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       infix operator ^^ : PostfixMagicOperatorProtocol, Class, Struct
       """,
         origin: "DeclarationTests.testOperators",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "consecutive statements on a line must be separated by ';'"
     ),
     SwiftSnippet(
         label: "testObjCAttribute#1",

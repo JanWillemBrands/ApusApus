@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00014200-advent-overaccept-26f6bb66808ac03f.json",
+    "durationSeconds" : 0.25465500354766846,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:line-comment+newline:real:StandardIOMessageConnection:26",
+    "index" : 14200,
+    "seed" : 1663247002126838338,
+    "signalHash" : "8a91230de2499f6b",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "26f6bb66808ac03f",
+    "sourceLength" : 52,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nprivate\nlet dup2 = _dup2 \/\/ c\n(_:_:)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"dup2\") \"dup2\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"_dup2\") \"_dup2\"\n                    DeclNameArguments\n                      leftParen \"(\"\n                      DeclNameArgumentList\n                        DeclNameArgument\n                          wildcard \"_\"\n                          colon \":\"\n                      rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D2A27402-F0DA-4A45-9E1B-168C9868B9CE.swift:1:3: error: consecutive statements on a line must be separated by ';'\n1 | () { dup2 = _dup2\n  |   `- error: consecutive statements on a line must be separated by ';'\n2 | (_:)\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D2A27402-F0DA-4A45-9E1B-168C9868B9CE.swift:1:4: error: top-level statement cannot begin with a closure expression\n1 | () { dup2 = _dup2\n  |    `- error: top-level statement cannot begin with a closure expression\n2 | (_:)\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D2A27402-F0DA-4A45-9E1B-168C9868B9CE.swift:2:4: error: expected expression in list of expressions\n1 | () { dup2 = _dup2\n2 | (_:)\n  |    `- error: expected expression in list of expressions\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "argumentLabel\t[\"_\"]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      "expressionIdentifier\t[identifier]",
+      "compoundNameBase\t[expressionIdentifier]",
+      "primaryExpression\t[compoundNameBase \"(\" argumentNames \")\"]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator expression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 145,
+      "descriptorCount" : 346,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 181,
+      "parseSeconds" : 0.008461952209472656,
+      "sourceLength" : 24,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 11,
+      "yieldCount" : 281
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"dup2\") \"dup2\"\n                  AssignmentExpr\n                    equal \"=\"\n                  DeclReferenceExpr\n                    identifier(\"_dup2\") \"_dup2\"\n            CodeBlockItem\n              TupleExpr\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    wildcard \"_\"\n                    colon \":\"\n                    MissingExpr\n                rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "() { dup2 = _dup2\n(_:)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"dup2\\\") \\\"dup2\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"_dup2\\\") \\\"_dup2\\\"\\n                    DeclNameArguments\\n                      leftParen \\\"(\\\"\\n                      DeclNameArgumentList\\n                        DeclNameArgument\\n                          wildcard \\\"_\\\"\\n                          colon \\\":\\\"\\n                      rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D2A27402-F0DA-4A45-9E1B-168C9868B9CE.swift:1:3: error: consecutive statements on a line must be separated by ';'\\n1 | () { dup2 = _dup2\\n  |   `- error: consecutive statements on a line must be separated by ';'\\n2 | (_:)\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D2A27402-F0DA-4A45-9E1B-168C9868B9CE.swift:1:4: error: top-level statement cannot begin with a closure expression\\n1 | () { dup2 = _dup2\\n  |    `- error: top-level statement cannot begin with a closure expression\\n2 | (_:)\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D2A27402-F0DA-4A45-9E1B-168C9868B9CE.swift:2:4: error: expected expression in list of expressions\\n1 | () { dup2 = _dup2\\n2 | (_:)\\n  |    `- error: expected expression in list of expressions\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"argumentLabel\\t[\\\"_\\\"]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\"expressionIdentifier\\t[identifier]\",\"compoundNameBase\\t[expressionIdentifier]\",\"primaryExpression\\t[compoundNameBase \\\"(\\\" argumentNames \\\")\\\"]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator expression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":145,\"descriptorCount\":346,\"duplicateDescriptorCount\":0,\"oraclePruned\":181,\"parseSeconds\":0.008461952209472656,\"sourceLength\":24,\"suppressedDescriptorCount\":46,\"tokenCount\":11,\"yieldCount\":281},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"dup2\\\") \\\"dup2\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"_dup2\\\") \\\"_dup2\\\"\\n            CodeBlockItem\\n              TupleExpr\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    wildcard \\\"_\\\"\\n                    colon \\\":\\\"\\n                    MissingExpr\\n                rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

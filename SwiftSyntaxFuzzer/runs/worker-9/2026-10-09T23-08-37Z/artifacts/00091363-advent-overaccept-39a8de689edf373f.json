@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00091363-advent-overaccept-39a8de689edf373f.json",
+    "durationSeconds" : 0.19442391395568848,
+    "exitCode" : 1,
+    "generator" : "wide:closure:block-comment:translated:testFunctionTypeExpr#3",
+    "index" : 91363,
+    "seed" : 3326660354445696761,
+    "signalHash" : "7593fb73431f3ff7",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "39a8de689edf373f",
+    "sourceLength" : 40,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n(X) \/*\n*\/-> Y -> Z\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                    rightParen \")\"\n                  ArrowExpr\n                    arrow \"->\"\n                  DeclReferenceExpr\n                    identifier(\"Y\") \"Y\"\n                  ArrowExpr\n                    arrow \"->\"\n                  DeclReferenceExpr\n                    identifier(\"Z\") \"Z\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-6D1B807C-D7C1-4E20-AF6A-8AE50E624BFD.swift:3:4: error: single argument function types require parentheses\n1 |  fuzzClosure {\n2 | ()\n3 | -> Y -> Z\n  |    `- error: single argument function types require parentheses\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-6D1B807C-D7C1-4E20-AF6A-8AE50E624BFD.swift:4:1: error: expected 'in' after the closure signature\n2 | ()\n3 | -> Y -> Z\n4 | }\n  | `- error: expected 'in' after the closure signature\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"rethrows\" \"throws\")]",
+      "infixExpression\t[arrowExpr prefixExpression]",
+      "infixExpressions\t[infixExpression ]",
+      ".OPT\t[infixExpressions]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 157,
+      "descriptorCount" : 366,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 153,
+      "parseSeconds" : 0.006509900093078613,
+      "sourceLength" : 29,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 9,
+      "yieldCount" : 263
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          ClosureSignature\n            AttributeList\n            ClosureParameterClause\n              leftParen \"(\"\n              ClosureParameterList\n              rightParen \")\"\n            ReturnClause\n              arrow \"->\"\n              FunctionType\n                TupleTypeElementList\n                  TupleTypeElement\n                    IdentifierType\n                      identifier(\"Y\") \"Y\"\n                ReturnClause\n                  arrow \"->\"\n                  IdentifierType\n                    identifier(\"Z\") \"Z\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 35,
+  "source" : " fuzzClosure {\n()\n-> Y -> Z\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                    rightParen \\\")\\\"\\n                  ArrowExpr\\n                    arrow \\\"->\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"Y\\\") \\\"Y\\\"\\n                  ArrowExpr\\n                    arrow \\\"->\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"Z\\\") \\\"Z\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-6D1B807C-D7C1-4E20-AF6A-8AE50E624BFD.swift:3:4: error: single argument function types require parentheses\\n1 |  fuzzClosure {\\n2 | ()\\n3 | -> Y -> Z\\n  |    `- error: single argument function types require parentheses\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-6D1B807C-D7C1-4E20-AF6A-8AE50E624BFD.swift:4:1: error: expected 'in' after the closure signature\\n2 | ()\\n3 | -> Y -> Z\\n4 | }\\n  | `- error: expected 'in' after the closure signature\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"infixExpression\\t[arrowExpr prefixExpression]\",\"infixExpressions\\t[infixExpression ]\",\".OPT\\t[infixExpressions]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":157,\"descriptorCount\":366,\"duplicateDescriptorCount\":0,\"oraclePruned\":153,\"parseSeconds\":0.006509900093078613,\"sourceLength\":29,\"suppressedDescriptorCount\":46,\"tokenCount\":9,\"yieldCount\":263},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          ClosureSignature\\n            AttributeList\\n            ClosureParameterClause\\n              leftParen \\\"(\\\"\\n              ClosureParameterList\\n              rightParen \\\")\\\"\\n            ReturnClause\\n              arrow \\\"->\\\"\\n              FunctionType\\n                TupleTypeElementList\\n                  TupleTypeElement\\n                    IdentifierType\\n                      identifier(\\\"Y\\\") \\\"Y\\\"\\n                ReturnClause\\n                  arrow \\\"->\\\"\\n                  IdentifierType\\n                    identifier(\\\"Z\\\") \\\"Z\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

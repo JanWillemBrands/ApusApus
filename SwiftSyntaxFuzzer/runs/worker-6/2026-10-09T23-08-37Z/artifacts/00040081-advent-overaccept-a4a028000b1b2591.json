@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00040081-advent-overaccept-a4a028000b1b2591.json",
+    "durationSeconds" : 0.2845960855484009,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline+delete:attribute:testAttachedExtensionAttribute#1",
+    "index" : 40081,
+    "seed" : 6018004112543441592,
+    "signalHash" : "6592661410e1ba28",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/DeclReferenceExpr\/identifier()\/CodeBlockItemList\/CodeBlockItem\/MacroDecl\/Attri",
+    "sourceHash" : "a4a028000b1b2591",
+    "sourceLength" : 37,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                MacroDecl\n                  AttributeList\n                    Attribute\n                      atSign \"@\"\n                      IdentifierType\n                        identifier(\"attached\") \"attached\"\n                      leftParen \"(\"\n                      LabeledExprList\n                      rightParen \")\"\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.macro) \"macro\"\n                  identifier(\"m\") \"m\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      leftParen \"(\"\n                      FunctionParameterList\n                      rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8A468DF8-6500-456A-9F84-6B31FA683942.swift:2:10: error: expected an attached macro role such as 'accessor'\n1 | #if FOO\n2 | @attached(\n  |          `- error: expected an attached macro role such as 'accessor'\n3 | )\n4 | macro m()\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "parameterClause\t[\"(\" \")\"]",
+      "macroSignature\t[parameterClause ]",
+      "identifierToken\t[identifier]",
+      "attribute\t[\"@\" >s< \"attached\" >s< \"(\"  \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "macroDeclarationHead\t[  \"macro\"]",
+      "macroDeclaration\t[macroDeclarationHead identifierToken  macroSignature  ]",
+      "declaration\t[macroDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 204,
+      "descriptorCount" : 435,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 153,
+      "parseSeconds" : 0.013982057571411133,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 12,
+      "yieldCount" : 244
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                MacroDecl\n                  AttributeList\n                    Attribute\n                      atSign \"@\"\n                      IdentifierType\n                        identifier(\"attached\") \"attached\"\n                      leftParen \"(\"\n                      LabeledExprList\n                        LabeledExpr\n                          DeclReferenceExpr\n                      rightParen \")\"\n                  DeclModifierList\n                  keyword(SwiftSyntax.Keyword.macro) \"macro\"\n                  identifier(\"m\") \"m\"\n                  FunctionSignature\n                    FunctionParameterClause\n                      leftParen \"(\"\n                      FunctionParameterList\n                      rightParen \")\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 28,
+  "source" : "#if FOO\n@attached(\n)\nmacro m()\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                MacroDecl\\n                  AttributeList\\n                    Attribute\\n                      atSign \\\"@\\\"\\n                      IdentifierType\\n                        identifier(\\\"attached\\\") \\\"attached\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                      rightParen \\\")\\\"\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n                  identifier(\\\"m\\\") \\\"m\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      leftParen \\\"(\\\"\\n                      FunctionParameterList\\n                      rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8A468DF8-6500-456A-9F84-6B31FA683942.swift:2:10: error: expected an attached macro role such as 'accessor'\\n1 | #if FOO\\n2 | @attached(\\n  |          `- error: expected an attached macro role such as 'accessor'\\n3 | )\\n4 | macro m()\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"macroSignature\\t[parameterClause ]\",\"identifierToken\\t[identifier]\",\"attribute\\t[\\\"@\\\" >s< \\\"attached\\\" >s< \\\"(\\\"  \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"macroDeclarationHead\\t[  \\\"macro\\\"]\",\"macroDeclaration\\t[macroDeclarationHead identifierToken  macroSignature  ]\",\"declaration\\t[macroDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":204,\"descriptorCount\":435,\"duplicateDescriptorCount\":0,\"oraclePruned\":153,\"parseSeconds\":0.013982057571411133,\"sourceLength\":37,\"suppressedDescriptorCount\":42,\"tokenCount\":12,\"yieldCount\":244},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                MacroDecl\\n                  AttributeList\\n                    Attribute\\n                      atSign \\\"@\\\"\\n                      IdentifierType\\n                        identifier(\\\"attached\\\") \\\"attached\\\"\\n                      leftParen \\\"(\\\"\\n                      LabeledExprList\\n                        LabeledExpr\\n                          DeclReferenceExpr\\n                      rightParen \\\")\\\"\\n                  DeclModifierList\\n                  keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n                  identifier(\\\"m\\\") \\\"m\\\"\\n                  FunctionSignature\\n                    FunctionParameterClause\\n                      leftParen \\\"(\\\"\\n                      FunctionParameterList\\n                      rightParen \\\")\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

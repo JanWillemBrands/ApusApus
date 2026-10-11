@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00096913-tree-difference-360136985e71e0ec.json",
+    "durationSeconds" : 0.23737096786499023,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:keyword:translated:testGenericDisambiguation10#1",
+    "index" : 96913,
+    "seed" : 1663247002126838338,
+    "signalHash" : "b6c4a5ad73bfc275",
+    "signalSummary" : "tree-difference|line=11|ref=FunctionCallExpr|advent=TypeExpr",
+    "sourceHash" : "360136985e71e0ec",
+    "sourceLength" : 23,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nany(A<B>.self)\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  TupleType\n                    leftParen \"(\"\n                    TupleTypeElementList\n                      TupleTypeElement\n                        MemberType\n                          IdentifierType\n                            identifier(\"A\") \"A\"\n                            GenericArgumentClause\n                              leftAngle \"<\"\n                              GenericArgumentList\n                              rightAngle \">\"\n                          period \".\"\n                          keyword(SwiftSyntax.Keyword.self) \"self\"\n                    rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "typeMemberName\t[\"self\"]",
+      ".DO\t[>s< \".\" >s<]",
+      "typeGenericArgumentClause\t[openAngle  closeAngle]",
+      ".DO\t[typeGenericArgumentClause]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "simpleType\t[typeIdentifier]",
+      "memberType\t[simpleType  typeMemberName >->(openAngle)]",
+      "type\t[memberType]",
+      "tupleTypeElement\t[type]",
+      "type\t[\"(\" tupleTypeElement \")\"]",
+      "boxedProtocolType\t[\"any\" >->(\"__owned\" \"__shared\" \"_const\" \"borrowing\" \"consuming\" \"inout\" \"isolated\" \"nonisolated\" \"sending\") type]",
+      "primaryExpression\t[boxedProtocolType]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "trailingClosures\t[closureExpression >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelStatement\t[>->(\"{\") statement]",
+      "topLevelStatements\t[topLevelStatement  ]",
+      ".OPT\t[topLevelStatements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 186,
+      "descriptorCount" : 470,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 367,
+      "parseSeconds" : 0.008949041366577148,
+      "sourceLength" : 23,
+      "suppressedDescriptorCount" : 86,
+      "tokenCount" : 11,
+      "yieldCount" : 465
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"any\") \"any\"\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    MemberAccessExpr\n                      GenericSpecializationExpr\n                        DeclReferenceExpr\n                          identifier(\"A\") \"A\"\n                        GenericArgumentClause\n                          leftAngle \"<\"\n                          GenericArgumentList\n                          rightAngle \">\"\n                      period \".\"\n                      DeclReferenceExpr\n                        keyword(SwiftSyntax.Keyword.self) \"self\"\n                rightParen \")\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 34,
+  "source" : "fuzz {\nany(A< >.self)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  TupleType\\n                    leftParen \\\"(\\\"\\n                    TupleTypeElementList\\n                      TupleTypeElement\\n                        MemberType\\n                          IdentifierType\\n                            identifier(\\\"A\\\") \\\"A\\\"\\n                            GenericArgumentClause\\n                              leftAngle \\\"<\\\"\\n                              GenericArgumentList\\n                              rightAngle \\\">\\\"\\n                          period \\\".\\\"\\n                          keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                    rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"typeMemberName\\t[\\\"self\\\"]\",\".DO\\t[>s< \\\".\\\" >s<]\",\"typeGenericArgumentClause\\t[openAngle  closeAngle]\",\".DO\\t[typeGenericArgumentClause]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"simpleType\\t[typeIdentifier]\",\"memberType\\t[simpleType  typeMemberName >->(openAngle)]\",\"type\\t[memberType]\",\"tupleTypeElement\\t[type]\",\"type\\t[\\\"(\\\" tupleTypeElement \\\")\\\"]\",\"boxedProtocolType\\t[\\\"any\\\" >->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\") type]\",\"primaryExpression\\t[boxedProtocolType]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"trailingClosures\\t[closureExpression >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelStatement\\t[>->(\\\"{\\\") statement]\",\"topLevelStatements\\t[topLevelStatement  ]\",\".OPT\\t[topLevelStatements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":186,\"descriptorCount\":470,\"duplicateDescriptorCount\":0,\"oraclePruned\":367,\"parseSeconds\":0.008949041366577148,\"sourceLength\":23,\"suppressedDescriptorCount\":86,\"tokenCount\":11,\"yieldCount\":465},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"any\\\") \\\"any\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    MemberAccessExpr\\n                      GenericSpecializationExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"A\\\") \\\"A\\\"\\n                        GenericArgumentClause\\n                          leftAngle \\\"<\\\"\\n                          GenericArgumentList\\n                          rightAngle \\\">\\\"\\n                      period \\\".\\\"\\n                      DeclReferenceExpr\\n                        keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                rightParen \\\")\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

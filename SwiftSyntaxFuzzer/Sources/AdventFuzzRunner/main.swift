@@ -2685,7 +2685,6 @@ func stableHash(_ string: String) -> String {
 func sourceRequiresDisabledExperimentalFeature(_ source: String) -> Bool {
     if source.contains("dependsOn(") { return true }
     if source.contains("InlineArray<") { return true }
-    if source.contains("borrow {") || source.contains("mutate {") { return true }
     if source.contains("_borrow") || source.contains("_move") { return true }
     if source.contains("_mutating") || source.contains("_borrowing") || source.contains("_consuming") {
         return true
