@@ -129,6 +129,18 @@ struct SpecialTokenTests {
                 label: "negative token lookbehind boundary"
             ),
             TestCase(
+                grammar: #"S = ( "a" | "c" | "d" ) <-<( blocked "d" ) "b" . blocked = "c" ."#,
+                pass: ["ab", "a b"],
+                fail: ["cb", "db"],
+                label: "token lookbehind names a set, mixed with a literal"
+            ),
+            TestCase(
+                grammar: #"id - /[x-z]+/ . S = "a" >+>( next ) ( "b" | "c" | id ) . next = "b" | id ."#,
+                pass: ["ab", "a x"],
+                fail: ["ac"],
+                label: "token lookahead names a set of literals and terminals"
+            ),
+            TestCase(
                 grammar: #"S = "a" >+>(EOF) ."#,
                 pass: ["a"],
                 fail: ["ab"],

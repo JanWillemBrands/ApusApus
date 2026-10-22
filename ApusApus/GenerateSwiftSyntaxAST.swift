@@ -222,12 +222,12 @@ struct SwiftSyntaxGenerator {
     // MARK: - Statements
 
     private mutating func convertTopLevelDeclaration(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        // topLevelDeclaration = shebang? topLevelStatements? .
+        // topLevelDeclaration = shebang? statements? .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return []
         }
-        guard let stmtsNT = find("topLevelStatements", in: spans) ?? find("statements", in: spans) else {
+        guard let stmtsNT = find("statements", in: spans) else {
             // An empty source (or comment-only source) legitimately has no statement list.
             if !parser.isTriviaOnly(from..<to) {
                 record(.lookupFailed, "no statement-list child", from: from, to: to)
@@ -606,13 +606,13 @@ struct SwiftSyntaxGenerator {
     /// Returns whole `CodeBlockItem`s, not bare items, because an explicit `;` belongs to the
     /// item it terminates (`CodeBlockItem.semicolon`) and is otherwise dropped.
     private mutating func convertStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        convertStatementList(["statements", "topLevelStatements"], nt, from: from, to: to)
+        convertStatementList(["statements"], nt, from: from, to: to)
     }
 
     /// The items of a statement list, each carrying the `;` that terminates IT.
     ///
-    /// Serves `statements` and `ifConfigStatements`. The latter is the mode-bearing alias
-    /// `ifConfigStatements = @setMode(ifConfigBody) statements .`, so its caller passes BOTH names
+    /// Serves `statements` and `ifConfigStatements`. The latter is the flavor-bearing alias
+    /// `ifConfigStatements = @setFlavor(ifConfigBody) statements .`, so its caller passes BOTH names
     /// and the hop walk descends through the alias into the list itself.
     ///
     /// A HOP walk, because the `;` hangs on the LIST while swift-syntax hangs it on the item it
@@ -626,10 +626,7 @@ struct SwiftSyntaxGenerator {
         var semicolons: [CharPosition] = []
         for hop in listHops(of: listNames, nt, from: from, to: to) {
             semicolons.append(contentsOf: semicolonPositions(in: hop))
-            let statement = find("statement", in: hop) ?? find("topLevelStatement", in: hop).flatMap { top -> NTSpan? in
-                guard let (_, spans) = tileAlternate(top.nt, from: top.from, to: top.to) else { return nil }
-                return find("statement", in: spans)
-            }
+            let statement = find("statement", in: hop)
             if let statement,
                let item = convertStatement(statement.nt, from: statement.from, to: statement.to) {
                 items.append((item, statement.to))
@@ -1068,7 +1065,7 @@ struct SwiftSyntaxGenerator {
     // so one parameterised walk serves all of them.
 
     /// primaryAssociatedTypeClause = openAngle primaryAssociatedTypeList ","? closeAngle .
-    /// primaryAssociatedTypeList   = identifierToken { "," identifierToken } .
+    /// primaryAssociatedTypeList   = identifierOrSelf { "," identifierOrSelf } .
     private mutating func convertPrimaryAssociatedTypeClause(
         _ nt: GrammarNode, from: CharPosition, to: CharPosition
     ) -> PrimaryAssociatedTypeClauseSyntax? {
@@ -1097,7 +1094,7 @@ struct SwiftSyntaxGenerator {
         _ nt: GrammarNode, from: CharPosition, to: CharPosition, into items: inout [PrimaryAssociatedTypeSyntax]
     ) {
         let list = NTSpan(nt: nt, from: from, to: to)
-        for idNT in collectListElements(named: "identifierToken", in: list, recursiveListName: "primaryAssociatedTypeList") {
+        for idNT in collectListElements(named: "identifierOrSelf", in: list, recursiveListName: "primaryAssociatedTypeList") {
             items.append(PrimaryAssociatedTypeSyntax(
                 name: .identifier(collectTerminalText(idNT.nt, from: idNT.from, to: idNT.to))
             ))
@@ -1476,7 +1473,7 @@ struct SwiftSyntaxGenerator {
         )
     }
 
-    /// switchExpression = "switch" >->( "{" ) expression "{" switchCases? "}" .
+    /// switchExpression = "switch" >->( "{" ) expression "{" { switchCase } "}" .
     private mutating func convertSwitchExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> SwitchExprSyntax {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
@@ -1489,9 +1486,7 @@ struct SwiftSyntaxGenerator {
             record(.lookupFailed, "no subject expression child", from: from, to: to)
         }
         var cases: [SwitchCaseListSyntax.Element] = []
-        if let scNT = find("switchCases", in: spans) {
-            collectSwitchCases(scNT.nt, from: scNT.from, to: scNT.to, into: &cases)
-        }
+        collectSwitchCases(nt, from: from, to: to, into: &cases)
         return SwitchExprSyntax(
             switchKeyword: .keyword(.switch),
             subject: subject,
@@ -1501,7 +1496,7 @@ struct SwiftSyntaxGenerator {
         )
     }
 
-    /// switchCases  = switchCase switchCases? .
+    /// `nt` OWNS the case list: `switchExpression` or a `switch*DirectiveClause`, each `… { switchCase } …`.
     /// switchCase   = caseLabel statements | defaultLabel statements | conditionalSwitchCase .
     /// caseLabel    = switchCaseAttribute? "case" caseItemList ":" .
     /// defaultLabel = switchCaseAttribute? "default" ":" .
@@ -1509,7 +1504,10 @@ struct SwiftSyntaxGenerator {
     /// is a PEER of those cases in swift-syntax (`.ifConfigDecl`), not a wrapper — so it has to
     /// keep its source position in the list.
     private mutating func collectSwitchCases(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into cases: inout [SwitchCaseListSyntax.Element]) {
-        for scNT in listElements("switchCase", of: "switchCases", nt, from: from, to: to) {
+        // Structural descent: the `{ switchCase }` closure is walked; the subject `expression`
+        // and the directive condition are child nonterminals and are not searched.
+        for scNT in collectListElements(namedAny: ["switchCase"], in: NTSpan(nt: nt, from: from, to: to),
+                                        recursiveListNames: []) {
             guard let (_, scSpans) = tileAlternate(scNT.nt, from: scNT.from, to: scNT.to) else { continue }
             // switchCaseAttribute = "@" attributeName .  It lives inside caseLabel /
             // defaultLabel, NOT directly under switchCase — which is why looking for it here
@@ -1585,14 +1583,14 @@ struct SwiftSyntaxGenerator {
         let whereClauses = collectListElements(named: "whereClause", in: list, recursiveListName: "caseItemList")
         for (index, mpNT) in patterns.enumerated() {
             // whereClause     = "where" whereExpression .
-            // whereExpression = conditionExpression .   ← NOT `expression`
+            // whereExpression = expression .   (under `stmtCondition`)
             var whereClause: WhereClauseSyntax? = nil
             let nextStart = patterns.indices.contains(index + 1) ? patterns[index + 1].from : to
             if let wcNT = whereClauses.first(where: { $0.from >= mpNT.to && $0.from < nextStart }) {
                 if let (_, wcSpans) = tileAlternate(wcNT.nt, from: wcNT.from, to: wcNT.to),
                    let weNT = find("whereExpression", in: wcSpans),
                    let (_, weSpans) = tileAlternate(weNT.nt, from: weNT.from, to: weNT.to),
-                   let ceNT = find(firstOf: ["conditionExpression", "expression"], in: weSpans) {
+                   let ceNT = find("expression", in: weSpans) {
                     var elements: [ExprSyntax] = []
                     flattenExpression(ceNT.nt, from: ceNT.from, to: ceNT.to, into: &elements)
                     let condition: ExprSyntax = elements.count == 1
@@ -1852,6 +1850,7 @@ struct SwiftSyntaxGenerator {
         // elements are `PatternExpr`s — NOT a TuplePattern. TuplePattern is the DECLARATION binding
         // shape (`let (x, y) = …`, handled by `convertTupleBindingPattern`). This is the same
         // declaration-vs-switch-case split that `ParserProbe.patternNodeShapeProbe` documents.
+        let commas = elements.count - (hasTrailingComma(spans, afterList: "tupleMatchElementList") ? 0 : 1)
         let args = elements.enumerated().map { index, element -> LabeledExprSyntax in
             // An element that is ALREADY an expression pattern contributes its expression
             // directly — `case (2, let x)` gives `IntegerLiteralExpr` for `2` and a `PatternExpr`
@@ -1866,7 +1865,7 @@ struct SwiftSyntaxGenerator {
                 label: element.label,
                 colon: element.label == nil ? nil : .colonToken(),
                 expression: expression,
-                trailingComma: index == elements.count - 1 ? nil : .commaToken()
+                trailingComma: index < commas ? .commaToken() : nil
             )
         }
         return PatternSyntax(ExpressionPatternSyntax(expression: ExprSyntax(TupleExprSyntax(
@@ -2098,9 +2097,9 @@ struct SwiftSyntaxGenerator {
         ))
     }
 
-    /// conditionList = condition { "," condition } .
-    /// condition     = conditionExpression | availabilityCondition | caseCondition
-    ///               | optionalBindingCondition .
+    /// conditionList    = bindingCondition [ "," conditionListAfterBinding ] | condition [ "," conditionList ] .
+    /// bindingCondition = optionalBindingCondition | caseCondition .
+    /// condition        = expression | availabilityCondition | missingIntroducerWildcardCondition .
     private mutating func convertConditionList(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ConditionElementListSyntax {
         var items: [ConditionElementSyntax] = []
         collectConditions(nt, from: from, to: to, into: &items)
@@ -2114,7 +2113,9 @@ struct SwiftSyntaxGenerator {
 
     private mutating func collectConditions(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into items: inout [ConditionElementSyntax]) {
         let list = NTSpan(nt: nt, from: from, to: to)
-        for cNT in collectListElements(named: "condition", in: list, recursiveListName: "conditionList") {
+        // conditionList = bindingCondition [ "," conditionListAfterBinding ] | condition [ "," conditionList ] .
+        for cNT in collectListElements(namedAny: ["condition", "bindingCondition"], in: list,
+                                       recursiveListNames: ["conditionList", "conditionListAfterBinding"]) {
             guard let (_, cSpans) = tileAlternate(cNT.nt, from: cNT.from, to: cNT.to) else {
                 record(.lookupFailed, "no alternate tiles condition span", from: cNT.from, to: cNT.to)
                 continue
@@ -2123,9 +2124,7 @@ struct SwiftSyntaxGenerator {
                 items.append(ConditionElementSyntax(condition: .optionalBinding(
                     convertOptionalBinding(obNT.nt, from: obNT.from, to: obNT.to)
                 )))
-            } else if let ceNT = find("conditionExpression", in: cSpans) {
-                // conditionExpression mirrors `expression` (same two alternates), so the
-                // flat-sequence builder handles it — just without the assignment alternate.
+            } else if let ceNT = find("expression", in: cSpans) {
                 var elements: [ExprSyntax] = []
                 flattenExpression(ceNT.nt, from: ceNT.from, to: ceNT.to, into: &elements)
                 let expr: ExprSyntax = elements.count == 1
@@ -2259,7 +2258,7 @@ struct SwiftSyntaxGenerator {
     /// loopStatement        = forInStatement | whileStatement | repeatWhileStatement .
     /// forInStatement       = "for" "try"? "await"? "unsafe"? "case"? pattern "in" expression whereClause? codeBlock .
     /// whileStatement       = "while" >->( "{" ) conditionList codeBlock .
-    /// repeatWhileStatement = "repeat" codeBlock "while" >->( "{" ) conditionExpression .
+    /// repeatWhileStatement = "repeat" codeBlock "while" >->( "{" ) expression .
     private mutating func convertLoopStatement(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> StmtSyntax? {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
@@ -2289,7 +2288,7 @@ struct SwiftSyntaxGenerator {
                 body = convertCodeBlock(cbNT.nt, from: cbNT.from, to: cbNT.to)
             }
             var condition: ExprSyntax = ExprSyntax(MissingExprSyntax())
-            if let ceNT = find("conditionExpression", in: rSpans) {
+            if let ceNT = find("expression", in: rSpans) {
                 var elements: [ExprSyntax] = []
                 flattenExpression(ceNT.nt, from: ceNT.from, to: ceNT.to, into: &elements)
                 condition = elements.count == 1
@@ -2368,12 +2367,12 @@ struct SwiftSyntaxGenerator {
     }
 
     /// whereClause     = "where" whereExpression .
-    /// whereExpression = conditionExpression .
+    /// whereExpression = expression .
     private mutating func convertWhereClause(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> WhereClauseSyntax? {
         guard let (_, spans) = tileAlternate(nt, from: from, to: to),
               let weNT = find("whereExpression", in: spans),
               let (_, weSpans) = tileAlternate(weNT.nt, from: weNT.from, to: weNT.to),
-              let ceNT = find(firstOf: ["conditionExpression", "expression"], in: weSpans) else {
+              let ceNT = find("expression", in: weSpans) else {
             record(.lookupFailed, "whereClause condition could not be resolved", from: from, to: to)
             return nil
         }
@@ -3109,46 +3108,71 @@ struct SwiftSyntaxGenerator {
     }
 
     /// macroRoleArguments = macroRoleArgument { "," macroRoleArgument } .
-    /// macroRoleArgument  = macroRole | identifierToken ":" macroRoleName .
-    /// macroRoleArgument  = macroRoleName | identifierToken ":" macroRoleName .
+    /// macroRoleArgument  = macroRole | macroRoleCall | identifierToken ":" macroRoleName .
     private mutating func collectMacroRoleArguments(
         _ nt: GrammarNode, from: CharPosition, to: CharPosition, into items: inout [LabeledExprSyntax]
     ) {
         for argNT in listElements("macroRoleArgument", of: "macroRoleArguments", nt, from: from, to: to) {
             guard let (_, argSpans) = tileAlternate(argNT.nt, from: argNT.from, to: argNT.to) else { continue }
-            // macroRoleArgument = macroRole | identifierToken ":" macroRoleName . — the role is a bare name.
+            // The role is a bare name.
             if let roleNT = find("macroRole", in: argSpans) {
                 items.append(LabeledExprSyntax(expression: DeclReferenceExprSyntax(
                     baseName: .identifier(collectTerminalText(roleNT.nt, from: roleNT.from, to: roleNT.to))
                 )))
                 continue
             }
-            guard let nameNT = find(firstOf: ["macroRoleCallName", "macroRoleName"], in: argSpans) else { continue }
+            guard let nameNT = find(firstOf: ["macroRoleCall", "macroRoleName"], in: argSpans) else { continue }
             let label = find("identifierToken", in: argSpans)
             items.append(LabeledExprSyntax(
                 label: label.map { .identifier(collectTerminalText($0.nt, from: $0.from, to: $0.to)) },
                 colon: label == nil ? nil : .colonToken(),
-                expression: macroRoleName(nameNT.nt, from: nameNT.from, to: nameNT.to)
+                expression: macroRoleName(nameNT)
             ))
         }
     }
 
-    /// macroRoleName = macroRoleDeclName
-    ///               | macroRoleDeclName >s< "(" macroRoleName ")"
-    ///               | macroRoleDeclName >s< "(" argumentNames ")" .
+    /// macroRoleName = identifierToken | macroRoleCall .
+    /// macroRoleCall = identifierToken "(" introducedName ")" .
     ///
-    /// `named(deinit)` is a CALL of the reference `named`; `init(a:b:)` is one reference carrying
-    /// `DeclNameArguments`. Note the token kinds: in this position `init`/`deinit`/`subscript` are
-    /// KEYWORDS, unlike member position where swift-syntax keeps `deinit` and `subscript` as
-    /// identifiers — so this needs its own mapping rather than `declNameToken`.
-    private mutating func macroRoleName(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
-        guard let (_, spans) = tileAlternate(nt, from: from, to: to),
-              let declNT = find("macroRoleDeclName", in: spans) else {
-            return missingExpr(.lookupFailed, "no macroRoleDeclName child", from: from, to: to)
+    /// `named(x)` is a CALL of the kind `named`, with the introduced name as its one argument.
+    private mutating func macroRoleName(_ span: NTSpan) -> ExprSyntax {
+        guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to) else {
+            return missingExpr(.lookupFailed, "no alternate tiles the span", from: span.from, to: span.to)
         }
-        let text = collectTerminalText(declNT.nt, from: declNT.from, to: declNT.to)
+        if let callNT = find("macroRoleCall", in: spans) {
+            return macroRoleName(callNT)
+        }
+        guard let kindNT = find("identifierToken", in: spans) else {
+            return missingExpr(.lookupFailed, "no introduced-name kind", from: span.from, to: span.to)
+        }
+        let kind = DeclReferenceExprSyntax(baseName: .identifier(collectTerminalText(kindNT.nt, from: kindNT.from, to: kindNT.to)))
+        guard let nameNT = find("introducedName", in: spans) else {
+            return ExprSyntax(kind)
+        }
+        return ExprSyntax(FunctionCallExprSyntax(
+            calledExpression: kind,
+            leftParen: .leftParenToken(),
+            arguments: LabeledExprListSyntax([LabeledExprSyntax(expression: introducedName(nameNT))]),
+            rightParen: .rightParenToken()
+        ))
+    }
+
+    /// introducedName = attributeDeclBase [ "(" argumentNames ")" ] .
+    ///
+    /// Token kinds as swift-syntax builds them: `init`/`deinit`/`subscript`/`self`/`Self` stay KEYWORDS
+    /// (in member position `deinit` and `subscript` are identifiers, so `declNameToken` does not fit),
+    /// and keywords that are expressions keep their expression node (`named(true)`).
+    private mutating func introducedName(_ span: NTSpan) -> ExprSyntax {
+        guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to),
+              let baseNT = find("attributeDeclBase", in: spans) else {
+            return missingExpr(.lookupFailed, "no attributeDeclBase child", from: span.from, to: span.to)
+        }
+        let text = collectTerminalText(baseNT.nt, from: baseNT.from, to: baseNT.to)
+        let isOperator = tileAlternate(baseNT.nt, from: baseNT.from, to: baseNT.to)
+            .map { find("operator", in: $0.1) != nil } ?? false
         let base: TokenSyntax
         switch text {
+        case _ where isOperator: base = .binaryOperator(text)
         case "init":      base = .keyword(.`init`)
         case "deinit":    base = .keyword(.`deinit`)
         case "subscript": base = .keyword(.subscript)
@@ -3161,41 +3185,18 @@ struct SwiftSyntaxGenerator {
             var arguments: [DeclNameArgumentSyntax] = []
             collectDeclNameArguments(namesNT.nt, from: namesNT.from, to: namesNT.to, into: &arguments)
             return ExprSyntax(DeclReferenceExprSyntax(
-                moduleSelector: moduleSelector(in: spans),
                 baseName: base,
-                argumentNames: DeclNameArgumentsSyntax(
-                    arguments: DeclNameArgumentListSyntax(arguments)
-                )
+                argumentNames: DeclNameArgumentsSyntax(arguments: DeclNameArgumentListSyntax(arguments))
             ))
         }
-        // `named(x)` — a call whose single argument is the nested name.
-        if let innerNT = find("macroRoleName", in: spans) {
-            return ExprSyntax(FunctionCallExprSyntax(
-                calledExpression: DeclReferenceExprSyntax(
-                    moduleSelector: moduleSelector(in: spans), baseName: base
-                ),
-                leftParen: .leftParenToken(),
-                arguments: LabeledExprListSyntax([
-                    LabeledExprSyntax(expression: macroRoleName(innerNT.nt, from: innerNT.from, to: innerNT.to))
-                ]),
-                rightParen: .rightParenToken()
-            ))
+        switch text {
+        case "true", "false": return ExprSyntax(BooleanLiteralExprSyntax(literal: text == "true" ? .keyword(.true) : .keyword(.false)))
+        case "nil":           return ExprSyntax(NilLiteralExprSyntax())
+        case "super":         return ExprSyntax(SuperExprSyntax())
+        case "_":             return ExprSyntax(DiscardAssignmentExprSyntax())
+        case "Any":           return ExprSyntax(TypeExprSyntax(type: IdentifierTypeSyntax(name: .keyword(.Any))))
+        default:              return ExprSyntax(DeclReferenceExprSyntax(baseName: base))
         }
-        // A bare argument such as `named(true)` is an EXPRESSION in swift-syntax, so the keywords
-        // that are valid there keep their expression node rather than becoming a name reference.
-        if moduleSelector(in: spans) == nil {
-            switch text {
-            case "true", "false": return ExprSyntax(BooleanLiteralExprSyntax(literal: text == "true" ? .keyword(.true) : .keyword(.false)))
-            case "nil":           return ExprSyntax(NilLiteralExprSyntax())
-            case "super":         return ExprSyntax(SuperExprSyntax())
-            case "_":             return ExprSyntax(DiscardAssignmentExprSyntax())
-            case "Any":           return ExprSyntax(TypeExprSyntax(type: IdentifierTypeSyntax(name: .keyword(.Any))))
-            default: break
-            }
-        }
-        return ExprSyntax(DeclReferenceExprSyntax(
-            moduleSelector: moduleSelector(in: spans), baseName: base
-        ))
     }
 
     /// argumentNames = argumentName argumentNames? .   argumentName = argumentLabel ":" .
@@ -3505,10 +3506,10 @@ struct SwiftSyntaxGenerator {
                 rightParen: .rightParenToken()
             )
         }
-        // attribute = "@" >s< "_implements" >s< "(" type "," attributeDeclName ")" .
+        // attribute = "@" >s< "_implements" >s< "(" type "," implementsDeclName ")" .
         if spansContainKeyword(spans, "_implements"),
            let typeNT = find("type", in: spans),
-           let nameNT = find("attributeDeclName", in: spans) {
+           let nameNT = find("implementsDeclName", in: spans) {
             return AttributeSyntax(
                 atSign: .atSignToken(),
                 attributeName: TypeSyntax(IdentifierTypeSyntax(name: .identifier("_implements"))),
@@ -3737,7 +3738,7 @@ struct SwiftSyntaxGenerator {
         // no `attributeName` child at all and no recognised argument-clause node either. That is
         // an unconverted FORM, not a failed lookup; classifying it as `.lookupFailed` wrongly
         // reported a converter bug.
-        guard let nameNT = find("attributeName", in: spans),
+        guard let nameNT = find(firstOf: ["attributeName", "typeAttributeName", "typeAttributeNameWithoutArguments"], in: spans),
               let (_, nameSpans) = tileAlternate(nameNT.nt, from: nameNT.from, to: nameNT.to) else {
             let head = parser.contentText(from: from, to: to).prefix(while: { $0 != "(" })
             record(.unhandled, "attribute with a bespoke argument grammar not converted: \(head)", from: from, to: to)
@@ -3831,9 +3832,9 @@ struct SwiftSyntaxGenerator {
         guard let clauseNT = find("attributeArgumentExprClause", in: spans),
               let (_, clauseSpans) = tileAlternate(clauseNT.nt, from: clauseNT.from, to: clauseNT.to)
         else { return nil }
-        if let listNT = find("functionCallArgumentList", in: clauseSpans) {
+        if let listNT = find("labeledExpressionList", in: clauseSpans) {
             var args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
-            if hasTrailingComma(clauseSpans, afterList: "functionCallArgumentList"),
+            if hasTrailingComma(clauseSpans, afterList: "labeledExpressionList"),
                var last = args.last {
                 last.trailingComma = .commaToken()
                 args = LabeledExprListSyntax(args.dropLast() + [last])
@@ -4110,8 +4111,8 @@ struct SwiftSyntaxGenerator {
         }
     }
 
-    /// attributeDeclName = moduleSelector? attributeDeclBase
-    ///                   | moduleSelector? attributeDeclBase >s< "(" argumentNames? ")" .
+    /// attributeDeclName  = moduleSelector? attributeDeclBase declNameArguments? .
+    /// implementsDeclName = moduleSelector? implementsDeclBase declNameArguments? .
     ///
     /// The `parseDeclReferenceExpr` result for `@_dynamicReplacement` / `@_implements`: a base
     /// name plus, for the compound forms, a `DeclNameArguments` — EMPTY for the zero-arg form
@@ -4123,13 +4124,14 @@ struct SwiftSyntaxGenerator {
         }
         let selector = moduleSelector(in: spans)
         var baseName: TokenSyntax = .identifier("")
-        if let baseNT = find("attributeDeclBase", in: spans) {
+        if let baseNT = find(firstOf: ["attributeDeclBase", "implementsDeclBase"], in: spans) {
             baseName = declNameToken(collectTerminalText(baseNT.nt, from: baseNT.from, to: baseNT.to))
         }
         var arguments: DeclNameArgumentsSyntax? = nil
-        if spansContainKeyword(spans, "(") {
+        if let argsClauseNT = find("declNameArguments", in: spans) {
             var labels: [DeclNameArgumentSyntax] = []
-            if let argsNT = find("argumentNames", in: spans) {
+            if let (_, aSpans) = tileAlternate(argsClauseNT.nt, from: argsClauseNT.from, to: argsClauseNT.to),
+               let argsNT = find("argumentNames", in: aSpans) {
                 collectDeclNameArguments(argsNT.nt, from: argsNT.from, to: argsNT.to, into: &labels)
             }
             arguments = DeclNameArgumentsSyntax(
@@ -4414,10 +4416,10 @@ struct SwiftSyntaxGenerator {
             return PrecedenceGroupDeclSyntax(name: .identifier("?"), groupAttributes: [])
         }
         var name = TokenSyntax.identifier("?")
-        if let nameNT = find("precedenceGroupName", in: spans) {
+        if let nameNT = find("identifierOrSelf", in: spans) {
             name = .identifier(collectTerminalText(nameNT.nt, from: nameNT.from, to: nameNT.to))
         } else {
-            record(.lookupFailed, "no precedenceGroupName child", from: from, to: to)
+            record(.lookupFailed, "no identifierOrSelf child", from: from, to: to)
         }
         var attributes: [PrecedenceGroupAttributeListSyntax.Element] = []
         if let attrsNT = find("precedenceGroupAttributes", in: spans) {
@@ -4603,17 +4605,17 @@ struct SwiftSyntaxGenerator {
             record(.lookupFailed, "no parameterClause child", from: from, to: to)
         }
         var effects: FunctionEffectSpecifiersSyntax? = nil
-        let isAsync = spansContainKeyword(spans, "async")
-        let isReasync = spansContainKeyword(spans, "reasync")
-        let throwsClause = throwsClauseSyntax(in: spans)
-        if isAsync || isReasync || throwsClause != nil {
+        let effectPieces = effectSpans(in: spans)
+        let asyncText = asyncSpecifierText(in: effectPieces)
+        let throwsClause = throwsClauseSyntax(in: effectPieces)
+        if asyncText != nil || throwsClause != nil {
             effects = FunctionEffectSpecifiersSyntax(
-                asyncSpecifier: isReasync ? .keyword(.reasync) : (isAsync ? .keyword(.async) : nil),
+                asyncSpecifier: asyncText == "reasync" ? .keyword(.reasync) : (asyncText != nil ? .keyword(.async) : nil),
                 throwsClause: throwsClause
             )
         }
         var returnClause: ReturnClauseSyntax? = nil
-        if let resNT = find("functionResult", in: spans),
+        if let resNT = find(firstOf: ["declarationFunctionResult", "functionResult"], in: spans),
            let (_, resSpans) = tileAlternate(resNT.nt, from: resNT.from, to: resNT.to),
            let typeNT = find("resultType", in: resSpans) {
             returnClause = ReturnClauseSyntax(arrow: .arrowToken(), type: convertResultType(typeNT.nt, from: typeNT.from, to: typeNT.to))
@@ -4914,8 +4916,7 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertFunctionSignature(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> FunctionSignatureSyntax {
-        // functionSignature = parameterClause "async"? throwsClause? functionResult? .
-        // functionSignature = parameterClause "async"? "rethrows" functionResult? .
+        // functionSignature = parameterClause functionEffectSpecifiers? declarationFunctionResult? .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return emptySignature()
@@ -4933,18 +4934,18 @@ struct SwiftSyntaxGenerator {
         // swift-syntax's single `ThrowsClauseSyntax.throwsSpecifier`, so there is one
         // nonterminal to find here rather than a per-alternate keyword probe.
         var effects: FunctionEffectSpecifiersSyntax? = nil
-        let isAsync = spansContainKeyword(spans, "async")
-        let isReasync = spansContainKeyword(spans, "reasync")
-        let throwsClause = throwsClauseSyntax(in: spans)
-        if isAsync || isReasync || throwsClause != nil {
+        let effectPieces = effectSpans(in: spans)
+        let asyncText = asyncSpecifierText(in: effectPieces)
+        let throwsClause = throwsClauseSyntax(in: effectPieces)
+        if asyncText != nil || throwsClause != nil {
             effects = FunctionEffectSpecifiersSyntax(
-                asyncSpecifier: isReasync ? .keyword(.reasync) : (isAsync ? .keyword(.async) : nil),
+                asyncSpecifier: asyncText == "reasync" ? .keyword(.reasync) : (asyncText != nil ? .keyword(.async) : nil),
                 throwsClause: throwsClause
             )
         }
 
         var returnClause: ReturnClauseSyntax? = nil
-        if let resNT = find("functionResult", in: spans),
+        if let resNT = find(firstOf: ["declarationFunctionResult", "functionResult"], in: spans),
            let (_, resSpans) = tileAlternate(resNT.nt, from: resNT.from, to: resNT.to),
            let typeNT = find("resultType", in: resSpans) {
             returnClause = ReturnClauseSyntax(
@@ -5191,10 +5192,9 @@ struct SwiftSyntaxGenerator {
         if let listNT = find("tupleBindingElementList", in: spans) {
             collectTupleBindingElements(listNT.nt, from: listNT.from, to: listNT.to, into: &elements)
         }
-        if elements.count > 1 {
-            for i in 0..<elements.count - 1 {
-                elements[i] = elements[i].with(\.trailingComma, .commaToken())
-            }
+        let commas = elements.count - (hasTrailingComma(spans, afterList: "tupleBindingElementList") ? 0 : 1)
+        for i in 0..<max(commas, 0) {
+            elements[i] = elements[i].with(\.trailingComma, .commaToken())
         }
         return PatternSyntax(TuplePatternSyntax(
             leftParen: .leftParenToken(),
@@ -5363,33 +5363,15 @@ struct SwiftSyntaxGenerator {
         // though that is what the expression MEANS. `OperatorTable.foldAll()` reassociates later.
         let operand = convertPrefixExpression(prefNT.nt, from: prefNT.from, to: prefNT.to)
         elements.append(operand)
-        // `conditionExpression` is a PARALLEL copy of `expression` that swaps in its own
-        // infix family (`conditionInfixExpressions`, which omits the assignment alternate —
-        // assignment returns Void and is not a condition). Looking only for `infixExpressions`
-        // silently dropped the tail, so `if let x = y, x > 0` lost its `> 0`.
-        if let infSpan = find(firstOf: ["infixExpressions", "conditionInfixExpressions"], in: spans) {
+        if let infSpan = find("infixExpressions", in: spans) {
             flattenInfixExpressions(infSpan.nt, from: infSpan.from, to: infSpan.to, into: &elements)
         }
     }
 
     private mutating func flattenInfixExpressions(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into elements: inout [ExprSyntax]) {
-        // infixExpressions          = infixExpression infixExpressions? .
-        // conditionInfixExpressions = conditionInfixExpression conditionInfixExpressions? .
-        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
-            record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
-            return
-        }
-        for (sym, f, t) in spans {
-            for name in ["infixExpression", "conditionInfixExpression"] {
-                if let ieNT = findNonterminal(named: name, sym: sym, from: f, to: t) {
-                    flattenInfixExpression(ieNT.nt, from: ieNT.from, to: ieNT.to, into: &elements)
-                }
-            }
-            for name in ["infixExpressions", "conditionInfixExpressions"] {
-                if let nextNT = findNonterminal(named: name, sym: sym, from: f, to: t) {
-                    flattenInfixExpressions(nextNT.nt, from: nextNT.from, to: nextNT.to, into: &elements)
-                }
-            }
+        // infixExpressions = < infixExpression > .
+        for ieNT in listElements("infixExpression", of: "infixExpressions", nt, from: from, to: to) {
+            flattenInfixExpression(ieNT.nt, from: ieNT.from, to: ieNT.to, into: &elements)
         }
     }
 
@@ -5449,12 +5431,11 @@ struct SwiftSyntaxGenerator {
             // effect specifiers that precede the arrow.
             var effects: TypeEffectSpecifiersSyntax? = nil
             if let (_, aSpans) = tileAlternate(arrowNT.nt, from: arrowNT.from, to: arrowNT.to),
-               let teNT = find("typeEffectSpecifiers", in: aSpans),
-               let (_, teSpans) = tileAlternate(teNT.nt, from: teNT.from, to: teNT.to) {
-                let isAsync = spansContainKeyword(teSpans, "async")
+               find("typeEffectSpecifiers", in: aSpans) != nil {
+                let effectPieces = effectSpans(in: aSpans)
                 effects = TypeEffectSpecifiersSyntax(
-                    asyncSpecifier: isAsync ? .keyword(.async) : nil,
-                    throwsClause: throwsClauseSyntax(in: teSpans)
+                    asyncSpecifier: asyncSpecifierText(in: effectPieces) != nil ? .keyword(.async) : nil,
+                    throwsClause: throwsClauseSyntax(in: effectPieces)
                 )
             }
             elements.append(ExprSyntax(ArrowExprSyntax(effectSpecifiers: effects, arrow: .arrowToken())))
@@ -5709,25 +5690,13 @@ struct SwiftSyntaxGenerator {
             return ExprSyntax(OptionalChainingExprSyntax(expression: base, questionMark: .postfixQuestionMarkToken()))
         }
         // postfixExpression = postfixExpression >s< postfixOperator <s>
-        //                   | postfixExpression >s< postfixOperatorToken >+> ( … )
-        //                   | postfixExpression >s< dotOperator          >+> ( … ) .
-        if let baseNT = find("postfixExpression", in: spans) {
+        //                   | postfixExpression >s< postfixOperator >+> ( … ) .
+        if let baseNT = find("postfixExpression", in: spans), let opNT = find("postfixOperator", in: spans) {
             let base = convertPostfixExpression(baseNT.nt, from: baseNT.from, to: baseNT.to)
-            if let opNT = find(firstOf: ["postfixOperator", "postfixOperatorToken", "dotOperator"], in: spans) {
-                let opText = collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to)
-                return ExprSyntax(PostfixOperatorExprSyntax(
-                    expression: base, operator: .postfixOperator(opText)
-                ))
-            }
-            if let opText = findTerminal(named: "postfixOperatorToken", in: spans)
-                ?? findTerminal(named: "dotOperator", in: spans) {
-                let text = collectTerminalText(opText.nt, from: opText.from, to: opText.to)
-                return ExprSyntax(PostfixOperatorExprSyntax(
-                    expression: base, operator: .postfixOperator(text)
-                ))
-            }
+            let opText = collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to)
+            return ExprSyntax(PostfixOperatorExprSyntax(expression: base, operator: .postfixOperator(opText)))
         }
-        // postfixExpression = initializerExpression .   initializerExpression = "init" >-> ( "{" ) .
+        // postfixExpression = initializerExpression .   initializerExpression = "init" .
         // A bare `init` reference — the delegating `init()` call inside an initializer.
         // swift-syntax spells the name with a KEYWORD token, exactly as in member position.
         if find("initializerExpression", in: spans) != nil {
@@ -5798,7 +5767,7 @@ struct SwiftSyntaxGenerator {
         var additional = MultipleTrailingClosureElementListSyntax([])
         if let tcNT = find("trailingClosures", in: spans),
            let (_, tcSpans) = tileAlternate(tcNT.nt, from: tcNT.from, to: tcNT.to) {
-            if let closNT = find("closureExpression", in: tcSpans) {
+            if let closNT = find("trailingClosure", in: tcSpans) {
                 trailing = convertClosureExpression(closNT.nt, from: closNT.from, to: closNT.to)
             }
             if let labelledNT = find("labeledTrailingClosures", in: tcSpans) {
@@ -5812,10 +5781,10 @@ struct SwiftSyntaxGenerator {
         if let clauseNT = find("functionCallArgumentClause", in: spans),
            let (_, clauseSpans) = tileAlternate(clauseNT.nt, from: clauseNT.from, to: clauseNT.to) {
             parens = true
-            if let listNT = find("functionCallArgumentList", in: clauseSpans) {
+            if let listNT = find("labeledExpressionList", in: clauseSpans) {
                 args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
                 // SE-0470 trailing comma, kept on the LAST argument.
-                if hasTrailingComma(clauseSpans, afterList: "functionCallArgumentList"),
+                if hasTrailingComma(clauseSpans, afterList: "labeledExpressionList"),
                    var last = args.last {
                     last.trailingComma = .commaToken()
                     args = LabeledExprListSyntax(args.dropLast() + [last])
@@ -5888,9 +5857,9 @@ struct SwiftSyntaxGenerator {
     /// swift-syntax models this as a DECL (`IfConfigDecl`) even in statement position, with one
     /// `IfConfigClause` per directive.
     /// conditionalSwitchCase        = switchIfDirectiveClause switchElseifDirectiveClauses? switchElseDirectiveClause? endifDirective .
-    /// switchIfDirectiveClause      = ifDirective compilationCondition switchCases? .
-    /// switchElseifDirectiveClause  = elseifDirective compilationCondition switchCases? .
-    /// switchElseDirectiveClause    = elseDirective switchCases? .
+    /// switchIfDirectiveClause      = ifDirective compilationCondition { switchCase } .
+    /// switchElseifDirectiveClause  = elseifDirective compilationCondition { switchCase } .
+    /// switchElseDirectiveClause    = elseDirective { switchCase } .
     private mutating func convertConditionalSwitchCase(
         _ nt: GrammarNode, from: CharPosition, to: CharPosition
     ) -> IfConfigDeclSyntax? {
@@ -5944,9 +5913,7 @@ struct SwiftSyntaxGenerator {
             }
         }
         var cases: [SwitchCaseListSyntax.Element] = []
-        if let casesNT = find("switchCases", in: spans) {
-            collectSwitchCases(casesNT.nt, from: casesNT.from, to: casesNT.to, into: &cases)
-        }
+        collectSwitchCases(span.nt, from: span.from, to: span.to, into: &cases)
         clauses.append(IfConfigClauseSyntax(
             poundKeyword: keyword,
             condition: condition,
@@ -6150,7 +6117,7 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertIfConfigStatements(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> [CodeBlockItemSyntax] {
-        // `ifConfigStatements = @setMode(ifConfigBody) statements .`; walk THROUGH the alias.
+        // `ifConfigStatements = @setFlavor(ifConfigBody) statements .`; walk THROUGH the alias.
         convertStatementList(["ifConfigStatements", "statements"], nt, from: from, to: to)
     }
 
@@ -6450,9 +6417,9 @@ struct SwiftSyntaxGenerator {
         let text = String(parser.contentText(from: from, to: to))
         let period: TokenSyntax? = text.hasPrefix(".") ? .periodToken() : nil
 
-        if spansContainKeyword(spans, "[") || find("functionCallArgumentList", in: spans) != nil {
+        if spansContainKeyword(spans, "[") || find("labeledExpressionList", in: spans) != nil {
             var args = LabeledExprListSyntax([])
-            if let listNT = find("functionCallArgumentList", in: spans) {
+            if let listNT = find("labeledExpressionList", in: spans) {
                 args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
             }
             components.append(KeyPathComponentSyntax(
@@ -6487,7 +6454,7 @@ struct SwiftSyntaxGenerator {
     // MARK: - Closures
 
     /// closureExpression       = samelineOpenedClosure
-    ///                         | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
+    ///                         | @rejectsFlavor(stmtCondition trailingClosure) newlineOpenedClosure .
     /// samelineOpenedClosure   = "{" >n< closureSignature? statements? "}" .
     /// newlineOpenedClosure    = "{" <n> closureSignature? statements? "}" .
     private mutating func convertClosureExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ClosureExprSyntax {
@@ -6496,7 +6463,7 @@ struct SwiftSyntaxGenerator {
             return ClosureExprSyntax(statements: [])
         }
         // BOTH alternates are now a single nonterminal wrapping the same shape one level down —
-        // they exist only to carry the open-brace layout partition and parser-mode gate. `find`
+        // they exist only to carry the open-brace layout partition and the `trailingClosure` gate. `find`
         // does not descend through a nonterminal, so unwrap whichever one tiles here before looking
         // for `closureSignature` / `statements`. (When `samelineOpenedClosure` was spelled inline
         // this only had to unwrap the newline one; missing the new wrapper cost 54 labels — every
@@ -6526,7 +6493,7 @@ struct SwiftSyntaxGenerator {
         )
     }
 
-    /// closureSignature = attributes? captureList? closureParameterClause "async"? throwsClause? functionResult? "in" .
+    /// closureSignature = attributes? captureList? closureParameterClause typeEffectSpecifiers? functionResult? "in" .
     /// closureSignature = attributes? captureList "in" .
     /// closureSignature = attributes "in" .
     private mutating func convertClosureSignature(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ClosureSignatureSyntax {
@@ -6546,8 +6513,9 @@ struct SwiftSyntaxGenerator {
         }
 
         var effects: TypeEffectSpecifiersSyntax? = nil
-        let isAsync = spansContainKeyword(spans, "async")
-        let throwsClause = throwsClauseSyntax(in: spans)
+        let effectPieces = effectSpans(in: spans)
+        let isAsync = asyncSpecifierText(in: effectPieces) != nil
+        let throwsClause = throwsClauseSyntax(in: effectPieces)
         if isAsync || throwsClause != nil {
             effects = TypeEffectSpecifiersSyntax(
                 asyncSpecifier: isAsync ? .keyword(.async) : nil,
@@ -6556,7 +6524,7 @@ struct SwiftSyntaxGenerator {
         }
 
         var returnClause: ReturnClauseSyntax? = nil
-        if let resNT = find("functionResult", in: spans),
+        if let resNT = find(firstOf: ["declarationFunctionResult", "functionResult"], in: spans),
            let (_, resSpans) = tileAlternate(resNT.nt, from: resNT.from, to: resNT.to),
            let typeNT = find("resultType", in: resSpans) {
             returnClause = ReturnClauseSyntax(arrow: .arrowToken(), type: convertResultType(typeNT.nt, from: typeNT.from, to: typeNT.to))
@@ -6619,7 +6587,7 @@ struct SwiftSyntaxGenerator {
     }
 
     /// closureParameter      = attributes? [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation? .
-    /// closureParameterNames = externalParameterName closureParameterName | closureParameterName .
+    /// closureParameterNames = [ externalParameterName ] closureParameterName .
     private mutating func collectClosureParameters(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into params: inout [ClosureParameterSyntax]) {
         let list = NTSpan(nt: nt, from: from, to: to)
         for pNT in collectListElements(named: "closureParameter", in: list, recursiveListName: "closureParameterList") {
@@ -6631,13 +6599,13 @@ struct SwiftSyntaxGenerator {
             var second: TokenSyntax? = nil
             if let namesNT = find("closureParameterNames", in: pSpans),
                let (_, nameSpans) = tileAlternate(namesNT.nt, from: namesNT.from, to: namesNT.to) {
-                let ext = find("externalParameterName", in: nameSpans)
-                let local = find("closureParameterName", in: nameSpans)
-                if let ext, let local {
-                    first = closureNameToken(ext)
-                    second = closureNameToken(local)
-                } else if let only = local ?? ext {
-                    first = closureNameToken(only)
+                // closureParameterNames = [ "_" ] closureParameterName .
+                if let local = find("closureParameterName", in: nameSpans) {
+                    if spansContainKeyword(nameSpans, "_") {
+                        second = closureNameToken(local)
+                    } else {
+                        first = closureNameToken(local)
+                    }
                 }
             } else {
                 record(.lookupFailed, "no closureParameterNames child", from: pNT.from, to: pNT.to)
@@ -6646,8 +6614,21 @@ struct SwiftSyntaxGenerator {
             if let taNT = find("typeAnnotation", in: pSpans) {
                 type = convertTypeAnnotationType(taNT)
             }
+            var modifiers = DeclModifierListSyntax([])
+            if let modsNT = find("parameterDeclarationModifiers", in: pSpans) {
+                // In a closure parameter `_const x` is lexed as two names, even though the
+                // grammar can reuse the declaration-modifier path to recognize it.
+                let modifierText = collectTerminalText(modsNT.nt, from: modsNT.from, to: modsNT.to)
+                if modifierText == "_const", second == nil {
+                    second = first
+                    first = .identifier(modifierText)
+                } else {
+                    modifiers = convertDeclarationModifiers(modsNT.nt, from: modsNT.from, to: modsNT.to)
+                }
+            }
             params.append(ClosureParameterSyntax(
                 attributes: attributeList(in: pSpans),
+                modifiers: modifiers,
                 firstName: first,
                 secondName: second,
                 colon: type == nil ? nil : .colonToken(),
@@ -6662,7 +6643,7 @@ struct SwiftSyntaxGenerator {
     }
 
     /// captureList     = "[" "]" | "[" captureListItems ","? "]" .
-    /// captureListItem = captureHead | captureHead assignmentOperator expression .
+    /// captureListItem = captureHead [ assignmentOperator expression ] .
     /// captureHead     = captureSpecifier captureName | >-> ( "weak" "unowned" ) captureName .
     /// captureName     = identifierToken | "self" .
     private mutating func convertCaptureList(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ClosureCaptureClauseSyntax {
@@ -6855,39 +6836,30 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertTupleExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
-        // tupleExpression = "(" ")" | "(" argumentLabel ":" expression ")" | "(" tupleElement "," ")"
-        //                 | "(" tupleElement "," tupleElementList ","? ")" .
+        // tupleExpression = "(" ")" | "(" [ argumentLabel ":" ] operatorReference ")"
+        //                 | "(" argumentLabel ":" expression ")"
+        //                 | "(" labeledExpression "," [ labeledExpressionList ","? ] ")" .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             return missingExpr(.lookupFailed, "no alternate tiles the span", from: from, to: to)
         }
         var elements: [LabeledExprSyntax] = []
-        if let firstNT = find("tupleElement", in: spans) {
-            appendTupleElement(firstNT, into: &elements)
+        if let firstNT = find("labeledExpression", in: spans), let first = convertLabeledExpression(firstNT) {
+            elements.append(first)
         }
-        let listNT = find("tupleElementList", in: spans)
+        let listNT = find("labeledExpressionList", in: spans)
         if let listNT {
-            collectTupleElements(listNT.nt, from: listNT.from, to: listNT.to, into: &elements)
+            elements += labeledExpressions(in: listNT)
         }
-        if elements.isEmpty,
-           let labelNT = find(firstOf: ["argumentLabel"] + identifierNameSpellings, in: spans),
-           let exprNT = find("expression", in: spans) {
-            elements.append(LabeledExprSyntax(
-                label: argumentLabelToken(collectTerminalText(labelNT.nt, from: labelNT.from, to: labelNT.to)),
-                colon: .colonToken(),
-                expression: convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
-            ))
+        // The one-element alternates spell their element inline.
+        if elements.isEmpty, spans.count > 2, let single = labeledElement(in: spans, from: from, to: to) {
+            elements.append(single)
         }
-        if elements.count > 1 {
-            for i in 0..<elements.count - 1 {
-                elements[i] = elements[i].with(\.trailingComma, .commaToken())
-            }
-        }
-        // `(String,)` — SE-0470 trailing comma, which swift-syntax keeps on the LAST element. With no
-        // list, the comma follows the single `tupleElement` (`(A,)`).
-        if hasTrailingComma(spans, afterList: listNT == nil ? "tupleElement" : "tupleElementList"),
-           !elements.isEmpty {
-            elements[elements.count - 1] = elements[elements.count - 1]
-                .with(\.trailingComma, .commaToken())
+        // SE-0470 trailing comma, which swift-syntax keeps on the LAST element. With no list, the
+        // comma follows the single `labeledExpression` (`(A,)`).
+        let trailing = hasTrailingComma(spans, afterList: listNT == nil ? "labeledExpression" : "labeledExpressionList")
+        let commas = elements.count - (trailing ? 0 : 1)
+        for i in 0..<max(commas, 0) {
+            elements[i] = elements[i].with(\.trailingComma, .commaToken())
         }
         return ExprSyntax(TupleExprSyntax(
             leftParen: .leftParenToken(),
@@ -6896,42 +6868,55 @@ struct SwiftSyntaxGenerator {
         ))
     }
 
-    private mutating func collectTupleElements(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into elements: inout [LabeledExprSyntax]) {
-        // tupleElementList = tupleElement | tupleElement "," tupleElementList .
-        let list = NTSpan(nt: nt, from: from, to: to)
-        for elNT in collectListElements(named: "tupleElement", in: list, recursiveListName: "tupleElementList") {
-            appendTupleElement(elNT, into: &elements)
+    /// labeledExpression = [ argumentLabel ":" ] ( expression | operatorReference ) .
+    private mutating func convertLabeledExpression(_ span: NTSpan) -> LabeledExprSyntax? {
+        guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to) else {
+            record(.lookupFailed, "no alternate tiles the element span", from: span.from, to: span.to)
+            return nil
         }
+        return labeledElement(in: spans, from: span.from, to: span.to)
     }
 
-    private mutating func appendTupleElement(_ span: NTSpan, into elements: inout [LabeledExprSyntax]) {
-        // tupleElement = expression | argumentLabel ":" expression | operator | argumentLabel ":" operator .
-        guard let (_, spans) = tileAlternate(span.nt, from: span.from, to: span.to),
-              let expr = tupleElementExpression(from: spans) else {
-            record(.lookupFailed, "tuple element without expression/operator", from: span.from, to: span.to)
-            return
-        }
-        if let labelNT = find(firstOf: ["argumentLabel"] + identifierNameSpellings, in: spans) {
-            elements.append(LabeledExprSyntax(
-                label: argumentLabelToken(collectTerminalText(labelNT.nt, from: labelNT.from, to: labelNT.to)),
-                colon: .colonToken(),
-                expression: expr
-            ))
-        } else {
-            elements.append(LabeledExprSyntax(expression: expr))
-        }
-    }
-
-    private mutating func tupleElementExpression(from spans: [(GrammarNode, CharPosition, CharPosition)]) -> ExprSyntax? {
+    /// The label and value of one `LabeledExprSyntax`, without its comma.
+    private mutating func labeledElement(
+        in spans: [(GrammarNode, CharPosition, CharPosition)], from: CharPosition, to: CharPosition
+    ) -> LabeledExprSyntax? {
+        let expression: ExprSyntax
         if let exprNT = find("expression", in: spans) {
-            return convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
+            expression = convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
+        } else if let refNT = find("operatorReference", in: spans) {
+            expression = convertOperatorReference(refNT)
+        } else {
+            record(.lookupFailed, "element with neither an expression nor an operator: \(alternateKind(spans))",
+                   from: from, to: to)
+            return nil
         }
-        if let opNT = find("operator", in: spans) {
-            return ExprSyntax(DeclReferenceExprSyntax(
-                baseName: .binaryOperator(collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to))
-            ))
+        guard let labelNT = find(firstOf: ["argumentLabel"] + identifierNameSpellings, in: spans) else {
+            return LabeledExprSyntax(expression: expression)
         }
-        return nil
+        return LabeledExprSyntax(
+            label: argumentLabelToken(collectTerminalText(labelNT.nt, from: labelNT.from, to: labelNT.to)),
+            colon: .colonToken(),
+            expression: expression
+        )
+    }
+
+    /// labeledExpressionList = labeledExpression { "," labeledExpression } .
+    private mutating func labeledExpressions(in list: NTSpan) -> [LabeledExprSyntax] {
+        collectListElements(named: "labeledExpression", in: list, recursiveListName: "labeledExpressionList")
+            .compactMap { convertLabeledExpression($0) }
+    }
+
+    /// operatorReference = moduleSelector? ( operator | "&" | "!" ) .
+    /// swift-syntax spells the reference with a binaryOperator token, also for `&` and `!`.
+    private mutating func convertOperatorReference(_ span: NTSpan) -> ExprSyntax {
+        let spans = tileAlternate(span.nt, from: span.from, to: span.to)?.1 ?? []
+        let text = collectTerminalText(span.nt, from: span.from, to: span.to)
+        let name = text.range(of: "::", options: .backwards).map { String(text[$0.upperBound...]) } ?? text
+        return ExprSyntax(DeclReferenceExprSyntax(
+            moduleSelector: moduleSelector(in: spans),
+            baseName: .binaryOperator(name)
+        ))
     }
 
     /// A label spelled `_` is swift-syntax's wildcard token, not an identifier named `_`.
@@ -7108,9 +7093,8 @@ struct SwiftSyntaxGenerator {
 
     private mutating func convertExplicitMemberExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
         // explicitMemberExpression = postfixExpression memberDot decimalDigits .
-        // explicitMemberExpression = postfixExpression memberDot moduleSelector? memberName .
-        // explicitMemberExpression = postfixExpression memberDot moduleSelector? memberName genericArgumentClause .
-        // explicitMemberExpression = postfixExpression memberDot moduleSelector? memberName "(" argumentNames ")" .
+        // explicitMemberExpression = postfixExpression memberDot moduleSelector? memberName
+        //                            [ genericArgumentClause | >n< "(" argumentNames ")" ] .
         //   (memberDot = `( >s< "." >n< | <s> "." )` in the grammar)
         // explicitMemberExpression = postfixExpression postfixConditionalCompilationBlock .
         guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
@@ -7167,7 +7151,7 @@ struct SwiftSyntaxGenerator {
         return member
     }
 
-    /// moduleSelector = @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
+    /// moduleSelector = @rejectsFlavor(bindingIntroducer) identifierToken "::" >n< .
     ///
     /// SE-0491 `Module::name`. swift-syntax does NOT model this as a member access: the selector
     /// hangs off the referring node itself (`DeclReferenceExpr`, `IdentifierType`, `MemberType`,
@@ -7184,7 +7168,7 @@ struct SwiftSyntaxGenerator {
         )
     }
 
-    /// accessorEffects = throwsClause | "async" throwsClause? .
+    /// accessorEffects = typeEffectSpecifiers .
     /// Structured, not a text search: the thrown type of `get throws(E)` must survive, and a text
     /// search would also match `async`/`throws` inside that type's name.
     private mutating func accessorEffectSpecifiers(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> AccessorEffectSpecifiersSyntax {
@@ -7192,10 +7176,49 @@ struct SwiftSyntaxGenerator {
             record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
             return AccessorEffectSpecifiersSyntax()
         }
+        let effectPieces = effectSpans(in: spans)
         return AccessorEffectSpecifiersSyntax(
-            asyncSpecifier: spansContainKeyword(spans, "async") ? .keyword(.async) : nil,
-            throwsClause: throwsClauseSyntax(in: spans)
+            asyncSpecifier: asyncSpecifierText(in: effectPieces) != nil ? .keyword(.async) : nil,
+            throwsClause: throwsClauseSyntax(in: effectPieces)
         )
+    }
+
+    typealias TileSpans = [(GrammarNode, CharPosition, CharPosition)]
+
+    /// The pieces of an effect-specifier clause. Effects sit in a wrapper — `functionEffectSpecifiers`
+    /// (declarations), `typeEffectSpecifiers` (closures, function types, arrows) or `accessorEffects`
+    /// (accessors, around `typeEffectSpecifiers`) — whose body groups them as
+    /// `( "async" throwsClause? | throwsClause )`. Returns the innermost wrapper's spans with those
+    /// groups flattened, so `async`, `functionAsyncSpecifier` and the throws clause are direct spans;
+    /// `spans` (flattened) when there is no wrapper.
+    private mutating func effectSpans(in spans: TileSpans) -> TileSpans {
+        var current = spans
+        while let wrapper = find(firstOf: ["functionEffectSpecifiers", "typeEffectSpecifiers", "accessorEffects"], in: current),
+              let (_, inner) = tileAlternate(wrapper.nt, from: wrapper.from, to: wrapper.to) {
+            current = inner
+        }
+        return flattenedGroups(current)
+    }
+
+    private mutating func flattenedGroups(_ spans: TileSpans) -> TileSpans {
+        var out: TileSpans = []
+        for (sym, f, t) in spans {
+            if sym.kind == .DO || sym.kind == .OPT, f < t, let (_, inner) = tileAlternate(sym, from: f, to: t) {
+                out += flattenedGroups(inner)
+            } else {
+                out.append((sym, f, t))
+            }
+        }
+        return out
+    }
+
+    /// `async` or `reasync` among effect spans: a bare keyword or a `functionAsyncSpecifier`.
+    private mutating func asyncSpecifierText(in effects: TileSpans) -> String? {
+        for keyword in ["async", "reasync"] where spansContainKeyword(effects, keyword) { return keyword }
+        if let asyncNT = find("functionAsyncSpecifier", in: effects) {
+            return collectTerminalText(asyncNT.nt, from: asyncNT.from, to: asyncNT.to)
+        }
+        return nil
     }
 
     /// declarationThrowsClause = throwsClause | "rethrows" .
@@ -7280,8 +7303,9 @@ struct SwiftSyntaxGenerator {
                 rightParen: .rightParenToken()
             )))
         }
-        let isAsync = spansContainKeyword(ftSpans, "async")
-        let throwsClause = throwsClauseSyntax(in: ftSpans)
+        let effectPieces = effectSpans(in: ftSpans)
+        let isAsync = asyncSpecifierText(in: effectPieces) != nil
+        let throwsClause = throwsClauseSyntax(in: effectPieces)
         sequence.append(ExprSyntax(ArrowExprSyntax(
             effectSpecifiers: (isAsync || throwsClause != nil)
                 ? TypeEffectSpecifiersSyntax(
@@ -7549,10 +7573,10 @@ struct SwiftSyntaxGenerator {
         var additional = MultipleTrailingClosureElementListSyntax([])
         if let tcNT = find("trailingClosures", in: spans),
            let (_, tcSpans) = tileAlternate(tcNT.nt, from: tcNT.from, to: tcNT.to) {
-            if let closNT = find("closureExpression", in: tcSpans) {
+            if let closNT = find("trailingClosure", in: tcSpans) {
                 trailing = convertClosureExpression(closNT.nt, from: closNT.from, to: closNT.to)
             } else {
-                record(.lookupFailed, "trailingClosures without a closureExpression", from: tcNT.from, to: tcNT.to)
+                record(.lookupFailed, "trailingClosures without a trailingClosure", from: tcNT.from, to: tcNT.to)
             }
             if let labelledNT = find("labeledTrailingClosures", in: tcSpans) {
                 var extra: [MultipleTrailingClosureElementSyntax] = []
@@ -7567,9 +7591,9 @@ struct SwiftSyntaxGenerator {
         if let clauseNT = find("functionCallArgumentClause", in: spans),
            let (_, clauseSpans) = tileAlternate(clauseNT.nt, from: clauseNT.from, to: clauseNT.to) {
             hasParens = true
-            if let listNT = find("functionCallArgumentList", in: clauseSpans) {
+            if let listNT = find("labeledExpressionList", in: clauseSpans) {
                 args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
-                if hasTrailingComma(clauseSpans, afterList: "functionCallArgumentList"), var last = args.last {
+                if hasTrailingComma(clauseSpans, afterList: "labeledExpressionList"), var last = args.last {
                     last.trailingComma = .commaToken()
                     args = LabeledExprListSyntax(args.dropLast() + [last])
                 }
@@ -7611,9 +7635,9 @@ struct SwiftSyntaxGenerator {
         var args = LabeledExprListSyntax([])
         if let clauseNT = find("subscriptArgumentClause", in: spans),
            let (_, clauseSpans) = tileAlternate(clauseNT.nt, from: clauseNT.from, to: clauseNT.to),
-           let listNT = find("functionCallArgumentList", in: clauseSpans) {
+           let listNT = find("labeledExpressionList", in: clauseSpans) {
             args = convertArgumentList(listNT.nt, from: listNT.from, to: listNT.to)
-            if hasTrailingComma(clauseSpans, afterList: "functionCallArgumentList"),
+            if hasTrailingComma(clauseSpans, afterList: "labeledExpressionList"),
                var last = args.last {
                 last.trailingComma = .commaToken()
                 args = LabeledExprListSyntax(args.dropLast() + [last])
@@ -7692,7 +7716,7 @@ struct SwiftSyntaxGenerator {
         if let imNT = find("implicitMemberExpression", in: spans) {
             return convertImplicitMemberExpression(imNT.nt, from: imNT.from, to: imNT.to)
         }
-        // tupleExpression = "(" ")" | "(" tupleElement "," tupleElementList ","? ")" .
+        // tupleExpression = "(" ")" | "(" labeledExpression "," [ labeledExpressionList ","? ] ")" .
         if let tupNT = find("tupleExpression", in: spans) {
             return convertTupleExpression(tupNT.nt, from: tupNT.from, to: tupNT.to)
         }
@@ -7779,6 +7803,24 @@ struct SwiftSyntaxGenerator {
                 )
             ))
         }
+        // `inout` is the one hard parameter modifier the compiler also admits directly in
+        // expression position. Preserve its type structure rather than treating it as a name.
+        if spansContainKeyword(spans, "inout"),
+           let typeNT = find("type", in: spans) {
+            var specifiers: [TypeSpecifierListSyntax.Element] = [
+                .simpleTypeSpecifier(SimpleTypeSpecifierSyntax(specifier: .keyword(.inout)))
+            ]
+            var base = convertType(typeNT.nt, from: typeNT.from, to: typeNT.to)
+            if let inner = base.as(AttributedTypeSyntax.self) {
+                specifiers.append(contentsOf: inner.specifiers)
+                base = inner.baseType
+            }
+            return typeAsExpression(TypeSyntax(AttributedTypeSyntax(
+                specifiers: TypeSpecifierListSyntax(specifiers),
+                attributes: AttributeListSyntax([]),
+                baseType: base
+            )))
+        }
         // primaryExpression = parenthesisedExpressionSpecifierType .
         // parenthesisedExpressionSpecifierType = "(" expressionParenthesisedTypeSpecifier type ")" .
         // SwiftSyntax has this expression route for `nonisolated(nonsending)`, but not for
@@ -7836,21 +7878,6 @@ struct SwiftSyntaxGenerator {
         // primaryExpression = selfType .   `Self` used as a VALUE (`discard Self`).
         if find("selfType", in: spans) != nil {
             return ExprSyntax(DeclReferenceExprSyntax(baseName: .keyword(.Self)))
-        }
-        // primaryExpression = "(" moduleSelector? operator ")" .
-        // Operator-as-value, e.g. `(/)`, `(+)`, `(Swift::+)` per SE-0491. swift-syntax keeps the
-        // parentheses as a TupleExpr and spells the reference with a binaryOperator token — an
-        // `.identifier` would not match even with the same text.
-        if let opNT = find("operator", in: spans) {
-            let text = collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to)
-            return ExprSyntax(TupleExprSyntax(elements: LabeledExprListSyntax([
-                LabeledExprSyntax(expression: ExprSyntax(
-                    DeclReferenceExprSyntax(
-                        moduleSelector: moduleSelector(in: spans),
-                        baseName: .binaryOperator(text)
-                    )
-                ))
-            ])))
         }
         // primaryExpression = attribute type .
         // A TYPE in expression position — `[@convention(c) (Int32) -> Int32]`, `@Sendable () -> Void`.
@@ -8401,7 +8428,7 @@ struct SwiftSyntaxGenerator {
         let headName = "stringHead", partName = "stringPart", tailName = "stringTail"
         var pieces: [NTSpan] = []
         var visitedInterpolationPieceSearch: Set<String> = []
-        collectInterpolationPieces(spans, names: [headName, partName, tailName, "functionCallArgumentList"],
+        collectInterpolationPieces(spans, names: [headName, partName, tailName, "labeledExpressionList"],
                                    into: &pieces, visited: &visitedInterpolationPieceSearch)
         pieces.sort { $0.from < $1.from }
         guard let headPiece = pieces.first, headPiece.nt.name == headName,
@@ -8618,43 +8645,7 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func collectArguments(_ nt: GrammarNode, from: CharPosition, to: CharPosition, into items: inout [LabeledExprSyntax]) {
-        // functionCallArgument = @prefer expression | operator | moduleSelector operator .
-        // Requiring an `expression` child dropped the operator alternates SILENTLY — no node and
-        // no diagnostic — so `reduce(0, +)` lost its second argument entirely.
-        let list = NTSpan(nt: nt, from: from, to: to)
-        for argNT in collectListElements(named: "functionCallArgument", in: list, recursiveListName: "functionCallArgumentList") {
-            guard let (_, argSpans) = tileAlternate(argNT.nt, from: argNT.from, to: argNT.to) else {
-                record(.lookupFailed, "no alternate tiles function-call argument span", from: argNT.from, to: argNT.to)
-                continue
-            }
-            var expr: ExprSyntax? = nil
-            if let exprNT = find("expression", in: argSpans) {
-                expr = convertExpression(exprNT.nt, from: exprNT.from, to: exprNT.to)
-            } else if let opNT = find("operator", in: argSpans) {
-                // An operator passed as a VALUE. swift-syntax spells the reference with a
-                // binaryOperator token; unlike `(+)` there are no parentheses to model here.
-                expr = ExprSyntax(DeclReferenceExprSyntax(
-                    moduleSelector: moduleSelector(in: argSpans),
-                    baseName: .binaryOperator(collectTerminalText(opNT.nt, from: opNT.from, to: opNT.to))
-                ))
-            }
-            if let expr {
-                if let labelNT = find("argumentLabel", in: argSpans) {
-                    let label = collectTerminalText(labelNT.nt, from: labelNT.from, to: labelNT.to)
-                    items.append(LabeledExprSyntax(
-                        // `f(_: 1)` — a `_` label is a wildcard token, as in every name position.
-                        label: argumentLabelToken(label),
-                        colon: .colonToken(),
-                        expression: expr
-                    ))
-                } else {
-                    items.append(LabeledExprSyntax(expression: expr))
-                }
-            } else {
-                record(.lookupFailed, "argument with neither an expression nor an operator: \(alternateKind(argSpans))",
-                       from: argNT.from, to: argNT.to)
-            }
-        }
+        items += labeledExpressions(in: NTSpan(nt: nt, from: from, to: to))
     }
 
     // MARK: - Types
@@ -8766,6 +8757,24 @@ struct SwiftSyntaxGenerator {
                 moduleSelector: selector,
                 name: nameText == "self" && selector == nil ? .keyword(.`self`) : .identifier(nameText),
                 genericArgumentClause: generics
+            ))
+        }
+        // `parameterModifier "~" >n< simpleType` keeps the compiler's newline rule local to `~`,
+        // so this alternate has no intermediate `type`/`suppressedType` node. Recognize it before
+        // the generic `simpleType` fast path below, which would otherwise discard the modifier.
+        if let modifier = find("parameterModifier", in: spans),
+           let simple = find("simpleType", in: spans),
+           find("type", in: spans) == nil {
+            let suppressed = TypeSyntax(SuppressedTypeSyntax(
+                withoutTilde: .prefixOperator("~"),
+                type: convertType(simple.nt, from: simple.from, to: simple.to)
+            ))
+            return TypeSyntax(AttributedTypeSyntax(
+                specifiers: TypeSpecifierListSyntax([
+                    typeSpecifier(modifier.nt, from: modifier.from, to: modifier.to)
+                ]),
+                attributes: [],
+                baseType: suppressed
             ))
         }
         // `simpleType` is the postfix-bindable subset (`optionalType = simpleType >s< '?'`).
@@ -8908,7 +8917,7 @@ struct SwiftSyntaxGenerator {
                 elements: CompositionTypeElementListSyntax(elements)
             ))
         }
-        // protocolCompositionType = protocolCompositionElement "&" protocolCompositionContinuation .
+        // protocolCompositionType = protocolCompositionElement < "&" protocolCompositionElement > .
         if let pcNT = find("protocolCompositionType", in: spans) {
             var elements: [CompositionTypeElementSyntax] = []
             collectCompositionElements(pcNT.nt, from: pcNT.from, to: pcNT.to, into: &elements)
@@ -8931,14 +8940,14 @@ struct SwiftSyntaxGenerator {
            let constraint = convertBoxedProtocolConstraint(d) {
             return someOrAnyType(.any, constraint: constraint)
         }
-        // type = parameterModifier type .   type = attribute type .
+        // type = parameterModifier type .   type = typeAttribute type .
         // swift-syntax wraps both in ONE AttributedType: specifiers (`inout`, `borrowing`,
         // `sending`) go in `specifiers`, `@attr` goes in `attributes`, and the operand is
         // `baseType`. Our grammar is RIGHT-RECURSIVE, so `@autoclosure @escaping T` arrives as
         // three nested `type` nodes; converting each level separately nested an AttributedType
         // inside another one. Peel the whole prefix chain first and wrap exactly once.
         if find("type", in: spans) != nil,
-           find(firstOf: ["parameterModifier", "attribute"], in: spans) != nil {
+           find(firstOf: ["parameterModifier", "typeAttribute"], in: spans) != nil {
             var specifierItems: [TypeSpecifierListSyntax.Element] = []
             var attributeItems: [AttributeListSyntax.Element] = []
             var cursor: NTSpan? = NTSpan(nt: nt, from: from, to: to)
@@ -8946,14 +8955,14 @@ struct SwiftSyntaxGenerator {
             while let level = cursor {
                 guard let (_, levelSpans) = tileAlternate(level.nt, from: level.from, to: level.to),
                       let innerNT = find("type", in: levelSpans),
-                      find(firstOf: ["parameterModifier", "attribute"], in: levelSpans) != nil else {
+                      find(firstOf: ["parameterModifier", "typeAttribute"], in: levelSpans) != nil else {
                     baseType = convertType(level.nt, from: level.from, to: level.to)
                     break
                 }
                 if let modNT = find("parameterModifier", in: levelSpans) {
                     specifierItems.append(typeSpecifier(modNT.nt, from: modNT.from, to: modNT.to))
                 }
-                if let attrNT = find("attribute", in: levelSpans),
+                if let attrNT = find("typeAttribute", in: levelSpans),
                    let attribute = convertAttribute(attrNT.nt, from: attrNT.from, to: attrNT.to) {
                     attributeItems.append(.attribute(attribute))
                 }
@@ -9016,8 +9025,7 @@ struct SwiftSyntaxGenerator {
     /// tupleTypeElementList = tupleTypeElement | tupleTypeElement "," tupleTypeElementList .
     /// tupleTypeElement     = elementName typeAnnotation | type .
     /// elementName          = identifierToken | "_" .
-    /// protocolCompositionType         = protocolCompositionElement "&" protocolCompositionContinuation .
-    /// protocolCompositionContinuation = protocolCompositionElement | protocolCompositionType .
+    /// protocolCompositionType = protocolCompositionElement < "&" protocolCompositionElement > .
     /// protocolCompositionElement      = simpleType | suppressedType .
     ///
     /// The grammar nests to the right; swift-syntax keeps ONE flat `CompositionType` whose
@@ -9029,20 +9037,10 @@ struct SwiftSyntaxGenerator {
     private mutating func collectCompositionElements(
         _ nt: GrammarNode, from: CharPosition, to: CharPosition, into elements: inout [CompositionTypeElementSyntax]
     ) {
-        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
-            record(.lookupFailed, "no alternate tiles the span", from: from, to: to)
-            return
-        }
-        if let elNT = find("protocolCompositionElement", in: spans) {
+        let list = NTSpan(nt: nt, from: from, to: to)
+        for elNT in collectListElements(named: "protocolCompositionElement", in: list,
+                                        recursiveListName: "protocolCompositionType") {
             elements.append(compositionElement(elNT))
-        }
-        if let contNT = find("protocolCompositionContinuation", in: spans),
-           let (_, contSpans) = tileAlternate(contNT.nt, from: contNT.from, to: contNT.to) {
-            if let nestedNT = find("protocolCompositionType", in: contSpans) {
-                collectCompositionElements(nestedNT.nt, from: nestedNT.from, to: nestedNT.to, into: &elements)
-            } else if let lastNT = find("protocolCompositionElement", in: contSpans) {
-                elements.append(compositionElement(lastNT))
-            }
         }
     }
 
@@ -9146,8 +9144,9 @@ struct SwiftSyntaxGenerator {
         // swift-syntax: TypeEffectSpecifiers on a function TYPE (not FunctionEffectSpecifiers,
         // which is the declaration-side node).
         var effects: TypeEffectSpecifiersSyntax? = nil
-        let isAsync = spansContainKeyword(spans, "async")
-        let throwsClause = throwsClauseSyntax(in: spans)
+        let effectPieces = effectSpans(in: spans)
+        let isAsync = asyncSpecifierText(in: effectPieces) != nil
+        let throwsClause = throwsClauseSyntax(in: effectPieces)
         if isAsync || throwsClause != nil {
             effects = TypeEffectSpecifiersSyntax(
                 asyncSpecifier: isAsync ? .keyword(.async) : nil,

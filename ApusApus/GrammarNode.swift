@@ -191,21 +191,21 @@ final class GrammarNode {
     /// not an attribute" (see `statement` in `Swift.apus`).
     var forwardPredicates: [ForwardPredicate] = []
 
-    /// Scoped parser-mode annotations (`@setMode`/`@clearMode`/`@requiresMode`/`@rejectsMode`).
-    /// Compiled away at grammar load by `Grammar.specializeParserModes()`: the parser never
-    /// reads them. See `Parser Modes Specialization.md`.
-    var modeAdd: UInt64 = 0
-    var modeRemove: UInt64 = 0
-    var requiredModes: UInt64 = 0
-    var rejectedModes: UInt64 = 0
+    /// Scoped flavor annotations (`@setFlavor`/`@clearFlavor`/`@requiresFlavor`/`@rejectsFlavor`).
+    /// Compiled away at grammar load by `Grammar.specializeFlavors()`: the parser never
+    /// reads them. See `Parser Flavors Specialization.md`.
+    var flavorAdd: UInt64 = 0
+    var flavorRemove: UInt64 = 0
+    var requiredFlavors: UInt64 = 0
+    var rejectedFlavors: UInt64 = 0
 
-    /// On a specialized LHS copy `X⟨m⟩`: the original production `X` and the mode `m`
+    /// On a specialized LHS copy `X⟨m⟩`: the original production `X` and the flavors `m`
     /// (already projected onto the bits relevant to `X`). `nil`/`0` on original nodes.
     var origin: GrammarNode?
-    var instanceMode: UInt64 = 0
-    /// `@modeScope(m …)` on an LHS: the parser modes in scope for this nonterminal. An occurrence
-    /// passes only these bits of its mode into the nonterminal; every other bit is dropped.
-    var modeScope: UInt64 = 0
+    var instanceFlavors: UInt64 = 0
+    /// `@flavors(m …)` on an LHS: the flavors in scope for this nonterminal. An occurrence
+    /// passes only these of its flavors into the nonterminal; every other bit is dropped.
+    var flavorScope: UInt64 = 0
 
     /// `@left` / `@right` on an ALTERNATE — a child-position filter in the SDF sense.
     ///
@@ -330,7 +330,7 @@ extension GrammarNode: CustomStringConvertible {
 }
 
 extension GrammarNode {
-    /// Deep copy of a production subtree, for parser-mode specialization. Only valid BEFORE
+    /// Deep copy of a production subtree, for flavor specialization. Only valid BEFORE
     /// `resolveGrammarNodeLinks`, while every production is still a tree: it follows `.seq` and
     /// the `.alt` of LHS/ALT/bracket nodes, but an RHS nonterminal's `.alt` is a reference to
     /// another production and is copied as a pointer. `number`/`nameID` are assigned later.
@@ -351,13 +351,13 @@ extension GrammarNode {
         copy.isPreferred = isPreferred
         copy.isAvoided = isAvoided
         copy.forwardPredicates = forwardPredicates
-        copy.modeAdd = modeAdd
-        copy.modeRemove = modeRemove
-        copy.requiredModes = requiredModes
-        copy.rejectedModes = rejectedModes
+        copy.flavorAdd = flavorAdd
+        copy.flavorRemove = flavorRemove
+        copy.requiredFlavors = requiredFlavors
+        copy.rejectedFlavors = rejectedFlavors
         copy.origin = origin
-        copy.instanceMode = instanceMode
-        copy.modeScope = modeScope
+        copy.instanceFlavors = instanceFlavors
+        copy.flavorScope = flavorScope
         copy.associativityFilters = associativityFilters
         copy.sameLineOutsideBrackets = sameLineOutsideBrackets
         copy.suppressesLeadingTrivia = suppressesLeadingTrivia

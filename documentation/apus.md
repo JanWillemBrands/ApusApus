@@ -217,9 +217,9 @@ An annotation starts with `@`. Its meaning depends on its position. There are fo
 
 | Position | Annotations |
 | --- | --- |
-| Start of a production, before the name | `@longest` `@shortest` `@sameLineOutsideBrackets` `@modeScope` `@literalMunch` `@preempt` |
+| Start of a production, before the name | `@longest` `@shortest` `@sameLineOutsideBrackets` `@flavors` `@literalMunch` `@preempt` |
 | Start of an alternative, after `=` `\|` `(` `[` `{` `<` | `@prefer` `@avoid` `@left` `@right` `@canParse` `@cannotParse` |
-| Before an item | `@setMode` `@clearMode` `@requiresMode` `@rejectsMode` |
+| Before an item | `@setFlavor` `@clearFlavor` `@requiresFlavor` `@rejectsFlavor` |
 | Before a bracket | `@longest` `@shortest` |
 
 An annotation in the wrong position is an error. Exception: a terminal pragma on a production rule
@@ -321,83 +321,85 @@ two of its tokens, outside `( )`, `[ ]` and `{ }`. These line breaks do not coun
 
 With this rule, `f(a,⏎b)` is a valid condition, and `a⏎|| b` is not.
 
-## Parser Modes
+## Flavors
 
-A parser mode is a flag that a part of the grammar gives to its children. The same text can parse
+A flavor is a flag that a part of the grammar gives to its children. The same text can parse
 differently when the flag is set. For example, in a condition a `{` can start the body, not a
-closure.
+closure. The name comes from swift-syntax `ExprFlavor`. Unlike `ExprFlavor`, several flavors can be
+set at the same time.
 
-### Mode Annotations
+### Flavor Annotations
 
 ```apus
-@setMode(foo bar) X       // parse X with foo and bar set
-@clearMode(foo bar) X     // parse X with foo and bar not set
-@requiresMode(foo bar) X  // keep this path only if foo and bar are both set
-@rejectsMode(foo bar) X   // remove this path if foo and bar are both set
+@setFlavor(foo bar) X       // parse X with foo and bar set
+@clearFlavor(foo bar) X     // parse X with foo and bar not set
+@requiresFlavor(foo bar) X  // keep this path only if foo and bar are both set
+@rejectsFlavor(foo bar) X   // remove this path if foo and bar are both set
 ```
 
-`@setMode` and `@clearMode` change only the modes that they name. The change applies only to the
-annotated item. After that item, the parser continues with the modes it had before.
+`@setFlavor` and `@clearFlavor` change only the flavors that they name. The change applies only to
+the annotated item. After that item, the parser continues with the flavors it had before.
 
-A test (`@requiresMode`, `@rejectsMode`) uses the modes of its item, after `@setMode` and
-`@clearMode` on that same item.
+A test (`@requiresFlavor`, `@rejectsFlavor`) uses the flavors of its item, after `@setFlavor` and
+`@clearFlavor` on that same item.
 
-A grammar can have at most 64 modes.
+A grammar can have at most 64 flavors.
 
-### Mode Scopes: `@modeScope`
+### Flavor Scopes: `@flavors`
 
-Each mode has a scope. `@modeScope(m)` at the start of a production lets the mode `m` go into that
-nonterminal. A mode goes only into nonterminals that have it in their scope. At any other
-nonterminal, the mode stops.
+Each flavor has a scope. `@flavors(m)` at the start of a production lets the flavor `m` go into that
+nonterminal. A flavor goes only into nonterminals that have it in their scope. At any other
+nonterminal, the flavor stops.
 
 ```apus
-ifStatement = "if" @setMode(cond) expression block .
+ifStatement = "if" @setFlavor(cond) expression block .
 
-@modeScope(cond) expression = term { "+" term } .
-@modeScope(cond) term       = number | name | group | @rejectsMode(cond) closure .
-group                       = "(" expression ")" .
+@flavors(cond) expression = term { "+" term } .
+@flavors(cond) term       = number | name | group | @rejectsFlavor(cond) closure .
+group                     = "(" expression ")" .
 ```
 
 In the condition of `if`, a term cannot be a closure. `group` does not have `cond` in its scope.
-Thus the mode stops at `group`, and a closure is permitted inside parentheses again.
+Thus the flavor stops at `group`, and a closure is permitted inside parentheses again.
 
-You do not have to clear a mode where its scope ends. Use `@clearMode` only for a boundary inside a
-scope.
+You do not have to clear a flavor where its scope ends. Use `@clearFlavor` only for a boundary
+inside a scope.
 
-`@modeScope` can occur more than one time. When a nonterminal has more than one definition, its
+`@flavors` can occur more than one time. When a nonterminal has more than one definition, its
 scopes are combined.
 
 ### Checks
 
 When the grammar loads, these are errors:
 
-- a mode that no production has in its scope,
-- `@setMode(m) Y` where `Y` does not have `m` in its scope,
-- a test on a mode that can never be set at that position.
+- a flavor that no production has in its scope,
+- `@setFlavor(m) Y` where `Y` does not have `m` in its scope,
+- a test on a flavor that can never be set at that position.
 
 The load log also shows:
 
-- the cost of each mode,
-- each `@clearMode` that has no effect,
-- each scope exit: a place where a mode stops, but a test below could still use it.
+- the cost of each flavor,
+- each `@clearFlavor` that has no effect,
+- each scope exit: a place where a flavor stops, but a test below could still use it.
 
 A scope exit is correct at a boundary that you want. An unexpected scope exit means that a scope is
-too small. A mode with a cost of zero has no effect.
+too small. A flavor with a cost of zero has no effect.
 
 ### Cost
 
-Modes have no cost at parse time. When the grammar loads, APUS makes a copy of each nonterminal for
-each mode combination that changes its language. Nonterminals outside all scopes are not copied.
-The load log shows the number of copies for each mode. Keep scopes small to keep this number low.
+Flavors have no cost at parse time. When the grammar loads, APUS makes a copy of each nonterminal
+for each flavor combination that changes its language. Nonterminals outside all scopes are not
+copied.
+The load log shows the number of copies for each flavor. Keep scopes small to keep this number low.
 
-### When to Use a Mode
+### When to Use a Flavor
 
-- Use a mode for a flag that must go through one or more nonterminals. If the flag is necessary at
+- Use a flavor for a flag that must go through one or more nonterminals. If the flag is necessary at
   only one place, write a separate rule there.
-- Use a mode to make a reading valid or not valid. To choose between valid readings, use `@prefer`,
-  `@longest` and the other annotations in "Choosing Between Readings".
-- A mode goes from a parent to its children. It cannot go to a sibling. If the context comes from
-  the item to the left, a mode cannot express it.
+- Use a flavor to make a reading valid or not valid. To choose between valid readings, use
+  `@prefer`, `@longest` and the other annotations in "Choosing Between Readings".
+- A flavor goes from a parent to its children. It cannot go to a sibling. If the context comes from
+  the item to the left, a flavor cannot express it.
 - Make a scope as small as the context that it models.
 
 ## Sequence Predicates
@@ -458,6 +460,17 @@ A = X <-<( operator ) Y .
 ```apus
 A = X >+>( ")" EOF ) .
 ```
+
+A list can name a set, as `---( … )` can: a rule whose every alternative is one terminal, and which
+no production uses. Its terminals take the place of the name:
+
+```apus
+closer = ")" | "]" | "}" .
+A = X <-<( closer "," ) Y .
+```
+
+A lookaround tests tokens, so naming a rule that is also a production is an error. To test whether a
+rule parses, use `@cannotParse( … )` or `@canParse( … )`.
 
 ### Layout Tokens `>>|` and `|<<`
 
@@ -562,7 +575,7 @@ that the `;` follows that statement.
 Keep a rule, also if it is short, when something uses its name:
 
 ```apus
-condition = @setMode(cond) expression .
+condition = @setFlavor(cond) expression .
 ```
 
 An annotation, a tool or a converter can use a name. If you put the body of such a rule at the
@@ -598,7 +611,7 @@ selection    = sequence { "|" sequence } .
 sequence     = alternateAnnotation* < sequenceItem > .
 sequenceItem = layout
              | lookaround
-             | modeAnnotation* factor [ "?" | "*" | "+" ] [ exclusion ]
+             | flavorAnnotation* factor [ "?" | "*" | "+" ] [ exclusion ]
              .
 
 factor   = terminal
@@ -616,12 +629,12 @@ exclusion  = "---" "(" < literal | identifier > ")" .
 productionPragma    = terminalPragma | nonterminalPragma .
 terminalPragma      = "@literalMunch" | "@preempt" "(" identifier [ "," identifier ] ")" .
 nonterminalPragma   = "@longest" | "@shortest" | "@sameLineOutsideBrackets"
-                    | "@modeScope" "(" < identifier > ")" .
+                    | "@flavors" "(" < identifier > ")" .
 groupPragma         = "@longest" | "@shortest" .
 alternateAnnotation = "@prefer" | "@avoid"
                     | ( "@left" | "@right" ) [ "(" < identifier > ")" ]
                     | ( "@canParse" | "@cannotParse" ) "(" < identifier > ")" .
-modeAnnotation      = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" )
+flavorAnnotation    = ( "@setFlavor" | "@clearFlavor" | "@requiresFlavor" | "@rejectsFlavor" )
                       "(" < identifier > ")" .
 ```
 

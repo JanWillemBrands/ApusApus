@@ -175,101 +175,57 @@ extension GrammarNode {
     
 }
 
-// MARK: - Predicate target reachability (TODO.md / Make trivia handling principled)
+// MARK: - Predicate targets
 
 extension Grammar {
 
-    /// Flag `@canParse(N)` / `@cannotParse(N)` whose target can NEVER be predicted.
+    /// Reachability from the start symbol, following production bodies across flavor copies.
+    func computeParsedNonTerminals() -> Set<String> {
+        var parsed: Set<String> = []
+        var queue = [root.seq?.name ?? startSymbol].filter { nonTerminals[$0] != nil }
+        while let name = queue.popLast() {
+            guard parsed.insert(name).inserted else { continue }
+            var seen = Set<ObjectIdentifier>()
+            func collect(_ node: GrammarNode?) {
+                guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
+                for symbol in node.bodySymbols where nonTerminals[symbol.name] != nil {
+                    queue.append(symbol.name)
+                }
+                if node.kind != .END { collect(node.seq) }
+                if !node.isRHS { collect(node.alt) }
+            }
+            for instance in instances(of: name) { collect(instance) }
+        }
+        return parsed
+    }
+
+    /// Flag `@canParse(N)` / `@cannotParse(N)` whose target is not defined.
     ///
-    /// `LookaheadPredicateRule` answers "does `N` derive here?" by querying `N`'s yields. An empty
-    /// answer is ambiguous — `N` was attempted and failed (a real **false**), or `N` was never
-    /// attempted (the query is **blind**) — and blind resolves to the PERMISSIVE verdict: a negated
-    /// predicate with no target yields prunes nothing, so `@cannotParse(N)` silently becomes `true`.
-    /// `Ambiguity.md` §5.3 calls that "a specification error, not a false result"; this is that
-    /// error being raised.
+    /// A target need not be reachable: one that no reachable production body names is answered by
+    /// a speculative recogniser (`MessageParser.canDerive`), so it is never blind. An undefined name
+    /// is still a specification error.
     ///
-    /// SCOPE — this catches the UNCONDITIONALLY blind cases only: a target that no production body
-    /// mentions, or that nothing reachable from the root mentions. It cannot catch a target that is
-    /// referenced somewhere but not predicted AT THE ANCHOR, which is what bit
-    /// `@cannotParse(accessorBlockBrace)` (referenced by `getterSetterBlock`, hence reachable, but
-    /// never predicted at a *variable* brace). Deciding that statically needs per-dotted-position
-    /// reachability — an LR(0)-style item closure — which this deliberately does not build, so the
-    /// anchor-local half of the class still has to be checked by hand. TODO.md / Make trivia handling principled records why the
-    /// runtime alternative (seeding a sub-parse when the query looks blind) was tried and reverted.
-    ///
-    /// Returns one message per blind site (empty = clean) as well as logging, so tests can assert on
+    /// Returns one message per bad site (empty = clean) as well as logging, so tests can assert on
     /// the result instead of scraping OSLog.
     @discardableResult
     func diagnosePredicateTargets() -> [String] {
         var findings: [String] = []
-        var targets: [(target: String, owner: String)] = []
-        var referenced: Set<String> = []
         var seen = Set<ObjectIdentifier>()
-
         func walk(_ node: GrammarNode?, owner: String) {
             guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
-            for predicate in node.forwardPredicates {
-                targets.append((predicate.targetName, owner))
-            }
-            // A symbol occurrence in an alternate body is what makes a name PREDICTABLE. Names that
-            // appear only as predicate operands never get a descriptor.
-            for symbol in node.bodySymbols {
-                referenced.insert(symbol.name)
+            for predicate in node.forwardPredicates
+            where nonTerminals[predicate.targetName] == nil && terminals[predicate.targetName] == nil {
+                findings.append("undefined predicate target '\(predicate.targetName)' used by '\(owner)'")
             }
             if node.kind != .END { walk(node.seq, owner: owner) }
             // Every production is a root below; an RHS reference (`.alt` → its LHS) is not followed.
             if !node.isRHS { walk(node.alt, owner: owner) }
         }
         for (name, nt) in nonTerminals { walk(nt, owner: name) }
-
-        // Reachability from the root, following body symbols.
-        var live: Set<String> = []
-        var queue: [String] = nonTerminals[root.name] != nil ? [root.name] : Array(nonTerminals.keys.filter { $0 == root.name })
-        if queue.isEmpty, let start = grammarRootName { queue = [start] }
-        while let name = queue.popLast() {
-            guard live.insert(name).inserted, let nt = nonTerminals[name] else { continue }
-            var altSeen = Set<ObjectIdentifier>()
-            func collect(_ node: GrammarNode?) {
-                guard let node, altSeen.insert(ObjectIdentifier(node)).inserted else { return }
-                for symbol in node.bodySymbols where nonTerminals[symbol.name] != nil {
-                    queue.append(symbol.name)
-                }
-                if node.kind != .END { collect(node.seq) }
-                collect(node.alt)
-            }
-            collect(nt)
-        }
-
-        for (target, owner) in targets {
-            guard nonTerminals[target] != nil || terminals[target] != nil else {
-                findings.append("undefined predicate target '\(target)' used by '\(owner)'")
-                continue
-            }
-            // Terminal operands are a lexical peek, not a yield query, so reachability is moot.
-            guard terminals[target] == nil else { continue }
-            if !referenced.contains(target) {
-                findings.append("""
-                    BLIND PREDICATE: '\(target)' is named only as a predicate operand (by '\(owner)') \
-                    and appears in no production body, so it is never predicted and the predicate is \
-                    vacuously satisfied everywhere. Reference it from a production, or seed it. \
-                    See TODO.md / Make trivia handling principled.
-                    """)
-            } else if !live.isEmpty && !live.contains(target) {
-                findings.append("""
-                    BLIND PREDICATE: '\(target)' (used by '\(owner)') is unreachable from the grammar \
-                    root, so it is never predicted and the predicate is vacuously satisfied \
-                    everywhere. See TODO.md / Make trivia handling principled.
-                    """)
-            }
-        }
         for finding in findings {
             Logger.grammar.error("\(finding, privacy: .public)")
         }
         return findings
     }
 
-    /// The name of the nonterminal the parser actually starts from, when `root` is the EOS sentinel.
-    private var grammarRootName: String? {
-        root.seq?.name ?? nonTerminals.keys.first
-    }
 }

@@ -26,7 +26,7 @@ APUS resolves ambiguity in four layers. Each layer has a different job.
 | Layer | When | What it decides | Tools |
 |---|---|---|---|
 | Lexer | during the parse, per terminal | the extent of a token | `@literalMunch`, munch-exempt terminals, `@preempt` |
-| Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()`, parser modes |
+| Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()`, flavors |
 | Oracle | after the parse | which completed derivations to keep | `@canParse`, `@sameLineOutsideBrackets`, `@prefer`, `@longest`, `@left`, … |
 | AST generator | after the Oracle | the operator precedence tree | precedence metadata on the operator alternates |
 
@@ -217,9 +217,9 @@ Each edge in the order was a real bug:
 | sameSpan → structure | `f(1) {}⏎{}` | `f(1) {}` has two readings, and `@prefer` deletes the parenless one. Before it did, `@right` took `f(1) {}` for an instance of itself and broke the chain |
 | structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
 
-Parser modes replaced the old span-containment filters. They are compiled into the grammar at
-load (each mode-relevant nonterminal gets a copy per scoped mode, `@modeScope`), so they act before
-anything enters the forest and do not depend on later Oracle pruning. See `apus.md` § Parser Modes.
+Flavors replaced the old span-containment filters. They are compiled into the grammar at load
+(each flavor-relevant nonterminal gets a copy per scoped flavor, `@flavors`), so they act before
+anything enters the forest and do not depend on later Oracle pruning. See `apus.md` § Flavors.
 
 ### 5.3 Hard constraints
 
@@ -230,11 +230,17 @@ A hard constraint removes a reading that the language does not permit.
 | `@cannotParse(N)` | start of an alternate | Remove the alternate where a yield of `N` starts at the same position. |
 | `@canParse(N)` | start of an alternate | Remove the alternate where no yield of `N` starts at the same position. |
 | `@sameLineOutsideBrackets` | before a nonterminal | Keep the yield only if a surviving derivation crosses no newline trivia outside brackets. |
-| `@setMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` active. |
-| `@clearMode(N)` | before a sequence item | Parse that occurrence with parser mode `N` inactive. |
-| `@requiresMode(N)` | before a sequence item | Schedule that occurrence only when mode `N` is active. |
-| `@rejectsMode(N)` | before a sequence item | Reject that occurrence when mode `N` is active. |
-| `@modeScope(N)` | before a production | Mode `N` passes into this nonterminal; elsewhere it is dropped. |
+
+The flavor annotations are NOT Oracle rules. They are parse-time gates, compiled into the grammar
+at load, and are listed here only because they also remove readings the language does not permit:
+
+| Annotation | Position | Rule |
+|---|---|---|
+| `@setFlavor(F)` | before a sequence item | Parse that occurrence with flavor `F` set. |
+| `@clearFlavor(F)` | before a sequence item | Parse that occurrence with flavor `F` not set. |
+| `@requiresFlavor(F)` | before a sequence item | Keep that occurrence only when flavor `F` is set. |
+| `@rejectsFlavor(F)` | before a sequence item | Remove that occurrence when flavor `F` is set. |
+| `@flavors(F)` | before a production | Flavor `F` passes into this nonterminal; elsewhere it is dropped. |
 
 Details:
 
@@ -244,8 +250,8 @@ Details:
   `canParseX` test in swift-syntax.
 - `@cannotParse(A B)` means: neither `A` nor `B` starts here. `@canParse(A B)` means: both start
   here.
-- In `@requiresMode(A B)`, all listed modes must be active. In `@rejectsMode(A B)`, the
-  occurrence is rejected only when all listed modes are active.
+- In `@requiresFlavor(A B)`, all listed flavors must be set. In `@rejectsFlavor(A B)`, the
+  occurrence is removed only when all listed flavors are set.
 - `@sameLineOutsideBrackets` is derivation-local. It tiles the candidate yield through the current BSR and inspects
   the exact terminal commits used by that tiling. Commits from dead or competing derivations do not
   count.
@@ -261,15 +267,15 @@ Examples:
 
 ```apus
 statement      = @cannotParse(declaration attributes) expression .
-moduleSelector = @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
+moduleSelector = @rejectsFlavor(bindingIntroducer) identifierToken "::" >n< .
 ```
 
 To combine a context fact with a token or layout fact, put the layout gate in a nonterminal and
-the mode gate on the occurrence that needs it:
+the flavor gate on the occurrence that needs it:
 
 ```apus
-closureExpression     = samelineOpenedClosure
-                      | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure .
+trailingClosure       = samelineOpenedClosure
+                      | @rejectsFlavor(stmtCondition) newlineOpenedClosure .
 samelineOpenedClosure = "{" >n< closureSignature? statements? "}" .
 newlineOpenedClosure  = "{" <n> closureSignature? statements? "}" .
 ```
@@ -420,7 +426,7 @@ In a left-recursive grammar (`E = E "+" E | …`), precedence is an ambiguity. U
 | prefix, infix or postfix operator; newline continuation; call at line start | boundary predicate |
 | regex or division; generic-argument follow set | token lookaround |
 | keyword in an identifier position | `---(…)` |
-| a construct that is valid only in a context (swift-syntax `ExprFlavor`) | parser modes |
+| a construct that is valid only in a context (swift-syntax `ExprFlavor`) | flavors |
 | a swift-syntax `atStartOfX` or `canParseX` decision | `@canParse` / `@cannotParse`, or token lookaround |
 | the same span, two alternates | `@prefer` / `@avoid` |
 | the same start, two lengths | `@longest` / `@shortest` |
@@ -636,8 +642,9 @@ the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (se
 
 | File | Contents |
 |---|---|
+| `FlavorSpecialization.swift` | `specializeFlavors`: the flavor annotations, compiled into grammar copies at load |
 | `Lexer.swift` | `OnDemandLiteralLexer.lex`: `@literalMunch`, the `@preempt` split points |
-| `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround; parser mode gates |
+| `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround |
 | `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `SameLineSpanRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
 | `DerivationBuilder.swift` | builds the tree and reports residual ambiguity with a fingerprint |
 | `ApusApusTests/OracleDisambiguationTests.swift` | tests for each Oracle rule |

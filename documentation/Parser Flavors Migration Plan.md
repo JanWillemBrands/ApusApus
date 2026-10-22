@@ -1,11 +1,15 @@
-# Parser Modes Migration Plan
+# Parser Flavors Migration Plan
 
-This note sketches a scoped parser-mode mechanism for APUS and a migration path
+Historical: this plan introduced the RUNTIME design (a bitset in every descriptor). It was
+superseded by `Parser Flavors Specialization.md`. "Parser modes" were renamed to flavors on
+2026-10-21; the annotations below use the current names.
+
+This note sketches a scoped flavor mechanism for APUS and a migration path
 from `@confinedTo` / `@excludedFrom` to that mechanism.
 
 The goal is not general mutable parser state. The goal is a small, principled
-inherited-context mechanism: a finite set of mode flags carried by descriptors
-and CRF edges. Mode changes are scoped to grammar occurrences. They are not
+inherited-context mechanism: a finite set of flavor flags carried by descriptors
+and CRF edges. Flavor changes are scoped to grammar occurrences. They are not
 global actions and do not require explicit pops.
 
 ## Motivation
@@ -31,122 +35,122 @@ APUS currently treats the inner newline-opened trailing closure as being inside
 `conditionExpression` by span containment, even though SwiftSyntax has reset to
 ordinary expression parsing inside the argument closure.
 
-Parser modes make this context explicit on grammar edges.
+Flavors make this context explicit on grammar edges.
 
 ## Proposed Annotations
 
 Start with four scoped annotations:
 
 ```apus
-@setMode(foo bar) X       // parse X with foo and bar added
-@clearMode(foo bar) X     // parse X with foo and bar removed
-@requiresMode(foo bar) X  // valid only if all listed flags are active
-@rejectsMode(foo bar) X   // invalid if all listed flags are active
+@setFlavor(foo bar) X       // parse X with foo and bar added
+@clearFlavor(foo bar) X     // parse X with foo and bar removed
+@requiresFlavor(foo bar) X  // valid only if all listed flags are active
+@rejectsFlavor(foo bar) X   // invalid if all listed flags are active
 ```
 
-`@setMode` and `@clearMode` are set operations. Unnamed flags remain unchanged:
+`@setFlavor` and `@clearFlavor` are set operations. Unnamed flags remain unchanged:
 
 ```text
-childMode = parentMode | addedBits
-childMode = parentMode & ~removedBits
+childFlavor = parentFlavor | addedBits
+childFlavor = parentFlavor & ~removedBits
 ```
 
-The mode change applies only to the annotated child occurrence. After the child
-returns, the caller continuation resumes with the caller's original mode.
+The flavor change applies only to the annotated child occurrence. After the child
+returns, the caller continuation resumes with the caller's original flavor.
 
 This is deliberately not a scanner-mode stack:
 
-- no global mutable mode state
+- no global mutable flavor state
 - no terminal side effects
 - no explicit pop or reset action
 - no order-dependent transitions
-- no hidden mode annotations on terminals
+- no hidden flavor annotations on terminals
 
 ## Runtime Representation
 
-Use one `UInt64` bitset for mode flags.
+Use one `UInt64` bitset for flavor flags.
 
-Add mode allocation to `Grammar`:
-
-```swift
-var modeNameToBit: [String: UInt64]
-```
-
-Assign bits as mode names are parsed. Emit a grammar-load diagnostic if a grammar
-declares more than 64 mode names.
-
-Add mode fields to `GrammarNode`:
+Add flavor allocation to `Grammar`:
 
 ```swift
-var modeAdd: UInt64 = 0
-var modeRemove: UInt64 = 0
-var requiredModes: UInt64 = 0
-var rejectedModes: UInt64 = 0
+var flavorNameToBit: [String: UInt64]
 ```
 
-`modeAdd` and `modeRemove` describe the inherited mode for a child occurrence.
-`requiredModes` and `rejectedModes` describe validity tests at the annotated
+Assign bits as flavor names are parsed. Emit a grammar-load diagnostic if a grammar
+declares more than 64 flavor names.
+
+Add flavor fields to `GrammarNode`:
+
+```swift
+var flavorAdd: UInt64 = 0
+var flavorRemove: UInt64 = 0
+var requiredFlavors: UInt64 = 0
+var rejectedFlavors: UInt64 = 0
+```
+
+`flavorAdd` and `flavorRemove` describe the inherited flavor for a child occurrence.
+`requiredFlavors` and `rejectedFlavors` describe validity tests at the annotated
 node or alternate.
 
 ## Descriptor And CRF Changes
 
-Extend descriptors with mode:
+Extend descriptors with flavor:
 
 ```swift
 struct Descriptor: Hashable {
     let L: GrammarNode
     let k: CharPosition
     let i: CharPosition
-    let mode: UInt64
+    let flavor: UInt64
 }
 ```
 
-Add current parser mode:
+Add current flavor:
 
 ```swift
-var cMode: UInt64 = 0
+var cFlavor: UInt64 = 0
 ```
 
-Descriptor uniqueness includes `mode`.
+Descriptor uniqueness includes `flavor`.
 
-Extend CRF identity with mode:
+Extend CRF identity with flavor:
 
 ```swift
 struct ParsePosition: Hashable {
     let slot: GrammarNode
     let index: CharPosition
-    let mode: UInt64
+    let flavor: UInt64
 }
 ```
 
-A nonterminal at the same input position under different modes can accept a
-different language, so mode must be part of the CRF cluster key.
+A nonterminal at the same input position under different flavors can accept a
+different language, so flavor must be part of the CRF cluster key.
 
-Return edges must remember the caller mode, so a child entered under a modified
-mode can return to the original continuation mode.
+Return edges must remember the caller flavor, so a child entered under a modified
+flavor can return to the original continuation flavor.
 
-Pops should conservatively include callee mode:
+Pops should conservatively include callee flavor:
 
 ```swift
-struct ModePop: Hashable {
+struct FlavorPop: Hashable {
     let index: CharPosition
-    let mode: UInt64
+    let flavor: UInt64
 }
 ```
 
-There is no `stateOut` dimension for this initial design. Modes are inherited
+There is no `stateOut` dimension for this initial design. Flavors are inherited
 context, not arbitrary mutable state.
 
 ## Parse Loop Semantics
 
-Before executing a node or alternate with mode tests:
+Before executing a node or alternate with flavor tests:
 
 ```swift
-if requiredModes != 0 && (cMode & requiredModes) != requiredModes {
+if requiredFlavors != 0 && (cFlavor & requiredFlavors) != requiredFlavors {
     reject path
 }
 
-if rejectedModes != 0 && (cMode & rejectedModes) == rejectedModes {
+if rejectedFlavors != 0 && (cFlavor & rejectedFlavors) == rejectedFlavors {
     reject path
 }
 ```
@@ -154,26 +158,26 @@ if rejectedModes != 0 && (cMode & rejectedModes) == rejectedModes {
 When entering an annotated child:
 
 ```swift
-let childMode = (cMode | modeAdd) & ~modeRemove
+let childFlavor = (cFlavor | flavorAdd) & ~flavorRemove
 ```
 
-The continuation after the child must retain the original caller mode. This is
-the essential discipline that makes modes scoped rather than mutable.
+The continuation after the child must retain the original caller flavor. This is
+the essential discipline that makes flavors scoped rather than mutable.
 
 ## APUS Meta-Grammar
 
 Teach `grammars/apus.apus` to parse:
 
 ```apus
-modeAnnotation =
-    | "@setMode" "(" < identifier > ")"
-    | "@clearMode" "(" < identifier > ")"
-    | "@requiresMode" "(" < identifier > ")"
-    | "@rejectsMode" "(" < identifier > ")" .
+flavorAnnotation =
+    | "@setFlavor" "(" < identifier > ")"
+    | "@clearFlavor" "(" < identifier > ")"
+    | "@requiresFlavor" "(" < identifier > ")"
+    | "@rejectsFlavor" "(" < identifier > ")" .
 ```
 
-Allow mode annotations in sequence position before a factor. Support
-`@requiresMode` / `@rejectsMode` at alternate start too if that falls out
+Allow flavor annotations in sequence position before a factor. Support
+`@requiresFlavor` / `@rejectsFlavor` at alternate start too if that falls out
 naturally, but sequence-position support is enough for the initial migration.
 
 Implementation note: the initial migration replaced all live grammar uses, then
@@ -197,48 +201,48 @@ with:
 ```apus
 closureExpression =
     | samelineOpenedClosure
-    | @rejectsMode(stmtCondition trailingClosure) newlineOpenedClosure
+    | @rejectsFlavor(stmtCondition trailingClosure) newlineOpenedClosure
     .
 ```
 
-Set condition mode:
+Set condition flavor:
 
 ```apus
 condition =
-    | @setMode(stmtCondition) expression
+    | @setFlavor(stmtCondition) expression
     | availabilityCondition
     | caseCondition
     | missingIntroducerWildcardCondition
     | optionalBindingCondition
     .
 
-whereExpression = @setMode(stmtCondition) expression .
+whereExpression = @setFlavor(stmtCondition) expression .
 
 repeatWhileStatement =
-    "repeat" codeBlock "while" >-> ( "{" ) @setMode(stmtCondition) expression .
+    "repeat" codeBlock "while" >-> ( "{" ) @setFlavor(stmtCondition) expression .
 ```
 
-Set trailing-closure mode:
+Set trailing-closure flavor:
 
 ```apus
 trailingClosures =
-    | @setMode(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
+    | @setFlavor(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
       closureExpression labeledTrailingClosures
-    | @setMode(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
+    | @setFlavor(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
       closureExpression >-> ( "else" )
     .
 ```
 
-Clear condition mode at expression islands:
+Clear condition flavor at expression islands:
 
 ```apus
 functionCallArgument =
-    | @clearMode(stmtCondition) expression
-    | argumentLabel ":" @clearMode(stmtCondition) expression
+    | @clearFlavor(stmtCondition) expression
+    | argumentLabel ":" @clearFlavor(stmtCondition) expression
     .
 ```
 
-Also check whether closure bodies need `@clearMode(stmtCondition)` around their
+Also check whether closure bodies need `@clearFlavor(stmtCondition)` around their
 `statements?` body to match SwiftSyntax flavor reset behavior.
 
 ## Migration Step 2: Remaining Containment Uses
@@ -256,19 +260,19 @@ staticStringLiteral =
     .
 ```
 
-Mode replacement:
+Flavor replacement:
 
 ```apus
 attribute =
     "@" >s< "available" >s< "("
-    @setMode(availableAttributeMode) availabilityAttributeArguments
+    @setFlavor(availableAttributeFlavor) availabilityAttributeArguments
     ")" .
 
 staticStringLiteral =
     | singleLineStringLiteral
     | multilineStringLiteral
-    | @rejectsMode(availableAttributeMode) extendedSinglelineStringLiteral
-    | @rejectsMode(availableAttributeMode) extendedMultilineStringLiteral
+    | @rejectsFlavor(availableAttributeFlavor) extendedSinglelineStringLiteral
+    | @rejectsFlavor(availableAttributeFlavor) extendedMultilineStringLiteral
     .
 ```
 
@@ -281,11 +285,11 @@ moduleSelector =
     @excludedFrom(valueBindingPattern) identifierToken "::" >n< .
 ```
 
-Mode replacement:
+Flavor replacement:
 
 ```apus
 moduleSelector =
-    @rejectsMode(bindingIntroducer) identifierToken "::" >n< .
+    @rejectsFlavor(bindingIntroducer) identifierToken "::" >n< .
 ```
 
 Enter `bindingIntroducer` only around introduced binding-name positions. Avoid
@@ -301,16 +305,16 @@ statement =
     @prefer @confinedTo(initializerBody) >+> ( "init" ) expression .
 ```
 
-Mode replacement:
+Flavor replacement:
 
 ```apus
-initializerBody = @setMode(initializerBodyMode) codeBlock .
+initializerBody = @setFlavor(initializerBodyFlavor) codeBlock .
 
 statement =
-    @prefer @requiresMode(initializerBodyMode) >+> ( "init" ) expression .
+    @prefer @requiresFlavor(initializerBodyFlavor) >+> ( "init" ) expression .
 ```
 
-If `initializerBody` is only a sentinel, consider inlining the mode at
+If `initializerBody` is only a sentinel, consider inlining the flavor at
 initializer declaration body sites after the first migration is stable.
 
 ### Nested `#if` leading-dot body
@@ -325,13 +329,13 @@ ifDirectiveClause =
     ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
 ```
 
-Mode replacement:
+Flavor replacement:
 
 ```apus
-ifConfigStatements = @setMode(ifConfigBody) statements .
+ifConfigStatements = @setFlavor(ifConfigBody) statements .
 
 ifDirectiveClause =
-    @requiresMode(ifConfigBody)
+    @requiresFlavor(ifConfigBody)
     ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
 ```
 
@@ -346,19 +350,19 @@ identifierPattern =
     .
 ```
 
-Mode replacement:
+Flavor replacement:
 
 ```apus
 optionalBindingCondition =
-    ( "let" | "var" ) @setMode(optionalBinding) pattern initializer? .
+    ( "let" | "var" ) @setFlavor(optionalBinding) pattern initializer? .
 
 identifierPattern =
     | identifierToken
-    | @requiresMode(optionalBinding) "self"
+    | @requiresFlavor(optionalBinding) "self"
     .
 ```
 
-Check whether the mode should be even narrower than the whole pattern.
+Check whether the flavor should be even narrower than the whole pattern.
 
 ## Removing Containment
 
@@ -428,7 +432,7 @@ use `SWIFT_DETERMINISTIC_HASHING=1`.
 
 ## Migration Order
 
-1. Implement mode machinery while keeping containment.
+1. Implement flavor machinery while keeping containment.
 2. Migrate TODO #5 only.
 3. Run focused probes and limited SwiftSyntax tests.
 4. Migrate the six remaining containment uses one at a time.
@@ -437,5 +441,5 @@ use `SWIFT_DETERMINISTIC_HASHING=1`.
 7. Run the full suite again.
 8. Update documentation once syntax and semantics are stable.
 
-This keeps the risky part reversible: modes and containment can coexist until the
+This keeps the risky part reversible: flavors and containment can coexist until the
 grammar no longer depends on containment.

@@ -1481,7 +1481,7 @@ struct SwiftFragmentGenerator {
         case 1:
             return GeneratedSource(label: "frontier:condition-trailing-closure-scope", source: functionBody(conditionTrailingClosureFrontier(using: &rng)))
         case 2:
-            return GeneratedSource(label: "frontier:parser-mode-scope", source: parserModeScopeFrontier(using: &rng))
+            return GeneratedSource(label: "frontier:flavor-scope", source: flavorScopeFrontier(using: &rng))
         case 3:
             return GeneratedSource(label: "frontier:statement-member-context", source: statementMemberContextFrontier(using: &rng))
         case 4:
@@ -1582,7 +1582,7 @@ struct SwiftFragmentGenerator {
         ].random(using: &rng)
     }
 
-    private func parserModeScopeFrontier(using rng: inout SplitMix64) -> String {
+    private func flavorScopeFrontier(using rng: inout SplitMix64) -> String {
         [
             """
             @available(*, deprecated, message: "plain")

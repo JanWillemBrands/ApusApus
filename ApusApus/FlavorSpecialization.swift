@@ -1,31 +1,31 @@
 //
-//  ModeSpecialization.swift
+//  FlavorSpecialization.swift
 //  ApusApus
 //
-//  Parser modes compiled into the grammar. See `documentation/Parser Modes Specialization.md`.
+//  Flavors compiled into the grammar. See `documentation/Parser Flavors Specialization.md`.
 //
 
 import OSLog
 
-// A parser mode is a finite inherited attribute: `@setMode`/`@clearMode` fix a child
-// occurrence's mode as `(m | add) & ~remove`, and `@requiresMode`/`@rejectsMode` are fixed tests
-// on that mode. Modes are SCOPED: `@modeScope(m)` on a production declares that `m` passes into it;
+// A parser flavor is a finite inherited attribute: `@setFlavor`/`@clearFlavor` fix a child
+// occurrence's flavor as `(m | add) & ~remove`, and `@requiresFlavor`/`@rejectsFlavor` are fixed tests
+// on that flavor. Flavors are SCOPED: `@flavors(m)` on a production declares that `m` passes into it;
 // entering any other nonterminal drops `m` (a swift-syntax parameter that is not forwarded). A CFG
 // with finitely many inherited attribute values is a plain CFG over indexed nonterminals `X⟨m⟩`,
 // so instead of carrying `m` in every descriptor, CRF key and BSR yield, this pass builds that
 // CFG once at grammar load:
 //
-//   0. validation: every mode is declared by some `@modeScope`, set into a production that carries
+//   0. validation: every flavor is declared by some `@flavors`, set into a production that carries
 //      it, and tested only where it can be present;
-//   1. relevance: `rel(X)` = the carried mode bits that can change the language of `X`;
+//   1. relevance: `rel(X)` = the carried flavor bits that can change the language of `X`;
 //   2. expansion: every original production is its own `X⟨0⟩` instance; an occurrence reached
-//      under a mode that projects onto a non-empty subset of `rel(Y)` links to a copy `Y⟨m⟩`
+//      under a flavor that projects onto a non-empty subset of `rel(Y)` links to a copy `Y⟨m⟩`
 //      (memoized, so recursion closes into a cycle between copies);
-//   3. pruning: occurrences whose mode test fails statically are dead, and so is every
+//   3. pruning: occurrences whose flavor test fails statically are dead, and so is every
 //      alternate containing one (to a fixpoint, since a copy can lose all its alternates).
 //
-// The parser then sees an ordinary grammar: a slot's identity already says which mode it is in.
-// Grammars without modes, and every nonterminal outside all scopes, are left untouched.
+// The parser then sees an ordinary grammar: a slot's identity already says which flavor it is in.
+// Grammars without flavors, and every nonterminal outside all scopes, are left untouched.
 //
 // Runs right after the grammar text is parsed, while every production is still a TREE
 // (END links and RHS `.alt` bindings are not resolved yet), so copying is a tree clone.
@@ -34,24 +34,24 @@ extension Grammar {
 
     private struct InstanceKey: Hashable {
         let name: String
-        let mode: UInt64
+        let flavors: UInt64
     }
 
     /// The bits an occurrence's tests use.
     private static func tests(_ node: GrammarNode) -> UInt64 {
-        node.requiredModes | node.rejectedModes
+        node.requiredFlavors | node.rejectedFlavors
     }
 
-    /// The mode an occurrence is entered with, given the mode of its context. Its tests are
-    /// evaluated on this mode.
-    private static func childMode(_ node: GrammarNode, from mode: UInt64) -> UInt64 {
-        (mode | node.modeAdd) & ~node.modeRemove
+    /// The flavor an occurrence is entered with, given the flavor of its context. Its tests are
+    /// evaluated on this flavor.
+    private static func childFlavors(_ node: GrammarNode, from flavors: UInt64) -> UInt64 {
+        (flavors | node.flavorAdd) & ~node.flavorRemove
     }
 
-    /// Whether an occurrence's `@requiresMode`/`@rejectsMode` tests hold under `mode` (its child mode).
-    private static func allows(_ node: GrammarNode, in mode: UInt64) -> Bool {
-        if node.requiredModes != 0, (mode & node.requiredModes) != node.requiredModes { return false }
-        if node.rejectedModes != 0, (mode & node.rejectedModes) == node.rejectedModes { return false }
+    /// Whether an occurrence's `@requiresFlavor`/`@rejectsFlavor` tests hold under `flavor` (its child flavor).
+    private static func allows(_ node: GrammarNode, in flavors: UInt64) -> Bool {
+        if node.requiredFlavors != 0, (flavors & node.requiredFlavors) != node.requiredFlavors { return false }
+        if node.rejectedFlavors != 0, (flavors & node.rejectedFlavors) == node.rejectedFlavors { return false }
         return true
     }
 
@@ -69,73 +69,73 @@ extension Grammar {
         }
     }
 
-    /// The bits of `name`'s scope (`@modeScope`); 0 for undefined names.
-    private func modeScopeOf(_ name: String) -> UInt64 {
-        nonTerminals[name]?.modeScope ?? 0
+    /// The bits of `name`'s scope (`@flavors`); 0 for undefined names.
+    private func flavorScopeOf(_ name: String) -> UInt64 {
+        nonTerminals[name]?.flavorScope ?? 0
     }
 
-    private func modeNames(_ bits: UInt64) -> String {
-        modeNameToBit.filter { bits & $0.value != 0 }.keys.sorted().joined(separator: " ")
+    private func flavorNames(_ bits: UInt64) -> String {
+        flavorNameToBit.filter { bits & $0.value != 0 }.keys.sorted().joined(separator: " ")
     }
 
-    /// Load-time checks of the mode declarations. Errors make the annotations meaningless (a mode
+    /// Load-time checks of the flavor declarations. Errors make the annotations meaningless (a flavor
     /// that can never be present where it is tested); warnings flag annotations with no effect.
-    private func validateParserModes(_ originals: [GrammarNode]) throws {
+    private func validateFlavors(_ originals: [GrammarNode]) throws {
         var problems: [String] = []
         var declared: UInt64 = 0
         var setSomewhere: UInt64 = 0
-        for lhs in originals { declared |= lhs.modeScope }
+        for lhs in originals { declared |= lhs.flavorScope }
 
         // `possible`: the bits that can be present at this point of `owner`'s body.
         func check(_ owner: GrammarNode, in production: GrammarNode, possible: UInt64) {
             Self.forEachElement(of: owner) { e in
-                let used = e.modeAdd | e.modeRemove | Self.tests(e)
+                let used = e.flavorAdd | e.flavorRemove | Self.tests(e)
                 if used & ~declared != 0 {
-                    problems.append("mode '\(modeNames(used & ~declared))' is used in '\(production.name)' but no production declares it with @modeScope")
+                    problems.append("flavor '\(flavorNames(used & ~declared))' is used in '\(production.name)' but no production declares it with @flavors")
                 }
-                setSomewhere |= e.modeAdd
-                let child = (possible | e.modeAdd) & ~e.modeRemove
+                setSomewhere |= e.flavorAdd
+                let child = (possible | e.flavorAdd) & ~e.flavorRemove
                 if Self.tests(e) & ~child & declared != 0 {
-                    problems.append("'\(production.name)' tests mode '\(modeNames(Self.tests(e) & ~child))', which can never be present there; add it to '\(production.name)'s @modeScope or remove the test")
+                    problems.append("'\(production.name)' tests flavor '\(flavorNames(Self.tests(e) & ~child))', which can never be present there; add it to '\(production.name)'s @flavors or remove the test")
                 }
                 if e.kind == .N, nonTerminals[e.name] != nil {
-                    let target = modeScopeOf(e.name)
-                    if e.modeAdd & ~target != 0 {
-                        problems.append("'\(production.name)' sets mode '\(modeNames(e.modeAdd & ~target))' on '\(e.name)', which does not declare it with @modeScope")
+                    let target = flavorScopeOf(e.name)
+                    if e.flavorAdd & ~target != 0 {
+                        problems.append("'\(production.name)' sets flavor '\(flavorNames(e.flavorAdd & ~target))' on '\(e.name)', which does not declare it with @flavors")
                     }
-                    if e.modeRemove != 0, Self.tests(e) == 0, e.modeRemove & possible & target == 0 {
-                        report("'\(production.name)' clears '\(modeNames(e.modeRemove))' on '\(e.name)', but that mode can never reach it there; the @clearMode has no effect")
+                    if e.flavorRemove != 0, Self.tests(e) == 0, e.flavorRemove & possible & target == 0 {
+                        report("'\(production.name)' clears '\(flavorNames(e.flavorRemove))' on '\(e.name)', but that flavor can never reach it there; the @clearFlavor has no effect")
                     }
                 } else if e.kind.isBracket {
                     check(e, in: production, possible: child)
                 }
             }
         }
-        for lhs in originals { check(lhs, in: lhs, possible: lhs.modeScope) }
+        for lhs in originals { check(lhs, in: lhs, possible: lhs.flavorScope) }
 
-        for (name, bit) in modeNameToBit where declared & bit != 0 && setSomewhere & bit == 0 {
-            report("mode '\(name)' is carried but never set; it has no effect")
+        for (name, bit) in flavorNameToBit where declared & bit != 0 && setSomewhere & bit == 0 {
+            report("flavor '\(name)' is carried but never set; it has no effect")
         }
         if !problems.isEmpty {
-            for problem in problems { Logger.grammar.error("parser modes: \(problem, privacy: .public)") }
-            throw ApusParserError.unexpectedToken(explanation: "parser modes: " + problems.joined(separator: "; "))
+            for problem in problems { Logger.grammar.error("flavors: \(problem, privacy: .public)") }
+            throw ApusParserError.unexpectedToken(explanation: "flavors: " + problems.joined(separator: "; "))
         }
     }
 
-    /// Compile parser modes into the grammar graph. No-op for grammars without modes.
-    func specializeParserModes() throws {
-        guard !modeNameToBit.isEmpty else { return }
+    /// Compile flavors into the grammar graph. No-op for grammars without flavors.
+    func specializeFlavors() throws {
+        guard !flavorNameToBit.isEmpty else { return }
         let originals = nonTerminals.keys.sorted().map { nonTerminals[$0]! }
-        try validateParserModes(originals)
+        try validateFlavors(originals)
 
-        /// The mode a nonterminal occurrence passes to its callee: the child mode, restricted to
-        /// the callee's scope. Tests on the occurrence see the unrestricted child mode, i.e. the
+        /// The flavor a nonterminal occurrence passes to its callee: the child flavor, restricted to
+        /// the callee's scope. Tests on the occurrence see the unrestricted child flavor, i.e. the
         /// caller's context.
-        func calleeMode(_ e: GrammarNode, from mode: UInt64) -> UInt64 {
-            Self.childMode(e, from: mode) & modeScopeOf(e.name)
+        func calleeFlavors(_ e: GrammarNode, from flavors: UInt64) -> UInt64 {
+            Self.childFlavors(e, from: flavors) & flavorScopeOf(e.name)
         }
 
-        // 1. Relevance — least fixpoint, `scoped` restricted to each callee's `@modeScope`. A bit an
+        // 1. Relevance — least fixpoint, `scoped` restricted to each callee's `@flavors`. A bit an
         //    occurrence sets or clears is fixed for that child, so it never makes the context
         //    depend on it. The unscoped variant only feeds the scope-exit lint below.
         func relevance(scoped: Bool) -> [String: UInt64] {
@@ -144,9 +144,9 @@ extension Grammar {
                 var bits: UInt64 = 0
                 Self.forEachElement(of: owner) { e in
                     var inner = Self.tests(e)
-                    if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? modeScopeOf(e.name) : ~0) }
+                    if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? flavorScopeOf(e.name) : ~0) }
                     if e.kind.isBracket { inner |= ownerRelevance(e) }
-                    bits |= inner & ~(e.modeAdd | e.modeRemove)
+                    bits |= inner & ~(e.flavorAdd | e.flavorRemove)
                 }
                 return bits
             }
@@ -154,7 +154,7 @@ extension Grammar {
             while changed {
                 changed = false
                 for lhs in originals {
-                    let bits = ownerRelevance(lhs) & (scoped ? lhs.modeScope : ~0)
+                    let bits = ownerRelevance(lhs) & (scoped ? lhs.flavorScope : ~0)
                     if bits != rel[lhs.name] ?? 0 {
                         rel[lhs.name] = bits
                         changed = true
@@ -169,12 +169,12 @@ extension Grammar {
         // still reach a test of it. Expected at intended boundaries; anything else is a scope
         // that is too small. Informational.
         let reach = relevance(scoped: false)
-        for (modeName, bit) in modeNameToBit.sorted(by: { $0.value < $1.value }) {
+        for (flavorName, bit) in flavorNameToBit.sorted(by: { $0.value < $1.value }) {
             var exits = Set<String>()
             func collectExits(_ owner: GrammarNode, from production: GrammarNode) {
                 Self.forEachElement(of: owner) { e in
-                    if e.kind == .N, production.modeScope & bit != 0, e.modeRemove & bit == 0,
-                       modeScopeOf(e.name) & bit == 0, (reach[e.name] ?? 0) & bit != 0 {
+                    if e.kind == .N, production.flavorScope & bit != 0, e.flavorRemove & bit == 0,
+                       flavorScopeOf(e.name) & bit == 0, (reach[e.name] ?? 0) & bit != 0 {
                         exits.insert("\(production.name)→\(e.name)")
                     } else if e.kind.isBracket {
                         collectExits(e, from: production)
@@ -183,7 +183,7 @@ extension Grammar {
             }
             for lhs in originals { collectExits(lhs, from: lhs) }
             if !exits.isEmpty {
-                report("mode '\(modeName)' drops at \(exits.count) scope exits: \(exits.sorted().joined(separator: " "))")
+                report("flavor '\(flavorName)' drops at \(exits.count) scope exits: \(exits.sorted().joined(separator: " "))")
             }
         }
 
@@ -191,18 +191,18 @@ extension Grammar {
         //    `.alt` pointers (which every copy rebinds) and dead marks live in a side table, so the
         //    originals' tree structure is unchanged until pruning.
         var table: [InstanceKey: GrammarNode] = [:]
-        var worklist: [(owner: GrammarNode, mode: UInt64)] = originals.map { ($0, 0) }
+        var worklist: [(owner: GrammarNode, flavors: UInt64)] = originals.map { ($0, 0) }
         var dead = Set<ObjectIdentifier>()
 
-        func instance(_ name: String, _ mode: UInt64) -> GrammarNode? {
+        func instance(_ name: String, _ flavors: UInt64) -> GrammarNode? {
             guard let template = nonTerminals[name] else { return nil }
-            let projected = mode & (rel[name] ?? 0)
+            let projected = flavors & (rel[name] ?? 0)
             if projected == 0 { return template }
-            let key = InstanceKey(name: name, mode: projected)
+            let key = InstanceKey(name: name, flavors: projected)
             if let existing = table[key] { return existing }
             let copy = template.copySubtree()
             copy.origin = template
-            copy.instanceMode = projected
+            copy.instanceFlavors = projected
             table[key] = copy
             specializations.append(copy)
             specializationsByName[name, default: []].append(copy)
@@ -210,16 +210,16 @@ extension Grammar {
             return copy
         }
 
-        func bind(_ owner: GrammarNode, _ mode: UInt64) {
+        func bind(_ owner: GrammarNode, _ flavors: UInt64) {
             Self.forEachElement(of: owner) { e in
-                let child = Self.childMode(e, from: mode)
+                let child = Self.childFlavors(e, from: flavors)
                 guard Self.allows(e, in: child) else {
                     dead.insert(ObjectIdentifier(e))
                     return
                 }
                 if e.kind == .N {
                     // Undefined names stay unbound; `handleNonTerminal` reports them.
-                    e.alt = instance(e.name, calleeMode(e, from: mode))
+                    e.alt = instance(e.name, calleeFlavors(e, from: flavors))
                 } else if e.kind.isBracket {
                     bind(e, child)
                 }
@@ -227,7 +227,7 @@ extension Grammar {
         }
 
         while let item = worklist.popLast() {
-            bind(item.owner, item.mode)
+            bind(item.owner, item.flavors)
         }
 
         // 3. Pruning — to a fixpoint, because a copy can lose every alternate, which makes every
@@ -288,27 +288,27 @@ extension Grammar {
         }
 
         for lhs in productions where lhs.alt == nil {
-            Logger.grammar.error("parser modes: '\(Self.instanceName(lhs, modes: self.modeNameToBit), privacy: .public)' has no alternate left under its mode")
+            Logger.grammar.error("flavors: '\(Self.instanceName(lhs, flavors: self.flavorNameToBit), privacy: .public)' has no alternate left under its flavor")
         }
 
-        // Diagnostics: how many copies each mode costs.
-        for (modeName, bit) in modeNameToBit.sorted(by: { $0.value < $1.value }) {
-            let copies = specializations.filter { $0.instanceMode & bit != 0 }.count
-            report("mode '\(modeName)': \(copies) specialized copies")
+        // Diagnostics: how many copies each flavor costs.
+        for (flavorName, bit) in flavorNameToBit.sorted(by: { $0.value < $1.value }) {
+            let copies = specializations.filter { $0.instanceFlavors & bit != 0 }.count
+            report("flavor '\(flavorName)': \(copies) specialized copies")
         }
         report("\(specializations.count) specialized copies of \(originals.count) productions")
     }
 
-    /// Record a parser-mode notice in `parserModeReport` and the grammar log.
+    /// Record a flavor notice in `flavorReport` and the grammar log.
     private func report(_ notice: String) {
-        parserModeReport.append(notice)
-        Logger.grammar.info("parser modes: \(notice, privacy: .public)")
+        flavorReport.append(notice)
+        Logger.grammar.info("flavors: \(notice, privacy: .public)")
     }
 
-    /// `name⟨mode1 mode2⟩` for a specialized copy, plain `name` otherwise. Diagnostics only.
-    static func instanceName(_ node: GrammarNode, modes: [String: UInt64]) -> String {
-        guard node.instanceMode != 0 else { return node.name }
-        let names = modes.filter { node.instanceMode & $0.value != 0 }.keys.sorted()
+    /// `name⟨flavor1 flavor2⟩` for a specialized copy, plain `name` otherwise. Diagnostics only.
+    static func instanceName(_ node: GrammarNode, flavors: [String: UInt64]) -> String {
+        guard node.instanceFlavors != 0 else { return node.name }
+        let names = flavors.filter { node.instanceFlavors & $0.value != 0 }.keys.sorted()
         return "\(node.name)⟨\(names.joined(separator: " "))⟩"
     }
 

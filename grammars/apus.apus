@@ -63,14 +63,14 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 // There are exactly FOUR pragma positions, and every pragma belongs to just one.
 //
 // 1. PRODUCTION START, before the LHS name. ANY ORDER: the pragmas are independent
-//    properties of the production. Each appears at most once, except `@modeScope`, which may
-//    repeat (its mode lists union); an unknown pragma here is an error.
+//    properties of the production. Each appears at most once, except `@flavors`, which may
+//    repeat (its flavor lists union); an unknown pragma here is an error.
 //
-//    production   = { modeScope | extent | sameLine } identifier "=" alternates "." .
+//    production   = { flavors | extent | sameLine } identifier "=" alternates "." .
 //    production   = { extent | sameLine | "@literalMunch" | preempt }
 //                   identifier ( "-" | ":" ) terminalBody "." .
 //
-//    modeScope    = "@modeScope" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
+//    flavors      = "@flavors" "(" < identifier > ")" .     // flavor scope of this nonterminal
 //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
 //    sameLine     = "@sameLineOutsideBrackets" .
 //    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
@@ -90,14 +90,14 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //    these predicates on the alternate's first body symbol, relying on
 //    yield-start == alternate-start, and mid-body there is no anchor.
 //
-//    sequence     = { altPragma } < { modePragma } factor [ "?" | "*" | "+" ]
+//    sequence     = { altPragma } < { flavorPragma } factor [ "?" | "*" | "+" ]
 //                                 | spacing
 //                                 | lookaround
 //                                 > .
 //
 //    altPragma    = "@prefer" | "@avoid"
 //                 | ( "@cannotParse" | "@canParse" ) "(" < identifier > ")" .
-//    modePragma   = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" )
+//    flavorPragma = ( "@setFlavor" | "@clearFlavor" | "@requiresFlavor" | "@rejectsFlavor" )
 //                   "(" < identifier > ")" .
 //
 // 4. GROUP PREFIX, immediately before a bracket — `extent` again, and only there.
@@ -179,14 +179,14 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 // There are exactly FOUR pragma positions, and every pragma belongs to just one.
 //
 // 1. PRODUCTION START, before the LHS name. ANY ORDER: the pragmas are independent
-//    properties of the production. Each appears at most once, except `@modeScope`, which may
-//    repeat (its mode lists union); an unknown pragma here is an error.
+//    properties of the production. Each appears at most once, except `@flavors`, which may
+//    repeat (its flavor lists union); an unknown pragma here is an error.
 //
-//    production   = { modeScope | extent | sameLine } identifier "=" alternates "." .
+//    production   = { flavors | extent | sameLine } identifier "=" alternates "." .
 //    production   = { extent | sameLine | "@literalMunch" | preempt }
 //                   identifier ( "-" | ":" ) terminalBody "." .
 //
-//    modeScope    = "@modeScope" "(" < identifier > ")" .   // parser-mode scope of this nonterminal
+//    flavors      = "@flavors" "(" < identifier > ")" .     // flavor scope of this nonterminal
 //    extent       = "@longest" | "@shortest" | "@left" | "@right" .
 //    sameLine     = "@sameLineOutsideBrackets" .
 //    preempt      = "@preempt" "(" identifier [ "," identifier ] ")" .
@@ -206,14 +206,14 @@ lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EO
 //    these predicates on the alternate's first body symbol, relying on
 //    yield-start == alternate-start, and mid-body there is no anchor.
 //
-//    sequence     = { altPragma } < { modePragma } factor [ "?" | "*" | "+" ]
+//    sequence     = { altPragma } < { flavorPragma } factor [ "?" | "*" | "+" ]
 //                                 | spacing
 //                                 | lookaround
 //                                 > .
 //
 //    altPragma    = "@prefer" | "@avoid"
 //                 | ( "@cannotParse" | "@canParse" ) "(" < identifier > ")" .
-//    modePragma   = ( "@setMode" | "@clearMode" | "@requiresMode" | "@rejectsMode" )
+//    flavorPragma = ( "@setFlavor" | "@clearFlavor" | "@requiresFlavor" | "@rejectsFlavor" )
 //                   "(" < identifier > ")" .
 //
 // 4. GROUP PREFIX, immediately before a bracket — `extent` again, and only there.

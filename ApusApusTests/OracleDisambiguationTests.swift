@@ -463,49 +463,42 @@ struct OracleDisambiguationTests {
     @Suite("Parse predicates", .serialized)
     struct ParsePredicates {
 
-        // MARK: Blind-target diagnostic (TODO.md / Make trivia handling principled)
+        // MARK: Predicate targets
         //
-        // `LookaheadPredicateRule` answers "does N derive here?" from N's yields, and an empty
-        // answer is ambiguous: N failed (a real false) or N was never attempted (blind). Blind
-        // resolves to the PERMISSIVE verdict, so `@cannotParse(N)` silently becomes `true` and the
-        // guarded alternate is unguarded. `diagnosePredicateTargets` raises the unconditionally
-        // blind cases as the "specification error" the design doc already calls them.
+        // `LookaheadPredicateRule` answers "does N derive here?" from N's yields where the parse
+        // called N at the anchor, and from a speculative recogniser where it did not, so a target
+        // need not be predicted there. `diagnosePredicateTargets` reports only undefined targets.
 
-        @Test("a predicate target referenced by no production body is reported as blind")
-        func blindTargetNotReferenced() throws {
-            // `A` is defined and named by the predicate, but no production body mentions it, so it
-            // is never predicted and `@cannotParse(A)` can never fire.
-            let g = #"a - /a/ . S = @cannotParse(A) "a" . A = "a" ."#
+        @Test("an undefined predicate target is reported")
+        func undefinedTargetIsReported() throws {
+            let g = #"a - /a/ . S = @cannotParse(Missing) "a" ."#
             let findings = try parseGrammar(g).diagnosePredicateTargets()
-            #expect(findings.contains { $0.contains("BLIND PREDICATE") && $0.contains("'A'") },
-                    "expected a blind-predicate finding for 'A', got: \(findings)")
+            #expect(findings.contains { $0.contains("'Missing'") }, "expected a finding for 'Missing', got: \(findings)")
         }
 
-        @Test("a predicate target reachable from a production body is not reported")
-        func reachableTargetIsClean() throws {
-            // Same predicate, but `A` now appears in a body, so it is predicted and the query is
-            // authoritative. This is the guard against the diagnostic crying wolf.
-            let g = #"a - /a/ . S = @cannotParse(A) "a" | A . A = "a" ."#
+        @Test("a defined predicate target is not reported")
+        func definedTargetIsClean() throws {
+            let g = #"a - /a/ . S = @cannotParse(A) "a" . A = "a" ."#
             let findings = try parseGrammar(g).diagnosePredicateTargets()
             #expect(findings.isEmpty, "expected no findings, got: \(findings)")
         }
 
-        @Test("the Swift grammar has no blind predicate targets")
+        @Test("the Swift grammar's predicate targets are all defined")
         func swiftGrammarHasNoBlindPredicates() throws {
-            // Regression lock for the `@cannotParse(accessorBlockBrace)` class of bug: that guard was
-            // dead because the target was never predicted at a variable brace. This asserts the
-            // statically-detectable half stays clean as predicates are added.
             let findings = try loadGrammarFile(named: "Swift.apus").diagnosePredicateTargets()
-            #expect(findings.isEmpty, "Swift.apus has blind predicate targets: \(findings)")
+            #expect(findings.isEmpty, "Swift.apus has undefined predicate targets: \(findings)")
         }
 
-        @Test("@cannotParse is the Oracle predicate spelling")
-        func cannotParsePrunesAlternate() throws {
-            let g = #"a - /a/ . S = @cannotParse(A) "a" | A . A = "a" ."#
-            let r = try parseOracleAmbiguity(grammar: g, message: "a")
-            #expect(r.postMatch)
-            #expect(r.pruned > 0)
-            #expect(r.isUnambiguous)
+        @Test("a predicate target the parse never calls is answered by a recogniser")
+        func uncalledPredicateTargetIsRecognised() throws {
+            // `X` appears in no production body, so the parse never calls it; the predicate must
+            // still see that `X` derives at the start of "a b".
+            let g = #"S = @cannotParse(X) "a" B | "a" "c" . B = "b" . X = "a" "b" ."#
+            let accepted = try parseOracleAmbiguity(grammar: g, message: "a c")
+            #expect(accepted.postMatch)
+            let rejected = try parseOracleAmbiguity(grammar: g, message: "a b")
+            #expect(rejected.rawMatch)
+            #expect(!rejected.postMatch)
         }
 
         @Test("@canParse is the positive Oracle predicate spelling")

@@ -96,13 +96,26 @@ probe. Counts are unique reduced artifacts, approximate where a bucket mixes cau
    `typePrimaryExpression` and adding it beside the existing bare-literal callee filter. This
    rejects `f(Int: @P M {})` and `_ = "a\(Int: @P M {})b"` without cloning the call-argument
    grammar.
-10. Generic parameter with `::` (13). `class C<T:: Equatable> {}`, `func f<RX:: Decodable>()`.
-    swiftc: "expected '>' to complete generic parameter list".
-11. Effect specifiers out of place (~20). `func f() throws⏎async` ("'async' must precede
-    'throws'"), `func f⏎() -> await`, `func f() ->⏎async {}`, `_ = [String: (Int, await) -> Int]()`.
-12. `~` separated from its operand by a line break (~15). `func f(_: consuming ~⏎Copyable)`,
-    `typealias T = (borrowing ~⏎Copyable) -> Void`, `[P & ~⏎Copyable]`. (`~ Copyable` on one line
-    is valid.)
+10. **Done 2026-10-21.** Generic parameter names no longer reuse `typeName`, whose SE-0491
+    module-selector alternative made `T::Equatable` one unconstrained parameter name. They now
+    match swift-syntax `expectIdentifier(allowSelfOrCapitalSelfAsIdentifier: true)`: an identifier,
+    `self`, or `Self`. This rejects `class C<T:: Equatable> {}` and
+    `func f<RX:: Decodable>()` while preserving qualified constraint types such as
+    `class C<T: Swift::Equatable> {}`.
+11. **Done 2026-10-21.** Effect sequences now own trailing effect keywords after the first
+    specifier, so an invalid order cannot split into a shorter declaration plus another statement.
+    Declaration and function-type result arrows reject compiler-reserved misplaced effect words,
+    while preserving compiler-valid contextual type names such as `reasync` and escaped `async`.
+    The collection-only `(Int, await) -> Int` overaccept is rejected by a self-pruning
+    `awaitTupleFunctionType` probe on `typeExpression`; genuine type contexts still accept it.
+    Covers `func f() throws⏎async`, `func f⏎() -> await`, `func f() ->⏎async {}`, and
+    `_ = [String: (Int, await) -> Int]()`.
+12. **Done 2026-10-22.** Ordinary expression prefix operators now require their operand on the
+    same line, rejecting `[P & ~⏎Copyable]` as well as the corresponding `-` and `!` forms.
+    Suppressed types normally retain SwiftSyntax's structural rule that `~` may be separated from
+    its type by a newline. After a same-line parameter modifier, however, both the compiler and
+    SwiftSyntax require the operand to remain on the tilde's line; a two-way structural split on
+    `parameterModifier` models that exception without predicates or flavors.
 13. DONE 2026-10-11. `#if` followed by more tokens on its line (13). `#if FOO { init() }⏎#endif`,
     `#if FOO = /[abc/]⏎#endif` ("extra tokens following conditional compilation directive").
     Fixed by keeping directive conditions as expressions, with a small self-pruning probe so
@@ -112,8 +125,10 @@ probe. Counts are unique reduced artifacts, approximate where a bucket mixes cau
     `method⏎(_:⏎)`: the argument-label list must be glued to the name line; on a new line it is a
     tuple, and `(_:)` is not one. Fixed by adding the same no-newline boundary SwiftSyntax uses for
     `parseArgLabelList` to expression, member, and key-path compound names.
-15. Extended regex literal (18). Multiline form: `/#` must start its own line, `_ = #/⏎?/#`,
-    `_ = #/⏎abc/#` ("closing delimiter must appear on new line"). Unterminated: `do { #/\/#⏎}`.
+15. **Done 2026-10-22.** Extended regex literals use a custom consumer with distinct single-line
+    and multiline modes. A newline immediately after the opening delimiter selects multiline mode,
+    whose closing delimiter must start its own line (after indentation); mismatched pound counts and
+    unterminated literals are rejected. Covers `_ = #/⏎?/#`, `_ = #/⏎abc/#`, and `do { #/\/#⏎}`.
 16. DONE 2026-10-11. `=` with unbalanced spacing (6). `do {⏎=/0/ }`: "'=' must have consistent
     whitespace on both sides". The `@preempt` split of `=/` before the regex left `=` as a prefix
     operator; swift-syntax Cursor.swift `classifyOperatorToken` makes that piece `.equal`. Fixed with
@@ -121,8 +136,12 @@ probe. Counts are unique reduced artifacts, approximate where a bucket mixes cau
     (also catches `?/0/`), plus one engine fix: `---(…)` tests the text, without `@literalMunch`,
     which had hidden the excluded literal behind the longer `=/`. Moving the `@preempt` commit into
     the lexer was tried and dropped: it loses the slot context, so a left-bound `x=/0/` split too.
-17. Attribute spelling and position (~10). `@_Concurrency. MainActor() struct I {}` (space after
-    `.`), `extension Int: @rethrows Q {}`, `switch x {⏎@Self case _:⏎}`.
+17. **Done 2026-10-22.** Attribute spelling and position now follows the compiler in three
+    contexts: a qualified attribute name may have whitespace before its period but not after it;
+    the declaration-only `@rethrows` spelling cannot be reused as a type attribute; and `@Self`
+    is not accepted in switch-case attribute position. Covers
+    `@_Concurrency. MainActor() struct I {}`, `extension Int: @rethrows Q {}`, and
+    `switch x {⏎@Self case _:⏎}`.
 
 ## Underaccepts (swiftc and swift-syntax accept, APUS rejects)
 
@@ -132,21 +151,25 @@ probe. Counts are unique reduced artifacts, approximate where a bucket mixes cau
     `_ = /])/`, `_ = /),/`, `_ = /[\])/`, and preserves rejects such as `_ = /[/]/`, `_ = /[a/b]/`,
     `_ = /())/`, `_ = /a/*x*/b/`, and `_ = (^/)("/")`. Full Xcode test plan passed: 24,007 passed,
     1 skipped, 0 failed.
-19. Bare operators and `&` as expressions (~20). `_ = (&)`, `f(&)`, `P&`, `(0, Swift::+)`,
-    `??await`, `\_`.
-20. Assignment as a condition (~15). `if a = b {}`, `guard a = x else {}`, `if 42 = (⏎) {}`,
-    `guard unsafe = a else {}`, `if count = 1, let first {}`. Parse-valid; the type checker rejects.
-21. Tuple patterns with a trailing comma (~10). `let (x, ) = ()`, `for (i, ) in x {}`,
-    `case (let a, ):`.
-22. Keywords as names where swift-syntax allows them (~25). `inout a` and `x = inout y` as
-    expressions, `any isolated`, closure parameters `f { (while) in }`, `f { (static) in }`,
-    `{ (throws⏎) -> Void in }`, `precedencegroup self {}`, `typealias Z = ~some`,
-    `do {} catch init {}`, `@attached(member, names: named (init))` (space before `(`),
-    `@_dynamicReplacement(for: for())`, `case let E-> ():`.
+19. **Done 2026-10-22.** Bare operator references share one `operatorReference` production across
+    tuples and argument lists, including module selection and the lexer-special `&`/`!` spellings.
+    A tight prefix operator may also take compiler-remapped `await`. Covers `_ = (&)`, `f(&)`, `P&`,
+    `(0, Swift::+)`, `??await`, and `\_`.
+20. **Done 2026-10-22.** Conditions now reuse the ordinary expression grammar, including assignment;
+    the duplicated condition-expression/infix family was removed. Binding-following restrictions
+    remain localized in `conditionListAfterBinding`. Covers `if a = b {}`, `guard a = x else {}`,
+    `if 42 = (⏎) {}`, `guard unsafe = a else {}`, and `if count = 1, let first {}`.
+21. **Done 2026-10-22.** Binding and matching tuple patterns use the same EBNF list shape with an
+    optional trailing comma. Covers `let (x, ) = ()`, `for (i, ) in x {}`, and `case (let a, ):`.
+22. **Done 2026-10-22.** Name handling is split by syntactic context instead of widening the global
+    identifier rule: argument labels cover closure parameters, `identifierOrSelf` serves declaration
+    names, attribute declaration names have their own base category, and compiler-only type-name
+    remapping stays in expression/inverse/boxed type productions. Bare closure expressions are valid
+    top-level statements. Covers the listed keyword-name cases.
 
 ## Tree differences
 
-23. Token kinds and shapes (85):
+23. **Done 2026-10-22.** Token kinds and shapes (85):
     - `if⏎_ = 42 {}`: a line break after `if` loses the condition (18);
     - a left-bound operator is `postfixOperator` in swift-syntax: `infix operator%%`,
       `let x: any P& Q`, `where T==Int` (14);
@@ -162,25 +185,26 @@ probe. Counts are unique reduced artifacts, approximate where a bucket mixes cau
 
 ## Residual ambiguities
 
-24. `f { @MainActor() in }`: `closureSignature` `[closureParameterClause "in"] | [attributes "in"]`
+24. **Done 2026-10-22.** `f { @MainActor() in }`: `closureSignature` `[closureParameterClause "in"] | [attributes "in"]`
     (3; `@MainActor () in` with a space is fine). `yield {⏎}`: `statement`
     `[expression] | [yieldStatement]` (1). `init // c⏎()` twice inside `#if` in a class body:
     ambiguous iteration extent `[statementSeparator statement]` (1).
 
 ## Split from earlier items
 
-25. Several fixity modifiers before `operator` (13, from #3). `prefix⏎infix operator &+&`,
+25. **Done 2026-10-22.** Several fixity modifiers before `operator` (13, from #3). `prefix⏎infix operator &+&`,
     `postfix⏎postfix operator ^^*`: APUS reads the first word as an expression statement and the
     rest as a declaration. swiftc ("'infix' contradicts previous modifier", "duplicate modifier")
     and swift-syntax read all words as modifiers of one declaration (Declarations.swift
-    `parseOperatorDeclIntroducer`). `prefix⏎operator +++` is valid. Rejecting this needs a
-    declaration reading at `prefix` that the `statement` predicate (`@cannotParse(declaration …)`)
-    sees but that does not parse, so look for a solution without a self-cancelling helper rule.
-26. Declarations in the wrong context (~45 in the run). swiftc rejects at parse time what swift-syntax
+    `parseOperatorDeclIntroducer`). `prefix⏎operator +++` is valid. Fixed with one fixity-family
+    introducer recognizer: repeated fixities commit to the operator
+    declaration and are rejected together, while a single fixity followed by `operator` remains valid.
+26. **Done 2026-10-22.** Declarations in the wrong context (~45 in the run). swiftc rejects at parse time what swift-syntax
     leaves to later stages: `init()` outside a type ("initializers may only be declared within a
     type"), `operator`/`precedencegroup` outside file scope, `subscript` and `static func` outside a
-    type, `deinit` outside a class. All are swiftc `CurDeclContext` checks (ParseDecl.cpp). Look for one
-    rule per context (top level, type body, function body) rather than one per keyword.
+    type, `deinit` outside a class. All are swiftc `CurDeclContext` checks (ParseDecl.cpp). Implemented
+    as three bounded context flavors (file, member, concrete-type body); ordinary code blocks clear
+    them, and the SwiftSyntax recovery-only fixtures are centrally marked compiler-invalid.
 27. DONE 2026-10-11. Dot operator before a regex (from #16). `let y = ./0/` is accepted (swiftc:
     "expected identifier after '.' expression") and `let y = ../0/` builds a different tree.
     swift-syntax Cursor.swift `lexOperatorIdentifier` runs the same regex scan for dot operators,

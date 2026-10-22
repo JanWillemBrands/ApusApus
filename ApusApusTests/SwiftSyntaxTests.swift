@@ -61,7 +61,34 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
         self.origin = origin
         self.syntaxVersion = syntaxVersion
         self.gapReason = disabledReason
-        self.compilerRejects = compilerRejects
+        self.compilerRejects = compilerRejects ?? Self.compilerContextRejection(for: label)
+    }
+
+    /// Exact SwiftSyntax corpus rows that are valid recovery trees but invalid Swift source files.
+    /// Keep the policy here so the 603 and 604 copies cannot drift apart.
+    private static func compilerContextRejection(for label: String) -> String? {
+        switch label {
+        case "testTransposeAttribute#1", "testSilgenName#1", "testRecovery13#1":
+            return "static methods may only be declared on a type"
+        case "testABIAttribute#3", "testABIAttribute#12", "testDeinitializers#1",
+             "testDeinitializers#2", "testInitDeinit12#1", "testInitDeinit14#1",
+             "testInitDeinit16#1", "testInitDeinit18#1", "testInitDeinit19#1",
+             "testInitDeinit20#1":
+            return "deinitializers may only be declared within a class, actor, or noncopyable type"
+        case "testABIAttribute#6", "testABIAttribute#15", "testInitializerWithReturnType#2",
+             "testParseDynamicReplacement#4", "testInitDeinit21#1", "testInitDeinit22#1",
+             "testInitDeinit28#1":
+            return "initializers may only be declared within a type"
+        case "testABIAttribute#7", "testABIAttribute#16", "testYield#2":
+            return "subscripts may only be declared within a type"
+        case "testOperatorDecl19#1":
+            return "operator declarations are only allowed at global scope"
+        case "testOpenVarInCodeBlockItemList#1",
+             "testReferenceToOpenThatLooksLikeDeclarationModifier#1":
+            return "open declarations are not allowed in local scope"
+        default:
+            return nil
+        }
     }
 
     var experimentalLanguageFeatureReason: String? {
@@ -708,11 +735,20 @@ struct SwiftSyntaxSourceFileTests {
 ///     `_`, or any lexer keyword except `inout`).
 struct NamePosition: CustomTestStringConvertible, Sendable {
     let name: String
+    /// swiftc's verdict for a word, where it was measured to differ from swift-syntax. The compiler
+    /// wins, so this replaces swift-syntax as the reference for the position.
+    let swiftcAccepts: (@Sendable (String) -> Bool)?
     let make: @Sendable (String) -> String
     var testDescription: String { name }
 
-    func swiftSyntaxAccepts(_ source: String) -> Bool {
-        !Parser.parse(source: source).hasError
+    init(name: String, swiftcAccepts: (@Sendable (String) -> Bool)? = nil, make: @escaping @Sendable (String) -> String) {
+        self.name = name
+        self.swiftcAccepts = swiftcAccepts
+        self.make = make
+    }
+
+    func referenceAccepts(_ word: String) -> Bool {
+        swiftcAccepts?(word) ?? !Parser.parse(source: make(word)).hasError
     }
 }
 
@@ -761,7 +797,9 @@ enum NamePositionCorpus {
         NamePosition(name: "compound-base")         { "let v = \($0)(a:)" },
         NamePosition(name: "tuple-binding-label")   { "let (\($0): a, b: c) = t" },
         NamePosition(name: "tuple-match-label")     { "if case (\($0): let a, b: let c) = t {}" },
-        NamePosition(name: "macro-role-name")       { "@attached(peer, names: named(\($0))) macro m()" },
+        // swiftc accepts every word as an introduced name (`named(class)`); swift-syntax only the
+        // decl-reference names (measured 2026-10-22).
+        NamePosition(name: "macro-role-name", swiftcAccepts: { _ in true }) { "@attached(peer, names: named(\($0))) macro m()" },
         NamePosition(name: "macro-role-compound")   { "@attached(peer, names: named(f(\($0):))) macro m()" },
         NamePosition(name: "keypath-compound-arg")  { "let k = \\A.f(\($0):)" },
         NamePosition(name: "macro-role")            { "@attached(\($0)) macro m()" },
@@ -770,12 +808,12 @@ enum NamePositionCorpus {
 
 @Suite("SwiftSyntax - name positions")
 struct NamePositionTests {
-    @Test("Advent agrees with swift-syntax for every keyword", arguments: NamePositionCorpus.positions)
+    @Test("Advent agrees with the reference for every keyword", arguments: NamePositionCorpus.positions)
     func agreesWithSwiftSyntax(_ position: NamePosition) {
         var over: [String] = [], under: [String] = []
         for word in NamePositionCorpus.words {
             let src = position.make(word)
-            let swiftOK = position.swiftSyntaxAccepts(src)
+            let swiftOK = position.referenceAccepts(word)
             let adventOK = adventTreeForFile(src) != nil
             if swiftOK != adventOK { (adventOK ? { over.append(word) } : { under.append(word) })() }
         }
@@ -2387,7 +2425,8 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "trailing-closure-same-line-still-works", source: "func f(a: Int, _ c: () -> Void, b: () -> Void) {}\nf(a: 1) { } b: { }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // The brace after a CONDITION is still the statement body, never a trailing closure —
     // `atValidTrailingClosure`'s `.stmtCondition` branch, which we get from
-    // `@excludedFrom(conditionExpression)`. The `for`-`in` case is the reference's own example.
+    // `@rejectsFlavor(stmtCondition trailingClosure)` on `closureExpression`. The `for`-`in` case is
+    // the reference's own example.
     SwiftSnippet(label: "condition-brace-is-not-trailing-closure", source: "func g(f: (Int) -> Bool, y: [Int]) {\n  if y.isEmpty { }\n  while y.isEmpty { }\n  for x in y.filter { $0 > 4 } { _ = x }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // The other side of that split, and the reason `>n<` stays on the PARENLESS alternate: a
     // closure on the next line does NOT chain onto a parenless trailing-closure call. Measured
@@ -2728,6 +2767,78 @@ struct FuzzHarvestTests {
         }
     }
 
+    @Test("TODO #10 generic parameter names are not module-qualified")
+    func genericParameterNamesAreNotModuleQualified() throws {
+        for source in [
+            "class C<T:: Equatable> {}",
+            "func f<RX:: Decodable>() {}",
+        ] {
+            #expect(Parser.parse(source: source).hasError, "premise failed — swift-syntax accepts '\(source)'")
+            #expect(try adventParse(source) == nil, "accepted: \(source)")
+        }
+
+        for source in [
+            "class C<T: Swift::Equatable> {}",
+            "struct S<Self> {}",
+            "struct S<self> {}",
+        ] {
+            #expect(!Parser.parse(source: source).hasError, "premise failed — swift-syntax rejects '\(source)'")
+            #expect(try adventParse(source) != nil, "rejected: \(source)")
+        }
+    }
+
+    @Test("TODO #11 effect specifiers stay in their compiler-owned positions")
+    func effectSpecifiersStayInPosition() throws {
+        for source in [
+            "func f() throws\nasync",
+            "func f\n() -> await",
+            "func f() ->\nasync {}",
+            "_ = [String: (Int, await) -> Int]()",
+            "typealias T = () throws async -> Int",
+            "let f = { () throws async in }",
+            "struct S { var x: Int { get throws async {} } }",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted compiler-rejected source: \(source)")
+        }
+
+        for source in [
+            "func f() async throws {}",
+            "func f()\nasync",
+            "func f() -> reasync",
+            "func f() -> `async`",
+            "typealias T = () async throws -> Int",
+            "typealias T = (Int, await) -> Int",
+            "let f = { () -> async in }",
+            "struct S { var x: Int { get async throws {} } }",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("TODO #12 expression prefix operators stay on their operand line")
+    func prefixOperatorsStayOnOperandLine() throws {
+        for source in [
+            "_ = [P & ~\nCopyable]",
+            "_ = -\n1",
+            "_ = !\ntrue",
+            "func f(_: consuming ~\nCopyable) {}",
+            "typealias T = (borrowing ~\nCopyable) -> Void",
+        ] {
+            #expect(Parser.parse(source: source).hasError, "premise failed — swift-syntax accepts '\(source)'")
+            #expect(try adventParse(source) == nil, "accepted: \(source)")
+        }
+
+        for source in [
+            "typealias T = ~\nCopyable",
+            "typealias T = P & ~\nCopyable",
+            "func f(_: consuming\n~Copyable) {}",
+            "typealias T = (borrowing\n~Copyable) -> Void",
+        ] {
+            #expect(!Parser.parse(source: source).hasError, "premise failed — swift-syntax rejects '\(source)'")
+            #expect(try adventParse(source) != nil, "rejected SwiftSyntax-valid suppressed type: \(source)")
+        }
+    }
+
     @Test("TODO #13 ifconfig conditions stop before same-line extra tokens")
     func ifConfigConditionsStopBeforeSameLineExtraTokens() throws {
         for source in [
@@ -2762,6 +2873,156 @@ struct FuzzHarvestTests {
             #expect(!Parser.parse(source: source).hasError, "premise failed — swift-syntax rejects '\(source)'")
             #expect(try adventParse(source) != nil, "rejected: \(source)")
         }
+    }
+
+    @Test("TODO #15 extended regex closing delimiters start their own line")
+    func extendedRegexClosingDelimiterStartsItsOwnLine() throws {
+        for source in [
+            "_ = #/\n?/#",
+            "_ = #/\nabc/#",
+            "_ = ##/\nabc/##",
+            "do { #/\\\n/#\n}",
+            "_ = #/unterminated",
+        ] {
+            #expect(Parser.parse(source: source).hasError, "premise failed — swift-syntax accepts '\(source)'")
+            #expect(try adventParse(source) == nil, "accepted: \(source)")
+        }
+
+        for source in [
+            "_ = #/abc/#",
+            "_ = #/\n/#",
+            "_ = #/\nabc\n/#",
+            "_ = #/\nabc\n  /#",
+            "_ = ##/\nabc\n\t/##",
+        ] {
+            #expect(!Parser.parse(source: source).hasError, "premise failed — swift-syntax rejects '\(source)'")
+            #expect(try adventParse(source) != nil, "rejected: \(source)")
+        }
+    }
+
+    @Test("TODO #17 attributes obey their spelling and position rules")
+    func attributesObeySpellingAndPositionRules() throws {
+        for source in [
+            "@_Concurrency. MainActor() struct I {}",
+            "extension Int: @rethrows Q {}",
+            "switch 0 { @Self case _: break }",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted compiler-rejected source: \(source)")
+        }
+
+        for source in [
+            "@_Concurrency.MainActor() struct I {}",
+            "@_Concurrency .MainActor() struct I {}",
+            "extension Int: P {}",
+            "switch 0 { @unknown default: break }",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("type modifiers are preserved before suppressed types")
+    func typeModifiersBeforeSuppressedTypes() throws {
+        for source in [
+            "func f(_: borrowing ~Copyable) {}",
+            "func f(_: consuming ~Copyable) {}",
+            "typealias T = (borrowing ~Copyable) -> Void",
+            "typealias T = (_ x: borrowing ~Copyable) -> Void",
+        ] {
+            let reference = Parser.parse(source: source)
+            let advent = try #require(try adventSwiftSyntaxTree(source))
+            #expect(
+                dumpSwiftSyntaxNode(Syntax(reference), indent: 0)
+                    == dumpSwiftSyntaxNode(Syntax(advent), indent: 0),
+                "trees differ for: \(source)"
+            )
+        }
+    }
+
+    @Test("TODO #19 bare operators are expressions in operator-reference positions")
+    func bareOperatorReferences() throws {
+        for source in ["_ = (&)", "f(&)", "P&", "_ = (0, Swift::+)", "_ = ??await", #"_ = \_"#] {
+            #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("TODO #20 assignment is parse-valid in conditions")
+    func assignmentsInConditions() throws {
+        for source in [
+            "if a = b {}", "guard a = x else {}", "if 42 = (\n) {}",
+            "guard unsafe = a else {}", "if count = 1, let first {}",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("TODO #21 tuple patterns allow a trailing comma")
+    func trailingCommaInTuplePatterns() throws {
+        for source in ["let (x, ) = ()", "for (i, ) in x {}", "switch x { case (let a, ): break }"] {
+            #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("TODO #22 compiler-permitted keywords are accepted as names")
+    func keywordsAsNames() throws {
+        for source in [
+            "inout a", "x = inout y", "any isolated", "f { (while) in }", "f { (static) in }",
+            "{ (throws\n) -> Void in }",
+            "precedencegroup self {}", "typealias Z = ~some",
+            "do {} catch init {}", "@attached(member, names: named (init)) macro m()",
+            "@_dynamicReplacement(for: for()) func f() {}", "switch x { case let E-> (): break }",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("TODO #25 repeated operator fixities commit to one invalid declaration")
+    func repeatedOperatorFixities() throws {
+        for source in [
+            "prefix\ninfix operator &+&",
+            "postfix\npostfix operator ^^*",
+            "infix prefix postfix operator +++",
+        ] {
+            #expect(try adventParse(source) == nil, "split invalid operator declaration into statements: \(source)")
+        }
+        #expect(try adventParse("prefix\noperator +++") != nil)
+    }
+
+    @Test("TODO #26 declarations obey file, member, and local context")
+    func declarationContexts() throws {
+        for source in [
+            "init() {}",
+            "func f() { init() {} }",
+            "struct S { func f() { init() {} } }",
+            "func f() { infix operator +++ }",
+            "struct S { infix operator +++ }",
+            "func f() { precedencegroup P {} }",
+            "struct S { precedencegroup P {} }",
+            "func f() { subscript(i: Int) -> Int {} }",
+            "static func f() {}",
+            "func outer() { static func f() {} }",
+            "deinit {}",
+            "extension S { deinit {} }",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted declaration in the wrong context: \(source)")
+        }
+
+        for source in [
+            "infix operator +++",
+            "precedencegroup P {}",
+            "struct S {\ninit() {}\nsubscript(i: Int) -> Int {}\nstatic func f() {}\n}",
+            "struct S { deinit {} }",
+            "class C { deinit {} }",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected declaration in its valid context: \(source)")
+        }
+    }
+
+    @Test("open(set) remains a call in executable code")
+    func openSetCallTree() throws {
+        let source = "func test() {\nopen(set)\nvar foo = 2\n}"
+        let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
+        let advent = dumpSwiftSyntaxNode(Syntax(try #require(try adventSwiftSyntaxTree(source))), indent: 0)
+        #expect(reference == advent, "reference:\n\(reference.text)\nAdvent:\n\(advent.text)")
     }
 }
 
@@ -3169,10 +3430,12 @@ struct Phase3FunctionTests {
     }
 }
 
-/// `conditionExpression` is a PARALLEL copy of `expression` that exists only to forbid
-/// assignment (assignment returns Void, so it is not a condition). EVERY other difference
-/// between the two infix families is drift, because swift draws no other distinction:
-/// whatever parses as an expression must parse the same way in a condition.
+/// A condition is an ordinary `expression` parsed under the `stmtCondition` flavor (swift-syntax
+/// `parseConditionElement`). Until 2026-10-21 it was a PARALLEL `conditionExpression` family that
+/// excluded assignment, and every other difference between the two families was drift. `swiftc
+/// -parse` accepts assignment in a condition, so the family is gone; these rows guard against the
+/// flavor reintroducing a difference: whatever parses as an expression must parse the same way in a
+/// condition.
 ///
 /// Each row is the same operator form in both positions. `adventAccepts` asserts parity of
 /// acceptance; `unambiguous` asserts the condition form did not pick up an extra reading.
@@ -3196,30 +3459,23 @@ let infixParityCases: [InfixParityCase] = [
     .init(label: "ternary-try-else",  expressionForm: "let z = c ? f() : try g()", conditionForm: "if c ? f() : try g() { h() }"),
     .init(label: "ternary-await-else", expressionForm: "let z = c ? f() : await g()", conditionForm: "if c ? f() : await g() { h() }"),
     .init(label: "ternary-try-both",  expressionForm: "let z = c ? try f() : try g()", conditionForm: "if c ? try f() : try g() { h() }"),
+    // `swiftc -parse` accepts assignment in a condition; "use of '=' in a boolean context" is a
+    // type-checker diagnostic.
+    .init(label: "assignment",        expressionForm: "x = y",                    conditionForm: "if x = y { g() }"),
 ]
 
 @Suite("Grammar - condition/expression infix parity")
 struct ConditionInfixParityTests {
 
-    /// Why the `conditionExpression` duplication CANNOT simply be replaced by
-    /// `infixExpression = @excludedFrom(condition) assignmentOperator expression .`
-    ///
-    /// `ContainmentRule` is pure SPAN containment — it prunes a reading whose span lies inside any
-    /// yield of the container nonterminal (`$0.i <= span.i && span.j <= $0.j`). It is not an
-    /// ancestor walk and knows nothing about scope boundaries. An assignment inside a CLOSURE that
-    /// is itself inside a condition is lexically contained in the `condition` span, so
-    /// `@excludedFrom(condition)` would prune it — even though it is perfectly legal Swift.
-    ///
-    /// The duplication gets this right for free: a closure body re-enters through
-    /// `statements → statement → expression`, i.e. the UNRESTRICTED family, so the restriction
-    /// naturally stops at the scope boundary. Any factoring proposed in TODO 25 must keep this
-    /// case parsing.
+    /// An assignment inside a closure inside a condition must parse. Kept from the time conditions
+    /// had their own restricted family: any future condition-only restriction must stop at the
+    /// closure boundary, which flavor scopes (`@flavors`) do and span containment did not.
     @Test("assignment inside a closure inside a condition is legal")
     func assignmentInClosureInsideCondition() throws {
         let source = "func f() { if xs.contains(where: { c in count = 1; return true }) { g() } }"
         #expect(!Parser.parse(source: source).hasError, "swift-syntax rejected the premise")
         #expect(try adventParse(source) != nil, """
-            Advent rejected an assignment nested in a closure inside a condition. If this broke             after replacing the conditionExpression family with @excludedFrom(condition), that is             the span-containment-vs-scope problem, not a grammar bug in this snippet.
+            Advent rejected an assignment nested in a closure inside a condition.
             """)
     }
 
@@ -3228,7 +3484,7 @@ struct ConditionInfixParityTests {
         let exprOK = try adventParse(c.expressionForm) != nil
         let condOK = try adventParse(c.conditionForm) != nil
         #expect(exprOK == condOK, """
-            '\(c.label)': expression position \(exprOK ? "accepts" : "REJECTS"),             condition position \(condOK ? "accepts" : "REJECTS") — the two infix families             differ by more than the (deliberate) absence of assignment.
+            '\(c.label)': expression position \(exprOK ? "accepts" : "REJECTS"),             condition position \(condOK ? "accepts" : "REJECTS") — a condition must parse exactly like an expression.
               expr: \(c.expressionForm)
               cond: \(c.conditionForm)
             """)
@@ -3238,6 +3494,34 @@ struct ConditionInfixParityTests {
     func conditionUnambiguous(_ c: InfixParityCase) throws {
         guard let r = try adventParse(c.conditionForm) else { return }   // acceptance covered above
         #expect(r.isUnambiguous, "'\(c.label)' is ambiguous in condition position: \(r.builder.diagnostics)")
+    }
+}
+
+/// Assignment as a condition element. Compiler-first: every row was measured with
+/// `swiftc -swift-version 6 -parse` (2026-10-21); swift-syntax does not flag the `case` row.
+/// Right after a `let`/`var`/`case` binding, `name = …` is a binding missing its introducer
+/// ("expected 'let' in conditional"); anywhere else an assignment is an ordinary expression.
+@Suite("Grammar - assignment in condition lists")
+struct ConditionAssignmentTests {
+    @Test("accepted by swiftc", arguments: [
+        "func f(x: Int?) { var z = 0; if z = 1, let y = x {} }",
+        "func f(x: Int?) { var a = 0; if let y = x, a.b = 1 {} }",
+        "func f(x: Int?) { var z = 0; if let y = x, true, z = 1 {} }",
+        "func f(x: Int?) { var z = 0; if let y = x, z += 1 {} }",
+        "func f() { var x = 1; let y = 2; while x = y {} }",
+    ])
+    func accepted(_ source: String) throws {
+        #expect(try adventParse(source) != nil, "rejected: \(source)")
+    }
+
+    @Test("rejected by swiftc", arguments: [
+        "func f(x: Int?) { var z = 0; if let y = x, z = 1 {} }",
+        "func f(x: Int?) { var z = 0; guard let y = x, z = 1 else { return } }",
+        "func f(x: Int?) { var z = 0; if case 1? = x, z = 1 {} }",
+        "func f(x: Int?) { if let y = x, _ = 1 {} }",
+    ])
+    func rejected(_ source: String) throws {
+        #expect(try adventParse(source) == nil, "accepted: \(source)")
     }
 }
 

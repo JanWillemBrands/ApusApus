@@ -605,9 +605,20 @@ class Oracle {
                 let targets = grammar.instances(of: predicate.targetName)
                 if !targets.isEmpty, let anchor = node.bodySymbols.first {
                     // Snapshot RAW target starts NOW (Oracle init runs before dead-wood) — canParseAsXxx.
-                    // Every parser-mode instance of the target counts: the question is whether `N`
-                    // derives here at all, in whatever mode the parse reached it.
-                    let targetStarts = Set(targets.flatMap { parser.yield(of: $0).map(\.i) })
+                    // Every flavor instance of the target counts: the question is whether `N`
+                    // derives here at all, under whatever flavors the parse reached it.
+                    var targetStarts = Set(targets.flatMap { parser.yield(of: $0).map(\.i) })
+                    // A target no reachable production body names is never called, so it has no
+                    // yields and the query would be blind. Such a predicate-only recogniser
+                    // (`invalidOperatorDeclarationStart`) is answered by a sub-parse at each anchor.
+                    // A target the grammar does parse keeps the forest answer: where it is not
+                    // predicted, that is deliberately false (`closureSignatureStart` outside a closure).
+                    if !grammar.parsedNonTerminals.contains(predicate.targetName),
+                       let base = grammar.nonTerminals[predicate.targetName] {
+                        for i in Set(parser.yield(of: anchor).map(\.i)) where parser.canDerive(base, at: i) {
+                            targetStarts.insert(i)
+                        }
+                    }
                     rules.append((anchor, LookaheadPredicateRule(negated: predicate.negated,
                                                                  targetStarts: targetStarts)))
                 } else {

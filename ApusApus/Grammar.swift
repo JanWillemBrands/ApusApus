@@ -22,16 +22,19 @@ class Grammar {
     var messages: [String] = []
     var preamble: [String] = []
     var epilogue: [String] = []
-    var modeNameToBit: [String: UInt64] = [:]
-    /// Parser-mode copies `X⟨m⟩` made by `specializeParserModes()`; `nonTerminals` keeps only
+    var flavorNameToBit: [String: UInt64] = [:]
+    /// Flavor copies `X⟨m⟩` made by `specializeFlavors()`; `nonTerminals` keeps only
     /// the originals, so by-name lookups see `X⟨0⟩`. See `instances(of:)` / `allProductions`.
     var specializations: [GrammarNode] = []
     var specializationsByName: [String: [GrammarNode]] = [:]
-    /// Notices from `specializeParserModes()`: per-mode copy counts, scope exits, annotations with
+    /// Notices from `specializeFlavors()`: per-flavor copy counts, scope exits, annotations with
     /// no effect. Also logged; kept here so tests and tools can inspect them.
-    var parserModeReport: [String] = []
+    var flavorReport: [String] = []
 
     var root: GrammarNode = GrammarNode(kind: .EOS, name: "○")
+    /// Nonterminals some reachable production body names — the ones a parse can call. A parse
+    /// predicate on any other nonterminal is answered by a recogniser (`LookaheadPredicateRule`).
+    lazy var parsedNonTerminals: Set<String> = computeParsedNonTerminals()
     var isLL1: Bool = true
     /// Number of grammar nodes numbered during `resolveGrammarNodeLinks`; node
     /// numbers are compact per grammar ([0, nodeCount)). Used to size per-parse
@@ -40,13 +43,13 @@ class Grammar {
     /// True when unquoted synthetic layout terminals (>>| / |<<) are used in productions.
     var usesInjectedLayoutTokens: Bool = false
 
-    func parserModeBit(named name: String) throws -> UInt64 {
-        if let bit = modeNameToBit[name] { return bit }
-        guard modeNameToBit.count < UInt64.bitWidth else {
-            throw ApusParserError.unexpectedToken(explanation: "too many parser modes; APUS supports at most 64")
+    func flavorBit(named name: String) throws -> UInt64 {
+        if let bit = flavorNameToBit[name] { return bit }
+        guard flavorNameToBit.count < UInt64.bitWidth else {
+            throw ApusParserError.unexpectedToken(explanation: "too many flavors; APUS supports at most 64")
         }
-        let bit = UInt64(1) << UInt64(modeNameToBit.count)
-        modeNameToBit[name] = bit
+        let bit = UInt64(1) << UInt64(flavorNameToBit.count)
+        flavorNameToBit[name] = bit
         return bit
     }
     
@@ -432,7 +435,7 @@ extension Grammar {
         if let seq = node.seq {
             try populateFirstFollowSets(for: seq)
             updateFollow(for: node)
-            // `specializeParserModes()` pre-binds occurrences to their mode instance.
+            // `specializeFlavors()` pre-binds occurrences to their flavor instance.
             if let production = node.alt ?? nonTerminals[node.name] {
                 if production.isLexicalToken {
                     let error = """

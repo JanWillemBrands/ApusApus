@@ -20,7 +20,7 @@ enum ApusParserError: Error {
 }
 
 class ApusParser {
-    private struct ModeAnnotation {
+    private struct FlavorAnnotation {
         var add: UInt64 = 0
         var remove: UInt64 = 0
         var require: UInt64 = 0
@@ -92,8 +92,8 @@ class ApusParser {
         grammar.startSymbol = explicitStartSymbol
         try parseApusGrammar()
         try expandExclusionSetReferences()
-        // Compile parser modes into grammar copies while productions are still trees.
-        try grammar.specializeParserModes()
+        // Compile flavors into grammar copies while productions are still trees.
+        try grammar.specializeFlavors()
         
         let DUMP = false
         if DUMP {
@@ -193,11 +193,11 @@ class ApusParser {
     func production() throws {
         // Production-start pragmas, in ANY order. They are independent properties of the
         // production, so their order carries no meaning:
-        //   `@modeScope(m …)` — the parser modes this nonterminal is in scope for: an inherited mode
+        //   `@flavors(m …)` — the flavors this nonterminal is in scope for: an inherited flavor
         //       bit passes into an occurrence of this nonterminal only if it is listed here; anywhere
         //       else the bit is dropped on entry (a swift-syntax parameter that a function does not
         //       forward). May repeat; lists union, also across several definitions of one
-        //       nonterminal. See `Parser Modes Specialization.md`.
+        //       nonterminal. See `Parser Flavors Specialization.md`.
         //   `@longest` / `@shortest` — node-level extent of this nonterminal.
         //   `@sameLineOutsideBrackets` — a whole-nonterminal span property: the Oracle prunes this
         //       nonterminal's LHS completion yields; not an alternate-level notion. Line breaks
@@ -212,9 +212,9 @@ class ApusParser {
         //           differ in spelling and boundary behavior.
         //       N — OPTIONAL: the construct that must actually PARSE at a split point for the
         //           shorter reading to win. Without it the split is merely offered.
-        // Every pragma except `@modeScope` may appear once; `@longest`/`@shortest` are one property;
+        // Every pragma except `@flavors` may appear once; `@longest`/`@shortest` are one property;
         // an unknown pragma here is an error.
-        var modeScope: UInt64 = 0
+        var flavorScope: UInt64 = 0
         var disambiguationAnnotation: Disambiguation?
         var sameLineOutsideBrackets = false
         var isLiteralMunchAnnotation = false
@@ -229,12 +229,12 @@ class ApusParser {
         }
         while token.kind == "pragma" {
             switch token.stripped {
-            case "modeScope":
+            case "flavors":
                 cI += 1
                 try expect(["("]); cI += 1
                 repeat {
                     try expect(["identifier"])
-                    modeScope |= try grammar.parserModeBit(named: String(token.image))
+                    flavorScope |= try grammar.flavorBit(named: String(token.image))
                     cI += 1
                 } while token.kind == "identifier"
                 try expect([")"]); cI += 1
@@ -271,7 +271,7 @@ class ApusParser {
             default:
                 throw ApusParserError.unexpectedToken(
                     explanation: "@\(token.stripped) is not a production pragma "
-                               + "(@modeScope @longest @shortest @sameLineOutsideBrackets @literalMunch @preempt)")
+                               + "(@flavors @longest @shortest @sameLineOutsideBrackets @literalMunch @preempt)")
             }
         }
         try expect(["identifier"])
@@ -380,7 +380,7 @@ class ApusParser {
             if let d = disambiguationAnnotation {
                 lhsNode.disambiguation = d
             }
-            lhsNode.modeScope |= modeScope
+            lhsNode.flavorScope |= flavorScope
             if sameLineOutsideBrackets {
                 lhsNode.sameLineOutsideBrackets = true
             }
@@ -542,17 +542,17 @@ class ApusParser {
         termNode.actions = collectActions(at: cI)
         
         repeat {
-            let modeAnnotation = try parseModeAnnotations()
+            let flavorAnnotation = try parseFlavorAnnotations()
             switch token.kind {
             case "<n>", "<s>", ">>|", ">n<", ">s<", "|<<":
                 let layoutNode = layout()
-                apply(modeAnnotation, to: layoutNode)
+                apply(flavorAnnotation, to: layoutNode)
                 termNode.seq = layoutNode
                 termNode = layoutNode
                 termNode.actions = collectActions(at: cI)
             case ">+>", ">->", "<+<", "<-<":
                 let lookaroundNode = try tokenLookaround(after: termNode)
-                apply(modeAnnotation, to: lookaroundNode)
+                apply(flavorAnnotation, to: lookaroundNode)
                 termNode.seq = lookaroundNode
                 termNode = lookaroundNode
                 termNode.actions = collectActions(at: cI)
@@ -587,7 +587,7 @@ class ApusParser {
                 default:
                     break
                 }
-                apply(modeAnnotation, to: factorNode)
+                apply(flavorAnnotation, to: factorNode)
                 
                 termNode.seq = factorNode
                 termNode = factorNode
@@ -603,18 +603,18 @@ class ApusParser {
         return startOfSequence
     }
 
-    private func parseModeAnnotations() throws -> ModeAnnotation {
-        var annotation = ModeAnnotation()
+    private func parseFlavorAnnotations() throws -> FlavorAnnotation {
+        var annotation = FlavorAnnotation()
         while token.kind == "pragma" {
-            let target: WritableKeyPath<ModeAnnotation, UInt64>
+            let target: WritableKeyPath<FlavorAnnotation, UInt64>
             switch token.stripped {
-            case "setMode":
+            case "setFlavor":
                 target = \.add
-            case "clearMode":
+            case "clearFlavor":
                 target = \.remove
-            case "requiresMode":
+            case "requiresFlavor":
                 target = \.require
-            case "rejectsMode":
+            case "rejectsFlavor":
                 target = \.reject
             default:
                 return annotation
@@ -624,7 +624,7 @@ class ApusParser {
             try expect(["("]); cI += 1
             repeat {
                 try expect(["identifier"])
-                annotation[keyPath: target] |= try grammar.parserModeBit(named: String(token.image))
+                annotation[keyPath: target] |= try grammar.flavorBit(named: String(token.image))
                 cI += 1
             } while token.kind == "identifier"
             try expect([")"]); cI += 1
@@ -632,12 +632,12 @@ class ApusParser {
         return annotation
     }
 
-    private func apply(_ annotation: ModeAnnotation, to node: GrammarNode) {
+    private func apply(_ annotation: FlavorAnnotation, to node: GrammarNode) {
         guard !annotation.isEmpty else { return }
-        node.modeAdd |= annotation.add
-        node.modeRemove |= annotation.remove
-        node.requiredModes |= annotation.require
-        node.rejectedModes |= annotation.reject
+        node.flavorAdd |= annotation.add
+        node.flavorRemove |= annotation.remove
+        node.requiredFlavors |= annotation.require
+        node.rejectedFlavors |= annotation.reject
     }
     
     func layout() -> GrammarNode {
@@ -904,26 +904,67 @@ class ApusParser {
         return node
     }
     
-    /// Resolve `---( someSet )` references: `someSet` must be a nonterminal whose every alternate is
-    /// exactly one literal (`someSet = "a" | "b" | … .`). Its literals are added to the referencing
-    /// node's `exclude` set, in the same quoted form `---( "a" )` records.
+    /// Resolve named sets: `---( someSet )`, and a rule name in a token lookaround list
+    /// (`<-<( someSet … )`). `someSet` must be a nonterminal whose every alternate is exactly one
+    /// terminal (`someSet = "a" | "b" | identifier .`). Its terminals replace the name, in the same
+    /// form `---( "a" )` and `<-<( "a" )` record.
     private func expandExclusionSetReferences() throws {
+        func members(of name: String) throws -> [String] {
+            guard let set = grammar.nonTerminals[name] else {
+                throw ApusParserError.invalidExclusionSet(name: name, reason: "no nonterminal of that name")
+            }
+            var result: [String] = []
+            var alt = set.alt
+            while let a = alt {
+                let body = a.bodySymbols
+                guard body.count == 1, body[0].kind == .T || body[0].kind == .TI else {
+                    let found = body.map { "\($0.name) (\($0.kind))" }.joined(separator: " ")
+                    throw ApusParserError.invalidExclusionSet(name: name, reason: "every alternate must be a single terminal, found \(found)")
+                }
+                result.append(body[0].name)
+                alt = a.alt
+            }
+            return result
+        }
+        // Nonterminals referenced from a production body. A lookaround tests tokens, so it may name a
+        // rule only if that rule is a pure set; `>->( A )` for a production `A` is a mistaken parse
+        // predicate (`@cannotParse( A )`) and stays an error.
+        var productions = Set<String>()
+        var walked = Set<ObjectIdentifier>()
+        let roots = Set(grammar.nonTerminals.values.map(ObjectIdentifier.init))
+        func collect(_ node: GrammarNode?) {
+            guard let node, walked.insert(ObjectIdentifier(node)).inserted else { return }
+            if node.kind == .N, !roots.contains(ObjectIdentifier(node)) { productions.insert(node.name) }
+            if node.kind != .END { collect(node.seq) }
+            collect(node.alt)
+        }
+        for nt in grammar.nonTerminals.values { collect(nt) }
+        // A lookaround kind naming a set is replaced by its members; a terminal kind is kept as it is.
+        func expanded(_ kinds: Set<String>) throws -> Set<String> {
+            var result: Set<String> = []
+            for kind in kinds {
+                guard grammar.nonTerminals[kind] != nil else { result.insert(kind); continue }
+                guard !productions.contains(kind) else {
+                    throw ApusParserError.invalidExclusionSet(
+                        name: kind, reason: "a lookaround tests tokens; use @cannotParse(\(kind)) for a parse predicate")
+                }
+                result.formUnion(try members(of: kind))
+            }
+            return result
+        }
         var seen = Set<ObjectIdentifier>()
         func visit(_ node: GrammarNode?) throws {
             guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
             for name in node.excludeSetReferences {
-                guard let set = grammar.nonTerminals[name] else {
-                    throw ApusParserError.invalidExclusionSet(name: name, reason: "no nonterminal of that name")
-                }
-                var alt = set.alt
-                while let a = alt {
-                    let body = a.bodySymbols
-                    guard body.count == 1, body[0].kind == .T || body[0].kind == .TI else {
-                        throw ApusParserError.invalidExclusionSet(name: name, reason: "every alternate must be a single literal")
-                    }
-                    node.exclude.insert(body[0].name)
-                    alt = a.alt
-                }
+                node.exclude.formUnion(try members(of: name))
+            }
+            switch node.boundaryPredicate {
+            case .tokenLookahead(let positive, let kinds)?:
+                node.boundaryPredicate = .tokenLookahead(positive: positive, kinds: try expanded(kinds))
+            case .tokenLookbehind(let positive, let kinds, let distance)?:
+                node.boundaryPredicate = .tokenLookbehind(positive: positive, kinds: try expanded(kinds), distance: distance)
+            case nil:
+                break
             }
             if node.kind != .END { try visit(node.seq) }
             try visit(node.alt)

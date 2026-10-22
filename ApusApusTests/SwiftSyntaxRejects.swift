@@ -1883,7 +1883,8 @@ let attributeRejectSnippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        disabledReason: "swiftc accepts `class` as a generated name; SwiftSyntax rejects it"
     ),
     SwiftSnippet(
         label: "testABIAttribute#1",
@@ -11404,7 +11405,8 @@ let attribute604RejectSnippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        disabledReason: "swiftc accepts `class` as a generated name; SwiftSyntax rejects it"
     ),
     SwiftSnippet(
         label: "testABIAttribute#1",

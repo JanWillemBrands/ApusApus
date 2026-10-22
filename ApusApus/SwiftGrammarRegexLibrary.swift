@@ -378,17 +378,6 @@ enum ApusRegexLibrary {
 
     // ── Extended regex literal `#/…/#` ──────────────────────────────────────────
 
-    /// Swift's line terminators — CRLF first, so it is consumed as a unit. Deliberately
-    /// NOT `CharacterClass.newlineSequence`, which also matches U+000B/U+000C/U+0085/
-    /// U+2028/U+2029; those are not line terminators for Swift's lexer.
-    static let lineBreak = ChoiceOf {
-        "\r\n"
-        "\n"
-        "\r"
-    }
-
-    static let poundRun = OneOrMore { "#" }
-
     // TWO MODES, probe-confirmed (2026-08-30), exactly parallel to the multiline strings:
     //   `#/a/#`      → ok          `#/a⏎b/#`   → "expected '/#' to end regex literal"
     //   `#/⏎a⏎/#`    → ok          `#/\⏎/#`    → same error  (testRegexParseError17)
@@ -400,27 +389,53 @@ enum ApusRegexLibrary {
     // Extended regexes do NOT process escapes — `\` is ordinary content and only `/` + the matching
     // pound run closes the literal, which is why the single-line body admits a `/` that is not
     // followed by the delimiter.
-    static let extendedRegexPoundDelimiter = Reference(Substring.self)
-    static let extendedRegularExpressionLiteral = Regex {
-        Capture(poundRun, as: extendedRegexPoundDelimiter)
-        "/"
-        ChoiceOf {
-            Regex {                                     // multi-line: `#/` then a line break
-                lineBreak
-                ZeroOrMore(.reluctant) { CharacterClass.any }
+    struct ExtendedRegexLiteral: CustomConsumingRegexComponent {
+        typealias RegexOutput = Substring
+
+        func consuming(_ input: String, startingAt index: String.Index, in bounds: Range<String.Index>) throws -> (upperBound: String.Index, output: Substring)? {
+            guard bounds.contains(index), input[index] == "#" else { return nil }
+
+            var poundCount = 0
+            var i = index
+            while i < bounds.upperBound, input[i] == "#" {
+                poundCount += 1
+                i = input.index(after: i)
             }
-            ZeroOrMore(.reluctant) {                    // single-line: no newline anywhere
-                ChoiceOf {
-                    CharacterClass.anyOf("/\r\n").inverted
-                    Regex {
-                        "/"
-                        NegativeLookahead { extendedRegexPoundDelimiter }
+            guard i < bounds.upperBound, input[i] == "/" else { return nil }
+            i = input.index(after: i)
+
+            let isMultiline = i < bounds.upperBound && (input[i] == "\n" || input[i] == "\r")
+            var lineContainsOnlyIndentation = isMultiline
+            while i < bounds.upperBound {
+                if input[i] == "/" {
+                    var end = input.index(after: i)
+                    var closingPoundCount = 0
+                    while end < bounds.upperBound, input[end] == "#", closingPoundCount < poundCount {
+                        closingPoundCount += 1
+                        end = input.index(after: end)
+                    }
+                    if closingPoundCount == poundCount && (!isMultiline || lineContainsOnlyIndentation) {
+                        return (end, input[index..<end])
                     }
                 }
+
+                switch input[i] {
+                case "\n", "\r":
+                    guard isMultiline else { return nil }
+                    lineContainsOnlyIndentation = true
+                case " ", "\t":
+                    break
+                default:
+                    lineContainsOnlyIndentation = false
+                }
+                i = input.index(after: i)
             }
+            return nil
         }
-        "/"
-        extendedRegexPoundDelimiter
+    }
+
+    static let extendedRegularExpressionLiteral = Regex {
+        ExtendedRegexLiteral()
     }.matchingSemantics(.unicodeScalar)
 
     /// `regexLiteralToken` / `forcedRegexLiteralToken` — plain slash-delimited regex literals.

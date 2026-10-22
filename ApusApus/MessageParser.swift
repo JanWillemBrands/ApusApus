@@ -110,6 +110,32 @@ class MessageParser {
     /// Built in `prepareInput`; empty for sub-parsers. Consumed by the commit rule in `tokenMatch`.
     var preemptViable: [Int: (CharPosition) -> Bool] = [:]
 
+    /// Recogniser for parse predicates on a nonterminal the grammar never parses (`Oracle`
+    /// `LookaheadPredicateRule`). Built on first use; memoised per (target, position).
+    private var predicateRecogniser: MessageParser?
+    private var predicateMemo: [ParsePosition: Bool] = [:]
+
+    /// swift-syntax `canParseAsXxx`: can `target` derive starting at `pos`? A speculative sub-parse
+    /// with the main parse's own lexer (trivia, structured tokens, `@preempt`), so it answers the
+    /// question a raw-forest yield would have answered, had the parse called `target` there. No root
+    /// is FOLLOW-gated, so a derivation that stops short of the input end still counts.
+    func canDerive(_ target: GrammarNode, at pos: CharPosition) -> Bool {
+        let key = ParsePosition(slot: target, index: pos)
+        if let hit = predicateMemo[key] { return hit }
+        let recogniser: MessageParser
+        if let existing = predicateRecogniser {
+            recogniser = existing
+        } else {
+            recogniser = MessageParser(grammar: grammar)
+            recogniser.prepareInput(input: input)
+            predicateRecogniser = recogniser
+        }
+        recogniser.runGLL(root: target, start: pos)
+        let derives = recogniser.yield(of: target).contains { $0.i == pos }
+        predicateMemo[key] = derives
+        return derives
+    }
+
     /// True when this parser instance is a recogniser sub-parser (structured `:` trivia or
     /// structured `-` lexical nonterminal, prepared with `isSubParser: true`). Such a root is a RECOGNISER: it may
     /// complete at any position (the outer parser supplies the "next token" context). Since the
@@ -132,6 +158,29 @@ class MessageParser {
     /// memoization the per-terminal LCNP migration would re-run pattern
     /// matching tens of thousands of times.
     var lexCache: [LexCacheKey: [LexMatch]] = [:]
+
+    /// `(pos, terminalID)` → an EXCLUDED terminal's matches without literal munch, for the `---( )`
+    /// check in `tokenMatch`. Pure given the input, like `lexCache`, and kept apart from it because
+    /// the munch policy differs. Uncached, this re-lexed every excluded keyword for every candidate
+    /// match of every excluding slot (`identifier ---( lexerClassifiedKeyword )`), each time
+    /// skipping the leading trivia again, which made parsing ~4.5× slower (2026-10-21).
+    var exclusionLexCache: [LexCacheKey: [LexMatch]] = [:]
+
+    final func exclusionLex(at pos: CharPosition, terminalID: Int, suppressesLeadingTrivia: Bool) -> [LexMatch] {
+        guard !suppressesLeadingTrivia else {
+            // Exact-start recognizer slots are rare; keep the cache key small.
+            return lexer.lex(at: pos, terminalID: terminalID,
+                             suppressesLeadingTrivia: true, appliesLiteralMunch: false)
+        }
+        let key = LexCacheKey(pos: pos, terminalID: terminalID)
+        if let cached = exclusionLexCache[key] { return cached }
+        // `contentStart`: skipping the leading trivia is the expensive part of a lex (the trivia
+        // recognizer runs), and every excluded keyword asks about the same position.
+        let result = lexer.lex(at: pos, terminalID: terminalID, suppressesLeadingTrivia: false,
+                               appliesLiteralMunch: false, contentStart: contentStart(at: pos))
+        exclusionLexCache[key] = result
+        return result
+    }
 
     @inline(always)
     final func cachedLex(
@@ -495,6 +544,8 @@ class MessageParser {
         // Mirrors swift's `scanRegexLiteral`. Memoised per position, so the cost is one sub-parse per
         // distinct candidate split point. Skipped for sub-parsers (would recurse).
         preemptViable.removeAll(keepingCapacity: true)
+        predicateRecogniser = nil
+        predicateMemo.removeAll(keepingCapacity: true)
         if !isSubParser {
             for (name, pat) in grammar.terminals {
                 guard let tid = grammar.symbolToID[name],
@@ -561,6 +612,7 @@ class MessageParser {
             virtualTokensAt: virtualTokensAt
         )
         lexCache.removeAll(keepingCapacity: true)
+        exclusionLexCache.removeAll(keepingCapacity: true)
     }
 
     /// Per-call: reset GLL state, seed root cluster, run the GLL loop. Reads
@@ -842,7 +894,7 @@ class MessageParser {
         var covering: [String] = []
         for nt in grammar.allProductions {
             for y in yield(of: nt) where y.i <= pos && pos < y.j {
-                covering.append("\(Grammar.instanceName(nt, modes: grammar.modeNameToBit))[\(input.distance(from: input.startIndex, to: y.i))..\(input.distance(from: input.startIndex, to: y.j))]")
+                covering.append("\(Grammar.instanceName(nt, flavors: grammar.flavorNameToBit))[\(input.distance(from: input.startIndex, to: y.i))..\(input.distance(from: input.startIndex, to: y.j))]")
                 break
             }
         }
@@ -1198,12 +1250,8 @@ class MessageParser {
         if !cL.excludeBS.isEmpty {
             matches = matches.filter { m in
                 for eID in cL.excludeBS where eID != cL.nameID && eID != grammar.epsilonID {
-                    let excluded = lexer.lex(
-                        at: cI,
-                        terminalID: eID,
-                        suppressesLeadingTrivia: cL.suppressesLeadingTrivia,
-                        appliesLiteralMunch: false
-                    )
+                    let excluded = exclusionLex(at: cI, terminalID: eID,
+                                                suppressesLeadingTrivia: cL.suppressesLeadingTrivia)
                     for em in excluded where em.start == m.start && em.end == m.end {
                         return false
                     }

@@ -162,7 +162,7 @@ Current lanes are:
 
 - Recent-frontier lanes for the boundaries that produced useful bugs in the last week:
   interpolation expression delimiters, nested trailing closures inside statement conditions,
-  parser-mode scope transitions, statement/member conditional-compilation context, generic-member
+  flavor scope transitions, statement/member conditional-compilation context, generic-member
   expression-vs-type shapes, and protocol/accessor shapes. These are selected by
   `--frontier-percent` and are cheap targeted generation, not extra probing.
 - Curated fragment lanes for known sharp edges: generics, regex, key paths, conditional

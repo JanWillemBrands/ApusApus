@@ -5,7 +5,8 @@
 - Keep file reads minimal and targeted.
 - Make only targeted edits for the requested task.
 - Always run full builds and full test suites, unless it's very low risk to run a limited one.
-- If any command runs longer than 120 seconds, stop and replan with a lighter approach.
+- Long builds and test runs may exceed 120 seconds; let them finish while they continue to make
+  observable progress. Stop and replan only after 10 minutes without progress.
 
 ## Tool Selection (Critical)
 
@@ -71,4 +72,3 @@ See `TESTING.md` for the full approach. Non-negotiable rules distilled from prio
   full-parameter counts.
 - **Fix by root cause, not per-test**; prefer structural `.apus` fixes over
   `@prefer`/oracle hacks; re-harvest ambiguity + run the affected suite after each change.
-

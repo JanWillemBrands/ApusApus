@@ -1163,7 +1163,8 @@ let expressionSnippets: [SwiftSnippet] = [
       _ = { (x y: MyType) in }
       """,
         origin: "ExpressionTests.testClosureWithExternalParameterName",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        disabledReason: "swiftc rejects a non-underscore external name on a closure parameter; SwiftSyntax accepts it"
     ),
     SwiftSnippet(label: "testClosureParameterWithAttribute#1", source: "_ = { (@_noImplicitCopy _ x: Int) -> () in }", origin: "ExpressionTests.testClosureParameterWithAttribute", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "testClosureParameterWithAttribute#2", source: "_ = { (@Wrapper x) in }", origin: "ExpressionTests.testClosureParameterWithAttribute", syntaxVersion: "603.0.1"),
@@ -2538,7 +2539,8 @@ let expression604Snippets: [SwiftSnippet] = [
       _ = { (x y: MyType) in }
       """,
         origin: "ExpressionTests.testClosureWithExternalParameterName",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        disabledReason: "swiftc rejects a non-underscore external name on a closure parameter; SwiftSyntax accepts it"
     ),
     SwiftSnippet(label: "testClosureParameterWithAttribute#1", source: "_ = { (@_noImplicitCopy _ x: Int) -> () in }", origin: "ExpressionTests.testClosureParameterWithAttribute", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testClosureParameterWithAttribute#2", source: "_ = { (@Wrapper x) in }", origin: "ExpressionTests.testClosureParameterWithAttribute", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
