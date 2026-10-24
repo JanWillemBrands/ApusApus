@@ -200,6 +200,14 @@ enum ApusRegexLibrary {
     // ── Terminals ───────────────────────────────────────────────────────────────
     // `.matchingSemantics(.unicodeScalar)` applied directly on each composed regex.
 
+    /// `whitespace` trivia, per scalar like swiftc's byte lexer. Under grapheme semantics a space
+    /// followed by an extending scalar (`" \u{FE0F}"`, `" \u{200D}"`) is ONE `Character` that is not
+    /// whitespace, so nothing could start there; per scalar the space is trivia and the selector
+    /// starts an identifier (`enum ️ {}`). A newline already ends a grapheme cluster.
+    static let whitespace = Regex {
+        OneOrMore { CharacterClass.anyOf("\u{0000}\u{0009}\u{000A}\u{000B}\u{000C}\u{000D}\u{0020}\u{00A0}\u{FEFF}") }
+    }.matchingSemantics(.unicodeScalar)
+
     /// `identifier` — head then zero-or-more continuation chars.
     static let identifier = Regex {
         identifierHead
@@ -262,10 +270,6 @@ enum ApusRegexLibrary {
             }
         }
     }.matchingSemantics(.unicodeScalar)
-
-    /// `operatorToken` / `operatorName` — the operator body (already scalar-semantic)
-    /// (Swift.apus operator dev 1: one greedy `@literalMunch` token).
-    static let operatorToken = operatorBody
 
     /// `postfixOperatorToken` — operator body that may not BEGIN with `!`/`?`
     /// (Swift.apus operator dev 4: `x!!` is two force-unwraps, not a `!!` operator).
@@ -386,9 +390,7 @@ enum ApusRegexLibrary {
     // otherwise the body may contain no newline at all. The previous flat regex allowed newlines
     // unconditionally, so it accepted the single-line form spread over two lines.
     //
-    // Extended regexes do NOT process escapes — `\` is ordinary content and only `/` + the matching
-    // pound run closes the literal, which is why the single-line body admits a `/` that is not
-    // followed by the delimiter.
+    // A slash after an odd backslash run is escaped; otherwise `/` + the matching pound run closes.
     struct ExtendedRegexLiteral: CustomConsumingRegexComponent {
         typealias RegexOutput = Substring
 
@@ -406,8 +408,9 @@ enum ApusRegexLibrary {
 
             let isMultiline = i < bounds.upperBound && (input[i] == "\n" || input[i] == "\r")
             var lineContainsOnlyIndentation = isMultiline
+            var backslashRun = 0
             while i < bounds.upperBound {
-                if input[i] == "/" {
+                if input[i] == "/", backslashRun.isMultiple(of: 2) {
                     var end = input.index(after: i)
                     var closingPoundCount = 0
                     while end < bounds.upperBound, input[end] == "#", closingPoundCount < poundCount {
@@ -420,13 +423,18 @@ enum ApusRegexLibrary {
                 }
 
                 switch input[i] {
+                case "\\":
+                    backslashRun += 1
                 case "\n", "\r":
                     guard isMultiline else { return nil }
                     lineContainsOnlyIndentation = true
+                    backslashRun = 0
                 case " ", "\t":
+                    backslashRun = 0
                     break
                 default:
                     lineContainsOnlyIndentation = false
+                    backslashRun = 0
                 }
                 i = input.index(after: i)
             }
@@ -438,21 +446,20 @@ enum ApusRegexLibrary {
         ExtendedRegexLiteral()
     }.matchingSemantics(.unicodeScalar)
 
-    /// `regexLiteralToken` / `forcedRegexLiteralToken` — plain slash-delimited regex literals.
+    /// `regexLiteralToken` — plain slash-delimited regex literals.
     ///
     /// The slash/operator decision is still made by the grammar (`plainRegularExpressionLiteral`
     /// and operator preemption). In must-be-regex positions, the lexer owns the flat extent of the
     /// literal: escapes and the first unescaped closing slash are lexical rules, not recursive
-    /// grammar structure. In ambiguous slash positions, Swift still aborts the regex scan before a
-    /// depth-zero `)` so grouped operator expressions such as `(/x)` can survive.
+    /// grammar structure. The scan aborts before a depth-zero `)` so grouped operator expressions
+    /// such as `(/x)` can survive; swiftc's confident positions would lex on, but only into a regex
+    /// with an unbalanced `)`, which never compiles.
     struct PlainRegexLiteral: CustomConsumingRegexComponent {
         typealias RegexOutput = Substring
 
-        let allowUnbalancedClosers: Bool
         let allowImmediatelyClosedLeadingRightParen: Bool
 
-        init(allowUnbalancedClosers: Bool = false, allowImmediatelyClosedLeadingRightParen: Bool = false) {
-            self.allowUnbalancedClosers = allowUnbalancedClosers
+        init(allowImmediatelyClosedLeadingRightParen: Bool = false) {
             self.allowImmediatelyClosedLeadingRightParen = allowImmediatelyClosedLeadingRightParen
         }
 
@@ -466,7 +473,6 @@ enum ApusRegexLibrary {
 
             var lastWasSpace = false
             var sawBodyItem = false
-            var bodyStartedWithRightParen = false
             var groupDepth = 0
             var characterClassDepth = 0
             while i < bounds.upperBound {
@@ -495,8 +501,6 @@ enum ApusRegexLibrary {
                     i = input.index(after: i)
                     if characterClassDepth > 0 {
                         characterClassDepth -= 1
-                    } else if !sawBodyItem && allowUnbalancedClosers {
-                        bodyStartedWithRightParen = true
                     }
                     lastWasSpace = false
                     sawBodyItem = true
@@ -514,15 +518,9 @@ enum ApusRegexLibrary {
                         if groupDepth > 0 {
                             groupDepth -= 1
                         } else {
-                            if allowImmediatelyClosedLeadingRightParen && !sawBodyItem {
-                                let next = input.index(after: i)
-                                guard next < bounds.upperBound, input[next] == "/" else { return nil }
-                            } else {
-                                guard allowUnbalancedClosers && (!sawBodyItem || bodyStartedWithRightParen) else { return nil }
-                            }
-                            if !sawBodyItem {
-                                bodyStartedWithRightParen = true
-                            }
+                            guard allowImmediatelyClosedLeadingRightParen && !sawBodyItem else { return nil }
+                            let next = input.index(after: i)
+                            guard next < bounds.upperBound, input[next] == "/" else { return nil }
                         }
                     }
                     i = input.index(after: i)
@@ -551,10 +549,6 @@ enum ApusRegexLibrary {
         PlainRegexLiteral()
     }.matchingSemantics(.unicodeScalar)
 
-    static let forcedRegexLiteralToken = Regex {
-        PlainRegexLiteral(allowUnbalancedClosers: true)
-    }.matchingSemantics(.unicodeScalar)
-
     static let operatorRegexLiteralToken = Regex {
         PlainRegexLiteral(allowImmediatelyClosedLeadingRightParen: true)
     }.matchingSemantics(.unicodeScalar)
@@ -581,8 +575,8 @@ enum ApusRegexLibrary {
 
     // ── Registry (key == `.apus` terminal name) ─────────────────────────────────
     static let patterns: [String: Regex<AnyRegexOutput>] = [
+        "whitespace":                  Regex<AnyRegexOutput>(whitespace.regex),
         "identifier":                  Regex<AnyRegexOutput>(identifier.regex),
-        "operatorName":                Regex<AnyRegexOutput>(operatorToken.regex),
         "postfixOperatorToken":        Regex<AnyRegexOutput>(postfixOperatorToken.regex),
         "nonArrowOperatorToken":       Regex<AnyRegexOutput>(nonArrowOperatorToken.regex),
         "functionNameOperator":        Regex<AnyRegexOutput>(functionNameOperator.regex),
@@ -591,7 +585,6 @@ enum ApusRegexLibrary {
         "propertyWrapperProjection":   Regex<AnyRegexOutput>(propertyWrapperProjection.regex),
         "escapedIdentifier":           Regex<AnyRegexOutput>(escapedIdentifier.regex),
         "regexLiteralToken":           Regex<AnyRegexOutput>(regexLiteralToken.regex),
-        "forcedRegexLiteralToken":     Regex<AnyRegexOutput>(forcedRegexLiteralToken.regex),
         "operatorRegexLiteralToken":   Regex<AnyRegexOutput>(operatorRegexLiteralToken.regex),
         "extendedRegularExpressionLiteral": Regex<AnyRegexOutput>(extendedRegularExpressionLiteral.regex),
     ]

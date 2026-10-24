@@ -41,6 +41,8 @@ struct ProbeOutput: Codable {
     let adventDump: String?
     let metrics: Metrics?
     let error: String?
+    /// Whether no program compiles the source; nil when it was not type-checked.
+    var parseOnly: Bool? = nil
 }
 
 private struct ProbeRequest: Codable {
@@ -49,6 +51,9 @@ private struct ProbeRequest: Codable {
     /// Compatibility with older runners. Compiler-first classification ignores this; reducers must
     /// preserve the compiler parse result.
     let skipCompiler: Bool?
+    /// Type-check every compiler-accepted source, not only accept-side mismatches, and report
+    /// `parseOnly`. For vetting test fixtures (`tools/check_parse_only.py`) with the fuzzer's verdict.
+    let checkParseOnly: Bool?
 }
 
 @main
@@ -133,7 +138,8 @@ struct AdventProbe {
                     source: request.source,
                     grammar: grammar,
                     includeDumps: request.includeDumps ?? arguments.includeDumps,
-                    skipCompiler: request.skipCompiler ?? false
+                    skipCompiler: request.skipCompiler ?? false,
+                    checkParseOnly: request.checkParseOnly ?? false
                 )
                 try write(output)
             } catch {
@@ -147,7 +153,8 @@ struct AdventProbe {
         return try grammarParser.parse(explicitStartSymbol: "")
     }
 
-    private static func run(source: String, grammar: Grammar, includeDumps: Bool, skipCompiler: Bool = false) throws -> ProbeOutput {
+    private static func run(source: String, grammar: Grammar, includeDumps: Bool, skipCompiler: Bool = false,
+                            checkParseOnly: Bool = false) throws -> ProbeOutput {
         parseReports = false
 
         let referenceFeatures = swiftSyntaxExperimentalFeatures(for: source)
@@ -225,16 +232,21 @@ struct AdventProbe {
         }
 
         let compilerResult = runCompilerParse(source: source)
-        let compilerTypecheckResult: CompilerResult? = nil
+        var compilerTypecheckResult: CompilerResult? = nil
         let swiftSyntaxAccepted = !referenceHasError
-        let status: String
+        var status: String
         if compilerResult.timedOut {
             status = "compiler-timeout"
         } else if compilerResult.accepted != swiftSyntaxAccepted {
             status = "reference-disagreement"
         } else if compilerResult.accepted == true {
             if !adventAccepted {
-                status = "advent-underaccept"
+                // The agreed parse-recovery exception (2026-10-11): swiftc ParseDecl.cpp
+                // `isStartOfSwiftDecl` reads a statement-start `init` inside an initializer as a call
+                // only to diagnose a missing `self.`, which the type checker always rejects; APUS
+                // rejects it at parse time. Decided on the swift-syntax tree, as swiftc decides it on
+                // syntax: the type checker never reaches inactive `#if` code or unresolved closures.
+                status = Self.hasInitializerRecoveryStatement(reference) ? "compiler-recovery-reject" : "advent-underaccept"
             } else if !ambiguityDiagnostics.isEmpty {
                 status = "residual-ambiguity"
             } else if adventAccepted, adventDump == nil {
@@ -246,6 +258,21 @@ struct AdventProbe {
             }
         } else {
             status = adventAccepted ? "advent-overaccept" : "same"
+        }
+
+        // Parse-only triage (agreed 2026-10-24): an accept-side mismatch matters only if some program
+        // could compile the source. Type-check it; an error that a declaration or import would fix is
+        // context, any other error means no program compiles it, so the grammar need not follow swiftc.
+        var parseOnly: Bool? = nil
+        if Self.parseOnlyCandidateStatuses.contains(status) || (checkParseOnly && compilerResult.accepted == true) {
+            let result = runCompilerTypecheck(source: source)
+            compilerTypecheckResult = result
+            if !result.timedOut {
+                parseOnly = result.accepted == false && Self.hasStructuralTypecheckError(result.stderr)
+            }
+            if parseOnly == true, Self.parseOnlyCandidateStatuses.contains(status) {
+                status = "parse-only"
+            }
         }
 
         let metrics = ProbeOutput.Metrics(
@@ -269,7 +296,7 @@ struct AdventProbe {
             compilerChecked: true,
             compilerAccepted: compilerResult.accepted,
             compilerStderr: compilerResult.stderr.isEmpty == false ? compilerResult.stderr : nil,
-            compilerTypecheckChecked: false,
+            compilerTypecheckChecked: compilerTypecheckResult != nil,
             compilerTypecheckAccepted: compilerTypecheckResult?.accepted,
             compilerTypecheckStderr: compilerTypecheckResult?.stderr.isEmpty == false ? compilerTypecheckResult?.stderr : nil,
             residualAmbiguities: ambiguityDiagnostics,
@@ -282,7 +309,8 @@ struct AdventProbe {
             referenceDump: includeDumps || status != "same" ? referenceDump : nil,
             adventDump: includeDumps || status != "same" ? adventDump : nil,
             metrics: metrics,
-            error: nil
+            error: nil,
+            parseOnly: parseOnly
         )
     }
 
@@ -321,54 +349,93 @@ struct AdventProbe {
         return value
     }
 
-    private static let swiftcURL: URL = {
-        let fallback = URL(fileURLWithPath: "/usr/bin/swiftc")
+    /// One line of `xcrun` output, or nil.
+    private static func xcrun(_ arguments: [String]) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/xcrun")
-        process.arguments = ["--find", "swiftc"]
+        process.arguments = arguments
         let output = Pipe()
         process.standardOutput = output
         process.standardError = Pipe()
-        do {
-            try process.run()
-            process.waitUntilExit()
-            guard process.terminationStatus == 0 else { return fallback }
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            let path = (String(data: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-            return path.isEmpty ? fallback : URL(fileURLWithPath: path)
-        } catch {
-            return fallback
-        }
-    }()
+        guard (try? process.run()) != nil else { return nil }
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else { return nil }
+        let data = output.fileHandleForReading.readDataToEndOfFile()
+        let line = (String(data: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return line.isEmpty ? nil : line
+    }
+
+    private static let swiftcURL = URL(fileURLWithPath: xcrun(["--find", "swiftc"]) ?? "/usr/bin/swiftc")
+    /// `-parse` needs no standard library; `-typecheck` does, and swiftc run directly has no SDK.
+    private static let sdkPath = xcrun(["--show-sdk-path"])
 
     private static func runCompilerParse(source: String) -> CompilerResult {
         runCompiler(source: source, arguments: ["swiftc", "-swift-version", "6", "-parse"], description: "compiler parse")
     }
 
-    private static func runCompilerTypecheck(source: String) -> CompilerResult {
-        let prelude = """
-        protocol P {}
-        protocol Q {}
-        struct Foo { struct Bar {} }
-        struct Bar {}
-        struct Baz {}
-        func placeholder<T>() -> T { fatalError() }
-        func f<T>(_ value: T) -> T { value }
-        func f<T>(_ value: T, g: () -> Int) -> T { value }
-        let a = 1
-        let b = 2
-        let c = 3
-        let d = 4
-        let e = 5
-        let s = "abc"
-        let x: Foo? = nil
-        let y: Foo? = nil
-        let value: Optional<Int> = nil
-        let items = [1, 2, 3]
-        let children: [Foo] = []
+    /// swiftc ParseDecl.cpp `isStartOfSwiftDecl`: a code-block item that starts with `init` while the
+    /// nearest declaration context is an initializer. Statements, code blocks and `#if` clauses do not
+    /// change the context; closures and other declarations do.
+    private static func hasInitializerRecoveryStatement(_ tree: SourceFileSyntax) -> Bool {
+        for token in tree.tokens(viewMode: .sourceAccurate) where token.tokenKind == .keyword(.`init`) {
+            var node = Syntax(token).parent
+            while let current = node, !current.is(CodeBlockItemSyntax.self) { node = current.parent }
+            guard let item = node, item.firstToken(viewMode: .sourceAccurate) == token else { continue }
+            var context = item.parent
+            while let current = context {
+                if current.is(InitializerDeclSyntax.self) { return true }
+                if current.is(ClosureExprSyntax.self)
+                    || (current.isProtocol(DeclSyntaxProtocol.self) && !current.is(IfConfigDeclSyntax.self)) {
+                    break
+                }
+                context = current.parent
+            }
+        }
+        return false
+    }
 
-        """
-        return runCompiler(source: prelude + source, arguments: ["swiftc", "-swift-version", "6", "-typecheck"], description: "compiler typecheck")
+    /// No prelude: a declared name could collide with the source's own, and an undeclared one is
+    /// context anyway (`contextTypecheckErrors`).
+    private static func runCompilerTypecheck(source: String) -> CompilerResult {
+        let sdk = sdkPath.map { ["-sdk", $0] } ?? []
+        return runCompiler(source: source, arguments: ["swiftc", "-swift-version", "6", "-typecheck"] + sdk, description: "compiler typecheck")
+    }
+
+    /// Accept-side mismatches, the only ones a never-compiling source makes moot. Overaccepts are not
+    /// triaged: when `swiftc -parse` rejects, APUS must reject.
+    private static let parseOnlyCandidateStatuses: Set<String> = [
+        "advent-underaccept", "tree-difference", "residual-ambiguity", "advent-no-generated-tree",
+    ]
+
+    /// Type-check errors a fragment gets for lack of surroundings: undeclared names and modules, their
+    /// unknown types and members, imports, experimental features, and placement — a construct that is
+    /// fine elsewhere (`_ { (self, ) in }` is wrong only because of the `_` callee; an attribute on the
+    /// wrong declaration). Doubt counts as context: a false parse-only hides a real grammar bug, a false
+    /// keep only costs a look. A compiler crash ("failed to produce diagnostic") is not a verdict.
+    private static let contextTypecheckErrors: [NSRegularExpression] = [
+        "cannot find .* in scope", "no such module", "no macro named", "has no member", "value of type",
+        "is not a member type", "reference to member", "cannot infer", "could not be inferred", "ambiguous",
+        "cannot convert", "argument", "requires that", "does not conform", "cannot call value",
+        "cannot be used as a type", "only valid when experimental feature", "can only be used with members of",
+        "requires the '.*' module", "is only allowed inside a loop", "not contained in a closure",
+        "extra trailing closure", "cannot force unwrap", "failed to produce diagnostic", "use of unresolved",
+        "is unavailable", "has been renamed", "not in scope", "unknown attribute",
+        "not allowed here", "^'?@\\w+'? (attribute )?(may|can) only", "attribute cannot be applied",
+        "may only be declared", "not defined in an extension or at the file level",
+        "is not a .*operator", "must begin with a type",   // an operator or root type a program can declare
+    ].map { try! NSRegularExpression(pattern: $0) }
+
+    /// True when some type-check error is not context: no program compiles the source.
+    private static func hasStructuralTypecheckError(_ stderr: String) -> Bool {
+        for line in stderr.split(separator: "\n") {
+            guard let range = line.range(of: "error: ") else { continue }
+            let message = String(line[range.upperBound...])
+            let span = NSRange(message.startIndex..., in: message)
+            if !contextTypecheckErrors.contains(where: { $0.firstMatch(in: message, range: span) != nil }) {
+                return true
+            }
+        }
+        return false
     }
 
     private static func runCompiler(source: String, arguments: [String], description: String) -> CompilerResult {

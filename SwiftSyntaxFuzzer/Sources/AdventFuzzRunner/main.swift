@@ -682,8 +682,10 @@ struct AdventFuzzRunner {
             }
 
             let generated = generator.next(using: &rng)
-            if sourceRequiresDisabledExperimentalFeature(generated.source) {
-                let status = "skipped-experimental"
+            let skippedStatus: String? = sourceRequiresDisabledExperimentalFeature(generated.source)
+                ? "skipped-experimental"
+                : (sourceContainsConflictMarker(generated.source) ? "skipped-conflict-marker" : nil)
+            if let status = skippedStatus {
                 counts[status, default: 0] += 1
                 completed += 1
                 if index == 0 || index % max(1, options.heartbeatEvery) == max(1, options.heartbeatEvery) - 1 {
@@ -1591,14 +1593,6 @@ struct SwiftFragmentGenerator {
             """
             @available(*, deprecated, message: #"raw"#)
             func fuzz() {}
-            """,
-            """
-            struct Fuzz {
-              init() {
-                init
-                init(value)
-              }
-            }
             """,
             """
             func fuzz() {
@@ -2692,6 +2686,13 @@ func sourceRequiresDisabledExperimentalFeature(_ source: String) -> Bool {
     return source.split(whereSeparator: \.isNewline).contains { line in
         let trimmed = line.drop(while: { $0.isWhitespace })
         return trimmed == "using" || trimmed.hasPrefix("using ")
+    }
+}
+
+func sourceContainsConflictMarker(_ source: String) -> Bool {
+    source.split(whereSeparator: \.isNewline).contains { line in
+        let trimmed = line.drop(while: { $0.isWhitespace })
+        return ["<<<<", "====", ">>>>", "||||"].contains { trimmed.hasPrefix($0) }
     }
 }
 

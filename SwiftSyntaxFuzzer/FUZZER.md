@@ -145,6 +145,15 @@ be revisited later if the project chooses a single final acceptance oracle.
 - `same`: compiler and SwiftSyntax agree, and ApusApus agrees with them on syntax acceptance.
 - `reference-disagreement`: compiler and SwiftSyntax disagree; ApusApus agrees with one side.
 - `advent-underaccept`: compiler and SwiftSyntax both accept, but ApusApus does not build a tree.
+- `compiler-recovery-reject`: an underaccept on the agreed parse-recovery exception — a statement
+  that starts with `init` inside an initializer (swiftc ParseDecl.cpp `isStartOfSwiftDecl` parses it
+  only to diagnose a missing `self.`; the type checker always rejects it). Counted, not an artifact.
+- `parse-only`: an underaccept, tree difference, residual ambiguity or missing generated tree whose
+  source no program compiles (agreed 2026-10-24). The probe type-checks such a source; when some
+  error is not context (an undeclared name, module, member, experimental feature, or a placement
+  that is fine elsewhere), the grammar need not follow swiftc there. Counted, not an artifact; listed
+  in `events.jsonl` for spot checks. Because the reducer keeps the status, it no longer shrinks a real
+  mismatch into a never-compiling sample. Overaccepts are never triaged.
 - `advent-overaccept`: compiler and SwiftSyntax both reject, but ApusApus builds a tree.
 - `residual-ambiguity`: compiler, SwiftSyntax, and ApusApus accept, but the post-Oracle derivation is
   still ambiguous.

@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00033285-advent-overaccept-4ed6c1ef4b6b4fe3.json",
+    "durationSeconds" : 0.3091779947280884,
+    "exitCode" : 1,
+    "generator" : "wide:closure:delete+swap:fuzz-harvest:ifconfig-body-semicolon-last",
+    "index" : 33285,
+    "seed" : 8709271455669337765,
+    "signalHash" : "9dd54ab810d42f9d",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "4ed6c1ef4b6b4fe3",
+    "sourceLength" : 56,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\n g() {\n#if A\n  a()\n  b()#endif\n;\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                LabeledExprList\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      IfConfigDecl\n                        IfConfigClauseList\n                          IfConfigClause\n                            poundIf \"#if\"\n                            DeclReferenceExpr\n                              identifier(\"A\") \"A\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                TupleExpr\n                                  leftParen \"(\"\n                                  LabeledExprList\n                                  rightParen \")\"\n                        poundEndif \"#endif\"\n                      semicolon \";\"\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-388E65A7-EA2B-4887-87B6-6C54C3BA13BB.swift:2:4: error: consecutive statements on a line must be separated by ';'\n1 |  fuzzClosure {\n2 |  () {\n  |    `- error: consecutive statements on a line must be separated by ';'\n3 | #if A\n4 |   ()#endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-388E65A7-EA2B-4887-87B6-6C54C3BA13BB.swift:5:1: error: ';' statements are not allowed\n3 | #if A\n4 |   ()#endif\n5 | ;\n  | `- error: ';' statements are not allowed\n6 | }\n7 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "trailingClosure\t[newlineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 197,
+      "descriptorCount" : 394,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 139,
+      "parseSeconds" : 0.006865024566650391,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 34,
+      "tokenCount" : 13,
+      "yieldCount" : 282
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                LabeledExprList\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      IfConfigDecl\n                        IfConfigClauseList\n                          IfConfigClause\n                            poundIf \"#if\"\n                            DeclReferenceExpr\n                              identifier(\"A\") \"A\"\n                            CodeBlockItemList\n                              CodeBlockItem\n                                TupleExpr\n                                  leftParen \"(\"\n                                  LabeledExprList\n                                  rightParen \")\"\n                        poundEndif \"#endif\"\n                    CodeBlockItem\n                      UnexpectedCodeDecl\n                        UnexpectedNodes\n                      semicolon \";\"\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " fuzzClosure {\n () {\n#if A\n  ()#endif\n;\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                LabeledExprList\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      IfConfigDecl\\n                        IfConfigClauseList\\n                          IfConfigClause\\n                            poundIf \\\"#if\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"A\\\") \\\"A\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                TupleExpr\\n                                  leftParen \\\"(\\\"\\n                                  LabeledExprList\\n                                  rightParen \\\")\\\"\\n                        poundEndif \\\"#endif\\\"\\n                      semicolon \\\";\\\"\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-388E65A7-EA2B-4887-87B6-6C54C3BA13BB.swift:2:4: error: consecutive statements on a line must be separated by ';'\\n1 |  fuzzClosure {\\n2 |  () {\\n  |    `- error: consecutive statements on a line must be separated by ';'\\n3 | #if A\\n4 |   ()#endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-388E65A7-EA2B-4887-87B6-6C54C3BA13BB.swift:5:1: error: ';' statements are not allowed\\n3 | #if A\\n4 |   ()#endif\\n5 | ;\\n  | `- error: ';' statements are not allowed\\n6 | }\\n7 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"trailingClosure\\t[newlineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":197,\"descriptorCount\":394,\"duplicateDescriptorCount\":0,\"oraclePruned\":139,\"parseSeconds\":0.006865024566650391,\"sourceLength\":43,\"suppressedDescriptorCount\":34,\"tokenCount\":13,\"yieldCount\":282},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                LabeledExprList\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      IfConfigDecl\\n                        IfConfigClauseList\\n                          IfConfigClause\\n                            poundIf \\\"#if\\\"\\n                            DeclReferenceExpr\\n                              identifier(\\\"A\\\") \\\"A\\\"\\n                            CodeBlockItemList\\n                              CodeBlockItem\\n                                TupleExpr\\n                                  leftParen \\\"(\\\"\\n                                  LabeledExprList\\n                                  rightParen \\\")\\\"\\n                        poundEndif \\\"#endif\\\"\\n                    CodeBlockItem\\n                      UnexpectedCodeDecl\\n                        UnexpectedNodes\\n                      semicolon \\\";\\\"\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

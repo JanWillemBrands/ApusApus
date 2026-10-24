@@ -60,10 +60,11 @@ struct GapFacts: OptionSet, Hashable {
 
     init(rawValue: UInt8) { self.rawValue = rawValue }
 
-    /// Classify a slice that consists of trivia only.
+    /// Classify a slice that consists of trivia only. Per scalar, like swiftc: `"\r\n"` is ONE
+    /// `Character`, equal to neither `"\n"` nor `"\r"`, so a CRLF gap would lose its line break.
     init(classifying gap: Substring) {
         var facts: GapFacts = []
-        for ch in gap {
+        for ch in gap.unicodeScalars {
             facts.insert(.nonEmpty)
             if ch == "\n" || ch == "\r" { facts.insert(.lineBreak) }
             else if ch == "/" { facts.insert(.comment) }

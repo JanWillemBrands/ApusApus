@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00001398-advent-overaccept-7cb5f856c2403ea1.json",
+    "durationSeconds" : 0.4385589361190796,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:glue:fuzz-harvest:ifconfig-of-attributes-else",
+    "index" : 1398,
+    "seed" : 8709271432583922472,
+    "signalHash" : "d02a6ae95aafa03c",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/VariableDecl\/AttributeList\/DeclModifierList\/keyword()\/PatternBindingList\/PatternBinding\/IdentifierPattern\/identifier()\/InitializerCla",
+    "sourceHash" : "7cb5f856c2403ea1",
+    "sourceLength" : 65,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\n#if A\n@objc\n#else\n@MainActor #endif\nfunc h() {}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n          IfConfigDecl\n            IfConfigClauseList\n              IfConfigClause\n                poundIf \"#if\"\n                DeclReferenceExpr\n                  identifier(\"A\") \"A\"\n                AttributeList\n                  Attribute\n                    atSign \"@\"\n                    IdentifierType\n                      identifier(\"MainActor\") \"MainActor\"\n            poundEndif \"#endif\"\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"h\") \"h\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E84EFE5D-8B31-4E0A-980D-93906082384C.swift:2:12: error: expected declaration\n1 | #if A\n2 | @MainActor #endif\n  |            `- error: expected declaration\n3 | func h() {}\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionBody\t[codeBlock]",
+      ".OPT\t[functionBody]",
+      "parameterClause\t[\"(\" \")\"]",
+      "functionSignature\t[parameterClause   >->(\"async\")]",
+      "identifierToken\t[identifier]",
+      "functionName\t[identifierToken]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "attributeHeadName\t[identifierToken]",
+      "attributeName\t[attributeHeadName ]",
+      "attribute\t[\"@\" >->(\"_backDeploy\" \"_documentation\" \"_dynamicReplacement\" \"_effects\" \"_implements\" \"_lifetime\" \"_originallyDefinedIn\" \"_specialize\" \"abi\" \"attached\" \"available\" \"backDeployed\" \"convention\" \"derivative\" \"differentiable\" \"freestanding\" \"isolated\" \"lifetime\" \"objc\" \"specialized\" \"transpose\") >s< attributeName ]",
+      "attributes\t[attribute ]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveAttributes\t[ifDirective compilationCondition attributes]",
+      "conditionalCompilationAttributes\t[ifDirectiveAttributes   endifDirective]",
+      "attributes\t[conditionalCompilationAttributes ]",
+      ".OPT\t[attributes]",
+      "functionHead\t[  \"func\" ]",
+      "functionDeclaration\t[functionHead functionName  functionSignature  ]",
+      "declaration\t[functionDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 179,
+      "descriptorCount" : 366,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 150,
+      "parseSeconds" : 0.012493014335632324,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 41,
+      "tokenCount" : 12,
+      "yieldCount" : 246
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"A\") \"A\"\n            CodeBlockItemList\n              CodeBlockItem\n                MissingDecl\n                  AttributeList\n                    Attribute\n                      atSign \"@\"\n                      IdentifierType\n                        identifier(\"MainActor\") \"MainActor\"\n                  DeclModifierList\n        poundEndif \"#endif\"\n    CodeBlockItem\n      FunctionDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.func) \"func\"\n        identifier(\"h\") \"h\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 36,
+  "source" : "#if A\n@MainActor #endif\nfunc h() {}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n          IfConfigDecl\\n            IfConfigClauseList\\n              IfConfigClause\\n                poundIf \\\"#if\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"A\\\") \\\"A\\\"\\n                AttributeList\\n                  Attribute\\n                    atSign \\\"@\\\"\\n                    IdentifierType\\n                      identifier(\\\"MainActor\\\") \\\"MainActor\\\"\\n            poundEndif \\\"#endif\\\"\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"h\\\") \\\"h\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E84EFE5D-8B31-4E0A-980D-93906082384C.swift:2:12: error: expected declaration\\n1 | #if A\\n2 | @MainActor #endif\\n  |            `- error: expected declaration\\n3 | func h() {}\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionBody\\t[codeBlock]\",\".OPT\\t[functionBody]\",\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionSignature\\t[parameterClause   >->(\\\"async\\\")]\",\"identifierToken\\t[identifier]\",\"functionName\\t[identifierToken]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"attributeHeadName\\t[identifierToken]\",\"attributeName\\t[attributeHeadName ]\",\"attribute\\t[\\\"@\\\" >->(\\\"_backDeploy\\\" \\\"_documentation\\\" \\\"_dynamicReplacement\\\" \\\"_effects\\\" \\\"_implements\\\" \\\"_lifetime\\\" \\\"_originallyDefinedIn\\\" \\\"_specialize\\\" \\\"abi\\\" \\\"attached\\\" \\\"available\\\" \\\"backDeployed\\\" \\\"convention\\\" \\\"derivative\\\" \\\"differentiable\\\" \\\"freestanding\\\" \\\"isolated\\\" \\\"lifetime\\\" \\\"objc\\\" \\\"specialized\\\" \\\"transpose\\\") >s< attributeName ]\",\"attributes\\t[attribute ]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveAttributes\\t[ifDirective compilationCondition attributes]\",\"conditionalCompilationAttributes\\t[ifDirectiveAttributes   endifDirective]\",\"attributes\\t[conditionalCompilationAttributes ]\",\".OPT\\t[attributes]\",\"functionHead\\t[  \\\"func\\\" ]\",\"functionDeclaration\\t[functionHead functionName  functionSignature  ]\",\"declaration\\t[functionDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":179,\"descriptorCount\":366,\"duplicateDescriptorCount\":0,\"oraclePruned\":150,\"parseSeconds\":0.012493014335632324,\"sourceLength\":35,\"suppressedDescriptorCount\":41,\"tokenCount\":12,\"yieldCount\":246},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"A\\\") \\\"A\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                MissingDecl\\n                  AttributeList\\n                    Attribute\\n                      atSign \\\"@\\\"\\n                      IdentifierType\\n                        identifier(\\\"MainActor\\\") \\\"MainActor\\\"\\n                  DeclModifierList\\n        poundEndif \\\"#endif\\\"\\n    CodeBlockItem\\n      FunctionDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.func) \\\"func\\\"\\n        identifier(\\\"h\\\") \\\"h\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

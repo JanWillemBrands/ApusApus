@@ -987,7 +987,7 @@ class ApusParser {
                 error += "^"
             }
             Logger.grammar.error("\(error, privacy: .public)")
-            throw ApusParserError.unexpectedToken(explanation: "Failed to parse grammar from symbol \(grammar.startSymbol)")
+            throw ApusParserError.unexpectedToken(explanation: error)
         }
     }
     

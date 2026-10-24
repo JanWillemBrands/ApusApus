@@ -291,3 +291,86 @@ item
 for try await item in stream {
 _ = item
 }
+
+### operator-split-before-regex
+let fuzzValue = ^^/abc/ + x=/0/ + (x)&/0/
+
+### reserved-piece-before-regex
+let fuzzValue = &/0/
+let fuzzOther = !/0/
+
+### dot-operator-before-regex
+let fuzzValue = ../abc/
+let fuzzOther = f(a, .+/0/, x../0/)
+
+### regex-after-previous-token-kinds
+let fuzzValue = [f() /x/, a[0] /x/, x++ /x/, "a" /x/, try? /x/, await /x/]
+
+### closure-labeled-tuple-body
+let fuzzValue = f {
+    (
+        interval: settings.interval,
+        attention: settings.attention
+    )
+}
+
+### closure-signature-missing-in
+let fuzzValue = f {
+    (x: Int) async -> Y
+}
+
+### closure-keyword-parameter-names
+let fuzzValue = f { (while, _ static: Int, `class`) in 1 }
+
+### operator-reference-elements
+let fuzzValue = (reduce(0, +), (&), f(a: !), (0, Swift::+), x[+])
+
+### postfix-ampersand-and-placeholder-keypath
+let fuzzValue = (P&, x& + 1, \_, \_?.x, \any.x)
+
+### tuple-pattern-trailing-comma
+let (fuzzA, fuzzB,) = t
+for (i, ) in xs {}
+if case (let a, let b,) = t {}
+
+### init-reference-before-brace
+let fuzzValue = init { 1 }
+do {} catch init {}
+
+### fixity-modifier-run
+prefix
+infix operator &+&
+
+### declaration-contexts
+struct FuzzS {
+    init() {}
+    subscript(i: Int) -> Int { 0 }
+    static func f() {}
+    open(set) var x = 1
+    deinit {}
+}
+extension FuzzS {
+    init(y: Int) {}
+}
+
+### file-scope-declarations-in-ifconfig
+#if FOO
+import Foundation
+infix operator +++
+#endif
+
+### macro-role-introduced-names
+@attached(member, names: named (init), named(class), named(+), prefixed(_), arbitrary)
+macro m() = #externalMacro(module: "M", type: "T")
+
+### attribute-decl-names
+@_dynamicReplacement(for: for())
+func f() {}
+struct FuzzS {
+    @_implements(P, self)
+    func g() {}
+}
+
+### self-as-identifier-names
+precedencegroup self {}
+protocol FuzzP<Self, A> {}

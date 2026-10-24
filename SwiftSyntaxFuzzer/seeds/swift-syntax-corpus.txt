@@ -9600,6 +9600,16 @@ default:
   0
 }
 
+### pattern:enum-case-nested-tuple-expression-pattern
+if case .foo((a, b)) = value {}
+
+### pattern:enum-case-generic-qualified-catch-pattern
+do {
+} catch Tree<ParsableCommand.Type>.InitializationError
+  .recursiveSubcommand(let command)
+{
+}
+
 ### reject:testTernary#1
 let a =
 
@@ -14679,6 +14689,9 @@ final public class C {}
 ### phase3-modifier:private-set
 struct S { private(set) var x = 1 }
 
+### phase3-modifier:open-set
+struct S { open(set) var x = 1 }
+
 ### phase3-modifier:static-let
 struct S { static let x = 1 }
 
@@ -14878,6 +14891,18 @@ extension S { func f() {} }
 ### phase4-attr:attr-extension
 @objc extension S {}
 
+### phase4-attr:attr-ifconfig-elseif-list
+#if A
+@available(*)
+#elseif B
+@available(*)
+#elseif C
+@available(*)
+#else
+@available(*)
+#endif
+func f() {}
+
 ### phase4-attr:generic-func
 func f<T>(x: T) {}
 
@@ -14932,6 +14957,12 @@ let a = { () throws -> Int in 1 }
 ### phase4-closure:closure-async
 let a = { () async -> Int in 1 }
 
+### phase4-closure:closure-array-literal-body
+let a = { [x, y] }
+
+### phase4-closure:closure-async-identifier-body
+let a = { async }
+
 ### phase4-closure:capture-weak-self
 let a = { [weak self] in f() }
 
@@ -14983,6 +15014,9 @@ class C { public init() {} }
 ### phase4-decl:init-body
 struct S { init() { x = 1 } }
 
+### phase4-decl:decl-name-keyword-labels
+struct S { func f() { _ = self.versions(for:); _ = self.match(case:in:) } }
+
 ### phase4-decl:op-infix
 infix operator +++
 
@@ -14992,8 +15026,19 @@ prefix operator +++
 ### phase4-decl:op-postfix
 postfix operator +++
 
+### phase4-decl:op-prefix-equals
+prefix operator =
+
+### phase4-decl:op-prefix-question
+prefix operator ?
+
 ### phase4-decl:op-precedence
 infix operator +++ : AdditionPrecedence
+
+### phase4-decl:bang-infix-newlines
+nonOptional
+!
+x
 
 ### phase4-decl:arrow-in-seq
 let a = (Int) -> Bool
@@ -15249,6 +15294,12 @@ let a = #"say \"hi\""#
 ### phase4-string:raw-empty
 let a = #""#
 
+### phase4-string:emoji-only
+let a = "🏿"
+
+### phase4-string:raw-emoji-only
+let a = #"🏿"#
+
 ### phase4-string:multiline
 let a = """
 abc
@@ -15263,6 +15314,11 @@ let a = """
 let a = #"""
 abc
 """#
+
+### phase4-string:raw-multiline-indent
+let a = #"""
+    abc
+    """#
 
 ### phase4-string:multiline-2line
 let a = """
@@ -15425,6 +15481,17 @@ func f() { let a = borrow x }
 ### phase4-macro:copy
 func f() { let a = copy x }
 
+### phase4-macro:each-trailing-closure-call
+func f() { each {} }
+
+### phase4-macro:each-newline-call
+func f() { each
+{} }
+
+### phase4-macro:each-newline-stmt
+func f() { each
+x }
+
 ### phase4-loop:for-in
 func f() { for x in xs { g(x) } }
 
@@ -15469,6 +15536,18 @@ struct S { subscript(i: Int) -> Int { 0 } }
 
 ### phase4-loop:subscript-getset
 struct S { subscript(i: Int) -> Int { get { 0 } set { } } }
+
+### phase4-accessor:get-typed-throws
+struct S { var x: Int { get throws(E) { 0 } } }
+
+### phase4-accessor:get-async-typed-throws
+struct S { var x: Int { get async throws(E) { 0 } } }
+
+### phase4-accessor:subscript-typed-throws
+struct S { subscript(i: Int) -> Int { get throws(any Error) { 0 } } }
+
+### phase4-accessor:protocol-typed-throws
+protocol P { var x: Int { get async throws(E) } }
 
 ### phase4-accessor:computed-shorthand
 struct S { var x: Int { 0 } }
@@ -15557,6 +15636,12 @@ func f() { guard #available(macOS 10.15, *) else { return } }
 ### phase4-available:avail-introduced
 @available(macOS, introduced: 10.15) func f() {}
 
+### phase4-available:avail-deprecated-version
+@available(*, deprecated: 10.15) func f() {}
+
+### phase4-available:avail-noasync
+@available(*, noasync) func f() {}
+
 ### phase4-available:avail-unavailable
 @available(*, unavailable) func f() {}
 
@@ -15633,4 +15718,1225 @@ extension S where T: _Class {}
 
 ### fuzz-harvest:suppressed-composition
 let v: ~Copyable & P = x
+
+### fuzz-harvest:ifconfig-leading-dot-nested
+#if os(macOS)
+#if FOO
+.member
+#endif
+#endif
+
+### fuzz-harvest:ifconfig-leading-dot-after-decl
+#if os(macOS)
+@MainActor
+func fuzz() {}
+#endif
+#if FOO
+.member
+#endif
+#if FOO
+let fuzzSentinel = 1
+#endif
+
+### fuzz-harvest:ifconfig-leading-dot-after-extension
+extension UInt8? {
+func fuzz() {}
+}
+#if FOO
+let fuzzSentinel = 1
+#endif
+#if FOO
+.member
+#endif
+
+### fuzz-harvest:lifetime-underscored
+@_lifetime(borrow e)
+func f(e: E) -> S {}
+
+### fuzz-harvest:lifetime-bare
+@lifetime(borrow e)
+func f(e: E) -> S {}
+
+### fuzz-harvest:lifetime-borrow-self
+struct S {
+  @_lifetime(borrow self)
+  public func f() -> T {}
+}
+
+### fuzz-harvest:lifetime-copy
+@_lifetime(copy e)
+func f(e: E) -> S {}
+
+### fuzz-harvest:lifetime-labelled
+@_lifetime(eOut: borrow e)
+func f(e: E) -> S {}
+
+### fuzz-harvest:lifetime-multiple
+@_lifetime(e1, e2)
+func f() -> S {}
+
+### fuzz-harvest:lifetime-inout
+@_lifetime(&e)
+func f() -> S {}
+
+### fuzz-harvest:ifconfig-dot-after-endif
+#if A
+#endif
+#if FOO
+.member
+#endif
+
+### fuzz-harvest:pack-element-type
+func f<each T>(_ v: each T) {}
+
+### fuzz-harvest:pack-expansion-tuple-type
+func f<each A, each B>(_ v: (repeat (each A, each B))) {}
+
+### fuzz-harvest:attribute-argument-trailing-comma
+@Test(arguments: values,
+)
+struct S {}
+
+### fuzz-harvest:dollar-identifier-continuation
+struct S { var _$id: Int = 0; func _$willModify() {} }
+let v = a$b
+
+### fuzz-harvest:leading-dollar-projection-still-valid
+let v = $abc
+let w = $0
+
+### fuzz-harvest:integer-generic-parameter
+struct S<let N: Int> {}
+
+### fuzz-harvest:return-newline-takes-expression
+func g() -> Int {
+  return
+  a
+}
+
+### fuzz-harvest:return-newline-then-two-statements
+func g() {
+  return
+  a
+  b()
+}
+
+### fuzz-harvest:break-newline-is-not-a-label
+func g() {
+  outer: for i in 0..<2 {
+    break
+    foo
+  }
+}
+
+### fuzz-harvest:continue-newline-is-not-a-label
+func g() {
+  outer: for i in 0..<2 {
+    continue
+    foo
+  }
+}
+
+### fuzz-harvest:break-label-same-line
+func g() {
+  outer: for i in 0..<2 {
+    break outer
+  }
+}
+
+### fuzz-harvest:semicolon-on-last-statement
+func g() {
+  a()
+  return;
+}
+
+### fuzz-harvest:semicolon-on-first-statement
+func g() {
+  a();
+  return
+}
+
+### fuzz-harvest:semicolon-on-every-statement
+func g() {
+  a();
+  b();
+  c();
+}
+
+### fuzz-harvest:semicolon-joins-one-line
+func g() {
+  a(); b()
+  c()
+}
+
+### fuzz-harvest:semicolon-on-last-member
+struct S {
+  var a = 1
+  var b = 2;
+}
+
+### fuzz-harvest:semicolon-on-first-member
+struct S {
+  var a = 1;
+  var b = 2
+}
+
+### fuzz-harvest:semicolon-last-member-in-ifconfig
+struct S {
+#if DEBUG
+  var a = 1
+  var b = 2;
+#endif
+}
+
+### fuzz-harvest:semicolon-first-member-in-ifconfig
+struct S {
+#if DEBUG
+  var a = 1;
+  var b = 2
+#endif
+}
+
+### fuzz-harvest:empty-ifconfig-then-decl
+func g() {
+#if D
+#endif
+    let c = 1
+}
+
+### fuzz-harvest:empty-ifconfig-then-nested-func
+func g() {
+#if D
+#endif
+    func h() {}
+}
+
+### fuzz-harvest:empty-ifconfig-then-member
+struct S {
+#if D
+#endif
+    var c = 1
+}
+
+### fuzz-harvest:empty-ifconfig-top-level
+#if D
+#endif
+let c = 1
+
+### fuzz-harvest:empty-ifconfig-else-then-decl
+func g() {
+#if D
+#else
+#endif
+    let c = 1
+}
+
+### fuzz-harvest:ifconfig-of-attributes
+#if A
+@objc
+#endif
+func h() {}
+
+### fuzz-harvest:ifconfig-of-attributes-else
+#if A
+@objc
+#else
+@MainActor
+#endif
+func h() {}
+
+### fuzz-harvest:ifconfig-body-semicolon-last
+func g() {
+#if A
+  a()
+  b();
+#endif
+}
+
+### fuzz-harvest:ifconfig-body-semicolon-first
+func g() {
+#if A
+  a();
+  b()
+#endif
+}
+
+### fuzz-harvest:ifconfig-else-body-semicolon
+func g() {
+#if A
+  a()
+#else
+  b();
+  c()
+#endif
+}
+
+### fuzz-harvest:ternary-in-if-condition-chain
+func g(a: Bool, b: Bool, c: Bool, d: Bool) {
+  if a ? b : c && d { }
+}
+
+### fuzz-harvest:ternary-in-while-condition-chain
+func g(a: Bool, b: Bool, c: Bool, d: Bool) {
+  while a ? b : c && d { }
+}
+
+### fuzz-harvest:ternary-in-guard-condition-chain
+func g(a: Bool, b: Bool, c: Bool, d: Bool) -> Int {
+  guard a ? b : c && d else { return 0 }
+  return 1
+}
+
+### fuzz-harvest:ternary-in-condition-comparisons
+func g(distance: Int, l: Int) {
+  if distance > 0 ? l >= 0 && l < distance : l <= 0 && distance < l { }
+}
+
+### fuzz-harvest:ternary-in-expression-chain
+func g(a: Bool, b: Bool, c: Bool, d: Bool) {
+  let v = a ? b : c && d
+  _ = v
+}
+
+### fuzz-harvest:trailing-closure-next-line
+func f(a: Int, _ c: () -> Void) {}
+f(a: 1)
+{ }
+
+### fuzz-harvest:trailing-closure-next-line-labeled
+func f(a: Int, _ c: () -> Void, b: () -> Void) {}
+f(a: 1)
+{ } b: { }
+
+### fuzz-harvest:trailing-closure-next-line-multiline-args
+func f(a: Int, _ c: () -> Void) {}
+f(
+  a: 1)
+{ }
+
+### fuzz-harvest:trailing-closure-same-line-still-works
+func f(a: Int, _ c: () -> Void, b: () -> Void) {}
+f(a: 1) { } b: { }
+
+### fuzz-harvest:condition-brace-is-not-trailing-closure
+func g(f: (Int) -> Bool, y: [Int]) {
+  if y.isEmpty { }
+  while y.isEmpty { }
+  for x in y.filter { $0 > 4 } { _ = x }
+}
+
+### fuzz-harvest:trailing-closure-next-line-parenless
+let v = x.map
+{ $0 }
+
+### fuzz-harvest:trailing-closure-chained-after-parens
+let v = f(1) {}
+{}
+
+### fuzz-harvest:three-non-adjacent-closure-suffixes
+let v = x.map {}.filter {}.sorted {}
+
+### fuzz-harvest:no-chain-onto-parenless-trailing-closure
+func f(x: [Void]) {
+  var y: [[Void]] = x.map { [$0] }
+  {
+    $0.reserveCapacity(1)
+  } (&y[0])
+}
+
+### fuzz-harvest:trailing-closure-on-forced-literal
+let v = 1! {}
+
+### fuzz-harvest:trailing-closure-on-subscripted-literal
+let v = [1][0] {}
+
+### fuzz-harvest:trailing-closure-on-literal-member
+let v = 1.description {}
+
+### fuzz-harvest:capture-weak-self-initialized
+let f = { [weak self = self] in _ = self }
+
+### fuzz-harvest:capture-self-initialized
+let f = { [self = x] in }
+
+### fuzz-harvest:capture-mixed-list
+let f = { [weak self = self, x, unowned y = z] (a: Int) in }
+
+### fuzz-harvest:capture-list-trailing-comma
+let f = { [x,] in x }
+
+### fuzz-harvest:capture-named-weak
+let f = { [weak weak] in }
+
+### fuzz-harvest:effect-unsafe-try
+func f() throws { return unsafe try body(1) }
+
+### fuzz-harvest:effect-unsafe-try-trailing-closure
+func f() throws { unsafe try self.withUnsafe { $0 } }
+
+### fuzz-harvest:effect-unsafe-await
+func f() async { _ = unsafe await g() }
+
+### fuzz-harvest:effect-await-try
+func f() async throws { _ = await try g() }
+
+### fuzz-harvest:effect-try-try
+_ = try try f()
+
+### fuzz-harvest:effect-try-on-if-expression
+func f() throws -> Int { return try if c { g() } else { 0 } }
+
+### fuzz-harvest:func-name-bang
+struct S { static prefix func ! (rhs: S) -> S { rhs } }
+
+### fuzz-harvest:func-name-dot-operator
+struct S { static func ..<(lhs: S, rhs: S) -> S { lhs } }
+
+### fuzz-harvest:operator-decl-bang
+prefix operator !
+
+### fuzz-harvest:placeholder-iuo
+var iterator: _! = merge.makeAsyncIterator()
+
+### fuzz-harvest:placeholder-optional
+let x: _? = y
+
+### fuzz-harvest:placeholder-metatype
+let t: _.Type = Int.self
+
+### fuzz-harvest:implicit-member-compound-case
+func f(e: E) { switch e { case .compare, .compareString(_:): break } }
+
+### fuzz-harvest:implicit-member-compound-expr
+let g: (Int) -> E = .x(_:)
+
+### fuzz-harvest:generic-args-empty-spaced-expr
+_ = A< >.self
+
+### fuzz-harvest:generic-args-tight-postfix-operator
+_ = A<>.self
+
+### fuzz-harvest:generic-args-empty-type
+let x: A<> = y
+
+### fuzz-harvest:generic-args-trailing-comma
+let x: A<Int,> = y
+
+### fuzz-harvest:extended-regex-after-call-line
+let x = Regex {
+  c(.w)
+  #/$/#
+}
+
+### fuzz-harvest:extended-regex-after-identifier-line
+c
+#/a/#
+
+### fuzz-harvest:metatype-optional
+let t: P.Type? = nil
+
+### fuzz-harvest:metatype-iuo
+var t: Any.Type! = nil
+
+### fuzz-harvest:protocol-metatype-optional
+let t: P.Protocol? = nil
+
+### fuzz-harvest:metatype-of-metatype
+let t: X.Type.Type = x
+
+### fuzz-harvest:member-type-named-types
+let x: A.Types = y
+
+### fuzz-harvest:member-type-named-typex
+let x: A.TypeX = y
+
+### fuzz-harvest:macro-escaped-name
+#`expect`(Bool(true))
+
+### fuzz-harvest:macro-escaped-keyword-name
+let v = #`if`(1)
+
+### fuzz-harvest:macro-escaped-name-decl
+struct S { #`m`(1) }
+
+### fuzz-harvest:objc-escaped-bare-selector
+@objc(`testExplicitNameWithBackticks`) func f() {}
+
+### fuzz-harvest:objc-escaped-selector-piece
+@objc(`x`:) func f(_ a: Int) {}
+
+### fuzz-harvest:suppressed-type-spaced-tilde
+struct S: ~ Copyable {}
+
+### fuzz-harvest:extension-metatype-tuple
+extension ().Type { func fuzz() {} }
+
+### fuzz-harvest:extension-placeholder-inherits
+extension _: HasTrailingCodeBlock { init() }
+
+### fuzz-harvest:extension-dotted-newline
+extension BooleanLiteralExprSyntax .
+ExpressibleByBooleanLiteral {}
+
+### fuzz-harvest:extension-function-type
+extension (Int) -> Void {}
+
+### fuzz-harvest:extension-any-type
+extension any P {}
+
+### fuzz-harvest:extension-attributed-type
+extension @MainActor Foo {}
+
+### fuzz-harvest:keypath-rootless-double-dot-operator
+fuzzValue = \..foo
+
+### fuzz-harvest:keypath-root-newline-bare-subscript-empty
+_ = \Foo
+[]
+
+### fuzz-harvest:keypath-root-newline-bare-subscript-multiline
+_ = \ABCProtocol
+[
+]
+
+### fuzz-harvest:keypath-root-newline-dotted-subscript
+_ = \Foo
+.[0]
+
+### fuzz-harvest:subscript-trailing-comma-single
+let v = a[x,]
+
+### fuzz-harvest:subscript-trailing-comma-assignment
+a[x,] = 1
+
+### fuzz-harvest:subscript-trailing-comma-multiple
+let v = a[x, y,]
+
+### fuzz-harvest:subscript-trailing-comma-multiline
+a[
+  x,
+] = 1
+
+### fuzz-harvest:closure-parenthesized-self-and-value
+_ = { (self, value) in }
+
+### fuzz-harvest:closure-parenthesized-self-only
+_ = { (self) in }
+
+### fuzz-harvest:closure-parenthesized-self-typed
+_ = { (self: Int) in }
+
+### fuzz-harvest:sameline-qualified-generic-member
+let s = "\(A.B<C>.d)"
+
+### fuzz-harvest:sameline-generic-member-self
+let s = "\(a.b<C>.self) x"
+
+### fuzz-harvest:condition-nested-trailing-closure-while
+func f() {
+  while g(x: {
+    d.h {
+    }
+  }) {}
+}
+
+### fuzz-harvest:condition-nested-trailing-closure-guard
+func f() throws {
+  guard a.allSatisfy({ x in
+    b.allSatisfy {
+      $0 == x
+    }
+  }) else { throw E.x }
+}
+
+### fuzz-harvest:condition-nested-trailing-closure-if
+func f() {
+  if a.contains(where: { x in b.contains {
+    $0 == x
+  } }) { continue }
+}
+
+### fuzz-harvest:keypath-infix-not-equal-nonfirst-argument
+_ = f(a, \S.n != x)
+
+### fuzz-harvest:multiline-interpolation-midline-indent
+let n = 0
+let s = """
+            | \(String(repeating: " ", count: n))               end
+            """
+
+### fuzz-harvest:raw-multiline-interpolation-tail-delimiter
+let field = ""
+let body = #"""
+{"usage":\#(field)}
+"""#
+let x = 1
+
+### fuzz-harvest:raw-multiline-interpolation-paired-parts
+let a = ##"""
+x \##(m)
+"""##
+let b = ##"""
+y \##(m)
+"""##
+
+### fuzz-harvest:raw-singleline-interpolation-tail-delimiter
+let id = x
+let a = #"\#(id.uuidString)"#
+let b = #"\#(id.uuidString)"#
+
+### fuzz-harvest:ifconfig-condition-wildcard
+#if _
+#endif
+
+### fuzz-harvest:ifconfig-condition-empty-tuple
+fuzz {
+#if ()
+#endif
+}
+
+### fuzz-harvest:ifconfig-condition-tuple-trailing-comma
+fuzz {
+#if (A, )
+#endif
+}
+
+### fuzz-harvest:ifconfig-condition-init
+#if FOO
+#if init
+#endif
+#endif
+
+### fuzz-harvest:ifconfig-condition-call-newline-in-parens
+#if os(
+macOS)
+#endif
+
+### fuzz-harvest:ifconfig-condition-operator-newline-in-parens
+#if (A
+|| B)
+#endif
+
+### fuzz-harvest:ifconfig-condition-call-args-newline
+Fuzz {
+#if () (
+)
+#endif
+}
+
+### fuzz-harvest:ifconfig-condition-canimport-version
+#if canImport(A, _version: 2.2) && !B || compiler(>=5)
+#endif
+
+### fuzz-harvest:tuple-single-element-trailing-comma
+let x = (A, )
+
+### fuzz-harvest:tuple-single-labeled-trailing-comma
+let x = (a: 1,)
+
+### fuzz-harvest:postfix-ifconfig-member-chain-clauses
+let v = base
+#if FOO
+.a
+#elseif B
+.b()
+#else
+.c[0]
+#endif
+
+### fuzz-harvest:postfix-ifconfig-trailing-closure-chain
+struct S { var body: some View {
+x.foo {}
+#if B
+.bar {}
+#endif
+} }
+
+### fuzz-harvest:ifconfig-body-nested-block-leading-dot
+#if A
+func f() {
+#if FOO
+.x
+#endif
+}
+#endif
+
+### fuzz-harvest:ifconfig-body-first-nested-leading-dot
+#if A
+#if FOO
+.methodOne
+#endif
+#endif
+
+### fuzz-harvest:comment-after-leading-dot-member
+./*c*/init()
+
+### fuzz-harvest:comment-after-newline-dot-member-generic
+x
+./*
+*/f< >()
+
+### fuzz-harvest:comment-after-dot-operator-in-subscript
+text[.../*c*/]
+
+### fuzz-harvest:generic-call-newline-after-angle
+let a = f<Int>
+()
+
+### fuzz-harvest:macro-generic-call-newline-after-angle
+let a = #foo<Int>
+()
+
+### fuzz-harvest:generic-call-block-comment-newline-after-angle
+let a = f<Int> /*
+*/ ()
+
+### fuzz-harvest:generic-member-newline-after-angle
+let a = f<Int>
+.x
+
+### fuzz-harvest:generic-function-type-newline-call-after-angle
+A<() -> D>/*
+*/()
+
+### fuzz-harvest:raw-string-short-closer-is-content
+let s = ##"\##(x) "#"##
+
+### fuzz-harvest:raw-string-short-interpolation-is-content
+let s = ##"\##(x)\#(y)"##
+
+### fuzz-harvest:raw-multiline-short-closer-line
+let s = ##"""
+\##(x)
+"""#
+"""##
+
+### fuzz-harvest:raw-string-triple-quote-single-line
+let s = #"""a"#
+
+### fuzz-harvest:string-nested-interpolations
+let s = "\(f("\(g(")"))"))"
+
+### fuzz-harvest:multiline-interpolation-block-comment
+let s = """
+  \(x /* c
+  */)
+  """
+
+### fuzz-harvest:multiline-string-crlf
+let s = """
+  a
+  b
+  """
+
+### fuzz-harvest:multiline-interpolated-string-crlf
+let s = """
+  a\(x)
+  b
+  """
+
+### fuzz-harvest:accessor-observer-after-getter
+var x: Int { get {} willSet {} }
+
+### fuzz-harvest:accessor-modifier-on-observer
+struct S { var x: Int { mutating willSet {} } }
+
+### fuzz-harvest:accessor-init-after-getter
+struct S {
+  var x: Int {
+    get { 0 }
+    init {}
+  }
+}
+
+### fuzz-harvest:accessor-address-with-owner
+struct S { var x: Int { addressWithOwner {} } }
+
+### fuzz-harvest:initializer-trailing-closure-with-get-call
+var x = f { get {} }
+
+### fuzz-harvest:initializer-self-trailing-closure
+struct S { static let value = Self { 1 } }
+
+### fuzz-harvest:initializer-self-multiple-trailing-closures
+struct S { static let value = Self { 1 } actions: { 2 } }
+
+### fuzz-harvest:initializer-then-block-on-next-line
+f {
+let foo
+= 1
+{ }
+}
+
+### fuzz-harvest:operator-before-block-comment
+let x = a */* c */ b
+
+### fuzz-harvest:operator-declaration-glued-arrow
+infix operator->
+
+### fuzz-harvest:actor-as-expression
+let actor = 1
+actor
+
+### fuzz-harvest:macro-then-declaration
+f {
+macro
+let x = 1
+}
+
+### fuzz-harvest:any-call-is-a-name
+_ = any(x)
+
+### fuzz-harvest:any-then-newline-is-a-name
+let x = any
+P
+
+### fuzz-harvest:ampersand-split-before-regex
+let y = &/0/
+
+### fuzz-harvest:bang-split-before-regex
+let y = !/0/
+
+### fuzz-harvest:left-bound-equal-slash-operator
+let y = x=/0/
+
+### fuzz-harvest:dot-operator-split-before-regex
+let y = ../0/
+
+### fuzz-harvest:dot-operator-split-before-regex-in-call
+f(a, .+/0/)
+
+### fuzz-harvest:left-bound-dot-operator-slash
+let y = x../0/
+
+### fuzz-harvest:closure-labeled-tuple-body
+let c = { (x: Int) }
+
+### fuzz-harvest:closure-labeled-member-tuple-body
+let c = f {
+    (
+        a: x.y,
+        b: z.w
+    )
+}
+
+### fuzz-harvest:closure-labeled-inout-tuple-body
+let c = { (x: inout Int) }
+
+### fuzz-harvest-reject:glued-dot-newline
+let v = x.
+member
+
+### fuzz-harvest-reject:constraint-self
+struct S<T: Self> {}
+
+### fuzz-harvest-reject:capture-specifier-without-name
+let f = { [weak] in }
+
+### fuzz-harvest-reject:capture-generic-self-type
+let f = { [Self<Int>] in }
+
+### fuzz-harvest-reject:func-name-arrow
+func ->(a: Int, b: Int) {}
+
+### fuzz-harvest-reject:func-name-equal
+func = (a: Int, b: Int) {}
+
+### fuzz-harvest-reject:func-name-question
+func ? (a: Int) {}
+
+### fuzz-harvest-reject:extended-regex-same-line-after-operand
+a #/b/#
+
+### fuzz-harvest-reject:constraint-wildcard
+struct S<T: _> {}
+
+### fuzz-harvest-reject:constraint-tuple
+struct S<T: (A)> {}
+
+### fuzz-harvest-reject:cast-then-less
+let v = x as Int < 5
+
+### fuzz-harvest-reject:cast-then-less-equal
+let v = x as Int <= 5
+
+### fuzz-harvest-reject:is-then-shift
+let v = x is Int << 2
+
+### fuzz-harvest-reject:cast-generic-optional
+let v = value as A<B>??x
+
+### fuzz-harvest-reject:implicit-member-array
+_ = .Bar.[2]
+
+### fuzz-harvest-reject:newline-member-array
+Foo // c
+.Bar.[2]
+
+### fuzz-harvest-reject:postfix-op-dot-space
+fuzz {
+LOOK(
+)*!*. // c
+exclaim()
+}
+
+### fuzz-harvest-reject:condition-tight-coalesce
+if rhs??b {}
+
+### fuzz-harvest-reject:constraint-repeat-each
+struct Fuzz<T: repeat each T> { var value: T }
+
+### fuzz-harvest-reject:member-ifconfig-leading-dot
+struct Fuzz {
+#if FOO
+.member
+#endif
+}
+
+### fuzz-harvest-reject:member-ifconfig-leading-dot-warning
+struct Fuzz {
+#if FOO
+.member
+#endif
+#warning("seed")
+}
+
+### fuzz-harvest-reject:ifconfig-condition-newline-call-overaccept
+struct Fuzz {
+#if A
+(if let x = value as? T ?? nil { _ = x })
+#endif
+}
+
+### fuzz-harvest-reject:enum-case-payload-newline
+switch bar {
+case .payload // c
+(borrowing x):
+  break
+}
+
+### fuzz-harvest-reject:ifconfig-condition-next-line
+#if
+A
+#endif
+
+### fuzz-harvest-reject:ifconfig-condition-next-line-in-closure
+{
+#if
+DEBUG
+#endif
+}
+
+### fuzz-harvest-reject:ifconfig-condition-operator-next-line
+#if A
+|| B
+#endif
+
+### fuzz-harvest-reject:ifconfig-condition-operand-next-line
+#if A ||
+B
+#endif
+
+### fuzz-harvest-reject:postfix-ifconfig-else-non-member
+{ v = x
+#if FOO
+.borrowing
+#else
+b
+#endif
+}
+
+### fuzz-harvest-reject:postfix-ifconfig-binary-tail-in-ifconfig-body
+#if A
+let fuzzValue = base
+#if FOO
+.methodOne + 12
+#endif
+#endif
+
+### fuzz-harvest-reject:comment-after-dot-without-member
+builder./*
+*/lexemeCount
+
+### fuzz-harvest-reject:raw-string-closer-too-short
+let s = ##"\##(x)"#
+
+### fuzz-harvest-reject:raw-string-closer-too-long
+let s = #"\#(x)"##
+
+### fuzz-harvest-reject:raw-multiline-closer-too-long
+let s = #"""
+\#(x)
+"""##
+
+### fuzz-harvest-reject:multiline-indent-after-interpolation
+let s = """
+  a \(x)
+ b
+  """
+
+### fuzz-harvest-reject:multiline-indent-inside-interpolation
+let s = """
+  \(
+x
+  )
+  """
+
+### fuzz-harvest-reject:raw-string-invalid-escape
+let s = #"\#q"#
+
+### fuzz-harvest-reject:unicode-escape-out-of-range
+let s = "\u{110000}"
+
+### fuzz-harvest-reject:unicode-escape-surrogate
+let s = "\u{D800}"
+
+### fuzz-harvest-reject:unicode-escape-nine-digits
+let s = "\u{123456789}"
+
+### fuzz-harvest-reject:single-line-string-tab
+let s = "a	b"
+
+### fuzz-harvest-reject:accessor-list-then-statement
+var i: Int {
+get {
+}
+x
+}
+
+### fuzz-harvest-reject:accessor-list-then-identifier
+var i {
+_read {
+}
+_i
+}
+
+### fuzz-harvest-reject:accessor-getter-arrow
+var i: Int { get -> Int }
+
+### fuzz-harvest-reject:accessor-semicolon-separator
+var x: Int { get {} ; set {} }
+
+### fuzz-harvest-reject:accessor-getter-parameter
+struct S { var x: Int { get(v) {} } }
+
+### fuzz-harvest-reject:block-comment-end-alone
+*/x
+
+### fuzz-harvest-reject:block-comment-end-as-operator
+a */ b
+
+### fuzz-harvest-reject:block-comment-end-inside-operator
+a +*/ b
+
+### fuzz-harvest-reject:block-comment-end-in-parens
+( (
+*/) )
+
+### fuzz-harvest-reject:block-comment-end-operator-declaration
+prefix operator */
+
+### fuzz-harvest-reject:operator-designated-trailing-comma
+infix operator +++ : P,
+let x = 1
+
+### fuzz-harvest-reject:operator-declaration-with-body
+f {
+infix operator +++
+{}
+}
+
+### fuzz-harvest-reject:operator-name-glued-bangs
+prefix operator!!
+
+### fuzz-harvest-reject:operator-name-glued-questions
+postfix operator??
+
+### fuzz-harvest-reject:actor-introducer-next-line
+actor
+A
+
+### fuzz-harvest-reject:macro-introducer-next-line
+macro
+m1
+
+### fuzz-harvest-reject:init-call-in-function
+func f() { init(x: 1) }
+
+### fuzz-harvest-reject:init-alone-in-closure
+f {
+init
+}
+
+### fuzz-harvest-reject:any-twice
+any any Q
+
+### fuzz-harvest-reject:any-type-with-trailing-closure
+any P {
+}
+
+### fuzz-harvest-reject:any-type-under-prefix-operator
+_ = <any Copyable
+
+### fuzz-harvest-reject:some-in-array-literal
+_ = [some P]()
+
+### fuzz-harvest-reject:glued-ampersand-in-array-literal
+_ = [P& Copyable]()
+
+### fuzz-harvest-reject:binding-brace-next-line-is-accessor-block
+f {
+var x
+{
+  get
+ reasync { }
+}
+}
+
+### fuzz-harvest-reject:closure-empty-params-result-missing-in
+f {
+() -> Y
+}
+
+### fuzz-harvest-reject:closure-shorthand-result-missing-in
+f {
+_ -> Y
+}
+
+### fuzz-harvest-reject:closure-empty-params-function-result-missing-in
+f {
+() -> Y -> Z
+}
+
+### fuzz-harvest-reject:call-argument-attributed-type-trailing-closure
+f(Int: @P M {})
+
+### fuzz-harvest-reject:interpolation-argument-attributed-type-trailing-closure
+_ = "a\(Int: @P M {})b"
+
+### fuzz-harvest-reject:ifconfig-condition-trailing-closure
+#if FOO { init() }
+#endif
+
+### fuzz-harvest-reject:ifconfig-condition-unclosed-regex-class
+#if FOO = /[abc/]
+#endif
+
+### fuzz-harvest-reject:compound-name-labels-next-line
+x
+(_:)
+
+### fuzz-harvest-reject:compound-member-labels-next-line
+let _ = object.method
+(_:
+)
+
+### fuzz-harvest-reject:compound-keypath-labels-next-line
+let _ = \Foo.method
+(_:)
+
+### fuzz-harvest-reject:equal-split-before-regex-statement
+do {
+=/0/
+}
+
+### fuzz-harvest-reject:equal-split-before-regex-initializer
+let y = =/0/
+
+### fuzz-harvest-reject:question-split-before-regex
+let y = ?/0/
+
+### fuzz-harvest-reject:left-bound-equal-slash-binding
+let r=/a/
+
+### fuzz-harvest-reject:period-split-before-regex
+let y = ./0/
+
+### fuzz-harvest-reject:arrow-split-before-regex
+f(->/0/)
+
+### regex-lookbehind:div-int-int
+let x = 1 / 2
+
+### regex-lookbehind:div-ident-ident
+let z = a / b
+
+### regex-lookbehind:div-call-int
+let z = f() / 2
+
+### regex-lookbehind:div-subscript
+let z = arr[0] / 2
+
+### regex-lookbehind:div-chain
+let r = 1 / 2 ; let s = 3 / 4
+
+### regex-lookbehind:regex-after-eq
+let r = /abc/
+
+### regex-lookbehind:regex-after-lparen
+let r = (/abc/)
+
+### regex-lookbehind:regex-in-array
+let arr = [/abc/]
+
+### regex-lookbehind:regex-after-try-bang
+let m = try! /^x/.wholeMatch(in: "hello")
+
+### regex-lookbehind:regex-after-try-question
+let m = try? /^x/.wholeMatch(in: "hello")
+
+### regex-lookbehind:ternary-with-spaces
+let r = b ? /1/ : /2/
+
+### regex-lookbehind:ternary-tight
+let r = b?/1/:/2/
+
+### regex-lookbehind:regex-interior-space
+let r = /a b/
+
+### regex-lookbehind:regex-interior-2-spaces
+let r = /a  b/
+
+### regex-lookbehind:regex-interior-3-spaces
+let r = /a   b/
+
+### regex-lookbehind:regex-interior-space-thrice
+let r = /a b c/
+
+### regex-lookbehind:regex-interior-space-group
+let r = /(a  b)/
+
+### regex-lookbehind:regex-interior-space-class
+let r = /[a b]/
+
+### regex-lookbehind:regex-escaped-space
+let r = /a\ b/
+
+### regex-lookbehind:slash-comment-after-operator
+let x = true
+let r = /x*// / value
+
+### regex-whitespace:regex-space
+_ = /a b/
+
+### regex-whitespace:regex-spaces
+_ = /a  b/
+
+### regex-whitespace:regex-group-space
+_ = /(a b)/
+
+### regex-whitespace:regex-class-space
+_ = /[ a]/
+
+### regex-whitespace-reject:regex-tab
+_ = /a	b/
+
+### regex-whitespace-reject:regex-group-tab
+_ = /(a	b)/
+
+### regex-whitespace-reject:regex-class-tab
+_ = /[a	b]/
+
+### regex-whitespace-reject:regex-escaped-tab
+_ = /a\	b/
 

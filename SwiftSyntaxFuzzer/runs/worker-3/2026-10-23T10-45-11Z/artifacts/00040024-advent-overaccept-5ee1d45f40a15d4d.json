@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00040024-advent-overaccept-5ee1d45f40a15d4d.json",
+    "durationSeconds" : 0.25753796100616455,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+newline:fuzz-harvest:actor-as-expression+real:SyntaxClassifier:92",
+    "index" : 40024,
+    "seed" : 8709271455669337765,
+    "signalHash" : "a5ad96de5f70a9d9",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionDecl\/AttributeList\/DeclModifierList\/keyword()\/identifier()\/FunctionSignature\/FunctionParameterClause\/leftParen\/FunctionParame",
+    "sourceHash" : "5ee1d45f40a15d4d",
+    "sourceLength" : 575,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nlet actor = 1\nactor\npublic struct SyntaxClassifiedRange: Equatable, Sendable {\n  public var kind: SyntaxClassification\n  public var range: Range<AbsolutePosition>\n\n  @available(*, deprecated, message: \"Use range.lowerBound.utf8Offset instead\")\n  public var offset: Int { return range.offset }\n\n  @available(\n*, deprecated, message: \"Use range.utf8Length instead\") public var length: Int { return range.length.utf8Length }\n\n  @available(*, deprecated, message: \"Use range.upperBound.utf8Offset instead\")\n  public var endOffset: Int { return range.endOffset }\n}\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            DeclReferenceExpr\n              identifier(\"actor\") \"actor\"\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n                DeclModifier\n                  keyword(SwiftSyntax.Keyword.public) \"public\"\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"Sendable\") \"Sendable\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8C9A6D99-7948-4E64-8113-B57656CE851C.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | actor\n3 | public struct Sendable {\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8C9A6D99-7948-4E64-8113-B57656CE851C.swift:2:1: error: keyword 'public' cannot be used as an identifier here\n1 |  {\n2 | actor\n  | `- error: keyword 'public' cannot be used as an identifier here\n3 | public struct Sendable {\n4 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-8C9A6D99-7948-4E64-8113-B57656CE851C.swift:3:1: error: attribute 'public' can only be used in a non-local scope\n1 |  {\n2 | actor\n3 | public struct Sendable {\n  | `- error: attribute 'public' can only be used in a non-local scope\n4 | }\n5 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "structName\t[identifierToken]",
+      ".DO\t[\"public\"]",
+      "accessLevelModifier\t[ ]",
+      "declarationModifier\t[accessLevelModifier]",
+      "declarationModifiers\t[declarationModifier ]",
+      ".OPT\t[declarationModifiers]",
+      "structDeclaration\t[  \"struct\" structName    \"{\"  \"}\"]",
+      "declaration\t[structDeclaration]",
+      "statement\t[declaration]",
+      "statementSeparator\t[<n>]",
+      ".KLN\t[statementSeparator statement]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 130,
+      "descriptorCount" : 242,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 68,
+      "parseSeconds" : 0.005537986755371094,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 24,
+      "tokenCount" : 8,
+      "yieldCount" : 151
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            ActorDecl\n              AttributeList\n              DeclModifierList\n              keyword(SwiftSyntax.Keyword.actor) \"actor\"\n              MemberBlock\n                MemberBlockItemList\n          CodeBlockItem\n            StructDecl\n              AttributeList\n              DeclModifierList\n                DeclModifier\n                  keyword(SwiftSyntax.Keyword.public) \"public\"\n              keyword(SwiftSyntax.Keyword.struct) \"struct\"\n              identifier(\"Sendable\") \"Sendable\"\n              MemberBlock\n                leftBrace \"{\"\n                MemberBlockItemList\n                rightBrace \"}\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 44,
+  "source" : " {\nactor\npublic struct Sendable {\n}\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            DeclReferenceExpr\\n              identifier(\\\"actor\\\") \\\"actor\\\"\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n                DeclModifier\\n                  keyword(SwiftSyntax.Keyword.public) \\\"public\\\"\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"Sendable\\\") \\\"Sendable\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8C9A6D99-7948-4E64-8113-B57656CE851C.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | actor\\n3 | public struct Sendable {\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8C9A6D99-7948-4E64-8113-B57656CE851C.swift:2:1: error: keyword 'public' cannot be used as an identifier here\\n1 |  {\\n2 | actor\\n  | `- error: keyword 'public' cannot be used as an identifier here\\n3 | public struct Sendable {\\n4 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-8C9A6D99-7948-4E64-8113-B57656CE851C.swift:3:1: error: attribute 'public' can only be used in a non-local scope\\n1 |  {\\n2 | actor\\n3 | public struct Sendable {\\n  | `- error: attribute 'public' can only be used in a non-local scope\\n4 | }\\n5 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"structName\\t[identifierToken]\",\".DO\\t[\\\"public\\\"]\",\"accessLevelModifier\\t[ ]\",\"declarationModifier\\t[accessLevelModifier]\",\"declarationModifiers\\t[declarationModifier ]\",\".OPT\\t[declarationModifiers]\",\"structDeclaration\\t[  \\\"struct\\\" structName    \\\"{\\\"  \\\"}\\\"]\",\"declaration\\t[structDeclaration]\",\"statement\\t[declaration]\",\"statementSeparator\\t[<n>]\",\".KLN\\t[statementSeparator statement]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":130,\"descriptorCount\":242,\"duplicateDescriptorCount\":0,\"oraclePruned\":68,\"parseSeconds\":0.005537986755371094,\"sourceLength\":37,\"suppressedDescriptorCount\":24,\"tokenCount\":8,\"yieldCount\":151},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            ActorDecl\\n              AttributeList\\n              DeclModifierList\\n              keyword(SwiftSyntax.Keyword.actor) \\\"actor\\\"\\n              MemberBlock\\n                MemberBlockItemList\\n          CodeBlockItem\\n            StructDecl\\n              AttributeList\\n              DeclModifierList\\n                DeclModifier\\n                  keyword(SwiftSyntax.Keyword.public) \\\"public\\\"\\n              keyword(SwiftSyntax.Keyword.struct) \\\"struct\\\"\\n              identifier(\\\"Sendable\\\") \\\"Sendable\\\"\\n              MemberBlock\\n                leftBrace \\\"{\\\"\\n                MemberBlockItemList\\n                rightBrace \\\"}\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

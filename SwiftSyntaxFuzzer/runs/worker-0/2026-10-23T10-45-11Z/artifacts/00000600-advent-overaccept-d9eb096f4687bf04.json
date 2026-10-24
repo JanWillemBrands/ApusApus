@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00000600-advent-overaccept-d9eb096f4687bf04.json",
+    "durationSeconds" : 0.319053053855896,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:glue+splice+newline:translated:testFunctionTypeExpr#24",
+    "index" : 600,
+    "seed" : 11400602294513644260,
+    "signalHash" : "fd073e572c6c1fbf",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/FunctionCallExpr\/DeclReferenceExpr\/identifier()\/LabeledExprList\/ClosureExpr\/leftBrace\/CodeBlockItemList\/CodeBlockItem\/MemberAccessExp",
+    "sourceHash" : "d9eb096f4687bf04",
+    "sourceLength" : 45,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fuzz {\n((A &B) -> (C . D) -> E & Any)\n.self\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  SequenceExpr\n                    ExprList\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                          LabeledExpr\n                            TypeExpr\n                              CompositionType\n                                CompositionTypeElementList\n                                  CompositionTypeElement\n                                    IdentifierType\n                                      identifier(\"A\") \"A\"\n                                    binaryOperator(\"&\") \"&\"\n                                  CompositionTypeElement\n                                    IdentifierType\n                                      identifier(\"B\") \"B\"\n                        rightParen \")\"\n                      ArrowExpr\n                        arrow \"->\"\n                      TypeExpr\n                        TupleType\n                          leftParen \"(\"\n                          TupleTypeElementList\n                          rightParen \")\"\n              rightParen \")\"\n        rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-F6E25D4E-283F-4706-8938-23FBF332439F.swift:1:2: error: top-level statement cannot begin with a closure expression\n1 |  {\n  |  `- error: top-level statement cannot begin with a closure expression\n2 | ((A &B) -> ( ) )\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-F6E25D4E-283F-4706-8938-23FBF332439F.swift:2:5: error: expected ',' separator\n1 |  {\n2 | ((A &B) -> ( ) )\n  |     `- error: expected ',' separator\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "simpleType\t[typeIdentifier]",
+      "protocolCompositionElement\t[simpleType]",
+      ".POS\t[\"&\" protocolCompositionElement]",
+      "protocolCompositionType\t[protocolCompositionElement ]",
+      "type\t[protocolCompositionType]",
+      "functionTypeArgument\t[type]",
+      "functionTypeArgumentList\t[functionTypeArgument ]",
+      "functionTypeArgumentClause\t[\"(\" functionTypeArgumentList   \")\"]",
+      "functionType\t[functionTypeArgumentClause  \"->\" >->(\"async\" \"await\" \"rethrows\" \"throw\" \"throws\" \"try\") type]",
+      "typePrimaryExpression\t[\"(\" functionType \")\"]",
+      "primaryExpression\t[typePrimaryExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "closureExpression\t[newlineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 153,
+      "descriptorCount" : 329,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 119,
+      "parseSeconds" : 0.0090409517288208,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 12,
+      "yieldCount" : 223
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClosureExpr\n        leftBrace \"{\"\n        CodeBlockItemList\n          CodeBlockItem\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  SequenceExpr\n                    ExprList\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                          LabeledExpr\n                            DeclReferenceExpr\n                              identifier(\"A\") \"A\"\n                        UnexpectedNodes\n                          prefixAmpersand \"&\"\n                          identifier(\"B\") \"B\"\n                        rightParen \")\"\n                      ArrowExpr\n                        arrow \"->\"\n                      TupleExpr\n                        leftParen \"(\"\n                        LabeledExprList\n                        rightParen \")\"\n              rightParen \")\"\n        rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " {\n((A &B) -> ( ) )\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  SequenceExpr\\n                    ExprList\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                          LabeledExpr\\n                            TypeExpr\\n                              CompositionType\\n                                CompositionTypeElementList\\n                                  CompositionTypeElement\\n                                    IdentifierType\\n                                      identifier(\\\"A\\\") \\\"A\\\"\\n                                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                                  CompositionTypeElement\\n                                    IdentifierType\\n                                      identifier(\\\"B\\\") \\\"B\\\"\\n                        rightParen \\\")\\\"\\n                      ArrowExpr\\n                        arrow \\\"->\\\"\\n                      TypeExpr\\n                        TupleType\\n                          leftParen \\\"(\\\"\\n                          TupleTypeElementList\\n                          rightParen \\\")\\\"\\n              rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-F6E25D4E-283F-4706-8938-23FBF332439F.swift:1:2: error: top-level statement cannot begin with a closure expression\\n1 |  {\\n  |  `- error: top-level statement cannot begin with a closure expression\\n2 | ((A &B) -> ( ) )\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-F6E25D4E-283F-4706-8938-23FBF332439F.swift:2:5: error: expected ',' separator\\n1 |  {\\n2 | ((A &B) -> ( ) )\\n  |     `- error: expected ',' separator\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"simpleType\\t[typeIdentifier]\",\"protocolCompositionElement\\t[simpleType]\",\".POS\\t[\\\"&\\\" protocolCompositionElement]\",\"protocolCompositionType\\t[protocolCompositionElement ]\",\"type\\t[protocolCompositionType]\",\"functionTypeArgument\\t[type]\",\"functionTypeArgumentList\\t[functionTypeArgument ]\",\"functionTypeArgumentClause\\t[\\\"(\\\" functionTypeArgumentList   \\\")\\\"]\",\"functionType\\t[functionTypeArgumentClause  \\\"->\\\" >->(\\\"async\\\" \\\"await\\\" \\\"rethrows\\\" \\\"throw\\\" \\\"throws\\\" \\\"try\\\") type]\",\"typePrimaryExpression\\t[\\\"(\\\" functionType \\\")\\\"]\",\"primaryExpression\\t[typePrimaryExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"closureExpression\\t[newlineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":153,\"descriptorCount\":329,\"duplicateDescriptorCount\":0,\"oraclePruned\":119,\"parseSeconds\":0.0090409517288208,\"sourceLength\":21,\"suppressedDescriptorCount\":33,\"tokenCount\":12,\"yieldCount\":223},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClosureExpr\\n        leftBrace \\\"{\\\"\\n        CodeBlockItemList\\n          CodeBlockItem\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  SequenceExpr\\n                    ExprList\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                          LabeledExpr\\n                            DeclReferenceExpr\\n                              identifier(\\\"A\\\") \\\"A\\\"\\n                        UnexpectedNodes\\n                          prefixAmpersand \\\"&\\\"\\n                          identifier(\\\"B\\\") \\\"B\\\"\\n                        rightParen \\\")\\\"\\n                      ArrowExpr\\n                        arrow \\\"->\\\"\\n                      TupleExpr\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                        rightParen \\\")\\\"\\n              rightParen \\\")\\\"\\n        rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -977,8 +977,6 @@ struct KeyPathGrammarTests {
     @Test("regex literal tab fixtures", arguments: [
         "let r = /a b/",
         "let r = /a  b/",
-        "let r = /)/",
-        "func f() { _ = ^^/)/ }",
         "func f() {\n_ = /x(()/\n}",
         "let x = true\nlet r = /x*// / value",
         "let z = a / b / c",
@@ -1001,18 +999,12 @@ struct KeyPathGrammarTests {
     }
 
     @Test("plain regex extent follows swiftc", arguments: [
-        "_ = /)/",
-        "_ = /))/",
-        "_ = /)]/",
         "_ = /[]]/",
-        "_ = /])/",
-        "_ = /),/",
         #"_ = /[\])/"#,
         "_ = (/)/",
         "_ = (/x)/",
         "foo(/E.e, /E.e)",
         "baz(^^/, /)",
-        "_ = ^/)/",
         "_ = /(/",
         "_ = /[/",
         "_ = /]/",
@@ -2329,11 +2321,13 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "member-compound-name",  source: "let v = x.y(a:b:)",                   origin: "Fuzz", syntaxVersion: "603.0.1"),
     // Generic constraints and requirements are any type.
     SwiftSnippet(label: "constraint-any",        source: "struct S<T: any P> {}",               origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "constraint-iuo",        source: "struct S<T: UInt8!> {}",              origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "constraint-iuo",        source: "struct S<T: UInt8!> {}",              origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: type 'T' constrained to non-protocol, non-class type 'UInt8?'"),
     SwiftSnippet(label: "constraint-suppressed", source: "struct S<T: ~Copyable & P> {}",       origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "requirement-suppressed", source: "func f<T>(_ x: T) where T: ~Copyable & P {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "requirement-self-member", source: "struct S<T> where T: Sequence.self {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "requirement-layout",    source: "extension S where T: _Class {}",      origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "requirement-layout",    source: "extension S where T: _Class {}",      origin: "Fuzz", syntaxVersion: "603.0.1",
+                 compilerRejects: "layout constraints are only allowed inside '_specialize' attributes"),
     SwiftSnippet(label: "suppressed-composition", source: "let v: ~Copyable & P = x",           origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-09-27 long fuzzer harvest: valid source-file `#if` bodies may start with `.member`.
     SwiftSnippet(label: "ifconfig-leading-dot-nested", source: "#if os(macOS)\n#if FOO\n.member\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2353,7 +2347,8 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "ifconfig-dot-after-endif",  source: "#if A\n#endif\n#if FOO\n.member\n#endif",  origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-09-29: formerly-classified rejects that are accepted by swiftc -swift-version 6,
     // swift-syntax, and ApusApus after the Swift 6.4 grammar cleanup.
-    SwiftSnippet(label: "pack-element-type", source: "func f<each T>(_ v: each T) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "pack-element-type", source: "func f<each T>(_ v: each T) {}", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: pack reference 'T' requires expansion using keyword 'repeat'"),
     SwiftSnippet(label: "pack-expansion-tuple-type", source: "func f<each A, each B>(_ v: (repeat (each A, each B))) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "attribute-argument-trailing-comma", source: "@Test(arguments: values,\n)\nstruct S {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "dollar-identifier-continuation", source: "struct S { var _$id: Int = 0; func _$willModify() {} }\nlet v = a$b", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2508,17 +2503,22 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "member-type-module-selector", source: "func fn(_: Foo.Swift::Bar) {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "suppressed-type-spaced-tilde", source: "struct S: ~ Copyable {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // Extension subjects are parsed as full types by swift-syntax (`parseExtensionDeclaration` -> `parseType`).
-    SwiftSnippet(label: "extension-metatype-tuple", source: "extension ().Type { func fuzz() {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "extension-placeholder-inherits", source: "extension _: HasTrailingCodeBlock { init() }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-metatype-tuple", source: "extension ().Type { func fuzz() {} }", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: cannot extend a metatype '().Type'"),
+    SwiftSnippet(label: "extension-placeholder-inherits", source: "extension _: HasTrailingCodeBlock { init() }", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: cannot extend a type that contains placeholders"),
     SwiftSnippet(label: "extension-dotted-newline", source: "extension BooleanLiteralExprSyntax .\nExpressibleByBooleanLiteral {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "extension-function-type", source: "extension (Int) -> Void {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "extension-function-type", source: "extension (Int) -> Void {}", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: non-nominal type '(Int) -> Void' cannot be extended"),
     SwiftSnippet(label: "extension-any-type", source: "extension any P {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "extension-attributed-type", source: "extension @MainActor Foo {}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // SwiftSyntax treats dot-operator starts after a rootless key path as the following expression,
     // and bare subscript key-path components cannot start a new line.
     SwiftSnippet(label: "keypath-rootless-double-dot-operator", source: "fuzzValue = \\..foo", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "keypath-root-newline-bare-subscript-empty", source: "_ = \\Foo\n[]", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "keypath-root-newline-bare-subscript-multiline", source: "_ = \\ABCProtocol\n[\n]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-root-newline-bare-subscript-empty", source: "_ = \\Foo\n[]", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: empty collection literal requires an explicit type"),
+    SwiftSnippet(label: "keypath-root-newline-bare-subscript-multiline", source: "_ = \\ABCProtocol\n[\n]", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: empty collection literal requires an explicit type"),
     SwiftSnippet(label: "keypath-root-newline-dotted-subscript", source: "_ = \\Foo\n.[0]", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // SE-0439: trailing commas are accepted in subscript argument lists, as in calls.
     SwiftSnippet(label: "subscript-trailing-comma-single", source: "let v = a[x,]", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2547,17 +2547,22 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "raw-singleline-interpolation-tail-delimiter", source: "let id = x\nlet a = #\"\\#(id.uuidString)\"#\nlet b = #\"\\#(id.uuidString)\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-10-06 `#if` clusters (TODO #2). The condition is a general expression; line breaks are
     // free inside brackets (`@sameLineOutsideBrackets`).
-    SwiftSnippet(label: "ifconfig-condition-wildcard", source: "#if _\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "ifconfig-condition-empty-tuple", source: "fuzz {\n#if ()\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-wildcard", source: "#if _\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: invalid conditional compilation expression"),
+    SwiftSnippet(label: "ifconfig-condition-empty-tuple", source: "fuzz {\n#if ()\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: invalid conditional compilation expression"),
     SwiftSnippet(label: "ifconfig-condition-tuple-trailing-comma", source: "fuzz {\n#if (A, )\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-condition-init", source: "#if FOO\n#if init\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-condition-call-newline-in-parens", source: "#if os(\nmacOS)\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-condition-operator-newline-in-parens", source: "#if (A\n|| B)\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "ifconfig-condition-call-args-newline", source: " Fuzz {\n#if () (\n)\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-condition-call-args-newline", source: " Fuzz {\n#if () (\n)\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: invalid conditional compilation expression"),
     SwiftSnippet(label: "ifconfig-condition-canimport-version", source: "#if canImport(A, _version: 2.2) && !B || compiler(>=5)\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "tuple-single-element-trailing-comma", source: "let x = (A, )", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "tuple-single-labeled-trailing-comma", source: "let x = (a: 1,)", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "tuple-single-labeled-trailing-comma", source: "let x = (a: 1,)", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: cannot create a single-element tuple with an element label"),
     SwiftSnippet(label: "postfix-ifconfig-member-chain-clauses", source: "let v = base\n#if FOO\n.a\n#elseif B\n.b()\n#else\n.c[0]\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "postfix-ifconfig-trailing-closure-chain", source: "struct S { var body: some View {\nx.foo {}\n#if B\n.bar {}\n#endif\n} }", origin: "Top100", syntaxVersion: "604.0.0"),
     SwiftSnippet(label: "ifconfig-body-nested-block-leading-dot", source: "#if A\nfunc f() {\n#if FOO\n.x\n#endif\n}\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "ifconfig-body-first-nested-leading-dot", source: "#if A\n#if FOO\n.methodOne\n#endif\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // Comment openers stop dot-operator tokens; they remain trivia between member/subscript pieces.
@@ -2569,7 +2574,8 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "macro-generic-call-newline-after-angle", source: "let a = #foo<Int>\n()", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "generic-call-block-comment-newline-after-angle", source: "let a = f<Int> /*\n*/ ()", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "generic-member-newline-after-angle", source: "let a = f<Int>\n.x", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "generic-function-type-newline-call-after-angle", source: "A<() -> D>/*\n*/()", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "generic-function-type-newline-call-after-angle", source: "A<() -> D>/*\n*/()", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: expected type before '->'"),
     // 2026-10-09 string literal scanner (TODO #15): the opener's `#` count rules every later token.
     SwiftSnippet(label: "raw-string-short-closer-is-content", source: "let s = ##\"\\##(x) \"#\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "raw-string-short-interpolation-is-content", source: "let s = ##\"\\##(x)\\#(y)\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2582,16 +2588,18 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "multiline-interpolated-string-crlf", source: "let s = \"\"\"\r\n  a\\(x)\r\n  b\r\n  \"\"\"", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-10-10 accessor blocks (TODO #1): one accessor list in any order, as swift-syntax
     // `parseAccessorBlock`; a trailing closure is refused only before an observer.
-    SwiftSnippet(label: "accessor-observer-after-getter", source: "var x: Int { get {} willSet {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "accessor-observer-after-getter", source: "var x: Int { get {} willSet {} }", origin: "Fuzz", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: 'willSet' cannot be provided together with a getter"),
     SwiftSnippet(label: "accessor-modifier-on-observer", source: "struct S { var x: Int { mutating willSet {} } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "accessor-init-after-getter", source: "struct S {\n  var x: Int {\n    get { 0 }\n    init {}\n  }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "accessor-address-with-owner", source: "struct S { var x: Int { addressWithOwner {} } }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "initializer-trailing-closure-with-get-call", source: "var x = f { get {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "initializer-self-trailing-closure", source: "struct S { static let value = Self { 1 } }", origin: "Top-100 crawl", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "initializer-self-multiple-trailing-closures", source: "struct S { static let value = Self { 1 } actions: { 2 } }", origin: "Top-100 crawl", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "initializer-then-block-on-next-line", source: "f {\nlet foo\n= 1\n{ }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-10-10 (TODO #2): `*/*` is the operator `*` followed by a block comment.
     SwiftSnippet(label: "operator-before-block-comment", source: "let x = a */* c */ b", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-10-10 operator declarations (TODO #3): a glued `->` is still a valid operator name.
-    SwiftSnippet(label: "operator-declaration-glued-arrow", source: "infix operator->", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-10-10 (TODO #4): `actor`/`macro` without a following name stay expressions.
     SwiftSnippet(label: "actor-as-expression", source: "let actor = 1\nactor", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "macro-then-declaration", source: "f {\nmacro\nlet x = 1\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2607,8 +2615,26 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "dot-operator-split-before-regex", source: "let y = ../0/", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "dot-operator-split-before-regex-in-call", source: "f(a, .+/0/)", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "left-bound-dot-operator-slash", source: "let y = x../0/", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-23 (TODO #1, Thaw crawl): without `in` or a top-level `->` a parenthesised closure body
+    // is a tuple, even when every element looks like `name: Type` (`canParseClosureSignature`).
+    SwiftSnippet(label: "closure-labeled-tuple-body", source: "let c = { (x: Int) }", origin: "Crawl", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: cannot create a single-element tuple with an element label"),
+    SwiftSnippet(label: "closure-labeled-member-tuple-body", source: "let c = f {\n    (\n        a: x.y,\n        b: z.w\n    )\n}", origin: "Crawl", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "closure-labeled-inout-tuple-body", source: "let c = { (x: inout Int) }", origin: "Crawl", syntaxVersion: "603.0.1",
+                 disabledReason: "parse-only: 'inout' may only be used on parameters"),
+    // 2026-10-23 (TODO #6): a leading closure is fine below file scope.
+    SwiftSnippet(label: "local-statement-starts-with-closure", source: "func f() {\n{ }()\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-23 (TODO #7): swiftc `parseGetSet` — protocol accessors are bodyless requirements.
+    SwiftSnippet(label: "protocol-accessor-requirements", source: "protocol P {\n  var x: Int { mutating get nonmutating set }\n  subscript(i: Int) -> Int { get async throws }\n  static var y: Int { @available(*, deprecated) get }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "protocol-accessor-requirement-in-ifconfig", source: "protocol P {\n#if X\nvar x: Int { set get }\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "accessors-with-bodies", source: "struct S {\n  var x: Int { mutating get async throws { 1 } }\n  subscript(i: Int) -> Int { get { 0 } set(v) {} }\n}\nvar y = 0 { willSet {} didSet {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
+    // swiftc commits `inout x` to a binding declaration (TODO #9, #18): these are errors, not an
+    // expression plus a declaration. Removing the `inout` declaration alternative regressed them silently.
+    SwiftSnippet(label: "inout-binding-call-body", source: "inout f() {}",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "inout-binding-await-call", source: "inout await(Swift :self)",     origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "inout-binding-operator",  source: " inout b/",                     origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "glued-dot-newline",     source: "let v = x.\nmember",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "constraint-self",       source: "struct S<T: Self> {}",                origin: "Fuzz", syntaxVersion: "603.0.1"),
     // `[weak]` is a specifier with no name (`parseClosureCaptureSpecifiers` consumes `weak`
@@ -2719,6 +2745,8 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     // 2026-10-11 (TODO #27): `.` and `->` split off before a regex are punctuation too.
     SwiftSnippet(label: "period-split-before-regex", source: "let y = ./0/", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "arrow-split-before-regex", source: "f(->/0/)", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-10-23 (TODO #7): outside a protocol every accessor has a body.
+    SwiftSnippet(label: "accessor-without-body-before-accessor", source: "var x: Int { get get {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - fuzz harvest fixes")
@@ -2966,7 +2994,7 @@ struct FuzzHarvestTests {
     func keywordsAsNames() throws {
         for source in [
             "inout a", "x = inout y", "any isolated", "f { (while) in }", "f { (static) in }",
-            "{ (throws\n) -> Void in }",
+            "_ = { (throws\n) -> Void in }",  // a bare top-level closure is a swiftc error
             "precedencegroup self {}", "typealias Z = ~some",
             "do {} catch init {}", "@attached(member, names: named (init)) macro m()",
             "@_dynamicReplacement(for: for()) func f() {}", "switch x { case let E-> (): break }",
@@ -2985,6 +3013,47 @@ struct FuzzHarvestTests {
             #expect(try adventParse(source) == nil, "split invalid operator declaration into statements: \(source)")
         }
         #expect(try adventParse("prefix\noperator +++") != nil)
+    }
+
+    @Test("swiftc-only rejects: top-level closures (TODO #6), accessor bodies by context (TODO #7)")
+    func compilerOnlyRejects() throws {
+        // swift-syntax accepts all of these; swiftc rejects them at parse time.
+        for source in [
+            "{ }",
+            "let a = 1\n{ }()",
+            "#if X\n{ }\n#endif",
+            "struct S { var x: Int { get set } }",
+            "var y = 0 { didSet }",
+            "protocol P { var x: Int { get {} } }",
+            "protocol P { var x: Int { 1 } }",
+            "protocol P { var x: Int { _read } }",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted a compiler-rejected source: \(source)")
+        }
+    }
+
+    @Test("parse-only sources: swiftc parses them, no program compiles them, Advent rejects (2026-10-23)")
+    func parseOnlyRejects() throws {
+        // Decided 2026-10-23: the grammar does not carry rules whose only job is accepting these.
+        for source in [
+            "_ = Any { }",                      // 'Any' cannot be constructed
+            "if let nil = y {}",                // pattern matching in a condition requires 'case'
+            "if let ([]) = x {}",
+            "infix operator ->",                // cannot declare a custom 'infix' '->' operator
+            "infix operator->",
+            "postfix operator->",
+            "_ = /)/",                          // a regex with a `)` that closes nothing
+            "_ = /))/",
+            "_ = /)]/",
+            "_ = /])/",
+            "_ = /),/",
+            "_ = /})/",
+            "_ = ^/)/",
+            "func f() { _ = ^^/)/ }",
+            "let r = /)/",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted a parse-only source: \(source)")
+        }
     }
 
     @Test("TODO #26 declarations obey file, member, and local context")
@@ -4362,14 +4431,15 @@ struct SwiftSyntaxTests {
         /// Advent's keeps the pair locked together.
         ///
         /// The arrow is position-dependent: `->` is punctuation in an expression (reachable
-        /// only via `ArrowExprSyntax`) but a legal NAME in an operator declaration, and is
-        /// rejected in a function name. The generic-`<` peel-off is a separate axis — see
+        /// only via `ArrowExprSyntax`), a parse-only NAME in an operator declaration (Advent
+        /// rejects it, it never compiles), and rejected in a function name. The generic-`<` peel-off is a separate axis — see
         /// `functionNameOperator` / `@preempt(openAngle)` in Swift.apus.
         @Test("operator terminals: arrow position and generic peel-off match swift")
         func operatorTerminalFamilyProbe() throws {
-            // `->` as a DECLARED operator name: legal.
+            // `->` as a DECLARED operator name: parses, but never compiles ("cannot declare a custom
+            // 'infix' '->' operator"), so Advent rejects it (see `parseOnlyRejects`).
             #expect(!Parser.parse(source: "infix operator ->").hasError)
-            #expect(try adventParse("infix operator ->") != nil)
+            #expect(try adventParse("infix operator ->") == nil)
 
             // `->` as a FUNCTION name: "expected identifier in function".
             #expect(Parser.parse(source: "func ->(a: Int, b: Int) {}").hasError)

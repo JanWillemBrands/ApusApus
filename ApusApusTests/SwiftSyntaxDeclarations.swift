@@ -505,7 +505,7 @@ let declarationSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAccessors",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1", compilerRejects: "expected '{' to start getter definition"
     ),
     SwiftSnippet(
         label: "testInitAccessor#1",
@@ -1828,7 +1828,7 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAccessors",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05", compilerRejects: "expected '{' to start getter definition"
     ),
     SwiftSnippet(
         label: "testInitAccessor#1",
@@ -2403,7 +2403,7 @@ let declaration604Snippets: [SwiftSnippet] = [
         origin: "DeclarationTests.testEnumCaseWithGenericParameter",
         syntaxVersion: "604.0.0-prerelease-2026-06-05"
     ),
-    SwiftSnippet(label: "testLiteralInitializerWithTrailingClosure#1", source: "let foo = 1 { return 1 }", origin: "DeclarationTests.testLiteralInitializerWithTrailingClosure", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+    SwiftSnippet(label: "testLiteralInitializerWithTrailingClosure#1", source: "let foo = 1 { return 1 }", origin: "DeclarationTests.testLiteralInitializerWithTrailingClosure", syntaxVersion: "604.0.0-prerelease-2026-06-05", compilerRejects: "computed property must have an explicit type"),
     SwiftSnippet(label: "testInitializerWithReturnType#1", source: "init(_ ptr: UnsafeRawBufferPointer, _ a: borrowing Array<Int>) -> dependsOn(a) Self", origin: "DeclarationTests.testInitializerWithReturnType", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testInitializerWithReturnType#2", source: "public init() -> Int", origin: "DeclarationTests.testInitializerWithReturnType", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testSendingTypeSpecifier#1", source: "func testVarDeclTupleElt() -> (sending String, String) {}", origin: "DeclarationTests.testSendingTypeSpecifier", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
@@ -2598,7 +2598,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAccessorBlockDisambiguationMarker",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected '{' to start getter definition"
     ),
     SwiftSnippet(
         label: "testAccessorBlockAfterPatternBindingDeclWithAttribute#1",

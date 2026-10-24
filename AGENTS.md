@@ -1,3 +1,9 @@
+When using Bend:
+- run `bend guide` to learn it
+- use `LAWS.bend` to keep important rules
+- run `bend PROOF.bend` before committing
+- parallelize the code whenever possible
+
 ## Default Working Mode
 
 - This project/repository originated as Advent / AOC2021.  It is now called ApusApus, but references to the old names may persist.
@@ -5,8 +11,6 @@
 - Keep file reads minimal and targeted.
 - Make only targeted edits for the requested task.
 - Always run full builds and full test suites, unless it's very low risk to run a limited one.
-- Long builds and test runs may exceed 120 seconds; let them finish while they continue to make
-  observable progress. Stop and replan only after 10 minutes without progress.
 
 ## Tool Selection (Critical)
 
@@ -65,10 +69,24 @@ See `TESTING.md` for the full approach. Non-negotiable rules distilled from prio
 - **Always build before running a DerivedData binary** (stale products persist);
   `main.swift`/CLI diagnostics go to OSLog (`com.magenta.apusParser`), not stdout — an
   empty stdout with exit 1 is usually a grammar-load failure.
-- **Probe swift-syntax truth with `Parser.parse(source:).hasError`**, not `swiftc -parse`
-  (they diverge on trivia).
+- **The compiler is the truth for acceptance** (`swiftc -swift-version 6 -parse`); swift-syntax
+  (`Parser.parse(source:).hasError`) is a clue, and the reference for tree shape. When they
+  disagree the compiler wins: mark the fixture `compilerRejects:` or `disabledReason:`.
 - **MCP `RunSomeTests` smart-reruns** only previously-failing args after the first call
   (and a `.apus` edit isn't a "changed input"); use `xcodebuild` directly for true
   full-parameter counts.
 - **Fix by root cause, not per-test**; prefer structural `.apus` fixes over
   `@prefer`/oracle hacks; re-harvest ambiguity + run the affected suite after each change.
+
+### Fuzz Findings: Parse-Only Sources (agreed 2026-10-24)
+
+- A fuzz sample proves something about the grammar only if some program could compile it. Before
+  changing the grammar for an underaccept, tree difference or ambiguity, type-check the sample with
+  its names declared. If no program can compile it, it is **parse-only**: change the grammar only
+  when the change also simplifies it; otherwise record the decision in `TODO.md`.
+- The fuzzer probe applies this itself (status `parse-only`, `SwiftSyntaxFuzzer/FUZZER.md`).
+  Overaccepts are never triaged: when `swiftc -parse` rejects, APUS rejects.
+- Before adding an accept fixture harvested from the fuzzer, run `tools/check_parse_only.py` on it
+  (same verdict as the probe). A parse-only source is not an accept fixture: leave it out, or add it
+  to `parseOnlyRejects` (SwiftSyntaxTests.swift) when APUS rejects it; existing ones carry
+  `disabledReason: "parse-only: …"`.
