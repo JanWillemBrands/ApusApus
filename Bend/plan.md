@@ -15,3 +15,11 @@ Proposed low-hanging fruit, in order
 3. Adopt good trees as the specification for cyclic grammars, before step 4b.
 4. Split SPEC.bend from LAWS.bend􀰓.
 5. Later: an ambiguity law, and deciding validation versus proof for grammar transformations.
+
+
+If you agree, the order would be:
+1. slot navigation and the engine;
+2. checking it on the paper's examples;
+3. the closedness checker and its proof;
+4. the generalized pruning;
+5. gll_bsr_exact.
