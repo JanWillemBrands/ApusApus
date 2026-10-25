@@ -21,8 +21,35 @@ type Tree is Data:
   Leaf{kind: Nat}
   Node{index: Nat, children: +List<Tree>}
 
-# A binary subtree (BSR element): production `index` covers the input from position
-# i up to position j, and its last symbol starts at the pivot k. For A = "t" the
-# pivot is i; for A = B C, B covers i .. k and C covers k .. j.
+# A grammar slot: production `index` with its first `dot` symbols recognized.
+type Slot is Data:
+  Slot{index: Nat, dot: Nat}
+
+# A binary subtree (BSR element): the recognized symbols of the slot cover the
+# input from position i up to position j, and the last of them starts at the
+# pivot k. When dot is the length of the right side the whole production is
+# covered; for an empty right side the element is Bsr{Slot{index, 0}, i, i, i}.
 type Bsr is Data:
-  Bsr{index: Nat, i: Nat, k: Nat, j: Nat}
+  Bsr{slot: Slot, i: Nat, k: Nat, j: Nat}
+
+# Reading the grammar: what production `index` says.
+
+# Is production `index` a production of nonterminal `id`?
+def lhsIs(+grammar: +List<Production>, index: Nat, +id: Nat) -> Bool:
+  match grammar index:
+    case Nil{} _:
+      False{}
+    case Con{Production{lhs, rhs}, rest} 0n:
+      Nat.is_eq(lhs, id)
+    case Con{p, rest} 1n+i:
+      lhsIs(rest, i, id)
+
+# The right side of production `index` (empty when there is no such production).
+def rhsOf(+grammar: +List<Production>, index: Nat) -> +List<Symbol>:
+  match grammar index:
+    case Nil{} _:
+      []
+    case Con{Production{lhs, rhs}, rest} 0n:
+      rhs
+    case Con{p, rest} 1n+i:
+      rhsOf(rest, i)

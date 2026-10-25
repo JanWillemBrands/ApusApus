@@ -1,7 +1,7 @@
 import Base
 import ./TYPES.bend as Types
 
-# STEP 4: recursive grammars.
+# The parser: a CYK table, then the binary subtree (BSR) set built from it.
 
 def natMember(+x: Nat, xs: +List<Nat>) -> Bool:
   match xs:
@@ -103,16 +103,11 @@ def buildTable(+grammar: +List<Types.Production>, +inputTokens: +List<Nat>, +cou
       +shorterTable = buildTable(grammar, inputTokens, count, shorter)
       List.append(&2, Cell, row(grammar, inputTokens, shorterTable, 1n+shorter, count), shorterTable)
 
-# CYK accepts when the start symbol is in the cell for the whole input.
-def recognize(+grammar: +List<Types.Production>, +start: Nat, +inputTokens: +List<Nat>) -> Bool:
-  +count = List.length(&2, Nat, inputTokens)
-  natMember(start, lookup(buildTable(grammar, inputTokens, count, count), 0n, count))
-
 # BINARY SUBTREE SETS: every derivation step of every parse tree, as BSR elements.
 #
-# A step for A = "t" at position s is Bsr{p, s, s, s + 1}, when the token at s is t.
+# A step for A = "t" at position s is Bsr{Slot{p, 1}, s, s, s + 1}, when the token at s is t.
 # A step for A = B C over the span (s, l), split after k tokens, is
-# Bsr{p, s, s + k, s + l}, when B is in the cell for (s, k) and C in the cell for
+# Bsr{Slot{p, 2}, s, s + k, s + l}, when B is in the cell for (s, k) and C in the cell for
 # (s + k, l - k).
 
 def keepBsr(keep: Bool, element: Types.Bsr, others: +List<Types.Bsr>) -> +List<Types.Bsr>:
@@ -128,7 +123,7 @@ def terminalSteps(grammar: +List<Types.Production>, +kind: Nat, +s: Nat, +index:
     case Nil{}:
       Nil{}
     case Con{Types.Production{lhs, [Types.Terminal{k}]}, rest}:
-      keepBsr(Nat.is_eq(k, kind), Types.Bsr{index, s, s, 1n+s}, terminalSteps(rest, kind, s, 1n+index))
+      keepBsr(Nat.is_eq(k, kind), Types.Bsr{Types.Slot{index, 1n}, s, s, 1n+s}, terminalSteps(rest, kind, s, 1n+index))
     case Con{other, rest}:
       terminalSteps(rest, kind, s, 1n+index)
 
@@ -138,7 +133,7 @@ def binarySteps(grammar: +List<Types.Production>, +lefts: +List<Nat>, +rights: +
     case Nil{}:
       Nil{}
     case Con{Types.Production{lhs, [Types.Nonterminal{b}, Types.Nonterminal{c}]}, rest}:
-      keepBsr(Bool.and(natMember(b, lefts), natMember(c, rights)), Types.Bsr{index, i, k, j}, binarySteps(rest, lefts, rights, i, k, j, 1n+index))
+      keepBsr(Bool.and(natMember(b, lefts), natMember(c, rights)), Types.Bsr{Types.Slot{index, 2n}, i, k, j}, binarySteps(rest, lefts, rights, i, k, j, 1n+index))
     case Con{other, rest}:
       binarySteps(rest, lefts, rights, i, k, j, 1n+index)
 
@@ -184,7 +179,106 @@ def allSteps(+grammar: +List<Types.Production>, +inputTokens: +List<Nat>, +table
     case 1n+(+shorter):
       List.append(&2, Types.Bsr, rowSteps(grammar, inputTokens, table, 1n+shorter, count), allSteps(grammar, inputTokens, table, count, shorter))
 
-# The BSR set of the input: the CYK table, then every derivation step it supports.
-def bsrSet(+grammar: +List<Types.Production>, +inputTokens: +List<Nat>) -> +List<Types.Bsr>:
+# Every derivation step the CYK table supports, connected to the root or not.
+def cykSteps(+grammar: +List<Types.Production>, +inputTokens: +List<Nat>) -> +List<Types.Bsr>:
   +count = List.length(&2, Nat, inputTokens)
   allSteps(grammar, inputTokens, buildTable(grammar, inputTokens, count, count), count, count)
+
+# PRUNING: keep only the steps that contribute to a parse tree of the whole input.
+# A need asks for the steps of nonterminal a over i .. j. The first need is the
+# start symbol over the whole input; a kept step A = B C over i .. j with pivot k
+# needs B over i .. k and C over k .. j.
+
+type Need is Data:
+  Need{a: Nat, i: Nat, j: Nat}
+
+def needMember(+need: Need, needs: +List<Need>) -> Bool:
+  match need needs:
+    case _ Nil{}:
+      False{}
+    case Need{+a, +i, +j} Con{Need{a2, i2, j2}, rest}:
+      Bool.or(Bool.and(Nat.is_eq(a, a2), Bool.and(Nat.is_eq(i, i2), Nat.is_eq(j, j2))), needMember(Need{a, i, j}, rest))
+
+# The nonterminal of production `index` (0 when there is no such production).
+def lhsOf(+grammar: +List<Types.Production>, index: Nat) -> Nat:
+  match grammar index:
+    case Nil{} _:
+      0n
+    case Con{Types.Production{lhs, rhs}, rest} 0n:
+      lhs
+    case Con{p, rest} 1n+i:
+      lhsOf(rest, i)
+
+def isNeeded(+grammar: +List<Types.Production>, +needs: +List<Need>, element: Types.Bsr) -> Bool:
+  match element:
+    case Types.Bsr{Types.Slot{+p, d}, +i, k, +j}:
+      needMember(Need{lhsOf(grammar, p), i, j}, needs)
+
+def keepNeeded(keep: Bool, element: Types.Bsr, others: +List<Types.Bsr>) -> +List<Types.Bsr>:
+  match keep:
+    case False{}:
+      others
+    case True{}:
+      element <> others
+
+def filterNeeded(+grammar: +List<Types.Production>, +needs: +List<Need>, steps: +List<Types.Bsr>) -> +List<Types.Bsr>:
+  match steps:
+    case Nil{}:
+      Nil{}
+    case Con{+element, rest}:
+      keepNeeded(isNeeded(grammar, needs, element), element, filterNeeded(grammar, needs, rest))
+
+# What a complete step A = B C over i .. j with pivot k needs; other steps need nothing.
+def pairNeeds(rhs: +List<Types.Symbol>, +i: Nat, +k: Nat, +j: Nat) -> +List<Need>:
+  match rhs:
+    case Nil{}:
+      Nil{}
+    case Con{Types.Terminal{t}, more}:
+      Nil{}
+    case Con{Types.Nonterminal{b}, Nil{}}:
+      Nil{}
+    case Con{Types.Nonterminal{b}, Con{Types.Terminal{t}, more}}:
+      Nil{}
+    case Con{Types.Nonterminal{b}, Con{Types.Nonterminal{c}, Nil{}}}:
+      [Need{b, i, k}, Need{c, k, j}]
+    case Con{Types.Nonterminal{b}, Con{Types.Nonterminal{c}, Con{x, more}}}:
+      Nil{}
+
+def childNeeds(+grammar: +List<Types.Production>, element: Types.Bsr) -> +List<Need>:
+  match element:
+    case Types.Bsr{Types.Slot{p, 0n}, i, k, j}:
+      Nil{}
+    case Types.Bsr{Types.Slot{p, 1n+0n}, i, k, j}:
+      Nil{}
+    case Types.Bsr{Types.Slot{p, 1n+1n+0n}, +i, +k, +j}:
+      pairNeeds(Types.rhsOf(grammar, p), i, k, j)
+    case Types.Bsr{Types.Slot{p, 1n+1n+1n+more}, i, k, j}:
+      Nil{}
+
+def allChildNeeds(+grammar: +List<Types.Production>, kept: +List<Types.Bsr>) -> +List<Need>:
+  match kept:
+    case Nil{}:
+      Nil{}
+    case Con{element, rest}:
+      List.append(&2, Need, childNeeds(grammar, element), allChildNeeds(grammar, rest))
+
+# The needs after n rounds: each round adds what the steps needed so far need.
+def needsAt(+grammar: +List<Types.Production>, +start: Nat, +count: Nat, +steps: +List<Types.Bsr>, n: Nat) -> +List<Need>:
+  match n:
+    case 0n:
+      [Need{start, 0n, count}]
+    case 1n+(+m):
+      +before = needsAt(grammar, start, count, steps, m)
+      List.append(&2, Need, before, allChildNeeds(grammar, filterNeeded(grammar, before, steps)))
+
+# The BSR set of the input: the CYK steps that a parse tree of the whole input needs.
+# A need is for a shorter span than the step that needs it, so `count` rounds reach
+# every node of every parse tree.
+def bsrSet(+grammar: +List<Types.Production>, +start: Nat, +inputTokens: +List<Nat>) -> +List<Types.Bsr>:
+  +count = List.length(&2, Nat, inputTokens)
+  +steps = cykSteps(grammar, inputTokens)
+  filterNeeded(grammar, needsAt(grammar, start, count, steps, count), steps)
+
+# The recognizer: the input is accepted when the BSR set is not empty.
+def recognize(+grammar: +List<Types.Production>, +start: Nat, +inputTokens: +List<Nat>) -> Bool:
+  Bool.not(List.is_empty(&2, Types.Bsr, bsrSet(grammar, start, inputTokens)))

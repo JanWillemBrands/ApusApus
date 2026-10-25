@@ -145,6 +145,31 @@ def or_mono_right(x, y, z, e, f):
     case False{}:
       f(e)
 
+law or_false_right:
+  for x: Bool
+  for e: {Bool.or(x, False{}) == True{} : Bool}
+  {x == True{} : Bool}
+
+def or_false_right(x, e):
+  match x:
+    case False{}:
+      e
+    case True{}:
+      {==}
+
+law or_and_false:
+  for x: Bool
+  for -m: Bool
+  for e: {Bool.or(Bool.and(x, False{}), m) == True{} : Bool}
+  {m == True{} : Bool}
+
+def or_and_false(x, m, e):
+  match x:
+    case False{}:
+      e
+    case True{}:
+      e
+
 # ---- Nat ----
 
 # Nat.is_eq says True for equal numbers.
@@ -421,6 +446,144 @@ def lt_pos(s, n, lt):
       Empty.absurd({Nat.is_le(1n, 0n) == True{} : Bool}, lt_zero_false(s, lt))
     case 1n+q:
       zero_le(q)
+
+#
+# Every element of the set is either a leaf step Bsr{Slot{p, 1}, s, s, s + 1} whose
+# production is p = "t" with t the token at s, or a step Bsr{Slot{p, 2}, i, k, j}
+# whose production is p = B C, with B in the table cell for i .. k and C in the
+# cell for k .. j. All three BSR laws start from this fact.
+
+
+law sub_zero:
+  for n: Nat
+  {Nat.sub(n, 0n) == n : Nat}
+
+def sub_zero(n):
+  match n:
+    case 0n:
+      {==}
+    case 1n+p:
+      {==}
+
+law sub_add_left:
+  for i: Nat
+  for +x: Nat
+  {Nat.sub(Nat.add(i, x), i) == x : Nat}
+
+def sub_add_left(i, x):
+  match i:
+    case 0n:
+      sub_zero(x)
+    case 1n+p:
+      sub_add_left(p, x)
+
+law sub_add_add:
+  for i: Nat
+  for +x: Nat
+  for +y: Nat
+  {Nat.sub(Nat.add(i, Nat.add(x, y)), Nat.add(i, x)) == y : Nat}
+
+def sub_add_add(i, x, y):
+  match i:
+    case 0n:
+      sub_add_left(x, y)
+    case 1n+p:
+      sub_add_add(p, x, y)
+
+law lt_self_add:
+  for a: Nat
+  for +r: Nat
+  {Nat.is_lt(a, Nat.add(a, 1n+r)) == True{} : Bool}
+
+def lt_self_add(a, r):
+  match a:
+    case 0n:
+      {==}
+    case 1n+p:
+      lt_self_add(p, r)
+
+law lt_offset:
+  for i: Nat
+  for +a: Nat
+  for +r: Nat
+  {Nat.is_lt(Nat.add(i, a), Nat.add(i, Nat.add(a, 1n+r))) == True{} : Bool}
+
+def lt_offset(i, a, r):
+  match i:
+    case 0n:
+      lt_self_add(a, r)
+    case 1n+p:
+      lt_offset(p, a, r)
+
+law add_sub_cancel:
+  for i: Nat
+  for k: Nat
+  for lt: {Nat.is_lt(i, k) == True{} : Bool}
+  {Nat.add(i, Nat.sub(k, i)) == k : Nat}
+
+def add_sub_cancel(i, k, lt):
+  match i k:
+    case 0n _:
+      sub_zero(k)
+    case 1n+p 0n:
+      Empty.absurd({Nat.add(1n+p, Nat.sub(0n, 1n+p)) == 0n : Nat}, false_is_not_true(lt))
+    case 1n+p 1n+q:
+      %add_sub_cancel(p, q, lt) : {1n+Nat.add(p, Nat.sub(q, p)) == 1n+_ : Nat}
+      {==}
+
+law lt_of_succ_le:
+  for a: Nat
+  for b: Nat
+  for e: {Nat.is_le(1n+a, b) == True{} : Bool}
+  {Nat.is_lt(a, b) == True{} : Bool}
+
+def lt_of_succ_le(a, b, e):
+  match a b:
+    case _ 0n:
+      Empty.absurd({Nat.is_lt(a, 0n) == True{} : Bool}, false_is_not_true(e))
+    case 0n 1n+q:
+      {==}
+    case 1n+p 1n+q:
+      lt_of_succ_le(p, q, e)
+
+law le_of_succ_le:
+  for a: Nat
+  for b: Nat
+  for e: {Nat.is_le(1n+a, b) == True{} : Bool}
+  {Nat.is_le(a, b) == True{} : Bool}
+
+def le_of_succ_le(a, b, e):
+  match a b:
+    case _ 0n:
+      Empty.absurd({Nat.is_le(a, 0n) == True{} : Bool}, false_is_not_true(e))
+    case 0n 1n+q:
+      {==}
+    case 1n+p 1n+q:
+      le_of_succ_le(p, q, e)
+
+law add_congr:
+  for -a: Nat
+  for -b: Nat
+  for -c: Nat
+  for -d: Nat
+  for ab: {a == b : Nat}
+  for cd: {c == d : Nat}
+  {Nat.add(a, c) == Nat.add(b, d) : Nat}
+
+def add_congr(a, b, c, d, ab, cd):
+  %Equal.sym(Nat, a, b, ab) : {Nat.add(_, c) == Nat.add(b, d) : Nat}
+  %Equal.sym(Nat, c, d, cd) : {Nat.add(b, _) == Nat.add(b, d) : Nat}
+  {==}
+
+law nat_eq_of_eq:
+  for +a: Nat
+  for -b: Nat
+  for e: {a == b : Nat}
+  {Nat.is_eq(a, b) == True{} : Bool}
+
+def nat_eq_of_eq(a, b, e):
+  %e : {Nat.is_eq(a, _) == True{} : Bool}
+  nat_eq_refl(a)
 
 # ---- Maybe ----
 
