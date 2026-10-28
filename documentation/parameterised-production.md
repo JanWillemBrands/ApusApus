@@ -79,9 +79,8 @@ raw strings, interpolation, regexes, embedded languages or indentation, they sho
 a separate controlled-recognition facility. Any state affecting future recognition would have to
 participate in descriptor identity and, therefore, must not enter through this feature accidentally.
 
-Likewise, `@sameLineOutsideBrackets` should not be preserved by turning it into a production
-parameter. Conditional-compilation conditions should own their line-boundary protocol as part of
-the `#if` construct.
+Likewise, conditional-compilation conditions should own their line-boundary protocol as part of
+the `#if` construct, not through a production parameter.
 
 ## Lessons learned
 
@@ -248,7 +247,7 @@ Once all conditional-compilation forms are equivalent, remove duplicated rule fa
 the remaining uses of:
 
 - `ifConfigBody` flavors;
-- `@sameLineOutsideBrackets`;
+- the conditional-compilation line-boundary protocol;
 - special lookaround routes;
 - duplicated conditional-clause converters.
 

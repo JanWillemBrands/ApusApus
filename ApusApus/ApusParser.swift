@@ -204,9 +204,6 @@ class ApusParser {
         //       forward). May repeat; lists union, also across several definitions of one
         //       nonterminal. See `Parser Flavors Specialization.md`.
         //   `@longest` / `@shortest` — node-level extent of this nonterminal.
-        //   `@sameLineOutsideBrackets` — a whole-nonterminal span property: the Oracle prunes this
-        //       nonterminal's LHS completion yields; not an alternate-level notion. Line breaks
-        //       inside brackets are free.
         //   `@literalMunch` — a regex terminal participating in literal-suppression maximal munch
         //       (TODO #0).
         //   `@preempt(X)` / `@preempt(X, N)` — this terminal's maximal munch must not swallow
@@ -221,7 +218,6 @@ class ApusParser {
         // an unknown pragma here is an error.
         var flavorScope: UInt64 = 0
         var disambiguationAnnotation: Disambiguation?
-        var sameLineOutsideBrackets = false
         var isLiteralMunchAnnotation = false
         var preemptStartName: String? = nil
         var preemptConstructName: String? = nil
@@ -251,10 +247,6 @@ class ApusParser {
                 throw ApusParserError.unexpectedToken(
                     explanation: "@\(token.stripped) is an alternate-level associativity filter; "
                                + "write it after the `=` or `|`, on the alternate it governs")
-            case "sameLineOutsideBrackets":
-                try once("@sameLineOutsideBrackets")
-                sameLineOutsideBrackets = true
-                cI += 1
             case "literalMunch":
                 try once("@literalMunch")
                 isLiteralMunchAnnotation = true
@@ -276,7 +268,7 @@ class ApusParser {
             default:
                 throw ApusParserError.unexpectedToken(
                     explanation: "@\(token.stripped) is not a production pragma "
-                               + "(@flavors @longest @shortest @sameLineOutsideBrackets @literalMunch @preempt)")
+                               + "(@flavors @longest @shortest @literalMunch @preempt)")
             }
         }
         try expect(["identifier"])
@@ -386,9 +378,6 @@ class ApusParser {
                 lhsNode.disambiguation = d
             }
             lhsNode.flavorScope |= flavorScope
-            if sameLineOutsideBrackets {
-                lhsNode.sameLineOutsideBrackets = true
-            }
             try expect(["."])
             cI += 1
             

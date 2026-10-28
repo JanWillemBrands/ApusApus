@@ -53,7 +53,7 @@ protocol DisambiguationRule {
 ///                            initializer, the filter then removed the chain, and nothing was
 ///                            left.
 enum OraclePass: Int, CaseIterable {
-    /// Monotone language constraints: `@canParse`/`@cannotParse`, `@sameLineOutsideBrackets`.
+    /// Monotone language constraints: `@canParse`/`@cannotParse`.
     case filter
     /// Same-span choice among sibling alternates: `@prefer`, `@avoid` (explicit siblings).
     case sameSpan
@@ -227,220 +227,6 @@ struct BinarySpanExtent: Hashable {
     let to: CharPosition
 }
 
-/// `@sameLineOutsideBrackets`. Prunes a yield unless at least one surviving derivation of that
-/// yield crosses no line break in token-to-token trivia outside brackets: inside a body that opens
-/// with `(`, `[` or `{` and closes with the matching token, every gap up to the closer may break the
-/// line. Newlines INSIDE token content (a multiline string, a block comment) are never in a gap. A
-/// trailing newline after the annotated span is also legal: only gaps before another token in the
-/// same span are crossed.
-///
-/// Models swift-syntax's `ExprFlavor.poundIfDirective`. That flavor checks `atStartOfLine` only
-/// along the expression spine — before a binary operator, its right operand and a postfix suffix
-/// (`Expressions.swift` 160/181/201/780) — and every delimited form re-parses its contents as
-/// `.basic` (1439, 2840). So `#if os(⏎macOS)` is clean and `#if A⏎|| B` is not.
-///
-/// The check is derivation-local. It tiles the candidate yield over the current BSR forest and, for
-/// each terminal tile, reads that exact commit's trailing-trivia facts. It never asks "what commits
-/// ended at this cursor?" globally, so dead or competing derivations cannot make a live same-line
-/// derivation look as if it crossed a newline.
-struct SameLineSpanRule: DisambiguationRule {
-    var pass: OraclePass { .filter }
-    /// Which token-to-token gaps of a sub-derivation may hold a line break.
-    private enum Gaps: Hashable {
-        case none       // no gap, not even the trailing one
-        case trailing   // only the gap after the sub-derivation's last token
-        case any        // every gap (inside brackets)
-    }
-    private struct NodeSpanMode: Hashable {
-        let id: ObjectIdentifier
-        let from: CharPosition
-        let to: CharPosition
-        let gaps: Gaps
-    }
-
-    let parser: MessageParser
-    let node: GrammarNode
-
-    /// Literal terminal names keep their quotes: the `"("` terminal is named `"("`.
-    private static let closers: [String: String] = [#""(""#: #"")""#, #""[""#: #""]""#, #""{""#: #""}""#]
-
-    /// The number of leading body symbols whose gaps are free: an opener up to (excluding) its
-    /// matching closer. The closer and anything after it keep the enclosing policy.
-    private func bracketedPrefix(_ body: [GrammarNode]) -> Int {
-        guard let open = body.first, open.kind.isTerminal,
-              let close = Self.closers[open.name],
-              let c = body.lastIndex(where: { $0.kind.isTerminal && $0.name == close }), c > 0
-        else { return 0 }
-        return c
-    }
-
-    func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        let navigator = YieldNavigator(parser: parser)
-        var nodeMemo: [NodeSpanMode: Bool] = [:]
-        var nodeStack = Set<NodeSpanMode>()
-        var symbolMemo: [NodeSpanMode: Bool] = [:]
-        var closureMemo: [NodeSpanMode: Bool] = [:]
-        // Cycle cuts. Re-entering an in-progress `(node, span)` answers `false` PROVISIONALLY: the
-        // outer frame may still find a derivation. A `false` computed beneath such a cut is not a
-        // fact and must not be memoised, or a same-span unit chain (`expression → … →
-        // postfixExpression → … → expression`) caches "no derivation" for every node on the chain.
-        // `true` is always a fact. So: memoise `false` only when no cut happened while computing it.
-        var cycleCuts = 0
-        func memoise(_ memo: inout [NodeSpanMode: Bool], _ key: NodeSpanMode, _ result: Bool, cutsBefore: Int) {
-            if result || cycleCuts == cutsBefore { memo[key] = result }
-        }
-
-        func validNode(_ nt: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
-            let key = NodeSpanMode(id: ObjectIdentifier(nt), from: from, to: to, gaps: gaps)
-            if let cached = nodeMemo[key] { return cached }
-            guard nodeStack.insert(key).inserted else {
-                cycleCuts += 1
-                return false
-            }
-            defer { nodeStack.remove(key) }
-            guard navigator.hasSpan(nt, i: from, j: to) else {
-                nodeMemo[key] = false
-                return false
-            }
-            let cutsBefore = cycleCuts
-            var alt = nt.alt
-            while let a = alt {
-                defer { alt = a.alt }
-                let body = a.bodySymbols.filter { $0.kind != .EPS }
-                if body.isEmpty {
-                    if from == to {
-                        nodeMemo[key] = true
-                        return true
-                    }
-                } else if validBody(body[...], from: from, to: to, gaps: gaps, freeCount: bracketedPrefix(body)) {
-                    nodeMemo[key] = true
-                    return true
-                }
-            }
-            memoise(&nodeMemo, key, false, cutsBefore: cutsBefore)
-            return false
-        }
-
-        func validSymbol(_ sym: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
-            let key = NodeSpanMode(id: ObjectIdentifier(sym), from: from, to: to, gaps: gaps)
-            if let cached = symbolMemo[key] { return cached }
-            let cutsBefore = cycleCuts
-            let result: Bool
-            switch sym.kind {
-            case .T, .TI, .C:
-                guard navigator.hasPivotSpan(sym, k: from, j: to) else {
-                    result = false
-                    break
-                }
-                guard gaps == .none,
-                      let id = sym.nameID,
-                      let gap = parser.terminalGapFacts(terminalID: id, triviaStart: from, triviaEnd: to) else {
-                    result = true
-                    break
-                }
-                result = !gap.contains(.lineBreak)
-            case .B:
-                result = navigator.hasPivotSpan(sym, k: from, j: to)
-            case .EPS:
-                result = from == to
-            case .N:
-                guard navigator.hasPivotSpan(sym, k: from, j: to), let lhs = sym.alt else {
-                    result = false
-                    break
-                }
-                result = validNode(lhs, from: from, to: to, gaps: gaps)
-            case .DO, .OPT:
-                if from == to, sym.kind == .OPT {
-                    result = true
-                } else {
-                    result = validBracket(sym, from: from, to: to, gaps: gaps)
-                }
-            case .KLN, .POS:
-                if from == to, sym.kind == .KLN {
-                    result = true
-                } else {
-                    result = validClosure(sym, from: from, to: to, gaps: gaps)
-                }
-            default:
-                result = true
-            }
-            memoise(&symbolMemo, key, result, cutsBefore: cutsBefore)
-            return result
-        }
-
-        /// `freeCount`: how many leading symbols lie inside a bracket pair (`bracketedPrefix`) and so
-        /// may break the line anywhere.
-        func validBody(_ symbols: ArraySlice<GrammarNode>, from: CharPosition, to: CharPosition, gaps: Gaps,
-                       freeCount: Int = 0) -> Bool {
-            guard let first = symbols.first else { return from == to }
-            let rest = symbols.dropFirst()
-            let restFree = max(freeCount - 1, 0)
-            for mid in navigator.endPositions(first, from: from).sorted() where mid <= to {
-                // The head's trailing gap IS the span's trailing gap whenever the rest matches zero
-                // width — not only when the head is syntactically last. `A⏎` in `expression` is
-                // followed by empty `{ postfixSuffix }` etc.; no token follows, so nothing is crossed.
-                let headGaps: Gaps = gaps == .any || freeCount > 0 ? .any : (mid == to ? gaps : .none)
-                // SUFFIX FIRST. Validating the head before knowing the rest fits made a left-recursive
-                // alternate visit its head over the WHOLE span — `explicitMemberExpression [a..b]`
-                // checked `postfixExpression [a..b]`, which recursed straight back into the
-                // in-progress `explicitMemberExpression [a..b]`. The cycle guard answered `false`, that
-                // answer was MEMOISED for `postfixExpression [a..b]`, and the real derivation that
-                // needed it later (`a.b<C>` as the base of `.d` in `"\(a.b<C>.d)"`) was pruned.
-                // A split whose suffix cannot tile is never part of a derivation, so skip it before
-                // recursing into the head.
-                guard validBody(rest, from: mid, to: to, gaps: gaps, freeCount: restFree),
-                      validSymbol(first, from: from, to: mid, gaps: headGaps) else {
-                    continue
-                }
-                return true
-            }
-            return false
-        }
-
-        func validBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
-            var alt = bracket.alt
-            while let a = alt {
-                defer { alt = a.alt }
-                let body = a.bodySymbols.filter { $0.kind != .EPS }
-                if body.isEmpty {
-                    if from == to { return true }
-                } else if validBody(body[...], from: from, to: to, gaps: gaps, freeCount: bracketedPrefix(body)) {
-                    return true
-                }
-            }
-            return false
-        }
-
-        func validClosure(_ bracket: GrammarNode, from: CharPosition, to: CharPosition, gaps: Gaps) -> Bool {
-            let key = NodeSpanMode(id: ObjectIdentifier(bracket), from: from, to: to, gaps: gaps)
-            if let cached = closureMemo[key] { return cached }
-            let cutsBefore = cycleCuts
-            if from == to {
-                let result = bracket.kind == .KLN
-                closureMemo[key] = result
-                return result
-            }
-            for end in navigator.iterationEndPositions(bracket, from: from).sorted() where end > from && end <= to {
-                let isLast = end == to
-                if validBracket(bracket, from: from, to: end,
-                                gaps: isLast || gaps == .any ? gaps : .none),
-                   (isLast || validClosure(bracket, from: end, to: to, gaps: gaps)) {
-                    closureMemo[key] = true
-                    return true
-                }
-            }
-            memoise(&closureMemo, key, false, cutsBefore: cutsBefore)
-            return false
-        }
-
-        var pruned = 0
-        for span in yields where !validNode(node, from: span.i, to: span.j, gaps: .trailing) {
-            yields.remove(span)
-            pruned += 1
-        }
-        return pruned
-    }
-}
 
 // MARK: - Oracle
 
@@ -479,8 +265,8 @@ class Oracle {
     ///
     /// This used to be asserted as an invariant ("pruning may reduce the number of derivations,
     /// never to zero"). That premise is false for this grammar: rejecting invalid input by removing
-    /// its LAST reading is a deliberate mechanism — hard constraints (`@cannotParse`,
-    /// `@sameLineOutsideBrackets`, …) and preferences such as literal munch do exactly that for every reject
+    /// its LAST reading is a deliberate mechanism — hard constraints such as `@cannotParse` and
+    /// preferences such as literal munch do exactly that for every reject
     /// fixture. Once the assert ran in every configuration (2026-09-25) it fired on ~60 correct
     /// rejections per run. It is now a TRACE only: with `APUS_TRACE_ORACLE=1` the phase that
     /// removed the root is printed, which is what localises a genuine over-prune on VALID input
@@ -491,19 +277,6 @@ class Oracle {
             $0.i == input.startIndex && $0.j == input.endIndex
         }
         print("oracle-trace: after \(phase): root full-span yield \(alive ? "ALIVE" : "*** GONE ***")")
-    }
-
-    /// `@sameLineOutsideBrackets` — anchored on the LHS, whose completion yields have `i == k` and `j` =
-    /// the true end, i.e. the exact span of the construct. A body-symbol anchor cannot work: its yield is
-    /// `(i = production start, k = symbol start, j = SYMBOL end)`, so the first symbol gives too
-    /// little and the last gives an extent that measured wrong in practice (6 valid inputs pruned).
-    ///
-    /// The prune removes LHS yields, so it applies to EVERY alternate of the annotated nonterminal.
-    /// Put `@sameLineOutsideBrackets` only on a nonterminal whose alternates all need the rule.
-    /// (An earlier "exactly one alternate" assertion was a proxy for this and is gone.)
-    private func registerSameLine(nonTerminal nt: GrammarNode) {
-        guard nt.sameLineOutsideBrackets else { return }
-        rules.append((nt, SameLineSpanRule(parser: parser, node: nt)))
     }
 
     private struct NodeSpan: Hashable { let id: ObjectIdentifier; let from, to: CharPosition }
@@ -530,8 +303,6 @@ class Oracle {
             registerNodeDisambiguation(owner: nt)
             // Alternate-level @prefer / @avoid on the nonterminal's own alt chain.
             registerPrefer(altChainHead: nt.alt)
-            // `@sameLineOutsideBrackets` — anchored on the LHS, see below.
-            registerSameLine(nonTerminal: nt)
         }
 
         // Full-graph walk for the pragmas that live on a NESTED node — every ALT-bearing
@@ -612,8 +383,6 @@ class Oracle {
                               AssociativityFilterRule(forbiddenExtents: extents,
                                                       childIsRightmost: filter.direction == .left)))
             }
-            // `@sameLineOutsideBrackets` is registered per nonterminal, not here — it must
-            // anchor on LHS completion yields to get the construct's exact span.
             // Every production is a root below, so an RHS reference (`.alt` → its LHS) is not
             // followed: that would make the recursion as deep as the whole grammar graph.
             if node.kind != .END { walk(node.seq) }

@@ -110,8 +110,8 @@ Each step ends with the full test suite green (except known unrelated failures) 
    (`~/Library/Caches/ApusApusCorpus/oracle-ab`, 1,593 files); full crawl; replay the string fuzzer
    artifacts; recheck TODO #1.
 6. **Cleanup.** Delete the 16 old builders and their comments, `tookMultilineStringForm`, and the
-   `@sameLine` annotation on strings. If nothing else uses the deep form of `@sameLine`, remove it from
-   `SameLineSpanRule` and `apus.md` (only `@sameLineOutsideBrackets` would remain).
+   `@sameLine` annotation on strings. If nothing else uses the deep form, remove its Oracle support
+   and documentation.
 
 ## Risks and open points
 
@@ -147,7 +147,9 @@ Each step ends with the full test suite green (except known unrelated failures) 
   indent; `tookMultilineStringForm` is gone. The multiline helpers now test line breaks against
   `lineBreakCharacters` (`"\r\n"` is one `Character`, so tests for `"\n"` alone missed CRLF lines)
   and share `multilineContentText` / `strippingIndent`.
-- **`@sameLine` removed.** The deep form had no other user. `@sameLineOutsideBrackets` remains.
+- **`@sameLine` removed.** The deep form had no other user. The remaining shallow `#if` constraint
+  was later expressed directly with a scoped flavor and `>n<`, so its generic Oracle support was
+  removed as well.
 - **Results.** All 51 fixtures agree with swiftc and swift-syntax's tree (`ApusApusTests`
   fuzz-harvest suites: 8 accepts and 10 rejects added). `MultilineErrorsTests.swift` (TODO #1)
   parses with no residual ambiguity and the same tree as swift-syntax. Corpus slice (1,593 files):

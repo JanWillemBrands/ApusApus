@@ -190,6 +190,24 @@ ADJACENCY rule: no two closure suffixes in a row. An `@once`-style primitive wou
 rejected that line. What the shape really wants is associativity as a FILTER, which is
 what `@left`/`@right` became — see `apus.md`.
 
+## Parameterised productions — *tried 2026-10-28, reverted*
+
+**What they were.** Compile-time grammar templates intended to express Swift conditional
+compilation once and specialise it for statement, member, postfix, switch-case and attribute
+bodies. The mechanism itself worked: applications expanded into ordinary grammar graphs, shared
+identical specialisations, composed with parser flavors and remained transparent to SwiftSyntax
+conversion.
+
+**Why they died.** The motivating `#if` families do not have one small variation point. Their
+first-clause admission rules and body cardinalities differ materially. Passing the old clause
+families as parameters merely hid the duplication; parameterising body symbols required additional
+templates, wrappers and indirection, and increased the grammar's line count. Both results were less
+clear than the explicit productions they replaced.
+
+**The lesson.** Parameterise only when one complete grammar protocol has a small, genuine variation
+point. Similar-looking rules with distinct contextual constraints are often clearer when written
+explicitly.
+
 ## Shorter obituaries
 
 | Idea | What it was | Why it died / replacement |

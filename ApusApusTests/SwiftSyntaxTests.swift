@@ -2529,8 +2529,8 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "raw-multiline-interpolation-tail-delimiter", source: "let field = \"\"\nlet body = #\"\"\"\n{\"usage\":\\#(field)}\n\"\"\"#\nlet x = 1", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "raw-multiline-interpolation-paired-parts", source: "let a = ##\"\"\"\nx \\##(m)\n\"\"\"##\nlet b = ##\"\"\"\ny \\##(m)\n\"\"\"##", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "raw-singleline-interpolation-tail-delimiter", source: "let id = x\nlet a = #\"\\#(id.uuidString)\"#\nlet b = #\"\\#(id.uuidString)\"#", origin: "Fuzz", syntaxVersion: "603.0.1"),
-    // 2026-10-06 `#if` clusters (TODO #2). The condition is a general expression; line breaks are
-    // free inside brackets (`@sameLineOutsideBrackets`).
+    // 2026-10-06 `#if` clusters (TODO #2). The condition is a general expression; its SwiftSyntax
+    // flavor stops sequence/postfix continuation at a new line but parses delimited contents `.basic`.
     SwiftSnippet(label: "ifconfig-condition-wildcard", source: "#if _\n#endif", origin: "Fuzz", syntaxVersion: "603.0.1",
                  disabledReason: "parse-only: invalid conditional compilation expression"),
     SwiftSnippet(label: "ifconfig-condition-empty-tuple", source: "fuzz {\n#if ()\n#endif\n}", origin: "Fuzz", syntaxVersion: "603.0.1",

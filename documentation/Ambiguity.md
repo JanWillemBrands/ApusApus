@@ -27,7 +27,7 @@ APUS resolves ambiguity in four layers. Each layer has a different job.
 |---|---|---|---|
 | Lexer | during the parse, per terminal | the extent of a token | `@literalMunch`, munch-exempt terminals, `@preempt` |
 | Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()`, flavors |
-| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@sameLineOutsideBrackets`, `@prefer`, `@longest`, `@left`, … |
+| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@prefer`, `@longest`, `@left`, … |
 | AST generator | after the Oracle | the operator precedence tree | precedence metadata on the operator alternates |
 
 Obey these rules:
@@ -190,7 +190,7 @@ The Oracle (`Oracle.disambiguate`) does these steps:
 
 | Pass | Rules | What the rule needs to know |
 |---|---|---|
-| filter | `@canParse` `@cannotParse` `@sameLineOutsideBrackets` | only that some witness exists |
+| filter | `@canParse` `@cannotParse` | only that some witness exists |
 | sameSpan | `@prefer`, `@avoid` between siblings | the legal rivals at the SAME span |
 | structure | `@left` `@right` | which production occupies a span |
 | extent | `@longest` `@shortest` | the legal rivals at DIFFERENT extents |
@@ -229,7 +229,6 @@ A hard constraint removes a reading that the language does not permit.
 |---|---|---|
 | `@cannotParse(N)` | start of an alternate | Remove the alternate where a yield of `N` starts at the same position. |
 | `@canParse(N)` | start of an alternate | Remove the alternate where no yield of `N` starts at the same position. |
-| `@sameLineOutsideBrackets` | before a nonterminal | Keep the yield only if a surviving derivation crosses no newline trivia outside brackets. |
 
 The flavor annotations are NOT Oracle rules. They are parse-time gates, compiled into the grammar
 at load, and are listed here only because they also remove readings the language does not permit:
@@ -252,12 +251,6 @@ Details:
   here.
 - In `@requiresFlavor(A B)`, all listed flavors must be set. In `@rejectsFlavor(A B)`, the
   occurrence is removed only when all listed flavors are set.
-- `@sameLineOutsideBrackets` is derivation-local. It tiles the candidate yield through the current BSR and inspects
-  the exact terminal commits used by that tiling. Commits from dead or competing derivations do not
-  count.
-- For `@sameLineOutsideBrackets`, only token-to-token trivia gaps count. A newline inside a token (for example, a
-  multiline string) does not count. A newline in the annotated construct's trailing trivia does not
-  count either, because the construct did not cross it to reach another token.
 - The parser must try `N` at the anchor position of `@canParse(N)` or `@cannotParse(N)`. If the
   grammar never tries `N` there, `N` has no yield there, and `@cannotParse(N)` is always true.
   This is a specification error, not a false result. `GrammarDiagnostics` reports a target that
@@ -437,7 +430,7 @@ In a left-recursive grammar (`E = E "+" E | …`), precedence is an ambiguity. U
 | the same start, two lengths | `@longest` / `@shortest` |
 | a production nested directly in itself | `@left` / `@right` |
 | a named nonterminal forbidden as the first/last child | `@left( N … )` / `@right( N … )` |
-| a span that must stay on one line | `@sameLineOutsideBrackets` |
+| a context-sensitive line boundary | a scoped flavor plus layout predicates |
 
 ## 8. Categories of ambiguity
 
@@ -650,6 +643,6 @@ the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (se
 | `FlavorSpecialization.swift` | `specializeFlavors`: the flavor annotations, compiled into grammar copies at load |
 | `Lexer.swift` | `OnDemandLiteralLexer.lex`: `@literalMunch`, the `@preempt` split points |
 | `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround |
-| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `SameLineSpanRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
+| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
 | `DerivationBuilder.swift` | builds the tree and reports residual ambiguity with a fingerprint |
 | `ApusApusTests/OracleDisambiguationTests.swift` | tests for each Oracle rule |

@@ -6247,7 +6247,7 @@ struct SwiftSyntaxGenerator {
         return DeclSyntax(result)
     }
 
-    /// compilationCondition = >n< expression .   (`@sameLine`)
+    /// compilationCondition = >n< @setFlavor(poundIfDirective) expression .
     ///
     /// The condition IS an expression — swift-syntax parses it with `parseSequenceExpression` — so
     /// it converts exactly like one: a flat SequenceExpr when operators are present, the single

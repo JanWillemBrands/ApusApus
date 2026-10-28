@@ -279,15 +279,10 @@ longer applies. The principle that does apply is a clean split of responsibiliti
 
 Candidates that are really context, ranked by payoff:
 
-1. **`@sameLine` / `@sameLineOutsideBrackets` → a trivia flavor.** `SameLineSpanRule` is a
-   post-parse BSR walk with memo and cycle-cut subtleties (see the fixes in TODO #2). It
-   models swift-syntax's `leadingTriviaLexingMode`, which is lexer state, i.e. context.
-   With specialization, `@sameLine X` is `@setFlavor(noNewlineTrivia) X`, and
-   `…OutsideBrackets` adds `@clearFlavor(noNewlineTrivia)` at bracket bodies. Terminal clones
-   under that bit get a static "leading trivia may not contain a newline" flag. This
-   removes an Oracle rule and prunes during the parse. It depends on specialization:
-   runtime flavors cannot cheaply reach the terminal matcher. Before switching, map the
-   walk's edge cases (zero-width suffix allowance, committed multiline tokens).
+1. **Conditional-compilation line boundaries → a scoped flavor.** The SwiftSyntax
+   `poundIfDirective` expression flavor is context, not post-parse disambiguation. The grammar now
+   carries that flavor through the expression spine and uses `>n<` at continuation points, while
+   delimited expressions parse normally. This removed the generic line-span Oracle walk.
 2. **Postfix vs. statement `#if` lookbehinds** (`<-<( identifier … )`, `<+<( "#endif" )` on
    `ifDirectiveClause`). Being in postfix position is a structural fact, but it is
    approximated by token lookbehind. TODO #2 residual (a) is exactly where that
@@ -380,27 +375,12 @@ initializer body. swiftc ParseDecl.cpp `isStartOfSwiftDecl` reads it that way on
 missing `self.`, and the type checker always rejects it, so `Swift.apus` now treats a statement-start
 `init` as a declaration everywhere and needs no flavor for it.
 
-## Follow-up candidates, examined and set aside (2026-10-07)
+## Follow-up candidates (updated 2026-10-28)
 
-The two "context in disguise" candidates from "Point (2) revisited" do not fit flavors after all.
-
-**`@sameLine` as a trivia flavor.** A flavor version would be: every terminal matched under the flavor
-checks its LEADING gap (`>n<` at its cursor), which is exactly swift-syntax's `.noNewlines`
-leading-trivia lexing mode. The region's opener is placed outside the flavor. That fits the shallow
-`@sameLineOutsideBrackets` on `compilationCondition`. Its scope is the expression spine, and its
-first gap is already `>n<`. Bracket openers would still need `@flavors` with `@clearFlavor` on
-contents and closer. It does not fit the deep `@sameLine` on
-`singleLineInterpolatedStringLiteral`:
-
-- swift-syntax keeps that lexer state at any depth, including inside closures and statements in
-  the interpolation. The flavor would have to be carried by almost every production, roughly
-  doubling the grammar, and it would also combine with the other flavors.
-- The parse-time gap test is existential over commits ending at the cursor. `SameLineSpanRule`
-  reads the exact commit of each tile of a derivation, and the per-derivation check is why it
-  exists.
-
-So the Oracle rule has to stay for the deep case. Converting only the shallow case would remove
-just the bracket-prefix branch (`Gaps.any`, `bracketedPrefix`, about 25 lines). Not worth the risk.
+The conditional-compilation line rule did fit flavors once expressed at the expression spine's
+actual continuation points. The resulting `poundIfDirective` specialization uses the existing
+layout predicate, preserves ordinary parsing inside delimiters, and eliminated the old generic
+Oracle mechanism.
 
 **Structural postfix `#if` (TODO #2 residual a).** Whether a leading-dot `#if` is postfix depends
 on the LEFT SIBLING: swift-syntax's postfix-suffix loop is still active when the previous statement

@@ -217,7 +217,7 @@ An annotation starts with `@`. Its meaning depends on its position. There are fo
 
 | Position | Annotations |
 | --- | --- |
-| Start of a production, before the name | `@longest` `@shortest` `@sameLineOutsideBrackets` `@flavors` `@literalMunch` `@preempt` |
+| Start of a production, before the name | `@longest` `@shortest` `@flavors` `@literalMunch` `@preempt` |
 | Start of an alternative, after `=` `\|` `(` `[` `{` `<` | `@prefer` `@avoid` `@left` `@right` `@canParse` `@cannotParse` |
 | Before an item | `@setFlavor` `@clearFlavor` `@requiresFlavor` `@rejectsFlavor` |
 | Before a bracket | `@longest` `@shortest` |
@@ -304,22 +304,6 @@ the alternative.
 The parser must try `N` at this position for its own reasons. If no other rule uses `N`, the parser
 never tries it. Then `@canParse(N)` is always false and `@cannotParse(N)` is always true. These
 predicates cannot run a separate grammar as a lookahead.
-
-### `@sameLineOutsideBrackets`
-
-```apus
-@sameLineOutsideBrackets
-condition = expression .
-```
-
-`@sameLineOutsideBrackets` keeps a reading of this nonterminal only if it has no line break between
-two of its tokens, outside `( )`, `[ ]` and `{ }`. These line breaks do not count:
-
-- a line break inside `( )`, `[ ]` or `{ }`,
-- a line break in the text of a token (for example in a multiline string),
-- a line break after the last token of the nonterminal.
-
-With this rule, `f(a,⏎b)` is a valid condition, and `a⏎|| b` is not.
 
 ## Flavors
 
@@ -628,7 +612,7 @@ exclusion  = "---" "(" < literal | identifier > ")" .
 
 productionPragma    = terminalPragma | nonterminalPragma .
 terminalPragma      = "@literalMunch" | "@preempt" "(" identifier [ "," identifier ] ")" .
-nonterminalPragma   = "@longest" | "@shortest" | "@sameLineOutsideBrackets"
+nonterminalPragma   = "@longest" | "@shortest"
                     | "@flavors" "(" < identifier > ")" .
 groupPragma         = "@longest" | "@shortest" .
 alternateAnnotation = "@prefer" | "@avoid"

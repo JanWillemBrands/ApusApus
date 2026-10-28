@@ -675,7 +675,7 @@ classRestrictionType = "class" .
 
 // if/switch expressions may have at most one "as"/"as?"/"as!" coercion but not "is" or any other
 // infix operator. Mirrors swift-syntax's parseSingleValueStmt path.
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
 expression =
     | prefixExpression infixExpressions?
     | effectfulConditional coercingOperator?
@@ -691,7 +691,7 @@ effectMarker =
     | awaitOperator
     | "unsafe" <s> >n<
     .
-@flavors(stmtCondition)
+@flavors(stmtCondition poundIfDirective)
 // Right recursion on purpose: each marker wraps the rest (`TryExpr(AwaitExpr(…))`).
 effectfulConditional = conditionalExpression | effectMarker effectfulConditional .
 
@@ -728,7 +728,7 @@ effectfulConditional = conditionalExpression | effectMarker effectfulConditional
 // keyword rule (<s>), so the call reading survives unchallenged.
 // `>->( "@" )`: an attributed type starts a sequence element, never a prefix operand (swift-syntax
 // Expressions.swift `parseSequenceExpressionElement`; `-@Sendable () -> Void` is an error).
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
 @longest
 prefixExpression =
     | @cannotParse(anyBeforeTilde) @shortest [ prefixOperator >s< >n< >->( "@" ) ] postfixExpression
@@ -828,20 +828,29 @@ awaitOperator =
 // covers `\Foo.?.?[0]`'s `binaryOperator(".?")` directly, and maximal munch — not a `>-> ( "." )`
 // lookahead — is what keeps `.?.name` as the single token `.?.` rather than `.?` + `.name`.
 
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
 @longest
 infixExpression =
-    | <s> infixOperator <s> prefixExpression
-    | <s> infixOperator <s> effectfulConditional
-    | arrowExpr prefixExpression
-    | assignmentOperator expression
-    | conditionalOperator expression
+    | <s> infixOperator <s> ifConfigSameLine prefixExpression
+    | <s> infixOperator <s> ifConfigSameLine effectfulConditional
+    | arrowExpr ifConfigSameLine prefixExpression
+    | assignmentOperator ifConfigSameLine expression
+    | conditionalOperator ifConfigSameLine expression
     | typeCastingOperator
     | @cannotParse( genericArgumentClause )
-      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< prefixExpression
+      >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< ifConfigSameLine prefixExpression
     .
-@flavors(stmtCondition bindingIntroducer)
-infixExpressions = < infixExpression > .
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
+infixExpressions = < ifConfigSameLine infixExpression > .
+
+// SwiftSyntax's `ExprFlavor.poundIfDirective` stops the sequence-expression and postfix-suffix
+// loops when the next token starts a line. Outside that flavor this is empty. Delimited expression
+// bodies do not carry the flavor, matching SwiftSyntax's use of `.basic` for their contents.
+@flavors(poundIfDirective)
+ifConfigSameLine =
+    | @requiresFlavor(poundIfDirective) >n<
+    | @rejectsFlavor(poundIfDirective) ε
+    .
 
 // `arrowExpr` — swift-syntax CodeGeneration ExprNodes.swift `.arrowExpr`:
 //     Node(kind: .arrowExpr, base: .expr,
@@ -887,8 +896,8 @@ assignmentOperator = <s> "=" <s> | >s< "=" >s< .
 // <s> before `?` only: swift-syntax requires whitespace (space OR newline) BEFORE the ternary `?`.
 // A tight `a?` is postfix optional-chaining, not ternary.
 // The char AFTER `?` is free: `a ?b : c` is a valid ternary.
-@flavors(stmtCondition)
-conditionalOperator = <s> "?" expression ":" .
+@flavors(stmtCondition poundIfDirective)
+conditionalOperator = <s> "?" ifConfigSameLine expression ":" .
 
 /// Grammar of a type-casting operator
 /// type-casting-operator → is type
@@ -978,7 +987,7 @@ coercingOperator =
 // Swift::self, Swift::Self, Swift::Any, Swift::super, Swift::init, Swift::do, …). Subsumes
 // `moduleSelector identifier`.
 
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
 @longest
 primaryExpression =
     | genericIdentifier
@@ -1524,11 +1533,11 @@ keyPathBareComponent =
 // consumes every `.`/`.?`/`.!`/`.[`/`?`/`!`/`[` suffix as a key-path COMPONENT and never returns to
 // outer postfix parsing.) The `@cannotParse( keyPathExpression )` guard that used to stand in for
 // this is gone: it is an ORACLE prune, so it never affected the yields — see `primaryExpression`.
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
 postfixExpression =
     | primaryExpression
-    | @prefer postfixExpression >s< postfixOperator <s>
-    | postfixExpression >s< postfixOperator >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | @prefer postfixExpression ifConfigSameLine >s< postfixOperator <s>
+    | postfixExpression ifConfigSameLine >s< postfixOperator >+> ( "." ")" "]" "}" "," ";" ":" EOF )
     | functionCallExpression
     | initializerExpression
     | explicitMemberExpression
@@ -1548,7 +1557,7 @@ postfixExpression =
 /// labeled-trailing-closures → labeled-trailing-closure labeled-trailing-closures?
 /// labeled-trailing-closure → identifier : closure-expression
 
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition bindingIntroducer poundIfDirective)
 functionCallExpression = postfixExpression >n< functionCallArgumentClause .
 // >n<: a call `(` may not start a new line (swift-syntax `allowAtStartOfLine:false`) — `g()⏎(x)` is two statements, not `g()(x)`
 // A trailing closure belongs to the same call as a preceding argument clause:
@@ -1589,12 +1598,12 @@ functionCallExpression = postfixExpression >n< functionCallArgumentClause .
 //     those are expression-position types, not valid trailing-closure callees. This replaced a
 //     `nonLiteralPostfix`/`nonLiteralPrimary` clone of `postfixExpression`/`primaryExpression` (21
 //     alternates) that had drifted from its originals.
-functionCallExpression = @prefer postfixExpression >n< functionCallArgumentClause trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
-                       | @right @right( literalExpression typePrimaryExpression ) postfixExpression trailingClosures .
-functionCallExpression = collectionLiteralCallee trailingClosures .
+functionCallExpression = @prefer postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
+                       | @right @right( literalExpression typePrimaryExpression ) postfixExpression ifConfigSameLine trailingClosures .
+functionCallExpression = collectionLiteralCallee ifConfigSameLine trailingClosures .
 // `Self` is a type-primary syntactically, but unlike other bare type expressions it is also a
 // declaration reference and may be called with trailing closures (`Self { ... }`).
-functionCallExpression = selfType trailingClosures .
+functionCallExpression = selfType ifConfigSameLine trailingClosures .
 
 @flavors(stmtCondition)
 collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
@@ -1676,11 +1685,11 @@ initializerExpression = "init" .
 // swift-syntax `parseIfConfigExpressionSuffix` accepts only a dotted suffix or
 // nested `#if`, then resumes the postfix suffix loop.
 // The generic-argument island is structural — see `postfixExpression`.
-@flavors(stmtCondition)
-explicitMemberExpression = postfixExpression ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
-explicitMemberExpression = postfixExpression ( >s< "." >s< | <s> "." ) moduleSelector? memberName
+@flavors(stmtCondition poundIfDirective)
+explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
+explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< "." >s< | <s> "." ) moduleSelector? memberName
                            [ genericArgumentClause | >n< "(" argumentNames ")" ] .
-explicitMemberExpression = postfixExpression postfixConditionalCompilationBlock .
+explicitMemberExpression = postfixExpression ifConfigSameLine postfixConditionalCompilationBlock .
 
 argumentNames = argumentName argumentNames? .
 argumentName = argumentLabel ":" .   // swift-syntax `parseArgLabelList`: `isArgumentLabel`
@@ -1694,7 +1703,7 @@ argumentName = argumentLabel ":" .   // swift-syntax `parseArgLabelList`: `isArg
 /// Grammar of a subscript expression
 /// subscript-expression → postfix-expression [ function-call-argument-list ]
 
-@flavors(stmtCondition)
+@flavors(stmtCondition poundIfDirective)
 subscriptExpression = postfixExpression >n< subscriptArgumentClause .
 subscriptArgumentClause = "[" "]" | "[" labeledExpressionList ","? "]" .
 
@@ -1703,12 +1712,12 @@ subscriptArgumentClause = "[" "]" | "[" labeledExpressionList ","? "]" .
 /// Grammar of a forced-value expression
 /// forced-value-expression → postfix-expression !
 
-@flavors(stmtCondition bindingIntroducer) forcedValueExpression = postfixExpression >s< forceMark .
+@flavors(stmtCondition bindingIntroducer poundIfDirective) forcedValueExpression = postfixExpression >s< forceMark .
 
 /// Grammar of an optional-chaining expression
 /// optional-chaining-expression → postfix-expression ?
 
-@flavors(stmtCondition bindingIntroducer) optionalChainingExpression = postfixExpression >s< optionalMark .
+@flavors(stmtCondition bindingIntroducer poundIfDirective) optionalChainingExpression = postfixExpression >s< optionalMark .
 
 
 /// STATEMENTS
@@ -2160,15 +2169,14 @@ endifDirective = "#endif" <n> .
 // compares the completed condition extent with the trailing-closure recognizer: unlike a
 // start-based `@cannotParse`, it cannot mistake a trailing closure in the NEXT line's postfix body
 // for part of the condition.
-// Delimited contents are parsed `.basic`, so `os(⏎macOS)` is clean. So:
-// it starts on the `#if` line (`>n<`) and crosses no line break outside brackets
-// (`@sameLineOutsideBrackets`). Everything else — calls like `os(macOS)` / `canImport(A, _version:
+// Delimited contents are parsed `.basic`, so `os(⏎macOS)` is clean. `poundIfDirective` is carried
+// only through the sequence and postfix spines, where `ifConfigSameLine` mirrors SwiftSyntax's two
+// `atStartOfLine` loop exits. Everything else — calls like `os(macOS)` / `canImport(A, _version:
 // 2)`, `swift(>=5)`, `!FOO`, `(A) && B || C`, and the semantic-error shapes swift-syntax still
 // parses (`#if _`, `#if ()`, `#if (A, )`, `#if init`) — is just expression syntax. This replaced a
 // hand-written operand subset that drifted from it.
-@sameLineOutsideBrackets
 compilationCondition =
-    @right(ifConfigTrailingClosureCondition) >n< expression .
+    @right(ifConfigTrailingClosureCondition) >n< @setFlavor(poundIfDirective) expression .
 ifConfigTrailingClosureCondition = >n< postfixExpression trailingClosures .
 
 

@@ -218,12 +218,6 @@ final class GrammarNode {
     /// no single span with two pivots to rank. See `AssociativityFilterRule`.
     var associativityFilters: [ChildPositionFilter] = []
 
-    /// `@sameLineOutsideBrackets` — this nonterminal's span may not cross a newline consumed as
-    /// trivia, except in gaps inside a `(…)`/`[…]`/`{…}` body (swift-syntax's `#if` condition
-    /// flavor). Newlines inside a committed token (multiline string, block comment) are permitted.
-    /// See `SameLineSpanRule`.
-    var sameLineOutsideBrackets: Bool = false
-
     /// Terminal occurrence belongs directly to a structured `:` / `-` recognizer body and should
     /// match at the exact parser cursor instead of skipping leading trivia first. Normal `=`
     /// payloads reached from that body keep the default trivia skip.
@@ -353,7 +347,6 @@ extension GrammarNode {
         copy.instanceFlavors = instanceFlavors
         copy.flavorScope = flavorScope
         copy.associativityFilters = associativityFilters
-        copy.sameLineOutsideBrackets = sameLineOutsideBrackets
         copy.suppressesLeadingTrivia = suppressesLeadingTrivia
         copy.isLexicalToken = isLexicalToken
         copy.disambiguation = disambiguation

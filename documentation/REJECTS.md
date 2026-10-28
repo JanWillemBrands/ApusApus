@@ -579,8 +579,8 @@ registered per-alternate whose closure CAPTURES THE PARSER, so it can query anyt
 That corrects an earlier claim in this file — the committed-token cover IS reachable post-parse, via
 `parser.commits` (`TerminalCommit` carries `[start, end)`).
 
-Implemented: `GrammarNode.requiresSameLine`, an `@sameLine` production pragma in `ApusParser`, and
-`SameLineSpanRule` in `Oracle.swift` — prune a yield whose span contains a newline NOT covered by any
+Implemented at the time: `GrammarNode.requiresSameLine`, an `@sameLine` production pragma in
+`ApusParser`, and a line-span Oracle rule — prune a yield whose span contains a newline NOT covered by any
 committed token. Newlines inside a token stay legal, which is what keeps the nested-multiline case
 parseable. The cover over-approximates (the log includes commits from derivations that later died), so
 the rule can only MISS a prune, never remove a legitimate parse.
@@ -1238,7 +1238,7 @@ needs — in favour of the maximal `foo() { … }`. The lookahead then deleted t
 irreversible, so between them nothing survived.
 
 Fix: `DisambiguationRule.isHardConstraint` splits the rule pass in two. HARD CONSTRAINTS
-(`LookaheadPredicateRule`, `ContainmentRule`, `SameLineSpanRule` — what the LANGUAGE permits) run to
+(`LookaheadPredicateRule`, `ContainmentRule`, and the former line-span rule — what the LANGUAGE permits) run to
 a fixpoint first, then a dead-wood sweep propagates their kills, then PREFERENCES
 (`@longest`/`@shortest`/`@prefer`/`@avoid`, associativity — choices among readings that are all
 legal) run over the survivors. Now the constraint removes the closure, dead-wood removes the long

@@ -101,17 +101,16 @@ Do not restart with a universal graph.
 The best first slice remains `@prefer`/`@avoid` plus removal-driven dead-wood propagation. It is
 frequent, has simple Bend semantics, and can be evaluated without implementing every other rule.
 
-## `@sameLineOutsideBrackets`
+## Conditional-compilation line boundaries
 
 ### Present situation
 
-`SameLineSpanRule` is about 200 lines because it reconstructs a derivation through an ambiguous BSR,
+The former line-span rule was about 200 lines because it reconstructed a derivation through an ambiguous BSR,
 tracks whether each token gap is inside delimiters, looks up the exact terminal commit for each tile,
 memoises recursive grammar walks, and handles cycle cuts without caching provisional failures.
 
 That machinery was once defensible when a deep single-line interpolation constraint used it. It no
-longer does. The repository now contains exactly one use of `@sameLineOutsideBrackets`:
-`compilationCondition` in `Swift.apus`.
+longer does. Its last use was `compilationCondition` in `Swift.apus`.
 
 The required Swift behavior is narrower than the annotation's generic name suggests. SwiftSyntax's
 `poundIfDirective` expression flavor prevents the condition's expression spine from continuing at a
@@ -153,9 +152,9 @@ contents, which already have explicit grammar productions and declared flavor sc
 This uses the existing specialization system and existing gap predicate. It expresses the actual
 Swift rule instead of asking the Oracle to rediscover token paths after parsing. It should remove:
 
-- the `@sameLineOutsideBrackets` grammar pragma and parser support,
-- `GrammarNode.sameLineOutsideBrackets`,
-- `SameLineSpanRule`, and
+- the generic grammar pragma and parser support,
+- its `GrammarNode` property,
+- the line-span Oracle rule, and
 - its Oracle registration path.
 
 ### Required prototype checks

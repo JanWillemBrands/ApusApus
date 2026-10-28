@@ -42,7 +42,7 @@ struct TerminalCommit {
     let end: CharPosition
     let triviaEnd: CharPosition
     /// Shape of the trailing trivia `input[end ..< triviaEnd]`, classified once when the commit is
-    /// recorded. Layout gates, `@sameLine` and the converter's operator boundness read this instead
+    /// recorded. Layout gates and the converter's operator boundness read this instead
     /// of re-scanning the gap text.
     let gap: GapFacts
 }
