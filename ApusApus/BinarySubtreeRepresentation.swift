@@ -27,6 +27,7 @@ extension MessageParser {
     // Paper: bsrAdd(X ::= α·β, i, k, j) — add BSR element to the yield
     func addYield(L: GrammarNode, i: CharPosition, k: CharPosition, j: CharPosition) {
         let triple = BinarySpan(i: i, k: k, j: j)
+        if yields[L.number].isEmpty { touchedYieldNodes.append(L.number) }
         if yields[L.number].insert(triple).inserted {
             yieldCount += 1
         }
@@ -128,6 +129,10 @@ final class YieldNavigator {
             } else {
                 var positions = Set<CharPosition>()
                 if sym.kind == .KLN || sym.kind == .OPT { positions.insert(from) }
+                // A `< … >` has no skip, but it ends where it starts when one round can be empty.
+                // The rounds below count only rounds that consume input, so that round is added
+                // here; without it `S = < "x" | "" >.` had no parse of "" left after the Oracle.
+                if sym.kind == .POS, iterationEndPositions(sym, from: from).contains(from) { positions.insert(from) }
                 if sym.kind.isClosure {
                     var visited = Set<CharPosition>()
                     var queue = [from]
@@ -157,6 +162,13 @@ final class YieldNavigator {
 
     /// End positions of ONE iteration of `bracket` (one alternate of its body) starting at `from`.
     func iterationEndPositions(_ bracket: GrammarNode, from: CharPosition) -> Set<CharPosition> {
+        // A loop is built as `{ ( τ ) }` (`ApusParser.loopRound`): each round is the one round
+        // group, whose yields record (loop start, round start, round end). So a round's ends are
+        // READ from the group's yields with the round's start as pivot, not re-tiled from the
+        // body. An empty round has its yield too, (loop start, s, s).
+        if bracket.kind.isClosure, let round = bracket.alt?.seq, round.isLoopRound {
+            return ends(of: round, pivot: from)
+        }
         var positions = Set<CharPosition>()
         var alt = bracket.alt
         while let a = alt {

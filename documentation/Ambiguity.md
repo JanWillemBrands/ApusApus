@@ -193,7 +193,7 @@ The Oracle (`Oracle.disambiguate`) does these steps:
 | filter | `@canParse` `@cannotParse` `@sameLineOutsideBrackets` | only that some witness exists |
 | sameSpan | `@prefer`, `@avoid` between siblings | the legal rivals at the SAME span |
 | structure | `@left` `@right` | which production occupies a span |
-| extent | `@longest` `@shortest`, `@avoid` against an optional's skip | the legal rivals at DIFFERENT extents |
+| extent | `@longest` `@shortest` | the legal rivals at DIFFERENT extents |
 
 Step 1 makes sure that each remaining yield is part of a complete derivation. Thus a later
 rule cannot remove the only complete derivation by accident.
@@ -369,17 +369,22 @@ S = A | B | C | @avoid D .
 ```
 
 - `@prefer A` removes a sibling where `A` covers the same span `(i, j)`.
-- `@avoid D` is the same as `@prefer` on all siblings of `D`.
+- `@avoid D` removes `D` where a sibling that is not avoided covers the same span. Without
+  `@prefer` in the chain, this is the same as `@prefer` on all siblings of `D`.
+- The ranks are: `@prefer` above unmarked above `@avoid`. Siblings of the same rank are not
+  ranked, so two `@avoid` siblings both stay.
+- One alternative cannot be both `@prefer` and `@avoid`. That is a grammar error.
+- An alternative that outranks a sibling must not lie on a cycle that reads no input
+  (`A = @prefer A | "a"`). Every tree of `A` then ends in `"a"`, which `A → A` outranks, so
+  no parse is left. Loading refuses such a grammar (`diagnosePreferenceCycles`).
 - The rule compares exact spans. It does not prefer a longer alternate. Use `@longest` for
   that.
 - The annotated alternate must not be empty. The rule uses its last body symbol.
 - These annotations work at each alternate chain: a nonterminal, a group `( )`, `[ ]`, `{ }` or
   `< >`.
 
-`[ @avoid X ]` as the first item in `[ ]` or `{ }` is a different rule. It prefers to skip `X`
-when the enclosing span `(i, j)` is the same. It keeps the smallest pivot on the symbol after
-the bracket. `@shortest [ X ]` compares the bracket from its start and ignores the next symbol.
-Thus `[ @avoid X ]` removes fewer readings.
+The empty choice of `[ ]` or `{ }` is not a sibling, so `[ @avoid X ]` does not prefer the skip.
+Use `@shortest [ X ]` for that.
 
 ### 5.5 The limit of the Oracle
 

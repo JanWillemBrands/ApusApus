@@ -239,14 +239,17 @@ When the grammar is ambiguous, the parser finds all readings. These annotations 
 
 ```apus
 S = @prefer A | B .
-S = [ @avoid modifier ] name .
+S = A | @avoid B .
 ```
 
 - `@prefer`: this alternative wins over the other alternatives that match the same text.
-- `@avoid`: this alternative loses to the other alternatives that match the same text.
+- `@avoid`: this alternative loses to the other alternatives that match the same text, except
+  other `@avoid` alternatives.
 
-In `[ … ]` and `{ … }`, `@avoid` also loses to the empty choice. So `[ @avoid X ]` means: skip `X`
-if the parse still succeeds without it.
+An alternative cannot have both.
+
+The empty choice of `[ … ]` and `{ … }` is not an alternative, so `@avoid` does not lose to it. To
+skip `X` when the parse still succeeds without it, write `@shortest [ X ]`.
 
 ### `@longest` and `@shortest`
 
@@ -257,9 +260,6 @@ S = @shortest [ modifier ] name .
 
 `@longest` keeps the reading in which this node matches the most text. `@shortest` keeps the reading
 in which it matches the least text. Put them at the start of a production or before a bracket.
-
-`@avoid` and `@shortest` are not the same. `[ @avoid X ]` compares the alternatives. `@shortest [ X ]`
-compares how much text the bracket matches.
 
 ### `@left` and `@right`
 

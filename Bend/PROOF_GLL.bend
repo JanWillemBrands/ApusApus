@@ -21,15 +21,6 @@ law nats_eq_sound:
   for e: {Gll.natsEq(xs, ys) == True{} : Bool}
   {xs == ys : +List<Nat>}
 
-
-
-
-
-
-
-
-
-
 def nats_eq_sound(xs, ys, e):
   match xs ys:
     case Nil{} Nil{}:
@@ -51,15 +42,6 @@ law target_eq_sound:
   for b: Gll.Target
   for e: {Gll.targetEq(a, b) == True{} : Bool}
   {a == b : Gll.Target}
-
-
-
-
-
-
-
-
-
 
 def target_eq_sound(a, b, e):
   match a b:
@@ -83,15 +65,6 @@ law key_eq_sound:
   for e: {Gll.keyEq(a, b) == True{} : Bool}
   {a == b : Gll.CKey}
 
-
-
-
-
-
-
-
-
-
 def key_eq_sound(a, b, e):
   match a b:
     case Gll.CKey{+t1, +k1} Gll.CKey{+t2, +k2}:
@@ -107,15 +80,6 @@ law edge_eq_sound:
   for b: Gll.Edge
   for e: {Gll.edgeEq(a, b) == True{} : Bool}
   {a == b : Gll.Edge}
-
-
-
-
-
-
-
-
-
 
 def edge_eq_sound(a, b, e):
   match a b:
@@ -138,15 +102,6 @@ law desc_eq_sound:
   for b: Gll.Desc
   for e: {Gll.descEq(a, b) == True{} : Bool}
   {a == b : Gll.Desc}
-
-
-
-
-
-
-
-
-
 
 def desc_eq_sound(a, b, e):
   match a b:
@@ -183,15 +138,6 @@ law desc_pick:
   for searchRest: {Gll.descIn(d, rest) == True{} : Bool} -> {Check.descOk(d, grammar, input, s) == True{} : Bool}
   {Check.descOk(d, grammar, input, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def desc_pick(d, y, rest, grammar, input, s, cases, yOk, searchRest):
   match cases:
     case Inl{same}:
@@ -209,15 +155,6 @@ law desc_ok:
   for all: {Check.allDescs(xs, grammar, input, s) == True{} : Bool}
   for m: {Gll.descIn(d, xs) == True{} : Bool}
   {Check.descOk(d, grammar, input, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def desc_ok(xs, d, grammar, input, s, all, m):
   match xs:
@@ -243,15 +180,6 @@ law cluster_pick:
   for searchRest: {Gll.keyIn(key, rest) == True{} : Bool} -> {Check.allSeen(Check.seedsOf(grammar, key), s) == True{} : Bool}
   {Check.allSeen(Check.seedsOf(grammar, key), s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def cluster_pick(key, y, rest, grammar, s, cases, yOk, searchRest):
   match cases:
     case Inl{same}:
@@ -268,15 +196,6 @@ law cluster_seeds:
   for all: {Check.allClusters(cs, grammar, s) == True{} : Bool}
   for m: {Gll.keyIn(key, cs) == True{} : Bool}
   {Check.allSeen(Check.seedsOf(grammar, key), s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def cluster_seeds(cs, key, grammar, s, all, m):
   match cs:
@@ -304,15 +223,6 @@ law pop_pick:
   for searchRest: {Gll.popIn(key, j, rest) == True{} : Bool} -> {Check.allSeen(Check.againOfKey(grammar, key, j), s) == True{} : Bool}
   {Check.allSeen(Check.againOfKey(grammar, key, j), s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def pop_pick(key, j, k2, j2, rest, grammar, s, cases, yOk, searchRest):
   match cases:
     case Inl{same}:
@@ -334,15 +244,6 @@ law pop_again:
   for all: {Check.allPops(ps, grammar, s) == True{} : Bool}
   for m: {Gll.popIn(key, j, ps) == True{} : Bool}
   {Check.allSeen(Check.againOfKey(grammar, key, j), s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def pop_again(ps, key, j, grammar, s, all, m):
   match ps:
@@ -367,15 +268,6 @@ law resume_hit:
   for r: {Check.resumeIfOk(hit, edge, kc, j, s) == True{} : Bool}
   {Check.resumeOk(edge, kc, j, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def resume_hit(hit, edge, kc, j, s, isHit, r):
   match hit:
     case True{}:
@@ -396,15 +288,6 @@ law edge_pop_pick:
   for searchRest: {Gll.popIn(key, j, rest) == True{} : Bool} -> {Check.resumeOk(edge, Check.keyStart(key), j, s) == True{} : Bool}
   {Check.resumeOk(edge, Check.keyStart(key), j, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def edge_pop_pick(key, edge, j, k2, j2, rest, s, cases, here, searchRest):
   match cases:
     case Inl{same}:
@@ -424,15 +307,6 @@ law edge_pop:
   for all: {Check.edgePops(ps, key, edge, s) == True{} : Bool}
   for m: {Gll.popIn(key, j, ps) == True{} : Bool}
   {Check.resumeOk(edge, Check.keyStart(key), j, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def edge_pop(ps, key, edge, j, s, all, m):
   match ps:
@@ -459,15 +333,6 @@ law return_pick:
   for searchRest: {Gll.retIn(key, edge, rest) == True{} : Bool} -> {Check.edgePops(ps, key, edge, s) == True{} : Bool}
   {Check.edgePops(ps, key, edge, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def return_pick(key, edge, k2, e2, rest, ps, s, cases, here, searchRest):
   match cases:
     case Inl{same}:
@@ -489,15 +354,6 @@ law return_edge:
   for all: {Check.allReturns(rs, ps, s) == True{} : Bool}
   for m: {Gll.retIn(key, edge, rs) == True{} : Bool}
   {Check.edgePops(ps, key, edge, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def return_edge(rs, ps, key, edge, s, all, m):
   match rs:
@@ -521,15 +377,6 @@ law keep_head:
   for all: {Check.allSeen(Gll.keepDesc(keep, d, ds), s) == True{} : Bool}
   {Check.descSeen(d, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def keep_head(keep, isKept, d, ds, s, all):
   match keep:
     case True{}:
@@ -544,15 +391,6 @@ law keep_tail:
   for +s: Gll.GState
   for all: {Check.allSeen(Gll.keepDesc(keep, d, ds), s) == True{} : Bool}
   {Check.allSeen(ds, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def keep_tail(keep, d, ds, s, all):
   match keep:
@@ -572,15 +410,6 @@ law productions_seen:
   for lhsOk: {Spec.lhsIs(grammar, q, x) == True{} : Bool}
   for all: {Check.allSeen(Gll.productionsOf(grammar, x, o, i), s) == True{} : Bool}
   {Check.descSeen(Gll.Desc{Nat.add(o, q), [], 0n, i, i}, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def productions_seen(grammar, x, o, i, q, s, lhsOk, all):
   match grammar q:
@@ -610,15 +439,6 @@ law alt_pick:
   for later: {Nat.is_lt(a, m) == True{} : Bool} -> {Check.allSeen(Gll.alternatives(m, index, rpath, k, i), s) == True{} : Bool} -> {Check.descSeen(Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}
   {Check.descSeen(Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def alt_pick(same, m, a, sameEq, index, rpath, k, i, s, lt, all, later):
   match same:
     case True{}:
@@ -639,15 +459,6 @@ law alternatives_seen:
   for lt: {Nat.is_lt(a, n) == True{} : Bool}
   for all: {Check.allSeen(Gll.alternatives(n, index, rpath, k, i), s) == True{} : Bool}
   {Check.descSeen(Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def alternatives_seen(n, index, rpath, k, i, a, s, lt, all):
   match n:
@@ -670,15 +481,6 @@ law split_slice:
   for sp: {List.append(&2, Nat, w1, w2) == Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : +List<Nat>}
   {Lemma.slice(input, pos, Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2))) == List.append(&2, Nat, w1, w2) : +List<Nat>}
 
-
-
-
-
-
-
-
-
-
 def split_slice(input, pos, w1, w2, sp):
   Equal.trans(+List<Nat>, Lemma.slice(input, pos, Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2))), Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))), List.append(&2, Nat, w1, w2),
     Equal.cong(Nat, +List<Nat>, v => Lemma.slice(input, pos, v), Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2)), List.length(&2, Nat, List.append(&2, Nat, w1, w2)), Equal.sym(Nat, List.length(&2, Nat, List.append(&2, Nat, w1, w2)), Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2)), Lemma.length_append(w1, w2))),
@@ -692,15 +494,6 @@ law spells_first:
   for sp: {List.append(&2, Nat, w1, w2) == Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : +List<Nat>}
   {w1 == Lemma.slice(input, pos, List.length(&2, Nat, w1)) : +List<Nat>}
 
-
-
-
-
-
-
-
-
-
 def spells_first(input, pos, w1, w2, sp):
   Equal.sym(+List<Nat>, Lemma.slice(input, pos, List.length(&2, Nat, w1)), w1, Lemma.slice_left(input, pos, w1, w2, split_slice(input, pos, w1, w2, sp)))
 
@@ -711,15 +504,6 @@ law spells_second:
   for +w2: +List<Nat>
   for sp: {List.append(&2, Nat, w1, w2) == Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : +List<Nat>}
   {w2 == Lemma.slice(input, Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)) : +List<Nat>}
-
-
-
-
-
-
-
-
-
 
 def spells_second(input, pos, w1, w2, sp):
   Equal.sym(+List<Nat>, Lemma.slice(input, Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)), w2, Lemma.slice_right(input, pos, w1, w2, split_slice(input, pos, w1, w2, sp)))
@@ -733,15 +517,6 @@ law leaf_token:
   for sp: {kind <> rest == Lemma.slice(input, pos, List.length(&2, Nat, kind <> rest)) : +List<Nat>}
   {List.get(&2, Nat, input, pos) == Some{kind} : Maybe<&2, Nat>}
 
-
-
-
-
-
-
-
-
-
 def leaf_token(input, pos, kind, rest, sp):
   Lemma.slice_get(input, pos, kind, Equal.sym(+List<Nat>, [kind], Lemma.slice(input, pos, 1n), spells_first(input, pos, [kind], rest, sp)))
 
@@ -752,15 +527,6 @@ law leaf_rest:
   for +rest: +List<Nat>
   for sp: {kind <> rest == Lemma.slice(input, pos, List.length(&2, Nat, kind <> rest)) : +List<Nat>}
   {rest == Lemma.slice(input, 1n+pos, List.length(&2, Nat, rest)) : +List<Nat>}
-
-
-
-
-
-
-
-
-
 
 def leaf_rest(input, pos, kind, rest, sp):
   %Lemma.add_one_right(pos) : {rest == Lemma.slice(input, _, List.length(&2, Nat, rest)) : +List<Nat>}
@@ -773,15 +539,6 @@ law end_split:
   for +w2: +List<Nat>
   {Nat.add(Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)) == Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : Nat}
 
-
-
-
-
-
-
-
-
-
 def end_split(pos, w1, w2):
   Equal.trans(Nat, Nat.add(Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)), Nat.add(pos, Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2))), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))),
     Lemma.add_assoc(pos, List.length(&2, Nat, w1), List.length(&2, Nat, w2)),
@@ -791,15 +548,6 @@ law end_alone:
   for +pos: Nat
   for +w: +List<Nat>
   {Nat.add(pos, List.length(&2, Nat, w)) == Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, w, []))) : Nat}
-
-
-
-
-
-
-
-
-
 
 def end_alone(pos, w):
   Equal.cong(+List<Nat>, Nat, v => Nat.add(pos, List.length(&2, Nat, v)), w, List.append(&2, Nat, w, []), Equal.sym(+List<Nat>, List.append(&2, Nat, w, []), w, Lemma.append_nil_right(w)))
@@ -844,15 +592,6 @@ law drop_next:
   for e: {dropItems(n, seq) == it <> rest : +List<Spec.Item>}
   {Gll.nthItem(seq, n) == Some{it} : Maybe<&2, Spec.Item>}
 
-
-
-
-
-
-
-
-
-
 def drop_next(n, seq, it, rest, e):
   match n seq:
     case 0n Nil{}:
@@ -872,15 +611,6 @@ law drop_succ:
   for e: {dropItems(n, seq) == it <> rest : +List<Spec.Item>}
   {dropItems(1n+n, seq) == rest : +List<Spec.Item>}
 
-
-
-
-
-
-
-
-
-
 def drop_succ(n, seq, it, rest, e):
   match n seq:
     case 0n Nil{}:
@@ -897,15 +627,6 @@ law drop_end:
   for seq: +List<Spec.Item>
   for e: {dropItems(n, seq) == [] : +List<Spec.Item>}
   {Gll.nthItem(seq, n) == None{} : Maybe<&2, Spec.Item>}
-
-
-
-
-
-
-
-
-
 
 def drop_end(n, seq, e):
   match n seq:
@@ -924,15 +645,6 @@ law lhs_of_is:
   for +a: Nat
   for e: {Spec.lhsIs(grammar, p, a) == True{} : Bool}
   {Gll.lhsOf(grammar, p) == a : Nat}
-
-
-
-
-
-
-
-
-
 
 def lhs_of_is(grammar, p, a, e):
   match grammar p:
@@ -953,15 +665,6 @@ law nat_append_assoc:
   for +zs: +List<Nat>
   {List.append(&2, Nat, List.append(&2, Nat, xs, ys), zs) == List.append(&2, Nat, xs, List.append(&2, Nat, ys, zs)) : +List<Nat>}
 
-
-
-
-
-
-
-
-
-
 def nat_append_assoc(xs, ys, zs):
   match xs:
     case Nil{}:
@@ -973,15 +676,6 @@ law rev_onto:
   for xs: +List<Nat>
   for +acc: +List<Nat>
   {Gll.reverseOnto(xs, acc) == List.append(&2, Nat, Gll.reverseOnto(xs, []), acc) : +List<Nat>}
-
-
-
-
-
-
-
-
-
 
 def rev_onto(xs, acc):
   match xs:
@@ -1003,15 +697,6 @@ law prefix_ext:
   for pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
   {List.append(&2, Nat, prefix, extra) == Gll.reverseOnto(rpath, extra) : +List<Nat>}
 
-
-
-
-
-
-
-
-
-
 def prefix_ext(rpath, prefix, extra, pEq):
   Equal.trans(+List<Nat>, List.append(&2, Nat, prefix, extra), List.append(&2, Nat, Gll.reverseOnto(rpath, []), extra), Gll.reverseOnto(rpath, extra),
     Equal.cong(+List<Nat>, +List<Nat>, v => List.append(&2, Nat, v, extra), prefix, Gll.reverseOnto(rpath, []), pEq),
@@ -1031,15 +716,6 @@ law step_in:
   for m: {Check.stepIn(Gll.stepAt(index, rpath, d, i, k, j), s) == True{} : Bool}
   {Spec.bsrMember(Spec.at(index, prefix, d, i, k, j), Check.stepsOf(s)) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def step_in(index, rpath, prefix, d, i, k, j, s, pEq, m):
   %Equal.sym(+List<Nat>, List.append(&2, Nat, prefix, [d]), Gll.reverseOnto(rpath, [d]), prefix_ext(rpath, prefix, [d], pEq)) : {Spec.bsrMember(Spec.Bsr{Spec.Slot{index, _}, i, k, j}, Check.stepsOf(s)) == True{} : Bool}
   m
@@ -1056,15 +732,6 @@ law all_in_app:
   for hx: {Spec.allIn(xs, set) == True{} : Bool}
   for +hy: {Spec.allIn(ys, set) == True{} : Bool}
   {Spec.allIn(List.append(&2, Spec.Bsr, xs, ys), set) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def all_in_app(xs, ys, set, hx, hy):
   match xs:
@@ -1118,15 +785,6 @@ law seen_ok:
   for seen: {Check.descSeen(d, s) == True{} : Bool}
   {Check.descOk(d, grammar, input, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def seen_ok(grammar, input, s, closedOk, d, seen):
   desc_ok(Check.seenOf(s), d, grammar, input, s,
     Lemma.and_true_left(Check.allDescs(Check.seenOf(s), grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), grammar, s), Bool.and(Check.allReturns(Check.returnsOf(s), Check.popsOf(s), s), Check.allPops(Check.popsOf(s), grammar, s))), closedOk),
@@ -1138,15 +796,6 @@ law closed_rest:
   for +s: Gll.GState
   for closedOk: {Check.closed(grammar, input, s) == True{} : Bool}
   {Bool.and(Check.allClusters(Check.clustersOf(s), grammar, s), Bool.and(Check.allReturns(Check.returnsOf(s), Check.popsOf(s), s), Check.allPops(Check.popsOf(s), grammar, s))) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def closed_rest(grammar, input, s, closedOk):
   Lemma.and_true_right_side(Check.allDescs(Check.seenOf(s), grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), grammar, s), Bool.and(Check.allReturns(Check.returnsOf(s), Check.popsOf(s), s), Check.allPops(Check.popsOf(s), grammar, s))), closedOk)
@@ -1160,15 +809,6 @@ law cluster_ok:
   for inC: {Check.clusterIn(key, s) == True{} : Bool}
   {Check.allSeen(Check.seedsOf(grammar, key), s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def cluster_ok(grammar, input, s, closedOk, key, inC):
   cluster_seeds(Check.clustersOf(s), key, grammar, s,
     Lemma.and_true_left(Check.allClusters(Check.clustersOf(s), grammar, s), Bool.and(Check.allReturns(Check.returnsOf(s), Check.popsOf(s), s), Check.allPops(Check.popsOf(s), grammar, s)), closed_rest(grammar, input, s, closedOk)),
@@ -1180,15 +820,6 @@ law closed_last:
   for +s: Gll.GState
   for closedOk: {Check.closed(grammar, input, s) == True{} : Bool}
   {Bool.and(Check.allReturns(Check.returnsOf(s), Check.popsOf(s), s), Check.allPops(Check.popsOf(s), grammar, s)) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def closed_last(grammar, input, s, closedOk):
   Lemma.and_true_right_side(Check.allClusters(Check.clustersOf(s), grammar, s), Bool.and(Check.allReturns(Check.returnsOf(s), Check.popsOf(s), s), Check.allPops(Check.popsOf(s), grammar, s)), closed_rest(grammar, input, s, closedOk))
@@ -1204,15 +835,6 @@ law resume_ok:
   for inR: {Check.returnIn(key, edge, s) == True{} : Bool}
   for inP: {Check.popIn(key, j, s) == True{} : Bool}
   {Check.resumeOk(edge, Check.keyStart(key), j, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def resume_ok(grammar, input, s, closedOk, key, edge, j, inR, inP):
   edge_pop(Check.popsOf(s), key, edge, j, s,
@@ -1230,15 +852,6 @@ law again_ok:
   for +j: Nat
   for inP: {Check.popIn(key, j, s) == True{} : Bool}
   {Check.allSeen(Check.againOfKey(grammar, key, j), s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def again_ok(grammar, input, s, closedOk, key, j, inP):
   pop_again(Check.popsOf(s), key, j, grammar, s,
@@ -1258,15 +871,6 @@ law item_ok_at:
   for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == item : Maybe<&2, Spec.Item>}
   for ok: {Check.descOk(Gll.Desc{index, rpath, dot, ctx, pos}, grammar, input, s) == True{} : Bool}
   {Check.itemOk(item, grammar, input, index, rpath, dot, ctx, pos, s) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def item_ok_at(grammar, input, s, index, rpath, dot, ctx, pos, item, itemEq, ok):
   Equal.trans(Bool, Check.itemOk(item, grammar, input, index, rpath, dot, ctx, pos, s), Check.itemOk(Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), grammar, input, index, rpath, dot, ctx, pos, s), True{},
@@ -1290,15 +894,6 @@ law nil_seq:
   for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
   for +itemNone: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == None{} : Maybe<&2, Spec.Item>}
   Walked(False{}, grammar, s, [], index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
-
 
 def nil_seq(dot, grammar, input, s, closedOk, index, rpath, prefix, ctx, pos, pEq, seen, itemNone):
   match dot:
@@ -1330,15 +925,6 @@ law token_hit:
   for r: {Check.tokenOk(ok, index, rpath, dot, k, i, s) == True{} : Bool}
   {Bool.and(Check.descSeen(Gll.Desc{index, rpath, 1n+dot, k, 1n+i}, s), Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, k, i, 1n+i), s)) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def token_hit(ok, okEq, index, rpath, dot, k, i, s, r):
   match ok:
     case True{}:
@@ -1361,15 +947,6 @@ law leaf_finish:
   for stepP: {Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, 1n+pos), s) == True{} : Bool}
   for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, 1n+pos)
   Walked(False{}, grammar, s, Spec.Leaf{kind} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
-
 
 def leaf_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, kind, ts, pEq, stepP, ih):
   match ih:
@@ -1403,15 +980,6 @@ law leaf_case:
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Leaf{kind} <> ts, index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
-
-
 def leaf_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, ts, t, rest, pEq, sp, seen, itemEq, restEq, fit, ihTs):
   isKT = Lemma.and_true_left(Nat.is_eq(kind, t), Spec.fits(ts, grammar, rest), fit)
   fitTs = Lemma.and_true_right_side(Nat.is_eq(kind, t), Spec.fits(ts, grammar, rest), fit)
@@ -1441,15 +1009,6 @@ law skip_finish:
   for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, pos)
   Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
-
-
 def skip_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, stepP, ih):
   match ih:
     case (stepsTs, popTs):
@@ -1466,15 +1025,6 @@ law skip_hit:
   for +s: Gll.GState
   for r: {Check.skipOk(skip, index, rpath, dot, k, i, s) == True{} : Bool}
   {Bool.and(Check.descSeen(Gll.Desc{index, rpath, 1n+dot, k, i}, s), Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, k, i, i), s)) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def skip_hit(skip, skipEq, index, rpath, dot, k, i, s, r):
   match skip:
@@ -1500,15 +1050,6 @@ law skip_parts:
   for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
   for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
   {Bool.and(Check.descSeen(Gll.Desc{index, rpath, 1n+dot, ctx, pos}, s), Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos), s)) == True{} : Bool}
-
-
-
-
-
-
-
-
-
 
 def skip_parts(grammar, input, s, closedOk, index, rpath, dot, ctx, pos, bkind, balts, skippable, seen, itemEq):
   +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, pos} : Gll.CKey}
@@ -1541,17 +1082,39 @@ law skip_case:
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
-
-
 def skip_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, ts, balts, rest, pEq, sp, seen, itemEq, restEq, fitTs, ihTs):
   +parts = skip_parts(grammar, input, s, closedOk, index, rpath, dot, ctx, pos, Spec.Optional{}, balts, {==}, seen, itemEq)
+  +next = {Gll.Desc{index, rpath, 1n+dot, ctx, pos} : Gll.Desc}
+  +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos)
+  skip_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), parts),
+    ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, pos, rest, Spec.Group{}, [], pEq, sp, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), parts), (restEq, fitTs))))
+
+# ---- An ε item: like a skip ----
+
+law eps_case:
+  for +grammar: +List<Spec.Production>
+  for +input: +List<Nat>
+  for +s: Gll.GState
+  for +closedOk: {Check.closed(grammar, input, s) == True{} : Bool}
+  for +index: Nat
+  for +rpath: +List<Nat>
+  for +prefix: +List<Nat>
+  for +dot: Nat
+  for +ctx: Nat
+  for +pos: Nat
+  for +ts: +List<Spec.Tree>
+  for +rest: +List<Spec.Item>
+  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
+  for +sp: Spells(Spec.Skip{} <> ts, input, pos)
+  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
+  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Eps{}} : Maybe<&2, Spec.Item>}
+  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
+  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
+  for ihTs: WalkIH(grammar, input, s, ts)
+  Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
+
+def eps_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, ts, rest, pEq, sp, seen, itemEq, restEq, fitTs, ihTs):
+  +parts = item_ok_at(grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Eps{}}, itemEq, seen_ok(grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
   +next = {Gll.Desc{index, rpath, 1n+dot, ctx, pos} : Gll.Desc}
   +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos)
   skip_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), parts),
@@ -1572,15 +1135,6 @@ law empty_loop_finish:
   for stepP: {Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, Nat.add(pos, 0n)), s) == True{} : Bool}
   for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, Nat.add(pos, 0n))
   Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
-
 
 def empty_loop_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, stepP, ih):
   match ih:
@@ -1613,15 +1167,6 @@ law empty_loop_case:
   for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
-
 
 def empty_loop_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, ts, balts, rest, pEq, sp, seen, itemEq, restEq, fitTs, ihTs):
   +parts = skip_parts(grammar, input, s, closedOk, index, rpath, dot, ctx, pos, Spec.Closure{}, balts, {==}, seen, itemEq)
@@ -1661,15 +1206,6 @@ law call_finish:
   for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, end)
   {allStepsIn(Spec.at(index, prefix, 1n+dot, ctx, pos, end) <> List.append(&2, Spec.Bsr, inner, Spec.walk(ts, False{}, index, prefix, 1n+dot, ctx, end)), s) == True{} : Bool} & {Check.popIn(Check.endKey(grammar, index, rpath, ctx), total, s) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def call_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, end, inner, ts, total, pEq, stepP, innerOk, endEq, ih):
   match ih:
     case (stepsTs, popTs):
@@ -1697,15 +1233,6 @@ law resumed:
   for inP: {Check.popIn(Gll.CKey{target, pos}, end, s) == True{} : Bool}
   {Bool.and(Check.descSeen(Gll.Desc{index, rpath, 1n+dot, ctx, end}, s), Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, end), s)) == True{} : Bool}
 
-
-
-
-
-
-
-
-
-
 def resumed(grammar, input, s, closedOk, target, index, rpath, dot, ctx, pos, end, inR, inP):
   resume_ok(grammar, input, s, closedOk, Gll.CKey{target, pos}, Gll.Edge{index, rpath, dot, ctx}, end, inR, inP)
 
@@ -1722,14 +1249,6 @@ law alt_seeds:
   for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
   for seeds: {Check.allSeen(Check.seedsOf(grammar, Gll.CKey{Gll.TBr{index, dot <> rpath}, pos}), s) == True{} : Bool}
   {Check.allSeen(Gll.alternatives(List.length(&2, +List<Spec.Item>, balts), index, dot <> rpath, pos, pos), s) == True{} : Bool}
-
-
-
-
-
-
-
-
 
 def alt_seeds(grammar, s, index, rpath, dot, pos, bkind, balts, itemEq, seeds):
   +item = Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot)
@@ -1748,14 +1267,6 @@ law alt_seq:
   for +balts: +List<+List<Spec.Item>>
   for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
   {dropItems(0n, Gll.seqAt(grammar, index, a <> dot <> rpath)) == Spec.altOf(balts, a) : +List<Spec.Item>}
-
-
-
-
-
-
-
-
 
 def alt_seq(grammar, index, rpath, dot, a, bkind, balts, itemEq):
   Equal.cong(Maybe<&2, Spec.Item>, +List<Spec.Item>, v => Gll.bracketAlt(v, a), Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), Some{Spec.Brack{bkind, balts}}, itemEq)
@@ -1787,14 +1298,6 @@ law node_after:
   for ihTs: WalkIH(grammar, input, s, ts)
   for inner: Walked(False{}, grammar, s, ch, q, [], [], 0n, pos, pos)
   Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
 
 def node_after(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, q, ch, ts, x, rest, pEq, sp, lhsOk, inR, restEq, fitTs, ihTs, inner):
   match inner:
@@ -1837,14 +1340,6 @@ law node_case:
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
-
 def node_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, q, ch, ts, x, rest, pEq, sp, seen, itemEq, restEq, fit, ihCh, ihTs):
   +h = Bool.and(Spec.lhsIs(grammar, q, x), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)))
   +hOk = Lemma.and_true_left(h, Spec.fits(ts, grammar, rest), fit)
@@ -1884,14 +1379,6 @@ law pick_after:
   for ihTs: WalkIH(grammar, input, s, ts)
   for inner: Walked(False{}, grammar, s, ch, index, a <> dot <> rpath, List.append(&2, Nat, prefix, [dot, a]), 0n, pos, pos)
   Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
 
 def pick_after(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, a, ch, ts, rest, pEq, sp, inR, restEq, fitTs, ihTs, inner):
   match inner:
@@ -1935,14 +1422,6 @@ law pick_case:
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
-
 def pick_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, a, ch, ts, bkind, balts, rest, pEq, sp, seen, itemEq, restEq, isA, fitCh, fitTs, ihCh, ihTs):
   +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, pos} : Gll.CKey}
   +edge = {Gll.Edge{index, rpath, dot, ctx} : Gll.Edge}
@@ -1979,14 +1458,6 @@ law loop_after:
   for ihTs: WalkIH(grammar, input, s, ts)
   for inner: Walked(True{}, grammar, s, r <> rr, index, dot <> rpath, List.append(&2, Nat, prefix, [dot]), 0n, pos, pos)
   Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
-
 
 def loop_after(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, r, rr, ts, rest, pEq, sp, inR, restEq, fitTs, ihTs, inner):
   match inner:
@@ -2030,14 +1501,6 @@ law loop_case:
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
-
 def loop_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, r, rr, ts, bkind, balts, rest, pEq, sp, seen, itemEq, restEq, loopOk, fitRs, fitTs, ihRs, ihTs):
   +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, pos} : Gll.CKey}
   +edge = {Gll.Edge{index, rpath, dot, ctx} : Gll.Edge}
@@ -2061,13 +1524,6 @@ law again_hit:
   for +s: Gll.GState
   for r: {Check.allSeen(Gll.againPick(loop, n, index, rpath, k, i), s) == True{} : Bool}
   {Check.allSeen(Gll.alternatives(n, index, rpath, k, i), s) == True{} : Bool}
-
-
-
-
-
-
-
 
 def again_hit(loop, loopEq, n, index, rpath, k, i, s, r):
   match loop:
@@ -2094,13 +1550,6 @@ law round_again:
   for inP: {Check.popIn(Gll.CKey{Gll.TBr{index, m <> outer}, ctx}, j, s) == True{} : Bool}
   {Check.allSeen(Gll.alternatives(List.length(&2, +List<Spec.Item>, alts), index, m <> outer, ctx, j), s) == True{} : Bool}
 
-
-
-
-
-
-
-
 def round_again(grammar, input, s, closedOk, index, m, outer, ctx, j, kind, alts, itemEq, loopOk, inP):
   +item = Gll.nthItem(Gll.seqAt(grammar, index, outer), m)
   again = again_ok(grammar, input, s, closedOk, Gll.CKey{Gll.TBr{index, m <> outer}, ctx}, j, inP)
@@ -2126,13 +1575,6 @@ law round_rest:
   for stepsCh: {allStepsIn(Spec.walk(ch, False{}, index, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos), s) == True{} : Bool}
   for later: Walked(True{}, grammar, s, r2 <> rest2, index, m <> outer, prefix, 0n, ctx, Nat.add(pos, List.length(&2, Nat, Spec.leaves(ch))))
   Walked(True{}, grammar, s, Spec.Pick{a, ch} <> r2 <> rest2, index, m <> outer, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
 
 def round_rest(grammar, s, index, m, outer, prefix, dot, ctx, pos, a, ch, r2, rest2, stepsCh, later):
   match later:
@@ -2172,13 +1614,6 @@ law round_after:
   for inner: Walked(False{}, grammar, s, ch, index, a <> m <> outer, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos)
   Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, m <> outer, prefix, dot, ctx, pos)
 
-
-
-
-
-
-
-
 def round_after(rest, grammar, input, s, closedOk, index, m, outer, prefix, dot, ctx, pos, a, ch, kind, alts, pEq, sp, itemEq, loopOk, fitRest, ihRest, inner):
   match rest:
     case Nil{}:
@@ -2208,7 +1643,6 @@ def isNone(x: Maybe<&2, Spec.Item>) -> Bool:
     case Some{v}:
       False{}
 
-
 law round_case:
   for rpath: +List<Nat>
   for +grammar: +List<Spec.Production>
@@ -2236,13 +1670,6 @@ law round_case:
   for ihCh: WalkIH(grammar, input, s, ch)
   for ihRest: WalkIH(grammar, input, s, rest)
   Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
-
-
-
 
 def round_case(rpath, grammar, input, s, closedOk, index, prefix, dot, ctx, pos, a, ch, rest, kind, alts, pEq, sp, starts, itemEq, loopOk, isA, fitCh, fitRest, ihCh, ihRest):
   match rpath:
@@ -2275,10 +1702,6 @@ law leaf_disp:
   for ready: Ready(False{}, grammar, input, s, Spec.Leaf{k0} <> ts, index, rpath, dot, ctx, pos, items, kind, alts)
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def leaf_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, k0, ts, pEq, sp, ready, ihTs):
   match items:
@@ -2315,6 +1738,10 @@ def leaf_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx
       match ready:
         case (seen0, (rem0, fit0)):
           Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
+    case Con{Spec.Eps{}, +rest}:
+      match ready:
+        case (seen0, (rem0, fit0)):
+          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
 
 law node_disp:
   for items: +List<Spec.Item>
@@ -2339,10 +1766,6 @@ law node_disp:
   for ihCh: WalkIH(grammar, input, s, ch)
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def node_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, q, ch, ts, pEq, sp, ready, ihCh, ihTs):
   match items:
@@ -2379,6 +1802,10 @@ def node_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx
       match ready:
         case (seen0, (rem0, fit0)):
           Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
+    case Con{Spec.Eps{}, +rest}:
+      match ready:
+        case (seen0, (rem0, fit0)):
+          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
 
 law pick_disp:
   for items: +List<Spec.Item>
@@ -2403,10 +1830,6 @@ law pick_disp:
   for ihCh: WalkIH(grammar, input, s, ch)
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def pick_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, a, ch, ts, pEq, sp, ready, ihCh, ihTs):
   match items:
@@ -2443,16 +1866,22 @@ def pick_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx
           +fit = {fit0 : {Spec.fits(Spec.Pick{a, ch} <> ts, grammar, Spec.Brack{Spec.Optional{}, balts} <> rest) == True{} : Bool}}
           +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Optional{}, balts}, rest, rem)
           +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Optional{}, balts}, rest, rem)
-          +hOk = Lemma.and_true_left(Bool.and(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit)
+          +okR = Spec.roundsOk(Spec.Optional{}, [Spec.Pick{a, ch}])
+          +hOk = Lemma.and_true_left(Bool.and(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit)
+          +altOk = Lemma.and_true_left(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk)
           pick_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, a, ch, ts, Spec.Optional{}, balts, rest, pEq, sp, seen, itemEq, restEq,
-            Lemma.and_true_left(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk),
-            Lemma.and_true_right_side(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk),
-            Lemma.and_true_right_side(Bool.and(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit), ihCh, ihTs)
+            Lemma.and_true_right_side(okR, Spec.isAlt(balts, a), altOk),
+            Lemma.and_true_right_side(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk),
+            Lemma.and_true_right_side(Bool.and(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit), ihCh, ihTs)
     case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
       match ready:
         case (seen0, (rem0, fit0)):
           Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
     case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
+      match ready:
+        case (seen0, (rem0, fit0)):
+          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
+    case Con{Spec.Eps{}, +rest}:
       match ready:
         case (seen0, (rem0, fit0)):
           Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
@@ -2477,10 +1906,6 @@ law skip_disp:
   for ready: Ready(False{}, grammar, input, s, Spec.Skip{} <> ts, index, rpath, dot, ctx, pos, items, kind, alts)
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def skip_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, ts, pEq, sp, ready, ihTs):
   match items:
@@ -2517,6 +1942,15 @@ def skip_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx
       match ready:
         case (seen0, (rem0, fit0)):
           Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
+    case Con{Spec.Eps{}, +rest}:
+      match ready:
+        case (seen0, (rem0, fit0)):
+          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
+          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Eps{} <> rest : +List<Spec.Item>}}
+          +fit = {fit0 : {Spec.fits(Spec.Skip{} <> ts, grammar, Spec.Eps{} <> rest) == True{} : Bool}}
+          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Eps{}, rest, rem)
+          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Eps{}, rest, rem)
+          eps_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, ts, rest, pEq, sp, seen, itemEq, restEq, fit, ihTs)
 
 law loop0_disp:
   for items: +List<Spec.Item>
@@ -2538,10 +1972,6 @@ law loop0_disp:
   for ready: Ready(False{}, grammar, input, s, Spec.Loop{[]} <> ts, index, rpath, dot, ctx, pos, items, kind, alts)
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def loop0_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, ts, pEq, sp, ready, ihTs):
   match items:
@@ -2578,6 +2008,10 @@ def loop0_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ct
       match ready:
         case (seen0, (rem0, fit0)):
           Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
+    case Con{Spec.Eps{}, +rest}:
+      match ready:
+        case (seen0, (rem0, fit0)):
+          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
 
 law loop_disp:
   for items: +List<Spec.Item>
@@ -2602,10 +2036,6 @@ law loop_disp:
   for ihRs: WalkIH(grammar, input, s, r <> rr)
   for ihTs: WalkIH(grammar, input, s, ts)
   Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def loop_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, r, rr, ts, pEq, sp, ready, ihRs, ihTs):
   match items:
@@ -2637,9 +2067,11 @@ def loop_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx
           +fit = {fit0 : {Spec.fits(Spec.Loop{r <> rr} <> ts, grammar, Spec.Brack{Spec.Closure{}, balts} <> rest) == True{} : Bool}}
           +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Closure{}, balts}, rest, rem)
           +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Closure{}, balts}, rest, rem)
+          +okR = Spec.roundsOk(Spec.Closure{}, r <> rr)
+          +both = Lemma.and_true_left(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit)
           loop_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, r, rr, ts, Spec.Closure{}, balts, rest, pEq, sp, seen, itemEq, restEq, {==},
-            Lemma.and_true_left(Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), Spec.fits(ts, grammar, rest), fit),
-            Lemma.and_true_right_side(Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), Spec.fits(ts, grammar, rest), fit), ihRs, ihTs)
+            Lemma.and_true_right_side(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), both),
+            Lemma.and_true_right_side(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit), ihRs, ihTs)
     case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
       match ready:
         case (seen0, (rem0, fit0)):
@@ -2648,9 +2080,15 @@ def loop_disp(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx
           +fit = {fit0 : {Spec.fits(Spec.Loop{r <> rr} <> ts, grammar, Spec.Brack{Spec.Positive{}, balts} <> rest) == True{} : Bool}}
           +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Positive{}, balts}, rest, rem)
           +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Positive{}, balts}, rest, rem)
+          +okR = Spec.roundsOk(Spec.Positive{}, r <> rr)
+          +both = Lemma.and_true_left(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit)
           loop_case(grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, r, rr, ts, Spec.Positive{}, balts, rest, pEq, sp, seen, itemEq, restEq, {==},
-            Lemma.and_true_left(Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), Spec.fits(ts, grammar, rest), fit),
-            Lemma.and_true_right_side(Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), Spec.fits(ts, grammar, rest), fit), ihRs, ihTs)
+            Lemma.and_true_right_side(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), both),
+            Lemma.and_true_right_side(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit), ihRs, ihTs)
+    case Con{Spec.Eps{}, +rest}:
+      match ready:
+        case (seen0, (rem0, fit0)):
+          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
 
 law round_disp:
   for +a: Nat
@@ -2674,10 +2112,6 @@ law round_disp:
   for ihCh: WalkIH(grammar, input, s, ch)
   for ihRest: WalkIH(grammar, input, s, rest)
   Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def round_disp(a, ch, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, rest, pEq, sp, ready, ihCh, ihRest):
   match ready:
@@ -2712,10 +2146,6 @@ law seq_nil:
   for ready: Ready(False{}, grammar, input, s, [], index, rpath, dot, ctx, pos, items, kind, alts)
   Walked(False{}, grammar, s, [], index, rpath, prefix, dot, ctx, pos)
 
-
-
-
-
 def seq_nil(items, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, kind, alts, pEq, ready):
   match items:
     case Nil{}:
@@ -2749,10 +2179,6 @@ law walk_closed:
   for +sp: Spells(forest, input, pos)
   for ready: Ready(rounds, grammar, input, s, forest, index, rpath, dot, ctx, pos, items, kind, alts)
   Walked(rounds, grammar, s, forest, index, rpath, prefix, dot, ctx, pos)
-
-
-
-
 
 def walk_closed(forest, rounds, grammar, input, s, closedOk, index, rpath, prefix, dot, ctx, pos, items, kind, alts, pEq, sp, ready):
   match forest rounds:
@@ -2801,9 +2227,6 @@ law root_spells:
   for spelled: {Spec.leaves([Spec.Node{q, ch}]) == input : +List<Nat>}
   Spells(ch, input, 0n)
 
-
-
-
 def root_spells(input, q, ch, spelled):
   +lch = Spec.leaves(ch)
   +same = Equal.trans(+List<Nat>, lch, List.append(&2, Nat, lch, []), input, Equal.sym(+List<Nat>, List.append(&2, Nat, lch, []), lch, Lemma.append_nil_right(lch)), spelled)
@@ -2820,14 +2243,10 @@ law root_done:
   for w: Walked(False{}, grammar, s, ch, q, [], [], 0n, 0n, 0n)
   {Spec.allIn(Spec.steps(Spec.Node{q, ch}, 0n), Check.stepsOf(s)) == True{} : Bool}
 
-
-
-
 def root_done(grammar, s, q, ch, w):
   match w:
     case (steps, pop):
       steps
-
 
 # A closed state with the start symbol's cluster at 0 holds every step of every parse tree.
 law closed_complete:
@@ -2841,9 +2260,6 @@ law closed_complete:
   for fitting: {Spec.fits([tree], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
   for spelled: {Spec.leaves([tree]) == input : +List<Nat>}
   {Spec.allIn(Spec.steps(tree, 0n), Check.stepsOf(s)) == True{} : Bool}
-
-
-
 
 def closed_complete(grammar, start, input, s, closedOk, rootIn, tree, fitting, spelled):
   match tree:
@@ -2872,8 +2288,6 @@ law path_eq_sound:
   for ys: +List<Nat>
   for e: {Spec.pathEq(xs, ys) == True{} : Bool}
   {xs == ys : +List<Nat>}
-
-
 
 def path_eq_sound(xs, ys, e):
   match xs ys:
@@ -2905,8 +2319,6 @@ law ebnf_bsr_eq_sound:
   for same: {Bool.and(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))))) == True{} : Bool}
   {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p2, path2}, i2, k2, j2} : Spec.Bsr}
 
-
-
 def ebnf_bsr_eq_sound(p, path, i, k, j, p2, path2, i2, k2, j2, same):
   +s0 = same
   +s1 = Lemma.and_true_right_side(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2)))), s0)
@@ -2934,8 +2346,6 @@ law member_pick:
   for searchRest: {Spec.bsrMember(element, rest) == True{} : Bool} -> {Spec.bsrMember(element, set) == True{} : Bool}
   {Spec.bsrMember(element, set) == True{} : Bool}
 
-
-
 def member_pick(element, x, rest, set, cases, inX, searchRest):
   match cases:
     case Inl{same}:
@@ -2958,8 +2368,6 @@ law ebnf_cases_pick:
   for cases: Either<{Bool.and(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))))) == True{} : Bool}, {Spec.bsrMember(Spec.Bsr{Spec.Slot{p, path}, i, k, j}, rest) == True{} : Bool}>
   Either<{Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p2, path2}, i2, k2, j2} : Spec.Bsr}, {Spec.bsrMember(Spec.Bsr{Spec.Slot{p, path}, i, k, j}, rest) == True{} : Bool}>
 
-
-
 def ebnf_cases_pick(p, path, i, k, j, p2, path2, i2, k2, j2, rest, cases):
   match cases:
     case Inl{same}:
@@ -2974,8 +2382,6 @@ law ebnf_member_cases:
   for m: {Spec.bsrMember(element, x <> rest) == True{} : Bool}
   Either<{element == x : Spec.Bsr}, {Spec.bsrMember(element, rest) == True{} : Bool}>
 
-
-
 def ebnf_member_cases(element, x, rest, m):
   match element x:
     case Spec.Bsr{Spec.Slot{+p, +path}, +i, +k, +j} Spec.Bsr{Spec.Slot{+p2, +path2}, +i2, +k2, +j2}:
@@ -2986,8 +2392,6 @@ law ebnf_not_in_empty:
   for element: Spec.Bsr
   for m: {Spec.bsrMember(element, []) == True{} : Bool}
   Empty
-
-
 
 def ebnf_not_in_empty(element, m):
   match element:
@@ -3002,8 +2406,6 @@ law ebnf_all_in_member:
   for all: {Spec.allIn(xs, set) == True{} : Bool}
   for m: {Spec.bsrMember(element, xs) == True{} : Bool}
   {Spec.bsrMember(element, set) == True{} : Bool}
-
-
 
 def ebnf_all_in_member(xs, set, element, all, m):
   match xs:
@@ -3036,8 +2438,6 @@ law check_pick:
   for got: {Check.checkPick(ok, s) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
   {ok == True{} : Bool} & {Check.stepsOf(s) == set : +List<Spec.Bsr>}
 
-
-
 def check_pick(ok, s, set, got):
   match ok:
     case True{}:
@@ -3054,7 +2454,6 @@ law state_done:
   for facts: {Bool.and(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)) == True{} : Bool} & {Check.stepsOf(s) == set : +List<Spec.Bsr>}
   Spec.EveryParseStep(grammar, start, input, set)
 
-
 def state_done(grammar, start, input, s, set, facts):
   match facts:
     case (ok0, same0):
@@ -3067,7 +2466,6 @@ def state_done(grammar, start, input, s, set, facts):
         Equal.trans(Bool, Spec.bsrMember(element, set), Spec.bsrMember(element, Check.stepsOf(s)), True{},
           Equal.cong(+List<Spec.Bsr>, Bool, v => Spec.bsrMember(element, v), set, Check.stepsOf(s), Equal.sym(+List<Spec.Bsr>, Check.stepsOf(s), set, same)), inS)
 
-
 law state_complete:
   for +grammar: +List<Spec.Production>
   for +start: Nat
@@ -3076,8 +2474,6 @@ law state_complete:
   for +set: +List<Spec.Bsr>
   for got: {Check.checkPick(Bool.and(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)), s) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
   Spec.EveryParseStep(grammar, start, input, set)
-
-
 
 def state_complete(grammar, start, input, s, set, got):
   state_done(grammar, start, input, s, set, check_pick(Bool.and(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)), s, set, got))

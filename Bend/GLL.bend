@@ -340,6 +340,8 @@ def stepItem(item: Maybe<&2, Spec.Item>, +grammar: +List<Spec.Production>, +inpu
     case Some{Spec.Brack{+kind, +alts}}:
       skipIf(isSkippable(kind), index, rpath, dot, k, i,
         call(TBr{index, dot <> rpath}, i, Edge{index, rpath, dot, k}, alternatives(List.length(&2, +List<Spec.Item>, alts), index, dot <> rpath, i, i), s))
+    case Some{Spec.Eps{}}:
+      skipIf(True{}, index, rpath, dot, k, i, s)
     case None{}:
       finish(grammar, index, rpath, k, i, emptyIf(dot, index, rpath, k, i, s))
 

@@ -4638,7 +4638,7 @@ struct SwiftSyntaxGenerator {
         let throwsClause = throwsClauseSyntax(in: effectPieces)
         if asyncText != nil || throwsClause != nil {
             effects = FunctionEffectSpecifiersSyntax(
-                asyncSpecifier: asyncText == "reasync" ? .keyword(.reasync) : (asyncText != nil ? .keyword(.async) : nil),
+                asyncSpecifier: asyncText != nil ? .keyword(.async) : nil,
                 throwsClause: throwsClause
             )
         }
@@ -4958,7 +4958,7 @@ struct SwiftSyntaxGenerator {
             record(.lookupFailed, "no parameterClause child", from: from, to: to)
         }
 
-        // `async` / `reasync` are bare terminals in the rule, so match their text rather than a
+        // `async` is a bare terminal in the rule, so match its text rather than a
         // nonterminal. `declarationThrowsClause = throwsClause | "rethrows"` mirrors
         // swift-syntax's single `ThrowsClauseSyntax.throwsSpecifier`, so there is one
         // nonterminal to find here rather than a per-alternate keyword probe.
@@ -4968,7 +4968,7 @@ struct SwiftSyntaxGenerator {
         let throwsClause = throwsClauseSyntax(in: effectPieces)
         if asyncText != nil || throwsClause != nil {
             effects = FunctionEffectSpecifiersSyntax(
-                asyncSpecifier: asyncText == "reasync" ? .keyword(.reasync) : (asyncText != nil ? .keyword(.async) : nil),
+                asyncSpecifier: asyncText != nil ? .keyword(.async) : nil,
                 throwsClause: throwsClause
             )
         }
@@ -7257,9 +7257,9 @@ struct SwiftSyntaxGenerator {
         return out
     }
 
-    /// `async` or `reasync` among effect spans: a bare keyword or a `functionAsyncSpecifier`.
+    /// `async` among effect spans: a bare keyword or a `functionAsyncSpecifier`.
     private mutating func asyncSpecifierText(in effects: TileSpans) -> String? {
-        for keyword in ["async", "reasync"] where spansContainKeyword(effects, keyword) { return keyword }
+        if spansContainKeyword(effects, "async") { return "async" }
         if let asyncNT = find("functionAsyncSpecifier", in: effects) {
             return collectTerminalText(asyncNT.nt, from: asyncNT.from, to: asyncNT.to)
         }

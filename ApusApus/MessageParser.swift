@@ -109,7 +109,13 @@ class MessageParser {
     /// `@preempt(X, N)` viability queries, keyed by the ID of the terminal carrying the annotation:
     /// "can `N` parse starting here?", answered by a memoised speculative recogniser sub-parse.
     /// Built in `prepareInput`; empty for sub-parsers. Consumed by the commit rule in `tokenMatch`.
-    var preemptViable: [Int: (CharPosition) -> Bool] = [:]
+    var preemptViable: [Int: (CharPosition, CharPosition) -> Bool] = [:]
+
+    /// A speculative recognizer has no local commit before its root. At that one boundary,
+    /// lookbehind reads the parent parser at the start of the complete token being considered.
+    weak var outerLookbehindParser: MessageParser?
+    var outerLookbehindLocalStart: CharPosition?
+    var outerLookbehindAnchor: CharPosition?
 
     /// Recogniser for parse predicates on a nonterminal the grammar never parses (`Oracle`
     /// `LookaheadPredicateRule`). Built on first use; memoised per (target, position).
@@ -243,6 +249,11 @@ class MessageParser {
     /// commit's `end` in steady state); etc. Walks set-unions when multiple
     /// histories arrive at the same position.
     func previousKindIDs(at pos: CharPosition, distance: Int) -> BitSet {
+        if pos == outerLookbehindLocalStart,
+           let parent = outerLookbehindParser,
+           let anchor = outerLookbehindAnchor {
+            return parent.previousKindIDs(at: anchor, distance: distance)
+        }
         var endPositions: Set<CharPosition> = [pos]
         for _ in 1..<distance {
             var next: Set<CharPosition> = []
@@ -282,6 +293,10 @@ class MessageParser {
     /// sub-parse can run on the same grammar by spinning up a separate
     /// `MessageParser` instance with its own `yields` array.
     var yields: [Set<BinarySpan>] = []
+    /// The nodes whose yield set may be non-empty, so a new run empties only those. A recogniser
+    /// (`canDerive`) runs once per anchor over a few tokens; emptying every node's set each time
+    /// (thousands of them, with flavors) cost more than the sub-parse itself.
+    var touchedYieldNodes: [Int] = []
 
     /// Read accessor for consumers (Oracle, diagrams, tests). Inside the
     /// parser/BSR hot path we use direct `yields[node.number]` access.
@@ -554,12 +569,15 @@ class MessageParser {
                       let target = grammar.nonTerminals[targetName] else { continue }
                 let sub = MessageParser(grammar: grammar)
                 sub.prepareInput(input: input, isSubParser: true)
-                var memo: [CharPosition: Bool] = [:]
-                preemptViable[tid] = { pos in
-                    if let hit = memo[pos] { return hit }
-                    sub.runGLL(root: target, start: pos)
-                    let viable = sub.yield(of: target).contains { $0.i == pos }
-                    memo[pos] = viable
+                var memo: [CharPosition: [CharPosition: Bool]] = [:]
+                preemptViable[tid] = { [weak self] tokenStart, splitPoint in
+                    if let hit = memo[tokenStart]?[splitPoint] { return hit }
+                    sub.outerLookbehindParser = self
+                    sub.outerLookbehindLocalStart = splitPoint
+                    sub.outerLookbehindAnchor = tokenStart
+                    sub.runGLL(root: target, start: splitPoint)
+                    let viable = sub.yield(of: target).contains { $0.i == splitPoint }
+                    memo[tokenStart, default: [:]][splitPoint] = viable
                     return viable
                 }
             }
@@ -639,8 +657,9 @@ class MessageParser {
         if yields.count < grammar.nodeCount {
             yields = Array(repeating: [], count: grammar.nodeCount)
         } else {
-            for i in yields.indices { yields[i].removeAll(keepingCapacity: true) }
+            for i in touchedYieldNodes { yields[i].removeAll(keepingCapacity: true) }
         }
+        touchedYieldNodes.removeAll(keepingCapacity: true)
         furthestMismatchIndex = origin
         furthestMismatchSlot = currentParseRoot
         furthestMismatchExpected = []
@@ -1162,6 +1181,18 @@ class MessageParser {
                 if !symbol.isNullable { break }
             }
             return false
+        case .DO, .OPT, .KLN, .POS:
+            // An alternative may start with a bracket, the implicit group of a loop round
+            // (`ApusParser.loopRound`) among them: ask the bracket's alternative that can start
+            // with this terminal.
+            var alternative = slot.alt
+            while let a = alternative {
+                if a.firstBS.contains(terminalID) {
+                    return suppressesLeadingTriviaForPrediction(slot: a, terminalID: terminalID)
+                }
+                alternative = a.alt
+            }
+            return false
         default:
             return false
         }
@@ -1234,7 +1265,7 @@ class MessageParser {
         if matches.count > 1, let viable = preemptViable[cL.nameID] {
             let maxEnd = matches.map(\.end).max()!
             let splitEnds = Set(matches.map(\.end)).filter { $0 < maxEnd }.sorted()
-            if let commitEnd = splitEnds.first(where: viable) {
+            if let commitEnd = splitEnds.first(where: { viable(cI, $0) }) {
                 matches = matches.filter { $0.end <= commitEnd }
             } else {
                 matches = matches.filter { $0.end == maxEnd }

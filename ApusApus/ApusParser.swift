@@ -17,6 +17,7 @@ enum ApusParserError: Error {
     case undefinedNonTerminal(name: String, definedAsTerminal: Bool)
     case startSymbolNotFound(name: String)
     case invalidExclusionSet(name: String, reason: String)
+    case preferenceCycle(findings: [String])
 }
 
 class ApusParser {
@@ -162,6 +163,10 @@ class ApusParser {
         grammar.isLL1 = isLL1
         grammar.propagateExcludeSets()
         grammar.diagnosePredicateTargets()
+        // A preference on a cycle that reads no input can remove every parse in the Oracle,
+        // where the specification (Bend/SPEC.bend) keeps one. Refuse such a grammar.
+        let preferenceCycles = grammar.diagnosePreferenceCycles()
+        if !preferenceCycles.isEmpty { throw ApusParserError.preferenceCycle(findings: preferenceCycles) }
         try grammar.populateBitSets()
         
         return grammar
@@ -444,6 +449,22 @@ class ApusParser {
         cI += 1
     }
     
+    /// The one alternative of a loop: `{ τ }` is built as `{ ( τ ) }`, the alternatives of τ
+    /// inside an implicit group. Each round of the loop is then one item in the loop's own
+    /// sequence: its step records where the loop started, where the round started and where
+    /// it ended, and the group's own sequence starts at the round's start. Without the group,
+    /// the items of every round would count from the loop's start, and a round's own span
+    /// would not be in the BSR: `@prefer` among a loop's alternatives then compared loop
+    /// prefixes instead of rounds. This is Scott and Johnstone's "local root node" for a
+    /// closure ("GLL Syntax Analysers for EBNF Grammars", section 3.1), one per round.
+    private func loopRound(_ alternatives: GrammarNode) -> GrammarNode {
+        let group = GrammarNode(kind: .DO, name: "", alt: alternatives)
+        group.seq = GrammarNode(kind: .END, name: "")
+        let round = GrammarNode(kind: .ALT, name: "")
+        round.seq = group
+        return round
+    }
+
     func selection() throws -> GrammarNode {
         // skip an optional first "|" to enable compact grammar formatting of multiple alternates
         if token.kind == "|" { cI += 1 }
@@ -478,13 +499,9 @@ class ApusParser {
         // can appear in any order before the first factor.
         //
         // `@prefer` marks this alternate a WINNER (its siblings lose where they tile the
-        // same span). `@avoid` marks this alternate a LOSER — the dual of `@prefer`. Its
-        // rivals are its explicit siblings AND, when the enclosing group is an OPT/KLN,
-        // that group's implicit empty (skip) branch. So `[ @avoid X ]` means "prefer the
-        // skip", spelled as an annotation on the body alternate `X` rather than on the
-        // bracket. The Oracle picks the mechanism by group shape (same-span `PreferRule`
-        // for non-empty siblings; follower-pivot for the epsilon skip) — see
-        // `registerPrefer` / the OPT/KLN walk.
+        // same span). `@avoid` marks this alternate a LOSER — the dual of `@prefer`: it loses
+        // to its siblings that are not avoided. The skip of a `[ … ]` or `{ … }` is not a
+        // sibling; `@shortest` prefers that. One alternate cannot be both. See `registerPrefer`.
         //
         // `@cannotParse(N)` / `@canParse(N)` are parse predicates with NONTERMINAL
         // operands at this alternate start. Captured on this ALT node; the Oracle anchors
@@ -497,9 +514,15 @@ class ApusParser {
         annotationLoop: while token.kind == "pragma" {
             switch token.stripped {
             case "prefer":
+                guard !startOfSequence.isAvoided else {
+                    throw ApusParserError.unexpectedToken(explanation: "@prefer: this alternative is already @avoid")
+                }
                 startOfSequence.isPreferred = true
                 cI += 1
             case "avoid":
+                guard !startOfSequence.isPreferred else {
+                    throw ApusParserError.unexpectedToken(explanation: "@avoid: this alternative is already @prefer")
+                }
                 startOfSequence.isAvoided = true
                 cI += 1
             case "left", "right":
@@ -569,8 +592,8 @@ class ApusParser {
                     miniSeq.seq?.seq = GrammarNode(kind: .END, name: "")
                     
                     if token.kind == "?" { factorNode = GrammarNode(kind: .OPT, name: "", alt: miniSeq) }
-                    if token.kind == "*" { factorNode = GrammarNode(kind: .KLN, name: "", alt: miniSeq) }
-                    if token.kind == "+" { factorNode = GrammarNode(kind: .POS, name: "", alt: miniSeq) }
+                    if token.kind == "*" { factorNode = GrammarNode(kind: .KLN, name: "", alt: loopRound(miniSeq)) }
+                    if token.kind == "+" { factorNode = GrammarNode(kind: .POS, name: "", alt: loopRound(miniSeq)) }
 
 //                    switch token.kind {
 //                    case "?":
@@ -855,12 +878,12 @@ class ApusParser {
             cI += 1
         case "{":
             cI += 1
-            node = GrammarNode(kind: .KLN, name: "", alt: try selection())
+            node = GrammarNode(kind: .KLN, name: "", alt: loopRound(try selection()))
             try expect(["}"])
             cI += 1
         case "<":
             cI += 1
-            node = GrammarNode(kind: .POS, name: "", alt: try selection())
+            node = GrammarNode(kind: .POS, name: "", alt: loopRound(try selection()))
             try expect([">"])
             cI += 1
         default:

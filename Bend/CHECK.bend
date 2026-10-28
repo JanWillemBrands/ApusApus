@@ -99,6 +99,8 @@ def itemOk(item: Maybe<&2, Spec.Item>, +grammar: +List<Spec.Production>, +input:
     case Some{Spec.Brack{+kind, alts}}:
       +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, i} : Gll.CKey}
       Bool.and(clusterIn(key, s), Bool.and(returnIn(key, Gll.Edge{index, rpath, dot, k}, s), skipOk(Gll.isSkippable(kind), index, rpath, dot, k, i, s)))
+    case Some{Spec.Eps{}}:
+      skipOk(True{}, index, rpath, dot, k, i, s)
     case None{}:
       Bool.and(emptyOk(dot, index, rpath, k, i, s), popIn(endKey(grammar, index, rpath, k), i, s))
 

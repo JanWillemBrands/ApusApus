@@ -228,4 +228,121 @@ extension Grammar {
         return findings
     }
 
+
+    /// Flag a preference that can remove every parse: an alternative that outranks a sibling
+    /// (`@prefer` over an unmarked or avoided sibling, or unmarked over an `@avoid`) and lies
+    /// on a cycle that reads no input. In `A = @prefer A | "a"` every tree of `A` ends in the
+    /// `"a"` alternative, and there `A → A` covers the same tokens and outranks it, so no
+    /// tree is left (Bend/SPEC.bend, preferences). A cycle through an alternative that
+    /// outranks nothing is harmless: `A = @prefer "a" | A`.
+    ///
+    /// An alternative reaches a nonterminal over its own span when the nonterminal (or a
+    /// bracket holding it) can be the whole of the alternative: every other item can read
+    /// nothing. A bracket's alternative is checked against the nonterminal that holds the
+    /// bracket, which may report a cycle the bracket cannot actually close.
+    ///
+    /// Grammar loading refuses a grammar with findings (`ApusParserError.preferenceCycle`).
+    /// Returns one message per bad alternative (empty = clean) as well as logging.
+    @discardableResult
+    func diagnosePreferenceCycles() -> [String] {
+        // Which nonterminals can read nothing, as a fixpoint. (A node's `isNullable` reads its
+        // positional FIRST set, which looks through to what follows, so it can't say this.)
+        var nullable = Set<ObjectIdentifier>()
+        func readsNothing(_ s: GrammarNode) -> Bool {
+            switch s.kind {
+            case .EPS, .B, .OPT, .KLN: return true
+            case .N: return s.alt.map { nullable.contains(ObjectIdentifier($0)) } ?? false
+            case .DO, .POS: return someAlternativeReadsNothing(s.alt)
+            default: return false
+            }
+        }
+        func someAlternativeReadsNothing(_ head: GrammarNode?) -> Bool {
+            var scan = head
+            while let a = scan {
+                if a.bodySymbols.allSatisfy(readsNothing) { return true }
+                scan = a.alt
+            }
+            return false
+        }
+        var grew = true
+        while grew {
+            grew = false
+            for lhs in allProductions where !nullable.contains(ObjectIdentifier(lhs)) && someAlternativeReadsNothing(lhs.alt) {
+                nullable.insert(ObjectIdentifier(lhs))
+                grew = true
+            }
+        }
+
+        // The nonterminals (LHS nodes) an alternative body can be entirely, over its own span.
+        func sameSpanTargets(_ body: [GrammarNode], into targets: inout [GrammarNode], seen: inout Set<ObjectIdentifier>) {
+            for (k, s) in body.enumerated()
+            where body.indices.allSatisfy({ $0 == k || readsNothing(body[$0]) }) {
+                if s.kind == .N, let lhs = s.alt {
+                    targets.append(lhs)
+                } else if s.kind.isBracket, seen.insert(ObjectIdentifier(s)).inserted {
+                    var scan = s.alt
+                    while let a = scan { sameSpanTargets(a.bodySymbols, into: &targets, seen: &seen); scan = a.alt }
+                }
+            }
+        }
+        func targets(ofBody body: [GrammarNode]) -> [GrammarNode] {
+            var out: [GrammarNode] = []
+            var seen = Set<ObjectIdentifier>()
+            sameSpanTargets(body, into: &out, seen: &seen)
+            return out
+        }
+
+        // Edges LHS → LHS over the same span, and whether `goal` is reachable from `start`.
+        var edges: [ObjectIdentifier: [GrammarNode]] = [:]
+        func edgesOf(_ lhs: GrammarNode) -> [GrammarNode] {
+            if let known = edges[ObjectIdentifier(lhs)] { return known }
+            var out: [GrammarNode] = []
+            var scan = lhs.alt
+            while let a = scan { out += targets(ofBody: a.bodySymbols); scan = a.alt }
+            edges[ObjectIdentifier(lhs)] = out
+            return out
+        }
+        func reaches(_ from: [GrammarNode], _ goal: GrammarNode) -> Bool {
+            var stack = from
+            var visited = Set<ObjectIdentifier>()
+            while let n = stack.popLast() {
+                if n === goal { return true }
+                guard visited.insert(ObjectIdentifier(n)).inserted else { continue }
+                stack += edgesOf(n)
+            }
+            return false
+        }
+
+        func rank(_ a: GrammarNode) -> Int { a.isPreferred ? 2 : (a.isAvoided ? 0 : 1) }
+
+        var findings: [String] = []
+        // One choice point: the alternative chain from `head`, held by nonterminal `owner`.
+        func check(chain head: GrammarNode?, owner: GrammarNode) {
+            var alts: [GrammarNode] = []
+            var scan = head
+            while let a = scan { alts.append(a); scan = a.alt }
+            guard let lowest = alts.map(rank).min() else { return }
+            for (n, a) in alts.enumerated() where rank(a) > lowest {
+                if reaches(targets(ofBody: a.bodySymbols), owner) {
+                    findings.append("'\(owner.name)': alternative \(n + 1) outranks a sibling and can derive '\(owner.name)' again without reading input, so the preference can remove every parse")
+                }
+            }
+        }
+        var seenBrackets = Set<ObjectIdentifier>()
+        func walkBrackets(_ node: GrammarNode?, owner: GrammarNode) {
+            guard let node, seenBrackets.insert(ObjectIdentifier(node)).inserted else { return }
+            if node.kind.isBracket { check(chain: node.alt, owner: owner) }
+            if node.kind != .END { walkBrackets(node.seq, owner: owner) }
+            if !node.isRHS { walkBrackets(node.alt, owner: owner) }
+        }
+        for lhs in allProductions {
+            check(chain: lhs.alt, owner: lhs)
+            walkBrackets(lhs.alt, owner: lhs)
+        }
+        for finding in findings {
+            Logger.grammar.error("\(finding, privacy: .public)")
+        }
+        return findings
+    }
+
 }

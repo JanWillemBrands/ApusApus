@@ -83,6 +83,8 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
             return "subscripts may only be declared within a type"
         case "testOperatorDecl19#1":
             return "operator declarations are only allowed at global scope"
+        case "testReasyncFunctions#1":
+            return "'reasync' is not a supported function effect"
         case "testOpenVarInCodeBlockItemList#1",
              "testReferenceToOpenThatLooksLikeDeclarationModifier#1":
             return "open declarations are not allowed in local scope"
@@ -1457,14 +1459,14 @@ let regexLookbehindSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "regex-after-eq",   source: "let r = /abc/",            origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "regex-after-lparen", source: "let r = (/abc/)",        origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "regex-in-array",   source: "let arr = [/abc/]",        origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-after-prefix-bang", source: "let r = !/^/",       origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
 
     // Compound positive override — eliminates Swift's `preferRegexOverBinaryOperator` hack.
     // NOT newly broken: this row is accepted and always was, but until `treesMatch` was added to
     // this suite (2026-09-17) nothing here compared trees, so the converter gap was invisible.
     SwiftSnippet(label: "regex-after-try-bang",
                  source: #"let m = try! /^x/.wholeMatch(in: "hello")"#,
-                 origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "converter tree gap on `try!` + regex + member call; acceptance is fine. Pre-existing, surfaced by this suite's new treesMatch test"),
+                 origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "regex-after-try-question",
                  source: #"let m = try? /^x/.wholeMatch(in: "hello")"#,
                  origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
@@ -1478,31 +1480,13 @@ let regexLookbehindSnippets: [SwiftSnippet] = [
                  origin: "RegexLookbehind", syntaxVersion: "603.0.1",
                  disabledReason: "lookbehind allows regex after '?'; blocked by Swift.apus conditionalOperator's <s> spacing requirement, a separate grammar policy"),
 
-    // INTERIOR SPACES — a KNOWN DEFECT, recorded here so it cannot be forgotten again. The corpus
-    // had no fixture with a space inside a `/…/` body, which is why the loss went unseen.
-    //
-    // `plainRegularExpressionLiteral`'s body is a sequence of TOKENS with trivia skipped between the
-    // items, so `regexSpaceAtom` never matches — the space is always consumed as trivia first. The
-    // converter's `collectTerminalText` then rebuilds the literal by concatenating COMMITTED
-    // terminals, so every interior space is dropped and `/a b/` generates the pattern `ab` — a regex
-    // that matches something else entirely, silently. All these rows ACCEPT; they fail `treesMatch`.
-    //
-    // The fix is to make the body character-tight, which is TODO.md item 13 — attempted 2026-09-17
-    // and reverted twice (6 → 45 and 6 → 629 issues); see that item for the two failure modes.
-    // `regex-escaped-space` is the control: `\ ` lexes as one `regexEscape` token, so it survives
-    // and must keep passing.
-    SwiftSnippet(label: "regex-interior-space",       source: "let r = /a b/",     origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "interior space dropped from the generated pattern (`ab`) — TODO.md / Keep regex literal text reconstruction faithful"),
-    SwiftSnippet(label: "regex-interior-2-spaces",    source: "let r = /a  b/",    origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "interior spaces dropped from the generated pattern (`ab`) — TODO.md / Keep regex literal text reconstruction faithful"),
-    SwiftSnippet(label: "regex-interior-3-spaces",    source: "let r = /a   b/",   origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "interior spaces dropped from the generated pattern (`ab`) — TODO.md / Keep regex literal text reconstruction faithful"),
-    SwiftSnippet(label: "regex-interior-space-thrice", source: "let r = /a b c/",  origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "interior spaces dropped from the generated pattern (`abc`) — TODO.md / Keep regex literal text reconstruction faithful"),
-    SwiftSnippet(label: "regex-interior-space-group", source: "let r = /(a  b)/",  origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "interior spaces dropped from the generated pattern (`(ab)`) — TODO.md / Keep regex literal text reconstruction faithful"),
-    SwiftSnippet(label: "regex-interior-space-class", source: "let r = /[a b]/",   origin: "RegexLookbehind", syntaxVersion: "603.0.1",
-                 disabledReason: "interior space dropped from the generated pattern (`[ab]`) — TODO.md / Keep regex literal text reconstruction faithful"),
+    // Preserve interior spaces from the source span; an escaped space remains the control.
+    SwiftSnippet(label: "regex-interior-space",       source: "let r = /a b/",     origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-interior-2-spaces",    source: "let r = /a  b/",    origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-interior-3-spaces",    source: "let r = /a   b/",   origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-interior-space-thrice", source: "let r = /a b c/",  origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-interior-space-group", source: "let r = /(a  b)/",  origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "regex-interior-space-class", source: "let r = /[a b]/",   origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "regex-escaped-space",        source: #"let r = /a\ b/"#,  origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "slash-comment-after-operator", source: "let x = true\nlet r = /x*// / value", origin: "RegexLookbehind", syntaxVersion: "603.0.1"),
 ]
@@ -3027,6 +3011,8 @@ struct FuzzHarvestTests {
             "protocol P { var x: Int { get {} } }",
             "protocol P { var x: Int { 1 } }",
             "protocol P { var x: Int { _read } }",
+            "f()\n!/^/",
+            "func f() reasync {}",
         ] {
             #expect(try adventParse(source) == nil, "accepted a compiler-rejected source: \(source)")
         }

@@ -60,7 +60,7 @@ enum OraclePass: Int, CaseIterable {
     /// Parent/child-shape filters that ask WHICH production occupies a span: `@left`/`@right`.
     /// That question only has an answer once `sameSpan` has settled each span's alternate.
     case structure
-    /// Different-extent choice: `@longest`, `@shortest`, `@avoid` against an optional's skip.
+    /// Different-extent choice: `@longest`, `@shortest`.
     /// Last, because it ranks the extents that the passes before it remove.
     case extent
 }
@@ -78,48 +78,6 @@ struct ShortestMatchRule: DisambiguationRule {
     let input: String
     func prune(_ yields: inout Set<BinarySpan>) -> Int {
         pruneByExtent(yields: &yields, input: input, keepLongest: false)
-    }
-}
-
-/// The optional-skip rule — compiled from an `@avoid` alternate inside an OPT/KLN: prefer NOT
-/// taking the optional whenever skipping still yields a complete parse. Registered on the
-/// symbol immediately FOLLOWING the bracket. Competing readings reach the same enclosing span
-/// `(i, j)` and differ only in the pivot `k` = where the bracket ended / the follower began.
-/// The pivot uniformly encodes HOW MUCH the bracket consumed: `k = i` (bracket start) is the
-/// skip, larger `k` are progressively longer takes. Keep the min-`k` (least consumption) and
-/// prune the rest — so this prefers the skip, and, where the skip is not viable, the SHORTEST
-/// take. That uniformity is exactly why the decision lives on the follower's pivot and not on
-/// the avoided alternate's own yields: "skip" is the *absence* of an avoided-alternate yield,
-/// observable only here. When skipping does not complete, phase-1 has already removed the skip
-/// yield, so the lone take survives (e.g. `-x`).
-///
-/// ALTERNATE-AWARE: the bare pivot `k` cannot say WHICH alternate produced a taken reading, so a
-/// non-avoided sibling `B` sharing `A`'s pivot would be collateral-pruned. `protectedLast` holds
-/// the non-avoided siblings' last body symbols; any pivot they reach from the bracket start is
-/// exempted. `A`'s same-span removal is `PreferRule`'s job. Single-body `[ @avoid X ]` has no
-/// siblings, so `protectedLast` is empty and this is the classic keep-min-pivot.
-struct AvoidOptionalRule: DisambiguationRule {
-    /// Extent, not same-span: the rivals share `(i, j)` but differ in how much the optional
-    /// consumed, which is the inner bracket's extent.
-    var pass: OraclePass { .extent }
-    let protectedLast: [GrammarNode]
-    let yieldsOf: (GrammarNode) -> Set<BinarySpan>
-    func prune(_ yields: inout Set<BinarySpan>) -> Int {
-        let grouped = Dictionary(grouping: yields) { SpanKey(i: $0.i, j: $0.j) }
-        var pruned = 0
-        for (_, spans) in grouped where spans.count > 1 {
-            let ks = spans.map(\.k)
-            guard let minK = ks.min(), Set(ks).count > 1 else { continue }
-            var protected = Set<CharPosition>()
-            for sym in protectedLast {
-                for y in yieldsOf(sym) where y.i == minK { protected.insert(y.j) }
-            }
-            for span in spans where span.k != minK && !protected.contains(span.k) {
-                yields.remove(span)
-                pruned += 1
-            }
-        }
-        return pruned
     }
 }
 
@@ -585,17 +543,12 @@ class Oracle {
         //     `.alt` exactly like a nonterminal LHS — `factor()` → `GrammarNode(.DO/…,
         //     alt: selection())`). Run per BRACKET node (not per ALT node, whose `.alt`
         //     is a sibling continuation), so each group is registered exactly once.
-        //   - the optional-skip: an `@avoid` alternate inside an OPT/KLN competes against
-        //     that group's implicit empty (skip) branch — the ε rival that `registerPrefer`
-        //     can't key on. `registerOptionalSkip` compiles it to an alternate-aware
-        //     follower-pivot rule (`AvoidOptionalRule`).
         var seen = Set<ObjectIdentifier>()
         func walk(_ node: GrammarNode?) {
             guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
             if node.kind.isBracket {
                 registerNodeDisambiguation(owner: node)
                 registerPrefer(altChainHead: node.alt)
-                registerOptionalSkip(bracket: node)
             }
             // Leading parse predicate on an ALT node (`@cannotParse(N)`/`@canParse(N)`, N a
             // nonterminal). Anchor the prune on the alternate's first body symbol.
@@ -615,7 +568,8 @@ class Oracle {
                     // predicted, that is deliberately false (`closureSignatureStart` outside a closure).
                     if !grammar.parsedNonTerminals.contains(predicate.targetName),
                        let base = grammar.nonTerminals[predicate.targetName] {
-                        for i in Set(parser.yield(of: anchor).map(\.i)) where parser.canDerive(base, at: i) {
+                        let fromForest = forestRecogniser(base)
+                        for i in Set(parser.yield(of: anchor).map(\.i)) where fromForest?(i) ?? parser.canDerive(base, at: i) {
                             targetStarts.insert(i)
                         }
                     }
@@ -668,6 +622,41 @@ class Oracle {
         for nt in grammar.allProductions { walk(nt) }
     }
 
+    /// A predicate-only target answered from the main parse where it can be, instead of by a
+    /// sub-parse. When every alternative of the target is token lookaheads followed by one
+    /// nonterminal (`committingStatementDeclaration = >->( "open" ) declaration`), the target
+    /// derives at i exactly when some alternative's lookaheads hold at i and its nonterminal
+    /// derives at i. If the main parse called that nonterminal at i, its cluster there holds
+    /// every way it ends (GLL is complete for every call it makes), so the answer is in the
+    /// forest. Where it never called it (`initializerHead` at a statement start), the answer
+    /// is unknown (nil) and the caller falls back to the sub-parse. A sub-parse at every statement
+    /// start re-parsed a whole declaration, nested bodies included: 2.8 s on a 66 KB source,
+    /// more than the parse itself. Returns nil for a target of another shape.
+    private func forestRecogniser(_ target: GrammarNode) -> ((CharPosition) -> Bool?)? {
+        var alternatives: [(gates: [GrammarNode], callee: GrammarNode)] = []
+        var scan = target.alt
+        while let a = scan {
+            let body = a.bodySymbols
+            guard let last = body.last, last.kind == .N, let callee = last.alt else { return nil }
+            let gates = Array(body.dropLast())
+            for gate in gates {
+                guard gate.kind == .B, case .tokenLookahead = gate.boundaryPredicate else { return nil }
+            }
+            alternatives.append((gates, callee))
+            scan = a.alt
+        }
+        guard !alternatives.isEmpty else { return nil }
+        let p = parser
+        return { i in
+            var unknown = false
+            for alt in alternatives where alt.gates.allSatisfy({ p.boundaryMatches($0, at: i) }) {
+                guard let cluster = p.crf[ParsePosition(slot: alt.callee, index: i)] else { unknown = true; continue }
+                if !cluster.pops.isEmpty { return true }
+            }
+            return unknown ? nil : false
+        }
+    }
+
     /// Register node-level extent for an ALT-bearing `owner` (a
     /// nonterminal LHS or an inline `( )`/`[ ]`/`{ }`/`< >` cluster), reading the pragma
     /// off `owner.disambiguation` (set before the LHS in `production()` or before the
@@ -700,12 +689,10 @@ class Oracle {
     /// head may be a nonterminal's `nt.alt` or an inline cluster's `bracket.alt`.
     ///   - `@prefer` names WINNERS: every non-preferred sibling is pruned where a
     ///     preferred sibling covers the same `(i, j)` span.
-    ///   - `@avoid` names a LOSER: it is the dual — an avoided alternate is pruned where ANY
-    ///     of its siblings covers the same `(i, j)`, i.e. `@avoid A` ≡ `@prefer` on all of
-    ///     A's (non-empty) siblings. This handles only the EXPLICIT-sibling rivalry; the
-    ///     avoided alternate's other rival — an OPT/KLN's implicit empty (skip) branch — is
-    ///     compiled separately by `registerOptionalSkip`, because ε has no last body symbol
-    ///     to key a same-span rule on.
+    ///   - `@avoid` names a LOSER: it is the dual — an avoided alternate is pruned where a
+    ///     sibling that is not avoided covers the same `(i, j)`, i.e. `@avoid A` ≡ `@prefer`
+    ///     on all of A's siblings (in a chain without `@prefer`). Inside `[ … ]` or `{ … }` the skip is not a sibling:
+    ///     `@avoid` never ranks taking the bracket against skipping it (that is `@shortest`).
     /// Both key on last body symbols, so a winner must be non-empty to be keyable.
     private func registerPrefer(altChainHead: GrammarNode?) {
         var alts: [GrammarNode] = []
@@ -724,34 +711,16 @@ class Oracle {
             }
         }
 
-        // @avoid (alt-prefix): an avoided alternate loses to all its (non-empty) siblings.
+        // @avoid (alt-prefix): an avoided alternate loses to its siblings that are not avoided.
+        // Two avoided siblings have the same rank and both stay (Bend/SPEC.bend, `outranks`):
+        // letting each lose to the other made the survivor depend on rule order.
         for a in alts where a.isAvoided {
-            let siblingsLast = alts.filter { $0 !== a }.compactMap { $0.bodySymbols.last }
+            let siblingsLast = alts.filter { !$0.isAvoided }.compactMap { $0.bodySymbols.last }
             if let last = a.bodySymbols.last, !siblingsLast.isEmpty {
                 rules.append((last, PreferRule(preferredLastSymbols: siblingsLast,
                                                yieldsOf: { p.yield(of: $0) })))
             }
         }
-    }
-
-    /// The optional-skip: an `@avoid` alternate inside an OPT (`[ … ]`) or KLN (`{ … }`)
-    /// competes against the group's **implicit empty (skip) branch** — the ε rival that
-    /// `registerPrefer` can't key on (ε has no last body symbol). Register an
-    /// `AvoidOptionalRule` on EACH avoided alternate's own `lastContentSymbol`: it reads the
-    /// bracket's follower to detect the take-vs-skip competition and removes the avoided
-    /// alternate's own "taken" completions. POS (`< … >`) and DO (`( … )`) have no skip
-    /// branch and are excluded.
-    private func registerOptionalSkip(bracket: GrammarNode) {
-        guard bracket.kind == .OPT || bracket.kind == .KLN else { return }
-        var alts: [GrammarNode] = []
-        var scan = bracket.alt
-        while let a = scan { alts.append(a); scan = a.alt }
-        guard alts.contains(where: { $0.isAvoided }) else { return }
-        guard let next = bracket.seq, next.kind != .END else { return }
-        let protectedLast = alts.filter { !$0.isAvoided }.compactMap { $0.bodySymbols.last }
-        let p = parser
-        rules.append((next, AvoidOptionalRule(protectedLast: protectedLast,
-                                              yieldsOf: { p.yield(of: $0) })))
     }
 
     @discardableResult
@@ -979,6 +948,8 @@ private struct IJPair: Hashable {
 
     // MARK: - Phase 1: Prune Unproductive Yields
 
+    /// Compatibility bridge for bracket-local extent selection. The dependency
+    /// Oracle calls this once until bracket extent has an explicit dependency model.
     private func pruneUnproductive(endPosition n: CharPosition) -> Int {
         var reachable = Set<NodeSpan>()
         var expanding = Set<NodeSpan>()
@@ -1046,7 +1017,10 @@ private struct IJPair: Hashable {
                             reachable.insert(NodeSpan(id: ObjectIdentifier(eps), from: from, to: from))
                         }
                     }
-                } else if tileBody(body, from: from, to: to) {
+                } else if tileBody(a.bodySymbols, from: from, to: to) {
+                    // Tile with the EPS symbols left in: `visitSymbol` then marks their `(k, k)`
+                    // yields. Tiling the filtered body left them unmarked, and the sweep deleted
+                    // the only parse of `S = "a" "".` (found by the Bend check, 2026-10-26).
                     found = true
                 }
             }
@@ -1081,7 +1055,7 @@ private struct IJPair: Hashable {
         // Per-context (not per-start) is the whole point — it's the constraint-solver reading:
         // minimise/maximise this node's span *subject to a complete parse existing*. Both
         // flavors collapse here: siblings absorb the slack (`[x][x]`, `{x}{x}{x}`), or the
-        // follower does (optional-skip). Nonterminal extent stays on the classic global rule.
+        // follower does (the optional's skip). Nonterminal extent stays on the classic global rule.
         func bracketExtent(_ node: GrammarNode) -> Disambiguation? {
             guard node.kind.isBracket, let d = node.disambiguation,
                   d == .shortest || d == .longest else { return nil }
@@ -1194,13 +1168,18 @@ private struct IJPair: Hashable {
         func visitBracket(_ bracket: GrammarNode, from: CharPosition, to: CharPosition) {
             let key = NodeSpan(id: ObjectIdentifier(bracket), from: from, to: to)
             if from == to {
-                // A zero-width span. For a closure it is the skip: there is no iteration to walk.
-                // A `( … )` / `[ … ]` is one pass, and that pass may legitimately consume nothing
+                // A zero-width span. For a `{ … }` or a `[ … ]` it is the skip: there is no
+                // iteration to walk. A round that reads nothing is not a parse of its own
+                // (Bend/SPEC.bend, roundsOk); walking it kept dead wood for `[ "" ]`.
+                // A `( … )` is one pass, and that pass may legitimately consume nothing
                 // through a zero-width alternate — `( clause | >-> ( openAngle ) )`. Returning
                 // early here (as it once did for every bracket) left that alternate's gate yield
                 // unmarked, the sweep deleted it, and `pruneUnsupported` cascaded the loss to the
                 // root: every type in the grammar underaccepted (2026-10-04).
-                guard !bracket.kind.isClosure, visitedBrackets.insert(key).inserted else { return }
+                // A `< … >` has no skip: over a zero-width span it is one empty round, so it is
+                // walked like a `( … )`. Skipping it removed the only parse of `S = < "x" | "" >.`
+                // on "" (found by the Bend check, 2026-10-26).
+                guard bracket.kind != .KLN, bracket.kind != .OPT, visitedBrackets.insert(key).inserted else { return }
                 if visitAlternates(bracket, from: from, to: to) { reachable.insert(key) }
                 return
             }

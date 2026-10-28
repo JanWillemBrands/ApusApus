@@ -306,9 +306,10 @@ regexBlockingToken = "true" | "false" | "nil" | "self" | "Self" | "super" | "Any
 // `tryScanOperatorAsRegexLiteral` also lexes confidently (`mustBeRegex`) or tentatively (in an
 // argument list, after `(` `[` `,` `:` `::`); the modes differ only on a `)` that closes nothing,
 // which no valid regex contains, so one token serves both.
-plainRegularExpressionLiteral = ( >n< <-< ( regexBlockingToken ) | <n> ) regexLiteralToken .
+plainRegularExpressionLiteral = >n< <-< ( regexBlockingToken ) regexLiteralToken
+                              | <n> regexLiteralToken .
 
-tryScanOperatorAsRegexLiteral = operatorRegexLiteralToken .
+tryScanOperatorAsRegexLiteral = <-< ( regexBlockingToken ) operatorRegexLiteralToken .
 
 regularExpressionLiteral = plainRegularExpressionLiteral | extendedRegularExpressionLiteral .
 
@@ -2502,8 +2503,8 @@ operatorNameExtra = dotOperator | "!" | "&" .
 // A following `async` always belongs to the signature, also on the next line: before `->` it is the
 // effect, after the result swiftc diagnoses it ("'async' may only occur before '->'"), so `func f()⏎async()`
 // and `-> Int⏎async {}` are errors, not a declaration plus a call. After a `where` clause it is a new statement.
-functionSignature = parameterClause functionEffectSpecifiers? declarationFunctionResult? >->( "async" ) .
-functionAsyncSpecifier = "async" | "reasync" .
+functionSignature = parameterClause functionEffectSpecifiers? declarationFunctionResult? >->( "async" "reasync" ) .
+functionAsyncSpecifier = "async" .
 functionEffectSpecifiers = ( functionAsyncSpecifier declarationThrowsClause? | declarationThrowsClause ) >-> ( "async" "reasync" "throws" "rethrows" ) .
 functionResult = "->" resultType .
 declarationFunctionResult = "->" >-> ( "async" "throws" "rethrows" "await" "try" "throw" ) resultType .

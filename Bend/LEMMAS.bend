@@ -453,7 +453,6 @@ def lt_pos(s, n, lt):
 # whose production is p = B C, with B in the table cell for i .. k and C in the
 # cell for k .. j. All three BSR laws start from this fact.
 
-
 law sub_zero:
   for n: Nat
   {Nat.sub(n, 0n) == n : Nat}
@@ -1040,3 +1039,15 @@ def slice_len_le(inputTokens, s, l, w, e, len):
   lenSlice = Equal.trans(Nat, List.length(&2, Nat, slice(inputTokens, s, l)), List.length(&2, Nat, w), l, Equal.cong(+List<Nat>, Nat, x => List.length(&2, Nat, x), slice(inputTokens, s, l), w, e), len)
   %lenSlice : {Nat.is_le(_, List.length(&2, Nat, inputTokens)) == True{} : Bool}
   le_trans(List.length(&2, Nat, takeN(l, d)), List.length(&2, Nat, d), List.length(&2, Nat, inputTokens), length_take_le(l, d), length_drop_le(s, inputTokens))
+
+# True is the unit of a conjunction.
+law and_true_unit:
+  for x: Bool
+  {Bool.and(x, True{}) == x : Bool}
+
+def and_true_unit(x):
+  match x:
+    case False{}:
+      {==}
+    case True{}:
+      {==}

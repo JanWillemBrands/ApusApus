@@ -167,17 +167,11 @@ final class GrammarNode {
 
     /// Alternate-level `@avoid` annotation — the negative dual of `@prefer`, ALWAYS on the
     /// `.ALT` node heading an alternate (prefix, right after `=`, `|`, or an opening
-    /// `(`/`[`/`{`/`<`). "Avoid this alternate": it loses to its rivals. Its rivals are
-    ///   • its **explicit siblings** — pruned same-span wherever a sibling covers the same
-    ///     `(i,j)` (`@avoid A` ≡ `@prefer` on A's siblings), via Oracle `registerPrefer`; and
-    ///   • when the enclosing group is an **OPT/KLN**, that group's **implicit empty (skip)
-    ///     branch** — the reading where the whole optional is dropped. ε has no last body
-    ///     symbol to key a same-span rule on, so the Oracle compiles this rival as an
-    ///     alternate-aware follower-pivot (`AvoidOptionalRule`) via `registerOptionalSkip`.
-    /// `[ @avoid X ]` (single body alternate) is thus just the skip-rival case: "prefer the
-    /// skip", expressed as an annotation on the body alternate — NOT a bracket property, and
-    /// NOT `@shortest` (extent over-prunes and changes acceptance).
+    /// `(`/`[`/`{`/`<`). "Avoid this alternate": it loses to its siblings that are not
+    /// avoided, wherever one covers the same `(i,j)` (Oracle `registerPrefer`). The skip of a
+    /// `[ … ]` or `{ … }` is not a sibling; `@shortest` prefers that.
     var isAvoided: Bool = false
+
 
     /// Parse predicate on an alternate — a leading `@cannotParse(N)` / `@canParse(N)` whose
     /// operand `N` is a NONTERMINAL. Captured on the `.ALT` node heading the alternate.
@@ -395,11 +389,20 @@ extension GrammarNode {
 }
 
 extension GrammarNode {
+    /// Is this the implicit group of a loop round? A loop `{ τ }` / `< τ >` / `x*` / `x+` is
+    /// built as `{ ( τ ) }` (`ApusParser.loopRound`): its one alternative is a group, followed by
+    /// the END of that alternative, whose link leads back to the loop. Printing leaves this group
+    /// out. (Only meaningful once `resolveGrammarNodeLinks` has linked END nodes.)
+    var isLoopRound: Bool {
+        kind == .DO && seq?.kind == .END && seq?.seq?.kind.isClosure == true
+    }
+
     /// Label for a bracket node showing only its own content, not the continuation.
     /// e.g. `{ "a" }` instead of `{ "a" } { "a" }`.
     func bracketLabel() -> String {
         switch kind {
-        case .DO:  return "(\((alt?.ebnf() ?? "").trimmingCharacters(in: .whitespaces)))"
+        case .DO:  return isLoopRound ? (alt?.ebnf() ?? "").trimmingCharacters(in: .whitespaces)
+                                      : "(\((alt?.ebnf() ?? "").trimmingCharacters(in: .whitespaces)))"
         case .OPT: return "[\((alt?.ebnf() ?? "").trimmingCharacters(in: .whitespaces))]"
         case .POS: return "<\((alt?.ebnf() ?? "").trimmingCharacters(in: .whitespaces))>"
         case .KLN: return "{\((alt?.ebnf() ?? "").trimmingCharacters(in: .whitespaces))}"
@@ -431,7 +434,7 @@ extension GrammarNode {
         case .END:
             break
         case .DO:
-            if let alt { s += "( " + alt.ebnf() + ") " }
+            if let alt { s += isLoopRound ? alt.ebnf() : "( " + alt.ebnf() + ") " }
             if let seq { s += seq.ebnf() }
         case .OPT:
             if let alt { s += "[ " + alt.ebnf() + "] " }
@@ -485,9 +488,9 @@ extension GrammarNode {
             }
         case .DO:
             if let alt {
-                ebnf += "("
+                if !isLoopRound { ebnf += "(" }
                 try alt.emit(into: &ebnf, dottedSlot: dottedSlot)
-                ebnf += ")"
+                if !isLoopRound { ebnf += ")" }
             }
             if self == dottedSlot { ebnf += middleDot }
             if let seq { try seq.emit(into: &ebnf, dottedSlot: dottedSlot) }

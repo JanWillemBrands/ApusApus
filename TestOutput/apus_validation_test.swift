@@ -63,44 +63,44 @@ func expect(_ expected: String...) {
 
 // MARK: - start of generated code
 let tokenPatterns: [String:TokenPattern] = [
+	"pragma":	("/@\\p{XID_Start}\\p{XID_Continue}*/",	/@\p{XID_Start}\p{XID_Continue}*/,	false,	false),
+	"whitespace":	("/\\s+/",	/\s+/,	false,	true),
 	"literal":	("/\\\"(?:[^\\\"\\\\]|\\\\.)+\\\"/",	/\"(?:[^\"\\]|\\.)+\"/,	false,	false),
 	"message":	("/\\^\\^\\^(?:(?s).*?)(?=\\^\\^\\^|$)/",	/\^\^\^(?:(?s).*?)(?=\^\^\^|$)/,	false,	false),
-	"pragma":	("/@\\p{XID_Start}\\p{XID_Continue}*/",	/@\p{XID_Start}\p{XID_Continue}*/,	false,	false),
 	"regex":	("/\\/(?!\\*)(?:[^\\/\\\\]|\\\\.)+\\//",	/\/(?!\*)(?:[^\/\\]|\\.)+\//,	false,	false),
-	"comment":	("/\\/\\/.*/",	/\/\/.*/,	false,	true),
-	"whitespace":	("/\\s+/",	/\s+/,	false,	true),
-	"identifier":	("/[_\\p{XID_Start}][-\\p{XID_Continue}]*/",	/[_\p{XID_Start}][-\p{XID_Continue}]*/,	false,	false),
 	"action":	("/\'(?:[^\'\\\\]|\\\\.)*\'/",	/'(?:[^'\\]|\\.)*'/,	false,	true),
-	"\"]\"":	("]",	Regex { "]" },	true,	false),
-	"\")\"":	(")",	Regex { ")" },	true,	false),
-	"\"<s>\"":	("<s>",	Regex { "<s>" },	true,	false),
+	"identifier":	("/[_\\p{XID_Start}][-\\p{XID_Continue}]*/",	/[_\p{XID_Start}][-\p{XID_Continue}]*/,	false,	false),
+	"comment":	("/\\/\\/.*/",	/\/\/.*/,	false,	true),
 	"\">>|\"":	(">>|",	Regex { ">>|" },	true,	false),
-	"\"ε\"":	("ε",	Regex { "ε" },	true,	false),
-	"\".\"":	(".",	Regex { "." },	true,	false),
-	"\">n<\"":	(">n<",	Regex { ">n<" },	true,	false),
-	"\"\\\"\\\"\"":	("\"\"",	Regex { "\"\"" },	true,	false),
-	"\"*\"":	("*",	Regex { "*" },	true,	false),
-	"\"<+<\"":	("<+<",	Regex { "<+<" },	true,	false),
-	"\"---\"":	("---",	Regex { "---" },	true,	false),
-	"\":\"":	(":",	Regex { ":" },	true,	false),
-	"\">\"":	(">",	Regex { ">" },	true,	false),
-	"\"EOF\"":	("EOF",	Regex { "EOF" },	true,	false),
-	"\"|<<\"":	("|<<",	Regex { "|<<" },	true,	false),
-	"\"+\"":	("+",	Regex { "+" },	true,	false),
-	"\">->\"":	(">->",	Regex { ">->" },	true,	false),
-	"\"<-<\"":	("<-<",	Regex { "<-<" },	true,	false),
-	"\"<\"":	("<",	Regex { "<" },	true,	false),
-	"\">+>\"":	(">+>",	Regex { ">+>" },	true,	false),
-	"\"|\"":	("|",	Regex { "|" },	true,	false),
-	"\"?\"":	("?",	Regex { "?" },	true,	false),
-	"\"}\"":	("}",	Regex { "}" },	true,	false),
-	"\"(\"":	("(",	Regex { "(" },	true,	false),
-	"\"[\"":	("[",	Regex { "[" },	true,	false),
-	"\">s<\"":	(">s<",	Regex { ">s<" },	true,	false),
 	"\"<n>\"":	("<n>",	Regex { "<n>" },	true,	false),
-	"\"{\"":	("{",	Regex { "{" },	true,	false),
+	"\"]\"":	("]",	Regex { "]" },	true,	false),
+	"\">->\"":	(">->",	Regex { ">->" },	true,	false),
+	"\"*\"":	("*",	Regex { "*" },	true,	false),
+	"\">s<\"":	(">s<",	Regex { ">s<" },	true,	false),
+	"\"<\"":	("<",	Regex { "<" },	true,	false),
+	"\")\"":	(")",	Regex { ")" },	true,	false),
+	"\"?\"":	("?",	Regex { "?" },	true,	false),
+	"\"+\"":	("+",	Regex { "+" },	true,	false),
+	"\".\"":	(".",	Regex { "." },	true,	false),
+	"\">\"":	(">",	Regex { ">" },	true,	false),
+	"\"---\"":	("---",	Regex { "---" },	true,	false),
+	"\">n<\"":	(">n<",	Regex { ">n<" },	true,	false),
+	"\"[\"":	("[",	Regex { "[" },	true,	false),
+	"\"<s>\"":	("<s>",	Regex { "<s>" },	true,	false),
+	"\"ε\"":	("ε",	Regex { "ε" },	true,	false),
 	"\"=\"":	("=",	Regex { "=" },	true,	false),
+	"\"(\"":	("(",	Regex { "(" },	true,	false),
+	"\"}\"":	("}",	Regex { "}" },	true,	false),
+	"\"|\"":	("|",	Regex { "|" },	true,	false),
+	"\"|<<\"":	("|<<",	Regex { "|<<" },	true,	false),
+	"\"{\"":	("{",	Regex { "{" },	true,	false),
+	"\"EOF\"":	("EOF",	Regex { "EOF" },	true,	false),
+	"\"<+<\"":	("<+<",	Regex { "<+<" },	true,	false),
 	"\"-\"":	("-",	Regex { "-" },	true,	false),
+	"\"<-<\"":	("<-<",	Regex { "<-<" },	true,	false),
+	"\"\\\"\\\"\"":	("\"\"",	Regex { "\"\"" },	true,	false),
+	"\":\"":	(":",	Regex { ":" },	true,	false),
+	"\">+>\"":	(">+>",	Regex { ">+>" },	true,	false),
 ]
 func alternates() throws {
 	if ["\"|\""].contains(token.kind) {
@@ -108,6 +108,7 @@ func alternates() throws {
 	}
 	try sequence()
 	while ["\"|\""].contains(token.kind) {
+		expect("\"|\"")
 		cI += 1
 		try sequence()
 	}
@@ -157,6 +158,7 @@ func grammar() throws {
 		try production()
 	} while ["identifier", "pragma"].contains(token.kind)
 	while ["message"].contains(token.kind) {
+		expect("message")
 		cI += 1
 	}
 }
@@ -192,6 +194,7 @@ func lookaround() throws {
 }
 func production() throws {
 	while ["pragma"].contains(token.kind) {
+		expect("pragma")
 		cI += 1
 	}
 	expect("identifier")
