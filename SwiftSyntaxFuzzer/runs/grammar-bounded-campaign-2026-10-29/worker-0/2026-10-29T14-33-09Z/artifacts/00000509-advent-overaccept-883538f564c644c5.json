@@ -1,0 +1,63 @@
+{
+  "event" : {
+    "artifact" : "00000509-advent-overaccept-883538f564c644c5.json",
+    "durationSeconds" : 0.40173304080963135,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=38",
+    "index" : 509,
+    "seed" : 11400602259624511793,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "883538f564c644c5",
+    "sourceLength" : 17,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DiscardStmt\n        keyword(SwiftSyntax.Keyword.discard) \"discard\"\n        TryExpr\n          keyword(SwiftSyntax.Keyword.try) \"try\"\n          MissingExpr\n            identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-85CEA866-555E-4921-BAEB-A30725061A9E.swift:1:8: error: consecutive statements on a line must be separated by ';'\n1 | discard try+await\n  |        `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-85CEA866-555E-4921-BAEB-A30725061A9E.swift:1:12: error: expected expression after unary operator\n1 | discard try+await\n  |            `- error: expected expression after unary operator\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "tryOperator\t[\"try\" >s< >->(forceMark optionalMark)]",
+      "effectMarker\t[tryOperator]",
+      "prefixExpression\t[effectMarker prefixExpression]",
+      "expression\t[prefixExpression ]",
+      "discardStatement\t[\"discard\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "statement\t[discardStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 65,
+      "descriptorCount" : 142,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 60,
+      "parseSeconds" : 0.002933025360107422,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 4,
+      "yieldCount" : 96
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DiscardStmt\n        keyword(SwiftSyntax.Keyword.discard) \"discard\"\n        SequenceExpr\n          ExprList\n            TryExpr\n              keyword(SwiftSyntax.Keyword.try) \"try\"\n              MissingExpr\n            BinaryOperatorExpr\n              binaryOperator(\"+\") \"+\"\n            AwaitExpr\n              keyword(SwiftSyntax.Keyword.await) \"await\"\n              MissingExpr\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 6,
+  "source" : "discard try+await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DiscardStmt\\n        keyword(SwiftSyntax.Keyword.discard) \\\"discard\\\"\\n        TryExpr\\n          keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n          MissingExpr\\n            identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-85CEA866-555E-4921-BAEB-A30725061A9E.swift:1:8: error: consecutive statements on a line must be separated by ';'\\n1 | discard try+await\\n  |        `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-85CEA866-555E-4921-BAEB-A30725061A9E.swift:1:12: error: expected expression after unary operator\\n1 | discard try+await\\n  |            `- error: expected expression after unary operator\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"tryOperator\\t[\\\"try\\\" >s< >->(forceMark optionalMark)]\",\"effectMarker\\t[tryOperator]\",\"prefixExpression\\t[effectMarker prefixExpression]\",\"expression\\t[prefixExpression ]\",\"discardStatement\\t[\\\"discard\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"statement\\t[discardStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":65,\"descriptorCount\":142,\"duplicateDescriptorCount\":0,\"oraclePruned\":60,\"parseSeconds\":0.002933025360107422,\"sourceLength\":17,\"suppressedDescriptorCount\":10,\"tokenCount\":4,\"yieldCount\":96},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DiscardStmt\\n        keyword(SwiftSyntax.Keyword.discard) \\\"discard\\\"\\n        SequenceExpr\\n          ExprList\\n            TryExpr\\n              keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n              MissingExpr\\n            BinaryOperatorExpr\\n              binaryOperator(\\\"+\\\") \\\"+\\\"\\n            AwaitExpr\\n              keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n              MissingExpr\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

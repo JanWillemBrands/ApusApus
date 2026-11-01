@@ -15,7 +15,8 @@ parseReports = true
 let grammarURL = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()
     .deletingLastPathComponent()
-    .appendingPathComponent("grammars/Swift")
+//    .appendingPathComponent("grammars/Swift")
+    .appendingPathComponent("grammars/Bend 2/bend")
 //    .appendingPathComponent("grammars/layout")
 //    .appendingPathComponent("grammars/apus")
 //    .appendingPathComponent("grammars/Python/Python")
@@ -100,6 +101,7 @@ for (mi, message) in grammar.messages.enumerated() {
     var stats = "cpuTime, descriptorCount, crf.count, sizeOfSets, yieldCount\n"
     stats += "\(cpuTime), \(messageParser.descriptorCount), \(messageParser.crf.count), \(GrammarNode.sizeofSets), \(messageParser.yieldCount)\n"
     Logger.ui.info("\(stats, privacy: .public)")
+    
 //    print("tokenPatterns:")
 //    for tp in grammar.terminals {
 //        print(tp.key, tp.value.source)
@@ -163,7 +165,7 @@ for (mi, message) in grammar.messages.enumerated() {
     }
     
     
-    let generateParser = true
+    let generateParser = false
     if generateParser && grammar.nonTerminals.count < 1000 && messageParser.crf.count < 1000 {
         let parserFile = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()

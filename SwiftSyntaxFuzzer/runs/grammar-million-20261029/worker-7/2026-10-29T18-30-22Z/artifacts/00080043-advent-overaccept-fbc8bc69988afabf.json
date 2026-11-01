@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00080043-advent-overaccept-fbc8bc69988afabf.json",
+    "durationSeconds" : 2.66770601272583,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=171",
+    "index" : 80043,
+    "seed" : 17418699775820060581,
+    "signalHash" : "b2788d8670d6fda4",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|'<value>' should appear at the beginning of a composition",
+    "sourceHash" : "fbc8bc69988afabf",
+    "sourceLength" : 73,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "await await switch any __shared & any _ .Type{}as~some;yield each &x::xx;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          SequenceExpr\n            ExprList\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n              BinaryOperatorExpr\n                binaryOperator(\"&\") \"&\"\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  MetatypeType\n                    IdentifierType\n                      wildcard \"_\"\n                    period \".\"\n                    keyword(SwiftSyntax.Keyword.Type) \"Type\"\n          leftBrace \"{\"\n          SwitchCaseList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D5100F11-DC9B-463D-B116-1C47C13962BA.swift:1:24: error: 'any' should appear at the beginning of a composition\n1 |  switch any __shared & any _ .Type{}\n  |                        `- error: 'any' should appear at the beginning of a composition\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __shared »"
+    ],
+    "grammarCoverage" : [
+      ".DO\t[\"Type\"]",
+      ".DO\t[<s> \".\"]",
+      "placeholderType\t[\"_\"]",
+      "simpleType\t[placeholderType]",
+      "metatypeType\t[simpleType  ]",
+      "type\t[metatypeType]",
+      "boxedProtocolConstraint\t[>->(\"__owned\" \"__shared\" \"_const\" \"any\" \"borrowing\" \"consuming\" \"inout\" \"isolated\" \"nonisolated\" \"sending\" \"some\") type]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "ifConfigSameLine\t[]",
+      "infixOperator\t[\"&\"]",
+      "infixExpression\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "boxedProtocolKeywordName\t[\"__shared\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "switchExpression\t[\"switch\" expressionIntroducerBoundary >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "effectfulConditional\t[conditionalExpression]",
+      "expression\t[effectfulConditional ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 91,
+      "descriptorCount" : 230,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 110,
+      "parseSeconds" : 0.0020979642868041992,
+      "sourceLength" : 36,
+      "suppressedDescriptorCount" : 24,
+      "tokenCount" : 10,
+      "yieldCount" : 194
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          TypeExpr\n            SomeOrAnyType\n              keyword(SwiftSyntax.Keyword.any) \"any\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"__shared\") \"__shared\"\n                    binaryOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"any\") \"any\"\n          UnexpectedNodes\n            wildcard \"_\"\n            period \".\"\n            identifier(\"Type\") \"Type\"\n          leftBrace \"{\"\n          SwitchCaseList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 31,
+  "source" : " switch any __shared & any _ .Type{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          SequenceExpr\\n            ExprList\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n              BinaryOperatorExpr\\n                binaryOperator(\\\"&\\\") \\\"&\\\"\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  MetatypeType\\n                    IdentifierType\\n                      wildcard \\\"_\\\"\\n                    period \\\".\\\"\\n                    keyword(SwiftSyntax.Keyword.Type) \\\"Type\\\"\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D5100F11-DC9B-463D-B116-1C47C13962BA.swift:1:24: error: 'any' should appear at the beginning of a composition\\n1 |  switch any __shared & any _ .Type{}\\n  |                        `- error: 'any' should appear at the beginning of a composition\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __shared »\"],\"grammarCoverage\":[\".DO\\t[\\\"Type\\\"]\",\".DO\\t[<s> \\\".\\\"]\",\"placeholderType\\t[\\\"_\\\"]\",\"simpleType\\t[placeholderType]\",\"metatypeType\\t[simpleType  ]\",\"type\\t[metatypeType]\",\"boxedProtocolConstraint\\t[>->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"any\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\" \\\"some\\\") type]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"ifConfigSameLine\\t[]\",\"infixOperator\\t[\\\"&\\\"]\",\"infixExpression\\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"boxedProtocolKeywordName\\t[\\\"__shared\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"switchExpression\\t[\\\"switch\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"effectfulConditional\\t[conditionalExpression]\",\"expression\\t[effectfulConditional ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":91,\"descriptorCount\":230,\"duplicateDescriptorCount\":0,\"oraclePruned\":110,\"parseSeconds\":0.0020979642868041992,\"sourceLength\":36,\"suppressedDescriptorCount\":24,\"tokenCount\":10,\"yieldCount\":194},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          TypeExpr\\n            SomeOrAnyType\\n              keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"__shared\\\") \\\"__shared\\\"\\n                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"any\\\") \\\"any\\\"\\n          UnexpectedNodes\\n            wildcard \\\"_\\\"\\n            period \\\".\\\"\\n            identifier(\\\"Type\\\") \\\"Type\\\"\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

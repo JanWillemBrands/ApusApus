@@ -1,0 +1,65 @@
+{
+  "event" : {
+    "artifact" : "00076318-tree-difference-f91e03100945f824.json",
+    "durationSeconds" : 1.790774941444397,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=41",
+    "index" : 76318,
+    "seed" : 11400602262994805491,
+    "signalHash" : "9c4ed70721184e3e",
+    "signalSummary" : "tree-difference|line=10|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "f91e03100945f824",
+    "sourceLength" : 26,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7021A515-978D-4530-8F3B-444E899023DF.swift:1:19: error: cannot find type 'isolated' in scope\n1 | repeat{}while any isolated\n  |                   `- error: cannot find type 'isolated' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7021A515-978D-4530-8F3B-444E899023DF.swift:1:15: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n1 | repeat{}while any isolated\n  |               `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any isolated»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"isolated\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 53,
+      "descriptorCount" : 114,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 49,
+      "parseSeconds" : 0.002807021141052246,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 7,
+      "tokenCount" : 6,
+      "yieldCount" : 88
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        TypeExpr\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.any) \"any\"\n            IdentifierType\n              identifier(\"isolated\") \"isolated\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 8,
+  "source" : "repeat{}while any isolated",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7021A515-978D-4530-8F3B-444E899023DF.swift:1:19: error: cannot find type 'isolated' in scope\\n1 | repeat{}while any isolated\\n  |                   `- error: cannot find type 'isolated' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7021A515-978D-4530-8F3B-444E899023DF.swift:1:15: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n1 | repeat{}while any isolated\\n  |               `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any isolated»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"isolated\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":53,\"descriptorCount\":114,\"duplicateDescriptorCount\":0,\"oraclePruned\":49,\"parseSeconds\":0.002807021141052246,\"sourceLength\":26,\"suppressedDescriptorCount\":7,\"tokenCount\":6,\"yieldCount\":88},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        TypeExpr\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n            IdentifierType\\n              identifier(\\\"isolated\\\") \\\"isolated\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00062782-advent-overaccept-ff775b3c9112da56.json",
+    "durationSeconds" : 1.3738899230957031,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=80",
+    "index" : 62782,
+    "seed" : 11400602262994805491,
+    "signalHash" : "6f247a2b88e8052c",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected '<value>' as the isolation kind",
+    "sourceHash" : "ff775b3c9112da56",
+    "sourceLength" : 50,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "do throws(@isolated(x)__owned ~() .Type){}catch{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          AttributedType\n            TypeSpecifierList\n              SimpleTypeSpecifier\n                keyword(SwiftSyntax.Keyword.__owned) \"__owned\"\n            AttributeList\n              Attribute\n                atSign \"@\"\n                IdentifierType\n                  identifier(\"isolated\") \"isolated\"\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    DeclReferenceExpr\n                      identifier(\"x\") \"x\"\n                rightParen \")\"\n            TypeSpecifierList\n            TupleType\n              leftParen \"(\"\n              TupleTypeElementList\n              rightParen \")\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n            CodeBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-36137DD5-3519-4D61-B031-CE3F569E611F.swift:1:21: error: expected 'any' as the isolation kind\n1 | do throws(@isolated(x)__owned () ){}catch{}\n  |                     `- error: expected 'any' as the isolation kind\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-36137DD5-3519-4D61-B031-CE3F569E611F.swift:1:23: error: '__owned' may only be used on parameters\n1 | do throws(@isolated(x)__owned () ){}catch{}\n  |                       `- error: '__owned' may only be used on parameters\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "catchClause\t[\"catch\"  codeBlock]",
+      "catchClauses\t[catchClause ]",
+      ".OPT\t[catchClauses]",
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "parameterModifier\t[\"__owned\"]",
+      "type\t[parameterModifier >->(\"~\") type]",
+      "typeAttribute\t[\"@\" >s< \"isolated\" >s< \"(\" identifier \")\"]",
+      "type\t[typeAttribute type]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 89,
+      "descriptorCount" : 198,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 101,
+      "parseSeconds" : 0.003771066665649414,
+      "sourceLength" : 43,
+      "suppressedDescriptorCount" : 19,
+      "tokenCount" : 17,
+      "yieldCount" : 161
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          AttributedType\n            TypeSpecifierList\n            AttributeList\n              Attribute\n                atSign \"@\"\n                IdentifierType\n                  identifier(\"isolated\") \"isolated\"\n                leftParen \"(\"\n                LabeledExprList\n                  LabeledExpr\n                    DeclReferenceExpr\n                      identifier(\"x\") \"x\"\n                rightParen \")\"\n            TypeSpecifierList\n            IdentifierType\n              identifier(\"__owned\") \"__owned\"\n          UnexpectedNodes\n            leftParen \"(\"\n            rightParen \")\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n            CodeBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "do throws(@isolated(x)__owned () ){}catch{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          AttributedType\\n            TypeSpecifierList\\n              SimpleTypeSpecifier\\n                keyword(SwiftSyntax.Keyword.__owned) \\\"__owned\\\"\\n            AttributeList\\n              Attribute\\n                atSign \\\"@\\\"\\n                IdentifierType\\n                  identifier(\\\"isolated\\\") \\\"isolated\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n                rightParen \\\")\\\"\\n            TypeSpecifierList\\n            TupleType\\n              leftParen \\\"(\\\"\\n              TupleTypeElementList\\n              rightParen \\\")\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n            CodeBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-36137DD5-3519-4D61-B031-CE3F569E611F.swift:1:21: error: expected 'any' as the isolation kind\\n1 | do throws(@isolated(x)__owned () ){}catch{}\\n  |                     `- error: expected 'any' as the isolation kind\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-36137DD5-3519-4D61-B031-CE3F569E611F.swift:1:23: error: '__owned' may only be used on parameters\\n1 | do throws(@isolated(x)__owned () ){}catch{}\\n  |                       `- error: '__owned' may only be used on parameters\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"catchClause\\t[\\\"catch\\\"  codeBlock]\",\"catchClauses\\t[catchClause ]\",\".OPT\\t[catchClauses]\",\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"parameterModifier\\t[\\\"__owned\\\"]\",\"type\\t[parameterModifier >->(\\\"~\\\") type]\",\"typeAttribute\\t[\\\"@\\\" >s< \\\"isolated\\\" >s< \\\"(\\\" identifier \\\")\\\"]\",\"type\\t[typeAttribute type]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":89,\"descriptorCount\":198,\"duplicateDescriptorCount\":0,\"oraclePruned\":101,\"parseSeconds\":0.003771066665649414,\"sourceLength\":43,\"suppressedDescriptorCount\":19,\"tokenCount\":17,\"yieldCount\":161},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          AttributedType\\n            TypeSpecifierList\\n            AttributeList\\n              Attribute\\n                atSign \\\"@\\\"\\n                IdentifierType\\n                  identifier(\\\"isolated\\\") \\\"isolated\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                  LabeledExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n                rightParen \\\")\\\"\\n            TypeSpecifierList\\n            IdentifierType\\n              identifier(\\\"__owned\\\") \\\"__owned\\\"\\n          UnexpectedNodes\\n            leftParen \\\"(\\\"\\n            rightParen \\\")\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n            CodeBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -165,9 +165,15 @@ xcrun swiftc \
   -swift-version 5 \
   -O \
   -parse-as-library \
+  -enable-bare-slash-regex \
   -module-cache-path "$BUILD/module-cache" \
+  -I "$PRODUCTS" \
+  -I "$SWIFT_SYNTAX_SHIMS" \
+  "${ADVENT_SOURCES[@]}" \
   "$FUZZER/Sources/AdventFuzzRunner/Widening.swift" \
+  "$FUZZER/Sources/AdventFuzzRunner/GrammarDirected.swift" \
   "$FUZZER/Sources/AdventFuzzRunner/main.swift" \
+  "${DEPENDENCY_OBJECTS[@]}" \
   -o "$BUILD/advent-fuzz-runner"
 
 echo "Built:"

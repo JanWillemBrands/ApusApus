@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00066184-advent-overaccept-3fb59b0e4a7092c0.json",
+    "durationSeconds" : 1.5518569946289062,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=68",
+    "index" : 66184,
+    "seed" : 3326660242193084383,
+    "signalHash" : "9aa16edb4c854743",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected identifier for type name",
+    "sourceHash" : "3fb59b0e4a7092c0",
+    "sourceLength" : 30,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "return copy any some & ??await",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SequenceExpr\n        ExprList\n          MissingExpr\n            identifier(\"<#expression#>\") \"<#expression#>\"\n          BinaryOperatorExpr\n            binaryOperator(\"&\") \"&\"\n          MissingExpr\n            identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A7B5E2C8-FF4D-4D33-84E2-A909A0EAE41F.swift:1:13: error: expected identifier for type name\n1 |  any some & ??await\n  |             `- error: expected identifier for type name\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A7B5E2C8-FF4D-4D33-84E2-A909A0EAE41F.swift:1:12: error: consecutive statements on a line must be separated by ';'\n1 |  any some & ??await\n  |            `- error: consecutive statements on a line must be separated by ';'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — « any some »",
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "ifConfigSameLine\t[]",
+      "infixOperator\t[\"&\"]",
+      "infixExpression\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "boxedProtocolKeywordName\t[\"some\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 65,
+      "descriptorCount" : 145,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 66,
+      "parseSeconds" : 0.0038520097732543945,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 5,
+      "yieldCount" : 118
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      TypeExpr\n        SomeOrAnyType\n          keyword(SwiftSyntax.Keyword.any) \"any\"\n          CompositionType\n            CompositionTypeElementList\n              CompositionTypeElement\n                IdentifierType\n                  identifier(\"some\") \"some\"\n                binaryOperator(\"&\") \"&\"\n              CompositionTypeElement\n                MissingType\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"??\") \"??\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 16,
+  "source" : " any some & ??await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SequenceExpr\\n        ExprList\\n          MissingExpr\\n            identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          BinaryOperatorExpr\\n            binaryOperator(\\\"&\\\") \\\"&\\\"\\n          MissingExpr\\n            identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A7B5E2C8-FF4D-4D33-84E2-A909A0EAE41F.swift:1:13: error: expected identifier for type name\\n1 |  any some & ??await\\n  |             `- error: expected identifier for type name\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A7B5E2C8-FF4D-4D33-84E2-A909A0EAE41F.swift:1:12: error: consecutive statements on a line must be separated by ';'\\n1 |  any some & ??await\\n  |            `- error: consecutive statements on a line must be separated by ';'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — « any some »\",\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"ifConfigSameLine\\t[]\",\"infixOperator\\t[\\\"&\\\"]\",\"infixExpression\\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"boxedProtocolKeywordName\\t[\\\"some\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":65,\"descriptorCount\":145,\"duplicateDescriptorCount\":0,\"oraclePruned\":66,\"parseSeconds\":0.0038520097732543945,\"sourceLength\":19,\"suppressedDescriptorCount\":10,\"tokenCount\":5,\"yieldCount\":118},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      TypeExpr\\n        SomeOrAnyType\\n          keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n          CompositionType\\n            CompositionTypeElementList\\n              CompositionTypeElement\\n                IdentifierType\\n                  identifier(\\\"some\\\") \\\"some\\\"\\n                binaryOperator(\\\"&\\\") \\\"&\\\"\\n              CompositionTypeElement\\n                MissingType\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"??\\\") \\\"??\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

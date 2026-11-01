@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00000086-advent-overaccept-15ed6983d3e877a4.json",
+    "durationSeconds" : 0.27243292331695557,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=73",
+    "index" : 86,
+    "seed" : 15755288930206707447,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "15ed6983d3e877a4",
+    "sourceLength" : 57,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "discard ==await;break\n#sourceLocation();#sourceLocation()",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DiscardStmt\n        keyword(SwiftSyntax.Keyword.discard) \"discard\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n    CodeBlockItem\n      PoundSourceLocation\n        poundSourceLocation \"#sourceLocation\"\n        leftParen \"(\"\n        rightParen \")\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-01836FD4-6C62-4F98-A9F3-AFEF1D9796E3.swift:1:8: error: consecutive statements on a line must be separated by ';'\n1 | discard ==await\n  |        `- error: consecutive statements on a line must be separated by ';'\n2 | #sourceLocation();\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-01836FD4-6C62-4F98-A9F3-AFEF1D9796E3.swift:2:18: error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\n1 | discard ==await\n2 | #sourceLocation();\n  |                  `- error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await\n»"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "lineControlStatement\t[\"#sourceLocation\" \"(\" \")\"]",
+      "compilerControlStatement\t[lineControlStatement]",
+      "statement\t[compilerControlStatement]",
+      "statementSeparator\t[<n>]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "discardStatement\t[\"discard\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "statement\t[discardStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 83,
+      "descriptorCount" : 181,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 91,
+      "parseSeconds" : 0.003394007682800293,
+      "sourceLength" : 34,
+      "suppressedDescriptorCount" : 9,
+      "tokenCount" : 8,
+      "yieldCount" : 132
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DiscardStmt\n        keyword(SwiftSyntax.Keyword.discard) \"discard\"\n        PrefixOperatorExpr\n          prefixOperator(\"==\") \"==\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n    CodeBlockItem\n      PoundSourceLocation\n        poundSourceLocation \"#sourceLocation\"\n        leftParen \"(\"\n        rightParen \")\"\n        UnexpectedNodes\n          semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 31,
+  "source" : "discard ==await\n#sourceLocation();",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DiscardStmt\\n        keyword(SwiftSyntax.Keyword.discard) \\\"discard\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n    CodeBlockItem\\n      PoundSourceLocation\\n        poundSourceLocation \\\"#sourceLocation\\\"\\n        leftParen \\\"(\\\"\\n        rightParen \\\")\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-01836FD4-6C62-4F98-A9F3-AFEF1D9796E3.swift:1:8: error: consecutive statements on a line must be separated by ';'\\n1 | discard ==await\\n  |        `- error: consecutive statements on a line must be separated by ';'\\n2 | #sourceLocation();\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-01836FD4-6C62-4F98-A9F3-AFEF1D9796E3.swift:2:18: error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\\n1 | discard ==await\\n2 | #sourceLocation();\\n  |                  `- error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await\\n»\"],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"lineControlStatement\\t[\\\"#sourceLocation\\\" \\\"(\\\" \\\")\\\"]\",\"compilerControlStatement\\t[lineControlStatement]\",\"statement\\t[compilerControlStatement]\",\"statementSeparator\\t[<n>]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"discardStatement\\t[\\\"discard\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"statement\\t[discardStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":83,\"descriptorCount\":181,\"duplicateDescriptorCount\":0,\"oraclePruned\":91,\"parseSeconds\":0.003394007682800293,\"sourceLength\":34,\"suppressedDescriptorCount\":9,\"tokenCount\":8,\"yieldCount\":132},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DiscardStmt\\n        keyword(SwiftSyntax.Keyword.discard) \\\"discard\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"==\\\") \\\"==\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n    CodeBlockItem\\n      PoundSourceLocation\\n        poundSourceLocation \\\"#sourceLocation\\\"\\n        leftParen \\\"(\\\"\\n        rightParen \\\")\\\"\\n        UnexpectedNodes\\n          semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00081117-advent-overaccept-07fd78fce40a1575.json",
+    "durationSeconds" : 1.427051067352295,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=178",
+    "index" : 81117,
+    "seed" : 15755288936030989017,
+    "signalHash" : "640dca23d39685eb",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|function types cannot have argument labels; use '<value>' before '<value>'",
+    "sourceHash" : "07fd78fce40a1575",
+    "sourceLength" : 84,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "async:repeat{}while init is some(T:(),)throws->any any async throws->consume init- ;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      LabeledStmt\n        identifier(\"async\") \"async\"\n        colon \":\"\n        RepeatStmt\n          keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n          CodeBlock\n            leftBrace \"{\"\n            CodeBlockItemList\n            rightBrace \"}\"\n          keyword(SwiftSyntax.Keyword.while) \"while\"\n          SequenceExpr\n            ExprList\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.init) \"init\"\n              UnresolvedIsExpr\n                keyword(SwiftSyntax.Keyword.is) \"is\"\n              TypeExpr\n                TupleType\n                  leftParen \"(\"\n                  TupleTypeElementList\n                    TupleTypeElement\n                      identifier(\"T\") \"T\"\n                      colon \":\"\n                      TupleType\n                        leftParen \"(\"\n                        TupleTypeElementList\n                        rightParen \")\"\n                  rightParen \")\"\n              ArrowExpr\n                arrow \"->\"\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.init) \"init\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-0379FA45-EC6A-4D50-BA70-FFCE6E10761C.swift:1:30: error: function types cannot have argument labels; use '_' before 'T'\n1 | async:repeat{}while init is (T:())-> init\n  |                              `- error: function types cannot have argument labels; use '_' before 'T'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-0379FA45-EC6A-4D50-BA70-FFCE6E10761C.swift:1:38: error: expected type for function result\n1 | async:repeat{}while init is (T:())-> init\n  |                                      `- error: expected type for function result\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "initializerExpression\t[\"init\"]",
+      "postfixExpression\t[initializerExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "ifConfigSameLine\t[]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"await\" \"rethrows\" \"throw\" \"throws\" \"try\")]",
+      "infixExpression\t[arrowExpr ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "tupleType\t[\"(\" \")\"]",
+      "type\t[tupleType]",
+      "resultType\t[type]",
+      "typeAnnotation\t[\":\" resultType]",
+      "elementName\t[identifier]",
+      "tupleTypeElement\t[elementName typeAnnotation]",
+      "type\t[\"(\" tupleTypeElement \")\"]",
+      "typeCastingOperator\t[\"is\" type]",
+      "infixExpression\t[typeCastingOperator]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "labelName\t[identifier]",
+      "statementLabel\t[labelName \":\"]",
+      "labeledStatement\t[statementLabel loopStatement]",
+      "statement\t[labeledStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 198,
+      "descriptorCount" : 430,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 220,
+      "parseSeconds" : 0.01435399055480957,
+      "sourceLength" : 41,
+      "suppressedDescriptorCount" : 57,
+      "tokenCount" : 16,
+      "yieldCount" : 318
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      LabeledStmt\n        identifier(\"async\") \"async\"\n        colon \":\"\n        RepeatStmt\n          keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n          CodeBlock\n            leftBrace \"{\"\n            CodeBlockItemList\n            rightBrace \"}\"\n          keyword(SwiftSyntax.Keyword.while) \"while\"\n          SequenceExpr\n            ExprList\n              DeclReferenceExpr\n                keyword(SwiftSyntax.Keyword.init) \"init\"\n              UnresolvedIsExpr\n                keyword(SwiftSyntax.Keyword.is) \"is\"\n              TypeExpr\n                FunctionType\n                  leftParen \"(\"\n                  TupleTypeElementList\n                    TupleTypeElement\n                      identifier(\"T\") \"T\"\n                      colon \":\"\n                      TupleType\n                        leftParen \"(\"\n                        TupleTypeElementList\n                        rightParen \")\"\n                  rightParen \")\"\n                  ReturnClause\n                    arrow \"->\"\n                    MissingType\n    CodeBlockItem\n      InitializerDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.init) \"init\"\n        FunctionSignature\n          FunctionParameterClause\n            FunctionParameterList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "async:repeat{}while init is (T:())-> init",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      LabeledStmt\\n        identifier(\\\"async\\\") \\\"async\\\"\\n        colon \\\":\\\"\\n        RepeatStmt\\n          keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n          CodeBlock\\n            leftBrace \\\"{\\\"\\n            CodeBlockItemList\\n            rightBrace \\\"}\\\"\\n          keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n          SequenceExpr\\n            ExprList\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              UnresolvedIsExpr\\n                keyword(SwiftSyntax.Keyword.is) \\\"is\\\"\\n              TypeExpr\\n                TupleType\\n                  leftParen \\\"(\\\"\\n                  TupleTypeElementList\\n                    TupleTypeElement\\n                      identifier(\\\"T\\\") \\\"T\\\"\\n                      colon \\\":\\\"\\n                      TupleType\\n                        leftParen \\\"(\\\"\\n                        TupleTypeElementList\\n                        rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n              ArrowExpr\\n                arrow \\\"->\\\"\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-0379FA45-EC6A-4D50-BA70-FFCE6E10761C.swift:1:30: error: function types cannot have argument labels; use '_' before 'T'\\n1 | async:repeat{}while init is (T:())-> init\\n  |                              `- error: function types cannot have argument labels; use '_' before 'T'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-0379FA45-EC6A-4D50-BA70-FFCE6E10761C.swift:1:38: error: expected type for function result\\n1 | async:repeat{}while init is (T:())-> init\\n  |                                      `- error: expected type for function result\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"initializerExpression\\t[\\\"init\\\"]\",\"postfixExpression\\t[initializerExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"ifConfigSameLine\\t[]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"await\\\" \\\"rethrows\\\" \\\"throw\\\" \\\"throws\\\" \\\"try\\\")]\",\"infixExpression\\t[arrowExpr ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"tupleType\\t[\\\"(\\\" \\\")\\\"]\",\"type\\t[tupleType]\",\"resultType\\t[type]\",\"typeAnnotation\\t[\\\":\\\" resultType]\",\"elementName\\t[identifier]\",\"tupleTypeElement\\t[elementName typeAnnotation]\",\"type\\t[\\\"(\\\" tupleTypeElement \\\")\\\"]\",\"typeCastingOperator\\t[\\\"is\\\" type]\",\"infixExpression\\t[typeCastingOperator]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"labelName\\t[identifier]\",\"statementLabel\\t[labelName \\\":\\\"]\",\"labeledStatement\\t[statementLabel loopStatement]\",\"statement\\t[labeledStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":198,\"descriptorCount\":430,\"duplicateDescriptorCount\":0,\"oraclePruned\":220,\"parseSeconds\":0.01435399055480957,\"sourceLength\":41,\"suppressedDescriptorCount\":57,\"tokenCount\":16,\"yieldCount\":318},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      LabeledStmt\\n        identifier(\\\"async\\\") \\\"async\\\"\\n        colon \\\":\\\"\\n        RepeatStmt\\n          keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n          CodeBlock\\n            leftBrace \\\"{\\\"\\n            CodeBlockItemList\\n            rightBrace \\\"}\\\"\\n          keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n          SequenceExpr\\n            ExprList\\n              DeclReferenceExpr\\n                keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n              UnresolvedIsExpr\\n                keyword(SwiftSyntax.Keyword.is) \\\"is\\\"\\n              TypeExpr\\n                FunctionType\\n                  leftParen \\\"(\\\"\\n                  TupleTypeElementList\\n                    TupleTypeElement\\n                      identifier(\\\"T\\\") \\\"T\\\"\\n                      colon \\\":\\\"\\n                      TupleType\\n                        leftParen \\\"(\\\"\\n                        TupleTypeElementList\\n                        rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n                  ReturnClause\\n                    arrow \\\"->\\\"\\n                    MissingType\\n    CodeBlockItem\\n      InitializerDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.init) \\\"init\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            FunctionParameterList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00053034-residual-ambiguity-5a8e0e58eb51ccb6.json",
+    "durationSeconds" : 1.5572900772094727,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:space+newline+keyword:phase4-loop:do-plain",
+    "index" : 53034,
+    "seed" : 17418699775999965614,
+    "signalHash" : "bb0f2523cb900b86",
+    "signalSummary" : "residual-ambiguity|statement\tambiguous alternate\t[ expression] | [discardStatement]",
+    "sourceHash" : "5a8e0e58eb51ccb6",
+    "sourceLength" : 45,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "struct Fuzz {\nfunc f() {\ndiscard { g( ) } }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"Fuzz\") \"Fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"f\") \"f\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      FunctionCallExpr\n                        DeclReferenceExpr\n                          identifier(\"discard\") \"discard\"\n                        LabeledExprList\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              TupleExpr\n                                leftParen \"(\"\n                                LabeledExprList\n                                rightParen \")\"\n                          rightBrace \"}\"\n                        MultipleTrailingClosureElementList\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-AA120AE0-277D-439A-AFDD-2BEA9478E49E.swift:1:2: error: cannot find 'Fuzz' in scope\n1 |  Fuzz { f() {\n  |  `- error: cannot find 'Fuzz' in scope\n2 | discard { ( ) } }\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-AA120AE0-277D-439A-AFDD-2BEA9478E49E.swift:1:9: error: cannot find 'f' in scope\n1 |  Fuzz { f() {\n  |         `- error: cannot find 'f' in scope\n2 | discard { ( ) } }\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-AA120AE0-277D-439A-AFDD-2BEA9478E49E.swift:2:1: error: cannot find 'discard' in scope\n1 |  Fuzz { f() {\n2 | discard { ( ) } }\n  | `- error: cannot find 'discard' in scope\n3 | }\n",
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "ifConfigSameLine\t[]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "discardStatement\t[\"discard\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "trailingClosure\t[newlineOpenedClosure]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 198,
+      "descriptorCount" : 424,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 189,
+      "parseSeconds" : 0.003984928131103516,
+      "sourceLength" : 33,
+      "suppressedDescriptorCount" : 69,
+      "tokenCount" : 13,
+      "yieldCount" : 367
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"Fuzz\") \"Fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"f\") \"f\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      FunctionCallExpr\n                        DeclReferenceExpr\n                          identifier(\"discard\") \"discard\"\n                        LabeledExprList\n                        ClosureExpr\n                          leftBrace \"{\"\n                          CodeBlockItemList\n                            CodeBlockItem\n                              TupleExpr\n                                leftParen \"(\"\n                                LabeledExprList\n                                rightParen \")\"\n                          rightBrace \"}\"\n                        MultipleTrailingClosureElementList\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+      "statement\tambiguous alternate\t[ expression] | [discardStatement]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 50,
+  "source" : " Fuzz { f() {\ndiscard { ( ) } }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"f\\\") \\\"f\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      FunctionCallExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"discard\\\") \\\"discard\\\"\\n                        LabeledExprList\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              TupleExpr\\n                                leftParen \\\"(\\\"\\n                                LabeledExprList\\n                                rightParen \\\")\\\"\\n                          rightBrace \\\"}\\\"\\n                        MultipleTrailingClosureElementList\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-AA120AE0-277D-439A-AFDD-2BEA9478E49E.swift:1:2: error: cannot find 'Fuzz' in scope\\n1 |  Fuzz { f() {\\n  |  `- error: cannot find 'Fuzz' in scope\\n2 | discard { ( ) } }\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-AA120AE0-277D-439A-AFDD-2BEA9478E49E.swift:1:9: error: cannot find 'f' in scope\\n1 |  Fuzz { f() {\\n  |         `- error: cannot find 'f' in scope\\n2 | discard { ( ) } }\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-AA120AE0-277D-439A-AFDD-2BEA9478E49E.swift:2:1: error: cannot find 'discard' in scope\\n1 |  Fuzz { f() {\\n2 | discard { ( ) } }\\n  | `- error: cannot find 'discard' in scope\\n3 | }\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"ifConfigSameLine\\t[]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"discardStatement\\t[\\\"discard\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"trailingClosure\\t[newlineOpenedClosure]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":198,\"descriptorCount\":424,\"duplicateDescriptorCount\":0,\"oraclePruned\":189,\"parseSeconds\":0.003984928131103516,\"sourceLength\":33,\"suppressedDescriptorCount\":69,\"tokenCount\":13,\"yieldCount\":367},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"f\\\") \\\"f\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      FunctionCallExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"discard\\\") \\\"discard\\\"\\n                        LabeledExprList\\n                        ClosureExpr\\n                          leftBrace \\\"{\\\"\\n                          CodeBlockItemList\\n                            CodeBlockItem\\n                              TupleExpr\\n                                leftParen \\\"(\\\"\\n                                LabeledExprList\\n                                rightParen \\\")\\\"\\n                          rightBrace \\\"}\\\"\\n                        MultipleTrailingClosureElementList\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[\"statement\\tambiguous alternate\\t[ expression] | [discardStatement]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

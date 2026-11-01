@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00072393-tree-difference-5cc72ac5786f2321.json",
+    "durationSeconds" : 1.3806649446487427,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=56",
+    "index" : 72393,
+    "seed" : 17418699775820060581,
+    "signalHash" : "7bb3931efd7055e2",
+    "signalSummary" : "tree-difference|line=18|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "5cc72ac5786f2321",
+    "sourceLength" : 30,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "defer{};repeat{}while ==await;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n      semicolon \";\"\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-77D8C97D-E3B5-4436-B177-21E847F8238B.swift:1:23: error: '==' is not a prefix unary operator\n1 | defer{};repeat{}while ==await\n  |                       `- error: '==' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-77D8C97D-E3B5-4436-B177-21E847F8238B.swift:1:25: error: cannot find 'await' in scope\n1 | defer{};repeat{}while ==await\n  |                         `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "statement\t[loopStatement]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 60,
+      "descriptorCount" : 128,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 32,
+      "parseSeconds" : 0.0046509504318237305,
+      "sourceLength" : 29,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 10,
+      "yieldCount" : 82
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n      semicolon \";\"\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        PrefixOperatorExpr\n          prefixOperator(\"==\") \"==\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 19,
+  "source" : "defer{};repeat{}while ==await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-77D8C97D-E3B5-4436-B177-21E847F8238B.swift:1:23: error: '==' is not a prefix unary operator\\n1 | defer{};repeat{}while ==await\\n  |                       `- error: '==' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-77D8C97D-E3B5-4436-B177-21E847F8238B.swift:1:25: error: cannot find 'await' in scope\\n1 | defer{};repeat{}while ==await\\n  |                         `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"statement\\t[loopStatement]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":60,\"descriptorCount\":128,\"duplicateDescriptorCount\":0,\"oraclePruned\":32,\"parseSeconds\":0.0046509504318237305,\"sourceLength\":29,\"suppressedDescriptorCount\":1,\"tokenCount\":10,\"yieldCount\":82},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"==\\\") \\\"==\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

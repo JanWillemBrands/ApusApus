@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00015054-advent-overaccept-e972f69215a7f82e.json",
+    "durationSeconds" : 1.176287055015564,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=73",
+    "index" : 15054,
+    "seed" : 4354586739611356967,
+    "signalHash" : "bf2fe8a1fe02fb23",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected expression for '<value>' guard of '<value>'",
+    "sourceHash" : "e972f69215a7f82e",
+    "sourceLength" : 38,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          MissingType\n            identifier(\"<#type#>\") \"<#type#>\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n              CatchItem\n                WhereClause\n                  keyword(SwiftSyntax.Keyword.where) \"where\"\n                  MissingExpr\n                    identifier(\"<#expression#>\") \"<#expression#>\"\n            CodeBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4883882C-8D74-4B2F-B997-AE41E71FC8E6.swift:1:30: error: expected expression for 'where' guard of 'catch'\n1 | do throws(~some){}catch where??await{}\n  |                              `- error: expected expression for 'where' guard of 'catch'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4883882C-8D74-4B2F-B997-AE41E71FC8E6.swift:1:30: error: expected '{' after 'catch' pattern\n1 | do throws(~some){}catch where??await{}\n  |                              `- error: expected '{' after 'catch' pattern\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "lookupFailed in convertSuppressedType(_:from:to:): suppressedType without an inner type — «~some»",
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "whereExpression\t[expression]",
+      "whereClause\t[\"where\" whereExpression]",
+      "catchPattern\t[whereClause]",
+      "catchPatternList\t[catchPattern ]",
+      ".OPT\t[catchPatternList]",
+      "catchClause\t[\"catch\"  codeBlock]",
+      "catchClauses\t[catchClause ]",
+      ".OPT\t[catchClauses]",
+      "suppressedType\t[<+<(\"(\" \",\" \":\" \";\" \"[\" \"any\" \"as\" \"is\" \"some\" \"{\" forceMark optionalMark) >s< \"~\" \"some\"]",
+      "type\t[suppressedType]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 93,
+      "descriptorCount" : 181,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 36,
+      "parseSeconds" : 0.0019921064376831055,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 3,
+      "tokenCount" : 14,
+      "yieldCount" : 103
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          SuppressedType\n            prefixOperator(\"~\") \"~\"\n            IdentifierType\n              identifier(\"some\") \"some\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n              CatchItem\n                WhereClause\n                  keyword(SwiftSyntax.Keyword.where) \"where\"\n                  MissingExpr\n            CodeBlock\n              UnexpectedNodes\n                postfixQuestionMark \"?\"\n                postfixQuestionMark \"?\"\n                identifier(\"await\") \"await\"\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 21,
+  "source" : "do throws(~some){}catch where??await{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          MissingType\\n            identifier(\\\"<#type#>\\\") \\\"<#type#>\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n              CatchItem\\n                WhereClause\\n                  keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                  MissingExpr\\n                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n            CodeBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4883882C-8D74-4B2F-B997-AE41E71FC8E6.swift:1:30: error: expected expression for 'where' guard of 'catch'\\n1 | do throws(~some){}catch where??await{}\\n  |                              `- error: expected expression for 'where' guard of 'catch'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4883882C-8D74-4B2F-B997-AE41E71FC8E6.swift:1:30: error: expected '{' after 'catch' pattern\\n1 | do throws(~some){}catch where??await{}\\n  |                              `- error: expected '{' after 'catch' pattern\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"lookupFailed in convertSuppressedType(_:from:to:): suppressedType without an inner type — «~some»\",\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"whereExpression\\t[expression]\",\"whereClause\\t[\\\"where\\\" whereExpression]\",\"catchPattern\\t[whereClause]\",\"catchPatternList\\t[catchPattern ]\",\".OPT\\t[catchPatternList]\",\"catchClause\\t[\\\"catch\\\"  codeBlock]\",\"catchClauses\\t[catchClause ]\",\".OPT\\t[catchClauses]\",\"suppressedType\\t[<+<(\\\"(\\\" \\\",\\\" \\\":\\\" \\\";\\\" \\\"[\\\" \\\"any\\\" \\\"as\\\" \\\"is\\\" \\\"some\\\" \\\"{\\\" forceMark optionalMark) >s< \\\"~\\\" \\\"some\\\"]\",\"type\\t[suppressedType]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":93,\"descriptorCount\":181,\"duplicateDescriptorCount\":0,\"oraclePruned\":36,\"parseSeconds\":0.0019921064376831055,\"sourceLength\":38,\"suppressedDescriptorCount\":3,\"tokenCount\":14,\"yieldCount\":103},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          SuppressedType\\n            prefixOperator(\\\"~\\\") \\\"~\\\"\\n            IdentifierType\\n              identifier(\\\"some\\\") \\\"some\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n              CatchItem\\n                WhereClause\\n                  keyword(SwiftSyntax.Keyword.where) \\\"where\\\"\\n                  MissingExpr\\n            CodeBlock\\n              UnexpectedNodes\\n                postfixQuestionMark \\\"?\\\"\\n                postfixQuestionMark \\\"?\\\"\\n                identifier(\\\"await\\\") \\\"await\\\"\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

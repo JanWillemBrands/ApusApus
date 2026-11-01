@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00038249-tree-difference-003823303678363e.json",
+    "durationSeconds" : 1.4265609979629517,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+duplicate:fuzz-harvest-reject:any-twice",
+    "index" : 38249,
+    "seed" : 15755288936104848697,
+    "signalHash" : "981d955919cb218b",
+    "signalSummary" : "tree-difference|line=17|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "003823303678363e",
+    "sourceLength" : 29,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "func fuzz() {\nany any\nany Q\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-AF6FD6F0-4EBC-4F4A-9F24-7E05E655E87E.swift:1:2: error: cannot find 'fuzz' in scope\n1 |  fuzz() {\n  |  `- error: cannot find 'fuzz' in scope\n2 | any any\n3 | }\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any\n»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"any\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "trailingClosure\t[newlineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "ifConfigSameLine\t[]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 98,
+      "descriptorCount" : 211,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 121,
+      "parseSeconds" : 0.005532979965209961,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 31,
+      "tokenCount" : 7,
+      "yieldCount" : 195
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  IdentifierType\n                    identifier(\"any\") \"any\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 31,
+  "source" : " fuzz() {\nany any\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-AF6FD6F0-4EBC-4F4A-9F24-7E05E655E87E.swift:1:2: error: cannot find 'fuzz' in scope\\n1 |  fuzz() {\\n  |  `- error: cannot find 'fuzz' in scope\\n2 | any any\\n3 | }\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any\\n»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"any\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"trailingClosure\\t[newlineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"ifConfigSameLine\\t[]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":98,\"descriptorCount\":211,\"duplicateDescriptorCount\":0,\"oraclePruned\":121,\"parseSeconds\":0.005532979965209961,\"sourceLength\":19,\"suppressedDescriptorCount\":31,\"tokenCount\":7,\"yieldCount\":195},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  IdentifierType\\n                    identifier(\\\"any\\\") \\\"any\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

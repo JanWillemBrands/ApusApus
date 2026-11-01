@@ -225,6 +225,8 @@ struct FailureReducer {
     /// reduction cannot drift onto an unrelated bug with the same status.
     static func key(_ output: ProbeOutput) -> String {
         switch output.status {
+        case "advent-overaccept":
+            return "advent-overaccept|" + (primaryCompilerDiagnostic(output.compilerStderr) ?? "<unknown>")
         case "tree-difference":
             let signal = dumpDifferenceSignal(reference: output.referenceDump, advent: output.adventDump)
             return "tree-difference|" + signal.split(separator: "|").dropFirst().joined(separator: "|")

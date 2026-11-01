@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00068636-tree-difference-633330e4f0321448.json",
+    "durationSeconds" : 1.348992943763733,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=118",
+    "index" : 68636,
+    "seed" : 11400602262994805491,
+    "signalHash" : "8af457818b94dc2b",
+    "signalSummary" : "tree-difference|line=31|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "633330e4f0321448",
+    "sourceLength" : 55,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "guard #available(*,x),case is x .Type = ==await else{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n            comma \",\"\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DeclReferenceExpr\n                  identifier(\"Type\") \"Type\"\n              InitializerClause\n                equal \"=\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:7: error: cannot convert value of type '()' to expected condition type 'Bool'\n1 | guard (),case Type = ==await else{}\n  |       `- error: cannot convert value of type '()' to expected condition type 'Bool'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:15: error: cannot find 'Type' in scope\n1 | guard (),case Type = ==await else{}\n  |               `- error: cannot find 'Type' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:22: error: '==' is not a prefix unary operator\n1 | guard (),case Type = ==await else{}\n  |                      `- error: '==' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:24: error: cannot find 'await' in scope\n1 | guard (),case Type = ==await else{}\n  |                        `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await »"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "bindingCondition\t[caseCondition]",
+      "conditionList\t[bindingCondition ]",
+      ".OPT\t[\",\" conditionList]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "condition\t[expression]",
+      "conditionList\t[condition ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "guardStatement\t[\"guard\" expressionIntroducerBoundary >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 130,
+      "descriptorCount" : 278,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 96,
+      "parseSeconds" : 0.004166960716247559,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 12,
+      "yieldCount" : 187
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n            comma \",\"\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DeclReferenceExpr\n                  identifier(\"Type\") \"Type\"\n              InitializerClause\n                equal \"=\"\n                PrefixOperatorExpr\n                  prefixOperator(\"==\") \"==\"\n                  DeclReferenceExpr\n                    identifier(\"await\") \"await\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 45,
+  "source" : "guard (),case Type = ==await else{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DeclReferenceExpr\\n                  identifier(\\\"Type\\\") \\\"Type\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:7: error: cannot convert value of type '()' to expected condition type 'Bool'\\n1 | guard (),case Type = ==await else{}\\n  |       `- error: cannot convert value of type '()' to expected condition type 'Bool'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:15: error: cannot find 'Type' in scope\\n1 | guard (),case Type = ==await else{}\\n  |               `- error: cannot find 'Type' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:22: error: '==' is not a prefix unary operator\\n1 | guard (),case Type = ==await else{}\\n  |                      `- error: '==' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D7B3C1C3-F5B3-4F87-8CD0-A34587CF2406.swift:1:24: error: cannot find 'await' in scope\\n1 | guard (),case Type = ==await else{}\\n  |                        `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await »\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"bindingCondition\\t[caseCondition]\",\"conditionList\\t[bindingCondition ]\",\".OPT\\t[\\\",\\\" conditionList]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"condition\\t[expression]\",\"conditionList\\t[condition ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"guardStatement\\t[\\\"guard\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":130,\"descriptorCount\":278,\"duplicateDescriptorCount\":0,\"oraclePruned\":96,\"parseSeconds\":0.004166960716247559,\"sourceLength\":35,\"suppressedDescriptorCount\":21,\"tokenCount\":12,\"yieldCount\":187},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DeclReferenceExpr\\n                  identifier(\\\"Type\\\") \\\"Type\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"==\\\") \\\"==\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"await\\\") \\\"await\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

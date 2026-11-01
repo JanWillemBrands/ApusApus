@@ -332,15 +332,255 @@ def EveryParseStep(+grammar: +List<Production>, +start: Nat, +inputTokens: +List
 def IsExactBsr(+grammar: +List<Production>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
   OnlyParseSteps(grammar, start, inputTokens, set) & EveryParseStep(grammar, start, inputTokens, set)
 
-# PREFERENCES: @prefer AND @avoid. A grammar's annotations choose among its parse trees;
+# DISAMBIGUATION IN THREE PHASES. A grammar's annotations choose among its parse trees;
 # they never add one. This is a disambiguation filter in the sense of Klint and Visser
-# (1994): it maps the parse trees of an input to a subset of them.
+# (1994): it maps the parse trees of an input to a subset of them. The filter works in
+# three phases, each on what the one before it left:
+#
+#   1. ADMISSIBLE (lookahead, @left, @right): hard rules on single nodes. A node that
+#      breaks one is out. AdmissibleTree, EmbedsAdmissible.
+#   2. UNBEATEN (@prefer, @avoid): among the admissible trees, none of whose nodes is
+#      outranked by an admissible rival. UnbeatenTree, SomeUnbeaten, EmbedsUnbeaten.
+#   3. SELECTED (@longest, @shortest): among the admissible, unbeaten trees, the ones
+#      no sequence of which has a better reading of its marked items. ExtentBestTree,
+#      EmbedsExtentBest, and Selected for all three phases together.
+#
+# Each phase has its own oracle and its own laws in LAWS.bend; the final answer is the
+# selected trees. Phase 2 is joined to phase 1: its rivals must be admissible. Not yet
+# joined: phase 3 does not yet ask its rivals to be admissible and unbeaten (README.md,
+# "Still to do").
+
+# PHASE 1, ADMISSIBLE TREES: LOOKAHEAD (@canParse, @cannotParse), @left AND @right.
+#
+# These annotations are hard rules on single nodes, not rankings between siblings: a node
+# that breaks one is out, whether or not a sibling could take its place. So they come
+# first. A parse tree is admissible when every node, pick and round keeps the rules of the
+# alternative it chose. The rules don't depend on each other, so the order in which they
+# are checked doesn't matter.
+#
+# A rule looks at more than the node's own tokens. A lookahead looks into the rest of
+# the input, from where the node starts. @left and @right look at what
+# the annotated alternative, or a listed nonterminal, could derive. So the walk carries
+# the tokens that follow the forest, up to the end of the input.
+
+# One rule. N... is a list of nonterminals. Ahead{N...}: every N derives some prefix of
+# the input from where the alternative starts; this is Swift Apus's @canParse(N...).
+# NotAhead{N...}: no N does; @cannotParse(N...). LeftAssoc{[]} is a bare @left: the
+# alternative may not have, as its last child, something the alternative itself derives.
+# A tree that reads a + b + c as a + (b + c) under E ::= @left E "+" E is out, because
+# its last child, b + c, is again E "+" E. LeftAssoc{N...} is @left(N...): the last child may not
+# spell tokens that some listed N derives. RightAssoc is the same for the first child.
+#
+# Three things to note. (1) This is about the language, not about the tree's shape. The
+# last child is out when the alternative can derive its tokens, even if the child itself
+# took another path, for example through a unit chain like postfixExpression ->
+# functionCallExpression. (2) So @left is stricter than a check on the shape: under
+# E ::= @left E "+" E | E "+" F | number, it also removes a tree whose last child is an
+# E that went through E "+" F, because E "+" E can derive those tokens as well. (3) Ahead
+# means the language: N derives a prefix, whether or not GLL predicted N there. Swift
+# Apus answers a nonterminal it didn't predict with a recogniser, so it means the same;
+# the comparison with Swift checks this (BendCheck, "unpredicted target").
+#
+# On the names. The literature calls Ahead and NotAhead positive and negative lookahead
+# (the and- and not-predicates of PEG, Ford 2004; ANTLR's syntactic predicates). Apus's
+# token lookaround >+>( … ) and >->( … ) is the case where every N derives just single
+# tokens. Under consideration: letting >+> and >-> take nonterminals, so that one
+# notation covers both, and Ahead/NotAhead are >+>/>-> at the start of an alternative.
+type Guard is Data:
+  Ahead{ids: +List<Nat>}
+  NotAhead{ids: +List<Nat>}
+  LeftAssoc{ids: +List<Nat>}
+  RightAssoc{ids: +List<Nat>}
+
+# Where a rule sits, as in Mark. ProdGuard: on production `index`. AltGuard: on
+# alternative `alt` of the bracket at (index, path). An alternative may have any number
+# of rules, and all of them must hold, unlike ranks, where the first one counts.
+type GuardMark is Data:
+  ProdGuard{index: Nat, guard: Guard}
+  AltGuard{index: Nat, path: +List<Nat>, alt: Nat, guard: Guard}
+
+# The rule in front of the others, when it applies.
+def consIf(hit: Bool, g: Guard, +rest: +List<Guard>) -> +List<Guard>:
+  match hit:
+    case True{}:
+      g <> rest
+    case False{}:
+      rest
+
+# The rules on production q, in order.
+def prodGuards(marks: +List<GuardMark>, +q: Nat) -> +List<Guard>:
+  match marks:
+    case Nil{}:
+      []
+    case Con{ProdGuard{p, g}, rest}:
+      consIf(Nat.is_eq(p, q), g, prodGuards(rest, q))
+    case Con{AltGuard{p, bp, b, g}, rest}:
+      prodGuards(rest, q)
+
+# The rules on alternative a of the bracket at (index, path), in order.
+def altGuards(marks: +List<GuardMark>, +index: Nat, +path: +List<Nat>, +a: Nat) -> +List<Guard>:
+  match marks:
+    case Nil{}:
+      []
+    case Con{ProdGuard{p, g}, rest}:
+      altGuards(rest, index, path, a)
+    case Con{AltGuard{p, bp, b, g}, rest}:
+      consIf(Bool.and(Nat.is_eq(p, index), Bool.and(pathEq(bp, path), Nat.is_eq(b, a))), g, altGuards(rest, index, path, a))
+
+# Nonterminal x is ahead: it derives some prefix of the tokens from here on.
+def DerivesAhead(+grammar: +List<Production>, +x: Nat, +ahead: +List<Nat>) -> Type:
+  &pre: +List<Nat> -> &post: +List<Nat> -> {List.append(&2, Nat, pre, post) == ahead : +List<Nat>} & Derives(grammar, [Sym{Nonterminal{x}}], pre)
+
+# Each of the nonterminals is ahead.
+def AllAhead(+grammar: +List<Production>, xs: +List<Nat>, +ahead: +List<Nat>) -> Type:
+  match xs:
+    case Nil{}:
+      Unit
+    case Con{x, rest}:
+      DerivesAhead(grammar, x, ahead) & AllAhead(grammar, rest, ahead)
+
+# None of the nonterminals is ahead.
+def NoneAhead(+grammar: +List<Production>, xs: +List<Nat>, +ahead: +List<Nat>) -> Type:
+  match xs:
+    case Nil{}:
+      Unit
+    case Con{x, rest}:
+      (DerivesAhead(grammar, x, ahead) -> Empty) & NoneAhead(grammar, rest, ahead)
+
+# None of the nonterminals derives exactly these tokens.
+def NoneDerive(+grammar: +List<Production>, xs: +List<Nat>, +w: +List<Nat>) -> Type:
+  match xs:
+    case Nil{}:
+      Unit
+    case Con{x, rest}:
+      (Derives(grammar, [Sym{Nonterminal{x}}], w) -> Empty) & NoneDerive(grammar, rest, w)
+
+# The tokens of the first and of the last child, when there are children.
+def firstSpell(children: +List<Tree>) -> Maybe<&2, +List<Nat>>:
+  match children:
+    case Nil{}:
+      None{}
+    case Con{+t, ts}:
+      Some{leaves([t])}
+
+def lastOf(ts: +List<Tree>, +t: Tree) -> Tree:
+  match ts:
+    case Nil{}:
+      t
+    case Con{+u, us}:
+      lastOf(us, u)
+
+def lastSpell(children: +List<Tree>) -> Maybe<&2, +List<Nat>>:
+  match children:
+    case Nil{}:
+      None{}
+    case Con{+t, ts}:
+      Some{leaves([lastOf(ts, t)])}
+
+# The items don't derive these tokens.
+def NotDerives(+grammar: +List<Production>, +items: +List<Item>, +w: +List<Nat>) -> Type:
+  Derives(grammar, items, w) -> Empty
+
+# The child at the edge spells w. Bare (no nonterminals listed): the alternative's own
+# items must not derive w. With a list: no listed nonterminal may.
+def EdgeOk(+grammar: +List<Production>, ids: +List<Nat>, +items: +List<Item>, +w: +List<Nat>) -> Type:
+  match ids:
+    case Nil{}:
+      NotDerives(grammar, items, w)
+    case Con{x, rest}:
+      NoneDerive(grammar, {x <> rest : +List<Nat>}, w)
+
+# The child at the edge, which spells `edge`, is allowed (EdgeOk). Without children
+# there is nothing to check.
+def EdgeFree(+grammar: +List<Production>, +ids: +List<Nat>, +items: +List<Item>, edge: Maybe<&2, +List<Nat>>) -> Type:
+  match edge:
+    case None{}:
+      Unit
+    case Some{w}:
+      EdgeOk(grammar, ids, items, w)
+
+# One rule holds for a node, pick or round: it chose the alternative `items`, its
+# children are `children`, and `ahead` are the tokens from where it starts to the end of
+# the input.
+def Holds(+grammar: +List<Production>, guard: Guard, +items: +List<Item>, +children: +List<Tree>, +ahead: +List<Nat>) -> Type:
+  match guard:
+    case Ahead{ids}:
+      AllAhead(grammar, ids, ahead)
+    case NotAhead{ids}:
+      NoneAhead(grammar, ids, ahead)
+    case LeftAssoc{ids}:
+      EdgeFree(grammar, ids, items, lastSpell(children))
+    case RightAssoc{ids}:
+      EdgeFree(grammar, ids, items, firstSpell(children))
+
+# Every rule in the list holds.
+def AllHold(+grammar: +List<Production>, guards: +List<Guard>, +items: +List<Item>, +children: +List<Tree>, +ahead: +List<Nat>) -> Type:
+  match guards:
+    case Nil{}:
+      Unit
+    case Con{g, rest}:
+      Holds(grammar, g, items, children, ahead) & AllHold(grammar, rest, items, children, ahead)
+
+# Every node, pick and round of the forest keeps its rules. The walk is the same as in
+# Unbeaten: the forest fits the items from the dot on in the sequence at (index, prefix).
+# `after` are the tokens that follow the whole forest, up to the end of the input. So a
+# tree t in front of ts starts with leaves(t), then leaves(ts), then `after`, and its
+# children are followed by leaves(ts) and `after`.
+def Admissible(+grammar: +List<Production>, +guards: +List<GuardMark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +after: +List<Nat>) -> Type:
+  match forest items:
+    case Con{Node{+q, +children}, +ts} Con{Sym{Nonterminal{x}}, +rest}:
+      +next = List.append(&2, Nat, leaves(ts), after)
+      +ahead = List.append(&2, Nat, leaves(children), next)
+      AllHold(grammar, prodGuards(guards, q), rhsOf(grammar, q), children, ahead) & Admissible(grammar, guards, children, rhsOf(grammar, q), q, [], 0n, next) & Admissible(grammar, guards, ts, rest, index, prefix, 1n+dot, after)
+    case Con{Pick{+a, +children}, +ts} Con{Brack{kind, +alts}, +rest}:
+      +next = List.append(&2, Nat, leaves(ts), after)
+      +ahead = List.append(&2, Nat, leaves(children), next)
+      +path = List.append(&2, Nat, prefix, [dot])
+      AllHold(grammar, altGuards(guards, index, path, a), altOf(alts, a), children, ahead) & Admissible(grammar, guards, children, altOf(alts, a), index, List.append(&2, Nat, path, [a]), 0n, next) & Admissible(grammar, guards, ts, rest, index, prefix, 1n+dot, after)
+    case Con{Loop{+rounds}, +ts} Con{Brack{kind, +alts}, +rest}:
+      RoundsAdmissible(grammar, guards, rounds, alts, index, List.append(&2, Nat, prefix, [dot]), List.append(&2, Nat, leaves(ts), after)) & Admissible(grammar, guards, ts, rest, index, prefix, 1n+dot, after)
+    case Con{t, +ts} Con{it, +rest}:
+      Admissible(grammar, guards, ts, rest, index, prefix, 1n+dot, after)
+    case _ _:
+      Unit
+
+# The rounds of a loop, each a pick of an alternative of the bracket at (index, path).
+# `after` are the tokens that follow the whole loop. A round is followed by the rounds
+# after it, and then `after`.
+def RoundsAdmissible(+grammar: +List<Production>, +guards: +List<GuardMark>, rounds: +List<Tree>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>, +after: +List<Nat>) -> Type:
+  match rounds:
+    case Nil{}:
+      Unit
+    case Con{Pick{+a, +children}, +rest}:
+      +next = List.append(&2, Nat, leaves(rest), after)
+      +ahead = List.append(&2, Nat, leaves(children), next)
+      AllHold(grammar, altGuards(guards, index, path, a), altOf(alts, a), children, ahead) & Admissible(grammar, guards, children, altOf(alts, a), index, List.append(&2, Nat, path, [a]), 0n, next) & RoundsAdmissible(grammar, guards, rest, alts, index, path, after)
+    case Con{other, +rest}:
+      RoundsAdmissible(grammar, guards, rest, alts, index, path, after)
+
+# An admissible tree: a parse tree of the input whose every node keeps its rules.
+def AdmissibleTree(+grammar: +List<Production>, +guards: +List<GuardMark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
+  {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} & {leaves([tree]) == inputTokens : +List<Nat>} & Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [])
+
+# A set that embeds exactly the admissible trees: a parse tree of the input uses only
+# steps of the set when, and only when, it is admissible. As in phase 2, the set may hold
+# steps that are in no admissible tree. There is no counterpart of SomeUnbeaten: a hard
+# rule may leave no tree at all, and that is the grammar's doing, not the oracle's.
+def EmbedsAdmissible(+grammar: +List<Production>, +guards: +List<GuardMark>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
+  @tree: Tree -> {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} -> {leaves([tree]) == inputTokens : +List<Nat>} ->
+    ({allIn(steps(tree, 0n), set) == True{} : Bool} -> Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [])) &
+    (Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, []) -> {allIn(steps(tree, 0n), set) == True{} : Bool})
+
+# PHASE 2, UNBEATEN TREES: @prefer AND @avoid.
 #
 # A choice point is a nonterminal (its productions) or a bracket (its alternatives).
 # Every alternative has a rank: @prefer is high, @avoid is low, unmarked is in between.
 # A node that chose alternative x for the tokens it reads is outranked when a sibling of
-# higher rank also derives exactly those tokens. A selected tree is a parse tree with no
-# outranked node. The rival's own tree need not be selected: grammars are context-free,
+# higher rank also derives exactly those tokens, admissibly: the sibling's own rules hold
+# over those tokens and the tokens after them, and so do the rules of every node in the
+# sibling's forest (phase 1). A rival that breaks a hard rule can't take the node's place,
+# so it beats nothing. An unbeaten tree is a parse tree with no
+# outranked node. The rival's own tree need not be unbeaten: grammars are context-free,
 # so a subtree over the same tokens can always be swapped in. But it must not go round a
 # cycle: it must not come back, over the same tokens, to this node's nonterminal or to a
 # node above it that reads the same tokens. Such a rival only says "the same again", and
@@ -465,10 +705,15 @@ def revisits(+grammar: +List<Production>, forest: +List<Tree>, +xs: +List<Nat>, 
     case Con{Skip{}, ts}:
       revisits(grammar, ts, xs, tokens)
 
-# The items derive these tokens without a node of one of the nonterminals xs over the
-# same tokens.
-def DerivesOnce(+grammar: +List<Production>, +items: +List<Item>, +tokens: +List<Nat>, +xs: +List<Nat>) -> Type:
-  &forest: +List<Tree> -> {fits(forest, grammar, items) == True{} : Bool} & {leaves(forest) == tokens : +List<Nat>} & {revisits(grammar, forest, xs, tokens) == False{} : Bool}
+# The items, the sequence at (index, prefix) with the rules `own`, derive these tokens
+# admissibly, followed by `after`, without a node of one of the nonterminals xs over the
+# same tokens. Admissible because only an admissible forest could take a node's place:
+# the rules of the sequence itself hold for the forest (AllHold), and so do those of every
+# node, pick and round inside it (Admissible). The rules look at the tokens after the
+# forest; they are the node's own `after`, since the rival reads the same tokens at the
+# same place.
+def DerivesOnce(+grammar: +List<Production>, +guards: +List<GuardMark>, +items: +List<Item>, +own: +List<Guard>, +index: Nat, +prefix: +List<Nat>, +tokens: +List<Nat>, +after: +List<Nat>, +xs: +List<Nat>) -> Type:
+  &forest: +List<Tree> -> {fits(forest, grammar, items) == True{} : Bool} & {leaves(forest) == tokens : +List<Nat>} & {revisits(grammar, forest, xs, tokens) == False{} : Bool} & AllHold(grammar, own, items, forest, List.append(&2, Nat, tokens, after)) & Admissible(grammar, guards, forest, items, index, prefix, 0n, after)
 
 # A rival of a node that used production q of nonterminal x: another production of x, of
 # higher rank, whose right side derives the same tokens without going round a cycle. The
@@ -478,15 +723,15 @@ def DerivesOnce(+grammar: +List<Production>, +items: +List<Item>, +tokens: +List
 # only derive the tokens by going round a cycle does not count: in A ::= @prefer A | a,
 # the tree A -> a would otherwise lose to A -> A, which can only end in A -> a again,
 # and no tree would be left.
-def ProdRival(+grammar: +List<Production>, +marks: +List<Mark>, +x: Nat, +q: Nat, +tokens: +List<Nat>, +xs: +List<Nat>) -> Type:
-  &q2: Nat -> {Bool.and(lhsIs(grammar, q2, x), outranks(prodRank(marks, q2), prodRank(marks, q))) == True{} : Bool} & DerivesOnce(grammar, rhsOf(grammar, q2), tokens, xs)
+def ProdRival(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +x: Nat, +q: Nat, +tokens: +List<Nat>, +after: +List<Nat>, +xs: +List<Nat>) -> Type:
+  &q2: Nat -> {Bool.and(lhsIs(grammar, q2, x), outranks(prodRank(marks, q2), prodRank(marks, q))) == True{} : Bool} & DerivesOnce(grammar, guards, rhsOf(grammar, q2), prodGuards(guards, q2), q2, [], tokens, after, xs)
 
 # A rival of a pick or a round that used alternative a of the bracket at (index, path):
 # another alternative of that bracket, of higher rank, that derives the same tokens
 # without going round a cycle back to one of the nonterminals `xs`. Those include the
 # nonterminal of production `index`: a cycle back to this bracket passes through it.
-def AltRival(+grammar: +List<Production>, +marks: +List<Mark>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>, +a: Nat, +tokens: +List<Nat>, +xs: +List<Nat>) -> Type:
-  &a2: Nat -> {Bool.and(isAlt(alts, a2), outranks(altRank(marks, index, path, a2), altRank(marks, index, path, a))) == True{} : Bool} & DerivesOnce(grammar, altOf(alts, a2), tokens, xs)
+def AltRival(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>, +a: Nat, +tokens: +List<Nat>, +after: +List<Nat>, +xs: +List<Nat>) -> Type:
+  &a2: Nat -> {Bool.and(isAlt(alts, a2), outranks(altRank(marks, index, path, a2), altRank(marks, index, path, a))) == True{} : Bool} & DerivesOnce(grammar, guards, altOf(alts, a2), altGuards(guards, index, path, a2), index, List.append(&2, Nat, path, [a2]), tokens, after, xs)
 
 # The nonterminals above a tree that read the same tokens as the tree: `above` are the
 # ones above its parent, which read `span`; they still count when the tree reads `span`
@@ -507,48 +752,213 @@ def sameAbove(+above: +List<Nat>, +span: +List<Nat>, +tokens: +List<Nat>) -> +Li
 # read the tokens `span`, the tokens of the enclosing node or pick. A node is checked
 # against the other productions of its nonterminal, a pick against the other
 # alternatives of its bracket, and a loop round by round. Leaves and skips make no
-# choice.
-def Unbeaten(+grammar: +List<Production>, +marks: +List<Mark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +above: +List<Nat>, +span: +List<Nat>) -> Type:
+# choice. `after` are the tokens after the forest, as in Admissible: a rival's rules
+# look at them.
+def Unbeaten(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +above: +List<Nat>, +span: +List<Nat>, +after: +List<Nat>) -> Type:
   match forest items:
     case Con{Node{+q, +children}, +ts} Con{Sym{Nonterminal{+x}}, +rest}:
       +w = leaves(children)
+      +next = List.append(&2, Nat, leaves(ts), after)
       +xs = {x <> sameAbove(above, span, w) : +List<Nat>}
-      (ProdRival(grammar, marks, x, q, w, xs) -> Empty) & Unbeaten(grammar, marks, children, rhsOf(grammar, q), q, [], 0n, xs, w) & Unbeaten(grammar, marks, ts, rest, index, prefix, 1n+dot, above, span)
+      (ProdRival(grammar, guards, marks, x, q, w, next, xs) -> Empty) & Unbeaten(grammar, guards, marks, children, rhsOf(grammar, q), q, [], 0n, xs, w, next) & Unbeaten(grammar, guards, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case Con{Pick{+a, +children}, +ts} Con{Brack{kind, +alts}, +rest}:
       +w = leaves(children)
+      +next = List.append(&2, Nat, leaves(ts), after)
       +same = sameAbove(above, span, w)
       +path = List.append(&2, Nat, prefix, [dot])
-      (AltRival(grammar, marks, alts, index, path, a, w, {lhsOf(grammar, index) <> same : +List<Nat>}) -> Empty) & Unbeaten(grammar, marks, children, altOf(alts, a), index, List.append(&2, Nat, path, [a]), 0n, same, w) & Unbeaten(grammar, marks, ts, rest, index, prefix, 1n+dot, above, span)
+      (AltRival(grammar, guards, marks, alts, index, path, a, w, next, {lhsOf(grammar, index) <> same : +List<Nat>}) -> Empty) & Unbeaten(grammar, guards, marks, children, altOf(alts, a), index, List.append(&2, Nat, path, [a]), 0n, same, w, next) & Unbeaten(grammar, guards, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case Con{Loop{+rounds}, +ts} Con{Brack{kind, +alts}, +rest}:
-      RoundsUnbeaten(grammar, marks, rounds, alts, index, List.append(&2, Nat, prefix, [dot]), above, span) & Unbeaten(grammar, marks, ts, rest, index, prefix, 1n+dot, above, span)
+      RoundsUnbeaten(grammar, guards, marks, rounds, alts, index, List.append(&2, Nat, prefix, [dot]), above, span, List.append(&2, Nat, leaves(ts), after)) & Unbeaten(grammar, guards, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case Con{t, +ts} Con{it, +rest}:
-      Unbeaten(grammar, marks, ts, rest, index, prefix, 1n+dot, above, span)
+      Unbeaten(grammar, guards, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case _ _:
       Unit
 
 # The rounds of a loop. Each round is a pick of an alternative of the bracket at
 # (index, path), and is checked on its own against the other alternatives.
-def RoundsUnbeaten(+grammar: +List<Production>, +marks: +List<Mark>, rounds: +List<Tree>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>, +above: +List<Nat>, +span: +List<Nat>) -> Type:
+def RoundsUnbeaten(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, rounds: +List<Tree>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>, +above: +List<Nat>, +span: +List<Nat>, +after: +List<Nat>) -> Type:
   match rounds:
     case Nil{}:
       Unit
     case Con{Pick{+a, +children}, +rest}:
       +w = leaves(children)
+      +next = List.append(&2, Nat, leaves(rest), after)
       +same = sameAbove(above, span, w)
-      (AltRival(grammar, marks, alts, index, path, a, w, {lhsOf(grammar, index) <> same : +List<Nat>}) -> Empty) & Unbeaten(grammar, marks, children, altOf(alts, a), index, List.append(&2, Nat, path, [a]), 0n, same, w) & RoundsUnbeaten(grammar, marks, rest, alts, index, path, above, span)
+      (AltRival(grammar, guards, marks, alts, index, path, a, w, next, {lhsOf(grammar, index) <> same : +List<Nat>}) -> Empty) & Unbeaten(grammar, guards, marks, children, altOf(alts, a), index, List.append(&2, Nat, path, [a]), 0n, same, w, next) & RoundsUnbeaten(grammar, guards, marks, rest, alts, index, path, above, span, after)
     case Con{other, +rest}:
-      RoundsUnbeaten(grammar, marks, rest, alts, index, path, above, span)
+      RoundsUnbeaten(grammar, guards, marks, rest, alts, index, path, above, span, after)
 
-# A selected tree: a parse tree of the input with no outranked node. This is the filter:
-# the trees that the annotations keep. Without marks, every parse tree is selected.
-def Selected(+grammar: +List<Production>, +marks: +List<Mark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
-  {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} & {leaves([tree]) == inputTokens : +List<Nat>} & Unbeaten(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [])
+# An unbeaten tree: an admissible tree with no outranked node. These are the trees that
+# @prefer and @avoid keep, among the admissible ones. Without marks, every admissible tree
+# is unbeaten; without rules, every parse tree is admissible.
+def UnbeatenTree(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
+  AdmissibleTree(grammar, guards, start, inputTokens, tree) & Unbeaten(grammar, guards, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], [])
 
-# A set that embeds exactly the selected trees: a parse tree of the input uses only steps
-# of the set when, and only when, no node of it is outranked. The set may also hold steps
-# that are in no selected tree; they make no tree of their own, so an oracle that keeps
-# them still chooses among the selected trees, and only those.
-def EmbedsSelected(+grammar: +List<Production>, +marks: +List<Mark>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
+# Some parse tree of the input is unbeaten: the preferences leave a reading.
+def SomeUnbeaten(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +start: Nat, +inputTokens: +List<Nat>) -> Type:
+  &tree: Tree -> UnbeatenTree(grammar, guards, marks, start, inputTokens, tree)
+
+# A set that embeds exactly the unbeaten trees: a parse tree of the input uses only steps
+# of the set when, and only when, it is admissible and no node of it is outranked. The
+# set may also hold steps that are in no unbeaten tree; they make no tree of their own,
+# so an oracle that keeps them still chooses among the unbeaten trees, and only those.
+def EmbedsUnbeaten(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
   @tree: Tree -> {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} -> {leaves([tree]) == inputTokens : +List<Nat>} ->
-    ({allIn(steps(tree, 0n), set) == True{} : Bool} -> Unbeaten(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [])) &
-    (Unbeaten(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], []) -> {allIn(steps(tree, 0n), set) == True{} : Bool})
+    ({allIn(steps(tree, 0n), set) == True{} : Bool} -> Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, []) & Unbeaten(grammar, guards, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], [])) &
+    (Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, []) & Unbeaten(grammar, guards, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], []) -> {allIn(steps(tree, 0n), set) == True{} : Bool})
+
+# PHASE 3, SELECTED TREES: @longest AND @shortest.
+#
+# An extent mark asks for the longest or shortest reading of an item: of every node of a
+# nonterminal (`@longest X = ...`), or of one bracket (`@longest { word }`). It is local,
+# like @prefer: it compares the readings of one sequence over the same tokens, the
+# children of one node, pick or round. A sequence's forest is out when another forest
+# fits the same items, spells the same tokens, and reads its marked items better: longer
+# for @longest, shorter for @shortest. With several marked items in one sequence, the
+# first one decides, then the next, and so on (left to right, as Swift Apus's bracket
+# extent does). Some forest always reads them best, so @longest and @shortest never remove
+# every reading of a sequence. A forest can only be swapped for another over the same
+# tokens, so a node's marked items are compared within the node, never across trees.
+#
+# Not yet joined: the better forest need not be admissible or unbeaten (README.md, "Still
+# to do"), as for the rivals of phase 2.
+
+type Extent is Data:
+  Longest{}
+  Shortest{}
+
+# Where an extent mark sits. NtExtent: on every node of nonterminal x. BrackExtent: on the
+# bracket item at (index, path), with path as in Mark: [m] for item m of the right side of
+# production `index`, [m, a, d] for item d of alternative a of the bracket at m, and so on.
+type ExtentMark is Data:
+  NtExtent{x: Nat, ext: Extent}
+  BrackExtent{index: Nat, path: +List<Nat>, ext: Extent}
+
+def extentIf(hit: Bool, +e: Extent) -> Maybe<&2, Extent>:
+  match hit:
+    case True{}:
+      Some{e}
+    case False{}:
+      None{}
+
+def orExtent(found: Maybe<&2, Extent>, +otherwise: Maybe<&2, Extent>) -> Maybe<&2, Extent>:
+  match found:
+    case Some{e}:
+      Some{e}
+    case None{}:
+      otherwise
+
+# The extent asked of nonterminal x, from the first mark for it.
+def ntExtent(marks: +List<ExtentMark>, +x: Nat) -> Maybe<&2, Extent>:
+  match marks:
+    case Nil{}:
+      None{}
+    case Con{NtExtent{y, +e}, rest}:
+      orExtent(extentIf(Nat.is_eq(y, x), e), ntExtent(rest, x))
+    case Con{BrackExtent{p, bp, e}, rest}:
+      ntExtent(rest, x)
+
+# The extent asked of the bracket item at (index, path), from the first mark for it.
+def brackExtent(marks: +List<ExtentMark>, +index: Nat, +path: +List<Nat>) -> Maybe<&2, Extent>:
+  match marks:
+    case Nil{}:
+      None{}
+    case Con{NtExtent{y, e}, rest}:
+      brackExtent(rest, index, path)
+    case Con{BrackExtent{p, bp, +e}, rest}:
+      orExtent(extentIf(Bool.and(Nat.is_eq(p, index), pathEq(bp, path)), e), brackExtent(rest, index, path))
+
+# The extent asked of an item at (index, path); terminals and ε have none.
+def itemExtent(+marks: +List<ExtentMark>, item: Item, +index: Nat, +path: +List<Nat>) -> Maybe<&2, Extent>:
+  match item:
+    case Sym{Nonterminal{+x}}:
+      ntExtent(marks, x)
+    case Sym{Terminal{k}}:
+      None{}
+    case Brack{kind, alts}:
+      brackExtent(marks, index, path)
+    case Eps{}:
+      None{}
+
+# A marked item's reading: what is asked of it, and how many tokens it reads.
+type Measure is Data:
+  Measure{ext: Extent, len: Nat}
+
+def measureIf(found: Maybe<&2, Extent>, +len: Nat, +rest: +List<Measure>) -> +List<Measure>:
+  match found:
+    case Some{+e}:
+      Measure{e, len} <> rest
+    case None{}:
+      rest
+
+# The readings of the marked items of the sequence at (index, prefix), from the dot on.
+def measures(+marks: +List<ExtentMark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat) -> +List<Measure>:
+  match forest items:
+    case Con{+t, ts} Con{+it, rest}:
+      measureIf(itemExtent(marks, it, index, List.append(&2, Nat, prefix, [dot])), List.length(&2, Nat, leaves([t])), measures(marks, ts, rest, index, prefix, 1n+dot))
+    case _ _:
+      []
+
+# Does a reading of length a beat one of length b?
+def better(e: Extent, +a: Nat, +b: Nat) -> Bool:
+  match e:
+    case Longest{}:
+      Nat.is_lt(b, a)
+    case Shortest{}:
+      Nat.is_lt(a, b)
+
+# Do the readings xs beat ys? The first marked item where they differ decides.
+def beats(xs: +List<Measure>, ys: +List<Measure>) -> Bool:
+  match xs ys:
+    case Con{Measure{+e, +a}, xr} Con{Measure{e2, +b}, yr}:
+      Bool.or(better(e, a, b), Bool.and(Nat.is_eq(a, b), beats(xr, yr)))
+    case _ _:
+      False{}
+
+# A better reading of a sequence: another forest for the same items over the same tokens
+# w, whose marked items beat those of f.
+def ExtentRival(+grammar: +List<Production>, +marks: +List<ExtentMark>, +items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +w: +List<Nat>, +f: +List<Tree>) -> Type:
+  &f2: +List<Tree> -> {fits(f2, grammar, items) == True{} : Bool} & {leaves(f2) == w : +List<Nat>} & {beats(measures(marks, f2, items, index, prefix, 0n), measures(marks, f, items, index, prefix, 0n)) == True{} : Bool}
+
+# No sequence of the forest has a better reading. The walk is the one of Admissible: the
+# children of every node, pick and round are checked against the other forests for their
+# alternative over the same tokens.
+def ExtentBest(+grammar: +List<Production>, +marks: +List<ExtentMark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat) -> Type:
+  match forest items:
+    case Con{Node{+q, +children}, +ts} Con{Sym{Nonterminal{x}}, +rest}:
+      (ExtentRival(grammar, marks, rhsOf(grammar, q), q, [], leaves(children), children) -> Empty) & ExtentBest(grammar, marks, children, rhsOf(grammar, q), q, [], 0n) & ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+    case Con{Pick{+a, +children}, +ts} Con{Brack{kind, +alts}, +rest}:
+      +pre = List.append(&2, Nat, List.append(&2, Nat, prefix, [dot]), [a])
+      (ExtentRival(grammar, marks, altOf(alts, a), index, pre, leaves(children), children) -> Empty) & ExtentBest(grammar, marks, children, altOf(alts, a), index, pre, 0n) & ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+    case Con{Loop{+rounds}, +ts} Con{Brack{kind, +alts}, +rest}:
+      RoundsBest(grammar, marks, rounds, alts, index, List.append(&2, Nat, prefix, [dot])) & ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+    case Con{t, +ts} Con{it, +rest}:
+      ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+    case _ _:
+      Unit
+
+# The rounds of a loop, each a pick of an alternative of the bracket at (index, path).
+def RoundsBest(+grammar: +List<Production>, +marks: +List<ExtentMark>, rounds: +List<Tree>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>) -> Type:
+  match rounds:
+    case Nil{}:
+      Unit
+    case Con{Pick{+a, +children}, +rest}:
+      +pre = List.append(&2, Nat, path, [a])
+      (ExtentRival(grammar, marks, altOf(alts, a), index, pre, leaves(children), children) -> Empty) & ExtentBest(grammar, marks, children, altOf(alts, a), index, pre, 0n) & RoundsBest(grammar, marks, rest, alts, index, path)
+    case Con{other, +rest}:
+      RoundsBest(grammar, marks, rest, alts, index, path)
+
+# A parse tree of the input with no sequence that has a better reading.
+def ExtentBestTree(+grammar: +List<Production>, +marks: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
+  {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} & {leaves([tree]) == inputTokens : +List<Nat>} & ExtentBest(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n)
+
+# A set that embeds exactly the trees of phase 3, as in phases 1 and 2.
+def EmbedsExtentBest(+grammar: +List<Production>, +marks: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
+  @tree: Tree -> {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} -> {leaves([tree]) == inputTokens : +List<Nat>} ->
+    ({allIn(steps(tree, 0n), set) == True{} : Bool} -> ExtentBest(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n)) &
+    (ExtentBest(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n) -> {allIn(steps(tree, 0n), set) == True{} : Bool})
+
+# THE SELECTED TREES: the answer of all three phases. A selected tree is a parse tree of the
+# input that is admissible, unbeaten and extent-best.
+def Selected(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +extents: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
+  UnbeatenTree(grammar, guards, marks, start, inputTokens, tree) & ExtentBestTree(grammar, extents, start, inputTokens, tree)

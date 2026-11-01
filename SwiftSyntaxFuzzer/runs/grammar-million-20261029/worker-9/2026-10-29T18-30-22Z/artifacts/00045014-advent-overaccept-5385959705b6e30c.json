@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00045014-advent-overaccept-5385959705b6e30c.json",
+    "durationSeconds" : 1.3829320669174194,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=64",
+    "index" : 45014,
+    "seed" : 3326660242193084383,
+    "signalHash" : "a27938d989c938fe",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected pattern",
+    "sourceHash" : "5385959705b6e30c",
+    "sourceLength" : 32,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "guard case deinit = any _ else{}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              IdentifierPattern\n                identifier(\"deinit\") \"deinit\"\n              InitializerClause\n                equal \"=\"\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:12: error: expected pattern\n1 | guard case deinit = _ else{}\n  |            `- error: expected pattern\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:12: error: variable binding in a condition requires an initializer\n1 | guard case deinit = _ else{}\n  |            `- error: variable binding in a condition requires an initializer\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:12: error: expected 'else' after 'guard' condition\n1 | guard case deinit = _ else{}\n  |            `- error: expected 'else' after 'guard' condition\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:11: error: consecutive statements on a line must be separated by ';'\n1 | guard case deinit = _ else{}\n  |           `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:19: error: expected '{' for deinitializer\n1 | guard case deinit = _ else{}\n  |                   `- error: expected '{' for deinitializer\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "matchIdentifierPattern\t[\"deinit\"]",
+      "matchPattern\t[matchIdentifierPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "bindingCondition\t[caseCondition]",
+      "conditionList\t[bindingCondition ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "guardStatement\t[\"guard\" expressionIntroducerBoundary >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 81,
+      "descriptorCount" : 158,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 16,
+      "parseSeconds" : 0.002667069435119629,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 6,
+      "tokenCount" : 8,
+      "yieldCount" : 73
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DeclReferenceExpr\n              InitializerClause\n                MissingExpr\n        CodeBlock\n          CodeBlockItemList\n            CodeBlockItem\n              DeinitializerDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.deinit) \"deinit\"\n            CodeBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  equal \"=\"\n                  wildcard \"_\"\n                  keyword(SwiftSyntax.Keyword.else) \"else\"\n                  leftBrace \"{\"\n                  rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 26,
+  "source" : "guard case deinit = _ else{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              IdentifierPattern\\n                identifier(\\\"deinit\\\") \\\"deinit\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:12: error: expected pattern\\n1 | guard case deinit = _ else{}\\n  |            `- error: expected pattern\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:12: error: variable binding in a condition requires an initializer\\n1 | guard case deinit = _ else{}\\n  |            `- error: variable binding in a condition requires an initializer\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:12: error: expected 'else' after 'guard' condition\\n1 | guard case deinit = _ else{}\\n  |            `- error: expected 'else' after 'guard' condition\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:11: error: consecutive statements on a line must be separated by ';'\\n1 | guard case deinit = _ else{}\\n  |           `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-70735695-C710-4475-A9D3-C212166ADBF6.swift:1:19: error: expected '{' for deinitializer\\n1 | guard case deinit = _ else{}\\n  |                   `- error: expected '{' for deinitializer\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"matchIdentifierPattern\\t[\\\"deinit\\\"]\",\"matchPattern\\t[matchIdentifierPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"bindingCondition\\t[caseCondition]\",\"conditionList\\t[bindingCondition ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"guardStatement\\t[\\\"guard\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":81,\"descriptorCount\":158,\"duplicateDescriptorCount\":0,\"oraclePruned\":16,\"parseSeconds\":0.002667069435119629,\"sourceLength\":28,\"suppressedDescriptorCount\":6,\"tokenCount\":8,\"yieldCount\":73},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DeclReferenceExpr\\n              InitializerClause\\n                MissingExpr\\n        CodeBlock\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeinitializerDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.deinit) \\\"deinit\\\"\\n            CodeBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  equal \\\"=\\\"\\n                  wildcard \\\"_\\\"\\n                  keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n                  leftBrace \\\"{\\\"\\n                  rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

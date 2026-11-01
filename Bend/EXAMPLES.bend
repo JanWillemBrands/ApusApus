@@ -5,6 +5,10 @@ import ./CHECK.bend as Check
 import ./PRUNE.bend as Prune
 import ./WITNESS.bend as Witness
 import ./EXACT.bend as Exact
+import ./PREFER.bend as Prefer
+import ./GUARD.bend as Guard
+import ./UNBEATEN.bend as Unb
+import ./EXTENT.bend as Extent
 import ./PROOF.bend as Proof
 import ./LEMMAS.bend as Lemma
 import ./FITS.bend as Fits
@@ -414,11 +418,11 @@ def viaA() -> Spec.Tree:
 def viaB() -> Spec.Tree:
   Spec.Node{1n, [Spec.Node{3n, [Spec.Leaf{1n}]}]}
 
-# The tree through B is a parse tree, but not selected: S ::= A outranks it on t.
-def viaBRejected(sel: Spec.Selected(preferGrammar(), preferMarks(), 0n, [1n], viaB())) -> Empty:
+# The tree through B is a parse tree, but beaten: S ::= A outranks it on t.
+def viaBRejected(sel: Spec.UnbeatenTree(preferGrammar(), [], preferMarks(), 0n, [1n], viaB())) -> Empty:
   match sel:
-    case (fit, (spell, (notBeaten, rest))):
-      notBeaten((0n, ({==}, ([Spec.Node{2n, [Spec.Leaf{1n}]}], ({==}, ({==}, {==}))))))
+    case (adm, (notBeaten, rest)):
+      notBeaten((0n, ({==}, ([Spec.Node{2n, [Spec.Leaf{1n}]}], ({==}, ({==}, ({==}, (Unit{}, (Unit{}, (Unit{}, Unit{}))))))))))
 
 def noRivalOfSAt(q2: Nat, cond: {Bool.and(Spec.lhsIs(preferGrammar(), q2, 0n), Spec.outranks(Spec.prodRank(preferMarks(), q2), Spec.prodRank(preferMarks(), 0n))) == True{} : Bool}) -> Empty:
   match q2:
@@ -440,7 +444,7 @@ def noRivalOfSAt(q2: Nat, cond: {Bool.and(Spec.lhsIs(preferGrammar(), q2, 0n), S
                   Lemma.false_is_not_true(cond)
 
 # No production of S outranks the preferred S ::= A.
-def noRivalOfS(rival: Spec.ProdRival(preferGrammar(), preferMarks(), 0n, 0n, [1n], [0n])) -> Empty:
+def noRivalOfS(rival: Spec.ProdRival(preferGrammar(), [], preferMarks(), 0n, 0n, [1n], [], [0n])) -> Empty:
   match rival:
     case (q2, (cond, der)):
       noRivalOfSAt(q2, cond)
@@ -465,18 +469,18 @@ def noRivalOfAAt(q2: Nat, cond: {Bool.and(Spec.lhsIs(preferGrammar(), q2, 1n), S
                 case 1n+p4:
                   Lemma.false_is_not_true(cond)
 
-def noRivalOfA(rival: Spec.ProdRival(preferGrammar(), preferMarks(), 1n, 2n, [1n], [1n, 0n])) -> Empty:
+def noRivalOfA(rival: Spec.ProdRival(preferGrammar(), [], preferMarks(), 1n, 2n, [1n], [], [1n, 0n])) -> Empty:
   match rival:
     case (q2, (cond, der)):
       noRivalOfAAt(q2, cond)
 
-# The tree through A is selected.
-def viaASelected() -> Spec.Selected(preferGrammar(), preferMarks(), 0n, [1n], viaA()):
-  ({==}, ({==}, (r => noRivalOfS(r), ((r => noRivalOfA(r), (Unit{}, Unit{})), Unit{}))))
+# The tree through A is unbeaten.
+def viaASelected() -> Spec.UnbeatenTree(preferGrammar(), [], preferMarks(), 0n, [1n], viaA()):
+  (({==}, ({==}, (Unit{}, ((Unit{}, (Unit{}, Unit{})), Unit{})))), (r => noRivalOfS(r), ((r => noRivalOfA(r), (Unit{}, Unit{})), Unit{})))
 
 # A ::= @prefer A | t, on t. Productions: 0 is A ::= A, 1 is A ::= t; A = 0. Every tree
 # ends in A -> t. The preferred A -> A derives t only by coming back to A over t, so it is
-# no rival, and A -> t is selected: the preference does not remove every tree.
+# no rival, and A -> t is unbeaten: the preference does not remove every tree.
 def cycleGrammar() -> +List<Spec.Production>:
   [Spec.Production{0n, [n(0n)]}, Spec.Production{0n, [t(1n)]}]
 
@@ -525,11 +529,11 @@ def cycleForest(forest: +List<Spec.Tree>,
 
 def cycleNoRivalAt(q2: Nat,
     cond: {Bool.and(Spec.lhsIs(cycleGrammar(), q2, 0n), Spec.outranks(Spec.prodRank(cycleMarks(), q2), Spec.prodRank(cycleMarks(), 1n))) == True{} : Bool},
-    der: Spec.DerivesOnce(cycleGrammar(), Spec.rhsOf(cycleGrammar(), q2), [1n], [0n])) -> Empty:
+    der: Spec.DerivesOnce(cycleGrammar(), [], Spec.rhsOf(cycleGrammar(), q2), [], q2, [], [1n], [], [0n])) -> Empty:
   match q2:
     case 0n:
       match der:
-        case (forest, (fit, (spell, clean))):
+        case (forest, (fit, (spell, (clean, rules)))):
           cycleForest(forest, fit, spell, clean)
     case 1n+p:
       match p:
@@ -538,30 +542,30 @@ def cycleNoRivalAt(q2: Nat,
         case 1n+p2:
           Lemma.false_is_not_true(cond)
 
-def cycleNoRival(rival: Spec.ProdRival(cycleGrammar(), cycleMarks(), 0n, 1n, [1n], [0n])) -> Empty:
+def cycleNoRival(rival: Spec.ProdRival(cycleGrammar(), [], cycleMarks(), 0n, 1n, [1n], [], [0n])) -> Empty:
   match rival:
     case (q2, (cond, der)):
       cycleNoRivalAt(q2, cond, der)
 
-# So A -> t is selected.
-def cycleSelected() -> Spec.Selected(cycleGrammar(), cycleMarks(), 0n, [1n], Spec.Node{1n, [Spec.Leaf{1n}]}):
-  ({==}, ({==}, (r => cycleNoRival(r), (Unit{}, Unit{}))))
+# So A -> t is unbeaten.
+def cycleSelected() -> Spec.UnbeatenTree(cycleGrammar(), [], cycleMarks(), 0n, [1n], Spec.Node{1n, [Spec.Leaf{1n}]}):
+  (({==}, ({==}, (Unit{}, (Unit{}, Unit{})))), (r => cycleNoRival(r), (Unit{}, Unit{})))
 
 # X ::= @prefer Y | t, Y ::= @prefer X | t, on t: a cycle of two. Productions: 0 is
 # X ::= Y, 1 is X ::= t, 2 is Y ::= X, 3 is Y ::= t; X = 0, Y = 1. The tree X -> t loses
 # to Y -> t. In X -> Y -> t, the rival Y ::= X of Y -> t would come back to X, which is
-# above it over the same tokens, so it does not count, and the tree is selected.
+# above it over the same tokens, so it does not count, and the tree is unbeaten.
 def pairGrammar() -> +List<Spec.Production>:
   [Spec.Production{0n, [n(1n)]}, Spec.Production{0n, [t(1n)]}, Spec.Production{1n, [n(0n)]}, Spec.Production{1n, [t(1n)]}]
 
 def pairMarks() -> +List<Spec.Mark>:
   [Spec.ProdMark{0n, Spec.Preferred{}}, Spec.ProdMark{2n, Spec.Preferred{}}]
 
-# X -> t is not selected: Y -> t is a rival, and does not come back to X.
-def pairDirectRejected(sel: Spec.Selected(pairGrammar(), pairMarks(), 0n, [1n], Spec.Node{1n, [Spec.Leaf{1n}]})) -> Empty:
+# X -> t is beaten: Y -> t is a rival, and does not come back to X.
+def pairDirectRejected(sel: Spec.UnbeatenTree(pairGrammar(), [], pairMarks(), 0n, [1n], Spec.Node{1n, [Spec.Leaf{1n}]})) -> Empty:
   match sel:
-    case (fit, (spell, (notBeaten, rest))):
-      notBeaten((0n, ({==}, ([Spec.Node{3n, [Spec.Leaf{1n}]}], ({==}, ({==}, {==}))))))
+    case (adm, (notBeaten, rest)):
+      notBeaten((0n, ({==}, ([Spec.Node{3n, [Spec.Leaf{1n}]}], ({==}, ({==}, ({==}, (Unit{}, (Unit{}, (Unit{}, Unit{}))))))))))
 
 # Nothing outranks X ::= Y, which is preferred.
 def pairNoRivalOfXAt(q2: Nat, cond: {Bool.and(Spec.lhsIs(pairGrammar(), q2, 0n), Spec.outranks(Spec.prodRank(pairMarks(), q2), Spec.prodRank(pairMarks(), 0n))) == True{} : Bool}) -> Empty:
@@ -583,7 +587,7 @@ def pairNoRivalOfXAt(q2: Nat, cond: {Bool.and(Spec.lhsIs(pairGrammar(), q2, 0n),
                 case 1n+p4:
                   Lemma.false_is_not_true(cond)
 
-def pairNoRivalOfX(rival: Spec.ProdRival(pairGrammar(), pairMarks(), 0n, 0n, [1n], [0n])) -> Empty:
+def pairNoRivalOfX(rival: Spec.ProdRival(pairGrammar(), [], pairMarks(), 0n, 0n, [1n], [], [0n])) -> Empty:
   match rival:
     case (q2, (cond, der)):
       pairNoRivalOfXAt(q2, cond)
@@ -631,7 +635,7 @@ def pairForest(forest: +List<Spec.Tree>,
 # The only rival of Y -> t below X is Y ::= X, which comes back to X.
 def pairNoRivalOfYAt(q2: Nat,
     cond: {Bool.and(Spec.lhsIs(pairGrammar(), q2, 1n), Spec.outranks(Spec.prodRank(pairMarks(), q2), Spec.prodRank(pairMarks(), 3n))) == True{} : Bool},
-    der: Spec.DerivesOnce(pairGrammar(), Spec.rhsOf(pairGrammar(), q2), [1n], [1n, 0n])) -> Empty:
+    der: Spec.DerivesOnce(pairGrammar(), [], Spec.rhsOf(pairGrammar(), q2), [], q2, [], [1n], [], [1n, 0n])) -> Empty:
   match q2:
     case 0n:
       Lemma.false_is_not_true(cond)
@@ -643,7 +647,7 @@ def pairNoRivalOfYAt(q2: Nat,
           match p2:
             case 0n:
               match der:
-                case (forest, (fit, (spell, clean))):
+                case (forest, (fit, (spell, (clean, rules)))):
                   pairForest(forest, fit, spell, clean)
             case 1n+p3:
               match p3:
@@ -652,14 +656,14 @@ def pairNoRivalOfYAt(q2: Nat,
                 case 1n+p4:
                   Lemma.false_is_not_true(cond)
 
-def pairNoRivalOfY(rival: Spec.ProdRival(pairGrammar(), pairMarks(), 1n, 3n, [1n], [1n, 0n])) -> Empty:
+def pairNoRivalOfY(rival: Spec.ProdRival(pairGrammar(), [], pairMarks(), 1n, 3n, [1n], [], [1n, 0n])) -> Empty:
   match rival:
     case (q2, (cond, der)):
       pairNoRivalOfYAt(q2, cond, der)
 
-# X -> Y -> t is selected.
-def pairSelected() -> Spec.Selected(pairGrammar(), pairMarks(), 0n, [1n], Spec.Node{0n, [Spec.Node{3n, [Spec.Leaf{1n}]}]}):
-  ({==}, ({==}, (r => pairNoRivalOfX(r), ((r => pairNoRivalOfY(r), (Unit{}, Unit{})), Unit{}))))
+# X -> Y -> t is unbeaten.
+def pairSelected() -> Spec.UnbeatenTree(pairGrammar(), [], pairMarks(), 0n, [1n], Spec.Node{0n, [Spec.Node{3n, [Spec.Leaf{1n}]}]}):
+  (({==}, ({==}, (Unit{}, ((Unit{}, (Unit{}, Unit{})), Unit{})))), (r => pairNoRivalOfX(r), ((r => pairNoRivalOfY(r), (Unit{}, Unit{})), Unit{})))
 
 # ---- A loop round with more than one item ----
 
@@ -685,4 +689,276 @@ def exactRoundNone() -> {Spec.sameSet(exact(roundGrammar(), [2n]), Spec.steps(ro
   {==}
 
 def exactRoundTwo() -> {Spec.sameSet(exact(roundGrammar(), [1n, 2n]), List.append(&2, Spec.Bsr, Spec.steps(roundAE(), 0n), Spec.steps(roundEA(), 0n))) == True{} : Bool}:
+  {==}
+
+# ---- The preference oracle ----
+
+# The oracle's set, or nothing when it refuses.
+def prefer(+grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+  Unb.unbeatenSteps(2000n, grammar, [], marks, 0n, input)
+
+def preferOr(m: Maybe<&2, +List<Spec.Bsr>>) -> +List<Spec.Bsr>:
+  match m:
+    case Some{+xs}:
+      xs
+    case None{}:
+      []
+
+# Does the oracle's set embed the tree?
+def embeds(+grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +tree: Spec.Tree) -> Bool:
+  Spec.allIn(Spec.steps(tree, 0n), preferOr(prefer(grammar, marks, input)))
+
+# S ::= @prefer A | B: the set embeds the tree through A, not the one through B.
+def preferKeepsA() -> {embeds(preferGrammar(), preferMarks(), [1n], viaA()) == True{} : Bool}:
+  {==}
+
+def preferDropsB() -> {embeds(preferGrammar(), preferMarks(), [1n], viaB()) == False{} : Bool}:
+  {==}
+
+# A ::= @prefer A | t goes round a cycle, and so does X ::= @prefer Y | t, Y ::= @prefer X | t:
+# the oracle refuses both, as Swift Apus refuses such a grammar.
+def preferRefusesCycle() -> {prefer(cycleGrammar(), cycleMarks(), [1n]) == None{} : Maybe<&2, +List<Spec.Bsr>>}:
+  {==}
+
+def preferRefusesPair() -> {prefer(pairGrammar(), pairMarks(), [1n]) == None{} : Maybe<&2, +List<Spec.Bsr>>}:
+  {==}
+
+# S ::= { ( @avoid A | B ) }, A ::= t, B ::= t, on t t: every round takes B.
+def avoidGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [Spec.Brack{Spec.Closure{}, [[Spec.Brack{Spec.Group{}, [[n(1n)], [n(2n)]]}]]}]}, Spec.Production{1n, [t(1n)]}, Spec.Production{2n, [t(1n)]}]
+
+def avoidMarks() -> +List<Spec.Mark>:
+  [Spec.AltMark{0n, [0n, 0n, 0n], 0n, Spec.Avoided{}}]
+
+def avoidRound(+a: Nat, +q: Nat) -> Spec.Tree:
+  Spec.Pick{0n, [Spec.Pick{a, [Spec.Node{q, [Spec.Leaf{1n}]}]}]}
+
+def avoidBB() -> Spec.Tree:
+  Spec.Node{0n, [Spec.Loop{[avoidRound(1n, 2n), avoidRound(1n, 2n)]}]}
+
+def avoidAB() -> Spec.Tree:
+  Spec.Node{0n, [Spec.Loop{[avoidRound(0n, 1n), avoidRound(1n, 2n)]}]}
+
+def avoidKeepsBB() -> {embeds(avoidGrammar(), avoidMarks(), [1n, 1n], avoidBB()) == True{} : Bool}:
+  {==}
+
+def avoidDropsAB() -> {embeds(avoidGrammar(), avoidMarks(), [1n, 1n], avoidAB()) == False{} : Bool}:
+  {==}
+
+# A loop written { τ } is refused: its rounds are not groups.
+def rawLoopGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [Spec.Brack{Spec.Closure{}, [[n(1n)], [n(2n)]]}]}, Spec.Production{1n, [t(1n)]}, Spec.Production{2n, [t(1n)]}]
+
+def preferRefusesRawLoop() -> {prefer(rawLoopGrammar(), [Spec.AltMark{0n, [0n], 0n, Spec.Avoided{}}], [1n]) == None{} : Maybe<&2, +List<Spec.Bsr>>}:
+  {==}
+
+# ---- Phase 2 on top of phase 1 ----
+
+# S ::= @prefer A | B, A ::= @left(P) P "+" P, P ::= n | n "+" n, B ::= n "+" n "+" n,
+# with n = 1 and "+" = 2, on n + n + n. Productions: 0 is S ::= A, 1 is S ::= B, 2 is
+# A ::= P + P, 3 and 4 are P's, 5 is B's; S = 0, A = 1, P = 2, B = 3. Every tree of A
+# breaks @left(P), since P derives the last child's tokens. So A is no rival: a preferred
+# alternative that can't take the place of B beats nothing, and the tree through B stays.
+# Without the rules, A is preferred and B goes.
+def joinGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [n(1n)]}, Spec.Production{0n, [n(3n)]},
+   Spec.Production{1n, [n(2n), t(2n), n(2n)]},
+   Spec.Production{2n, [t(1n)]}, Spec.Production{2n, [t(1n), t(2n), t(1n)]},
+   Spec.Production{3n, [t(1n), t(2n), t(1n), t(2n), t(1n)]}]
+
+def joinGuards() -> +List<Spec.GuardMark>:
+  [Spec.ProdGuard{2n, Spec.LeftAssoc{[2n]}}]
+
+def joinMarks() -> +List<Spec.Mark>:
+  [Spec.ProdMark{0n, Spec.Preferred{}}]
+
+def joinInput() -> +List<Nat>:
+  [1n, 2n, 1n, 2n, 1n]
+
+def joinViaB() -> Spec.Tree:
+  Spec.Node{1n, [Spec.Node{5n, [Spec.Leaf{1n}, Spec.Leaf{2n}, Spec.Leaf{1n}, Spec.Leaf{2n}, Spec.Leaf{1n}]}]}
+
+def joined(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +marks: +List<Spec.Mark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+  Unb.unbeatenSteps(2000n, grammar, gm, marks, 0n, input)
+
+def joinKeepsB() -> {Spec.allIn(Spec.steps(joinViaB(), 0n), preferOr(joined(joinGrammar(), joinGuards(), joinMarks(), joinInput()))) == True{} : Bool}:
+  {==}
+
+def noRulesDropsB() -> {embeds(joinGrammar(), joinMarks(), joinInput(), joinViaB()) == False{} : Bool}:
+  {==}
+
+# ---- The guard oracle (phase 1) ----
+
+# The oracle's set, or nothing when it refuses.
+def guarded(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+  Guard.guardSteps(2000n, grammar, gm, 0n, input)
+
+# Does the oracle's set embed the tree?
+def admits(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +input: +List<Nat>, +tree: Spec.Tree) -> Bool:
+  Spec.allIn(Spec.steps(tree, 0n), preferOr(guarded(grammar, gm, input)))
+
+# E ::= E "+" E | a, with a = 1 and "+" = 2, on a + a + a.
+def sumGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [n(0n), t(2n), n(0n)]}, Spec.Production{0n, [t(1n)]}]
+
+def atom() -> Spec.Tree:
+  Spec.Node{1n, [Spec.Leaf{1n}]}
+
+def sum(+l: Spec.Tree, +r: Spec.Tree) -> Spec.Tree:
+  Spec.Node{0n, [l, Spec.Leaf{2n}, r]}
+
+def sumInput() -> +List<Nat>:
+  [1n, 2n, 1n, 2n, 1n]
+
+# @left: (a + a) + a stays, a + (a + a) goes.
+def leftMarks() -> +List<Spec.GuardMark>:
+  [Spec.ProdGuard{0n, Spec.LeftAssoc{[]}}]
+
+def leftKeepsLeft() -> {admits(sumGrammar(), leftMarks(), sumInput(), sum(sum(atom(), atom()), atom())) == True{} : Bool}:
+  {==}
+
+def leftDropsRight() -> {admits(sumGrammar(), leftMarks(), sumInput(), sum(atom(), sum(atom(), atom()))) == False{} : Bool}:
+  {==}
+
+# @right: the other way round.
+def rightMarks() -> +List<Spec.GuardMark>:
+  [Spec.ProdGuard{0n, Spec.RightAssoc{[]}}]
+
+def rightKeepsRight() -> {admits(sumGrammar(), rightMarks(), sumInput(), sum(atom(), sum(atom(), atom()))) == True{} : Bool}:
+  {==}
+
+def rightDropsLeft() -> {admits(sumGrammar(), rightMarks(), sumInput(), sum(sum(atom(), atom()), atom())) == False{} : Bool}:
+  {==}
+
+# S ::= A A, A ::= t | t, D ::= t t, with a lookahead on the first A ::= t, on t t.
+def aheadGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [n(1n), n(1n)]}, Spec.Production{1n, [t(1n)]}, Spec.Production{1n, [t(1n)]}, Spec.Production{2n, [t(1n), t(1n)]}]
+
+def aheadTree(+q1: Nat, +q2: Nat) -> Spec.Tree:
+  Spec.Node{0n, [Spec.Node{q1, [Spec.Leaf{1n}]}, Spec.Node{q2, [Spec.Leaf{1n}]}]}
+
+# NotAhead(D): the first A ::= t only where D does not follow, so only at the second t.
+def notAheadMarks() -> +List<Spec.GuardMark>:
+  [Spec.ProdGuard{1n, Spec.NotAhead{[2n]}}]
+
+def notAheadKeeps() -> {admits(aheadGrammar(), notAheadMarks(), [1n, 1n], aheadTree(2n, 1n)) == True{} : Bool}:
+  {==}
+
+def notAheadDrops() -> {admits(aheadGrammar(), notAheadMarks(), [1n, 1n], aheadTree(1n, 2n)) == False{} : Bool}:
+  {==}
+
+# Ahead(D): the first A ::= t only where D follows, so only at the first t.
+def aheadMarks() -> +List<Spec.GuardMark>:
+  [Spec.ProdGuard{1n, Spec.Ahead{[2n]}}]
+
+def aheadKeeps() -> {admits(aheadGrammar(), aheadMarks(), [1n, 1n], aheadTree(1n, 2n)) == True{} : Bool}:
+  {==}
+
+def aheadDrops() -> {admits(aheadGrammar(), aheadMarks(), [1n, 1n], aheadTree(2n, 1n)) == False{} : Bool}:
+  {==}
+
+# A rule on the alternative of a loop is refused.
+def guardRefusesLoop() -> {guarded(avoidGrammar(), [Spec.AltGuard{0n, [0n], 0n, Spec.LeftAssoc{[]}}], [1n, 1n]) == None{} : Maybe<&2, +List<Spec.Bsr>>}:
+  {==}
+
+# Without rules both readings of a + a + a stay.
+def noGuardKeepsBoth() -> {Bool.and(admits(sumGrammar(), [], sumInput(), sum(atom(), sum(atom(), atom()))), admits(sumGrammar(), [], sumInput(), sum(sum(atom(), atom()), atom()))) == True{} : Bool}:
+  {==}
+
+# ---- The extent oracle (phase 3) ----
+
+def extented(+grammar: +List<Spec.Production>, +em: +List<Spec.ExtentMark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+  Extent.extentSteps(2000n, grammar, em, 0n, input)
+
+def picks(+grammar: +List<Spec.Production>, +em: +List<Spec.ExtentMark>, +input: +List<Nat>, +tree: Spec.Tree) -> Bool:
+  Spec.allIn(Spec.steps(tree, 0n), preferOr(extented(grammar, em, input)))
+
+# S ::= { ( a ) } B, B ::= ε | a, on a a: the loop reads both a's, or one.
+def extLoopGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [Spec.Brack{Spec.Closure{}, [[Spec.Brack{Spec.Group{}, [[t(1n)]]}]]}, n(1n)]}, Spec.Production{1n, [Spec.Eps{}]}, Spec.Production{1n, [t(1n)]}]
+
+def aRound() -> Spec.Tree:
+  Spec.Pick{0n, [Spec.Pick{0n, [Spec.Leaf{1n}]}]}
+
+def loopTwo() -> Spec.Tree:
+  Spec.Node{0n, [Spec.Loop{[aRound(), aRound()]}, Spec.Node{1n, [Spec.Skip{}]}]}
+
+def loopOne() -> Spec.Tree:
+  Spec.Node{0n, [Spec.Loop{[aRound()]}, Spec.Node{2n, [Spec.Leaf{1n}]}]}
+
+# @longest on the loop: it takes both a's.
+def longestLoop() -> +List<Spec.ExtentMark>:
+  [Spec.BrackExtent{0n, [0n], Spec.Longest{}}]
+
+def longestKeepsTwo() -> {picks(extLoopGrammar(), longestLoop(), [1n, 1n], loopTwo()) == True{} : Bool}:
+  {==}
+
+def longestDropsOne() -> {picks(extLoopGrammar(), longestLoop(), [1n, 1n], loopOne()) == False{} : Bool}:
+  {==}
+
+# @shortest on the loop: it takes one.
+def shortestLoop() -> +List<Spec.ExtentMark>:
+  [Spec.BrackExtent{0n, [0n], Spec.Shortest{}}]
+
+def shortestKeepsOne() -> {picks(extLoopGrammar(), shortestLoop(), [1n, 1n], loopOne()) == True{} : Bool}:
+  {==}
+
+def shortestDropsTwo() -> {picks(extLoopGrammar(), shortestLoop(), [1n, 1n], loopTwo()) == False{} : Bool}:
+  {==}
+
+# S ::= X Y, X ::= a | a a, Y ::= ε | a, with @longest X, on a a.
+def ntGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [n(1n), n(2n)]}, Spec.Production{1n, [t(1n)]}, Spec.Production{1n, [t(1n), t(1n)]}, Spec.Production{2n, [Spec.Eps{}]}, Spec.Production{2n, [t(1n)]}]
+
+def xLong() -> Spec.Tree:
+  Spec.Node{0n, [Spec.Node{2n, [Spec.Leaf{1n}, Spec.Leaf{1n}]}, Spec.Node{3n, [Spec.Skip{}]}]}
+
+def xShort() -> Spec.Tree:
+  Spec.Node{0n, [Spec.Node{1n, [Spec.Leaf{1n}]}, Spec.Node{4n, [Spec.Leaf{1n}]}]}
+
+def longestX() -> +List<Spec.ExtentMark>:
+  [Spec.NtExtent{1n, Spec.Longest{}}]
+
+def longestXKeeps() -> {picks(ntGrammar(), longestX(), [1n, 1n], xLong()) == True{} : Bool}:
+  {==}
+
+def longestXDrops() -> {picks(ntGrammar(), longestX(), [1n, 1n], xShort()) == False{} : Bool}:
+  {==}
+
+# Without marks both stay.
+def noExtentKeepsBoth() -> {Bool.and(picks(ntGrammar(), [], [1n, 1n], xLong()), picks(ntGrammar(), [], [1n, 1n], xShort())) == True{} : Bool}:
+  {==}
+
+# Two marked items in one sequence are refused.
+def extentRefusesTwo() -> {extented(ntGrammar(), [Spec.NtExtent{1n, Spec.Longest{}}, Spec.NtExtent{2n, Spec.Longest{}}], [1n, 1n]) == None{} : Maybe<&2, +List<Spec.Bsr>>}:
+  {==}
+
+# S ::= P X Q, P ::= ε | a, X ::= a | a a, Q ::= ε | a, with @longest X, on a a: of the
+# three readings only P = ε, X = a a, Q = ε stays, and the oracle answers.
+def pxqGrammar() -> +List<Spec.Production>:
+  [Spec.Production{0n, [n(1n), n(2n), n(3n)]}, Spec.Production{1n, [Spec.Eps{}]}, Spec.Production{1n, [t(1n)]}, Spec.Production{2n, [t(1n)]}, Spec.Production{2n, [t(1n), t(1n)]}, Spec.Production{3n, [Spec.Eps{}]}, Spec.Production{3n, [t(1n)]}]
+
+def pxq(+p: Spec.Tree, +x: Spec.Tree, +q: Spec.Tree) -> Spec.Tree:
+  Spec.Node{0n, [p, x, q]}
+
+def pxqMarks() -> +List<Spec.ExtentMark>:
+  [Spec.NtExtent{2n, Spec.Longest{}}]
+
+def isSomeSet(m: Maybe<&2, +List<Spec.Bsr>>) -> Bool:
+  match m:
+    case Some{xs}:
+      True{}
+    case None{}:
+      False{}
+
+def pxqAnswers() -> {isSomeSet(extented(pxqGrammar(), pxqMarks(), [1n, 1n])) == True{} : Bool}:
+  {==}
+
+def pxqKeepsLong() -> {picks(pxqGrammar(), pxqMarks(), [1n, 1n], pxq(Spec.Node{1n, [Spec.Skip{}]}, Spec.Node{4n, [Spec.Leaf{1n}, Spec.Leaf{1n}]}, Spec.Node{5n, [Spec.Skip{}]})) == True{} : Bool}:
+  {==}
+
+def pxqDropsLeft() -> {picks(pxqGrammar(), pxqMarks(), [1n, 1n], pxq(Spec.Node{2n, [Spec.Leaf{1n}]}, Spec.Node{3n, [Spec.Leaf{1n}]}, Spec.Node{5n, [Spec.Skip{}]})) == False{} : Bool}:
+  {==}
+
+def pxqDropsRight() -> {picks(pxqGrammar(), pxqMarks(), [1n, 1n], pxq(Spec.Node{1n, [Spec.Skip{}]}, Spec.Node{3n, [Spec.Leaf{1n}]}, Spec.Node{6n, [Spec.Leaf{1n}]})) == False{} : Bool}:
   {==}

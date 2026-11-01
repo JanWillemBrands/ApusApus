@@ -1,0 +1,67 @@
+{
+  "event" : {
+    "artifact" : "00054815-tree-difference-b428969d7f6c35b2.json",
+    "durationSeconds" : 1.7851200103759766,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=60",
+    "index" : 54815,
+    "seed" : 8709271213640533849,
+    "signalHash" : "ace04b1410b1d670",
+    "signalSummary" : "tree-difference|line=9|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "b428969d7f6c35b2",
+    "sourceLength" : 19,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "do{-await;}catch{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n            CodeBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CAA0107B-2B17-43F7-B38A-F698735C1E97.swift:1:5: error: cannot find 'await' in scope\n1 | do{-await}catch{}\n  |     `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "catchClause\t[\"catch\"  codeBlock]",
+      "catchClauses\t[catchClause ]",
+      ".OPT\t[catchClauses]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 93,
+      "descriptorCount" : 184,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 71,
+      "parseSeconds" : 0.0019379854202270508,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 8,
+      "yieldCount" : 122
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              PrefixOperatorExpr\n                prefixOperator(\"-\") \"-\"\n                DeclReferenceExpr\n                  identifier(\"await\") \"await\"\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n            CodeBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 26,
+  "source" : "do{-await}catch{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n            CodeBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CAA0107B-2B17-43F7-B38A-F698735C1E97.swift:1:5: error: cannot find 'await' in scope\\n1 | do{-await}catch{}\\n  |     `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"catchClause\\t[\\\"catch\\\"  codeBlock]\",\"catchClauses\\t[catchClause ]\",\".OPT\\t[catchClauses]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":93,\"descriptorCount\":184,\"duplicateDescriptorCount\":0,\"oraclePruned\":71,\"parseSeconds\":0.0019379854202270508,\"sourceLength\":17,\"suppressedDescriptorCount\":10,\"tokenCount\":8,\"yieldCount\":122},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              PrefixOperatorExpr\\n                prefixOperator(\\\"-\\\") \\\"-\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"await\\\") \\\"await\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n            CodeBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

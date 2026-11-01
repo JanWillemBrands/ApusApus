@@ -1,0 +1,68 @@
+{
+  "event" : {
+    "artifact" : "00080231-tree-difference-1e3b81fc99f1e09a.json",
+    "durationSeconds" : 1.4148370027542114,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=57",
+    "index" : 80231,
+    "seed" : 1663247169048140644,
+    "signalHash" : "b4ccd87bddf4ce8d",
+    "signalSummary" : "tree-difference|line=11|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "1e3b81fc99f1e09a",
+    "sourceLength" : 30,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "for unsafe case xx in +await{}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ForStmt\n        keyword(SwiftSyntax.Keyword.for) \"for\"\n        IdentifierPattern\n          identifier(\"unsafe\") \"unsafe\"\n        keyword(SwiftSyntax.Keyword.in) \"in\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-01F54008-1515-44E6-9D9C-163135DDF307.swift:1:16: error: cannot find 'await' in scope\n1 | for unsafe in +await{}\n  |                `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "forInStatement\t[\"for\"    >->(\"await\") bindingPattern \"in\" expressionIntroducerBoundary expression  codeBlock]",
+      "loopStatement\t[forInStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 55,
+      "descriptorCount" : 102,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 26,
+      "parseSeconds" : 0.0013799667358398438,
+      "sourceLength" : 22,
+      "suppressedDescriptorCount" : 3,
+      "tokenCount" : 7,
+      "yieldCount" : 74
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ForStmt\n        keyword(SwiftSyntax.Keyword.for) \"for\"\n        IdentifierPattern\n          identifier(\"unsafe\") \"unsafe\"\n        keyword(SwiftSyntax.Keyword.in) \"in\"\n        PrefixOperatorExpr\n          prefixOperator(\"+\") \"+\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 16,
+  "source" : "for unsafe in +await{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ForStmt\\n        keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n        IdentifierPattern\\n          identifier(\\\"unsafe\\\") \\\"unsafe\\\"\\n        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-01F54008-1515-44E6-9D9C-163135DDF307.swift:1:16: error: cannot find 'await' in scope\\n1 | for unsafe in +await{}\\n  |                `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"forInStatement\\t[\\\"for\\\"    >->(\\\"await\\\") bindingPattern \\\"in\\\" expressionIntroducerBoundary expression  codeBlock]\",\"loopStatement\\t[forInStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":55,\"descriptorCount\":102,\"duplicateDescriptorCount\":0,\"oraclePruned\":26,\"parseSeconds\":0.0013799667358398438,\"sourceLength\":22,\"suppressedDescriptorCount\":3,\"tokenCount\":7,\"yieldCount\":74},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ForStmt\\n        keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n        IdentifierPattern\\n          identifier(\\\"unsafe\\\") \\\"unsafe\\\"\\n        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"+\\\") \\\"+\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

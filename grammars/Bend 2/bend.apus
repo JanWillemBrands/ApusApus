@@ -1,0 +1,587 @@
+// modified from bend.ts 2.0.39 on 2016.10.31
+//
+// Bend
+// ====
+//
+// SYNTAX
+// ------
+
+Book = { Import } { TLD } .
+
+Whitespace  : /\s+/ .
+Comment     : /#.*/ .
+
+CHAR    - /'([^'\\\n]|\\.)'/ .
+STRING  - /"[^"\\]*(?:\\.[^"\\]*)*"/ .
+F32Lit  - /[0-9]+\.[0-9]+(?:[eE][+-]?[0-9]+)?(?![a-zA-Z0-9._-])/ .
+NatSucc - /[0-9]+n\+/ .
+NatLit  - /[0-9]+n(?![a-zA-Z0-9._-])/ .
+U32Lit  - /[0-9]+(?![a-zA-Z0-9._-])/ .
+Name    - /[a-zA-Z_][a-zA-Z0-9._-]*/ .
+
+FilePath    - /\.\/[a-zA-Z0-9_-]+\.bend/ .
+PackagePath - /[a-zA-Z0-9_-]+(@[0-9.]+)?\/[a-zA-Z0-9_-]+\.bend/ .
+HashPath    - /0x[a-fA-F0-9]+\/[a-zA-Z0-9_-]+\.bend/ .
+
+Quant = [ "-" | "+" ] .
+    
+Bind =
+    | Quant Name ":" Term
+    | "~" Name ":" Term
+    | Name
+    .
+    
+Term =
+    | Var
+    | Ref
+    | Ann
+    | Typ
+    | Qnt
+    | Qua
+    | Min
+    | All
+    | Lam
+    | App
+    | Fill
+    | CtrTerm
+    | Mat
+    | Efq
+    | Eql
+    | Rfl
+    | Rwt
+    | Hol
+    | Grp
+
+    | DoBlock
+    
+    | Lit
+    | Nat
+    | Plus
+    | Arrow
+    | Exists
+    | Pair
+    | Or
+    | Not
+    | Tuple
+    | List
+    | Cons
+    | Array
+    | Index
+    | Op
+    .
+    
+// Local variable binding
+// Meaning: Parses a standard identifier that refers to a local variable or function argument inside the current scope.
+Var = Name .
+
+// Global definition reference
+// Meaning: Parses an identifier that references a global function, a law, or an algebraic data type defined at the top level.
+Ref = Name .
+
+// Type Annotation
+// Meaning: Enforces an explicit type check on an expression. Example: `{ x : Nat }` asserts that the term `x` is of type `Nat`.
+Ann = "{" Term ":" Term "}" .
+
+// Universe / Type Hierarchies
+// Meaning: Defines the core type system layers required for dependent typing, handling standard types, physical data representations, or higher-order kinds.
+Typ = "Type" | "Data" | "Kind" "(" Term ")" .
+
+// Linear/Structural Quantifier
+// Meaning: Defines a base erasure or dependency property classifier inside formal declarations.
+Qnt = "Quant" .
+
+// Quantity Modifiers / Multiplicities
+// Meaning: Dictates resource usage constraints for linear logic verification, explicitly marking terms as affine, linear, or unrestricted.
+Qua = "&0" | "&1" | "&2" .
+
+// Erasure / Intersection Type
+// Meaning: Specifies a structural intersection or dependent composition joining two distinct terms together.
+Min = Term "<&>" Term .
+
+// Dependent Function / Pi-Type
+// Meaning: Declares a universal quantifier signature where the output type changes depending directly on the binding constraint value.
+All = "@" Bind "->" Term .
+
+// Lambda Abstraction (Function Instance)
+// Meaning: Creates an anonymous function or closure that accepts a variable `Name` and evaluates the subsequent `Term` body.
+Lam = Name "=>" Block .
+
+// Function Application
+// Meaning: Applies a function to an argument list. The first term is the target function expression, followed by its runtime parameters.
+App = Term "(" { Term ","? } ")" .
+
+// Algebraic Data Type Signature
+// Meaning: References a parameterizable datatype structure wrapped with explicit type inputs inside angle brackets.
+Fill = Name "<" { Term ","? } ">" .
+
+// Object Constructor Instance
+// Meaning: Builds a concrete instance of a structured type data payload, passing values into structural record braces.
+CtrTerm = Name "{" { Term ","? } "}" .
+
+// Pattern Match Body / Dependent Elimination
+// Meaning: Unpacks a value by matching it against structural projections, binding parameters safely to resolve branches.
+Mat = "\\" "{" Name ":" Term ";"? Term "}" .
+
+// Ex Falso Quodlibet / Empty Elimination
+// Meaning: Represents a structural absurdity elimination mechanism (an empty match statement) used to discharge logically impossible proof goals.
+Efq = "\\" "{" "}" .
+
+// Definitional / Propositional Equality
+// Meaning: Declares a formal proof goal asserting that two distinct terms are equivalent within a specific type framework.
+Eql = "{" Term "==" Term ":" Term "}" .
+
+// Proof Reflexivity Instance
+// Meaning: Automatically satisfies an equality constraint proof if the left-hand and right-hand side expressions reduce identically.
+Rfl = "{" "==" "}" .
+
+// Proof Rewriting / Substitution
+// Meaning: Substitutes elements across equivalent proofs, rewriting active targets using an equality witness expression.
+Rwt = "%" [ Name "@" ] Term ":" Term ";"? Body .
+
+// Compile-Time Meta-Variable / Hole
+// Meaning: Inserts a type-directed compiler hole placeholder for code you want the type checker to automatically fill or analyze.
+Hol = "?" Name .
+
+// Parenthetical Sub-Expression Group
+// Meaning: Groups structural terms together to alter parser precedence and boundaries, isolating an inner body block.
+Grp = "(" Body ")" .
+
+// Surface syntax implemented by parse_term_base/parse_term_ops in bend.ts.
+U32    = U32Lit .
+F32    = F32Lit .
+Chr    = CHAR .
+Str    = STRING .
+Lit    = U32 | F32 | Chr | Str .
+Nat    = NatSucc Term | NatLit .
+Plus   = "+" Name [ "<" { Term ","? } ">" ] .
+Arrow  = Term "->" Term .
+Exists = "&" Name ":" Term "->" Term .
+Pair   = Term "&" Term .
+Or     = Term "|" Term .
+Not    = "{" Term "!=" Term ":" Term "}" .
+Tuple  = "(" Term "," Term { "," Term } ","? ")" .
+List   = "[" { Term ","? } "]" .
+Cons   = Term "<>" Term .
+Array  = "[" Term ":" Term ( "*" | "^" ) Term "]" .
+Index  = Term "[" Term "]" [ "<-" Term ] .
+Op     = Term ( "||" | "&&" | "++" ) Term
+       | "(" OpExpr ":" Term ")" .
+OpExpr = Term OpSymbol Term { OpSymbol Term } .
+OpSymbol = "<" | "<=" | ">" | ">="
+         | ".|." | ".^." | ".&." | "<<" | ">>"
+         | "+" | "-" | "*" | "/" | "%" .
+
+
+Case    = "case" { Term } ":" Block .
+Match   = "match" { Term } ":" ( >n< Case+
+                               | <n> >>| Case+ |<<
+                               ) .
+Local   = < Quant Name | Term > "=" Term+ ( ";" | <n> ) Body .
+Reply   = Term .
+Body    = Match | Local | Reply .
+Block   = >n< Body
+        | <n> >>| Body |<<
+        .
+CtrDecl = Name "{" { Bind ","? } "}" .
+ADTDecl = "type" Name [ "<" { Bind ","? } ">" ] "is" Term ":" [ >n< < CtrDecl >
+                                                              | <n> >>| < CtrDecl <n> > |<<
+                                                              ] .
+Clause  = ( "for" ( Quant | "~" ) | "exs" ) Name ":" Term [ "where" Term ] .
+Law     = "law" Name ":" ( >n< { Clause } Body
+                         | <n> >>| { Clause <n> } Body |<<
+                         ) .
+Def     = [ "@unsafe" ] "def" Name "?"? "(" { Bind ","? } ")" [ "->" Term ] ":" ( Block | < "import" STRING > ) .
+TLD     = ADTDecl | Law | Def .
+Import  = "import" "Base" | "import" Path "as" Name .
+Path    = FilePath | PackagePath | HashPath .
+
+
+//
+// SUGARS
+// ------
+//
+// Name   | Grammar                    | Term
+// ------ | -------------------------- | ----
+// Arrow  | A "->" B                   | @_:A -> B
+// Exists | "&" Name ":" A "->" B      | Exists(A, x => B)
+// Pair   | A "&" B                    | Pair(A, B)
+// Or     | A "|" B                    | Or(A, B)
+// Not    | "{" a "!=" b ":" T "}"     | {a == b : T} -> Empty
+// Tuple  | "(" A ("," B)+ ")"         | Tuple{A, Tuple{B, ..}}
+// List   | "[" [A ","?] "]", A "<>" B | Con{A, ..Nil{}}, Con{A, B}
+// Array  | "[" A ":" T ("*" 2^D "n" | "^" D) "]" | Array.new(T, D, A)
+// Nat    | NUMBER "n" ("+" T)?        | Lit, read as Succ{..Zero{}}; Succ{..T}
+// U32    | NUMBER                     | Lit, read as U32{WCon{b, ..WNil{}}}
+// F32    | NUMBER "." NUMBER [EXP]    | Lit, read as F32{WCon{b, ..WNil{}}}
+// Chr    | "'" CHAR "'"               | Chr{U32}, its U32 a Lit
+// Str    | "\\"" [CHAR] "\\""           | Lit, read as SCon{Chr, ..SNil{}}
+// Index  | x "[" i "]" ("<-" v)?      | Array.get(U32, x, i), ..set(..)
+// Fill   | D "<" [A ","?] ">"         | D<&1.., A..>
+// Plus   | "+" D ("<" [A ","?] ">")?  | D<&2.., A..>
+// Ops    | "(" a "+" b ":" T ")"      | T.add(a, b)
+//
+// every word the parser dispatches on is reserved and names nothing:
+// def, type, law, match, case, do, return, for, exs, where,
+// is, import, Type, Data, Kind, Quant ("as" reads only on an import
+// line and "unsafe" only after "@", so they stay free).
+// a file's namespace is its real path without ".bend", from the entry's
+// directory; a "0x<hash>/" path is its own namespace, read from BEND_LIB
+// and fetched from BEND_HUB on a miss; a "<name>@<version>/" path is the
+// hash the hub names it, kept under BEND_LIB/names. "as Name" binds a
+// per-file alias: Name.x resolves to the file's canonical name, so two
+// aliases of one file agree, and a def of an aliased name fills it.
+// "import Base" is the empty namespace; an unknown name is the file's own,
+// unless its bare spelling is Base's.
+// a def with no prior law types itself: a Bind telescope and a
+// "->" return type. a def after its law takes bare names, no "->".
+// "def f?(..)" is "@unsafe def f(..)".
+// a bare Bind name is -Name: Quant. Fill and Plus omit a datatype's
+// leading Quant parameters as a block; Plus alone fills a quant-only D.
+// a literal expands to one node per unit, unbounded by design, but a
+// number, a string and a char's code stay one Lit node and unfold where
+// a chain is read (a match, a comparison, a descent, a pattern); a full
+// word, a Nat, a Char, a String, a list, a tuple and an array (its
+// slots) print back as literals; "*" takes a power of two. Arrow is
+// right-associative; the domain of a written @ or & binder stops at the
+// first bare "->", so an arrow (or a nested binder) there needs parens.
+// infix "&" and "|" are right-associative, share one precedence, and
+// bind tighter than "->". a rewrite "%e@E : P; f" binds e and "_" inside
+// its motive P; "%E : P; f" is the nameless form: the equation binder is
+// spelled "" and cannot be referenced.
+//
+// an operator is a method with no namespace: the ": T" before the ")"
+// around it names T's head as its namespace, and nested parens
+// inherit, so (a + b * c : U32) is U32.add(a, U32.mul(b, c)) and an
+// argument is f((a + b : U32)); an index x[i + 1] is U32's; with no
+// parens it is refused; braces only annotate. || && ++ <> & | are
+// fixed, and equality is a call: T.is_eq(a, b).
+//
+// juxtaposition laws: a call or index suffix may be spaced but a
+// newline ends the spine. after a term, "<" takes one argument above
+// comparison level, then one token decides: ">" or "," commits to
+// type args (x<y>, X<A, B>), anything else is less-than -- so a
+// compound FIRST type argument needs parens (X<(A & B), C>; later
+// arguments are full terms). a glued
+// ">"-headed operator never fires -- space your comparisons and
+// shifts -- so nested closers stack (List<List<A>>). "-" or "+" glued
+// to a name heads a binder or literal, never an operator. a + on a
+// pattern, let, lambda or do binder x re-binds it reusable: +x = x
+// opens its body, below the destructures and match arms that head it.
+// statements
+// live in bodies: a def body, a case body, a lambda body or a
+// rewrite tail; parens hold one body, or a tuple.
+// a parallel let "x y z = a b c" is one Let binding n names to n
+// values, each checked in the outer scope; the compiler forks its
+// calls. a write a[i] <- v followed by a body statement is the let
+// a = a[i] <- v. one token after a parsed term decides, but a ": T" with
+// no "=" after it rewinds.
+//
+// "~k: T" heading a def's telescope, or "for ~k: T" in a law, makes it a
+// template: a call T(~a, ..) writes ~ before each ~ argument, or none; a
+// live closed call is the instance T~n, the def at a, minted and checked
+// when the call checks; an open one is refused, and a call in a type or
+// in a template's own text stays T's.
+//
+// Do-Notation
+// -----------
+
+ DoBlock = "do" Name "<" { Term ","? } ">" ":" DoLayout .
+ DoLayout = >n< DoStmt
+          | <n> >>| DoStmt |<<
+          .
+
+ DoStmt =
+    | DoLet
+    | DoExec
+    | DoBind
+    | DoStep
+    | DoPure
+    | DoRetr
+    .
+
+DoLet  = Name ":" Term "=" Term ";"? DoStmt .
+DoExec = Term "<-" Term ";"? DoStmt .
+DoBind = Name ":" Term "<-" Term ";"? DoStmt .
+DoStep = Term ( ";" | <n> ) DoStmt .
+DoPure = "return" Term .
+DoRetr = Term .
+
+//
+// do M<ls.., R>: desugars onto M.bind(ls.., A, R, v, x => ..) and
+// M.pure(ls.., R, e); an empty list (do M<>:) drops R from both. A
+// step is Unit <- Term: a term is a step when a ";" or a line at the
+// block's column (its first statement's) follows it, else the value.
+
+
+^^^
+import Base
+import ./SPEC.bend as Spec
+import ./GLL.bend as Gll
+import ./CHECK.bend as Check
+import ./EXACT.bend as Exact
+import ./PREFER.bend as Prefer
+import ./GUARD.bend as Guard
+
+# THE LAWS: every claim, and nothing else. `bend PROOF.bend` checks them all.
+#
+# What the laws talk about is defined in SPEC.bend. The parser (GLL.bend), the
+# pruning (PRUNE.bend) and the witness search (WITNESS.bend) are not trusted: their
+# output is only handed out after a check (CHECK.bend, PRUNE.bend, EXACT.bend). The same
+# goes for the preference oracle (PREFER.bend).
+
+# REWRITING LAWS. Each bracket means its usual BNF rewriting, stated on sentential
+# forms (items followed by `rest`), without ever making a helper nonterminal:
+#   ( τ1 | .. | τn ) η   derives what some  τa η  derives
+#   [ τ ] η              derives what  η  or  ( τ ) η  derives
+#   { τ } η              derives what  η  or  ( τ ) { τ } η  derives
+#   < τ > η              derives what  ( τ ) { τ } η  derives
+#   ε η                  derives what  η  derives
+# together with the BNF steps for symbols. Proofs of algorithms reason with these.
+
+# NOTHING DERIVES NOTHING. An empty sequence of items derives only the empty input.
+law empty_derives:
+  for +grammar: +List<Spec.Production>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, [], w)
+  {w == [] : +List<Nat>}
+
+# A TERMINAL FIRST. If terminal k followed by `rest` derives w, then w starts with the
+# token k, and `rest` derives the remainder w2.
+law terminal_unfold:
+  for +grammar: +List<Spec.Production>
+  for +k: Nat
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Sym{Spec.Terminal{k}} <> rest, w)
+  exs w2: +List<Nat>
+  {w == k <> w2 : +List<Nat>} & Spec.Derives(grammar, rest, w2)
+
+# A NONTERMINAL FIRST, UNFOLDED. If nonterminal a followed by `rest` derives w, then one
+# of a's productions p can take its place: p's right side followed by `rest` derives w.
+# This is the BNF step a ⇒ rhs.
+law nonterminal_unfold:
+  for +grammar: +List<Spec.Production>
+  for +a: Nat
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Sym{Spec.Nonterminal{a}} <> rest, w)
+  exs p: Nat
+  {Spec.lhsIs(grammar, p, a) == True{} : Bool} & Spec.Derives(grammar, List.append(&2, Spec.Item, Spec.rhsOf(grammar, p), rest), w)
+
+# A NONTERMINAL FIRST, FOLDED. The converse: if the right side of a production p of a,
+# followed by `rest`, derives w, then a followed by `rest` derives w.
+law nonterminal_fold:
+  for +grammar: +List<Spec.Production>
+  for +a: Nat
+  for +p: Nat
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for lhsOk: {Spec.lhsIs(grammar, p, a) == True{} : Bool}
+  for d: Spec.Derives(grammar, List.append(&2, Spec.Item, Spec.rhsOf(grammar, p), rest), w)
+  Spec.Derives(grammar, Spec.Sym{Spec.Nonterminal{a}} <> rest, w)
+
+# A GROUP, UNFOLDED. If ( τ1 | .. | τn ) followed by `rest` derives w, then one of its
+# alternatives τa, written in its place, derives w.
+law group_unfold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> rest, w)
+  exs a: Nat
+  {Spec.isAlt(alts, a) == True{} : Bool} & Spec.Derives(grammar, List.append(&2, Spec.Item, Spec.altOf(alts, a), rest), w)
+
+# A GROUP, FOLDED. The converse: if an alternative τa followed by `rest` derives w, then
+# the group followed by `rest` derives w.
+law group_fold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +a: Nat
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for isA: {Spec.isAlt(alts, a) == True{} : Bool}
+  for d: Spec.Derives(grammar, List.append(&2, Spec.Item, Spec.altOf(alts, a), rest), w)
+  Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> rest, w)
+
+# AN OPTIONAL, UNFOLDED. If [ τ ] followed by `rest` derives w, then either `rest` alone
+# derives w (the optional matched nothing), or ( τ ) followed by `rest` does (it matched
+# once).
+law optional_unfold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Brack{Spec.Optional{}, alts} <> rest, w)
+  Either<Spec.Derives(grammar, rest, w), Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> rest, w)>
+
+# AN OPTIONAL, FOLDED. The converse: either way of deriving w also derives it through [
+# τ ]. When τ matches nothing, the tree uses the skip, because a pick of [ τ ] must read
+# something; the input derived is the same.
+law optional_fold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Either<Spec.Derives(grammar, rest, w), Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> rest, w)>
+  Spec.Derives(grammar, Spec.Brack{Spec.Optional{}, alts} <> rest, w)
+
+# A CLOSURE, UNFOLDED. If { τ } followed by `rest` derives w, then either `rest` alone
+# derives w (no rounds), or one round ( τ ), then the closure again, then `rest` does.
+law closure_unfold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Brack{Spec.Closure{}, alts} <> rest, w)
+  Either<Spec.Derives(grammar, rest, w), Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> Spec.Brack{Spec.Closure{}, alts} <> rest, w)>
+
+# A CLOSURE, FOLDED. The converse: either way of deriving w also derives it through { τ
+# }. A round that matches nothing is dropped, so the tree has no removable empty round;
+# the input derived is the same.
+law closure_fold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Either<Spec.Derives(grammar, rest, w), Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> Spec.Brack{Spec.Closure{}, alts} <> rest, w)>
+  Spec.Derives(grammar, Spec.Brack{Spec.Closure{}, alts} <> rest, w)
+
+# A POSITIVE CLOSURE, UNFOLDED. If < τ > followed by `rest` derives w, then one round (
+# τ ), then the closure { τ }, then `rest` derives w.
+law positive_unfold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Brack{Spec.Positive{}, alts} <> rest, w)
+  Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> Spec.Brack{Spec.Closure{}, alts} <> rest, w)
+
+# A POSITIVE CLOSURE, FOLDED. The converse: ( τ ) followed by { τ } and `rest` derives
+# what < τ > followed by `rest` derives. When every round matches nothing, the tree
+# keeps exactly one empty round, as the bracket rule wants.
+law positive_fold:
+  for +grammar: +List<Spec.Production>
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Brack{Spec.Group{}, alts} <> Spec.Brack{Spec.Closure{}, alts} <> rest, w)
+  Spec.Derives(grammar, Spec.Brack{Spec.Positive{}, alts} <> rest, w)
+
+# ε, UNFOLDED. ε reads nothing: if ε followed by `rest` derives w, then `rest` alone
+# derives w.
+law epsilon_unfold:
+  for +grammar: +List<Spec.Production>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, Spec.Eps{} <> rest, w)
+  Spec.Derives(grammar, rest, w)
+
+# ε, FOLDED. The converse: if `rest` derives w, then ε followed by `rest` derives w.
+law epsilon_fold:
+  for +grammar: +List<Spec.Production>
+  for +rest: +List<Spec.Item>
+  for +w: +List<Nat>
+  for d: Spec.Derives(grammar, rest, w)
+  Spec.Derives(grammar, Spec.Eps{} <> rest, w)
+
+# THE CHECKED GLL PARSER MISSES NOTHING. Whenever the checked GLL parser hands out a set of steps, no
+# step of any parse tree of the input is missing from it. The engine itself is not
+# trusted: what it hands out passed the closedness check.
+law gll_every_parse_step:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Check.checkedSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EveryParseStep(grammar, start, input, set)
+
+# THE EXACT PARSER IS EXACT: whenever `exactSteps` hands out a set, it holds exactly
+# the steps of the parse trees of the input. Nothing is missing, and every element
+# is a step of some parse tree, so an oracle choosing from the set chooses among all
+# parse trees, and only those.
+law gll_bsr_exact:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Exact.exactSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.IsExactBsr(grammar, start, input, set)
+
+# TREES FROM THE EXACT SET SPELL THE INPUT: a tree that 1: fits the start symbol, 2: uses
+# only steps of the exact parser's set, and 3: is as long as the input, spells the input.
+# An oracle that picks a tree from the set cannot produce something that is not a
+# parse tree. (Without the length condition this fails: for S ::= S S | a on aa, the
+# tree S -> a uses only steps of the set, but spells a.)
+law exact_trees_spell:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Exact.exactSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  for +tree: Spec.Tree
+  for fitting: {Spec.fits([tree], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for inSet: {Spec.allIn(Spec.steps(tree, 0n), set) == True{} : Bool}
+  for long: {List.length(&2, Nat, Spec.leaves([tree])) == List.length(&2, Nat, input) : Nat}
+  {Spec.leaves([tree]) == input : +List<Nat>}
+
+# DISAMBIGUATION, IN THE THREE PHASES OF SPEC.bend: 1. admissible (lookahead,
+# @left, @right), 2. unbeaten (@prefer, @avoid), 3. selected (@longest,
+# @shortest). Each phase's oracle gets an exactness law: its set embeds exactly the
+# trees of that phase.
+#
+# PHASE 1, ADMISSIBLE.
+#
+# THE RULES KEEP EXACTLY THE ADMISSIBLE TREES. Whenever the guard oracle hands out a set,
+# a parse tree of the input uses only steps of that set exactly when it is admissible:
+# every node, pick and round keeps the lookahead, @left and @right rules of the
+# alternative it chose. So a tree read from the set breaks no rule, and no tree that
+# keeps them all is lost. The oracle refuses rules on the alternatives of a loop.
+law guards_exact:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Guard.guardSteps(fuel, grammar, guards, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EmbedsAdmissible(grammar, guards, start, input, set)
+#
+# PHASE 2, UNBEATEN.
+#
+# @prefer AND @avoid CHOOSE EXACTLY THE UNBEATEN TREES. Whenever the preference oracle
+# hands out a set, a parse tree of the input uses only steps of that set exactly when it
+# is unbeaten: no node of it is outranked. So a tree read from the set made every choice
+# the annotations ask for, and no tree that did is lost. The oracle refuses a grammar
+# whose preferences go round a cycle, and a loop not written { ( τ ) }.
+law prefer_avoid_exact:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +marks: +List<Spec.Mark>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Prefer.preferSteps(fuel, grammar, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EmbedsUnbeaten(grammar, marks, start, input, set)
+
+# @prefer AND @avoid LEAVE A READING. Whenever the preference oracle hands out a set and
+# the input has a parse tree, some parse tree is unbeaten. The oracle's answer never
+# throws every reading away. (Stronger, and not proven here: that preferences never
+# remove every parse tree, answer or not. Its classical proof, "it is impossible that no
+# tree is unbeaten", uses a hypothesis twice, which Bend's affine logic does not allow.)
+law prefer_avoid_safe:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +marks: +List<Spec.Mark>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Prefer.preferSteps(fuel, grammar, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  for tree: Spec.Tree
+  for fitting: {Spec.fits([tree], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for spelled: {Spec.leaves([tree]) == input : +List<Nat>}
+  Spec.SomeUnbeaten(grammar, marks, start, input)
+
+# PHASE 3, SELECTED. Laws to come, for @longest and @shortest.

@@ -1,0 +1,65 @@
+{
+  "event" : {
+    "artifact" : "00027620-tree-difference-7183c2c97bceea07.json",
+    "durationSeconds" : 1.5092829465866089,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=41",
+    "index" : 27620,
+    "seed" : 15755288936024556338,
+    "signalHash" : "9c4ed70721184e3e",
+    "signalSummary" : "tree-difference|line=10|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "7183c2c97bceea07",
+    "sourceLength" : 25,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7493C41B-0CAE-4AC1-A8FF-A48D5843C590.swift:1:19: error: cannot find type 'sending' in scope\n1 | repeat{}while any sending\n  |                   `- error: cannot find type 'sending' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7493C41B-0CAE-4AC1-A8FF-A48D5843C590.swift:1:15: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n1 | repeat{}while any sending\n  |               `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any sending»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"sending\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 53,
+      "descriptorCount" : 114,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 49,
+      "parseSeconds" : 0.0015230178833007812,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 7,
+      "tokenCount" : 6,
+      "yieldCount" : 88
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        TypeExpr\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.any) \"any\"\n            IdentifierType\n              identifier(\"sending\") \"sending\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 8,
+  "source" : "repeat{}while any sending",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7493C41B-0CAE-4AC1-A8FF-A48D5843C590.swift:1:19: error: cannot find type 'sending' in scope\\n1 | repeat{}while any sending\\n  |                   `- error: cannot find type 'sending' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7493C41B-0CAE-4AC1-A8FF-A48D5843C590.swift:1:15: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n1 | repeat{}while any sending\\n  |               `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any sending»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"sending\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":53,\"descriptorCount\":114,\"duplicateDescriptorCount\":0,\"oraclePruned\":49,\"parseSeconds\":0.0015230178833007812,\"sourceLength\":25,\"suppressedDescriptorCount\":7,\"tokenCount\":6,\"yieldCount\":88},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        TypeExpr\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n            IdentifierType\\n              identifier(\\\"sending\\\") \\\"sending\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

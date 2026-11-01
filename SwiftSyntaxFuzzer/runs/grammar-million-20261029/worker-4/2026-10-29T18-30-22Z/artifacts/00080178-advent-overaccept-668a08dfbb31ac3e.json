@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00080178-advent-overaccept-668a08dfbb31ac3e.json",
+    "durationSeconds" : 1.2610840797424316,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=68",
+    "index" : 80178,
+    "seed" : 1663247169048140644,
+    "signalHash" : "95216d3fe86d437f",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|single argument function types require parentheses",
+    "sourceHash" : "668a08dfbb31ac3e",
+    "sourceLength" : 35,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "do throws(some()throws->any any){};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.some) \"some\"\n            FunctionType\n              leftParen \"(\"\n              TupleTypeElementList\n              rightParen \")\"\n              ReturnClause\n                arrow \"->\"\n                IdentifierType\n                  identifier(\"anyany\") \"anyany\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-76E4C4A9-3436-42A5-A527-ABF063BF173C.swift:1:11: error: single argument function types require parentheses\n1 | do throws(some()->any any){}\n  |           `- error: single argument function types require parentheses\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-76E4C4A9-3436-42A5-A527-ABF063BF173C.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n1 | do throws(some()->any any){}\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertType(_:from:to:): type form has no converter; flattened to IdentifierType: boxedProtocolType — «any any»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "boxedProtocolKeywordName\t[\"any\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "boxedProtocolType\t[\"any\" boxedProtocolConstraint]",
+      "type\t[boxedProtocolType]",
+      "functionTypeArgumentClause\t[\"(\" \")\"]",
+      "functionType\t[functionTypeArgumentClause  \"->\" >->(\"async\" \"await\" \"rethrows\" \"throw\" \"throws\" \"try\") type]",
+      "type\t[functionType]",
+      "opaqueType\t[\"some\" >->(\"any\" \"some\") type]",
+      "type\t[opaqueType]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 61,
+      "descriptorCount" : 137,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 30,
+      "parseSeconds" : 0.0013840198516845703,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 6,
+      "tokenCount" : 12,
+      "yieldCount" : 82
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          FunctionType\n            TupleTypeElementList\n              TupleTypeElement\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.some) \"some\"\n                  TupleType\n                    leftParen \"(\"\n                    TupleTypeElementList\n                    rightParen \")\"\n            ReturnClause\n              arrow \"->\"\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.any) \"any\"\n                IdentifierType\n                  identifier(\"any\") \"any\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 34,
+  "source" : "do throws(some()->any any){}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n            FunctionType\\n              leftParen \\\"(\\\"\\n              TupleTypeElementList\\n              rightParen \\\")\\\"\\n              ReturnClause\\n                arrow \\\"->\\\"\\n                IdentifierType\\n                  identifier(\\\"anyany\\\") \\\"anyany\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-76E4C4A9-3436-42A5-A527-ABF063BF173C.swift:1:11: error: single argument function types require parentheses\\n1 | do throws(some()->any any){}\\n  |           `- error: single argument function types require parentheses\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-76E4C4A9-3436-42A5-A527-ABF063BF173C.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n1 | do throws(some()->any any){}\\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertType(_:from:to:): type form has no converter; flattened to IdentifierType: boxedProtocolType — «any any»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"boxedProtocolKeywordName\\t[\\\"any\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"boxedProtocolType\\t[\\\"any\\\" boxedProtocolConstraint]\",\"type\\t[boxedProtocolType]\",\"functionTypeArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"functionType\\t[functionTypeArgumentClause  \\\"->\\\" >->(\\\"async\\\" \\\"await\\\" \\\"rethrows\\\" \\\"throw\\\" \\\"throws\\\" \\\"try\\\") type]\",\"type\\t[functionType]\",\"opaqueType\\t[\\\"some\\\" >->(\\\"any\\\" \\\"some\\\") type]\",\"type\\t[opaqueType]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":61,\"descriptorCount\":137,\"duplicateDescriptorCount\":0,\"oraclePruned\":30,\"parseSeconds\":0.0013840198516845703,\"sourceLength\":28,\"suppressedDescriptorCount\":6,\"tokenCount\":12,\"yieldCount\":82},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          FunctionType\\n            TupleTypeElementList\\n              TupleTypeElement\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n                  TupleType\\n                    leftParen \\\"(\\\"\\n                    TupleTypeElementList\\n                    rightParen \\\")\\\"\\n            ReturnClause\\n              arrow \\\"->\\\"\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                IdentifierType\\n                  identifier(\\\"any\\\") \\\"any\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

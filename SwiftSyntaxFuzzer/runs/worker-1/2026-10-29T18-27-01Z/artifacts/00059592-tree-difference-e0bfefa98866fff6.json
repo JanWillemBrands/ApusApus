@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00059592-tree-difference-e0bfefa98866fff6.json",
+    "durationSeconds" : 1.6925950050354004,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:glue+block-comment+delete:type:testNonisolatedSpecifier#6",
+    "index" : 59592,
+    "seed" : 4354586739665297708,
+    "signalHash" : "a56d5dfd661bfaa4",
+    "signalSummary" : "tree-difference|line=24|ref=TypeExpr|advent=SequenceExpr",
+    "sourceHash" : "e0bfefa98866fff6",
+    "sourceLength" : 74,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let prior = value\n foo(test: nonisolated(nonsending) () \/*c*\/async-> Void)",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"foo\") \"foo\"\n        leftParen \"(\"\n        LabeledExprList\n          LabeledExpr\n            identifier(\"test\") \"test\"\n            colon \":\"\n            SequenceExpr\n              ExprList\n                FunctionCallExpr\n                  FunctionCallExpr\n                    DeclReferenceExpr\n                      identifier(\"nonisolated\") \"nonisolated\"\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n                          identifier(\"nonsending\") \"nonsending\"\n                    rightParen \")\"\n                    MultipleTrailingClosureElementList\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n                ArrowExpr\n                  TypeEffectSpecifiers\n                    keyword(SwiftSyntax.Keyword.async) \"async\"\n                  arrow \"->\"\n                DeclReferenceExpr\n                  identifier(\"Void\") \"Void\"\n        rightParen \")\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4C3D43BC-1FA1-47F8-86F7-285700D1CF89.swift:1:2: error: cannot find 'foo' in scope\n1 |  foo(test: nonisolated(nonsending) () async-> Void)\n  |  `- error: cannot find 'foo' in scope\n",
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "ifConfigSameLine\t[]",
+      ".DO\t[\"async\" ]",
+      "typeEffectSpecifiers\t[ >->(\"async\" \"reasync\" \"rethrows\" \"throws\")]",
+      ".OPT\t[typeEffectSpecifiers]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"await\" \"rethrows\" \"throw\" \"throws\" \"try\")]",
+      "infixExpression\t[arrowExpr ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expression\t[prefixExpression ]",
+      ".DO\t[expression]",
+      "labeledExpression\t[ ]",
+      "labeledExpressionList\t[labeledExpression ]",
+      "functionCallArgumentClause\t[\"(\" labeledExpressionList  \")\"]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "argumentLabel\t[identifier]",
+      ".OPT\t[argumentLabel \":\"]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 167,
+      "descriptorCount" : 369,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 185,
+      "parseSeconds" : 0.003287076950073242,
+      "sourceLength" : 51,
+      "suppressedDescriptorCount" : 65,
+      "tokenCount" : 14,
+      "yieldCount" : 327
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"foo\") \"foo\"\n        leftParen \"(\"\n        LabeledExprList\n          LabeledExpr\n            identifier(\"test\") \"test\"\n            colon \":\"\n            TypeExpr\n              AttributedType\n                TypeSpecifierList\n                  NonisolatedTypeSpecifier\n                    keyword(SwiftSyntax.Keyword.nonisolated) \"nonisolated\"\n                    NonisolatedSpecifierArgument\n                      leftParen \"(\"\n                      keyword(SwiftSyntax.Keyword.nonsending) \"nonsending\"\n                      rightParen \")\"\n                AttributeList\n                TypeSpecifierList\n                FunctionType\n                  leftParen \"(\"\n                  TupleTypeElementList\n                  rightParen \")\"\n                  TypeEffectSpecifiers\n                    keyword(SwiftSyntax.Keyword.async) \"async\"\n                  ReturnClause\n                    arrow \"->\"\n                    IdentifierType\n                      identifier(\"Void\") \"Void\"\n        rightParen \")\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 24,
+  "source" : " foo(test: nonisolated(nonsending) () async-> Void)",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"foo\\\") \\\"foo\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n          LabeledExpr\\n            identifier(\\\"test\\\") \\\"test\\\"\\n            colon \\\":\\\"\\n            SequenceExpr\\n              ExprList\\n                FunctionCallExpr\\n                  FunctionCallExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"nonisolated\\\") \\\"nonisolated\\\"\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"nonsending\\\") \\\"nonsending\\\"\\n                    rightParen \\\")\\\"\\n                    MultipleTrailingClosureElementList\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n                ArrowExpr\\n                  TypeEffectSpecifiers\\n                    keyword(SwiftSyntax.Keyword.async) \\\"async\\\"\\n                  arrow \\\"->\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Void\\\") \\\"Void\\\"\\n        rightParen \\\")\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4C3D43BC-1FA1-47F8-86F7-285700D1CF89.swift:1:2: error: cannot find 'foo' in scope\\n1 |  foo(test: nonisolated(nonsending) () async-> Void)\\n  |  `- error: cannot find 'foo' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"ifConfigSameLine\\t[]\",\".DO\\t[\\\"async\\\" ]\",\"typeEffectSpecifiers\\t[ >->(\\\"async\\\" \\\"reasync\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\".OPT\\t[typeEffectSpecifiers]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"await\\\" \\\"rethrows\\\" \\\"throw\\\" \\\"throws\\\" \\\"try\\\")]\",\"infixExpression\\t[arrowExpr ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expression\\t[prefixExpression ]\",\".DO\\t[expression]\",\"labeledExpression\\t[ ]\",\"labeledExpressionList\\t[labeledExpression ]\",\"functionCallArgumentClause\\t[\\\"(\\\" labeledExpressionList  \\\")\\\"]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"argumentLabel\\t[identifier]\",\".OPT\\t[argumentLabel \\\":\\\"]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":167,\"descriptorCount\":369,\"duplicateDescriptorCount\":0,\"oraclePruned\":185,\"parseSeconds\":0.003287076950073242,\"sourceLength\":51,\"suppressedDescriptorCount\":65,\"tokenCount\":14,\"yieldCount\":327},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"foo\\\") \\\"foo\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n          LabeledExpr\\n            identifier(\\\"test\\\") \\\"test\\\"\\n            colon \\\":\\\"\\n            TypeExpr\\n              AttributedType\\n                TypeSpecifierList\\n                  NonisolatedTypeSpecifier\\n                    keyword(SwiftSyntax.Keyword.nonisolated) \\\"nonisolated\\\"\\n                    NonisolatedSpecifierArgument\\n                      leftParen \\\"(\\\"\\n                      keyword(SwiftSyntax.Keyword.nonsending) \\\"nonsending\\\"\\n                      rightParen \\\")\\\"\\n                AttributeList\\n                TypeSpecifierList\\n                FunctionType\\n                  leftParen \\\"(\\\"\\n                  TupleTypeElementList\\n                  rightParen \\\")\\\"\\n                  TypeEffectSpecifiers\\n                    keyword(SwiftSyntax.Keyword.async) \\\"async\\\"\\n                  ReturnClause\\n                    arrow \\\"->\\\"\\n                    IdentifierType\\n                      identifier(\\\"Void\\\") \\\"Void\\\"\\n        rightParen \\\")\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00042113-tree-difference-992334294241c705.json",
+    "durationSeconds" : 1.3953360319137573,
+    "exitCode" : 1,
+    "generator" : "wide:closure:duplicate:fuzz-harvest:any-then-newline-is-a-name",
+    "index" : 42113,
+    "seed" : 3326660242440995284,
+    "signalHash" : "8812659da25bec40",
+    "signalSummary" : "tree-difference|line=27|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "992334294241c705",
+    "sourceLength" : 39,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "let fuzzClosure = {\nlet x = any any\nP\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  AssignmentExpr\n                    equal \"=\"\n                  MissingExpr\n                    identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-62E53D96-74A5-413D-A378-FE162097621D.swift:1:2: error: cannot find 'fuzzClosure' in scope\n1 |  fuzzClosure { x = any any\n  |  `- error: cannot find 'fuzzClosure' in scope\n2 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-62E53D96-74A5-413D-A378-FE162097621D.swift:1:16: error: cannot find 'x' in scope\n1 |  fuzzClosure { x = any any\n  |                `- error: cannot find 'x' in scope\n2 | }\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any\n»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"any\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "ifConfigSameLine\t[]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator ifConfigSameLine expression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 118,
+      "descriptorCount" : 260,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 122,
+      "parseSeconds" : 0.0024280548095703125,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 7,
+      "yieldCount" : 224
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  AssignmentExpr\n                    equal \"=\"\n                  TypeExpr\n                    SomeOrAnyType\n                      keyword(SwiftSyntax.Keyword.any) \"any\"\n                      IdentifierType\n                        identifier(\"any\") \"any\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 34,
+  "source" : " fuzzClosure { x = any any\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  MissingExpr\\n                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-62E53D96-74A5-413D-A378-FE162097621D.swift:1:2: error: cannot find 'fuzzClosure' in scope\\n1 |  fuzzClosure { x = any any\\n  |  `- error: cannot find 'fuzzClosure' in scope\\n2 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-62E53D96-74A5-413D-A378-FE162097621D.swift:1:16: error: cannot find 'x' in scope\\n1 |  fuzzClosure { x = any any\\n  |                `- error: cannot find 'x' in scope\\n2 | }\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any\\n»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"any\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"ifConfigSameLine\\t[]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator ifConfigSameLine expression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":118,\"descriptorCount\":260,\"duplicateDescriptorCount\":0,\"oraclePruned\":122,\"parseSeconds\":0.0024280548095703125,\"sourceLength\":28,\"suppressedDescriptorCount\":33,\"tokenCount\":7,\"yieldCount\":224},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  TypeExpr\\n                    SomeOrAnyType\\n                      keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                      IdentifierType\\n                        identifier(\\\"any\\\") \\\"any\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

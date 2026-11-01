@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00000016-advent-overaccept-fd1b6af1a2301568.json",
+    "durationSeconds" : 1.8000229597091675,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=160",
+    "index" : 16,
+    "seed" : 8709271214554400112,
+    "signalHash" : "808137f8fd8161fe",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected expression",
+    "sourceHash" : "fd1b6af1a2301568",
+    "sourceLength" : 57,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if??\\(x: ~_x) .Type\n#else\nyield consume !init.0;#endif\n;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            PrefixOperatorExpr\n              prefixOperator(\"??\") \"??\"\n              MemberAccessExpr\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                period \".\"\n                DeclReferenceExpr\n                  identifier(\"Type\") \"Type\"\n            CodeBlockItemList\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"yield\") \"yield\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:1:4: error: expected expression\n1 | #if??() .Type\n  |    `- error: expected expression\n2 | yield #endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:1:4: error: consecutive statements on a line must be separated by ';'\n1 | #if??() .Type\n  |    `- error: consecutive statements on a line must be separated by ';'\n2 | yield #endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:1:4: error: expected expression\n1 | #if??() .Type\n  |    `- error: expected expression\n2 | yield #endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:2:7: error: unexpected conditional compilation block terminator\n1 | #if??() .Type\n2 | yield #endif\n  |       `- error: unexpected conditional compilation block terminator\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      "ifConfigStatements\t[statements]",
+      ".OPT\t[ifConfigStatements]",
+      "memberName\t[identifier]",
+      ".DO\t[<s> \".\"]",
+      "ifConfigSameLine\t[>n<]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "explicitMemberExpression\t[postfixExpression ifConfigSameLine   memberName ]",
+      "postfixExpression\t[explicitMemberExpression]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s< >n< >->(\"@\")]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 152,
+      "descriptorCount" : 287,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 82,
+      "parseSeconds" : 0.0056569576263427734,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 24,
+      "tokenCount" : 9,
+      "yieldCount" : 175
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            MissingExpr\n            UnexpectedNodes\n              postfixQuestionMark \"?\"\n              postfixQuestionMark \"?\"\n              leftParen \"(\"\n              rightParen \")\"\n              period \".\"\n              identifier(\"Type\") \"Type\"\n            CodeBlockItemList\n              CodeBlockItem\n                DeclReferenceExpr\n                  identifier(\"yield\") \"yield\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 31,
+  "source" : "#if??() .Type\nyield #endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"??\\\") \\\"??\\\"\\n              MemberAccessExpr\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                period \\\".\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"Type\\\") \\\"Type\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"yield\\\") \\\"yield\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:1:4: error: expected expression\\n1 | #if??() .Type\\n  |    `- error: expected expression\\n2 | yield #endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:1:4: error: consecutive statements on a line must be separated by ';'\\n1 | #if??() .Type\\n  |    `- error: consecutive statements on a line must be separated by ';'\\n2 | yield #endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:1:4: error: expected expression\\n1 | #if??() .Type\\n  |    `- error: expected expression\\n2 | yield #endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CB61A08A-EDFA-45B4-A2E0-4CF660A05D65.swift:2:7: error: unexpected conditional compilation block terminator\\n1 | #if??() .Type\\n2 | yield #endif\\n  |       `- error: unexpected conditional compilation block terminator\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\"ifConfigStatements\\t[statements]\",\".OPT\\t[ifConfigStatements]\",\"memberName\\t[identifier]\",\".DO\\t[<s> \\\".\\\"]\",\"ifConfigSameLine\\t[>n<]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"explicitMemberExpression\\t[postfixExpression ifConfigSameLine   memberName ]\",\"postfixExpression\\t[explicitMemberExpression]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s< >n< >->(\\\"@\\\")]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":152,\"descriptorCount\":287,\"duplicateDescriptorCount\":0,\"oraclePruned\":82,\"parseSeconds\":0.0056569576263427734,\"sourceLength\":26,\"suppressedDescriptorCount\":24,\"tokenCount\":9,\"yieldCount\":175},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            MissingExpr\\n            UnexpectedNodes\\n              postfixQuestionMark \\\"?\\\"\\n              postfixQuestionMark \\\"?\\\"\\n              leftParen \\\"(\\\"\\n              rightParen \\\")\\\"\\n              period \\\".\\\"\\n              identifier(\\\"Type\\\") \\\"Type\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                DeclReferenceExpr\\n                  identifier(\\\"yield\\\") \\\"yield\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00057850-tree-difference-12b43487da338365.json",
+    "durationSeconds" : 2.0166600942611694,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=62",
+    "index" : 57850,
+    "seed" : 8709271213634121394,
+    "signalHash" : "a01b6cbc269a7b02",
+    "signalSummary" : "tree-difference|line=14|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "12b43487da338365",
+    "sourceLength" : 24,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "while case _=any some{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      WhileStmt\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n              InitializerClause\n                equal \"=\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-F29B1659-A680-4B20-AEC4-6F8E1F8161B9.swift:1:18: error: cannot find type 'some' in scope\n1 | while case _=any some{}\n  |                  `- error: cannot find type 'some' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any some»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "boxedProtocolKeywordName\t[\"some\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[>s< \"=\" >s<]",
+      "initializer\t[assignmentOperator expression]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "bindingCondition\t[caseCondition]",
+      "conditionList\t[bindingCondition ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "whileStatement\t[\"while\" expressionIntroducerBoundary >->(\"{\") conditionList codeBlock]",
+      "loopStatement\t[whileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 103,
+      "descriptorCount" : 230,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 99,
+      "parseSeconds" : 0.0017780065536499023,
+      "sourceLength" : 23,
+      "suppressedDescriptorCount" : 19,
+      "tokenCount" : 8,
+      "yieldCount" : 169
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      WhileStmt\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n              InitializerClause\n                equal \"=\"\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    IdentifierType\n                      identifier(\"some\") \"some\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 16,
+  "source" : "while case _=any some{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      WhileStmt\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-F29B1659-A680-4B20-AEC4-6F8E1F8161B9.swift:1:18: error: cannot find type 'some' in scope\\n1 | while case _=any some{}\\n  |                  `- error: cannot find type 'some' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any some»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"boxedProtocolKeywordName\\t[\\\"some\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[>s< \\\"=\\\" >s<]\",\"initializer\\t[assignmentOperator expression]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"bindingCondition\\t[caseCondition]\",\"conditionList\\t[bindingCondition ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"whileStatement\\t[\\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList codeBlock]\",\"loopStatement\\t[whileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":103,\"descriptorCount\":230,\"duplicateDescriptorCount\":0,\"oraclePruned\":99,\"parseSeconds\":0.0017780065536499023,\"sourceLength\":23,\"suppressedDescriptorCount\":19,\"tokenCount\":8,\"yieldCount\":169},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      WhileStmt\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    IdentifierType\\n                      identifier(\\\"some\\\") \\\"some\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

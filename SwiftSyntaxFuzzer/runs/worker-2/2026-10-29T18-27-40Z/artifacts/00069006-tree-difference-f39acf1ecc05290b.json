@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00069006-tree-difference-f39acf1ecc05290b.json",
+    "durationSeconds" : 1.4466038942337036,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=45",
+    "index" : 69006,
+    "seed" : 15755288936030989017,
+    "signalHash" : "db46b973bf9e744b",
+    "signalSummary" : "tree-difference|line=8|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "f39acf1ecc05290b",
+    "sourceLength" : 19,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "break async;??await",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"async\") \"async\"\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D60BF87B-499F-41DE-B09D-4ED8EF1F8CFD.swift:1:2: error: generic parameter 'Success' could not be inferred\n1 |  async;??await\n  |  `- error: generic parameter 'Success' could not be inferred\n\n_Concurrency.async:4:13: note: in call to function 'async(priority:operation:)'\n2 | @available(*, deprecated, message: \"`async` was replaced by `Task.init` and will be removed shortly.\")\n3 | @discardableResult\n4 | public func async<Success>(priority: TaskPriority? = nil, operation: __owned @escaping @isolated(any) @Sendable () async -> Success) -> Task<Success, Never> where Success : Sendable\n  |             `- note: in call to function 'async(priority:operation:)'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D60BF87B-499F-41DE-B09D-4ED8EF1F8CFD.swift:1:8: error: '??' is not a prefix unary operator\n1 |  async;??await\n  |        `- error: '??' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D60BF87B-499F-41DE-B09D-4ED8EF1F8CFD.swift:1:10: error: cannot find 'await' in scope\n1 |  async;??await\n  |          `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 102,
+      "descriptorCount" : 195,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 73,
+      "parseSeconds" : 0.0016559362411499023,
+      "sourceLength" : 14,
+      "suppressedDescriptorCount" : 23,
+      "tokenCount" : 4,
+      "yieldCount" : 120
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"async\") \"async\"\n      semicolon \";\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"??\") \"??\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 13,
+  "source" : " async;??await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"async\\\") \\\"async\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D60BF87B-499F-41DE-B09D-4ED8EF1F8CFD.swift:1:2: error: generic parameter 'Success' could not be inferred\\n1 |  async;??await\\n  |  `- error: generic parameter 'Success' could not be inferred\\n\\n_Concurrency.async:4:13: note: in call to function 'async(priority:operation:)'\\n2 | @available(*, deprecated, message: \\\"`async` was replaced by `Task.init` and will be removed shortly.\\\")\\n3 | @discardableResult\\n4 | public func async<Success>(priority: TaskPriority? = nil, operation: __owned @escaping @isolated(any) @Sendable () async -> Success) -> Task<Success, Never> where Success : Sendable\\n  |             `- note: in call to function 'async(priority:operation:)'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D60BF87B-499F-41DE-B09D-4ED8EF1F8CFD.swift:1:8: error: '??' is not a prefix unary operator\\n1 |  async;??await\\n  |        `- error: '??' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D60BF87B-499F-41DE-B09D-4ED8EF1F8CFD.swift:1:10: error: cannot find 'await' in scope\\n1 |  async;??await\\n  |          `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":102,\"descriptorCount\":195,\"duplicateDescriptorCount\":0,\"oraclePruned\":73,\"parseSeconds\":0.0016559362411499023,\"sourceLength\":14,\"suppressedDescriptorCount\":23,\"tokenCount\":4,\"yieldCount\":120},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"async\\\") \\\"async\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"??\\\") \\\"??\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

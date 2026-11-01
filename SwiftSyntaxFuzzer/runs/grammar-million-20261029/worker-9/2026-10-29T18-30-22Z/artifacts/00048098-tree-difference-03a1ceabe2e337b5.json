@@ -1,0 +1,66 @@
+{
+  "event" : {
+    "artifact" : "00048098-tree-difference-03a1ceabe2e337b5.json",
+    "durationSeconds" : 2.034490942955017,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=42",
+    "index" : 48098,
+    "seed" : 3326660242193084383,
+    "signalHash" : "b4ccd87bddf4ce8d",
+    "signalSummary" : "tree-difference|line=11|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "03a1ceabe2e337b5",
+    "sourceLength" : 14,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-DBC7952B-C58A-4A60-95F5-7D72C5A0C7DD.swift:1:10: error: cannot find 'await' in scope\n1 | defer{};+await\n  |          `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 43,
+      "descriptorCount" : 93,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 27,
+      "parseSeconds" : 0.0013409852981567383,
+      "sourceLength" : 14,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 6,
+      "yieldCount" : 64
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n      semicolon \";\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"+\") \"+\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 8,
+  "source" : "defer{};+await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-DBC7952B-C58A-4A60-95F5-7D72C5A0C7DD.swift:1:10: error: cannot find 'await' in scope\\n1 | defer{};+await\\n  |          `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":43,\"descriptorCount\":93,\"duplicateDescriptorCount\":0,\"oraclePruned\":27,\"parseSeconds\":0.0013409852981567383,\"sourceLength\":14,\"suppressedDescriptorCount\":1,\"tokenCount\":6,\"yieldCount\":64},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"+\\\") \\\"+\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00047394-tree-difference-a27cbcd53ac13135.json",
+    "durationSeconds" : 1.5226210355758667,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=231",
+    "index" : 47394,
+    "seed" : 15755288936030989017,
+    "signalHash" : "392bd89ed2a2ace7",
+    "signalSummary" : "tree-difference|line=71|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "a27cbcd53ac13135",
+    "sourceLength" : 80,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "break value;T:do{async:for try unsafe(x:var _,var(x:()),x,x:(x:()),)in -await{}}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ForStmt\n                keyword(SwiftSyntax.Keyword.for) \"for\"\n                TuplePattern\n                  leftParen \"(\"\n                  TuplePatternElementList\n                    TuplePatternElement\n                      WildcardPattern\n                        wildcard \"_\"\n                      comma \",\"\n                    TuplePatternElement\n                      TuplePattern\n                        leftParen \"(\"\n                        TuplePatternElementList\n                          TuplePatternElement\n                            identifier(\"x\") \"x\"\n                            colon \":\"\n                            TuplePattern\n                              leftParen \"(\"\n                              TuplePatternElementList\n                              rightParen \")\"\n                        rightParen \")\"\n                  rightParen \")\"\n                keyword(SwiftSyntax.Keyword.in) \"in\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-83C75745-485F-4D65-96EC-D2C90534CBDE.swift:1:23: error: cannot find 'await' in scope\n1 | do{for ( _,(x:()))in -await{}}\n  |                       `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "tupleBindingPattern\t[\"(\"  \")\"]",
+      "bindingSubpattern\t[tupleBindingPattern]",
+      "identifierToken\t[identifier]",
+      "tupleBindingLabel\t[identifierToken]",
+      ".OPT\t[tupleBindingLabel \":\"]",
+      "tupleBindingElement\t[ bindingSubpattern]",
+      "tupleBindingElementList\t[tupleBindingElement ]",
+      ".OPT\t[tupleBindingElementList ]",
+      ".DO\t[\",\" tupleBindingElement]",
+      ".KLN\t[]",
+      "wildcardPattern\t[\"_\"]",
+      "bindingSubpattern\t[wildcardPattern]",
+      "bindingPattern\t[tupleBindingPattern ]",
+      "forInStatement\t[\"for\"    >->(\"await\") bindingPattern \"in\" expressionIntroducerBoundary expression  codeBlock]",
+      "loopStatement\t[forInStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 112,
+      "descriptorCount" : 213,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 43,
+      "parseSeconds" : 0.004819989204406738,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 6,
+      "tokenCount" : 19,
+      "yieldCount" : 151
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              ForStmt\n                keyword(SwiftSyntax.Keyword.for) \"for\"\n                TuplePattern\n                  leftParen \"(\"\n                  TuplePatternElementList\n                    TuplePatternElement\n                      WildcardPattern\n                        wildcard \"_\"\n                      comma \",\"\n                    TuplePatternElement\n                      TuplePattern\n                        leftParen \"(\"\n                        TuplePatternElementList\n                          TuplePatternElement\n                            identifier(\"x\") \"x\"\n                            colon \":\"\n                            TuplePattern\n                              leftParen \"(\"\n                              TuplePatternElementList\n                              rightParen \")\"\n                        rightParen \")\"\n                  rightParen \")\"\n                keyword(SwiftSyntax.Keyword.in) \"in\"\n                PrefixOperatorExpr\n                  prefixOperator(\"-\") \"-\"\n                  DeclReferenceExpr\n                    identifier(\"await\") \"await\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "do{for ( _,(x:()))in -await{}}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ForStmt\\n                keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n                TuplePattern\\n                  leftParen \\\"(\\\"\\n                  TuplePatternElementList\\n                    TuplePatternElement\\n                      WildcardPattern\\n                        wildcard \\\"_\\\"\\n                      comma \\\",\\\"\\n                    TuplePatternElement\\n                      TuplePattern\\n                        leftParen \\\"(\\\"\\n                        TuplePatternElementList\\n                          TuplePatternElement\\n                            identifier(\\\"x\\\") \\\"x\\\"\\n                            colon \\\":\\\"\\n                            TuplePattern\\n                              leftParen \\\"(\\\"\\n                              TuplePatternElementList\\n                              rightParen \\\")\\\"\\n                        rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n                keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-83C75745-485F-4D65-96EC-D2C90534CBDE.swift:1:23: error: cannot find 'await' in scope\\n1 | do{for ( _,(x:()))in -await{}}\\n  |                       `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"tupleBindingPattern\\t[\\\"(\\\"  \\\")\\\"]\",\"bindingSubpattern\\t[tupleBindingPattern]\",\"identifierToken\\t[identifier]\",\"tupleBindingLabel\\t[identifierToken]\",\".OPT\\t[tupleBindingLabel \\\":\\\"]\",\"tupleBindingElement\\t[ bindingSubpattern]\",\"tupleBindingElementList\\t[tupleBindingElement ]\",\".OPT\\t[tupleBindingElementList ]\",\".DO\\t[\\\",\\\" tupleBindingElement]\",\".KLN\\t[]\",\"wildcardPattern\\t[\\\"_\\\"]\",\"bindingSubpattern\\t[wildcardPattern]\",\"bindingPattern\\t[tupleBindingPattern ]\",\"forInStatement\\t[\\\"for\\\"    >->(\\\"await\\\") bindingPattern \\\"in\\\" expressionIntroducerBoundary expression  codeBlock]\",\"loopStatement\\t[forInStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":112,\"descriptorCount\":213,\"duplicateDescriptorCount\":0,\"oraclePruned\":43,\"parseSeconds\":0.004819989204406738,\"sourceLength\":30,\"suppressedDescriptorCount\":6,\"tokenCount\":19,\"yieldCount\":151},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              ForStmt\\n                keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n                TuplePattern\\n                  leftParen \\\"(\\\"\\n                  TuplePatternElementList\\n                    TuplePatternElement\\n                      WildcardPattern\\n                        wildcard \\\"_\\\"\\n                      comma \\\",\\\"\\n                    TuplePatternElement\\n                      TuplePattern\\n                        leftParen \\\"(\\\"\\n                        TuplePatternElementList\\n                          TuplePatternElement\\n                            identifier(\\\"x\\\") \\\"x\\\"\\n                            colon \\\":\\\"\\n                            TuplePattern\\n                              leftParen \\\"(\\\"\\n                              TuplePatternElementList\\n                              rightParen \\\")\\\"\\n                        rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n                keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"-\\\") \\\"-\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"await\\\") \\\"await\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

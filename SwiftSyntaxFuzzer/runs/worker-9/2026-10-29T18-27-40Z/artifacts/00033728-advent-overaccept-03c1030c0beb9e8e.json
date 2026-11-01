@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00033728-advent-overaccept-03c1030c0beb9e8e.json",
+    "durationSeconds" : 1.5113309621810913,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=69",
+    "index" : 33728,
+    "seed" : 3326660242203428404,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "03c1030c0beb9e8e",
+    "sourceLength" : 34,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "discard any sending & copy +await;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SequenceExpr\n        ExprList\n          MissingExpr\n            identifier(\"<#expression#>\") \"<#expression#>\"\n          BinaryOperatorExpr\n            binaryOperator(\"&\") \"&\"\n          CopyExpr\n            keyword(SwiftSyntax.Keyword.copy) \"copy\"\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-FCBE2B85-C2BF-4240-BB1A-25C98EE26E7E.swift:1:20: error: consecutive statements on a line must be separated by ';'\n1 |  any sending & copy +await\n  |                    `- error: consecutive statements on a line must be separated by ';'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — « any sending »",
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "prefixExpression\t[\"copy\" >->(\"(\" \".\" \"[\" \"{\") <s> >n< prefixExpression]",
+      "ifConfigSameLine\t[]",
+      "infixOperator\t[\"&\"]",
+      "infixExpression\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "boxedProtocolKeywordName\t[\"sending\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 91,
+      "descriptorCount" : 218,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 123,
+      "parseSeconds" : 0.0044519901275634766,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 15,
+      "tokenCount" : 6,
+      "yieldCount" : 181
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      TypeExpr\n        SomeOrAnyType\n          keyword(SwiftSyntax.Keyword.any) \"any\"\n          CompositionType\n            CompositionTypeElementList\n              CompositionTypeElement\n                IdentifierType\n                  identifier(\"sending\") \"sending\"\n                binaryOperator(\"&\") \"&\"\n              CompositionTypeElement\n                IdentifierType\n                  identifier(\"copy\") \"copy\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"+\") \"+\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 21,
+  "source" : " any sending & copy +await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SequenceExpr\\n        ExprList\\n          MissingExpr\\n            identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          BinaryOperatorExpr\\n            binaryOperator(\\\"&\\\") \\\"&\\\"\\n          CopyExpr\\n            keyword(SwiftSyntax.Keyword.copy) \\\"copy\\\"\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-FCBE2B85-C2BF-4240-BB1A-25C98EE26E7E.swift:1:20: error: consecutive statements on a line must be separated by ';'\\n1 |  any sending & copy +await\\n  |                    `- error: consecutive statements on a line must be separated by ';'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — « any sending »\",\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"prefixExpression\\t[\\\"copy\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") <s> >n< prefixExpression]\",\"ifConfigSameLine\\t[]\",\"infixOperator\\t[\\\"&\\\"]\",\"infixExpression\\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"boxedProtocolKeywordName\\t[\\\"sending\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":91,\"descriptorCount\":218,\"duplicateDescriptorCount\":0,\"oraclePruned\":123,\"parseSeconds\":0.0044519901275634766,\"sourceLength\":26,\"suppressedDescriptorCount\":15,\"tokenCount\":6,\"yieldCount\":181},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      TypeExpr\\n        SomeOrAnyType\\n          keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n          CompositionType\\n            CompositionTypeElementList\\n              CompositionTypeElement\\n                IdentifierType\\n                  identifier(\\\"sending\\\") \\\"sending\\\"\\n                binaryOperator(\\\"&\\\") \\\"&\\\"\\n              CompositionTypeElement\\n                IdentifierType\\n                  identifier(\\\"copy\\\") \\\"copy\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"+\\\") \\\"+\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

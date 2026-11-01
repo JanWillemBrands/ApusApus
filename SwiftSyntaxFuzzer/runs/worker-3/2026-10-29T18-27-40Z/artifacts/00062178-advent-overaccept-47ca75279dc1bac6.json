@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00062178-advent-overaccept-47ca75279dc1bac6.json",
+    "durationSeconds" : 1.4356460571289062,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=73",
+    "index" : 62178,
+    "seed" : 8709271213634121394,
+    "signalHash" : "09869bd16764b8f5",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected '<value>' after thrown error type",
+    "sourceHash" : "47ca75279dc1bac6",
+    "sourceLength" : 35,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.any) \"any\"\n            PackElementType\n              keyword(SwiftSyntax.Keyword.each) \"each\"\n              MetatypeType\n                MemberType\n                  IdentifierType\n                    wildcard \"_\"\n                  period \".\"\n                  keyword(SwiftSyntax.Keyword.self) \"self\"\n                period \".\"\n                keyword(SwiftSyntax.Keyword.Type) \"Type\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-9F67F285-C4DC-4A08-B981-B7F73C2B4717.swift:1:20: error: expected ')' after thrown error type\n1 | do throws(any each _ .self .Type){}\n  |          |         `- error: expected ')' after thrown error type\n  |          `- note: to match this opening '('\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-9F67F285-C4DC-4A08-B981-B7F73C2B4717.swift:1:20: error: expected '{' after 'do'\n1 | do throws(any each _ .self .Type){}\n  |                    `- error: expected '{' after 'do'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-9F67F285-C4DC-4A08-B981-B7F73C2B4717.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n1 | do throws(any each _ .self .Type){}\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      ".DO\t[\"Type\"]",
+      ".DO\t[<s> \".\"]",
+      "typeMemberName\t[\"self\"]",
+      "placeholderType\t[\"_\"]",
+      "simpleType\t[placeholderType]",
+      "memberType\t[simpleType  typeMemberName >->(openAngle)]",
+      "simpleType\t[memberType]",
+      "metatypeType\t[simpleType  ]",
+      "type\t[metatypeType]",
+      "packElementType\t[\"each\" >->(\"each\") type]",
+      "packType\t[packElementType]",
+      "type\t[packType]",
+      "boxedProtocolConstraint\t[>->(\"__owned\" \"__shared\" \"_const\" \"any\" \"borrowing\" \"consuming\" \"inout\" \"isolated\" \"nonisolated\" \"sending\" \"some\") type]",
+      "boxedProtocolType\t[\"any\" boxedProtocolConstraint]",
+      "type\t[boxedProtocolType]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 68,
+      "descriptorCount" : 177,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 69,
+      "parseSeconds" : 0.001605987548828125,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 11,
+      "tokenCount" : 13,
+      "yieldCount" : 135
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.any) \"any\"\n            IdentifierType\n              identifier(\"each\") \"each\"\n          UnexpectedNodes\n            wildcard \"_\"\n            period \".\"\n            keyword(SwiftSyntax.Keyword.self) \"self\"\n            period \".\"\n            identifier(\"Type\") \"Type\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 21,
+  "source" : "do throws(any each _ .self .Type){}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n            PackElementType\\n              keyword(SwiftSyntax.Keyword.each) \\\"each\\\"\\n              MetatypeType\\n                MemberType\\n                  IdentifierType\\n                    wildcard \\\"_\\\"\\n                  period \\\".\\\"\\n                  keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                period \\\".\\\"\\n                keyword(SwiftSyntax.Keyword.Type) \\\"Type\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-9F67F285-C4DC-4A08-B981-B7F73C2B4717.swift:1:20: error: expected ')' after thrown error type\\n1 | do throws(any each _ .self .Type){}\\n  |          |         `- error: expected ')' after thrown error type\\n  |          `- note: to match this opening '('\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-9F67F285-C4DC-4A08-B981-B7F73C2B4717.swift:1:20: error: expected '{' after 'do'\\n1 | do throws(any each _ .self .Type){}\\n  |                    `- error: expected '{' after 'do'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-9F67F285-C4DC-4A08-B981-B7F73C2B4717.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n1 | do throws(any each _ .self .Type){}\\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\".DO\\t[\\\"Type\\\"]\",\".DO\\t[<s> \\\".\\\"]\",\"typeMemberName\\t[\\\"self\\\"]\",\"placeholderType\\t[\\\"_\\\"]\",\"simpleType\\t[placeholderType]\",\"memberType\\t[simpleType  typeMemberName >->(openAngle)]\",\"simpleType\\t[memberType]\",\"metatypeType\\t[simpleType  ]\",\"type\\t[metatypeType]\",\"packElementType\\t[\\\"each\\\" >->(\\\"each\\\") type]\",\"packType\\t[packElementType]\",\"type\\t[packType]\",\"boxedProtocolConstraint\\t[>->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"any\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\" \\\"some\\\") type]\",\"boxedProtocolType\\t[\\\"any\\\" boxedProtocolConstraint]\",\"type\\t[boxedProtocolType]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":68,\"descriptorCount\":177,\"duplicateDescriptorCount\":0,\"oraclePruned\":69,\"parseSeconds\":0.001605987548828125,\"sourceLength\":35,\"suppressedDescriptorCount\":11,\"tokenCount\":13,\"yieldCount\":135},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n            IdentifierType\\n              identifier(\\\"each\\\") \\\"each\\\"\\n          UnexpectedNodes\\n            wildcard \\\"_\\\"\\n            period \\\".\\\"\\n            keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n            period \\\".\\\"\\n            identifier(\\\"Type\\\") \\\"Type\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

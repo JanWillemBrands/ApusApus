@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00015840-advent-overaccept-d601b736a5b23b17.json",
+    "durationSeconds" : 1.169585943222046,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=87",
+    "index" : 15840,
+    "seed" : 4354586739611356967,
+    "signalHash" : "8f99857d20a2553f",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected expression in '<value>' statement",
+    "sourceHash" : "d601b736a5b23b17",
+    "sourceLength" : 32,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "return!\\ .value::async & +await;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ReturnStmt\n        keyword(SwiftSyntax.Keyword.return) \"return\"\n        SequenceExpr\n          ExprList\n            PrefixOperatorExpr\n              prefixOperator(\"!\") \"!\"\n              KeyPathExpr\n                backslash \"\\\"\n                IdentifierType\n                  ModuleSelector\n                    identifier(\"value\") \"value\"\n                    colonColon \"::\"\n                  identifier(\"async\") \"async\"\n                KeyPathComponentList\n            BinaryOperatorExpr\n              binaryOperator(\"&\") \"&\"\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7A2F7A1F-56D0-4BFA-9360-6FE7B217A071.swift:1:7: error: expected expression in 'return' statement\n1 | return!\\ value::async & +await\n  |       `- error: expected expression in 'return' statement\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "ifConfigSameLine\t[]",
+      "infixOperator\t[\"&\"]",
+      "infixExpression\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "keyPathExpressionStop\t[>->(keyPathDot keyPathMarkRunStart)]",
+      "identifierToken\t[identifier]",
+      ".DO\t[identifierToken]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector ]",
+      "keyPathRootBase\t[typeName >->(openAngle)]",
+      "keyPathRootType\t[keyPathRootBase  >->(keyPathMetatypeStart)]",
+      "keyPathExpression\t[\"\\\\\" keyPathRootType keyPathExpressionStop]",
+      "prefixExpression\t[\"!\" >s< >n< keyPathExpression]",
+      "expression\t[prefixExpression ]",
+      ".OPT\t[expression]",
+      "returnStatement\t[\"return\" ]",
+      "controlTransferStatement\t[returnStatement]",
+      "statement\t[controlTransferStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 70,
+      "descriptorCount" : 168,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 90,
+      "parseSeconds" : 0.0036929845809936523,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 6,
+      "tokenCount" : 9,
+      "yieldCount" : 165
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ReturnStmt\n        keyword(SwiftSyntax.Keyword.return) \"return\"\n        MissingExpr\n    CodeBlockItem\n      UnexpectedCodeDecl\n        UnexpectedNodes\n          exclamationMark \"!\"\n          backslash \"\\\"\n          identifier(\"value\") \"value\"\n          colonColon \"::\"\n          identifier(\"async\") \"async\"\n          binaryOperator(\"&\") \"&\"\n          prefixOperator(\"+\") \"+\"\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 29,
+  "source" : "return!\\ value::async & +await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ReturnStmt\\n        keyword(SwiftSyntax.Keyword.return) \\\"return\\\"\\n        SequenceExpr\\n          ExprList\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"!\\\") \\\"!\\\"\\n              KeyPathExpr\\n                backslash \\\"\\\\\\\"\\n                IdentifierType\\n                  ModuleSelector\\n                    identifier(\\\"value\\\") \\\"value\\\"\\n                    colonColon \\\"::\\\"\\n                  identifier(\\\"async\\\") \\\"async\\\"\\n                KeyPathComponentList\\n            BinaryOperatorExpr\\n              binaryOperator(\\\"&\\\") \\\"&\\\"\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7A2F7A1F-56D0-4BFA-9360-6FE7B217A071.swift:1:7: error: expected expression in 'return' statement\\n1 | return!\\\\ value::async & +await\\n  |       `- error: expected expression in 'return' statement\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"ifConfigSameLine\\t[]\",\"infixOperator\\t[\\\"&\\\"]\",\"infixExpression\\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"keyPathExpressionStop\\t[>->(keyPathDot keyPathMarkRunStart)]\",\"identifierToken\\t[identifier]\",\".DO\\t[identifierToken]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector ]\",\"keyPathRootBase\\t[typeName >->(openAngle)]\",\"keyPathRootType\\t[keyPathRootBase  >->(keyPathMetatypeStart)]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" keyPathRootType keyPathExpressionStop]\",\"prefixExpression\\t[\\\"!\\\" >s< >n< keyPathExpression]\",\"expression\\t[prefixExpression ]\",\".OPT\\t[expression]\",\"returnStatement\\t[\\\"return\\\" ]\",\"controlTransferStatement\\t[returnStatement]\",\"statement\\t[controlTransferStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":70,\"descriptorCount\":168,\"duplicateDescriptorCount\":0,\"oraclePruned\":90,\"parseSeconds\":0.0036929845809936523,\"sourceLength\":30,\"suppressedDescriptorCount\":6,\"tokenCount\":9,\"yieldCount\":165},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ReturnStmt\\n        keyword(SwiftSyntax.Keyword.return) \\\"return\\\"\\n        MissingExpr\\n    CodeBlockItem\\n      UnexpectedCodeDecl\\n        UnexpectedNodes\\n          exclamationMark \\\"!\\\"\\n          backslash \\\"\\\\\\\"\\n          identifier(\\\"value\\\") \\\"value\\\"\\n          colonColon \\\"::\\\"\\n          identifier(\\\"async\\\") \\\"async\\\"\\n          binaryOperator(\\\"&\\\") \\\"&\\\"\\n          prefixOperator(\\\"+\\\") \\\"+\\\"\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00070237-tree-difference-ea6ed7491bcdbc34.json",
+    "durationSeconds" : 1.4166209697723389,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=91",
+    "index" : 70237,
+    "seed" : 15755288936030989017,
+    "signalHash" : "2e011f86369c419a",
+    "signalSummary" : "tree-difference|line=25|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "ea6ed7491bcdbc34",
+    "sourceLength" : 47,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "guard case .async() = unsafe try any any else{}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n              InitializerClause\n                equal \"=\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3B1CCB0A-5E68-43E4-92C3-E5F2E8099A81.swift:1:21: error: cannot find type 'any' in scope\n1 | guard case () = any any else{}\n  |                     `- error: cannot find type 'any' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3B1CCB0A-5E68-43E4-92C3-E5F2E8099A81.swift:1:17: error: cannot convert value of type '_.Type' to specified type '()'\n1 | guard case () = any any else{}\n  |                 `- error: cannot convert value of type '_.Type' to specified type '()'\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any »"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "boxedProtocolKeywordName\t[\"any\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "bindingCondition\t[caseCondition]",
+      "conditionList\t[bindingCondition ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "guardStatement\t[\"guard\" expressionIntroducerBoundary >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 112,
+      "descriptorCount" : 243,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 108,
+      "parseSeconds" : 0.0020890235900878906,
+      "sourceLength" : 30,
+      "suppressedDescriptorCount" : 19,
+      "tokenCount" : 10,
+      "yieldCount" : 180
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                TupleExpr\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n              InitializerClause\n                equal \"=\"\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    IdentifierType\n                      identifier(\"any\") \"any\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 32,
+  "source" : "guard case () = any any else{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3B1CCB0A-5E68-43E4-92C3-E5F2E8099A81.swift:1:21: error: cannot find type 'any' in scope\\n1 | guard case () = any any else{}\\n  |                     `- error: cannot find type 'any' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3B1CCB0A-5E68-43E4-92C3-E5F2E8099A81.swift:1:17: error: cannot convert value of type '_.Type' to specified type '()'\\n1 | guard case () = any any else{}\\n  |                 `- error: cannot convert value of type '_.Type' to specified type '()'\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any »\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"boxedProtocolKeywordName\\t[\\\"any\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"bindingCondition\\t[caseCondition]\",\"conditionList\\t[bindingCondition ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"guardStatement\\t[\\\"guard\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":112,\"descriptorCount\":243,\"duplicateDescriptorCount\":0,\"oraclePruned\":108,\"parseSeconds\":0.0020890235900878906,\"sourceLength\":30,\"suppressedDescriptorCount\":19,\"tokenCount\":10,\"yieldCount\":180},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                TupleExpr\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    IdentifierType\\n                      identifier(\\\"any\\\") \\\"any\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

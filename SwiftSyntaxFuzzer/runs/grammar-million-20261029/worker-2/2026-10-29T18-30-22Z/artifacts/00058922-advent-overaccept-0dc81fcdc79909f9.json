@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00058922-advent-overaccept-0dc81fcdc79909f9.json",
+    "durationSeconds" : 3.159543037414551,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=200",
+    "index" : 58922,
+    "seed" : 15755288936024556338,
+    "signalHash" : "59b320c136ce1135",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected thrown error type after '<value>'",
+    "sourceHash" : "0dc81fcdc79909f9",
+    "sourceLength" : 85,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "do throws(some repeat _){}catch{discard \\ .T::x(async:x:x:);};repeat{}while !init+==;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.some) \"some\"\n            PackExpansionType\n              keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n              IdentifierType\n                wildcard \"_\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeclReferenceExpr\n                ModuleSelector\n                  identifier(\"T\") \"T\"\n                  colonColon \"::\"\n                identifier(\"x\") \"x\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:16: error: expected thrown error type after 'throws('\n1 | do throws(some repeat _){ T::x}\n  |                `- error: expected thrown error type after 'throws('\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:23: error: expected ')' after thrown error type\n1 | do throws(some repeat _){ T::x}\n  |          |            `- error: expected ')' after thrown error type\n  |          `- note: to match this opening '('\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:23: error: expected '{' after 'do'\n1 | do throws(some repeat _){ T::x}\n  |                       `- error: expected '{' after 'do'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n1 | do throws(some repeat _){ T::x}\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "moduleGenericIdentifier\t[moduleSelector identifier ]",
+      "primaryExpression\t[moduleGenericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "placeholderType\t[\"_\"]",
+      "type\t[placeholderType]",
+      "packExpansionType\t[\"repeat\" >->(\"repeat\") type]",
+      "packType\t[packExpansionType]",
+      "type\t[packType]",
+      "opaqueType\t[\"some\" >->(\"any\" \"some\") type]",
+      "type\t[opaqueType]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 92,
+      "descriptorCount" : 203,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 68,
+      "parseSeconds" : 0.0022460222244262695,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 12,
+      "yieldCount" : 141
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.some) \"some\"\n            MissingType\n        CodeBlock\n          CodeBlockItemList\n            CodeBlockItem\n              PackExpansionExpr\n                keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n                DiscardAssignmentExpr\n                  wildcard \"_\"\n            CodeBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  rightParen \")\"\n                  leftBrace \"{\"\n                  identifier(\"T\") \"T\"\n                  colonColon \"::\"\n                  identifier(\"x\") \"x\"\n                  rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 50,
+  "source" : "do throws(some repeat _){ T::x}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n            PackExpansionType\\n              keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n              IdentifierType\\n                wildcard \\\"_\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeclReferenceExpr\\n                ModuleSelector\\n                  identifier(\\\"T\\\") \\\"T\\\"\\n                  colonColon \\\"::\\\"\\n                identifier(\\\"x\\\") \\\"x\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:16: error: expected thrown error type after 'throws('\\n1 | do throws(some repeat _){ T::x}\\n  |                `- error: expected thrown error type after 'throws('\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:23: error: expected ')' after thrown error type\\n1 | do throws(some repeat _){ T::x}\\n  |          |            `- error: expected ')' after thrown error type\\n  |          `- note: to match this opening '('\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:23: error: expected '{' after 'do'\\n1 | do throws(some repeat _){ T::x}\\n  |                       `- error: expected '{' after 'do'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-EA89B997-F674-437A-B702-3B3E6172C314.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n1 | do throws(some repeat _){ T::x}\\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"moduleGenericIdentifier\\t[moduleSelector identifier ]\",\"primaryExpression\\t[moduleGenericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"placeholderType\\t[\\\"_\\\"]\",\"type\\t[placeholderType]\",\"packExpansionType\\t[\\\"repeat\\\" >->(\\\"repeat\\\") type]\",\"packType\\t[packExpansionType]\",\"type\\t[packType]\",\"opaqueType\\t[\\\"some\\\" >->(\\\"any\\\" \\\"some\\\") type]\",\"type\\t[opaqueType]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":92,\"descriptorCount\":203,\"duplicateDescriptorCount\":0,\"oraclePruned\":68,\"parseSeconds\":0.0022460222244262695,\"sourceLength\":31,\"suppressedDescriptorCount\":22,\"tokenCount\":12,\"yieldCount\":141},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.some) \\\"some\\\"\\n            MissingType\\n        CodeBlock\\n          CodeBlockItemList\\n            CodeBlockItem\\n              PackExpansionExpr\\n                keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n                DiscardAssignmentExpr\\n                  wildcard \\\"_\\\"\\n            CodeBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  rightParen \\\")\\\"\\n                  leftBrace \\\"{\\\"\\n                  identifier(\\\"T\\\") \\\"T\\\"\\n                  colonColon \\\"::\\\"\\n                  identifier(\\\"x\\\") \\\"x\\\"\\n                  rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

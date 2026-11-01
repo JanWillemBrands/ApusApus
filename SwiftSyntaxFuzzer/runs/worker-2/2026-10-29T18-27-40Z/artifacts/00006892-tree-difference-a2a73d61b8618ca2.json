@@ -1,0 +1,65 @@
+{
+  "event" : {
+    "artifact" : "00006892-tree-difference-a2a73d61b8618ca2.json",
+    "durationSeconds" : 0.890733003616333,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=48",
+    "index" : 6892,
+    "seed" : 15755288936030989017,
+    "signalHash" : "c0d6ba7b404d2e13",
+    "signalSummary" : "tree-difference|line=13|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "a2a73d61b8618ca2",
+    "sourceLength" : 28,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "async:repeat{}while ==await;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-54266BBA-77D8-4472-9635-4767378E70FA.swift:1:15: error: '==' is not a prefix unary operator\n1 | repeat{}while ==await\n  |               `- error: '==' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-54266BBA-77D8-4472-9635-4767378E70FA.swift:1:17: error: cannot find 'await' in scope\n1 | repeat{}while ==await\n  |                 `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 42,
+      "descriptorCount" : 85,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 17,
+      "parseSeconds" : 0.003264904022216797,
+      "sourceLength" : 21,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 6,
+      "yieldCount" : 53
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        PrefixOperatorExpr\n          prefixOperator(\"==\") \"==\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 14,
+  "source" : "repeat{}while ==await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-54266BBA-77D8-4472-9635-4767378E70FA.swift:1:15: error: '==' is not a prefix unary operator\\n1 | repeat{}while ==await\\n  |               `- error: '==' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-54266BBA-77D8-4472-9635-4767378E70FA.swift:1:17: error: cannot find 'await' in scope\\n1 | repeat{}while ==await\\n  |                 `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":42,\"descriptorCount\":85,\"duplicateDescriptorCount\":0,\"oraclePruned\":17,\"parseSeconds\":0.003264904022216797,\"sourceLength\":21,\"suppressedDescriptorCount\":1,\"tokenCount\":6,\"yieldCount\":53},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"==\\\") \\\"==\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00000629-tree-difference-032e24cb992c211e.json",
+    "durationSeconds" : 1.5778310298919678,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=82",
+    "index" : 629,
+    "seed" : 13064010938106345112,
+    "signalHash" : "8f6f6642882214bf",
+    "signalSummary" : "tree-difference|line=26|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "032e24cb992c211e",
+    "sourceLength" : 33,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "while #available(*,*,*){};+await;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n            LabeledExpr\n              DeclReferenceExpr\n                binaryOperator(\"*\") \"*\"\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-96479723-1F20-4A3D-82EF-FBD62F641822.swift:1:7: error: missing argument for parameter #2 in call\n1 |  (*){};+await\n  |       `- error: missing argument for parameter #2 in call\n\nSwift.SIMD.*:2:20: note: '*' declared here\n1 | protocol SIMD {\n2 | public static func * (a: Self.Scalar, b: Self) -> Self}\n  |                    `- note: '*' declared here\n3 | \n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-96479723-1F20-4A3D-82EF-FBD62F641822.swift:1:9: error: cannot find 'await' in scope\n1 |  (*){};+await\n  |         `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "ifConfigSameLine\t[]",
+      ".DO\t[operator]",
+      "operatorReference\t[ ]",
+      "tupleExpression\t[\"(\"  operatorReference \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 77,
+      "descriptorCount" : 165,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 80,
+      "parseSeconds" : 0.0019659996032714844,
+      "sourceLength" : 13,
+      "suppressedDescriptorCount" : 15,
+      "tokenCount" : 8,
+      "yieldCount" : 152
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        TupleExpr\n          leftParen \"(\"\n          LabeledExprList\n            LabeledExpr\n              DeclReferenceExpr\n                binaryOperator(\"*\") \"*\"\n          rightParen \")\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n      semicolon \";\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"+\") \"+\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : " (*){};+await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n            LabeledExpr\\n              DeclReferenceExpr\\n                binaryOperator(\\\"*\\\") \\\"*\\\"\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-96479723-1F20-4A3D-82EF-FBD62F641822.swift:1:7: error: missing argument for parameter #2 in call\\n1 |  (*){};+await\\n  |       `- error: missing argument for parameter #2 in call\\n\\nSwift.SIMD.*:2:20: note: '*' declared here\\n1 | protocol SIMD {\\n2 | public static func * (a: Self.Scalar, b: Self) -> Self}\\n  |                    `- note: '*' declared here\\n3 | \\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-96479723-1F20-4A3D-82EF-FBD62F641822.swift:1:9: error: cannot find 'await' in scope\\n1 |  (*){};+await\\n  |         `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"ifConfigSameLine\\t[]\",\".DO\\t[operator]\",\"operatorReference\\t[ ]\",\"tupleExpression\\t[\\\"(\\\"  operatorReference \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":77,\"descriptorCount\":165,\"duplicateDescriptorCount\":0,\"oraclePruned\":80,\"parseSeconds\":0.0019659996032714844,\"sourceLength\":13,\"suppressedDescriptorCount\":15,\"tokenCount\":8,\"yieldCount\":152},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        TupleExpr\\n          leftParen \\\"(\\\"\\n          LabeledExprList\\n            LabeledExpr\\n              DeclReferenceExpr\\n                binaryOperator(\\\"*\\\") \\\"*\\\"\\n          rightParen \\\")\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"+\\\") \\\"+\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

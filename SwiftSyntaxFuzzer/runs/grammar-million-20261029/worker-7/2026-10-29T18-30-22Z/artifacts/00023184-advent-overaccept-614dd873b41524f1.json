@@ -1,0 +1,71 @@
+{
+  "event" : {
+    "artifact" : "00023184-advent-overaccept-614dd873b41524f1.json",
+    "durationSeconds" : 1.7967040538787842,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=79",
+    "index" : 23184,
+    "seed" : 17418699775820060581,
+    "signalHash" : "2b3963fbf6e90a6c",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|'<value>' statements are not allowed",
+    "sourceHash" : "614dd873b41524f1",
+    "sourceLength" : 21,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if !\\x::ifx\n#endif\n;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              ModuleSelector\n                identifier(\"x\") \"x\"\n                colonColon \"::\"\n              identifier(\"ifx\") \"ifx\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-04407DF7-3796-46B5-94BB-5D81DE8388CC.swift:3:1: error: ';' statements are not allowed\n1 | #if x::ifx\n2 | #endif\n3 | ;\n  | `- error: ';' statements are not allowed\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "moduleGenericIdentifier\t[moduleSelector identifier ]",
+      "primaryExpression\t[moduleGenericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "ifDirective\t[\"#if\" expressionIntroducerBoundary]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 114,
+      "descriptorCount" : 216,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 67,
+      "parseSeconds" : 0.0024160146713256836,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 17,
+      "tokenCount" : 7,
+      "yieldCount" : 122
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              ModuleSelector\n                identifier(\"x\") \"x\"\n                colonColon \"::\"\n              identifier(\"ifx\") \"ifx\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n    CodeBlockItem\n      UnexpectedCodeDecl\n        UnexpectedNodes\n      semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 28,
+  "source" : "#if x::ifx\n#endif\n;",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              ModuleSelector\\n                identifier(\\\"x\\\") \\\"x\\\"\\n                colonColon \\\"::\\\"\\n              identifier(\\\"ifx\\\") \\\"ifx\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-04407DF7-3796-46B5-94BB-5D81DE8388CC.swift:3:1: error: ';' statements are not allowed\\n1 | #if x::ifx\\n2 | #endif\\n3 | ;\\n  | `- error: ';' statements are not allowed\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"moduleGenericIdentifier\\t[moduleSelector identifier ]\",\"primaryExpression\\t[moduleGenericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"expressionIntroducerBoundary\\t[<s>]\",\"ifDirective\\t[\\\"#if\\\" expressionIntroducerBoundary]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":114,\"descriptorCount\":216,\"duplicateDescriptorCount\":0,\"oraclePruned\":67,\"parseSeconds\":0.0024160146713256836,\"sourceLength\":19,\"suppressedDescriptorCount\":17,\"tokenCount\":7,\"yieldCount\":122},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              ModuleSelector\\n                identifier(\\\"x\\\") \\\"x\\\"\\n                colonColon \\\"::\\\"\\n              identifier(\\\"ifx\\\") \\\"ifx\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n    CodeBlockItem\\n      UnexpectedCodeDecl\\n        UnexpectedNodes\\n      semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

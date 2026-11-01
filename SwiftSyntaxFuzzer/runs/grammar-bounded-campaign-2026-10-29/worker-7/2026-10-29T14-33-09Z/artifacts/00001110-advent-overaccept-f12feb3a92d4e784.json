@@ -1,0 +1,76 @@
+{
+  "event" : {
+    "artifact" : "00001110-advent-overaccept-f12feb3a92d4e784.json",
+    "durationSeconds" : 0.43493902683258057,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=179",
+    "index" : 1110,
+    "seed" : 17418699776768529804,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "f12feb3a92d4e784",
+    "sourceLength" : 69,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "yield repeat try try!switch-await ! consume +\\xxxx->consume -await{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      YieldStmt\n        keyword(SwiftSyntax.Keyword.yield) \"yield\"\n        SequenceExpr\n          ExprList\n            TryExpr\n              keyword(SwiftSyntax.Keyword.try) \"try\"\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n            BinaryOperatorExpr\n              binaryOperator(\"!\") \"!\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E24632ED-2F72-45EB-9835-8FC425E449F0.swift:1:6: error: consecutive statements on a line must be separated by ';'\n1 | yield try-await ! {}\n  |      `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E24632ED-2F72-45EB-9835-8FC425E449F0.swift:1:10: error: expected expression after unary operator\n1 | yield try-await ! {}\n  |          `- error: expected expression after unary operator\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await »"
+    ],
+    "grammarCoverage" : [
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "closureExpression\t[samelineOpenedClosure]",
+      "primaryExpression\t[closureExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "ifConfigSameLine\t[]",
+      "infixOperator\t[\"!\"]",
+      "infixExpression\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "tryOperator\t[\"try\" >s< >->(forceMark optionalMark)]",
+      "effectMarker\t[tryOperator]",
+      "prefixExpression\t[effectMarker prefixExpression]",
+      "expression\t[prefixExpression ]",
+      "yieldStatement\t[\"yield\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "statement\t[yieldStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 106,
+      "descriptorCount" : 233,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 92,
+      "parseSeconds" : 0.004305005073547363,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 19,
+      "tokenCount" : 7,
+      "yieldCount" : 161
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      YieldStmt\n        keyword(SwiftSyntax.Keyword.yield) \"yield\"\n        SequenceExpr\n          ExprList\n            TryExpr\n              keyword(SwiftSyntax.Keyword.try) \"try\"\n              MissingExpr\n            BinaryOperatorExpr\n              binaryOperator(\"-\") \"-\"\n            AwaitExpr\n              keyword(SwiftSyntax.Keyword.await) \"await\"\n              MissingExpr\n            BinaryOperatorExpr\n              binaryOperator(\"!\") \"!\"\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 31,
+  "source" : "yield try-await ! {}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      YieldStmt\\n        keyword(SwiftSyntax.Keyword.yield) \\\"yield\\\"\\n        SequenceExpr\\n          ExprList\\n            TryExpr\\n              keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n            BinaryOperatorExpr\\n              binaryOperator(\\\"!\\\") \\\"!\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E24632ED-2F72-45EB-9835-8FC425E449F0.swift:1:6: error: consecutive statements on a line must be separated by ';'\\n1 | yield try-await ! {}\\n  |      `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E24632ED-2F72-45EB-9835-8FC425E449F0.swift:1:10: error: expected expression after unary operator\\n1 | yield try-await ! {}\\n  |          `- error: expected expression after unary operator\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await »\"],\"grammarCoverage\":[\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"closureExpression\\t[samelineOpenedClosure]\",\"primaryExpression\\t[closureExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"ifConfigSameLine\\t[]\",\"infixOperator\\t[\\\"!\\\"]\",\"infixExpression\\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"tryOperator\\t[\\\"try\\\" >s< >->(forceMark optionalMark)]\",\"effectMarker\\t[tryOperator]\",\"prefixExpression\\t[effectMarker prefixExpression]\",\"expression\\t[prefixExpression ]\",\"yieldStatement\\t[\\\"yield\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"statement\\t[yieldStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":106,\"descriptorCount\":233,\"duplicateDescriptorCount\":0,\"oraclePruned\":92,\"parseSeconds\":0.004305005073547363,\"sourceLength\":20,\"suppressedDescriptorCount\":19,\"tokenCount\":7,\"yieldCount\":161},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      YieldStmt\\n        keyword(SwiftSyntax.Keyword.yield) \\\"yield\\\"\\n        SequenceExpr\\n          ExprList\\n            TryExpr\\n              keyword(SwiftSyntax.Keyword.try) \\\"try\\\"\\n              MissingExpr\\n            BinaryOperatorExpr\\n              binaryOperator(\\\"-\\\") \\\"-\\\"\\n            AwaitExpr\\n              keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n              MissingExpr\\n            BinaryOperatorExpr\\n              binaryOperator(\\\"!\\\") \\\"!\\\"\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

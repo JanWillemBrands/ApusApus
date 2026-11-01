@@ -1,0 +1,67 @@
+{
+  "event" : {
+    "artifact" : "00041466-tree-difference-8d2eedb74b7c77ef.json",
+    "durationSeconds" : 1.7914179563522339,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=127",
+    "index" : 41466,
+    "seed" : 11400602263005678360,
+    "signalHash" : "32589cfc0c555bf4",
+    "signalSummary" : "tree-difference|line=34|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "8d2eedb74b7c77ef",
+    "sourceLength" : 43,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "x:for try(value:_,x,async:_,_,)in ??await{}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ForStmt\n        keyword(SwiftSyntax.Keyword.for) \"for\"\n        TuplePattern\n          leftParen \"(\"\n          TuplePatternElementList\n          rightParen \")\"\n        keyword(SwiftSyntax.Keyword.in) \"in\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1737CCD4-3B66-44D9-8E22-FE08C07D1A14.swift:1:10: error: '??' is not a prefix unary operator\n1 | for ()in ??await{}\n  |          `- error: '??' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1737CCD4-3B66-44D9-8E22-FE08C07D1A14.swift:1:12: error: cannot find 'await' in scope\n1 | for ()in ??await{}\n  |            `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "tupleBindingPattern\t[\"(\"  \")\"]",
+      "bindingPattern\t[tupleBindingPattern ]",
+      "forInStatement\t[\"for\"    >->(\"await\") bindingPattern \"in\" expressionIntroducerBoundary expression  codeBlock]",
+      "loopStatement\t[forInStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 50,
+      "descriptorCount" : 93,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 17,
+      "parseSeconds" : 0.003923892974853516,
+      "sourceLength" : 18,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 8,
+      "yieldCount" : 65
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ForStmt\n        keyword(SwiftSyntax.Keyword.for) \"for\"\n        TuplePattern\n          leftParen \"(\"\n          TuplePatternElementList\n          rightParen \")\"\n        keyword(SwiftSyntax.Keyword.in) \"in\"\n        PrefixOperatorExpr\n          prefixOperator(\"??\") \"??\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 49,
+  "source" : "for ()in ??await{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ForStmt\\n        keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n        TuplePattern\\n          leftParen \\\"(\\\"\\n          TuplePatternElementList\\n          rightParen \\\")\\\"\\n        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1737CCD4-3B66-44D9-8E22-FE08C07D1A14.swift:1:10: error: '??' is not a prefix unary operator\\n1 | for ()in ??await{}\\n  |          `- error: '??' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1737CCD4-3B66-44D9-8E22-FE08C07D1A14.swift:1:12: error: cannot find 'await' in scope\\n1 | for ()in ??await{}\\n  |            `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"tupleBindingPattern\\t[\\\"(\\\"  \\\")\\\"]\",\"bindingPattern\\t[tupleBindingPattern ]\",\"forInStatement\\t[\\\"for\\\"    >->(\\\"await\\\") bindingPattern \\\"in\\\" expressionIntroducerBoundary expression  codeBlock]\",\"loopStatement\\t[forInStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":50,\"descriptorCount\":93,\"duplicateDescriptorCount\":0,\"oraclePruned\":17,\"parseSeconds\":0.003923892974853516,\"sourceLength\":18,\"suppressedDescriptorCount\":1,\"tokenCount\":8,\"yieldCount\":65},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ForStmt\\n        keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n        TuplePattern\\n          leftParen \\\"(\\\"\\n          TuplePatternElementList\\n          rightParen \\\")\\\"\\n        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"??\\\") \\\"??\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

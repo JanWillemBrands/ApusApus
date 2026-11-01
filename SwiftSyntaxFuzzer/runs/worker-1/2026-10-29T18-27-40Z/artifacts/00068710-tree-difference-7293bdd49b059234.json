@@ -1,0 +1,66 @@
+{
+  "event" : {
+    "artifact" : "00068710-tree-difference-7293bdd49b059234.json",
+    "durationSeconds" : 1.3524360656738281,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=42",
+    "index" : 68710,
+    "seed" : 4354586739618047692,
+    "signalHash" : "b4ccd87bddf4ce8d",
+    "signalSummary" : "tree-difference|line=11|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "7293bdd49b059234",
+    "sourceLength" : 15,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-964BD94F-BE62-46D7-A809-66E225593035.swift:1:9: error: '==' is not a prefix unary operator\n1 | defer{};==await\n  |         `- error: '==' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-964BD94F-BE62-46D7-A809-66E225593035.swift:1:11: error: cannot find 'await' in scope\n1 | defer{};==await\n  |           `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 43,
+      "descriptorCount" : 93,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 27,
+      "parseSeconds" : 0.002949953079223633,
+      "sourceLength" : 15,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 6,
+      "yieldCount" : 64
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n      semicolon \";\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"==\") \"==\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 8,
+  "source" : "defer{};==await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-964BD94F-BE62-46D7-A809-66E225593035.swift:1:9: error: '==' is not a prefix unary operator\\n1 | defer{};==await\\n  |         `- error: '==' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-964BD94F-BE62-46D7-A809-66E225593035.swift:1:11: error: cannot find 'await' in scope\\n1 | defer{};==await\\n  |           `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":43,\"descriptorCount\":93,\"duplicateDescriptorCount\":0,\"oraclePruned\":27,\"parseSeconds\":0.002949953079223633,\"sourceLength\":15,\"suppressedDescriptorCount\":1,\"tokenCount\":6,\"yieldCount\":64},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"==\\\") \\\"==\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

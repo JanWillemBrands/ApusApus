@@ -1,0 +1,67 @@
+{
+  "event" : {
+    "artifact" : "00000421-advent-overaccept-022d55635ced079b.json",
+    "durationSeconds" : 0.26924896240234375,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=46",
+    "index" : 421,
+    "seed" : 17418699778530522091,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "022d55635ced079b",
+    "sourceLength" : 31,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      YieldStmt\n        keyword(SwiftSyntax.Keyword.yield) \"yield\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n      semicolon \";\"\n    CodeBlockItem\n      PoundSourceLocation\n        poundSourceLocation \"#sourceLocation\"\n        leftParen \"(\"\n        rightParen \")\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3A4AB519-9D32-4B20-9B06-5F6E6E84CFF4.swift:1:6: error: consecutive statements on a line must be separated by ';'\n1 | yield -await;#sourceLocation();\n  |      `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-3A4AB519-9D32-4B20-9B06-5F6E6E84CFF4.swift:1:31: error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\n1 | yield -await;#sourceLocation();\n  |                               `- error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "lineControlStatement\t[\"#sourceLocation\" \"(\" \")\"]",
+      "compilerControlStatement\t[lineControlStatement]",
+      "statement\t[compilerControlStatement]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "yieldStatement\t[\"yield\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "statement\t[yieldStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 97,
+      "descriptorCount" : 212,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 102,
+      "parseSeconds" : 0.0022569894790649414,
+      "sourceLength" : 31,
+      "suppressedDescriptorCount" : 11,
+      "tokenCount" : 9,
+      "yieldCount" : 143
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      YieldStmt\n        keyword(SwiftSyntax.Keyword.yield) \"yield\"\n        PrefixOperatorExpr\n          prefixOperator(\"-\") \"-\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n      semicolon \";\"\n    CodeBlockItem\n      PoundSourceLocation\n        poundSourceLocation \"#sourceLocation\"\n        leftParen \"(\"\n        rightParen \")\"\n        UnexpectedNodes\n          semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 14,
+  "source" : "yield -await;#sourceLocation();",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      YieldStmt\\n        keyword(SwiftSyntax.Keyword.yield) \\\"yield\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PoundSourceLocation\\n        poundSourceLocation \\\"#sourceLocation\\\"\\n        leftParen \\\"(\\\"\\n        rightParen \\\")\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3A4AB519-9D32-4B20-9B06-5F6E6E84CFF4.swift:1:6: error: consecutive statements on a line must be separated by ';'\\n1 | yield -await;#sourceLocation();\\n  |      `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-3A4AB519-9D32-4B20-9B06-5F6E6E84CFF4.swift:1:31: error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\\n1 | yield -await;#sourceLocation();\\n  |                               `- error: parameterless closing #sourceLocation() directive without prior opening #sourceLocation(file:,line:) directive\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»\"],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"lineControlStatement\\t[\\\"#sourceLocation\\\" \\\"(\\\" \\\")\\\"]\",\"compilerControlStatement\\t[lineControlStatement]\",\"statement\\t[compilerControlStatement]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"yieldStatement\\t[\\\"yield\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"statement\\t[yieldStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":97,\"descriptorCount\":212,\"duplicateDescriptorCount\":0,\"oraclePruned\":102,\"parseSeconds\":0.0022569894790649414,\"sourceLength\":31,\"suppressedDescriptorCount\":11,\"tokenCount\":9,\"yieldCount\":143},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      YieldStmt\\n        keyword(SwiftSyntax.Keyword.yield) \\\"yield\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"-\\\") \\\"-\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PoundSourceLocation\\n        poundSourceLocation \\\"#sourceLocation\\\"\\n        leftParen \\\"(\\\"\\n        rightParen \\\")\\\"\\n        UnexpectedNodes\\n          semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

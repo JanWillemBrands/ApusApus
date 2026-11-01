@@ -4,6 +4,9 @@ import ./GLL.bend as Gll
 import ./CHECK.bend as Check
 import ./EXACT.bend as Exact
 import ./PREFER.bend as Prefer
+import ./GUARD.bend as Guard
+import ./UNBEATEN.bend as Unb
+import ./EXTENT.bend as Ext
 
 # THE LAWS: every claim, and nothing else. `bend PROOF.bend` checks them all.
 #
@@ -210,17 +213,206 @@ law exact_trees_spell:
   for long: {List.length(&2, Nat, Spec.leaves([tree])) == List.length(&2, Nat, input) : Nat}
   {Spec.leaves([tree]) == input : +List<Nat>}
 
-# @prefer AND @avoid CHOOSE EXACTLY THE SELECTED TREES. Whenever the preference oracle
+# DISAMBIGUATION, IN THE THREE PHASES OF SPEC.bend: 1. admissible (lookahead,
+# @left, @right), 2. unbeaten (@prefer, @avoid), 3. selected (@longest,
+# @shortest). Each phase's oracle gets an exactness law: its set embeds exactly the
+# trees of that phase.
+#
+# PHASE 1, ADMISSIBLE.
+#
+# THE RULES KEEP EXACTLY THE ADMISSIBLE TREES. Whenever the guard oracle hands out a set,
+# a parse tree of the input uses only steps of that set exactly when it is admissible:
+# every node, pick and round keeps the lookahead, @left and @right rules of the
+# alternative it chose. So a tree read from the set breaks no rule, and no tree that
+# keeps them all is lost. The oracle refuses rules on the alternatives of a loop.
+law guards_exact:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Guard.guardSteps(fuel, grammar, guards, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EmbedsAdmissible(grammar, guards, start, input, set)
+#
+# PHASE 2, UNBEATEN.
+#
+# @prefer AND @avoid CHOOSE EXACTLY THE UNBEATEN TREES. Whenever the preference oracle
 # hands out a set, a parse tree of the input uses only steps of that set exactly when it
-# is selected: no node of it is outranked. So a tree read from the set made every choice
-# the annotations ask for, and no tree that did is lost. The oracle refuses a grammar
-# whose preferences go round a cycle, and a loop not written { ( τ ) }.
+# is admissible and unbeaten: no node of it is outranked by an admissible rival. So a tree
+# read from the set keeps every hard rule and made every choice the annotations ask for,
+# and no tree that did is lost. The oracle runs on the guard oracle's set. It refuses a
+# grammar whose preferences go round a cycle, and a loop not written { ( τ ) }.
 law prefer_avoid_exact:
   for fuel: Nat
   for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
   for +marks: +List<Spec.Mark>
   for +start: Nat
   for +input: +List<Nat>
   for +set: +List<Spec.Bsr>
-  for got: {Prefer.preferSteps(fuel, grammar, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  Spec.EmbedsSelected(grammar, marks, start, input, set)
+  for got: {Unb.unbeatenSteps(fuel, grammar, guards, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EmbedsUnbeaten(grammar, guards, marks, start, input, set)
+
+# @prefer AND @avoid LEAVE A READING. Whenever the preference oracle hands out a set and
+# the input has an admissible tree, some admissible tree is unbeaten. The oracle's answer
+# never throws every reading away. (Stronger, and not proven here: that preferences never
+# remove every admissible tree, answer or not. Its classical proof, "it is impossible that
+# no tree is unbeaten", uses a hypothesis twice, which Bend's affine logic does not allow.)
+law prefer_avoid_safe:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +marks: +List<Spec.Mark>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Unb.unbeatenSteps(fuel, grammar, guards, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  for tree: Spec.Tree
+  for admissible: Spec.AdmissibleTree(grammar, guards, start, input, tree)
+  Spec.SomeUnbeaten(grammar, guards, marks, start, input)
+#
+# LOCALITY. The phases judge a node by what it reads, not by how its children read it:
+# a node's rules look only at its first and last child's tokens and the tokens ahead,
+# its rivals only at its tokens and context, and an extent only at its children's
+# lengths. So a node's children can be swapped for another forest over the same tokens
+# that keeps the phases where it stands, and the tree still keeps them. Grammar
+# transforms that preserve the selected trees rest on this.
+
+# The rules on a sequence's children depend on their first and last spelling only.
+law holds_local:
+  for +grammar: +List<Spec.Production>
+  for gs: +List<Spec.Guard>
+  for +items: +List<Spec.Item>
+  for +f: +List<Spec.Tree>
+  for +f2: +List<Spec.Tree>
+  for +ahead: +List<Nat>
+  for +eF: {Spec.firstSpell(f2) == Spec.firstSpell(f) : Maybe<&2, +List<Nat>>}
+  for +eL: {Spec.lastSpell(f2) == Spec.lastSpell(f) : Maybe<&2, +List<Nat>>}
+  for h: Spec.AllHold(grammar, gs, items, f, ahead)
+  Spec.AllHold(grammar, gs, items, f2, ahead)
+
+# Swapping a tree for one that spells the same keeps the first and last spelling.
+law spells_swap:
+  for +t: Spec.Tree
+  for +t2: Spec.Tree
+  for +ts: +List<Spec.Tree>
+  for +lv: {Spec.leaves([t2]) == Spec.leaves([t]) : +List<Nat>}
+  {Spec.firstSpell(t2 <> ts) == Spec.firstSpell(t <> ts) : Maybe<&2, +List<Nat>>} & {Spec.lastSpell(t2 <> ts) == Spec.lastSpell(t <> ts) : Maybe<&2, +List<Nat>>}
+
+# ... and the lengths an extent compares.
+law measures_swap:
+  for +marks: +List<Spec.ExtentMark>
+  for +t: Spec.Tree
+  for +t2: Spec.Tree
+  for +ts: +List<Spec.Tree>
+  for +items: +List<Spec.Item>
+  for +index: Nat
+  for +prefix: +List<Nat>
+  for +dot: Nat
+  for +lv: {Spec.leaves([t2]) == Spec.leaves([t]) : +List<Nat>}
+  {Spec.measures(marks, t2 <> ts, items, index, prefix, dot) == Spec.measures(marks, t <> ts, items, index, prefix, dot) : +List<Spec.Measure>}
+
+# A node's children swapped for an admissible forest over the same tokens: still admissible.
+law admissible_swap_node:
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +q: Nat
+  for +ch: +List<Spec.Tree>
+  for +ch2: +List<Spec.Tree>
+  for +ts: +List<Spec.Tree>
+  for +x: Nat
+  for +rest: +List<Spec.Item>
+  for +index: Nat
+  for +prefix: +List<Nat>
+  for +dot: Nat
+  for +after: +List<Nat>
+  for +lv: {Spec.leaves(ch2) == Spec.leaves(ch) : +List<Nat>}
+  for hold2: Spec.AllHold(grammar, Spec.prodGuards(guards, q), Spec.rhsOf(grammar, q), ch2, List.append(&2, Nat, Spec.leaves(ch2), List.append(&2, Nat, Spec.leaves(ts), after)))
+  for adm2: Spec.Admissible(grammar, guards, ch2, Spec.rhsOf(grammar, q), q, [], 0n, List.append(&2, Nat, Spec.leaves(ts), after))
+  for adm: Spec.Admissible(grammar, guards, Spec.Node{q, ch} <> ts, Spec.Sym{Spec.Nonterminal{x}} <> rest, index, prefix, dot, after)
+  Spec.Admissible(grammar, guards, Spec.Node{q, ch2} <> ts, Spec.Sym{Spec.Nonterminal{x}} <> rest, index, prefix, dot, after)
+
+law admissible_swap_pick:
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +a: Nat
+  for +ch: +List<Spec.Tree>
+  for +ch2: +List<Spec.Tree>
+  for +ts: +List<Spec.Tree>
+  for +kind: Spec.Bracket
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +index: Nat
+  for +prefix: +List<Nat>
+  for +dot: Nat
+  for +after: +List<Nat>
+  for +lv: {Spec.leaves(ch2) == Spec.leaves(ch) : +List<Nat>}
+  for hold2: Spec.AllHold(grammar, Spec.altGuards(guards, index, List.append(&2, Nat, prefix, [dot]), a), Spec.altOf(alts, a), ch2, List.append(&2, Nat, Spec.leaves(ch2), List.append(&2, Nat, Spec.leaves(ts), after)))
+  for adm2: Spec.Admissible(grammar, guards, ch2, Spec.altOf(alts, a), index, List.append(&2, Nat, List.append(&2, Nat, prefix, [dot]), [a]), 0n, List.append(&2, Nat, Spec.leaves(ts), after))
+  for adm: Spec.Admissible(grammar, guards, Spec.Pick{a, ch} <> ts, Spec.Brack{kind, alts} <> rest, index, prefix, dot, after)
+  Spec.Admissible(grammar, guards, Spec.Pick{a, ch2} <> ts, Spec.Brack{kind, alts} <> rest, index, prefix, dot, after)
+
+# A node's children swapped for an unbeaten forest over the same tokens: still unbeaten.
+law unbeaten_swap_node:
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +marks: +List<Spec.Mark>
+  for +q: Nat
+  for +ch: +List<Spec.Tree>
+  for +ch2: +List<Spec.Tree>
+  for +ts: +List<Spec.Tree>
+  for +x: Nat
+  for +rest: +List<Spec.Item>
+  for +index: Nat
+  for +prefix: +List<Nat>
+  for +dot: Nat
+  for +above: +List<Nat>
+  for +span: +List<Nat>
+  for +after: +List<Nat>
+  for +lv: {Spec.leaves(ch2) == Spec.leaves(ch) : +List<Nat>}
+  for unb2: Spec.Unbeaten(grammar, guards, marks, ch2, Spec.rhsOf(grammar, q), q, [], 0n, x <> Spec.sameAbove(above, span, Spec.leaves(ch)), Spec.leaves(ch), List.append(&2, Nat, Spec.leaves(ts), after))
+  for unb: Spec.Unbeaten(grammar, guards, marks, Spec.Node{q, ch} <> ts, Spec.Sym{Spec.Nonterminal{x}} <> rest, index, prefix, dot, above, span, after)
+  Spec.Unbeaten(grammar, guards, marks, Spec.Node{q, ch2} <> ts, Spec.Sym{Spec.Nonterminal{x}} <> rest, index, prefix, dot, above, span, after)
+
+law unbeaten_swap_pick:
+  for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +marks: +List<Spec.Mark>
+  for +a: Nat
+  for +ch: +List<Spec.Tree>
+  for +ch2: +List<Spec.Tree>
+  for +ts: +List<Spec.Tree>
+  for +kind: Spec.Bracket
+  for +alts: +List<+List<Spec.Item>>
+  for +rest: +List<Spec.Item>
+  for +index: Nat
+  for +prefix: +List<Nat>
+  for +dot: Nat
+  for +above: +List<Nat>
+  for +span: +List<Nat>
+  for +after: +List<Nat>
+  for +lv: {Spec.leaves(ch2) == Spec.leaves(ch) : +List<Nat>}
+  for unb2: Spec.Unbeaten(grammar, guards, marks, ch2, Spec.altOf(alts, a), index, List.append(&2, Nat, List.append(&2, Nat, prefix, [dot]), [a]), 0n, Spec.sameAbove(above, span, Spec.leaves(ch)), Spec.leaves(ch), List.append(&2, Nat, Spec.leaves(ts), after))
+  for unb: Spec.Unbeaten(grammar, guards, marks, Spec.Pick{a, ch} <> ts, Spec.Brack{kind, alts} <> rest, index, prefix, dot, above, span, after)
+  Spec.Unbeaten(grammar, guards, marks, Spec.Pick{a, ch2} <> ts, Spec.Brack{kind, alts} <> rest, index, prefix, dot, above, span, after)
+#
+# PHASE 3, SELECTED.
+#
+# @longest AND @shortest KEEP EXACTLY THE BEST-EXTENT TREES. Whenever the extent oracle
+# hands out a set, a parse tree of the input uses only steps of that set exactly when it
+# has the best extent: at every node, pick and round, no other reading of the same
+# children's tokens gives the marked item a longer span (@longest) or a shorter one
+# (@shortest). The comparison is local: it looks at the one sequence the mark sits in.
+# So a tree read from the set took the extent the annotation asks for everywhere, and
+# no tree that did is lost. The oracle refuses two marks in one sequence and a mark on
+# the alternative of a loop.
+law extent_exact:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +marks: +List<Spec.ExtentMark>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Ext.extentSteps(fuel, grammar, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EmbedsExtentBest(grammar, marks, start, input, set)

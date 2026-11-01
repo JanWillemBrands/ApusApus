@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00001785-advent-overaccept-75e6df53106b8286.json",
+    "durationSeconds" : 5.1217920780181885,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=67",
+    "index" : 1785,
+    "seed" : 11400602263005678360,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "75e6df53106b8286",
+    "sourceLength" : 30,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "yield any _const->copy ==await",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      YieldStmt\n        keyword(SwiftSyntax.Keyword.yield) \"yield\"\n        SequenceExpr\n          ExprList\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n            ArrowExpr\n              arrow \"->\"\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D28B7768-3B65-44CD-8AEA-1C51E952BCA9.swift:1:6: error: consecutive statements on a line must be separated by ';'\n1 | yield any _const-> ==await\n  |      `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-D28B7768-3B65-44CD-8AEA-1C51E952BCA9.swift:1:20: error: expected type for function result\n1 | yield any _const-> ==await\n  |                    `- error: expected type for function result\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any _const»",
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "ifConfigSameLine\t[]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"await\" \"rethrows\" \"throw\" \"throws\" \"try\")]",
+      "infixExpression\t[arrowExpr ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "boxedProtocolKeywordName\t[\"_const\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "yieldStatement\t[\"yield\" >->(\"(\" \".\" \"[\") <s> >n< expression]",
+      "statement\t[yieldStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 91,
+      "descriptorCount" : 201,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 107,
+      "parseSeconds" : 0.001690983772277832,
+      "sourceLength" : 26,
+      "suppressedDescriptorCount" : 16,
+      "tokenCount" : 6,
+      "yieldCount" : 163
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      YieldStmt\n        keyword(SwiftSyntax.Keyword.yield) \"yield\"\n        TypeExpr\n          FunctionType\n            TupleTypeElementList\n              TupleTypeElement\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  IdentifierType\n                    identifier(\"_const\") \"_const\"\n            ReturnClause\n              arrow \"->\"\n              MissingType\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"==\") \"==\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 17,
+  "source" : "yield any _const-> ==await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      YieldStmt\\n        keyword(SwiftSyntax.Keyword.yield) \\\"yield\\\"\\n        SequenceExpr\\n          ExprList\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n            ArrowExpr\\n              arrow \\\"->\\\"\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D28B7768-3B65-44CD-8AEA-1C51E952BCA9.swift:1:6: error: consecutive statements on a line must be separated by ';'\\n1 | yield any _const-> ==await\\n  |      `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-D28B7768-3B65-44CD-8AEA-1C51E952BCA9.swift:1:20: error: expected type for function result\\n1 | yield any _const-> ==await\\n  |                    `- error: expected type for function result\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any _const»\",\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"ifConfigSameLine\\t[]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"await\\\" \\\"rethrows\\\" \\\"throw\\\" \\\"throws\\\" \\\"try\\\")]\",\"infixExpression\\t[arrowExpr ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"boxedProtocolKeywordName\\t[\\\"_const\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"yieldStatement\\t[\\\"yield\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\") <s> >n< expression]\",\"statement\\t[yieldStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":91,\"descriptorCount\":201,\"duplicateDescriptorCount\":0,\"oraclePruned\":107,\"parseSeconds\":0.001690983772277832,\"sourceLength\":26,\"suppressedDescriptorCount\":16,\"tokenCount\":6,\"yieldCount\":163},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      YieldStmt\\n        keyword(SwiftSyntax.Keyword.yield) \\\"yield\\\"\\n        TypeExpr\\n          FunctionType\\n            TupleTypeElementList\\n              TupleTypeElement\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  IdentifierType\\n                    identifier(\\\"_const\\\") \\\"_const\\\"\\n            ReturnClause\\n              arrow \\\"->\\\"\\n              MissingType\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"==\\\") \\\"==\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

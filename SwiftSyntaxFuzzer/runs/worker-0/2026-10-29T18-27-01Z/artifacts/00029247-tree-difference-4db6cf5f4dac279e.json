@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00029247-tree-difference-4db6cf5f4dac279e.json",
+    "durationSeconds" : 1.1098541021347046,
+    "exitCode" : 1,
+    "generator" : "wide:trailing-closure:duplicate:fuzz-harvest:any-then-newline-is-a-name",
+    "index" : 29247,
+    "seed" : 11400602263018726675,
+    "signalHash" : "1079566f80034b16",
+    "signalSummary" : "tree-difference|line=21|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "4db6cf5f4dac279e",
+    "sourceLength" : 26,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "fuzz {\nlet x = any any\nP\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  AssignmentExpr\n                    equal \"=\"\n                  MissingExpr\n                    identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-22F21C55-B230-4DB7-BA82-8CE40BBFB105.swift:1:1: error: cannot find 'fuzz' in scope\n1 | fuzz { x = any any\n  | `- error: cannot find 'fuzz' in scope\n2 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-22F21C55-B230-4DB7-BA82-8CE40BBFB105.swift:1:8: error: cannot find 'x' in scope\n1 | fuzz { x = any any\n  |        `- error: cannot find 'x' in scope\n2 | }\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any\n»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"any\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "ifConfigSameLine\t[]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "infixExpression\t[assignmentOperator ifConfigSameLine expression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 118,
+      "descriptorCount" : 260,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 122,
+      "parseSeconds" : 0.0035349130630493164,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 33,
+      "tokenCount" : 7,
+      "yieldCount" : 224
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              SequenceExpr\n                ExprList\n                  DeclReferenceExpr\n                    identifier(\"x\") \"x\"\n                  AssignmentExpr\n                    equal \"=\"\n                  TypeExpr\n                    SomeOrAnyType\n                      keyword(SwiftSyntax.Keyword.any) \"any\"\n                      IdentifierType\n                        identifier(\"any\") \"any\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 31,
+  "source" : "fuzz { x = any any\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  MissingExpr\\n                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-22F21C55-B230-4DB7-BA82-8CE40BBFB105.swift:1:1: error: cannot find 'fuzz' in scope\\n1 | fuzz { x = any any\\n  | `- error: cannot find 'fuzz' in scope\\n2 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-22F21C55-B230-4DB7-BA82-8CE40BBFB105.swift:1:8: error: cannot find 'x' in scope\\n1 | fuzz { x = any any\\n  |        `- error: cannot find 'x' in scope\\n2 | }\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any any\\n»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"any\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"ifConfigSameLine\\t[]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"infixExpression\\t[assignmentOperator ifConfigSameLine expression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":118,\"descriptorCount\":260,\"duplicateDescriptorCount\":0,\"oraclePruned\":122,\"parseSeconds\":0.0035349130630493164,\"sourceLength\":20,\"suppressedDescriptorCount\":33,\"tokenCount\":7,\"yieldCount\":224},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              SequenceExpr\\n                ExprList\\n                  DeclReferenceExpr\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  AssignmentExpr\\n                    equal \\\"=\\\"\\n                  TypeExpr\\n                    SomeOrAnyType\\n                      keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                      IdentifierType\\n                        identifier(\\\"any\\\") \\\"any\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

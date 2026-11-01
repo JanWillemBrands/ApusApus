@@ -1,0 +1,64 @@
+{
+  "event" : {
+    "artifact" : "00038606-tree-difference-0dd4c795df549bcb.json",
+    "durationSeconds" : 1.2474418878555298,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=103",
+    "index" : 38606,
+    "seed" : 11400602263005678360,
+    "signalHash" : "b4ccd87bddf4ce8d",
+    "signalSummary" : "tree-difference|line=11|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "0dd4c795df549bcb",
+    "sourceLength" : 31,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "do{throw -await;};continue;\\_x;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-741AD296-7E7B-407C-B062-ABAF4A72C1E2.swift:1:6: error: cannot find 'await' in scope\n1 | do{ -await}\n  |      `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 59,
+      "descriptorCount" : 114,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 20,
+      "parseSeconds" : 0.00286102294921875,
+      "sourceLength" : 11,
+      "suppressedDescriptorCount" : 3,
+      "tokenCount" : 5,
+      "yieldCount" : 59
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              PrefixOperatorExpr\n                prefixOperator(\"-\") \"-\"\n                DeclReferenceExpr\n                  identifier(\"await\") \"await\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 28,
+  "source" : "do{ -await}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-741AD296-7E7B-407C-B062-ABAF4A72C1E2.swift:1:6: error: cannot find 'await' in scope\\n1 | do{ -await}\\n  |      `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":59,\"descriptorCount\":114,\"duplicateDescriptorCount\":0,\"oraclePruned\":20,\"parseSeconds\":0.00286102294921875,\"sourceLength\":11,\"suppressedDescriptorCount\":3,\"tokenCount\":5,\"yieldCount\":59},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              PrefixOperatorExpr\\n                prefixOperator(\\\"-\\\") \\\"-\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"await\\\") \\\"await\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

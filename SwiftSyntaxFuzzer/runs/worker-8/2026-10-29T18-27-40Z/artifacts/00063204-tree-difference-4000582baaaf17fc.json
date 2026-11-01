@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00063204-tree-difference-4000582baaaf17fc.json",
+    "durationSeconds" : 1.8755589723587036,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=74",
+    "index" : 63204,
+    "seed" : 10372684286792155739,
+    "signalHash" : "25ca1079f76ffd37",
+    "signalSummary" : "tree-difference|line=13|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "4000582baaaf17fc",
+    "sourceLength" : 37,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "do{copy copy any nonisolated\ndefer{}}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n            CodeBlockItem\n              DeferStmt\n                keyword(SwiftSyntax.Keyword.defer) \"defer\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-C2A1B14E-F251-4235-AC74-0D9F2B1CACF7.swift:2:1: warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\n1 | do{ any nonisolated\n2 | defer{}}\n  | `- warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-C2A1B14E-F251-4235-AC74-0D9F2B1CACF7.swift:1:9: error: cannot find type 'nonisolated' in scope\n1 | do{ any nonisolated\n  |         `- error: cannot find type 'nonisolated' in scope\n2 | defer{}}\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any nonisolated\n»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "statementSeparator\t[<n>]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "boxedProtocolKeywordName\t[\"nonisolated\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 77,
+      "descriptorCount" : 157,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 50,
+      "parseSeconds" : 0.0018699169158935547,
+      "sourceLength" : 28,
+      "suppressedDescriptorCount" : 10,
+      "tokenCount" : 8,
+      "yieldCount" : 106
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  IdentifierType\n                    identifier(\"nonisolated\") \"nonisolated\"\n            CodeBlockItem\n              DeferStmt\n                keyword(SwiftSyntax.Keyword.defer) \"defer\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 18,
+  "source" : "do{ any nonisolated\ndefer{}}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n            CodeBlockItem\\n              DeferStmt\\n                keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-C2A1B14E-F251-4235-AC74-0D9F2B1CACF7.swift:2:1: warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\\n1 | do{ any nonisolated\\n2 | defer{}}\\n  | `- warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-C2A1B14E-F251-4235-AC74-0D9F2B1CACF7.swift:1:9: error: cannot find type 'nonisolated' in scope\\n1 | do{ any nonisolated\\n  |         `- error: cannot find type 'nonisolated' in scope\\n2 | defer{}}\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any nonisolated\\n»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"statementSeparator\\t[<n>]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"boxedProtocolKeywordName\\t[\\\"nonisolated\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":77,\"descriptorCount\":157,\"duplicateDescriptorCount\":0,\"oraclePruned\":50,\"parseSeconds\":0.0018699169158935547,\"sourceLength\":28,\"suppressedDescriptorCount\":10,\"tokenCount\":8,\"yieldCount\":106},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  IdentifierType\\n                    identifier(\\\"nonisolated\\\") \\\"nonisolated\\\"\\n            CodeBlockItem\\n              DeferStmt\\n                keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

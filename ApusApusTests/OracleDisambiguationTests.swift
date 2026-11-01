@@ -35,6 +35,32 @@ import Foundation
 struct OracleDisambiguationTests {
 
 
+    // MARK: - Order of the annotations (Bend/SPEC.bend)
+
+    /// The order of annotations in `Bend/SPEC.bend`: hard rules first (lookahead, `@left`,
+    /// `@right`), then `@prefer`/`@avoid` among the admissible trees, then `@longest`/`@shortest`.
+    /// A preferred alternative with no admissible tree is no rival: it can't take the plain
+    /// alternative's place. Swift runs `@prefer` before `@left`/`@right`, so it removes the plain
+    /// reading for a rival that `@left` then removes too, and nothing is left.
+    @Suite("Annotation order (spec)", .serialized)
+    struct AnnotationOrder {
+
+        @Test("an inadmissible preferred rival does not beat the plain reading")
+        func inadmissibleRivalDoesNotWin() throws {
+            // A = @left(P) P "+" P: every A tree's last child is something P derives
+            // ("3", or "2 + 3"), so on 1 + 2 + 3 no A tree is admissible, and B is the reading.
+            let g = #"n - /[0-9]+/ . S = @prefer A | B . A = @left(P) P "+" P . P = n | n "+" n . B = n "+" n "+" n ."#
+            let r = try parseOracleAmbiguity(grammar: g, message: "1 + 2 + 3")
+            #expect(r.rawMatch)
+            // Control: without @prefer, @left(P) removes A's readings and S -> B stays.
+            let control = try parseOracleAmbiguity(grammar: g.replacingOccurrences(of: "@prefer ", with: ""), message: "1 + 2 + 3")
+            #expect(control.postMatch && control.isUnambiguous, "without @prefer, S -> B is the one reading")
+            withKnownIssue("Swift runs @prefer before @left/@right (Bend/SPEC.bend puts hard rules first)") {
+                #expect(r.postMatch, "the spec keeps S -> B; Swift removed every reading")
+            }
+        }
+    }
+
     // MARK: - Top-level pragmas (extracted, behaviour lock)
 
     @Suite("Top-level pragmas", .serialized)

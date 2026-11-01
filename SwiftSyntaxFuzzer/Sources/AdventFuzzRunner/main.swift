@@ -24,6 +24,7 @@ struct RunnerOptions {
     var wideCorpusPaths = ["SwiftSyntaxFuzzer/seeds/swift-syntax-corpus.txt", "SwiftSyntaxFuzzer/seeds/real-source.txt"]
     var widePercent = 50
     var frontierPercent = 20
+    var grammarDirectedPercent = 0
     var interestingCorpusPaths: [String] = []
     var interestingPercent = 15
     var includePassingEvents = true
@@ -65,6 +66,8 @@ struct RunnerOptions {
                 options.widePercent = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--frontier-percent":
                 options.frontierPercent = try parseValue(iterator.next(), as: Int.self, name: arg)
+            case "--grammar-directed-percent":
+                options.grammarDirectedPercent = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--interesting-corpus":
                 options.interestingCorpusPaths = try parsePathList(iterator.next(), name: arg)
             case "--interesting-percent":
@@ -617,18 +620,25 @@ struct AdventFuzzRunner {
         var rng = SplitMix64(seed: options.seed)
         let wideCorpus = options.wideCorpusPaths.flatMap { SeedCorpus.load(from: URL(fileURLWithPath: $0)).entries }
         let interestingCorpus = InterestingCorpus.load(paths: options.interestingCorpusPaths)
+        let grammarGenerator = options.grammarDirectedPercent > 0
+            ? try GrammarDirectedGenerator(grammarURL: grammarURL)
+            : nil
         var generator = SwiftFragmentGenerator(
             seedCorpus: seedCorpus.entries,
             wideCorpus: wideCorpus,
             widePercent: options.widePercent,
             frontierPercent: options.frontierPercent,
+            grammarGenerator: grammarGenerator,
+            grammarDirectedPercent: options.grammarDirectedPercent,
             interestingCorpus: interestingCorpus.entries,
             interestingPercent: options.interestingPercent
         )
         print("wide corpus: \(wideCorpus.count) entries, \(options.widePercent)% of inputs")
         print("frontier lanes: \(options.frontierPercent)% of inputs")
+        print("grammar-directed lane: \(grammarGenerator == nil ? 0 : options.grammarDirectedPercent)% of inputs")
         print("interesting corpus: \(interestingCorpus.entries.count) entries, \(interestingCorpus.entries.isEmpty ? 0 : options.interestingPercent)% of inputs")
         var counts: [String: Int] = [:]
+        var seenKnownIssues = Set<String>()
         var seenArtifacts = Set<String>()
         var artifactCount = 0
         var artifactCountsByStatus: [String: Int] = [:]
@@ -754,7 +764,45 @@ struct AdventFuzzRunner {
             } else {
                 status = decoded?.status ?? "invalid-probe-output"
             }
-            counts[status, default: 0] += 1
+            var knownIssue = knownOveracceptIssue(source: generated.source, status: status, probe: decoded)
+            if knownIssue == nil, status == "advent-overaccept" {
+                let fragments = independentStatementFragments(generated.source)
+                var sawCompilerOnlyRejection = false
+                var sawSwiftSyntaxOnlyRejection = false
+                for fragment in fragments.prefix(8) {
+                    do {
+                        if reducerProbe == nil {
+                            reducerProbe = try PersistentProbe(probeURL: probeURL, grammarURL: grammarURL)
+                        }
+                        guard let reducerProbe else { break }
+                        let fragmentResult = try reducerProbe.run(
+                            source: fragment,
+                            timeoutSeconds: options.timeoutSeconds
+                        )
+                        guard !fragmentResult.timedOut,
+                              let fragmentProbe = try? JSONDecoder().decode(
+                                ProbeOutput.self,
+                                from: Data(fragmentResult.stdout.utf8)
+                              ) else { continue }
+                        if fragmentProbe.compilerAccepted == false && !fragmentProbe.swiftSyntaxHasError {
+                            sawCompilerOnlyRejection = true
+                        }
+                        if fragmentProbe.compilerAccepted == true && fragmentProbe.swiftSyntaxHasError {
+                            sawSwiftSyntaxOnlyRejection = true
+                        }
+                    } catch {
+                        reducerProbe?.stop(killProcess: true)
+                        reducerProbe = nil
+                        break
+                    }
+                }
+                if sawCompilerOnlyRejection && sawSwiftSyntaxOnlyRejection {
+                    knownIssue = "compound-reference-collision"
+                }
+            }
+            let countedStatus = knownIssue.map { "known:\($0)" } ?? status
+            let isFirstKnownIssue = knownIssue.map { seenKnownIssues.insert($0).inserted } ?? false
+            counts[countedStatus, default: 0] += 1
             let failureSignal = makeFailureSignal(
                 status: status,
                 probe: decoded,
@@ -768,7 +816,7 @@ struct AdventFuzzRunner {
             }
 
             let sourceHash = stableHash(generated.source)
-            let shouldPersist = status != "same"
+            let shouldPersist = status != "same" && (knownIssue == nil || isFirstKnownIssue)
             let dedupeID = options.dedupeBySignal ? (failureSignal?.hash ?? sourceHash) : sourceHash
             let dedupeKey = "\(status):\(dedupeID)"
             let isDuplicate = shouldPersist && seenArtifacts.contains(dedupeKey)
@@ -779,7 +827,9 @@ struct AdventFuzzRunner {
             let canWriteArtifact = shouldPersist && statusAllowed && !isDuplicate && !overArtifactCount && !overArtifactBytes && !overArtifactStatus
             let artifactName = canWriteArtifact ? "\(String(format: "%08d", index))-\(status)-\(sourceHash).json" : nil
             let note: String?
-            if shouldPersist && !statusAllowed {
+            if let knownIssue {
+                note = "known-issue-\(isFirstKnownIssue ? "first" : "repeat"):\(knownIssue)"
+            } else if shouldPersist && !statusAllowed {
                 note = "artifact-status-filter"
             } else if isDuplicate {
                 note = "duplicate-artifact"
@@ -979,6 +1029,9 @@ struct AdventFuzzRunner {
             .map { "\($0.key): \($0.value)" }
         summaryLines.append("interesting-passes: \(interestingCount)")
         summaryLines.append("reduced-duplicates: \(reducedDuplicates)")
+        if let grammarGenerator {
+            summaryLines.append(contentsOf: grammarGenerator.statisticsLines())
+        }
         let summary = summaryLines.joined(separator: "\n")
         try? summary.write(to: summaryURL, atomically: true, encoding: .utf8)
         try? writeHeartbeat(
@@ -1203,6 +1256,8 @@ struct SwiftFragmentGenerator {
     private let wideCorpus: [SeedEntry]
     private let widePercent: Int
     private let frontierPercent: Int
+    private let grammarGenerator: GrammarDirectedGenerator?
+    private let grammarDirectedPercent: Int
     private let tokenMutator: TokenMutator
     private let interestingCorpus: [SeedEntry]
     private let interestingPercent: Int
@@ -1212,6 +1267,8 @@ struct SwiftFragmentGenerator {
         wideCorpus: [SeedEntry] = [],
         widePercent: Int = 0,
         frontierPercent: Int = 0,
+        grammarGenerator: GrammarDirectedGenerator? = nil,
+        grammarDirectedPercent: Int = 0,
         interestingCorpus: [SeedEntry] = [],
         interestingPercent: Int = 0
     ) {
@@ -1219,6 +1276,8 @@ struct SwiftFragmentGenerator {
         self.wideCorpus = wideCorpus
         self.widePercent = wideCorpus.isEmpty ? 0 : widePercent
         self.frontierPercent = max(0, frontierPercent)
+        self.grammarGenerator = grammarGenerator
+        self.grammarDirectedPercent = grammarGenerator == nil ? 0 : max(0, grammarDirectedPercent)
         self.tokenMutator = TokenMutator(corpus: wideCorpus)
         self.interestingCorpus = interestingCorpus
         self.interestingPercent = interestingCorpus.isEmpty ? 0 : interestingPercent
@@ -1323,6 +1382,10 @@ struct SwiftFragmentGenerator {
     private let callLabels = ["default", "operator", "repeat", "async", "await", "inout"]
 
     mutating func next(using rng: inout SplitMix64) -> GeneratedSource {
+        if grammarDirectedPercent > 0, rng.nextInt(upperBound: 100) < grammarDirectedPercent,
+           let grammarGenerator {
+            return grammarGenerator.next(using: &rng)
+        }
         if interestingPercent > 0, rng.nextInt(upperBound: 100) < interestingPercent {
             return interestingCorpusSource(using: &rng)
         }
@@ -2552,7 +2615,7 @@ func makeFailureSignal(
             "advent-overaccept",
             "compiler=\(probe?.compilerAccepted?.description ?? "unknown")",
             "swiftSyntaxHasError=\(probe?.swiftSyntaxHasError.description ?? "unknown")",
-            dumpShapeSignal(probe?.referenceDump)
+            primaryCompilerDiagnostic(probe?.compilerStderr) ?? dumpShapeSignal(probe?.referenceDump)
         ].joined(separator: "|")
     case "advent-underaccept":
         rawSummary = [
@@ -2584,6 +2647,70 @@ func makeFailureSignal(
         hash: stableHash(rawSummary),
         summary: abbreviate(rawSummary, maxLength: 240)
     )
+}
+
+/// Root causes already established by an independently minimal strong overaccept. Classification
+/// happens after probing: these constructs are still generated and can therefore participate in
+/// combinations that expose a different signal. The runner retains and reduces the first example
+/// of each issue, then counts repeats without writing more artifacts.
+func knownOveracceptIssue(source: String, status: String, probe: ProbeOutput?) -> String? {
+    guard status == "advent-overaccept",
+          probe?.compilerAccepted == false,
+          probe?.swiftSyntaxHasError == true else { return nil }
+    if source.range(
+        of: #"#sourceLocation\s*\([^\n]*\)\s*;"#,
+        options: .regularExpression
+    ) != nil {
+        return "source-location-trailing-token"
+    }
+    if source.range(
+        of: #"#sourceLocation\s*\(\s*file\s*:\s*#+\""#,
+        options: .regularExpression
+    ) != nil {
+        return "source-location-raw-file"
+    }
+    if source.range(
+        of: #"@(attached|freestanding)\s*\(\s*\)"#,
+        options: .regularExpression
+    ) != nil {
+        return "empty-macro-role"
+    }
+    if source.range(
+        of: #"yield\s+any\s*@convention\s*\(\s*async\s*\)\s*_"#,
+        options: .regularExpression
+    ) != nil {
+        return "yield-malformed-convention-type"
+    }
+    if source.range(
+        of: #"discard\s+switch\s*==\s*[A-Za-z_$][A-Za-z0-9_$]*\s*\{"#,
+        options: .regularExpression
+    ) != nil {
+        return "discard-malformed-switch-expression"
+    }
+    return nil
+}
+
+/// Candidate independently parseable statements for detecting a Boolean strong mismatch made from
+/// two opposing reference disagreements. This deliberately splits only at physical statement
+/// boundaries; nested constructs may produce unusable fragments, which merely cause a false
+/// negative rather than suppressing a real finding.
+func independentStatementFragments(_ source: String) -> [String] {
+    source.split(whereSeparator: { $0 == ";" || $0.isNewline })
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+}
+
+/// Stable root-cause key for compiler-rejected sources. Paths, line/column locations, excerpts,
+/// and carets vary with each generated source; the first diagnostic message is the useful part.
+func primaryCompilerDiagnostic(_ stderr: String?) -> String? {
+    guard let stderr else { return nil }
+    for line in stderr.split(whereSeparator: \.isNewline) {
+        guard let range = line.range(of: "error: ") else { continue }
+        return String(line[range.upperBound...])
+            .replacingOccurrences(of: #"'[^']+'"#, with: "'<value>'", options: .regularExpression)
+            .replacingOccurrences(of: #"\b[0-9]+\b"#, with: "<n>", options: .regularExpression)
+    }
+    return nil
 }
 
 func dumpDifferenceSignal(reference: String?, advent: String?) -> String {
@@ -2717,6 +2844,8 @@ func printHelp() {
       --wide-corpus PATHS  Comma-separated real-code seed files for the wide lanes (default: seeds/swift-syntax-corpus.txt,seeds/real-source.txt; "" disables)
       --wide-percent N     Share of inputs from the wide lanes (default: 50)
       --frontier-percent N Share of inputs from recent high-signal frontier lanes (default: 20)
+      --grammar-directed-percent N
+                           Share generated directly from the parsed Swift.apus graph (default: 0)
       --interesting-corpus PATHS
                            Comma-separated interesting.jsonl files to feed back as a coverage corpus
       --interesting-percent N

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00059062-advent-overaccept-b9f6ec553131f094.json",
+    "durationSeconds" : 3.4209200143814087,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=149",
+    "index" : 59062,
+    "seed" : 13064010938095722355,
+    "signalHash" : "409d23aa07d7352f",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|parameter may have at most one of the '<value>', '<value>', or '<value>' specifiers",
+    "sourceHash" : "b9f6ec553131f094",
+    "sourceLength" : 75,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "continue;break x;try!await switch &initx& {}as borrowing borrowing x::value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SequenceExpr\n        ExprList\n          SwitchExpr\n            keyword(SwiftSyntax.Keyword.switch) \"switch\"\n            DeclReferenceExpr\n              identifier(\"initx\") \"initx\"\n            leftBrace \"{\"\n            SwitchCaseList\n            rightBrace \"}\"\n          UnresolvedAsExpr\n            keyword(SwiftSyntax.Keyword.as) \"as\"\n          TypeExpr\n            AttributedType\n              TypeSpecifierList\n                SimpleTypeSpecifier\n                  keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n                SimpleTypeSpecifier\n                  keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n              AttributeList\n              TypeSpecifierList\n              IdentifierType\n                ModuleSelector\n                  identifier(\"x\") \"x\"\n                  colonColon \"::\"\n                identifier(\"value\") \"value\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-5DE63B5E-BD73-47B0-B5B0-1A08A3B95411.swift:1:30: error: parameter may have at most one of the 'inout', 'borrowing', or 'consuming' specifiers\n1 |  switch initx {}as borrowing borrowing x::value\n  |                              `- error: parameter may have at most one of the 'inout', 'borrowing', or 'consuming' specifiers\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-5DE63B5E-BD73-47B0-B5B0-1A08A3B95411.swift:1:48: error: expected '{' after 'switch' subject expression\n1 |  switch initx {}as borrowing borrowing x::value\n  |                                                `- error: expected '{' after 'switch' subject expression\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      ".DO\t[identifierToken]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector ]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "type\t[typeIdentifier]",
+      "parameterModifier\t[\"borrowing\"]",
+      "type\t[parameterModifier >->(\"~\") type]",
+      "coercingOperator\t[\"as\" type]",
+      ".OPT\t[coercingOperator]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "switchExpression\t[\"switch\" expressionIntroducerBoundary >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "effectfulConditional\t[conditionalExpression]",
+      "expression\t[effectfulConditional ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 122,
+      "descriptorCount" : 330,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 228,
+      "parseSeconds" : 0.002315998077392578,
+      "sourceLength" : 47,
+      "suppressedDescriptorCount" : 36,
+      "tokenCount" : 10,
+      "yieldCount" : 307
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          SequenceExpr\n            ExprList\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"initx\") \"initx\"\n                LabeledExprList\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n              UnresolvedAsExpr\n                keyword(SwiftSyntax.Keyword.as) \"as\"\n              TypeExpr\n                AttributedType\n                  TypeSpecifierList\n                    SimpleTypeSpecifier\n                      keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n                    SimpleTypeSpecifier\n                      keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n                  AttributeList\n                  TypeSpecifierList\n                  IdentifierType\n                    ModuleSelector\n                      identifier(\"x\") \"x\"\n                      colonColon \"::\"\n                    identifier(\"value\") \"value\"\n          SwitchCaseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 42,
+  "source" : " switch initx {}as borrowing borrowing x::value",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SequenceExpr\\n        ExprList\\n          SwitchExpr\\n            keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"initx\\\") \\\"initx\\\"\\n            leftBrace \\\"{\\\"\\n            SwitchCaseList\\n            rightBrace \\\"}\\\"\\n          UnresolvedAsExpr\\n            keyword(SwiftSyntax.Keyword.as) \\\"as\\\"\\n          TypeExpr\\n            AttributedType\\n              TypeSpecifierList\\n                SimpleTypeSpecifier\\n                  keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n                SimpleTypeSpecifier\\n                  keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n              AttributeList\\n              TypeSpecifierList\\n              IdentifierType\\n                ModuleSelector\\n                  identifier(\\\"x\\\") \\\"x\\\"\\n                  colonColon \\\"::\\\"\\n                identifier(\\\"value\\\") \\\"value\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-5DE63B5E-BD73-47B0-B5B0-1A08A3B95411.swift:1:30: error: parameter may have at most one of the 'inout', 'borrowing', or 'consuming' specifiers\\n1 |  switch initx {}as borrowing borrowing x::value\\n  |                              `- error: parameter may have at most one of the 'inout', 'borrowing', or 'consuming' specifiers\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-5DE63B5E-BD73-47B0-B5B0-1A08A3B95411.swift:1:48: error: expected '{' after 'switch' subject expression\\n1 |  switch initx {}as borrowing borrowing x::value\\n  |                                                `- error: expected '{' after 'switch' subject expression\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\".DO\\t[identifierToken]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector ]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"type\\t[typeIdentifier]\",\"parameterModifier\\t[\\\"borrowing\\\"]\",\"type\\t[parameterModifier >->(\\\"~\\\") type]\",\"coercingOperator\\t[\\\"as\\\" type]\",\".OPT\\t[coercingOperator]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"switchExpression\\t[\\\"switch\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"effectfulConditional\\t[conditionalExpression]\",\"expression\\t[effectfulConditional ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":122,\"descriptorCount\":330,\"duplicateDescriptorCount\":0,\"oraclePruned\":228,\"parseSeconds\":0.002315998077392578,\"sourceLength\":47,\"suppressedDescriptorCount\":36,\"tokenCount\":10,\"yieldCount\":307},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          SequenceExpr\\n            ExprList\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"initx\\\") \\\"initx\\\"\\n                LabeledExprList\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n              UnresolvedAsExpr\\n                keyword(SwiftSyntax.Keyword.as) \\\"as\\\"\\n              TypeExpr\\n                AttributedType\\n                  TypeSpecifierList\\n                    SimpleTypeSpecifier\\n                      keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n                    SimpleTypeSpecifier\\n                      keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n                  AttributeList\\n                  TypeSpecifierList\\n                  IdentifierType\\n                    ModuleSelector\\n                      identifier(\\\"x\\\") \\\"x\\\"\\n                      colonColon \\\"::\\\"\\n                    identifier(\\\"value\\\") \\\"value\\\"\\n          SwitchCaseList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

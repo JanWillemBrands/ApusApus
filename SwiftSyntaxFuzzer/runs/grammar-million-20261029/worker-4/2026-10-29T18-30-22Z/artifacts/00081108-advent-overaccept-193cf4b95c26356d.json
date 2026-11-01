@@ -1,0 +1,75 @@
+{
+  "event" : {
+    "artifact" : "00081108-advent-overaccept-193cf4b95c26356d.json",
+    "durationSeconds" : 3.7697129249572754,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=119",
+    "index" : 81108,
+    "seed" : 1663247169048140644,
+    "signalHash" : "f50634fc16a9df61",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|'<value>' may only be used on parameters",
+    "sourceHash" : "193cf4b95c26356d",
+    "sourceLength" : 56,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "fallthrough;T:do throws(each inout ~[xx .x::default]){};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          PackElementType\n            keyword(SwiftSyntax.Keyword.each) \"each\"\n            AttributedType\n              TypeSpecifierList\n                SimpleTypeSpecifier\n                  keyword(SwiftSyntax.Keyword.inout) \"inout\"\n              AttributeList\n              TypeSpecifierList\n              ArrayType\n                leftSquare \"[\"\n                IdentifierType\n                  ModuleSelector\n                    identifier(\"xx\") \"xx\"\n                    colonColon \"::\"\n                  identifier(\"default\") \"default\"\n                rightSquare \"]\"\n          rightParen \")\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B1B2F42A-3F4E-4091-A902-553A868EABD1.swift:1:16: error: 'inout' may only be used on parameters\n1 | do throws(each inout [xx ::default]){}\n  |                `- error: 'inout' may only be used on parameters\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B1B2F42A-3F4E-4091-A902-553A868EABD1.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n1 | do throws(each inout [xx ::default]){}\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "lexerClassifiedKeyword\t[\"default\"]",
+      ".DO\t[lexerClassifiedKeyword]",
+      "identifierToken\t[identifier]",
+      "moduleSelector\t[identifierToken \"::\" >n<]",
+      "typeName\t[moduleSelector ]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "type\t[typeIdentifier]",
+      "arrayType\t[\"[\" type \"]\"]",
+      "type\t[arrayType]",
+      "parameterModifier\t[\"inout\"]",
+      "type\t[parameterModifier >->(\"~\") type]",
+      "packElementType\t[\"each\" >->(\"each\") type]",
+      "packType\t[packElementType]",
+      "type\t[packType]",
+      ".OPT\t[\"(\" type \")\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 76,
+      "descriptorCount" : 182,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 53,
+      "parseSeconds" : 0.002774953842163086,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 15,
+      "tokenCount" : 13,
+      "yieldCount" : 118
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n          leftParen \"(\"\n          PackElementType\n            keyword(SwiftSyntax.Keyword.each) \"each\"\n            MissingType\n        CodeBlock\n          CodeBlockItemList\n            CodeBlockItem\n              VariableDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.inout) \"inout\"\n                PatternBindingList\n                  PatternBinding\n                    MissingPattern\n                    InitializerClause\n                      ArrayExpr\n                        leftSquare \"[\"\n                        ArrayElementList\n                          ArrayElement\n                            DeclReferenceExpr\n                              ModuleSelector\n                                identifier(\"xx\") \"xx\"\n                                colonColon \"::\"\n                              identifier(\"default\") \"default\"\n                        rightSquare \"]\"\n            CodeBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  rightParen \")\"\n                  leftBrace \"{\"\n                  rightBrace \"}\"\n        CatchClauseList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 49,
+  "source" : "do throws(each inout [xx ::default]){}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          PackElementType\\n            keyword(SwiftSyntax.Keyword.each) \\\"each\\\"\\n            AttributedType\\n              TypeSpecifierList\\n                SimpleTypeSpecifier\\n                  keyword(SwiftSyntax.Keyword.inout) \\\"inout\\\"\\n              AttributeList\\n              TypeSpecifierList\\n              ArrayType\\n                leftSquare \\\"[\\\"\\n                IdentifierType\\n                  ModuleSelector\\n                    identifier(\\\"xx\\\") \\\"xx\\\"\\n                    colonColon \\\"::\\\"\\n                  identifier(\\\"default\\\") \\\"default\\\"\\n                rightSquare \\\"]\\\"\\n          rightParen \\\")\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B1B2F42A-3F4E-4091-A902-553A868EABD1.swift:1:16: error: 'inout' may only be used on parameters\\n1 | do throws(each inout [xx ::default]){}\\n  |                `- error: 'inout' may only be used on parameters\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B1B2F42A-3F4E-4091-A902-553A868EABD1.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n1 | do throws(each inout [xx ::default]){}\\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"lexerClassifiedKeyword\\t[\\\"default\\\"]\",\".DO\\t[lexerClassifiedKeyword]\",\"identifierToken\\t[identifier]\",\"moduleSelector\\t[identifierToken \\\"::\\\" >n<]\",\"typeName\\t[moduleSelector ]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"type\\t[typeIdentifier]\",\"arrayType\\t[\\\"[\\\" type \\\"]\\\"]\",\"type\\t[arrayType]\",\"parameterModifier\\t[\\\"inout\\\"]\",\"type\\t[parameterModifier >->(\\\"~\\\") type]\",\"packElementType\\t[\\\"each\\\" >->(\\\"each\\\") type]\",\"packType\\t[packElementType]\",\"type\\t[packType]\",\".OPT\\t[\\\"(\\\" type \\\")\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":76,\"descriptorCount\":182,\"duplicateDescriptorCount\":0,\"oraclePruned\":53,\"parseSeconds\":0.002774953842163086,\"sourceLength\":38,\"suppressedDescriptorCount\":15,\"tokenCount\":13,\"yieldCount\":118},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n          leftParen \\\"(\\\"\\n          PackElementType\\n            keyword(SwiftSyntax.Keyword.each) \\\"each\\\"\\n            MissingType\\n        CodeBlock\\n          CodeBlockItemList\\n            CodeBlockItem\\n              VariableDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.inout) \\\"inout\\\"\\n                PatternBindingList\\n                  PatternBinding\\n                    MissingPattern\\n                    InitializerClause\\n                      ArrayExpr\\n                        leftSquare \\\"[\\\"\\n                        ArrayElementList\\n                          ArrayElement\\n                            DeclReferenceExpr\\n                              ModuleSelector\\n                                identifier(\\\"xx\\\") \\\"xx\\\"\\n                                colonColon \\\"::\\\"\\n                              identifier(\\\"default\\\") \\\"default\\\"\\n                        rightSquare \\\"]\\\"\\n            CodeBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  rightParen \\\")\\\"\\n                  leftBrace \\\"{\\\"\\n                  rightBrace \\\"}\\\"\\n        CatchClauseList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

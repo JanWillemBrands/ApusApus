@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00019918-advent-overaccept-b7b2068cdc8b609c.json",
+    "durationSeconds" : 4.057098031044006,
+    "exitCode" : 1,
+    "generator" : "wide:top:splice:translated:testErrors3#1",
+    "index" : 19918,
+    "seed" : 3326660242440995284,
+    "signalHash" : "80bbb23262c67dfc",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected '<value>' after '<value>' pattern",
+    "sourceHash" : "b7b2068cdc8b609c",
+    "sourceLength" : 82,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "do {\n  throw opaque_error()\n} catch MSV=Foo, MSV.CarriesInt(let num) {\n} catch {\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n              CatchItem\n                ExpressionPattern\n                  SequenceExpr\n                    ExprList\n                      DeclReferenceExpr\n                        identifier(\"MSV\") \"MSV\"\n                      AssignmentExpr\n                        equal \"=\"\n                      FunctionCallExpr\n                        DeclReferenceExpr\n                          identifier(\"Foo\") \"Foo\"\n                        leftParen \"(\"\n                        LabeledExprList\n                        rightParen \")\"\n                        MultipleTrailingClosureElementList\n            CodeBlock\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-95E3E0DD-E80C-4892-8315-4C32153F4F56.swift:2:12: error: expected '{' after 'catch' pattern\n1 | do {\n2 | } catch MSV=Foo () {\n  |            `- error: expected '{' after 'catch' pattern\n3 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "ifConfigSameLine\t[]",
+      "assignmentOperator\t[>s< \"=\" >s<]",
+      "infixExpression\t[assignmentOperator ifConfigSameLine expression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "catchPattern\t[matchPattern ]",
+      "catchPatternList\t[catchPattern ]",
+      ".OPT\t[catchPatternList]",
+      "catchClause\t[\"catch\"  codeBlock]",
+      "catchClauses\t[catchClause ]",
+      ".OPT\t[catchClauses]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 126,
+      "descriptorCount" : 297,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 181,
+      "parseSeconds" : 0.002145051956176758,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 34,
+      "tokenCount" : 11,
+      "yieldCount" : 280
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n          CatchClause\n            keyword(SwiftSyntax.Keyword.catch) \"catch\"\n            CatchItemList\n              CatchItem\n                ExpressionPattern\n                  DeclReferenceExpr\n                    identifier(\"MSV\") \"MSV\"\n            CodeBlock\n              UnexpectedNodes\n                equal \"=\"\n                identifier(\"Foo\") \"Foo\"\n                leftParen \"(\"\n                rightParen \")\"\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "do {\n} catch MSV=Foo () {\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n              CatchItem\\n                ExpressionPattern\\n                  SequenceExpr\\n                    ExprList\\n                      DeclReferenceExpr\\n                        identifier(\\\"MSV\\\") \\\"MSV\\\"\\n                      AssignmentExpr\\n                        equal \\\"=\\\"\\n                      FunctionCallExpr\\n                        DeclReferenceExpr\\n                          identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                        leftParen \\\"(\\\"\\n                        LabeledExprList\\n                        rightParen \\\")\\\"\\n                        MultipleTrailingClosureElementList\\n            CodeBlock\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-95E3E0DD-E80C-4892-8315-4C32153F4F56.swift:2:12: error: expected '{' after 'catch' pattern\\n1 | do {\\n2 | } catch MSV=Foo () {\\n  |            `- error: expected '{' after 'catch' pattern\\n3 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"ifConfigSameLine\\t[]\",\"assignmentOperator\\t[>s< \\\"=\\\" >s<]\",\"infixExpression\\t[assignmentOperator ifConfigSameLine expression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"catchPattern\\t[matchPattern ]\",\"catchPatternList\\t[catchPattern ]\",\".OPT\\t[catchPatternList]\",\"catchClause\\t[\\\"catch\\\"  codeBlock]\",\"catchClauses\\t[catchClause ]\",\".OPT\\t[catchClauses]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":126,\"descriptorCount\":297,\"duplicateDescriptorCount\":0,\"oraclePruned\":181,\"parseSeconds\":0.002145051956176758,\"sourceLength\":27,\"suppressedDescriptorCount\":34,\"tokenCount\":11,\"yieldCount\":280},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n          CatchClause\\n            keyword(SwiftSyntax.Keyword.catch) \\\"catch\\\"\\n            CatchItemList\\n              CatchItem\\n                ExpressionPattern\\n                  DeclReferenceExpr\\n                    identifier(\\\"MSV\\\") \\\"MSV\\\"\\n            CodeBlock\\n              UnexpectedNodes\\n                equal \\\"=\\\"\\n                identifier(\\\"Foo\\\") \\\"Foo\\\"\\n                leftParen \\\"(\\\"\\n                rightParen \\\")\\\"\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

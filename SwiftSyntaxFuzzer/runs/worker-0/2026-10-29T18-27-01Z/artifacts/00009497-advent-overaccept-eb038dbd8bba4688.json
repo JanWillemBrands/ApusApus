@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00009497-advent-overaccept-eb038dbd8bba4688.json",
+    "durationSeconds" : 4.148361086845398,
+    "exitCode" : 1,
+    "generator" : "wide:struct-member:newline+space+newline:type:testInverseTypesInParameter#8",
+    "index" : 9497,
+    "seed" : 11400602263018726675,
+    "signalHash" : "a87b5854af4ea240",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected '<value>' separator",
+    "sourceHash" : "eb038dbd8bba4688",
+    "sourceLength" : 60,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "struct Fuzz {\ntypealias T =\n(borrowing ~ Copyable)\n-> Void\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"Fuzz\") \"Fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeAliasDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.typealias) \"typealias\"\n                identifier(\"T\") \"T\"\n                TypeInitializerClause\n                  equal \"=\"\n                  TupleType\n                    leftParen \"(\"\n                    TupleTypeElementList\n                      TupleTypeElement\n                        AttributedType\n                          TypeSpecifierList\n                            SimpleTypeSpecifier\n                              keyword(SwiftSyntax.Keyword.borrowing) \"borrowing\"\n                          AttributeList\n                          TypeSpecifierList\n                          SuppressedType\n                            prefixOperator(\"~\") \"~\"\n                            IdentifierType\n                              identifier(\"Copyable\") \"Copyable\"\n                    rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2D000375-8E33-477C-BD54-4564B153A66C.swift:3:12: error: expected ',' separator\n1 |  Fuzz {\n2 | typealias T =\n3 | (borrowing ~ Copyable)\n  |            `- error: expected ',' separator\n4 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "simpleType\t[typeIdentifier]",
+      "parameterModifier\t[\"borrowing\"]",
+      "type\t[parameterModifier <s> \"~\" >n< simpleType]",
+      "tupleTypeElement\t[type]",
+      "type\t[\"(\" tupleTypeElement \")\"]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "typealiasAssignment\t[assignmentOperator type]",
+      "typealiasName\t[identifierToken]",
+      "typealiasDeclaration\t[  \"typealias\" typealiasName  typealiasAssignment ]",
+      "declaration\t[typealiasDeclaration]",
+      "statement\t[declaration]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "newlineOpenedClosure\t[\"{\" <n>   \"}\"]",
+      "trailingClosure\t[newlineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "ifConfigSameLine\t[]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 117,
+      "descriptorCount" : 259,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 105,
+      "parseSeconds" : 0.0022280216217041016,
+      "sourceLength" : 46,
+      "suppressedDescriptorCount" : 37,
+      "tokenCount" : 11,
+      "yieldCount" : 204
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"Fuzz\") \"Fuzz\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeAliasDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.typealias) \"typealias\"\n                identifier(\"T\") \"T\"\n                TypeInitializerClause\n                  equal \"=\"\n                  TupleType\n                    leftParen \"(\"\n                    TupleTypeElementList\n                      TupleTypeElement\n                        IdentifierType\n                          identifier(\"borrowing\") \"borrowing\"\n                    UnexpectedNodes\n                      binaryOperator(\"~\") \"~\"\n                      identifier(\"Copyable\") \"Copyable\"\n                    rightParen \")\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 42,
+  "source" : " Fuzz {\ntypealias T =\n(borrowing ~ Copyable)\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeAliasDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.typealias) \\\"typealias\\\"\\n                identifier(\\\"T\\\") \\\"T\\\"\\n                TypeInitializerClause\\n                  equal \\\"=\\\"\\n                  TupleType\\n                    leftParen \\\"(\\\"\\n                    TupleTypeElementList\\n                      TupleTypeElement\\n                        AttributedType\\n                          TypeSpecifierList\\n                            SimpleTypeSpecifier\\n                              keyword(SwiftSyntax.Keyword.borrowing) \\\"borrowing\\\"\\n                          AttributeList\\n                          TypeSpecifierList\\n                          SuppressedType\\n                            prefixOperator(\\\"~\\\") \\\"~\\\"\\n                            IdentifierType\\n                              identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2D000375-8E33-477C-BD54-4564B153A66C.swift:3:12: error: expected ',' separator\\n1 |  Fuzz {\\n2 | typealias T =\\n3 | (borrowing ~ Copyable)\\n  |            `- error: expected ',' separator\\n4 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"simpleType\\t[typeIdentifier]\",\"parameterModifier\\t[\\\"borrowing\\\"]\",\"type\\t[parameterModifier <s> \\\"~\\\" >n< simpleType]\",\"tupleTypeElement\\t[type]\",\"type\\t[\\\"(\\\" tupleTypeElement \\\")\\\"]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"typealiasAssignment\\t[assignmentOperator type]\",\"typealiasName\\t[identifierToken]\",\"typealiasDeclaration\\t[  \\\"typealias\\\" typealiasName  typealiasAssignment ]\",\"declaration\\t[typealiasDeclaration]\",\"statement\\t[declaration]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"newlineOpenedClosure\\t[\\\"{\\\" <n>   \\\"}\\\"]\",\"trailingClosure\\t[newlineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"ifConfigSameLine\\t[]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":117,\"descriptorCount\":259,\"duplicateDescriptorCount\":0,\"oraclePruned\":105,\"parseSeconds\":0.0022280216217041016,\"sourceLength\":46,\"suppressedDescriptorCount\":37,\"tokenCount\":11,\"yieldCount\":204},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"Fuzz\\\") \\\"Fuzz\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeAliasDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.typealias) \\\"typealias\\\"\\n                identifier(\\\"T\\\") \\\"T\\\"\\n                TypeInitializerClause\\n                  equal \\\"=\\\"\\n                  TupleType\\n                    leftParen \\\"(\\\"\\n                    TupleTypeElementList\\n                      TupleTypeElement\\n                        IdentifierType\\n                          identifier(\\\"borrowing\\\") \\\"borrowing\\\"\\n                    UnexpectedNodes\\n                      binaryOperator(\\\"~\\\") \\\"~\\\"\\n                      identifier(\\\"Copyable\\\") \\\"Copyable\\\"\\n                    rightParen \\\")\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

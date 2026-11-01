@@ -20,7 +20,7 @@ import ./LEMMAS.bend as Lemma
 # none, so nothing outranks the choice and the step stays.
 #
 # A removal is only handed out with a certificate that SPEC.bend's own definitions check:
-# a forest for the sibling's items over the same tokens, and a set C of nonterminals
+# a forest for the sibling's items over the same tokens, whose own steps are all kept, and a set C of nonterminals
 # containing every node that can be above the choice over the same tokens, such that the
 # forest has no node of C over those tokens. That is the rival of SPEC.bend, which must
 # not go round a cycle back to a node above it. C is grown from the choice's nonterminal
@@ -285,6 +285,29 @@ def anyForestOk(fs: +List<+List<Spec.Tree>>, +grammar: +List<Spec.Production>, +
     case Con{+f, rest}:
       Bool.or(forestOk(grammar, items, c, w, f), anyForestOk(rest, grammar, items, c, w))
 
+# The steps of a rival forest where it stands: the children of a node of production
+# `who`, or the sequence of alternative `who` of the bracket, from position i.
+def rivalWalk(d: Done, +who: Nat, +i: Nat, +f: +List<Spec.Tree>) -> +List<Spec.Bsr>:
+  match d:
+    case DoneProd{q}:
+      Spec.walk(f, False{}, who, [], 0n, i, i)
+    case DoneAlt{+index, +rb, a, alts}:
+      Spec.walk(f, False{}, index, List.append(&2, Nat, Gll.reverseOnto(rb, []), [who]), 0n, i, i)
+    case NotDone{}:
+      []
+
+# A rival forest passes when it is SPEC's rival and uses only kept steps itself: then a
+# tree that takes the rival's place uses only kept steps there too.
+def rivalOk(+d: Done, +grammar: +List<Spec.Production>, +ks: +List<Spec.Bsr>, +who: Nat, +i: Nat, +items: +List<Spec.Item>, +c: +List<Nat>, +w: +List<Nat>, +f: +List<Spec.Tree>) -> Bool:
+  Bool.and(forestOk(grammar, items, c, w, f), Spec.allIn(rivalWalk(d, who, i, f), ks))
+
+def anyRivalOk(fs: +List<+List<Spec.Tree>>, +d: Done, +grammar: +List<Spec.Production>, +ks: +List<Spec.Bsr>, +who: Nat, +i: Nat, +items: +List<Spec.Item>, +c: +List<Nat>, +w: +List<Nat>) -> Bool:
+  match fs:
+    case Nil{}:
+      False{}
+    case Con{+f, rest}:
+      Bool.or(rivalOk(d, grammar, ks, who, i, items, c, w, f), anyRivalOk(rest, d, grammar, ks, who, i, items, c, w))
+
 def nodeForests(cands: +List<Witness.Cand>) -> +List<+List<Spec.Tree>>:
   match cands:
     case Nil{}:
@@ -332,17 +355,43 @@ def choiceNt(d: Done, +grammar: +List<Spec.Production>) -> Nat:
     case NotDone{}:
       0n
 
-def certOk(+fuel: Nat, +grammar: +List<Spec.Production>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +d: Done, +who: Nat, +i: Nat, +j: Nat) -> Bool:
+def certOk(+fuel: Nat, +grammar: +List<Spec.Production>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>, +d: Done, +who: Nat, +i: Nat, +j: Nat) -> Bool:
   +w = tokensFrom(input, i, j)
   +c = grow(List.length(&2, Spec.Production, grammar), set, grammar, input, [choiceNt(d, grammar)], w)
-  Bool.and(Bool.and(natIn(choiceNt(d, grammar), c), closedFor(set, grammar, input, c, w)), anyForestOk(rivalForests(d, fuel, grammar, input, set, who, i, j), grammar, rivalItems(d, grammar, who), c, w))
+  Bool.and(Bool.and(natIn(choiceNt(d, grammar), c), closedFor(set, grammar, input, c, w)), anyRivalOk(rivalForests(d, fuel, grammar, input, ks, who, i, j), d, grammar, ks, who, i, rivalItems(d, grammar, who), c, w))
 
-def verdictOk(v: Verdict, +fuel: Nat, +grammar: +List<Spec.Production>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +d: Done, +i: Nat, +j: Nat) -> Bool:
+# A removal passes when some sibling of higher rank, not necessarily the one the verdict
+# named, has a certificate that passes. The first one found may itself be outranked, and
+# then its forest holds a removed step; one of the highest rank has none.
+def certAnyProd(n: Nat, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>, +x: Nat, +q: Nat, +i: Nat, +j: Nat) -> Bool:
+  match n:
+    case 0n:
+      False{}
+    case 1n+(+m):
+      Bool.or(Bool.and(prodCand(grammar, marks, x, q, m), certOk(fuel, grammar, input, set, ks, DoneProd{q}, m, i, j)), certAnyProd(m, fuel, grammar, marks, input, set, ks, x, q, i, j))
+
+def certAnyAlt(n: Nat, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>, +index: Nat, +rb: +List<Nat>, +a: Nat, +alts: +List<+List<Spec.Item>>, +i: Nat, +j: Nat) -> Bool:
+  match n:
+    case 0n:
+      False{}
+    case 1n+(+m):
+      Bool.or(Bool.and(altCand(marks, index, Gll.reverseOnto(rb, []), a, m), certOk(fuel, grammar, input, set, ks, DoneAlt{index, rb, a, alts}, m, i, j)), certAnyAlt(m, fuel, grammar, marks, input, set, ks, index, rb, a, alts, i, j))
+
+def certAny(d: Done, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>, +i: Nat, +j: Nat) -> Bool:
+  match d:
+    case DoneProd{+q}:
+      certAnyProd(List.length(&2, Spec.Production, grammar), fuel, grammar, marks, input, set, ks, Spec.lhsOf(grammar, q), q, i, j)
+    case DoneAlt{+index, +rb, +a, +alts}:
+      certAnyAlt(List.length(&2, +List<Spec.Item>, alts), fuel, grammar, marks, input, set, ks, index, rb, a, alts, i, j)
+    case NotDone{}:
+      False{}
+
+def verdictOk(v: Verdict, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>, +d: Done, +i: Nat, +j: Nat) -> Bool:
   match v:
     case Keep{}:
       True{}
-    case Remove{+who}:
-      certOk(fuel, grammar, input, set, d, who, i, j)
+    case Remove{who}:
+      certAny(d, fuel, grammar, marks, input, set, ks, i, j)
     case Unsure{}:
       False{}
 
@@ -392,18 +441,18 @@ def grouped(+grammar: +List<Spec.Production>, e: Spec.Bsr) -> Bool:
 
 # ---- The oracle ----
 
-def stepOk(+fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, e: Spec.Bsr) -> Bool:
+def stepOk(+fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>, e: Spec.Bsr) -> Bool:
   match e:
     case Spec.Bsr{Spec.Slot{+index, +path}, +i, +k, +j}:
       +d = doneAt(Gll.reverseOnto(path, []), grammar, index)
-      Bool.and(groupedAt(Gll.reverseOnto(path, []), grammar, index), verdictOk(verdictFor(d, fuel, grammar, marks, input, i, j), fuel, grammar, input, set, d, i, j))
+      Bool.and(groupedAt(Gll.reverseOnto(path, []), grammar, index), verdictOk(verdictFor(d, fuel, grammar, marks, input, i, j), fuel, grammar, marks, input, set, ks, d, i, j))
 
-def allStepsOk(es: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>) -> Bool:
+def allStepsOk(es: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +ks: +List<Spec.Bsr>) -> Bool:
   match es:
     case Nil{}:
       True{}
     case Con{+e, rest}:
-      Bool.and(stepOk(fuel, grammar, marks, input, set, e), allStepsOk(rest, fuel, grammar, marks, input, set))
+      Bool.and(stepOk(fuel, grammar, marks, input, set, ks, e), allStepsOk(rest, fuel, grammar, marks, input, set, ks))
 
 def kept(es: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.Mark>, +input: +List<Nat>) -> +List<Spec.Bsr>:
   match es:
@@ -423,7 +472,8 @@ def preferFrom(found: Maybe<&2, +List<Spec.Bsr>>, +fuel: Nat, +grammar: +List<Sp
   match found:
     case Some{+set}:
       +f = fuel
-      preferPick(allStepsOk(set, f, grammar, marks, input, set), kept(set, f, grammar, marks, input))
+      +ks = kept(set, f, grammar, marks, input)
+      preferPick(allStepsOk(set, f, grammar, marks, input, set, ks), ks)
     case None{}:
       None{}
 

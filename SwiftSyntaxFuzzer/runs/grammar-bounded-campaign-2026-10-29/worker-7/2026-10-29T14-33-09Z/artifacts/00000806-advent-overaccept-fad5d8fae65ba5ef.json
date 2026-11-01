@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00000806-advent-overaccept-fad5d8fae65ba5ef.json",
+    "durationSeconds" : 0.579355001449585,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=93",
+    "index" : 806,
+    "seed" : 17418699776768529804,
+    "signalHash" : "2dd6df0efb9160e1",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|extra tokens following conditional compilation directive",
+    "sourceHash" : "fad5d8fae65ba5ef",
+    "sourceLength" : 48,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if consume ??await == consume any some\n#endif\n;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            SequenceExpr\n              ExprList\n                ConsumeExpr\n                  keyword(SwiftSyntax.Keyword.consume) \"consume\"\n                  MissingExpr\n                    identifier(\"<#expression#>\") \"<#expression#>\"\n                BinaryOperatorExpr\n                  binaryOperator(\"==\") \"==\"\n                DeclReferenceExpr\n                  identifier(\"consume\") \"consume\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1E0231F1-6D69-4307-84B6-24EC7F1AB854.swift:1:13: error: extra tokens following conditional compilation directive\n1 | #if consume ??await == consume\n  |             `- error: extra tokens following conditional compilation directive\n2 | #endif\n3 | ;\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-1E0231F1-6D69-4307-84B6-24EC7F1AB854.swift:3:1: error: ';' statements are not allowed\n1 | #if consume ??await == consume\n2 | #endif\n3 | ;\n  | `- error: ';' statements are not allowed\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await »"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "endifDirective\t[\"#endif\" <n>]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "ifConfigSameLine\t[>n<]",
+      "operator\t[nonArrowOperatorToken]",
+      "infixOperator\t[operator]",
+      "infixExpression\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "prefixExpression\t[\"consume\" >->(\"(\" \".\" \"[\" \"{\") <s> >n< prefixExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "ifDirective\t[\"#if\"]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlStatement\t[conditionalCompilationBlock]",
+      "statement\t[compilerControlStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 157,
+      "descriptorCount" : 316,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 105,
+      "parseSeconds" : 0.005038022994995117,
+      "sourceLength" : 39,
+      "suppressedDescriptorCount" : 21,
+      "tokenCount" : 9,
+      "yieldCount" : 186
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            SequenceExpr\n              ExprList\n                ConsumeExpr\n                  keyword(SwiftSyntax.Keyword.consume) \"consume\"\n                  PrefixOperatorExpr\n                    prefixOperator(\"??\") \"??\"\n                    DeclReferenceExpr\n                      identifier(\"await\") \"await\"\n                BinaryOperatorExpr\n                  binaryOperator(\"==\") \"==\"\n                DeclReferenceExpr\n                  identifier(\"consume\") \"consume\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n    CodeBlockItem\n      UnexpectedCodeDecl\n        UnexpectedNodes\n      semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 19,
+  "source" : "#if consume ??await == consume\n#endif\n;",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            SequenceExpr\\n              ExprList\\n                ConsumeExpr\\n                  keyword(SwiftSyntax.Keyword.consume) \\\"consume\\\"\\n                  MissingExpr\\n                    identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"==\\\") \\\"==\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"consume\\\") \\\"consume\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1E0231F1-6D69-4307-84B6-24EC7F1AB854.swift:1:13: error: extra tokens following conditional compilation directive\\n1 | #if consume ??await == consume\\n  |             `- error: extra tokens following conditional compilation directive\\n2 | #endif\\n3 | ;\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-1E0231F1-6D69-4307-84B6-24EC7F1AB854.swift:3:1: error: ';' statements are not allowed\\n1 | #if consume ??await == consume\\n2 | #endif\\n3 | ;\\n  | `- error: ';' statements are not allowed\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await »\"],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"ifConfigSameLine\\t[>n<]\",\"operator\\t[nonArrowOperatorToken]\",\"infixOperator\\t[operator]\",\"infixExpression\\t[<s> infixOperator <s> ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"prefixExpression\\t[\\\"consume\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") <s> >n< prefixExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"ifDirective\\t[\\\"#if\\\"]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlStatement\\t[conditionalCompilationBlock]\",\"statement\\t[compilerControlStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":157,\"descriptorCount\":316,\"duplicateDescriptorCount\":0,\"oraclePruned\":105,\"parseSeconds\":0.005038022994995117,\"sourceLength\":39,\"suppressedDescriptorCount\":21,\"tokenCount\":9,\"yieldCount\":186},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            SequenceExpr\\n              ExprList\\n                ConsumeExpr\\n                  keyword(SwiftSyntax.Keyword.consume) \\\"consume\\\"\\n                  PrefixOperatorExpr\\n                    prefixOperator(\\\"??\\\") \\\"??\\\"\\n                    DeclReferenceExpr\\n                      identifier(\\\"await\\\") \\\"await\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"==\\\") \\\"==\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"consume\\\") \\\"consume\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n    CodeBlockItem\\n      UnexpectedCodeDecl\\n        UnexpectedNodes\\n      semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -1,0 +1,70 @@
+{
+  "event" : {
+    "artifact" : "00018558-advent-overaccept-20eed12b66171029.json",
+    "durationSeconds" : 2.0484989881515503,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=85",
+    "index" : 18558,
+    "seed" : 1663247169042248335,
+    "signalHash" : "4dc2796a2dca4ead",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|consecutive statements on a line must be separated by '<value>'",
+    "sourceHash" : "20eed12b66171029",
+    "sourceLength" : 58,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "defer{yield consume any@differentiable(async,wrt:self)_;};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  AttributedType\n                    TypeSpecifierList\n                    AttributeList\n                      Attribute\n                        atSign \"@\"\n                        IdentifierType\n                          identifier(\"differentiable\") \"differentiable\"\n                        leftParen \"(\"\n                        DifferentiableAttributeArguments\n                          DifferentiabilityWithRespectToArgument\n                            keyword(SwiftSyntax.Keyword.wrt) \"wrt\"\n                            colon \":\"\n                            DifferentiabilityArgument\n                              keyword(SwiftSyntax.Keyword.self) \"self\"\n                        rightParen \")\"\n                    TypeSpecifierList\n                    IdentifierType\n                      wildcard \"_\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-ED197EC1-C631-462D-882F-C5C2429848C8.swift:1:11: error: consecutive statements on a line must be separated by ';'\n1 | defer{ any@differentiable(wrt:self)_}\n  |           `- error: consecutive statements on a line must be separated by ';'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-ED197EC1-C631-462D-882F-C5C2429848C8.swift:1:27: warning: '@differentiable' has been renamed to '@differentiable(reverse)' and will be removed in the next release\n1 | defer{ any@differentiable(wrt:self)_}\n  |                           `- warning: '@differentiable' has been renamed to '@differentiable(reverse)' and will be removed in the next release\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-ED197EC1-C631-462D-882F-C5C2429848C8.swift:1:36: error: expected declaration\n1 | defer{ any@differentiable(wrt:self)_}\n  |                                    `- error: expected declaration\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "placeholderType\t[\"_\"]",
+      "type\t[placeholderType]",
+      "differentiabilityArgument\t[\"self\"]",
+      "differentiableWrt\t[\"wrt\" \":\" differentiabilityArgument]",
+      "differentiableArguments\t[differentiableWrt]",
+      "typeAttribute\t[\"@\" >s< \"differentiable\" >s< \"(\" differentiableArguments \")\"]",
+      "type\t[typeAttribute type]",
+      "boxedProtocolConstraint\t[>->(\"__owned\" \"__shared\" \"_const\" \"any\" \"borrowing\" \"consuming\" \"inout\" \"isolated\" \"nonisolated\" \"sending\" \"some\") type]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 75,
+      "descriptorCount" : 166,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 69,
+      "parseSeconds" : 0.0019980669021606445,
+      "sourceLength" : 37,
+      "suppressedDescriptorCount" : 18,
+      "tokenCount" : 12,
+      "yieldCount" : 131
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              TypeExpr\n                SomeOrAnyType\n                  keyword(SwiftSyntax.Keyword.any) \"any\"\n                  MissingType\n            CodeBlockItem\n              MissingDecl\n                AttributeList\n                  Attribute\n                    atSign \"@\"\n                    IdentifierType\n                      identifier(\"differentiable\") \"differentiable\"\n                    leftParen \"(\"\n                    DifferentiableAttributeArguments\n                      DifferentiabilityWithRespectToArgument\n                        keyword(SwiftSyntax.Keyword.wrt) \"wrt\"\n                        colon \":\"\n                        DifferentiabilityArgument\n                          keyword(SwiftSyntax.Keyword.self) \"self\"\n                    rightParen \")\"\n                DeclModifierList\n            CodeBlockItem\n              DiscardAssignmentExpr\n                wildcard \"_\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 43,
+  "source" : "defer{ any@differentiable(wrt:self)_}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  AttributedType\\n                    TypeSpecifierList\\n                    AttributeList\\n                      Attribute\\n                        atSign \\\"@\\\"\\n                        IdentifierType\\n                          identifier(\\\"differentiable\\\") \\\"differentiable\\\"\\n                        leftParen \\\"(\\\"\\n                        DifferentiableAttributeArguments\\n                          DifferentiabilityWithRespectToArgument\\n                            keyword(SwiftSyntax.Keyword.wrt) \\\"wrt\\\"\\n                            colon \\\":\\\"\\n                            DifferentiabilityArgument\\n                              keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                        rightParen \\\")\\\"\\n                    TypeSpecifierList\\n                    IdentifierType\\n                      wildcard \\\"_\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-ED197EC1-C631-462D-882F-C5C2429848C8.swift:1:11: error: consecutive statements on a line must be separated by ';'\\n1 | defer{ any@differentiable(wrt:self)_}\\n  |           `- error: consecutive statements on a line must be separated by ';'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-ED197EC1-C631-462D-882F-C5C2429848C8.swift:1:27: warning: '@differentiable' has been renamed to '@differentiable(reverse)' and will be removed in the next release\\n1 | defer{ any@differentiable(wrt:self)_}\\n  |                           `- warning: '@differentiable' has been renamed to '@differentiable(reverse)' and will be removed in the next release\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-ED197EC1-C631-462D-882F-C5C2429848C8.swift:1:36: error: expected declaration\\n1 | defer{ any@differentiable(wrt:self)_}\\n  |                                    `- error: expected declaration\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"placeholderType\\t[\\\"_\\\"]\",\"type\\t[placeholderType]\",\"differentiabilityArgument\\t[\\\"self\\\"]\",\"differentiableWrt\\t[\\\"wrt\\\" \\\":\\\" differentiabilityArgument]\",\"differentiableArguments\\t[differentiableWrt]\",\"typeAttribute\\t[\\\"@\\\" >s< \\\"differentiable\\\" >s< \\\"(\\\" differentiableArguments \\\")\\\"]\",\"type\\t[typeAttribute type]\",\"boxedProtocolConstraint\\t[>->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"any\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\" \\\"some\\\") type]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":75,\"descriptorCount\":166,\"duplicateDescriptorCount\":0,\"oraclePruned\":69,\"parseSeconds\":0.0019980669021606445,\"sourceLength\":37,\"suppressedDescriptorCount\":18,\"tokenCount\":12,\"yieldCount\":131},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              TypeExpr\\n                SomeOrAnyType\\n                  keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                  MissingType\\n            CodeBlockItem\\n              MissingDecl\\n                AttributeList\\n                  Attribute\\n                    atSign \\\"@\\\"\\n                    IdentifierType\\n                      identifier(\\\"differentiable\\\") \\\"differentiable\\\"\\n                    leftParen \\\"(\\\"\\n                    DifferentiableAttributeArguments\\n                      DifferentiabilityWithRespectToArgument\\n                        keyword(SwiftSyntax.Keyword.wrt) \\\"wrt\\\"\\n                        colon \\\":\\\"\\n                        DifferentiabilityArgument\\n                          keyword(SwiftSyntax.Keyword.self) \\\"self\\\"\\n                    rightParen \\\")\\\"\\n                DeclModifierList\\n            CodeBlockItem\\n              DiscardAssignmentExpr\\n                wildcard \\\"_\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

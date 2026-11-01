@@ -1,0 +1,64 @@
+{
+  "event" : {
+    "artifact" : "00015734-tree-difference-a1a1eb36a4c59be4.json",
+    "durationSeconds" : 1.3936409950256348,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=43",
+    "index" : 15734,
+    "seed" : 1663247169042248335,
+    "signalHash" : "ace04b1410b1d670",
+    "signalSummary" : "tree-difference|line=9|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "a1a1eb36a4c59be4",
+    "sourceLength" : 15,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "defer{??await};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              MissingExpr\n                identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E795E215-E367-4FAA-9D16-88BD40DF9AD2.swift:1:7: error: '??' is not a prefix unary operator\n1 | defer{??await}\n  |       `- error: '??' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E795E215-E367-4FAA-9D16-88BD40DF9AD2.swift:1:9: error: cannot find 'await' in scope\n1 | defer{??await}\n  |         `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 43,
+      "descriptorCount" : 85,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 15,
+      "parseSeconds" : 0.002229928970336914,
+      "sourceLength" : 14,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 5,
+      "yieldCount" : 52
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              PrefixOperatorExpr\n                prefixOperator(\"??\") \"??\"\n                DeclReferenceExpr\n                  identifier(\"await\") \"await\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 14,
+  "source" : "defer{??await}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              MissingExpr\\n                identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E795E215-E367-4FAA-9D16-88BD40DF9AD2.swift:1:7: error: '??' is not a prefix unary operator\\n1 | defer{??await}\\n  |       `- error: '??' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E795E215-E367-4FAA-9D16-88BD40DF9AD2.swift:1:9: error: cannot find 'await' in scope\\n1 | defer{??await}\\n  |         `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «??await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":43,\"descriptorCount\":85,\"duplicateDescriptorCount\":0,\"oraclePruned\":15,\"parseSeconds\":0.002229928970336914,\"sourceLength\":14,\"suppressedDescriptorCount\":1,\"tokenCount\":5,\"yieldCount\":52},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              PrefixOperatorExpr\\n                prefixOperator(\\\"??\\\") \\\"??\\\"\\n                DeclReferenceExpr\\n                  identifier(\\\"await\\\") \\\"await\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

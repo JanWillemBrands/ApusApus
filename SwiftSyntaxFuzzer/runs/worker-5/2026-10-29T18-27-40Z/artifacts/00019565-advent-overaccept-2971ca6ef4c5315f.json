@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00019565-advent-overaccept-2971ca6ef4c5315f.json",
+    "durationSeconds" : 0.9987609386444092,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=178",
+    "index" : 19565,
+    "seed" : 13064010938106345112,
+    "signalHash" : "c19b8755f6be277f",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|all statements inside a switch must be covered by a '<value>' or '<value>'",
+    "sourceHash" : "2971ca6ef4c5315f",
+    "sourceLength" : 72,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "try?switch switch consume any __owned&==\\ x + ![:]{}{@rethrows default:}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          FunctionCallExpr\n            DeclReferenceExpr\n              identifier(\"consume\") \"consume\"\n            LabeledExprList\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n            MultipleTrailingClosureElementList\n          leftBrace \"{\"\n          SwitchCaseList\n            SwitchCase\n              Attribute\n                atSign \"@\"\n                IdentifierType\n                  identifier(\"rethrows\") \"rethrows\"\n              SwitchDefaultLabel\n                keyword(SwiftSyntax.Keyword.default) \"default\"\n                colon \":\"\n              CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2DE80B96-2272-487F-8C4B-565FD4CD75A3.swift:1:20: error: all statements inside a switch must be covered by a 'case' or 'default'\n1 |  switch consume {}{@rethrows default:}\n  |                    `- error: all statements inside a switch must be covered by a 'case' or 'default'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2DE80B96-2272-487F-8C4B-565FD4CD75A3.swift:1:30: error: 'default' label in a 'switch' must have at least one executable statement\n1 |  switch consume {}{@rethrows default:}\n  |                              `- error: 'default' label in a 'switch' must have at least one executable statement\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "attributeName\t[\"rethrows\"]",
+      "switchCaseAttribute\t[\"@\" >->(\"Self\") attributeName]",
+      ".OPT\t[switchCaseAttribute]",
+      "defaultLabel\t[ \"default\" \":\"]",
+      "switchCase\t[defaultLabel ]",
+      ".DO\t[switchCase]",
+      ".KLN\t[]",
+      "samelineOpenedClosure\t[\"{\" >n<   \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "ifConfigSameLine\t[]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "switchExpression\t[\"switch\" expressionIntroducerBoundary >->(\"{\") expression \"{\"  \"}\"]",
+      "conditionalExpression\t[switchExpression]",
+      "effectfulConditional\t[conditionalExpression]",
+      "expression\t[effectfulConditional ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 133,
+      "descriptorCount" : 283,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 149,
+      "parseSeconds" : 0.004691958427429199,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 27,
+      "tokenCount" : 10,
+      "yieldCount" : 228
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ExpressionStmt\n        SwitchExpr\n          keyword(SwiftSyntax.Keyword.switch) \"switch\"\n          FunctionCallExpr\n            DeclReferenceExpr\n              identifier(\"consume\") \"consume\"\n            LabeledExprList\n            ClosureExpr\n              leftBrace \"{\"\n              CodeBlockItemList\n              rightBrace \"}\"\n            MultipleTrailingClosureElementList\n          leftBrace \"{\"\n          SwitchCaseList\n            SwitchCase\n              Attribute\n                atSign \"@\"\n                IdentifierType\n              SwitchDefaultLabel\n                UnexpectedNodes\n                  keyword(SwiftSyntax.Keyword.rethrows) \"rethrows\"\n                keyword(SwiftSyntax.Keyword.default) \"default\"\n                colon \":\"\n              CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 37,
+  "source" : " switch consume {}{@rethrows default:}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          FunctionCallExpr\\n            DeclReferenceExpr\\n              identifier(\\\"consume\\\") \\\"consume\\\"\\n            LabeledExprList\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n            MultipleTrailingClosureElementList\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n            SwitchCase\\n              Attribute\\n                atSign \\\"@\\\"\\n                IdentifierType\\n                  identifier(\\\"rethrows\\\") \\\"rethrows\\\"\\n              SwitchDefaultLabel\\n                keyword(SwiftSyntax.Keyword.default) \\\"default\\\"\\n                colon \\\":\\\"\\n              CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2DE80B96-2272-487F-8C4B-565FD4CD75A3.swift:1:20: error: all statements inside a switch must be covered by a 'case' or 'default'\\n1 |  switch consume {}{@rethrows default:}\\n  |                    `- error: all statements inside a switch must be covered by a 'case' or 'default'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2DE80B96-2272-487F-8C4B-565FD4CD75A3.swift:1:30: error: 'default' label in a 'switch' must have at least one executable statement\\n1 |  switch consume {}{@rethrows default:}\\n  |                              `- error: 'default' label in a 'switch' must have at least one executable statement\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"attributeName\\t[\\\"rethrows\\\"]\",\"switchCaseAttribute\\t[\\\"@\\\" >->(\\\"Self\\\") attributeName]\",\".OPT\\t[switchCaseAttribute]\",\"defaultLabel\\t[ \\\"default\\\" \\\":\\\"]\",\"switchCase\\t[defaultLabel ]\",\".DO\\t[switchCase]\",\".KLN\\t[]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<   \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"ifConfigSameLine\\t[]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"switchExpression\\t[\\\"switch\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression \\\"{\\\"  \\\"}\\\"]\",\"conditionalExpression\\t[switchExpression]\",\"effectfulConditional\\t[conditionalExpression]\",\"expression\\t[effectfulConditional ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":133,\"descriptorCount\":283,\"duplicateDescriptorCount\":0,\"oraclePruned\":149,\"parseSeconds\":0.004691958427429199,\"sourceLength\":38,\"suppressedDescriptorCount\":27,\"tokenCount\":10,\"yieldCount\":228},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ExpressionStmt\\n        SwitchExpr\\n          keyword(SwiftSyntax.Keyword.switch) \\\"switch\\\"\\n          FunctionCallExpr\\n            DeclReferenceExpr\\n              identifier(\\\"consume\\\") \\\"consume\\\"\\n            LabeledExprList\\n            ClosureExpr\\n              leftBrace \\\"{\\\"\\n              CodeBlockItemList\\n              rightBrace \\\"}\\\"\\n            MultipleTrailingClosureElementList\\n          leftBrace \\\"{\\\"\\n          SwitchCaseList\\n            SwitchCase\\n              Attribute\\n                atSign \\\"@\\\"\\n                IdentifierType\\n              SwitchDefaultLabel\\n                UnexpectedNodes\\n                  keyword(SwiftSyntax.Keyword.rethrows) \\\"rethrows\\\"\\n                keyword(SwiftSyntax.Keyword.default) \\\"default\\\"\\n                colon \\\":\\\"\\n              CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

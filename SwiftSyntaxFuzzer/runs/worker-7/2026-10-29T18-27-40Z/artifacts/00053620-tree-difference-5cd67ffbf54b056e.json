@@ -1,0 +1,78 @@
+{
+  "event" : {
+    "artifact" : "00053620-tree-difference-5cd67ffbf54b056e.json",
+    "durationSeconds" : 1.4888839721679688,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=106",
+    "index" : 53620,
+    "seed" : 17418699775809191502,
+    "signalHash" : "00d7037121935028",
+    "signalSummary" : "tree-difference|line=16|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "5cd67ffbf54b056e",
+    "sourceLength" : 48,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "guard case async = any __shared + any _x else{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DeclReferenceExpr\n                  identifier(\"async\") \"async\"\n              InitializerClause\n                equal \"=\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-59B3FC3B-05A9-45CD-9491-6C00832D3CCC.swift:1:24: error: cannot find type '__shared' in scope\n1 | guard case async = any __shared else{}\n  |                        `- error: cannot find type '__shared' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-59B3FC3B-05A9-45CD-9491-6C00832D3CCC.swift:1:12: error: generic parameter 'Success' could not be inferred\n1 | guard case async = any __shared else{}\n  |            `- error: generic parameter 'Success' could not be inferred\n\n_Concurrency.async:4:13: note: in call to function 'async(priority:operation:)'\n2 | @available(*, deprecated, message: \"`async` was replaced by `Task.init` and will be removed shortly.\")\n3 | @discardableResult\n4 | public func async<Success>(priority: TaskPriority? = nil, operation: __owned @escaping @isolated(any) @Sendable () async -> Success) -> Task<Success, Never> where Success : Sendable\n  |             `- note: in call to function 'async(priority:operation:)'\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __shared »"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "boxedProtocolKeywordName\t[\"__shared\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expressionPattern\t[expression]",
+      "matchPattern\t[expressionPattern]",
+      "caseCondition\t[\"case\" matchPattern initializer]",
+      "bindingCondition\t[caseCondition]",
+      "conditionList\t[bindingCondition ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "guardStatement\t[\"guard\" expressionIntroducerBoundary >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 112,
+      "descriptorCount" : 260,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 119,
+      "parseSeconds" : 0.0019530057907104492,
+      "sourceLength" : 38,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 9,
+      "yieldCount" : 193
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MatchingPatternCondition\n              keyword(SwiftSyntax.Keyword.case) \"case\"\n              ExpressionPattern\n                DeclReferenceExpr\n                  identifier(\"async\") \"async\"\n              InitializerClause\n                equal \"=\"\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    IdentifierType\n                      identifier(\"__shared\") \"__shared\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 17,
+  "source" : "guard case async = any __shared else{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DeclReferenceExpr\\n                  identifier(\\\"async\\\") \\\"async\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-59B3FC3B-05A9-45CD-9491-6C00832D3CCC.swift:1:24: error: cannot find type '__shared' in scope\\n1 | guard case async = any __shared else{}\\n  |                        `- error: cannot find type '__shared' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-59B3FC3B-05A9-45CD-9491-6C00832D3CCC.swift:1:12: error: generic parameter 'Success' could not be inferred\\n1 | guard case async = any __shared else{}\\n  |            `- error: generic parameter 'Success' could not be inferred\\n\\n_Concurrency.async:4:13: note: in call to function 'async(priority:operation:)'\\n2 | @available(*, deprecated, message: \\\"`async` was replaced by `Task.init` and will be removed shortly.\\\")\\n3 | @discardableResult\\n4 | public func async<Success>(priority: TaskPriority? = nil, operation: __owned @escaping @isolated(any) @Sendable () async -> Success) -> Task<Success, Never> where Success : Sendable\\n  |             `- note: in call to function 'async(priority:operation:)'\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __shared »\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"boxedProtocolKeywordName\\t[\\\"__shared\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expressionPattern\\t[expression]\",\"matchPattern\\t[expressionPattern]\",\"caseCondition\\t[\\\"case\\\" matchPattern initializer]\",\"bindingCondition\\t[caseCondition]\",\"conditionList\\t[bindingCondition ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"guardStatement\\t[\\\"guard\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":112,\"descriptorCount\":260,\"duplicateDescriptorCount\":0,\"oraclePruned\":119,\"parseSeconds\":0.0019530057907104492,\"sourceLength\":38,\"suppressedDescriptorCount\":22,\"tokenCount\":9,\"yieldCount\":193},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MatchingPatternCondition\\n              keyword(SwiftSyntax.Keyword.case) \\\"case\\\"\\n              ExpressionPattern\\n                DeclReferenceExpr\\n                  identifier(\\\"async\\\") \\\"async\\\"\\n              InitializerClause\\n                equal \\\"=\\\"\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    IdentifierType\\n                      identifier(\\\"__shared\\\") \\\"__shared\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

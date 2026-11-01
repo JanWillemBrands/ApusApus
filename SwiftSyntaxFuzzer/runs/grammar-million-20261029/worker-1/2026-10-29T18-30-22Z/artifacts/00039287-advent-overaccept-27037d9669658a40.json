@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00039287-advent-overaccept-27037d9669658a40.json",
+    "durationSeconds" : 2.3882699012756348,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=128",
+    "index" : 39287,
+    "seed" : 4354586739611356967,
+    "signalHash" : "a7bb7678b4ba364c",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|a '<value>' statement with a '<value>' clause must have at least one '<value>'",
+    "sourceHash" : "27037d9669658a40",
+    "sourceLength" : 78,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "do throws{};discard each \\[each some nonisolated(nonsending) ~Any of(-await)];",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-17A58BC3-C642-49E9-95DC-C28A668F0AB2.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n1 | do throws{}; [ nonisolated(nonsending) Any of(-await)]\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-17A58BC3-C642-49E9-95DC-C28A668F0AB2.swift:1:47: error: expected type\n1 | do throws{}; [ nonisolated(nonsending) Any of(-await)]\n  |                                               `- error: expected type\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in genericArgument(_:): generic argument form has no converter: parenthesizedExpression — «(-await)»",
+      "lookupFailed in convertPrimaryExpression(_:from:to:): inline array expression without a count and an element — «[ nonisolated(nonsending) Any of(-await)]»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "parenthesizedExpression\t[\"(\" expression \")\"]",
+      "genericArgument\t[parenthesizedExpression]",
+      "anyType\t[\"Any\"]",
+      "type\t[anyType]",
+      "expressionParenthesisedTypeSpecifier\t[\"nonisolated\" >s< \"(\" \"nonsending\" \")\"]",
+      "parenthesisedTypeSpecifier\t[expressionParenthesisedTypeSpecifier]",
+      "parameterModifier\t[parenthesisedTypeSpecifier]",
+      "type\t[parameterModifier >->(\"~\") type]",
+      "genericArgument\t[type]",
+      "inlineArrayType\t[\"[\" genericArgument >n< \"of\" genericArgument \"]\"]",
+      "typePrimaryExpression\t[inlineArrayType]",
+      "primaryExpression\t[typePrimaryExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "statement\t[ expression]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "throwsClause\t[\"throws\" ]",
+      ".OPT\t[throwsClause]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 186,
+      "descriptorCount" : 422,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 210,
+      "parseSeconds" : 0.004851937294006348,
+      "sourceLength" : 54,
+      "suppressedDescriptorCount" : 46,
+      "tokenCount" : 17,
+      "yieldCount" : 298
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        ThrowsClause\n          keyword(SwiftSyntax.Keyword.throws) \"throws\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        CatchClauseList\n      semicolon \";\"\n    CodeBlockItem\n      TypeExpr\n        InlineArrayType\n          leftSquare \"[\"\n          GenericArgument\n            AttributedType\n              TypeSpecifierList\n                NonisolatedTypeSpecifier\n                  keyword(SwiftSyntax.Keyword.nonisolated) \"nonisolated\"\n                  NonisolatedSpecifierArgument\n                    leftParen \"(\"\n                    keyword(SwiftSyntax.Keyword.nonsending) \"nonsending\"\n                    rightParen \")\"\n              AttributeList\n              TypeSpecifierList\n              IdentifierType\n                keyword(SwiftSyntax.Keyword.Any) \"Any\"\n          keyword(SwiftSyntax.Keyword.of) \"of\"\n          GenericArgument\n            TupleType\n              leftParen \"(\"\n              TupleTypeElementList\n                TupleTypeElement\n                  MissingType\n              UnexpectedNodes\n                prefixOperator(\"-\") \"-\"\n                identifier(\"await\") \"await\"\n              rightParen \")\"\n          rightSquare \"]\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : "do throws{}; [ nonisolated(nonsending) Any of(-await)]",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-17A58BC3-C642-49E9-95DC-C28A668F0AB2.swift:1:4: error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n1 | do throws{}; [ nonisolated(nonsending) Any of(-await)]\\n  |    `- error: a 'do' statement with a 'throws' clause must have at least one 'catch'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-17A58BC3-C642-49E9-95DC-C28A668F0AB2.swift:1:47: error: expected type\\n1 | do throws{}; [ nonisolated(nonsending) Any of(-await)]\\n  |                                               `- error: expected type\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in genericArgument(_:): generic argument form has no converter: parenthesizedExpression — «(-await)»\",\"lookupFailed in convertPrimaryExpression(_:from:to:): inline array expression without a count and an element — «[ nonisolated(nonsending) Any of(-await)]»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"parenthesizedExpression\\t[\\\"(\\\" expression \\\")\\\"]\",\"genericArgument\\t[parenthesizedExpression]\",\"anyType\\t[\\\"Any\\\"]\",\"type\\t[anyType]\",\"expressionParenthesisedTypeSpecifier\\t[\\\"nonisolated\\\" >s< \\\"(\\\" \\\"nonsending\\\" \\\")\\\"]\",\"parenthesisedTypeSpecifier\\t[expressionParenthesisedTypeSpecifier]\",\"parameterModifier\\t[parenthesisedTypeSpecifier]\",\"type\\t[parameterModifier >->(\\\"~\\\") type]\",\"genericArgument\\t[type]\",\"inlineArrayType\\t[\\\"[\\\" genericArgument >n< \\\"of\\\" genericArgument \\\"]\\\"]\",\"typePrimaryExpression\\t[inlineArrayType]\",\"primaryExpression\\t[typePrimaryExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"statement\\t[ expression]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"throwsClause\\t[\\\"throws\\\" ]\",\".OPT\\t[throwsClause]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":186,\"descriptorCount\":422,\"duplicateDescriptorCount\":0,\"oraclePruned\":210,\"parseSeconds\":0.004851937294006348,\"sourceLength\":54,\"suppressedDescriptorCount\":46,\"tokenCount\":17,\"yieldCount\":298},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        ThrowsClause\\n          keyword(SwiftSyntax.Keyword.throws) \\\"throws\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      TypeExpr\\n        InlineArrayType\\n          leftSquare \\\"[\\\"\\n          GenericArgument\\n            AttributedType\\n              TypeSpecifierList\\n                NonisolatedTypeSpecifier\\n                  keyword(SwiftSyntax.Keyword.nonisolated) \\\"nonisolated\\\"\\n                  NonisolatedSpecifierArgument\\n                    leftParen \\\"(\\\"\\n                    keyword(SwiftSyntax.Keyword.nonsending) \\\"nonsending\\\"\\n                    rightParen \\\")\\\"\\n              AttributeList\\n              TypeSpecifierList\\n              IdentifierType\\n                keyword(SwiftSyntax.Keyword.Any) \\\"Any\\\"\\n          keyword(SwiftSyntax.Keyword.of) \\\"of\\\"\\n          GenericArgument\\n            TupleType\\n              leftParen \\\"(\\\"\\n              TupleTypeElementList\\n                TupleTypeElement\\n                  MissingType\\n              UnexpectedNodes\\n                prefixOperator(\\\"-\\\") \\\"-\\\"\\n                identifier(\\\"await\\\") \\\"await\\\"\\n              rightParen \\\")\\\"\\n          rightSquare \\\"]\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

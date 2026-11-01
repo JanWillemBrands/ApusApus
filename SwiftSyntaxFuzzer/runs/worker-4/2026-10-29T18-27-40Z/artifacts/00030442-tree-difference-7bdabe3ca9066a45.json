@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00030442-tree-difference-7bdabe3ca9066a45.json",
+    "durationSeconds" : 1.3476829528808594,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=98",
+    "index" : 30442,
+    "seed" : 1663247169042248335,
+    "signalHash" : "be88882950f4c325",
+    "signalSummary" : "tree-difference|line=33|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "7bdabe3ca9066a45",
+    "sourceLength" : 46,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "while #available(*,value 42.0.42,x),==await{};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      WhileStmt\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        ConditionElementList\n          ConditionElement\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  DeclReferenceExpr\n                    binaryOperator(\"*\") \"*\"\n              rightParen \")\"\n            comma \",\"\n          ConditionElement\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2924FA64-7342-41DE-A71A-0A5D07A64649.swift:1:8: error: failed to produce diagnostic for expression; please submit a bug report (https:\/\/swift.org\/contributing\/#reporting-bugs)\n1 | while (* ),==await{}\n  |        `- error: failed to produce diagnostic for expression; please submit a bug report (https:\/\/swift.org\/contributing\/#reporting-bugs)\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2924FA64-7342-41DE-A71A-0A5D07A64649.swift:1:12: error: '==' is not a prefix unary operator\n1 | while (* ),==await{}\n  |            `- error: '==' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-2924FA64-7342-41DE-A71A-0A5D07A64649.swift:1:14: error: cannot find 'await' in scope\n1 | while (* ),==await{}\n  |              `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "condition\t[expression]",
+      "conditionList\t[condition ]",
+      ".OPT\t[\",\" conditionList]",
+      ".DO\t[operator]",
+      "operatorReference\t[ ]",
+      "tupleExpression\t[\"(\"  operatorReference \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "whileStatement\t[\"while\" expressionIntroducerBoundary >->(\"{\") conditionList codeBlock]",
+      "loopStatement\t[whileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 81,
+      "descriptorCount" : 167,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 45,
+      "parseSeconds" : 0.004328012466430664,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 9,
+      "tokenCount" : 9,
+      "yieldCount" : 113
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      WhileStmt\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        ConditionElementList\n          ConditionElement\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n                LabeledExpr\n                  DeclReferenceExpr\n                    binaryOperator(\"*\") \"*\"\n              rightParen \")\"\n            comma \",\"\n          ConditionElement\n            PrefixOperatorExpr\n              prefixOperator(\"==\") \"==\"\n              DeclReferenceExpr\n                identifier(\"await\") \"await\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 51,
+  "source" : "while (* ),==await{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      WhileStmt\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        ConditionElementList\\n          ConditionElement\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  DeclReferenceExpr\\n                    binaryOperator(\\\"*\\\") \\\"*\\\"\\n              rightParen \\\")\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2924FA64-7342-41DE-A71A-0A5D07A64649.swift:1:8: error: failed to produce diagnostic for expression; please submit a bug report (https:\\\/\\\/swift.org\\\/contributing\\\/#reporting-bugs)\\n1 | while (* ),==await{}\\n  |        `- error: failed to produce diagnostic for expression; please submit a bug report (https:\\\/\\\/swift.org\\\/contributing\\\/#reporting-bugs)\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2924FA64-7342-41DE-A71A-0A5D07A64649.swift:1:12: error: '==' is not a prefix unary operator\\n1 | while (* ),==await{}\\n  |            `- error: '==' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-2924FA64-7342-41DE-A71A-0A5D07A64649.swift:1:14: error: cannot find 'await' in scope\\n1 | while (* ),==await{}\\n  |              `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"condition\\t[expression]\",\"conditionList\\t[condition ]\",\".OPT\\t[\\\",\\\" conditionList]\",\".DO\\t[operator]\",\"operatorReference\\t[ ]\",\"tupleExpression\\t[\\\"(\\\"  operatorReference \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expressionIntroducerBoundary\\t[<s>]\",\"whileStatement\\t[\\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList codeBlock]\",\"loopStatement\\t[whileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":81,\"descriptorCount\":167,\"duplicateDescriptorCount\":0,\"oraclePruned\":45,\"parseSeconds\":0.004328012466430664,\"sourceLength\":20,\"suppressedDescriptorCount\":9,\"tokenCount\":9,\"yieldCount\":113},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      WhileStmt\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        ConditionElementList\\n          ConditionElement\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n                LabeledExpr\\n                  DeclReferenceExpr\\n                    binaryOperator(\\\"*\\\") \\\"*\\\"\\n              rightParen \\\")\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"==\\\") \\\"==\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"await\\\") \\\"await\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

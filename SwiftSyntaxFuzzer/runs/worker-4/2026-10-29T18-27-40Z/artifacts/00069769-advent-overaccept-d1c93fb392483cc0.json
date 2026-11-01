@@ -1,0 +1,83 @@
+{
+  "event" : {
+    "artifact" : "00069769-advent-overaccept-d1c93fb392483cc0.json",
+    "durationSeconds" : 2.101991057395935,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=132",
+    "index" : 69769,
+    "seed" : 1663247169042248335,
+    "signalHash" : "3a90f75c4ba3677b",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected '<value>' after '<value>' condition",
+    "sourceHash" : "d1c93fb392483cc0",
+    "sourceLength" : 47,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "defer{}\nwhile consume copy any T&each copy &_{}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      WhileStmt\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        ConditionElementList\n          ConditionElement\n            SequenceExpr\n              ExprList\n                TypeExpr\n                  SomeOrAnyType\n                    keyword(SwiftSyntax.Keyword.any) \"any\"\n                    IdentifierType\n                      identifier(\"T\") \"T\"\n                BinaryOperatorExpr\n                  binaryOperator(\"&\") \"&\"\n                PackElementExpr\n                  keyword(SwiftSyntax.Keyword.each) \"each\"\n                  DiscardAssignmentExpr\n                    wildcard \"_\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-C962813C-3698-441D-A9F1-C2A162C7713A.swift:1:18: error: expected '{' after 'while' condition\n1 | while any T&each _{}\n  |                  `- error: expected '{' after 'while' condition\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "wildcardExpression\t[\"_\"]",
+      "primaryExpression\t[wildcardExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "packElementExpression\t[\"each\" >->(\"(\" \".\" \"[\" \"{\") <s> >n< prefixExpression]",
+      "prefixExpression\t[packElementExpression]",
+      "ifConfigSameLine\t[]",
+      ".DO\t[\"&\"]",
+      "infixExpression\t[>s<  >->(\".\") >s< ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "identifierToken\t[identifier]",
+      "typeName\t[identifierToken]",
+      "typeIdentifier\t[>->(\"any\" \"each\" \"some\") typeName ]",
+      "type\t[typeIdentifier]",
+      "boxedProtocolConstraint\t[>->(\"__owned\" \"__shared\" \"_const\" \"any\" \"borrowing\" \"consuming\" \"inout\" \"isolated\" \"nonisolated\" \"sending\" \"some\") type]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "condition\t[expression]",
+      "conditionList\t[condition ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "whileStatement\t[\"while\" expressionIntroducerBoundary >->(\"{\") conditionList codeBlock]",
+      "loopStatement\t[whileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 122,
+      "descriptorCount" : 290,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 158,
+      "parseSeconds" : 0.002110004425048828,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 34,
+      "tokenCount" : 8,
+      "yieldCount" : 246
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      WhileStmt\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        ConditionElementList\n          ConditionElement\n            TypeExpr\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.any) \"any\"\n                CompositionType\n                  CompositionTypeElementList\n                    CompositionTypeElement\n                      IdentifierType\n                        identifier(\"T\") \"T\"\n                      binaryOperator(\"&\") \"&\"\n                    CompositionTypeElement\n                      IdentifierType\n                        identifier(\"each\") \"each\"\n        CodeBlock\n          UnexpectedNodes\n            wildcard \"_\"\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 28,
+  "source" : "while any T&each _{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      WhileStmt\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        ConditionElementList\\n          ConditionElement\\n            SequenceExpr\\n              ExprList\\n                TypeExpr\\n                  SomeOrAnyType\\n                    keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                    IdentifierType\\n                      identifier(\\\"T\\\") \\\"T\\\"\\n                BinaryOperatorExpr\\n                  binaryOperator(\\\"&\\\") \\\"&\\\"\\n                PackElementExpr\\n                  keyword(SwiftSyntax.Keyword.each) \\\"each\\\"\\n                  DiscardAssignmentExpr\\n                    wildcard \\\"_\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-C962813C-3698-441D-A9F1-C2A162C7713A.swift:1:18: error: expected '{' after 'while' condition\\n1 | while any T&each _{}\\n  |                  `- error: expected '{' after 'while' condition\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"wildcardExpression\\t[\\\"_\\\"]\",\"primaryExpression\\t[wildcardExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"packElementExpression\\t[\\\"each\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") <s> >n< prefixExpression]\",\"prefixExpression\\t[packElementExpression]\",\"ifConfigSameLine\\t[]\",\".DO\\t[\\\"&\\\"]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s< ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"identifierToken\\t[identifier]\",\"typeName\\t[identifierToken]\",\"typeIdentifier\\t[>->(\\\"any\\\" \\\"each\\\" \\\"some\\\") typeName ]\",\"type\\t[typeIdentifier]\",\"boxedProtocolConstraint\\t[>->(\\\"__owned\\\" \\\"__shared\\\" \\\"_const\\\" \\\"any\\\" \\\"borrowing\\\" \\\"consuming\\\" \\\"inout\\\" \\\"isolated\\\" \\\"nonisolated\\\" \\\"sending\\\" \\\"some\\\") type]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"condition\\t[expression]\",\"conditionList\\t[condition ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"whileStatement\\t[\\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList codeBlock]\",\"loopStatement\\t[whileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":122,\"descriptorCount\":290,\"duplicateDescriptorCount\":0,\"oraclePruned\":158,\"parseSeconds\":0.002110004425048828,\"sourceLength\":20,\"suppressedDescriptorCount\":34,\"tokenCount\":8,\"yieldCount\":246},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      WhileStmt\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        ConditionElementList\\n          ConditionElement\\n            TypeExpr\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                CompositionType\\n                  CompositionTypeElementList\\n                    CompositionTypeElement\\n                      IdentifierType\\n                        identifier(\\\"T\\\") \\\"T\\\"\\n                      binaryOperator(\\\"&\\\") \\\"&\\\"\\n                    CompositionTypeElement\\n                      IdentifierType\\n                        identifier(\\\"each\\\") \\\"each\\\"\\n        CodeBlock\\n          UnexpectedNodes\\n            wildcard \\\"_\\\"\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

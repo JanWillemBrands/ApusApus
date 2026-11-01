@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00049600-tree-difference-3fa44b77d621b0b7.json",
+    "durationSeconds" : 1.2189140319824219,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=61",
+    "index" : 49600,
+    "seed" : 13064010938106345112,
+    "signalHash" : "df58471fc4937ec5",
+    "signalSummary" : "tree-difference|line=19|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "3fa44b77d621b0b7",
+    "sourceLength" : 19,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "do{defer{}};+await;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeferStmt\n                keyword(SwiftSyntax.Keyword.defer) \"defer\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        CatchClauseList\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A5878C4C-A590-4C1D-B5C6-94756C4EBE08.swift:1:4: warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\n1 | do{defer{}};+await\n  |    `- warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A5878C4C-A590-4C1D-B5C6-94756C4EBE08.swift:1:14: error: cannot find 'await' in scope\n1 | do{defer{}};+await\n  |              `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statementSeparator\t[\";\"]",
+      ".DO\t[statementSeparator statement]",
+      ".KLN\t[]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "doStatement\t[\"do\"  codeBlock ]",
+      "statement\t[doStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 63,
+      "descriptorCount" : 130,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 30,
+      "parseSeconds" : 0.0026780366897583008,
+      "sourceLength" : 18,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 9,
+      "yieldCount" : 83
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DoStmt\n        keyword(SwiftSyntax.Keyword.do) \"do\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeferStmt\n                keyword(SwiftSyntax.Keyword.defer) \"defer\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n        CatchClauseList\n      semicolon \";\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"+\") \"+\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 27,
+  "source" : "do{defer{}};+await",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeferStmt\\n                keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A5878C4C-A590-4C1D-B5C6-94756C4EBE08.swift:1:4: warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\\n1 | do{defer{}};+await\\n  |    `- warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A5878C4C-A590-4C1D-B5C6-94756C4EBE08.swift:1:14: error: cannot find 'await' in scope\\n1 | do{defer{}};+await\\n  |              `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statementSeparator\\t[\\\";\\\"]\",\".DO\\t[statementSeparator statement]\",\".KLN\\t[]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"doStatement\\t[\\\"do\\\"  codeBlock ]\",\"statement\\t[doStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":63,\"descriptorCount\":130,\"duplicateDescriptorCount\":0,\"oraclePruned\":30,\"parseSeconds\":0.0026780366897583008,\"sourceLength\":18,\"suppressedDescriptorCount\":1,\"tokenCount\":9,\"yieldCount\":83},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DoStmt\\n        keyword(SwiftSyntax.Keyword.do) \\\"do\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeferStmt\\n                keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n        CatchClauseList\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"+\\\") \\\"+\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

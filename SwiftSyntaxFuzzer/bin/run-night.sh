@@ -20,6 +20,9 @@ INTERESTING_PASSES="${INTERESTING_PASSES:-1}"
 MAX_INTERESTING_PASSES="${MAX_INTERESTING_PASSES:-2000}"
 INTERESTING_CORPUS="${INTERESTING_CORPUS:-}"
 INTERESTING_PERCENT="${INTERESTING_PERCENT:-15}"
+GRAMMAR_DIRECTED_PERCENT="${GRAMMAR_DIRECTED_PERCENT:-0}"
+WIDE_PERCENT="${WIDE_PERCENT:-50}"
+FRONTIER_PERCENT="${FRONTIER_PERCENT:-20}"
 RUNS_DIR="${RUNS_DIR:-SwiftSyntaxFuzzer/runs}"
 WORKERS="${WORKERS:-$(sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)}"
 WORKERS="$(( WORKERS < 1 ? 1 : WORKERS ))"
@@ -59,6 +62,9 @@ PY
     --max-artifact-mb "$MAX_ARTIFACT_MB" \
     --reduce-artifacts "$REDUCE_ARTIFACTS" \
     --max-interesting-passes "$MAX_INTERESTING_PASSES" \
+    --grammar-directed-percent "$GRAMMAR_DIRECTED_PERCENT" \
+    --wide-percent "$WIDE_PERCENT" \
+    --frontier-percent "$FRONTIER_PERCENT" \
     --quiet-passes
   )
   if [[ "$INTERESTING_PASSES" == "0" ]]; then

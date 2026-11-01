@@ -70,6 +70,13 @@ struct SwiftSnippet: CustomTestStringConvertible, Sendable {
         switch label {
         case "testTransposeAttribute#1", "testSilgenName#1", "testRecovery13#1":
             return "static methods may only be declared on a type"
+        case "testSequence#1":
+            return "recovery-only arrow expression; compiler requires a valid function-type argument clause"
+        case "testTypeExpr25h#1", "testTypeExpr25i#1",
+             "testFunctionTypeExpr#1", "testFunctionTypeExpr#3", "testFunctionTypeExpr#4",
+             "testFunctionTypeExpr#5", "testFunctionTypeExpr#6", "testFunctionTypeExpr#7",
+             "testTypeExpr27#1":
+            return "recovery-only function-type expression rejected by the compiler"
         case "testABIAttribute#3", "testABIAttribute#12", "testDeinitializers#1",
              "testDeinitializers#2", "testInitDeinit12#1", "testInitDeinit14#1",
              "testInitDeinit16#1", "testInitDeinit18#1", "testInitDeinit19#1",
@@ -1034,6 +1041,215 @@ struct KeyPathGrammarTests {
     ])
     func plainRegexExtentRejectsLikeSwiftc(_ src: String) throws {
         #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected regex extent: \(src)")
+    }
+
+    @Test("expression introducer rejects tight operators", arguments: [
+        "discard switch==x{}",
+        "discard try+await",
+        "yield try-await",
+        "repeat-await",
+        "guard&init else{}",
+        "for _ in!x{}",
+        "repeat{}while+await",
+        "throw??await",
+        "guard??await else{}",
+        "for _ in switch&[]{}{}",
+        "#if??()\n#endif",
+    ])
+    func expressionIntroducerRejectsTightOperators(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("some/any reject a following type attribute", arguments: [
+        "yield any@convention(async)_",
+        "let _: any @Sendable P",
+        "let _: some @Sendable P",
+    ])
+    func someAnyRejectFollowingTypeAttribute(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("standalone semicolon after ifconfig is rejected", arguments: [
+        "#if true\n#endif\n;",
+        "func f() {\n#if true\n#endif\n;\n}",
+    ])
+    func standaloneSemicolonAfterIfConfigIsRejected(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("class immediately before a macro head starts a class declaration", arguments: [
+        "class #x",
+        "public class #x",
+        "@available(*, unavailable) class #x",
+    ])
+    func classBeforeMacroHeadIsRejected(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("class remains a macro modifier before another modifier", arguments: [
+        "class public #x",
+        "class final #x",
+    ])
+    func classBeforeAnotherMacroModifierIsAccepted(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("nonisolated inheritance rejects invalid specifier arguments", arguments: [
+        "protocol R { associatedtype X: nonisolated() }",
+        "protocol R { associatedtype X: nonisolated(Int) }",
+        "protocol R: nonisolated() {}",
+        "struct S: nonisolated(Int) {}",
+    ])
+    func nonisolatedInheritanceRejectsInvalidSpecifierArguments(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("nonisolated inheritance accepts bare and nonsending forms", arguments: [
+        "protocol R { associatedtype X: nonisolated P }",
+        "protocol R { associatedtype X: nonisolated(nonsending) P }",
+        "protocol R: nonisolated P {}",
+        "struct S: nonisolated(nonsending) P {}",
+    ])
+    func nonisolatedInheritanceAcceptsValidForms(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("if expression consumes its else before an enclosing guard", arguments: [
+        "guard if true {} else {}",
+        "guard if case x = if true {} else {} {} else {}",
+        "guard if case x = if #available(x) {} else {} {} else {}",
+    ])
+    func ifExpressionElseCannotBecomeGuardElse(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("control-flow keywords may be tight against availability conditions", arguments: [
+        "if#available(*) {}",
+        "while#unavailable(macOS 99) {}",
+        "guard#available(*) else {}",
+        "label: while#available(*) {}",
+        "if true { if#unavailable(macOS 99) {} }",
+    ])
+    func tightAvailabilityConditionAfterControlFlowKeyword(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("effect keywords may be tight against key-path expressions", arguments: [
+        "struct Root { var value: Int }; func f() async { _ = await\\Root.value }",
+        "struct Root { var value: Int }; func f() { _ = try\\Root.value }",
+        "struct Root { var value: Int }; func f() { _ = unsafe\\Root.value }",
+    ])
+    func tightKeyPathAfterEffectKeyword(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("module-qualified compound declaration reference")
+    func moduleQualifiedCompoundDeclarationReference() throws {
+        let src = "let f = Swift::fatalError(_:file:line:)"
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("expression introducer permits tight delimiters and members", arguments: [
+        "guard(x) else{}",
+        "throw(x)",
+        "for _ in[x]{}",
+        "repeat{}while.foo",
+        "switch(x){}",
+        "#if.foo\n#endif",
+    ])
+    func expressionIntroducerPermitsTightDelimitersAndMembers(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("sourceLocation ends before same-line syntax", arguments: [
+        "#sourceLocation();",
+        "#sourceLocation(file: \"x\", line: 1); ()\n#sourceLocation()",
+        "#sourceLocation(file: \"x\", line: 1) ()\n#sourceLocation()",
+    ])
+    func sourceLocationRejectsSameLineSyntax(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("sourceLocation follows swiftc on trailing comments", arguments: [
+        "#sourceLocation(file: \"x\", line: 1) // comment\n()\n#sourceLocation()",
+        "#sourceLocation(file: \"x\", line: 1)/* comment */\n()\n#sourceLocation()",
+    ])
+    func sourceLocationRejectsTrailingComment(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "expected the documented SwiftSyntax/compiler disagreement")
+        #expect(try adventParse(src) == nil, "Advent accepted source rejected by swiftc")
+    }
+
+    @Test("sourceLocation accepts newline or EOF termination", arguments: [
+        "#sourceLocation(file: \"x\", line: 1)\n()\n#sourceLocation()",
+        "#sourceLocation(file: \"x\", line: 1) \n()\n#sourceLocation()",
+    ])
+    func sourceLocationAcceptsLineTermination(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("sourceLocation rejects extended path delimiters")
+    func sourceLocationRejectsExtendedPathDelimiters() throws {
+        let src = "#sourceLocation(file: #\"x\"#, line: 1)\n#sourceLocation()"
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("restricted attribute strings follow swiftc", arguments: [
+        "let _: @convention(c, cType: #\"int\"#) () -> Void",
+        "@_originallyDefinedIn(module: #\"M\"#, macOS 10.15) func f() {}",
+    ])
+    func restrictedAttributeStringsFollowSwiftc(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "expected the documented SwiftSyntax/compiler disagreement")
+        #expect(try adventParse(src) == nil, "Advent accepted source rejected by swiftc")
+    }
+
+    @Test("restricted attribute strings retain multiline literals", arguments: [
+        "#sourceLocation(file: \"\"\"\nx\n\"\"\", line: 1)\n#sourceLocation()",
+        "let _: @convention(c, cType: \"\"\"\nint\n\"\"\") () -> Void",
+        "@_originallyDefinedIn(module: \"\"\"\nM\n\"\"\", macOS 10.15) func f() {}",
+    ])
+    func restrictedAttributeStringsRetainMultilineLiterals(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("documentation metadata permits extended string delimiters")
+    func documentationMetadataPermitsExtendedStringDelimiters() throws {
+        let src = "@_documentation(metadata: #\"m\"#) public class C {}"
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
+    }
+
+    @Test("macro role attributes require an argument", arguments: [
+        "@attached() import X",
+        "@freestanding() import X",
+    ])
+    func macroRoleAttributesRejectEmptyArguments(_ src: String) throws {
+        #expect(!swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly accepted `\(src)`")
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected `\(src)`")
+    }
+
+    @Test("macro role attributes retain nonempty arguments", arguments: [
+        "@attached(peer) macro m()",
+        "@freestanding(expression) macro m()",
+    ])
+    func macroRoleAttributesAcceptNonemptyArguments(_ src: String) throws {
+        #expect(swiftSyntaxParsesCleanly(src), "swift-syntax unexpectedly rejected `\(src)`")
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
     }
 
     /// 3 — nested value bindings in a tuple binding pattern. swift-syntax ACCEPTS these and models
@@ -2981,7 +3197,7 @@ struct FuzzHarvestTests {
             "_ = { (throws\n) -> Void in }",  // a bare top-level closure is a swiftc error
             "precedencegroup self {}", "typealias Z = ~some",
             "do {} catch init {}", "@attached(member, names: named (init)) macro m()",
-            "@_dynamicReplacement(for: for()) func f() {}", "switch x { case let E-> (): break }",
+            "@_dynamicReplacement(for: for()) func f() {}",
         ] {
             #expect(try adventParse(source) != nil, "rejected compiler-accepted source: \(source)")
         }
@@ -3037,6 +3253,7 @@ struct FuzzHarvestTests {
             "_ = ^/)/",
             "func f() { _ = ^^/)/ }",
             "let r = /)/",
+            "switch x { case let E-> (): break }", // recovered arrow pattern cannot type-check
         ] {
             #expect(try adventParse(source) == nil, "accepted a parse-only source: \(source)")
         }

@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00056781-tree-difference-7ee39511e25b1998.json",
+    "durationSeconds" : 1.6535999774932861,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=70",
+    "index" : 56781,
+    "seed" : 11400602263005678360,
+    "signalHash" : "c0d6ba7b404d2e13",
+    "signalSummary" : "tree-difference|line=13|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "7ee39511e25b1998",
+    "sourceLength" : 48,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "for try await unsafe case _ in ==await{defer{}};",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ForStmt\n        keyword(SwiftSyntax.Keyword.for) \"for\"\n        WildcardPattern\n          wildcard \"_\"\n        keyword(SwiftSyntax.Keyword.in) \"in\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeferStmt\n                keyword(SwiftSyntax.Keyword.defer) \"defer\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-6E2FF4D5-84BB-41DA-9FD6-2C6CD64D6D92.swift:1:10: error: '==' is not a prefix unary operator\n1 | for _ in ==await{defer{}}\n  |          `- error: '==' is not a prefix unary operator\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-6E2FF4D5-84BB-41DA-9FD6-2C6CD64D6D92.swift:1:12: error: cannot find 'await' in scope\n1 | for _ in ==await{defer{}}\n  |            `- error: cannot find 'await' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-6E2FF4D5-84BB-41DA-9FD6-2C6CD64D6D92.swift:1:18: warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\n1 | for _ in ==await{defer{}}\n  |                  `- warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "wildcardPattern\t[\"_\"]",
+      "bindingPattern\t[wildcardPattern ]",
+      "forInStatement\t[\"for\"    >->(\"await\") bindingPattern \"in\" expressionIntroducerBoundary expression  codeBlock]",
+      "loopStatement\t[forInStatement]",
+      "statement\t[loopStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 67,
+      "descriptorCount" : 127,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 20,
+      "parseSeconds" : 0.003083944320678711,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 1,
+      "tokenCount" : 10,
+      "yieldCount" : 80
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ForStmt\n        keyword(SwiftSyntax.Keyword.for) \"for\"\n        WildcardPattern\n          wildcard \"_\"\n        keyword(SwiftSyntax.Keyword.in) \"in\"\n        PrefixOperatorExpr\n          prefixOperator(\"==\") \"==\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              DeferStmt\n                keyword(SwiftSyntax.Keyword.defer) \"defer\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 33,
+  "source" : "for _ in ==await{defer{}}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ForStmt\\n        keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n        WildcardPattern\\n          wildcard \\\"_\\\"\\n        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeferStmt\\n                keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-6E2FF4D5-84BB-41DA-9FD6-2C6CD64D6D92.swift:1:10: error: '==' is not a prefix unary operator\\n1 | for _ in ==await{defer{}}\\n  |          `- error: '==' is not a prefix unary operator\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-6E2FF4D5-84BB-41DA-9FD6-2C6CD64D6D92.swift:1:12: error: cannot find 'await' in scope\\n1 | for _ in ==await{defer{}}\\n  |            `- error: cannot find 'await' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-6E2FF4D5-84BB-41DA-9FD6-2C6CD64D6D92.swift:1:18: warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\\n1 | for _ in ==await{defer{}}\\n  |                  `- warning: 'defer' statement at end of scope always executes immediately; replace with 'do' statement to silence this warning\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «==await»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"wildcardPattern\\t[\\\"_\\\"]\",\"bindingPattern\\t[wildcardPattern ]\",\"forInStatement\\t[\\\"for\\\"    >->(\\\"await\\\") bindingPattern \\\"in\\\" expressionIntroducerBoundary expression  codeBlock]\",\"loopStatement\\t[forInStatement]\",\"statement\\t[loopStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":67,\"descriptorCount\":127,\"duplicateDescriptorCount\":0,\"oraclePruned\":20,\"parseSeconds\":0.003083944320678711,\"sourceLength\":25,\"suppressedDescriptorCount\":1,\"tokenCount\":10,\"yieldCount\":80},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ForStmt\\n        keyword(SwiftSyntax.Keyword.for) \\\"for\\\"\\n        WildcardPattern\\n          wildcard \\\"_\\\"\\n        keyword(SwiftSyntax.Keyword.in) \\\"in\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"==\\\") \\\"==\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              DeferStmt\\n                keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

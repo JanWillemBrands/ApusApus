@@ -1,0 +1,66 @@
+{
+  "event" : {
+    "artifact" : "00050675-tree-difference-8f7eb64c99668412.json",
+    "durationSeconds" : 1.379662036895752,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=53",
+    "index" : 50675,
+    "seed" : 11400602263005678360,
+    "signalHash" : "768c514e9de4605c",
+    "signalSummary" : "tree-difference|line=16|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "8f7eb64c99668412",
+    "sourceLength" : 27,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              RepeatStmt\n                keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n                keyword(SwiftSyntax.Keyword.while) \"while\"\n                MissingExpr\n                  identifier(\"<#expression#>\") \"<#expression#>\"\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-60D5951B-A436-4B53-B366-1A06C9645D23.swift:1:22: error: cannot find 'await' in scope\n1 | defer{repeat{}while -await}\n  |                      `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»"
+    ],
+    "grammarCoverage" : [
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "statement\t[loopStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "deferStatement\t[\"defer\" codeBlock]",
+      "statement\t[deferStatement]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 74,
+      "descriptorCount" : 147,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 25,
+      "parseSeconds" : 0.0018379688262939453,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 3,
+      "tokenCount" : 9,
+      "yieldCount" : 75
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      DeferStmt\n        keyword(SwiftSyntax.Keyword.defer) \"defer\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              RepeatStmt\n                keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n                CodeBlock\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                  rightBrace \"}\"\n                keyword(SwiftSyntax.Keyword.while) \"while\"\n                PrefixOperatorExpr\n                  prefixOperator(\"-\") \"-\"\n                  DeclReferenceExpr\n                    identifier(\"await\") \"await\"\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 17,
+  "source" : "defer{repeat{}while -await}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              RepeatStmt\\n                keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n                keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n                MissingExpr\\n                  identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-60D5951B-A436-4B53-B366-1A06C9645D23.swift:1:22: error: cannot find 'await' in scope\\n1 | defer{repeat{}while -await}\\n  |                      `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»\"],\"grammarCoverage\":[\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"statement\\t[loopStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"deferStatement\\t[\\\"defer\\\" codeBlock]\",\"statement\\t[deferStatement]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":74,\"descriptorCount\":147,\"duplicateDescriptorCount\":0,\"oraclePruned\":25,\"parseSeconds\":0.0018379688262939453,\"sourceLength\":27,\"suppressedDescriptorCount\":3,\"tokenCount\":9,\"yieldCount\":75},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      DeferStmt\\n        keyword(SwiftSyntax.Keyword.defer) \\\"defer\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              RepeatStmt\\n                keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n                CodeBlock\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                  rightBrace \\\"}\\\"\\n                keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"-\\\") \\\"-\\\"\\n                  DeclReferenceExpr\\n                    identifier(\\\"await\\\") \\\"await\\\"\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00067552-tree-difference-a52e135b6fa761e2.json",
+    "durationSeconds" : 1.3773460388183594,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=94",
+    "index" : 67552,
+    "seed" : 8709271213634121394,
+    "signalHash" : "495e318e6baf77d1",
+    "signalSummary" : "tree-difference|line=11|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "a52e135b6fa761e2",
+    "sourceLength" : 58,
+    "status" : "tree-difference"
+  },
+  "originalSource" : "guard unsafe copy any sending,#unavailable(x 42.1.1)else{}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            MissingExpr\n              identifier(\"<#expression#>\") \"<#expression#>\"\n            comma \",\"\n          ConditionElement\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-DB5E1923-9761-4774-9D97-08BB4153D3C2.swift:1:11: error: cannot find type 'sending' in scope\n1 | guard any sending,( )else{}\n  |           `- error: cannot find type 'sending' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-DB5E1923-9761-4774-9D97-08BB4153D3C2.swift:1:7: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n1 | guard any sending,( )else{}\n  |       `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-DB5E1923-9761-4774-9D97-08BB4153D3C2.swift:1:19: error: cannot convert value of type '()' to expected condition type 'Bool'\n1 | guard any sending,( )else{}\n  |                   `- error: cannot convert value of type '()' to expected condition type 'Bool'\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any sending»"
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "tupleExpression\t[\"(\" \")\"]",
+      "primaryExpression\t[tupleExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "condition\t[expression]",
+      "conditionList\t[condition ]",
+      ".OPT\t[\",\" conditionList]",
+      "boxedProtocolKeywordName\t[\"sending\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "guardStatement\t[\"guard\" expressionIntroducerBoundary >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 77,
+      "descriptorCount" : 156,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 57,
+      "parseSeconds" : 0.004812002182006836,
+      "sourceLength" : 27,
+      "suppressedDescriptorCount" : 15,
+      "tokenCount" : 9,
+      "yieldCount" : 121
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            TypeExpr\n              SomeOrAnyType\n                keyword(SwiftSyntax.Keyword.any) \"any\"\n                IdentifierType\n                  identifier(\"sending\") \"sending\"\n            comma \",\"\n          ConditionElement\n            TupleExpr\n              leftParen \"(\"\n              LabeledExprList\n              rightParen \")\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 42,
+  "source" : "guard any sending,( )else{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            MissingExpr\\n              identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-DB5E1923-9761-4774-9D97-08BB4153D3C2.swift:1:11: error: cannot find type 'sending' in scope\\n1 | guard any sending,( )else{}\\n  |           `- error: cannot find type 'sending' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-DB5E1923-9761-4774-9D97-08BB4153D3C2.swift:1:7: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n1 | guard any sending,( )else{}\\n  |       `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-DB5E1923-9761-4774-9D97-08BB4153D3C2.swift:1:19: error: cannot convert value of type '()' to expected condition type 'Bool'\\n1 | guard any sending,( )else{}\\n  |                   `- error: cannot convert value of type '()' to expected condition type 'Bool'\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any sending»\"],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"tupleExpression\\t[\\\"(\\\" \\\")\\\"]\",\"primaryExpression\\t[tupleExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"condition\\t[expression]\",\"conditionList\\t[condition ]\",\".OPT\\t[\\\",\\\" conditionList]\",\"boxedProtocolKeywordName\\t[\\\"sending\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"expressionIntroducerBoundary\\t[<s>]\",\"guardStatement\\t[\\\"guard\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":77,\"descriptorCount\":156,\"duplicateDescriptorCount\":0,\"oraclePruned\":57,\"parseSeconds\":0.004812002182006836,\"sourceLength\":27,\"suppressedDescriptorCount\":15,\"tokenCount\":9,\"yieldCount\":121},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            TypeExpr\\n              SomeOrAnyType\\n                keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n                IdentifierType\\n                  identifier(\\\"sending\\\") \\\"sending\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            TupleExpr\\n              leftParen \\\"(\\\"\\n              LabeledExprList\\n              rightParen \\\")\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

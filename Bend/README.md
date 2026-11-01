@@ -10,7 +10,7 @@ there for intuition.
 
 | File | What it is | Read? |
 |---|---|---|
-| `SPEC.bend` | What parsing means: grammars (EBNF right sides with `( ) [ ] { } < >`), parse trees, `fits`, `leaves`, the steps of a tree as BSR elements, and exact BSR sets | **yes** |
+| `SPEC.bend` | What parsing means: grammars (EBNF right sides with `( ) [ ] { } < >`), parse trees, `fits`, `leaves`, the steps of a tree as BSR elements, exact BSR sets, and which trees `@prefer` and `@avoid` select | **yes** |
 | `LAWS.bend` | Every claim, nothing else | **yes** |
 | `EXAMPLES.bend` | The paper's examples, the engine on them, the check catching broken states | for intuition |
 | `GLL.bend` | The GLL engine, after tinyGLL and ApusApus | optional: not trusted |
@@ -18,7 +18,11 @@ there for intuition.
 | `PRUNE.bend` | The round rule on link steps, and pruning to the steps a parse tree needs, with its closedness check | optional |
 | `WITNESS.bend` | A search for parse trees built from the kept steps | optional: not trusted |
 | `EXACT.bend` | The exact parser `exactSteps`: pruned steps, handed out only when witness trees cover them all | optional |
-| `COMPARE.bend` | Sets Swift Apus's BSR yields next to the exact set: what is missing, what is dead wood | optional |
+| `GUARD.bend` | The guard oracle `guardSteps` (phase 1): the exact set without the steps of nodes that break a lookahead, `@left` or `@right` rule, every answer checked | optional |
+| `EXTENT.bend` | The extent oracle `extentSteps` (phase 3, `@longest`/`@shortest`): the exact set without the steps on no best reading, with a self-check against stitched readings | optional |
+| `UNBEATEN.bend` | The joined preference oracle `unbeatenSteps` (phase 2 on top of phase 1): the guard oracle's set without the steps of choices outranked by an admissible rival | optional |
+| `PREFER.bend` | The preference oracle `preferSteps`: the exact set without the steps of outranked choices, each removal with a checked certificate | optional |
+| `COMPARE.bend` | Sets Swift Apus's BSR yields next to the exact set, or after `@prefer`/`@avoid` next to the steps of the unbeaten trees: what is missing, what is dead wood | optional |
 | `swift/` | Cases exported from Swift Apus by `ApusApusTests/BendExport.swift`; generated | run |
 | `PROOF.bend` | The gate | run, don't read |
 | `PROOF_TREES.bend` | Proofs of the rewriting laws | no |
@@ -27,6 +31,11 @@ there for intuition.
 | `PROOF_PRUNE.bend` | Proof that pruning keeps every step of every parse tree | no |
 | `PROOF_EXACT.bend` | Proof that the exact parser's set is exact | no |
 | `PROOF_SPELL.bend` | Proof that trees built from the exact set spell the input | no |
+| `PROOF_GUARD.bend` | Proof that the guard oracle's set embeds exactly the admissible trees | no |
+| `PROOF_PREFER.bend` | Proof that the joined preference oracle's set embeds exactly the admissible unbeaten trees | no |
+| `PROOF_SUPPORT.bend` | Proof that a no from the admissible sub-parse leaves no admissible rival in place | no |
+| `PROOF_SUBPARSE.bend` | What a sub-parse and the exact set say about trees; shared by the oracle proofs | no |
+| `PROOF_EXTENT.bend` | Proof that the extent oracle's set embeds exactly the best-extent trees | no |
 | `FITS.bend` | Facts about `fits`: of a list, of its head and tail, of a join | no |
 | `LEMMAS.bend` | Facts about Bool, Nat and lists | no |
 | `bnf/` | The earlier BNF specification with a proven CYK parser, frozen | history |
@@ -63,7 +72,7 @@ Two opt-in suites use it (set the variable in the test plan, or as
 
 | Suite | Variable | What it does |
 |---|---|---|
-| Bend check | `APUS_BEND=1` (or the path to `bend`) | runs Bend on every accepted message of the `TestCase` tables in `CoreGrammarTests`, plus the cases below; fails when Swift misses a parse-tree step; a second test does the same after the Oracle (below); attaches a `bend report.txt` per case, and the Bend file of every difference |
+| Bend check | `APUS_BEND=1` (or the path to `bend`) | runs Bend on every accepted message of the `TestCase` tables in `CoreGrammarTests`, plus the cases below; fails when Swift misses a parse-tree step; a second test does the same after the Oracle, and a third compares grammars with `@prefer`/`@avoid`, and a fourth grammars with `@canParse`/`@cannotParse`/`@left`/`@right` (below); attaches a report per case, and the Bend file of every difference |
 | Bend export | `APUS_EXPORT_BEND=<path to Bend/swift>` | writes a few cases to `swift/`, to run by hand |
 
 Results (2026-10-27), 341 accepted messages:
@@ -117,6 +126,28 @@ The check found three bugs in phase 1, each fixed, each with a regression test i
 - **A zero-width `[ ]` kept dead wood**. Over nothing a `[ ]` is the skip, so
   `visitBracket` no longer walks its round.
 
+### After `@prefer` and `@avoid`
+
+A third test runs 20 grammars with `@prefer`/`@avoid`, from `OracleDisambiguationTests`,
+through Swift's Oracle and compares the yields with the steps of the unbeaten trees
+(`COMPARE.bend`, `preferReport`: the witness trees of the preference oracle's set that
+use only its steps).
+
+Results (2026-10-30), 35 messages: 32 agree exactly; 3 differ only by one loop
+iteration end each (the phase 1 exception above). No step of an unbeaten tree is
+missing, and no step of an outranked choice survives.
+
+### After lookahead, `@left` and `@right`
+
+A fourth test runs 13 grammars with `@canParse`/`@cannotParse`/`@left`/`@right` through
+Swift's Oracle and compares the yields with the steps of the admissible trees
+(`COMPARE.bend`, `guardReport`). The cases cover bare and listed `@left`/`@right`, both
+on productions and in groups, lookahead that removes every parse, ambiguous lookahead,
+and lookahead on a nonterminal GLL never predicts at that position.
+
+Results (2026-10-31), 17 messages: all 17 agree exactly. Where a rule removes every
+parse, Swift and Bend both leave nothing.
+
 ## What is proven
 
 - **Rewriting laws**: each bracket means its usual BNF rewriting, without helper
@@ -130,6 +161,34 @@ The check found three bugs in phase 1, each fixed, each with a regression test i
 - **Trees from the exact set spell the input** (`exact_trees_spell`): a tree that
   fits, uses only steps of the exact set, and is as long as the input, spells the
   input. An oracle choosing from the set cannot produce a non-parse.
+- **Lookahead, `@left` and `@right` keep exactly the admissible trees**
+  (`guards_exact`, phase 1): whenever `guardSteps` hands out a set, a parse tree of
+  the input uses only its steps exactly when every node, pick and round keeps the rules
+  of the alternative it chose (`SPEC.bend`, `Admissible`). The oracle refuses rules on
+  the alternatives of a loop.
+- **`@longest` and `@shortest` keep exactly the best-extent trees** (`extent_exact`,
+  phase 3): whenever `extentSteps` hands out a set, a parse tree of the input uses only
+  its steps exactly when no node, pick or round has a rival reading of the same
+  children's tokens whose marked item is longer (`@longest`) or shorter (`@shortest`)
+  (`SPEC.bend`, `ExtentBest`). The comparison is local, within the one sequence the
+  mark sits in. The oracle refuses two marks in one sequence and a mark on the
+  alternative of a loop. Its self-check (a kept step of a marked item, at each end of
+  its sequence, either lies on no reading or has the best length there) rules out
+  readings stitched together from different trees.
+- **`@prefer` and `@avoid` choose exactly the unbeaten trees, among the admissible
+  ones** (`prefer_avoid_exact`, phase 2 joined to phase 1): whenever `unbeatenSteps`
+  hands out a set, a parse tree of the input uses only its steps exactly when it is
+  admissible and no node of it is outranked by an admissible rival (`SPEC.bend`,
+  `UnbeatenTree`). A preferred alternative that breaks a hard rule beats nothing. The
+  set may keep steps inside a removed choice; they make no tree.
+- **An answer leaves a reading** (`prefer_avoid_safe`): whenever `unbeatenSteps` hands
+  out a set and the input has an admissible tree, some admissible tree is unbeaten. The proof
+  builds it: it repairs any parse tree from the top, keeping each node the oracle kept
+  and putting a removed node's certified rival in its place.
+  Not proven: the same without the oracle's answer, that preferences never remove every
+  parse tree. Its classical proof ("it is impossible that no tree is unbeaten") uses a
+  hypothesis twice, which Bend's affine logic does not allow (`¬¬(P ∨ ¬P)` is not
+  provable in Bend); it would need a verified recogniser instead.
 
 ## How the exact parser is built
 
@@ -153,6 +212,59 @@ about the checks:
    cover every kept step. So every kept step is a step of a parse tree.
 
 If a check fails, or an algorithm runs out of fuel, the parser hands out nothing.
+
+## How the guard oracle works
+
+`GUARD.bend` starts from the exact set and decides each rule from one step of the
+node, because of how a sequence's steps are recorded: the last step has the node's
+start i and its last child's span k..j, and the first step has the first child's span.
+Lookahead depends only on the choice and i, `@left` on the choice and k..j, `@right`
+on the choice and the first span. Two trees that share a step share these values, so
+removing the step takes out the nodes that break a rule, and only those; no pruning
+is needed. Every answer is checked: "N derives w" with a forest that `SPEC.bend`'s
+`fits` and `leaves` accept, "N does not derive w" when the checked parser finds no
+tree. A lookahead tries every prefix length of the rest of the input. Anything the
+oracle can't decide makes it hand out nothing.
+
+In the proof, a rule's Holds can be used only once (affine logic), while a node's own
+steps are visited one by one. Each rule is decided by exactly one own step, so the
+rules are split up front: the `@right` part goes to the first step, the rest to the
+last.
+
+## How the preference oracle works
+
+`UNBEATEN.bend` runs on the guard oracle's set (phase 1), with PREFER.bend's machinery
+and one change in step 1 below: the sub-parse's steps are moved back to where they
+stand in the input (shifted by the choice's start, the extra production's slots read
+as the rival's own), judged there by the guard oracle with the whole input to look
+ahead in, and pruned from below to the steps that what is kept supports (a loop that
+is not trusted, and a closure check that is). A rival is found only when the end of
+its sequence survives, so only admissible rivals count. Certificates are drawn from
+the guard oracle's set, so a certified rival is admissible (PROOF_GUARD's walks).
+What follows describes PREFER.bend, the unjoined original.
+
+`PREFER.bend` starts from the exact set. A step that completes a choice (the end of a
+production's right side, or of a bracket's alternative) reads the tokens from its i
+to its j. For each sibling of higher rank:
+
+1. **Keep** needs proof that the sibling cannot read those tokens. The checked GLL
+   parser runs on just those tokens, with the sibling's items as one extra
+   production. If its set has no end of that production over all of them,
+   `gll_every_parse_step` says no tree exists, so no rival exists.
+2. **Remove** needs a certificate from some sibling of higher rank, checked with
+   `SPEC.bend`'s own definitions: a forest for the sibling over the same tokens, made
+   of kept steps only, and a set C of nonterminals with no node in the forest over
+   those tokens. (Kept steps only: then the forest can take the removed node's place in
+   a tree of kept steps, which is how `prefer_avoid_safe` builds an unbeaten tree. Any
+   sibling may give the certificate: the first one found may be outranked itself.) C holds every nonterminal that can be above
+   the choice over the same tokens: it is grown from the choice's nonterminal along
+   steps that start a sequence with a member of C, and checked to be closed. That is
+   SPEC's rival, which may not go round a cycle back to a node above it.
+
+Without a certificate, or when the parser runs out of fuel, the oracle hands out
+nothing. That is the case for a grammar whose preferences go round a cycle (Swift
+Apus refuses those too), and for a loop not written `{ ( τ ) }`, whose rounds the
+steps cannot tell apart.
 
 ## Design choices in SPEC.bend
 
@@ -221,6 +333,17 @@ phase 1 of the Oracle removes them. It also reports no ambiguity for `( "" | A )
 with `A = ""`, which is a genuine one.
 
 ## Still to do
+
+- Join phase 3: `@longest`/`@shortest` rivals must be admissible and unbeaten. The same
+  route as phase 2: EXTENT.bend's rival search would run on the phase 2 set.
+- Decide whether Apus's token lookaround `>+>`/`>->` (and `<+<`/`<-<`) should take
+  nonterminals, replacing `@canParse`/`@cannotParse` (SPEC.bend `Ahead`/`NotAhead`).
+  This changes the grammar language: Swift Apus, Swift.apus and the docs.
+- Once the whole Oracle is proven: review the edifice and simplify it.
+
+- Preferences never remove every parse tree, without the premise that the oracle
+  answered: needs a verified recogniser for "do these items derive these tokens
+  without going round a cycle?" (see `prefer_avoid_safe`).
 
 - A law that enough fuel always gives an answer (today a failure is safe: no answer).
 - Larger grammars in the Bend check: the language fixtures, and the `fail` messages.

@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00050292-advent-overaccept-b2560af46f20e589.json",
+    "durationSeconds" : 1.6307669878005981,
+    "exitCode" : 1,
+    "generator" : "grammar-directed:nodes=174",
+    "index" : 50292,
+    "seed" : 4354586739611356967,
+    "signalHash" : "b2788d8670d6fda4",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|'<value>' should appear at the beginning of a composition",
+    "sourceHash" : "b2560af46f20e589",
+    "sourceLength" : 60,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "return any some&+\\xxxxxx async->any __owned&any nonisolated;",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SequenceExpr\n        ExprList\n          DeclReferenceExpr\n            identifier(\"async\") \"async\"\n          ArrowExpr\n            arrow \"->\"\n          MissingExpr\n            identifier(\"<#expression#>\") \"<#expression#>\"\n          BinaryOperatorExpr\n            binaryOperator(\"&\") \"&\"\n          MissingExpr\n            identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-DD12263E-A3F4-4910-8DFF-A59BFAF81D27.swift:1:21: error: 'any' should appear at the beginning of a composition\n1 |  async->any __owned&any nonisolated\n  |                     `- error: 'any' should appear at the beginning of a composition\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __owned»",
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any nonisolated»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"nonisolated\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint]",
+      "prefixExpression\t[anyTypeExpression]",
+      "ifConfigSameLine\t[]",
+      ".DO\t[\"&\"]",
+      "infixExpression\t[>s<  >->(\".\") >s< ifConfigSameLine prefixExpression]",
+      ".DO\t[ifConfigSameLine infixExpression]",
+      ".POS\t[]",
+      "boxedProtocolKeywordName\t[\"__owned\"]",
+      "arrowExpr\t[ \"->\" >->(\"async\" \"await\" \"rethrows\" \"throw\" \"throws\" \"try\")]",
+      "infixExpression\t[arrowExpr ifConfigSameLine prefixExpression]",
+      "infixExpressions\t[]",
+      ".OPT\t[infixExpressions]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "statements\t[statement  ]",
+      ".OPT\t[statements]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 151,
+      "descriptorCount" : 322,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 163,
+      "parseSeconds" : 0.0035430192947387695,
+      "sourceLength" : 35,
+      "suppressedDescriptorCount" : 36,
+      "tokenCount" : 7,
+      "yieldCount" : 246
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SequenceExpr\n        ExprList\n          DeclReferenceExpr\n            identifier(\"async\") \"async\"\n          ArrowExpr\n            arrow \"->\"\n          TypeExpr\n            SomeOrAnyType\n              keyword(SwiftSyntax.Keyword.any) \"any\"\n              CompositionType\n                CompositionTypeElementList\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"__owned\") \"__owned\"\n                    binaryOperator(\"&\") \"&\"\n                  CompositionTypeElement\n                    IdentifierType\n                      identifier(\"any\") \"any\"\n    CodeBlockItem\n      DeclReferenceExpr\n        identifier(\"nonisolated\") \"nonisolated\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 23,
+  "source" : " async->any __owned&any nonisolated",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SequenceExpr\\n        ExprList\\n          DeclReferenceExpr\\n            identifier(\\\"async\\\") \\\"async\\\"\\n          ArrowExpr\\n            arrow \\\"->\\\"\\n          MissingExpr\\n            identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n          BinaryOperatorExpr\\n            binaryOperator(\\\"&\\\") \\\"&\\\"\\n          MissingExpr\\n            identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-DD12263E-A3F4-4910-8DFF-A59BFAF81D27.swift:1:21: error: 'any' should appear at the beginning of a composition\\n1 |  async->any __owned&any nonisolated\\n  |                     `- error: 'any' should appear at the beginning of a composition\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __owned»\",\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any nonisolated»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"nonisolated\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint]\",\"prefixExpression\\t[anyTypeExpression]\",\"ifConfigSameLine\\t[]\",\".DO\\t[\\\"&\\\"]\",\"infixExpression\\t[>s<  >->(\\\".\\\") >s< ifConfigSameLine prefixExpression]\",\".DO\\t[ifConfigSameLine infixExpression]\",\".POS\\t[]\",\"boxedProtocolKeywordName\\t[\\\"__owned\\\"]\",\"arrowExpr\\t[ \\\"->\\\" >->(\\\"async\\\" \\\"await\\\" \\\"rethrows\\\" \\\"throw\\\" \\\"throws\\\" \\\"try\\\")]\",\"infixExpression\\t[arrowExpr ifConfigSameLine prefixExpression]\",\"infixExpressions\\t[]\",\".OPT\\t[infixExpressions]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"statements\\t[statement  ]\",\".OPT\\t[statements]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":151,\"descriptorCount\":322,\"duplicateDescriptorCount\":0,\"oraclePruned\":163,\"parseSeconds\":0.0035430192947387695,\"sourceLength\":35,\"suppressedDescriptorCount\":36,\"tokenCount\":7,\"yieldCount\":246},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SequenceExpr\\n        ExprList\\n          DeclReferenceExpr\\n            identifier(\\\"async\\\") \\\"async\\\"\\n          ArrowExpr\\n            arrow \\\"->\\\"\\n          TypeExpr\\n            SomeOrAnyType\\n              keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n              CompositionType\\n                CompositionTypeElementList\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"__owned\\\") \\\"__owned\\\"\\n                    binaryOperator(\\\"&\\\") \\\"&\\\"\\n                  CompositionTypeElement\\n                    IdentifierType\\n                      identifier(\\\"any\\\") \\\"any\\\"\\n    CodeBlockItem\\n      DeclReferenceExpr\\n        identifier(\\\"nonisolated\\\") \\\"nonisolated\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}
