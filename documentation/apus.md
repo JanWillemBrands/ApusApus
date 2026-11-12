@@ -218,18 +218,33 @@ An annotation starts with `@`. Its meaning depends on its position. There are fo
 | Position | Annotations |
 | --- | --- |
 | Start of a production, before the name | `@longest` `@shortest` `@flavors` `@literalMunch` `@preempt` |
-| Start of an alternative, after `=` `\|` `(` `[` `{` `<` | `@prefer` `@avoid` `@left` `@right` `@canParse` `@cannotParse` |
+| Start of an alternative, after `=` `\|` `(` `[` `{` `<` | `@prefer` `@avoid` `@left` `@right` |
 | Before an item | `@setFlavor` `@clearFlavor` `@requiresFlavor` `@rejectsFlavor` |
 | Before a bracket | `@longest` `@shortest` |
 
 An annotation in the wrong position is an error. Exception: a terminal pragma on a production rule
 (`=`) has no effect.
 
-Three other predicates also sit between items. They consume no input:
+Four other kinds of item consume no input:
 
 - layout boundaries `<s>` `>s<` `<n>` `>n<`,
 - token lookaround `>+>` `>->` `<+<` `<-<`,
+- parse predicates `>?>` `>!>`, only at the start of an alternative,
 - layout tokens `>>|` `|<<`.
+
+### Lists
+
+An annotation that takes a list separates the items with commas. A comma after the last item is
+allowed. A list cannot be empty: leave the annotation out instead.
+
+```apus
+name = identifier ---( "if", "while", "for" ) .
+@flavors(cond, call) expression = term { "+" term } .
+A = X >->( "(", "[", ) Y .
+```
+
+The items of a list are a set: their order does not matter. Without commas, `( "a" "b" )` would
+look like a sequence, so a missing comma is an error.
 
 ## Choosing Between Readings
 
@@ -289,22 +304,6 @@ You can put more than one `@left` or `@right` on one alternative.
 `@left` and `@right` apply to one production. They cannot make two different productions (for
 example `+` and `-`) associative with each other.
 
-### `@canParse` and `@cannotParse`
-
-```apus
-statement = @cannotParse( declaration ) expression .
-```
-
-- `@canParse(N)`: this alternative is valid only where `N` can start at this position.
-- `@cannotParse(N)`: this alternative is not valid where `N` can start at this position.
-
-"Can start" means that `N` has a parse that starts here. `N` does not have to cover the same text as
-the alternative.
-
-The parser must try `N` at this position for its own reasons. If no other rule uses `N`, the parser
-never tries it. Then `@canParse(N)` is always false and `@cannotParse(N)` is always true. These
-predicates cannot run a separate grammar as a lookahead.
-
 ## Flavors
 
 A flavor is a flag that a part of the grammar gives to its children. The same text can parse
@@ -315,10 +314,10 @@ set at the same time.
 ### Flavor Annotations
 
 ```apus
-@setFlavor(foo bar) X       // parse X with foo and bar set
-@clearFlavor(foo bar) X     // parse X with foo and bar not set
-@requiresFlavor(foo bar) X  // keep this path only if foo and bar are both set
-@rejectsFlavor(foo bar) X   // remove this path if foo and bar are both set
+@setFlavor(foo, bar) X       // parse X with foo and bar set
+@clearFlavor(foo, bar) X     // parse X with foo and bar not set
+@requiresFlavor(foo, bar) X  // keep this path only if foo and bar are both set
+@rejectsFlavor(foo, bar) X   // remove this path if foo and bar are both set
 ```
 
 `@setFlavor` and `@clearFlavor` change only the flavors that they name. The change applies only to
@@ -391,7 +390,7 @@ The load log shows the number of copies for each flavor. Keep scopes small to ke
 ### Exclusion Sets `---( )`
 
 ```apus
-name = identifier ---( "if" "while" "for" ) .
+name = identifier ---( "if", "while", "for" ) .
 ```
 
 A keyword and an identifier can match the same text, for example `if`. The parser then tries both.
@@ -442,7 +441,7 @@ A = X <-<( operator ) Y .
 `EOF` means the end of the input:
 
 ```apus
-A = X >+>( ")" EOF ) .
+A = X >+>( ")", EOF ) .
 ```
 
 A list can name a set, as `---( … )` can: a rule whose every alternative is one terminal, and which
@@ -450,11 +449,42 @@ no production uses. Its terminals take the place of the name:
 
 ```apus
 closer = ")" | "]" | "}" .
-A = X <-<( closer "," ) Y .
+A = X <-<( closer, "," ) Y .
 ```
 
 A lookaround tests tokens, so naming a rule that is also a production is an error. To test whether a
-rule parses, use `@cannotParse( … )` or `@canParse( … )`.
+rule parses, use a parse predicate.
+
+### Parse Predicates `>?>` and `>!>`
+
+```apus
+statement = >!>( declaration, attributes ) expression .
+call      = >?>( argumentStart ) name arguments .
+```
+
+| Predicate | True when |
+| --- | --- |
+| `>?>( N )` | `N` can parse here |
+| `>!>( N, … )` | none of the listed nonterminals can parse here |
+
+"Can parse here" means that `N` derives some text that starts at this position. `N` does not have
+to cover the same text as the alternative, and it does not matter whether the rest of the input
+parses. `N`'s own predicates do not count. `>?>` takes one nonterminal; `>!>` takes a list.
+
+Put a parse predicate at the start of an alternative: before the first item that reads input. Other
+zero-width items, such as a token lookaround, may come before it, and `@prefer`, `@avoid`, `@left`
+and `@right` may come before or after it.
+
+A parse predicate is a parse, not a test of one token. The parser starts `N` at this position, in
+addition to the alternative. If the grammar starts `N` there anyway, the predicate costs almost
+nothing. A target that is long or that starts at many positions costs more, so keep targets short:
+a target only needs to reach the point where the decision is clear, as in
+
+```apus
+missingBindingIntroducer = ( identifierToken | "_" ) assignmentOperator .
+```
+
+Use a token lookaround instead when one token decides.
 
 ### Layout Tokens `>>|` and `|<<`
 
@@ -573,7 +603,8 @@ own.
 
 ## Full Grammar
 
-`apus.apus` describes APUS. This is its structure:
+`apus.apus` describes APUS. Below is its structure, with each annotation in the one position where
+the parser accepts it:
 
 ```apus
 whitespace  : /\s+/ .
@@ -592,7 +623,7 @@ productionBody = terminalBody | selection .
 terminalBody   = regex | literal | "@builder" [ "(" identifier ")" ] .
 
 selection    = sequence { "|" sequence } .
-sequence     = alternateAnnotation* < sequenceItem > .
+sequence     = { alternateAnnotation | predicate | layout | lookaround } < sequenceItem > .
 sequenceItem = layout
              | lookaround
              | flavorAnnotation* factor [ "?" | "*" | "+" ] [ exclusion ]
@@ -607,19 +638,20 @@ factor   = terminal
 terminal = identifier | literal | regex | "ε" | "\"\"" .
 
 layout     = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
-lookaround = ( ">+>" | ">->" | "<+<" | "<-<" ) "(" < literal | identifier | "EOF" > ")" .
-exclusion  = "---" "(" < literal | identifier > ")" .
+lookaround = ( ">+>" | ">->" | "<+<" | "<-<" ) "(" item { "," item } [ "," ] ")" .
+exclusion  = "---" "(" item { "," item } [ "," ] ")" .
+item       = literal | identifier .                       // `EOF` is an identifier
+predicate  = ">?>" "(" identifier [ "," ] ")"
+           | ">!>" "(" names ")" .
+names      = identifier { "," identifier } [ "," ] .
 
 productionPragma    = terminalPragma | nonterminalPragma .
 terminalPragma      = "@literalMunch" | "@preempt" "(" identifier [ "," identifier ] ")" .
-nonterminalPragma   = "@longest" | "@shortest"
-                    | "@flavors" "(" < identifier > ")" .
+nonterminalPragma   = "@longest" | "@shortest" | "@flavors" "(" names ")" .
 groupPragma         = "@longest" | "@shortest" .
-alternateAnnotation = "@prefer" | "@avoid"
-                    | ( "@left" | "@right" ) [ "(" < identifier > ")" ]
-                    | ( "@canParse" | "@cannotParse" ) "(" < identifier > ")" .
+alternateAnnotation = "@prefer" | "@avoid" | ( "@left" | "@right" ) [ "(" names ")" ] .
 flavorAnnotation    = ( "@setFlavor" | "@clearFlavor" | "@requiresFlavor" | "@rejectsFlavor" )
-                      "(" < identifier > ")" .
+                      "(" names ")" .
 ```
 
 ## Sample Grammar

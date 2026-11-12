@@ -38,7 +38,7 @@ struct LexMatch: Hashable {
 
 /// Key for the parser's `(pos, terminalID) → [LexMatch]` memoization table.
 /// Lex queries are pure given the input; the same (pos, terminalID) gets asked
-/// many times during a parse (testSelect iterates `firstBS`, descriptor re-entry
+/// many times during a parse (viable iterates `firstBS`, descriptor re-entry
 /// revisits positions). Without this cache the per-terminal LCNP path would
 /// re-run pattern matching tens of thousands of times.
 struct LexCacheKey: Hashable {

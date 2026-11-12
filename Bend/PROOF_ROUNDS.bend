@@ -210,8 +210,8 @@ def checked_state(grammar, start, input, s, ys, facts, tree, fitting, spelled):
     case (ok0, same):
       +ok = {ok0 : {Bool.and(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)) == True{} : Bool}}
       %same : {Spec.allIn(Spec.steps(tree, 0n), _) == True{} : Bool}
-      G.closed_complete(grammar, start, input, s,
-        Lemma.and_true_left(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s), ok),
+      G.closed_complete(Gll.NoPred{}, grammar, start, input, s,
+        Lemma.and_true_left(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s), ok), {==},
         Lemma.and_true_right_side(Check.closed(grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s), ok),
         tree, fitting, spelled)
 

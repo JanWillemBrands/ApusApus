@@ -288,7 +288,7 @@ Candidates that are really context, ranked by payoff:
    approximated by token lookbehind. TODO #2 residual (a) is exactly where that
    approximation fails. Use a call-site split or a flavor set at the postfix-expression
    occurrence.
-3. **Per-use audit** of `@cannotParse` (23) and `@prefer` (32). Convert only uses that
+3. **Per-use audit** of `>!>` (23) and `@prefer` (32). Convert only uses that
    encode *position* rather than choose between two valid readings. No mass conversion.
 
 Not candidates: `@longest`/`@shortest`, `@prefer` between valid readings, `@preempt`, and
@@ -388,7 +388,7 @@ ends in an expression. Flavors flow down to children, never sideways, so they ca
 The realistic options:
 
 - **A BSR lookbehind predicate,** "no `postfixExpression` yield ends here". This is the dual of
-  `@cannotParse`, but raw yields include speculative ones. For example, `x { }` in
+  `>!>`, but raw yields include speculative ones. For example, `x { }` in
   `if x { }⏎#if A⏎.b⏎#endif` is a raw `postfixExpression` yield that would wrongly suppress the
   valid statement-level reading.
 - **A grammar refactor** that classifies statements by how they end. This is invasive.

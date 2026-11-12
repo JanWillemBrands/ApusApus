@@ -119,7 +119,8 @@ let statementSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testSwitch",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "unknown attribute '$dollar'"
     ),
     SwiftSnippet(
         label: "testSwitch#3",
@@ -394,7 +395,8 @@ let statementSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testTypedThrows",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a 'do' statement with a 'throws' clause must have at least one 'catch'"
     ),
     SwiftSnippet(
         label: "testTypedThrows#2",
@@ -404,7 +406,8 @@ let statementSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testTypedThrows",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a 'do' statement with a 'throws' clause must have at least one 'catch'"
     ),
     SwiftSnippet(
         label: "testTypedThrows#3",
@@ -414,7 +417,8 @@ let statementSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testTypedThrows",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a 'do' statement with a 'throws' clause must have at least one 'catch'"
     ),
     SwiftSnippet(label: "testForUnsafeStatement#1", source: "for try await unsafe x in e { }", origin: "StatementTests.testForUnsafeStatement", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "testForUnsafeStatement#2", source: "for try await unsafe in e { }", origin: "StatementTests.testForUnsafeStatement", syntaxVersion: "603.0.1"),
@@ -580,7 +584,8 @@ let statement604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testSwitch",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "unknown attribute '$dollar'"
     ),
     SwiftSnippet(
         label: "testSwitch#3",
@@ -855,7 +860,8 @@ let statement604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testTypedThrows",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a 'do' statement with a 'throws' clause must have at least one 'catch'"
     ),
     SwiftSnippet(
         label: "testTypedThrows#2",
@@ -865,7 +871,8 @@ let statement604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testTypedThrows",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a 'do' statement with a 'throws' clause must have at least one 'catch'"
     ),
     SwiftSnippet(
         label: "testTypedThrows#3",
@@ -875,7 +882,8 @@ let statement604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "StatementTests.testTypedThrows",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a 'do' statement with a 'throws' clause must have at least one 'catch'"
     ),
     SwiftSnippet(label: "testForUnsafeStatement#1", source: "for try await unsafe x in e { }", origin: "StatementTests.testForUnsafeStatement", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testForUnsafeStatement#2", source: "for try await unsafe in e { }", origin: "StatementTests.testForUnsafeStatement", syntaxVersion: "604.0.0-prerelease-2026-06-05"),

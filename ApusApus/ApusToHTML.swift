@@ -518,7 +518,7 @@ private final class ApusHTMLConverter {
             core = "?"; pos += 1
         }
 
-        // Schrödinger exclusion: ---("if" "for" …)
+        // exclusion: ---("if" "for" …)
         if k == "---" {
             pos += 1
             expect("(")

@@ -577,10 +577,10 @@ spaced `?` as infix rather than postfix.
 
 The fix is FOUR alternates, no restructuring, no converter change:
 
-    keyPathPivot         = <s> optionalMark >+> ( optionalMark forceMark ) .
-    keyPathPivot         = <s> forceMark   >+> ( optionalMark forceMark ) .
-    keyPathBareComponent = <s> optionalMark >+> ( optionalMark forceMark ) .
-    keyPathBareComponent = <s> forceMark   >+> ( optionalMark forceMark ) .
+    keyPathPivot         = <s> optionalMark >+> ( optionalMark, forceMark ) .
+    keyPathPivot         = <s> forceMark   >+> ( optionalMark, forceMark ) .
+    keyPathBareComponent = <s> optionalMark >+> ( optionalMark, forceMark ) .
+    keyPathBareComponent = <s> forceMark   >+> ( optionalMark, forceMark ) .
 
 A mark run is consumed however it is spaced (branch 2 is token-based), so `\Foo.bar ?? fallback`
 takes `??` as two components and `fallback` dangles. The `>+>` requires a FOLLOWING mark, so a
@@ -594,7 +594,7 @@ Two beliefs recorded earlier here were WRONG, and each cost a failed attempt:
    `hasError == false` and its tree is a MEMBER ACCESS whose base is the key path — swift ends the
    key path at `.bar` (a dotted form in phase 2 breaks the loop) and the enclosing postfix parser
    resumes. So the escape hatch is CORRECT; closing it with
-   `@cannotParse( keyPathExpression )` on `forcedValueExpression`/`optionalChainingExpression`
+   `>!>( keyPathExpression )` on `forcedValueExpression`/`optionalChainingExpression`
    broke exactly those two fixtures.
 2. **"`keyPathComponents` cannot express the component language, so it must be flattened."**
    FALSE. The three-rule shape already matches swift exactly. Confirmed by enumerating every

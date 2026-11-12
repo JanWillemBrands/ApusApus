@@ -70,6 +70,24 @@ SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
   --output /tmp/apus-grammar-fuzzer-smoke
 ```
 
+Boundary-recovery campaign (grammar-generated accepted anchors, followed by one local edit per sample):
+
+```sh
+SWIFT_DETERMINISTIC_HASHING=1 \
+SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
+  --iterations 20000 \
+  --boundary-recovery \
+  --timeout 30 \
+  --quiet-passes \
+  --output /tmp/apus-boundary-recovery
+```
+
+This mode does not retain or recombine anchors. It keeps mutations only until the current accepted
+anchor is exhausted. A compiler-rejected mutation for which ApusApus still builds a complete tree is
+stored as `boundary-recovery-overaccept`, even when SwiftSyntax accepts it through recovery. The
+summary separates anchors, mutations, compiler rejections, ApusApus overaccepts, and the subset on
+which SwiftSyntax recovered.
+
 Full-core campaign in this environment:
 
 ```sh
@@ -152,8 +170,9 @@ The fuzzer currently uses a **strong-bug policy** for acceptance mismatches:
 - If `swiftc -swift-version 6 -parse` and SwiftSyntax agree, ApusApus must agree with them.
 - If `swiftc` and SwiftSyntax disagree, the input is `reference-disagreement`; it is telemetry, not
   an ApusApus grammar bug by default.
-- This is deliberate. The current phase favors grammar simplicity and avoids churn from choosing a
-  final winner between compiler strictness and SwiftSyntax recovery.
+- This is deliberate for the general lanes. The boundary-recovery lane is the explicit exception:
+  its purpose is to find recovery syntax hidden in `Swift.apus`, so the compiler wins and a complete
+  ApusApus tree on a compiler rejection is an artifact even if SwiftSyntax recovers.
 
 Only strong bugs should become grammar TODOs during this phase. Reference-disagreement clusters can
 be revisited later if the project chooses a single final acceptance oracle.
@@ -246,11 +265,13 @@ Phase 1 is implemented:
 
 Phase 2 is partially implemented:
 
-- record grammar alternates reached by final derivations,
+- record numbered grammar alternatives reached by generated derivations,
+- weight generation by inverse emitted-alternative hit count while measuring compiler-accepted coverage separately,
+- report compiler-accepted alternative and alternative-pair coverage,
 
 Phase 2 should next make novelty broader:
 
-- replace name/body alternate fingerprints with explicit stable alternate IDs,
+- persist stable source-location alternative IDs across grammar reloads,
 - record SwiftSyntax node kinds and converter fallback diagnostics,
 - retain sources that cover a new node kind, Oracle prune kind, or converter diagnostic.
 

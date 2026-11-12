@@ -176,7 +176,8 @@ let translatedSnippets: [SwiftSnippet] = [
       async func asyncIncorrectly() { }
       """,
         origin: "AsyncTests.testAsync16",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "async must follow the function parameter list"
     ),
     SwiftSnippet(
         label: "testAvailabilityQuery1#1",
@@ -194,7 +195,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryTests.testAvailabilityQuery11",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQuery13#1",
@@ -291,7 +293,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryTests.testAvailabilityQuery23",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQuery24#1",
@@ -385,7 +388,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryUnavailabilityTests.testAvailabilityQueryUnavailability8",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQueryUnavailability10#1",
@@ -467,7 +471,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryUnavailabilityTests.testAvailabilityQueryUnavailability18",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQueryUnavailability21#1",
@@ -1015,7 +1020,8 @@ let translatedSnippets: [SwiftSnippet] = [
       var z = $x0 + $x1
       """,
         origin: "DebuggerTests.testDebugger2",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "the '$' prefix is reserved for implicitly synthesized declarations"
     ),
     SwiftSnippet(
         label: "testDebugger3#1",
@@ -1223,7 +1229,8 @@ let translatedSnippets: [SwiftSnippet] = [
       func shorthandFollowedByDeprecated() {}
       """,
         origin: "DiagnoseAvailabilityTests.testDiagnoseAvailability4",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "labelled availability cannot follow shorthand specification"
     ),
     SwiftSnippet(
         label: "testDiagnoseAvailability5#1",
@@ -1232,7 +1239,8 @@ let translatedSnippets: [SwiftSnippet] = [
       func shorthandFollowedByIntroduced() {}
       """,
         origin: "DiagnoseAvailabilityTests.testDiagnoseAvailability5",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "labelled availability cannot follow shorthand specification"
     ),
     SwiftSnippet(
         label: "testDiagnoseAvailability6#1",
@@ -1250,7 +1258,8 @@ let translatedSnippets: [SwiftSnippet] = [
       func twoShorthandsFollowedByDeprecated() {}
       """,
         origin: "DiagnoseAvailabilityTests.testDiagnoseAvailability7",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "labelled availability cannot follow shorthand specification"
     ),
     SwiftSnippet(
         label: "testDiagnoseAvailability9#1",
@@ -1678,7 +1687,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties5",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties6#1",
@@ -1691,7 +1701,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties6",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only a get accessor may carry effect specifiers"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties7#1",
@@ -1704,7 +1715,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties7",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties8#1",
@@ -1717,7 +1729,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties8",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties9#1",
@@ -1731,7 +1744,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties9",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties10#1",
@@ -1748,7 +1762,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties10",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties11#1",
@@ -1768,7 +1783,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties14",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only a get accessor may carry effect specifiers"
     ),
     SwiftSnippet(
         label: "testEnumElementPatternSwift42#1",
@@ -1934,7 +1950,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum12",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "enum case declarations are only allowed in an enum body"
     ),
     SwiftSnippet(
         label: "testEnum13#1",
@@ -1944,7 +1961,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum13",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "enum case declarations are only allowed in an enum body"
     ),
     SwiftSnippet(
         label: "testEnum14#1",
@@ -1957,7 +1975,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum14",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "enum case declarations are only allowed in an enum body"
     ),
     SwiftSnippet(
         label: "testEnum15#1",
@@ -2385,7 +2404,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum54",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "an enum raw value must be a literal"
     ),
     SwiftSnippet(
         label: "testEnum55#1",
@@ -2462,7 +2482,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum61",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "an enum raw value must be a literal"
     ),
     SwiftSnippet(
         label: "testEnum62#1",
@@ -2810,7 +2831,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnumCaseWithWildcardAsFirstName",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "associated values must start on the enum-case line"
     ),
     SwiftSnippet(
         label: "testErrors1#1",
@@ -2843,7 +2865,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "ErrorsTests.testErrors3",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "'num' must be bound in every catch pattern"
     ),
     SwiftSnippet(
         label: "testErrors4#1",
@@ -5506,7 +5529,8 @@ let translatedSnippets: [SwiftSnippet] = [
       #endif
       """,
         origin: "IfconfigExprTests.testIfConfigExpr33",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "#line was renamed to #sourceLocation"
     ),
     SwiftSnippet(
         label: "testCanImportFuncCall#1",
@@ -5667,7 +5691,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit4",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "initializers cannot declare a result type"
     ),
     SwiftSnippet(
         label: "testInitDeinit5a#1",
@@ -5677,7 +5702,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit5a",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testInitDeinit6#1",
@@ -5687,7 +5713,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit6",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testInitDeinit7#1",
@@ -5901,7 +5928,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testDeinitInSwiftinterfaceIsFollowedByFinalFunc",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testDeinitAsync#1",
@@ -5911,7 +5939,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testDeinitAsync",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testAsyncDeinit#1",
@@ -6066,7 +6095,8 @@ let translatedSnippets: [SwiftSnippet] = [
       func f1_43591(a : inout inout Int) {}
       """,
         origin: "InvalidTests.testInvalid16a",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "parameter may have at most one ownership specifier"
     ),
     SwiftSnippet(
         label: "testInvalid28#1",
@@ -6103,7 +6133,8 @@ let translatedSnippets: [SwiftSnippet] = [
       func f2_50734(@available(iOS, deprecated: 0) x: Int) {}
       """,
         origin: "InvalidTests.testInvalid33",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number in available attribute"
     ),
     SwiftSnippet(
         label: "testInvalid34#1",
@@ -6127,7 +6158,8 @@ let translatedSnippets: [SwiftSnippet] = [
       func f5_50734(@weak x: String) {}
       """,
         origin: "InvalidTests.testInvalid36",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "declaration modifier weak is not an attribute"
     ),
     SwiftSnippet(
         label: "testInvalid37#1",
@@ -6151,7 +6183,8 @@ let translatedSnippets: [SwiftSnippet] = [
       enum E_50734<@indirect T> {}
       """,
         origin: "InvalidTests.testInvalid39",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "declaration modifier indirect is not an attribute"
     ),
     SwiftSnippet(
         label: "testInvalid40#1",
@@ -6793,7 +6826,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "MatchingPatternsTests.testBorrowingContextualParsing",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "'borrowing' pattern modifier must be directly applied to a pattern variable name"
     ),
     SwiftSnippet(
         label: "testBorrowingContextualParsing#6",
@@ -7084,7 +7118,8 @@ let translatedSnippets: [SwiftSnippet] = [
       class C1 {}
       """,
         origin: "ModuleSelectorTests.testModuleSelectorIncorrectRuntimeBaseAttr",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "module selectors are not permitted in @_swift_native_objc_runtime_base"
     ),
     SwiftSnippet(
         label: "testModuleSelectorAttrs#1",
@@ -7093,7 +7128,8 @@ let translatedSnippets: [SwiftSnippet] = [
       public struct BadImplementsAttr: CustomStringConvertible {}
       """,
         origin: "ModuleSelectorTests.testModuleSelectorAttrs",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "module selectors are not permitted in @_spi"
     ),
     SwiftSnippet(
         label: "testModuleSelectorAttrs#2",
@@ -7102,7 +7138,8 @@ let translatedSnippets: [SwiftSnippet] = [
       public var stringValue: String { fatalError() }
       """,
         origin: "ModuleSelectorTests.testModuleSelectorAttrs",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "module-selected protocol type is not accepted by @_implements"
     ),
     SwiftSnippet(
         label: "testModuleSelectorAttrs#3",
@@ -8140,7 +8177,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "OperatorDeclTests.testOperatorDecl17",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "associativity attribute declared multiple times"
     ),
     SwiftSnippet(
         label: "testOperatorDecl18#1",
@@ -8151,7 +8189,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "OperatorDeclTests.testOperatorDecl18",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "assignment attribute declared multiple times"
     ),
     SwiftSnippet(
         label: "testOperatorDecl19#1",
@@ -8809,7 +8848,8 @@ let translatedSnippets: [SwiftSnippet] = [
       public class ToplevelClass4 {}
       """#,
         origin: "OriginalDefinedInAttrTests.testOriginalDefinedInAttr7",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected a named platform version in @_originallyDefinedIn"
     ),
     SwiftSnippet(
         label: "testOriginalDefinedInAttr7#2",
@@ -8895,7 +8935,8 @@ let translatedSnippets: [SwiftSnippet] = [
       struct Vehicle {}
       """,
         origin: "OriginalDefinedInAttrTests.testOrinalDefinedInAttr12",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected a platform version in @_originallyDefinedIn"
     ),
     SwiftSnippet(
         label: "testPatternWithoutVariablesScript1#1",
@@ -9004,7 +9045,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "PatternWithoutVariablesTests.testPatternWithoutVariables6",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "getter/setter requires a single named variable"
     ),
     SwiftSnippet(label: "testMutatingNotADeclarationStartIfNotEnabled#1", source: "_mutating = 2", origin: "PatternWithoutVariablesTests.testMutatingNotADeclarationStartIfNotEnabled", syntaxVersion: "603.0.1"),
     SwiftSnippet(
@@ -10352,7 +10394,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SubscriptingTests.testSubscripting19",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "class subscripts are restricted to class scope"
     ),
     SwiftSnippet(
         label: "testSubscripting20#1",
@@ -10366,7 +10409,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SubscriptingTests.testSubscripting20",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "class and static modifiers are mutually exclusive"
     ),
     SwiftSnippet(
         label: "testSuper1#1",
@@ -10646,7 +10690,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch17",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch20#1",
@@ -10819,7 +10864,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch33",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "'a' must be bound in every case pattern"
     ),
     SwiftSnippet(
         label: "testSwitch34#1",
@@ -11038,7 +11084,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch46",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch47#1",
@@ -11053,7 +11100,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch47",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch48#1",
@@ -11068,7 +11116,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch48",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch50#1",
@@ -11105,7 +11154,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch52",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch53#1",
@@ -11221,7 +11271,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch63",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "unknown attribute 'garbage'"
     ),
     SwiftSnippet(
         label: "testSwitch65#1",
@@ -11229,7 +11280,8 @@ let translatedSnippets: [SwiftSnippet] = [
       @unknown let _ = 1
       """,
         origin: "SwitchTests.testSwitch65",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "unknown attribute 'unknown'"
     ),
     SwiftSnippet(
         label: "testSwitch66#1",
@@ -11240,7 +11292,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch66",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "unknown attribute 'unknown'"
     ),
     SwiftSnippet(
         label: "testSwitch68#1",
@@ -11320,7 +11373,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch73",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch74#1",
@@ -11359,7 +11413,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch76",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch77#1",
@@ -11398,7 +11453,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch79",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch80#1",
@@ -12105,7 +12161,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "TypeExprTests.testTypeExpr4",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "protocol method and initializer requirements must be bodyless"
     ),
     SwiftSnippet(
         label: "testTypeExpr5#1",
@@ -12115,7 +12172,8 @@ let translatedSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "TypeExprTests.testTypeExpr5",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "protocol method and initializer requirements must be bodyless"
     ),
     SwiftSnippet(
         label: "testTypeExpr6#1",
@@ -12977,7 +13035,8 @@ let translated604Snippets: [SwiftSnippet] = [
       async func asyncIncorrectly() { }
       """,
         origin: "AsyncTests.testAsync16",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "async must follow the function parameter list"
     ),
     SwiftSnippet(
         label: "testAvailabilityQuery1#1",
@@ -12995,7 +13054,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryTests.testAvailabilityQuery11",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQuery13#1",
@@ -13092,7 +13152,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryTests.testAvailabilityQuery23",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQuery24#1",
@@ -13186,7 +13247,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryUnavailabilityTests.testAvailabilityQueryUnavailability8",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQueryUnavailability10#1",
@@ -13268,7 +13330,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "AvailabilityQueryUnavailabilityTests.testAvailabilityQueryUnavailability18",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number"
     ),
     SwiftSnippet(
         label: "testAvailabilityQueryUnavailability21#1",
@@ -13814,7 +13877,8 @@ let translated604Snippets: [SwiftSnippet] = [
       var z = $x0 + $x1
       """,
         origin: "DebuggerTests.testDebugger2",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "the '$' prefix is reserved for implicitly synthesized declarations"
     ),
     SwiftSnippet(
         label: "testDebugger3#1",
@@ -14022,7 +14086,8 @@ let translated604Snippets: [SwiftSnippet] = [
       func shorthandFollowedByDeprecated() {}
       """,
         origin: "DiagnoseAvailabilityTests.testDiagnoseAvailability4",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "labelled availability cannot follow shorthand specification"
     ),
     SwiftSnippet(
         label: "testDiagnoseAvailability5#1",
@@ -14031,7 +14096,8 @@ let translated604Snippets: [SwiftSnippet] = [
       func shorthandFollowedByIntroduced() {}
       """,
         origin: "DiagnoseAvailabilityTests.testDiagnoseAvailability5",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "labelled availability cannot follow shorthand specification"
     ),
     SwiftSnippet(
         label: "testDiagnoseAvailability6#1",
@@ -14049,7 +14115,8 @@ let translated604Snippets: [SwiftSnippet] = [
       func twoShorthandsFollowedByDeprecated() {}
       """,
         origin: "DiagnoseAvailabilityTests.testDiagnoseAvailability7",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "labelled availability cannot follow shorthand specification"
     ),
     SwiftSnippet(
         label: "testDiagnoseAvailability9#1",
@@ -14477,7 +14544,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties5",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties6#1",
@@ -14490,7 +14558,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties6",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only a get accessor may carry effect specifiers"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties7#1",
@@ -14503,7 +14572,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties7",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties8#1",
@@ -14516,7 +14586,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties8",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties9#1",
@@ -14530,7 +14601,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties9",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties10#1",
@@ -14547,7 +14619,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties10",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "effectful getters cannot be combined with write or yielding accessors"
     ),
     SwiftSnippet(
         label: "testEffectfulProperties11#1",
@@ -14567,7 +14640,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EffectfulPropertiesTests.testEffectfulProperties14",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only a get accessor may carry effect specifiers"
     ),
     SwiftSnippet(
         label: "testEnumElementPatternSwift42#1",
@@ -14733,7 +14807,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum12",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "enum case declarations are only allowed in an enum body"
     ),
     SwiftSnippet(
         label: "testEnum13#1",
@@ -14743,7 +14818,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum13",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "enum case declarations are only allowed in an enum body"
     ),
     SwiftSnippet(
         label: "testEnum14#1",
@@ -14756,7 +14832,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum14",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "enum case declarations are only allowed in an enum body"
     ),
     SwiftSnippet(
         label: "testEnum15#1",
@@ -15184,7 +15261,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum54",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "an enum raw value must be a literal"
     ),
     SwiftSnippet(
         label: "testEnum55#1",
@@ -15261,7 +15339,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum61",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "an enum raw value must be a literal"
     ),
     SwiftSnippet(
         label: "testEnum62#1",
@@ -15579,7 +15658,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnum83",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "enum element with associated values must have at least one associated"
     ),
     SwiftSnippet(
         label: "testEnum84#1",
@@ -15608,7 +15688,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "EnumTests.testEnumCaseWithWildcardAsFirstName",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "associated values must start on the enum-case line"
     ),
     SwiftSnippet(
         label: "testErrors1#1",
@@ -15641,7 +15722,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "ErrorsTests.testErrors3",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "'num' must be bound in every catch pattern"
     ),
     SwiftSnippet(
         label: "testErrors4#1",
@@ -18300,7 +18382,8 @@ let translated604Snippets: [SwiftSnippet] = [
       #endif
       """,
         origin: "IfconfigExprTests.testIfConfigExpr33",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "#line was renamed to #sourceLocation"
     ),
     SwiftSnippet(
         label: "testCanImportFuncCall#1",
@@ -18461,7 +18544,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit4",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "initializers cannot declare a result type"
     ),
     SwiftSnippet(
         label: "testInitDeinit5a#1",
@@ -18471,7 +18555,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit5a",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testInitDeinit6#1",
@@ -18481,7 +18566,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testInitDeinit6",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testInitDeinit7#1",
@@ -18695,7 +18781,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testDeinitInSwiftinterfaceIsFollowedByFinalFunc",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testDeinitAsync#1",
@@ -18705,7 +18792,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "InitDeinitTests.testDeinitAsync",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a deinitializer requires an immediate code block body"
     ),
     SwiftSnippet(
         label: "testAsyncDeinit#1",
@@ -18860,7 +18948,8 @@ let translated604Snippets: [SwiftSnippet] = [
       func f1_43591(a : inout inout Int) {}
       """,
         origin: "InvalidTests.testInvalid16a",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "parameter may have at most one ownership specifier"
     ),
     SwiftSnippet(
         label: "testInvalid28#1",
@@ -18897,7 +18986,8 @@ let translated604Snippets: [SwiftSnippet] = [
       func f2_50734(@available(iOS, deprecated: 0) x: Int) {}
       """,
         origin: "InvalidTests.testInvalid33",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number in available attribute"
     ),
     SwiftSnippet(
         label: "testInvalid34#1",
@@ -18921,7 +19011,8 @@ let translated604Snippets: [SwiftSnippet] = [
       func f5_50734(@weak x: String) {}
       """,
         origin: "InvalidTests.testInvalid36",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "declaration modifier weak is not an attribute"
     ),
     SwiftSnippet(
         label: "testInvalid37#1",
@@ -18945,7 +19036,8 @@ let translated604Snippets: [SwiftSnippet] = [
       enum E_50734<@indirect T> {}
       """,
         origin: "InvalidTests.testInvalid39",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "declaration modifier indirect is not an attribute"
     ),
     SwiftSnippet(
         label: "testInvalid40#1",
@@ -19871,7 +19963,8 @@ let translated604Snippets: [SwiftSnippet] = [
       class C1 {}
       """,
         origin: "ModuleSelectorTests.testModuleSelectorIncorrectRuntimeBaseAttr",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "module selectors are not permitted in @_swift_native_objc_runtime_base"
     ),
     SwiftSnippet(
         label: "testModuleSelectorAttrs#1",
@@ -19880,7 +19973,8 @@ let translated604Snippets: [SwiftSnippet] = [
       public struct BadImplementsAttr: CustomStringConvertible {}
       """,
         origin: "ModuleSelectorTests.testModuleSelectorAttrs",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "module selectors are not permitted in @_spi"
     ),
     SwiftSnippet(
         label: "testModuleSelectorAttrs#2",
@@ -19889,7 +19983,8 @@ let translated604Snippets: [SwiftSnippet] = [
       public var stringValue: String { fatalError() }
       """,
         origin: "ModuleSelectorTests.testModuleSelectorAttrs",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "module-selected protocol type is not accepted by @_implements"
     ),
     SwiftSnippet(
         label: "testModuleSelectorAttrs#3",
@@ -20924,7 +21019,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "OperatorDeclTests.testOperatorDecl17",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "associativity attribute declared multiple times"
     ),
     SwiftSnippet(
         label: "testOperatorDecl18#1",
@@ -20935,7 +21031,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "OperatorDeclTests.testOperatorDecl18",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "assignment attribute declared multiple times"
     ),
     SwiftSnippet(
         label: "testOperatorDecl19#1",
@@ -21593,7 +21690,8 @@ let translated604Snippets: [SwiftSnippet] = [
       public class ToplevelClass4 {}
       """#,
         origin: "OriginalDefinedInAttrTests.testOriginalDefinedInAttr7",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected a named platform version in @_originallyDefinedIn"
     ),
     SwiftSnippet(
         label: "testOriginalDefinedInAttr7#2",
@@ -21679,7 +21777,8 @@ let translated604Snippets: [SwiftSnippet] = [
       struct Vehicle {}
       """,
         origin: "OriginalDefinedInAttrTests.testOrinalDefinedInAttr12",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected a platform version in @_originallyDefinedIn"
     ),
     SwiftSnippet(
         label: "testPatternWithoutVariablesScript1#1",
@@ -21785,7 +21884,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "PatternWithoutVariablesTests.testPatternWithoutVariables6",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "getter/setter requires a single named variable"
     ),
     SwiftSnippet(label: "testMutatingNotADeclarationStartIfNotEnabled#1", source: "_mutating = 2", origin: "PatternWithoutVariablesTests.testMutatingNotADeclarationStartIfNotEnabled", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(
@@ -23115,7 +23215,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SubscriptingTests.testSubscripting17",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "subscript requires an accessor block"
     ),
     SwiftSnippet(
         label: "testSubscripting19#1",
@@ -23129,7 +23230,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SubscriptingTests.testSubscripting19",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "class subscripts are restricted to class scope"
     ),
     SwiftSnippet(
         label: "testSubscripting20#1",
@@ -23143,7 +23245,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SubscriptingTests.testSubscripting20",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "class and static modifiers are mutually exclusive"
     ),
     SwiftSnippet(
         label: "testSuper1#1",
@@ -23370,7 +23473,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch11",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch12#1",
@@ -23382,7 +23486,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch12",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch13#1",
@@ -23394,7 +23499,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch13",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch14#1",
@@ -23406,7 +23512,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch14",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch17#1",
@@ -23419,7 +23526,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch17",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch20#1",
@@ -23431,7 +23539,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch20",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch21#1",
@@ -23443,7 +23552,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch21",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch23#1",
@@ -23453,7 +23563,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch23",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch24#1",
@@ -23465,7 +23576,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch24",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch25#1",
@@ -23477,7 +23589,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch25",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch27#1",
@@ -23572,7 +23685,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch32",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch33#1",
@@ -23586,7 +23700,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch33",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "'a' must be bound in every case pattern"
     ),
     SwiftSnippet(
         label: "testSwitch34#1",
@@ -23749,7 +23864,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch42",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch43#1",
@@ -23761,7 +23877,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch43",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch44#1",
@@ -23773,7 +23890,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch44",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch45#1",
@@ -23785,7 +23903,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch45",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "switch case label without an executable body"
     ),
     SwiftSnippet(
         label: "testSwitch46#1",
@@ -23800,7 +23919,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch46",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch47#1",
@@ -23815,7 +23935,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch47",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch48#1",
@@ -23830,7 +23951,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch48",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch50#1",
@@ -23867,7 +23989,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch52",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch53#1",
@@ -23983,7 +24106,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch63",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "unknown attribute 'garbage'"
     ),
     SwiftSnippet(
         label: "testSwitch65#1",
@@ -23991,7 +24115,8 @@ let translated604Snippets: [SwiftSnippet] = [
       @unknown let _ = 1
       """,
         origin: "SwitchTests.testSwitch65",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "unknown attribute 'unknown'"
     ),
     SwiftSnippet(
         label: "testSwitch66#1",
@@ -24002,7 +24127,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch66",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "unknown attribute 'unknown'"
     ),
     SwiftSnippet(
         label: "testSwitch68#1",
@@ -24082,7 +24208,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch73",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch74#1",
@@ -24121,7 +24248,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch76",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch77#1",
@@ -24160,7 +24288,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "SwitchTests.testSwitch79",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "additional switch cases cannot follow the active default case"
     ),
     SwiftSnippet(
         label: "testSwitch80#1",
@@ -24867,7 +24996,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "TypeExprTests.testTypeExpr4",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "protocol method and initializer requirements must be bodyless"
     ),
     SwiftSnippet(
         label: "testTypeExpr5#1",
@@ -24877,7 +25007,8 @@ let translated604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "TypeExprTests.testTypeExpr5",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "protocol method and initializer requirements must be bodyless"
     ),
     SwiftSnippet(
         label: "testTypeExpr6#1",

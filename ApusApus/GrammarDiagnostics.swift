@@ -18,7 +18,7 @@ extension GrammarNode {
 //  What it does not mean — and this is the part that's stale relative to lex-on-demand: it does not mean at most one alternate can be predicted at a given input position. Three reasons, all of which survive symbol-disjointness:
 //
 //    • Distinct terminal IDs can co-match the same characters — an identifier regex and the literal "for" are different IDs with disjoint FIRST sets, and both match for.
-//    • testSelect asks the lexer a per-position question ("does any terminal in this alternate's FIRST match here?"). Set disjointness cannot answer it.
+//    • viable asks the lexer a per-position question ("does any terminal in this alternate's FIRST match here?"). Set disjointness cannot answer it.
 //    • The lexer returns a set of matches of differing lengths — maximal munch isn't global — so even a single terminal can fork.
 //
 //  verifyLL1 is a grammar-structure signal — useful for the detection tests, for main's report, and for populating ambiguous — but it is no longer, and can no longer be treated as, a parser precondition. Anyone reading "LL1 is true" should not infer prediction determinism.
@@ -179,31 +179,11 @@ extension GrammarNode {
 
 extension Grammar {
 
-    /// Reachability from the start symbol, following production bodies across flavor copies.
-    func computeParsedNonTerminals() -> Set<String> {
-        var parsed: Set<String> = []
-        var queue = [root.seq?.name ?? startSymbol].filter { nonTerminals[$0] != nil }
-        while let name = queue.popLast() {
-            guard parsed.insert(name).inserted else { continue }
-            var seen = Set<ObjectIdentifier>()
-            func collect(_ node: GrammarNode?) {
-                guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
-                for symbol in node.bodySymbols where nonTerminals[symbol.name] != nil {
-                    queue.append(symbol.name)
-                }
-                if node.kind != .END { collect(node.seq) }
-                if !node.isRHS { collect(node.alt) }
-            }
-            for instance in instances(of: name) { collect(instance) }
-        }
-        return parsed
-    }
-
-    /// Flag `@canParse(N)` / `@cannotParse(N)` whose target is not defined.
+    /// Flag `>?>(N)` / `>!>(N)` whose target is not defined.
     ///
-    /// A target need not be reachable: one that no reachable production body names is answered by
-    /// a speculative recogniser (`MessageParser.canDerive`), so it is never blind. An undefined name
-    /// is still a specification error.
+    /// A target need not be reachable: the parser probes it wherever the predicate is asked
+    /// (`MessageParser.probe`), so it is never blind. An undefined name is still a specification
+    /// error.
     ///
     /// Returns one message per bad site (empty = clean) as well as logging, so tests can assert on
     /// the result instead of scraping OSLog.
@@ -248,9 +228,14 @@ extension Grammar {
         // Which nonterminals can read nothing, as a fixpoint. (A node's `isNullable` reads its
         // positional FIRST set, which looks through to what follows, so it can't say this.)
         var nullable = Set<ObjectIdentifier>()
+        // The virtual tokens match zero characters: the layout tokens `>>|`/`|<<`
+        // (`computeVirtualLayoutTokens`) and the end of input. `A = @prefer >>| A | "a"` is the
+        // same input-free cycle as `A = @prefer A | "a"`.
+        let virtualTokenIDs = Set([symbolToID[">>|"], symbolToID["|<<"], eosID].compactMap { $0 })
         func readsNothing(_ s: GrammarNode) -> Bool {
             switch s.kind {
             case .EPS, .B, .OPT, .KLN: return true
+            case .T: return s.nameID.map { virtualTokenIDs.contains($0) } ?? false
             case .N: return s.alt.map { nullable.contains(ObjectIdentifier($0)) } ?? false
             case .DO, .POS: return someAlternativeReadsNothing(s.alt)
             default: return false

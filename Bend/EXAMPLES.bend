@@ -868,7 +868,7 @@ def noGuardKeepsBoth() -> {Bool.and(admits(sumGrammar(), [], sumInput(), sum(ato
 # ---- The extent oracle (phase 3) ----
 
 def extented(+grammar: +List<Spec.Production>, +em: +List<Spec.ExtentMark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
-  Extent.extentSteps(2000n, grammar, em, 0n, input)
+  Extent.extentSteps(2000n, grammar, [], [], em, 0n, input)
 
 def picks(+grammar: +List<Spec.Production>, +em: +List<Spec.ExtentMark>, +input: +List<Nat>, +tree: Spec.Tree) -> Bool:
   Spec.allIn(Spec.steps(tree, 0n), preferOr(extented(grammar, em, input)))
@@ -961,4 +961,52 @@ def pxqDropsLeft() -> {picks(pxqGrammar(), pxqMarks(), [1n, 1n], pxq(Spec.Node{2
   {==}
 
 def pxqDropsRight() -> {picks(pxqGrammar(), pxqMarks(), [1n, 1n], pxq(Spec.Node{1n, [Spec.Skip{}]}, Spec.Node{3n, [Spec.Leaf{1n}]}, Spec.Node{6n, [Spec.Leaf{1n}]})) == False{} : Bool}:
+  {==}
+
+# The join: only readings that phases 1 and 2 keep compete. S ::= X Y as above, with
+# D ::= a a a and a lookahead on X ::= a a: it stands only where D follows. On a a it
+# never does, so the long X is not admissible, and @longest X keeps the short one.
+def extJoinGrammar() -> +List<Spec.Production>:
+  List.append(&2, Spec.Production, ntGrammar(), [Spec.Production{3n, [t(1n), t(1n), t(1n)]}])
+
+def extJoinGuards() -> +List<Spec.GuardMark>:
+  [Spec.ProdGuard{2n, Spec.Ahead{[3n]}}]
+
+def extJoined(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +em: +List<Spec.ExtentMark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+  Extent.extentSteps(2000n, grammar, gm, [], em, 0n, input)
+
+def extJoinKeepsShort() -> {Spec.allIn(Spec.steps(xShort(), 0n), preferOr(extJoined(extJoinGrammar(), extJoinGuards(), longestX(), [1n, 1n]))) == True{} : Bool}:
+  {==}
+
+# Without the rule the long X competes, and the short one goes.
+def extNoRulesDropsShort() -> {picks(extJoinGrammar(), longestX(), [1n, 1n], xShort()) == False{} : Bool}:
+  {==}
+
+# THE CHOICES A TREE MAKES (SPEC choicesMade, used by the law ll1_at).
+
+def madeAt(dot: Nat) -> Spec.ChoicePoint:
+  Spec.BracketAt{0n, [], dot}
+
+# a {b} c on abbbc: three rounds chosen at 1, 2, 3, then leaving (choice 1) at 4.
+def loopMade() -> {Spec.choicesMade(loopGrammar(), 0n, loopTree()) == [Spec.Made{Spec.NonterminalAt{0n}, 0n, 0n}, Spec.Made{madeAt(1n), 1n, 0n}, Spec.Made{madeAt(1n), 2n, 0n}, Spec.Made{madeAt(1n), 3n, 0n}, Spec.Made{madeAt(1n), 4n, 1n}] : +List<Spec.Made>}:
+  {==}
+
+# a <b> c on abbc: the first round at the bracket, the second and leaving after a round.
+def posMade() -> {Spec.choicesMade([Spec.Production{0n, [t(1n), Spec.Brack{Spec.Positive{}, one(t(2n))}, t(3n)]}], 0n,
+    Spec.Node{0n, [Spec.Leaf{1n}, Spec.Loop{[Spec.Pick{0n, [Spec.Leaf{2n}]}, Spec.Pick{0n, [Spec.Leaf{2n}]}]}, Spec.Leaf{3n}]}) ==
+    [Spec.Made{Spec.NonterminalAt{0n}, 0n, 0n}, Spec.Made{madeAt(1n), 1n, 0n}, Spec.Made{Spec.AfterRoundAt{0n, [], 1n}, 2n, 0n}, Spec.Made{Spec.AfterRoundAt{0n, [], 1n}, 3n, 1n}] : +List<Spec.Made>}:
+  {==}
+
+# a (a b | a) (b c | c), tree A: alternative 0 at 1, alternative 1 at 3.
+def choiceMade() -> {Spec.choicesMade(choiceGrammar(), 0n, choiceA()) == [Spec.Made{Spec.NonterminalAt{0n}, 0n, 0n}, Spec.Made{madeAt(1n), 1n, 0n}, Spec.Made{madeAt(2n), 3n, 1n}] : +List<Spec.Made>}:
+  {==}
+
+# a [b] c on ac: [ ] left (choice 1) at 1; a nested ( ) inside [ ] gets the prefix [1, 0].
+def skipMade() -> {Spec.choicesMade([Spec.Production{0n, [t(1n), Spec.Brack{Spec.Optional{}, one(t(2n))}, t(3n)]}], 0n, Spec.Node{0n, [Spec.Leaf{1n}, Spec.Skip{}, Spec.Leaf{3n}]}) ==
+    [Spec.Made{Spec.NonterminalAt{0n}, 0n, 0n}, Spec.Made{madeAt(1n), 1n, 1n}] : +List<Spec.Made>}:
+  {==}
+
+def nestedMade() -> {Spec.choicesMade([Spec.Production{0n, [Spec.Brack{Spec.Optional{}, [[Spec.Brack{Spec.Group{}, [[t(1n)], [t(2n)]]}]]}]}], 0n,
+    Spec.Node{0n, [Spec.Pick{0n, [Spec.Pick{1n, [Spec.Leaf{2n}]}]}]}) ==
+    [Spec.Made{Spec.NonterminalAt{0n}, 0n, 0n}, Spec.Made{madeAt(0n), 0n, 0n}, Spec.Made{Spec.BracketAt{0n, [0n, 0n], 0n}, 0n, 1n}] : +List<Spec.Made>}:
   {==}

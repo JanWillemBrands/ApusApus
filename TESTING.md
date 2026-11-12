@@ -109,7 +109,7 @@ Current policy:
 Borrow-expression example: `borrow msg`, `use(borrow msg)`, `let b = (borrow
 self).buffer`, and `func f() { let a = borrow x }` are accepted by SwiftSyntax but
 rejected by `swiftc -swift-version 6 -parse`. The grammar intentionally does not
-include `prefixExpression = "borrow" >->( "(" "[" "." ) <s> >n< prefixExpression`;
+include `prefixExpression = "borrow" >->( "(", "[", "." ) <s> >n< prefixExpression`;
 the affected SwiftSyntax corpus rows are marked `compilerRejects`, and the local
 tree-comparison row for `borrow msg` was removed. Do not restore that grammar rule
 unless the oracle policy changes.
@@ -288,6 +288,68 @@ interpolation with loop variables — expand those into concrete snippets by han
 the new version string, diff against existing snippet files, and re-check the
 experimental-feature disables (features may have graduated).
 
+### 6a. Scraped top-100 GitHub corpus crawl
+
+This is a separate whole-file suite over the repositories already cached under
+`~/Library/Caches/ApusApusCorpus/repos`. A rerun uses that exact cached corpus; do not run
+`fetch_swift_repos.py --update` unless the task is explicitly to refresh the corpus.
+
+Before crawling:
+
+1. Run the full Xcode test suite and stop if it has any failures.
+2. Rebuild the dedicated release probe so it cannot contain stale parser code:
+
+   ```bash
+   bash SwiftSyntaxFuzzer/bin/build.sh
+   ```
+
+   In the sandboxed Xcode assistant environment, the script's internal `xcodebuild` may fail while
+   SwiftPM tries to write `~/Library/Caches/org.swift.swiftpm/manifests/ManifestLoading/*.dia`.
+   After a successful Xcode build/test run, reuse the existing Release dependency products and
+   rebuild the probe itself with:
+
+   ```bash
+   ADVENT_FUZZER_SKIP_XCODEBUILD=1 bash SwiftSyntaxFuzzer/bin/build.sh
+   ```
+
+   Use this fallback only when the script prints a valid Release products directory. It still
+   recompiles the ApusApus sources into `SwiftSyntaxFuzzer/.build/advent-fuzz-probe`.
+
+Run the frozen corpus with eight workers and a new output directory:
+
+```bash
+SWIFT_DETERMINISTIC_HASHING=1 python3 tools/crawl_swift_sources.py \
+  --workers 8 \
+  --out SwiftSyntaxFuzzer/crawls/YYYY-MM-DD-top100-current \
+  ~/Library/Caches/ApusApusCorpus/repos
+```
+
+The output directory must be new or empty: the crawler appends to `results.jsonl`, so reusing an
+old directory duplicates rows and corrupts the counts. The current frozen corpus contains about
+30,000 Swift files and takes roughly 30–35 minutes on eight workers. Progress is printed every 50
+files; final results are written to `results.jsonl` and `summary.txt`.
+
+Interpret statuses as follows:
+
+| Status | Meaning |
+|--------|---------|
+| `same` | ApusApus agrees with the available reference result and tree comparison. |
+| `advent-underaccept` | Candidate grammar rejection; reduce and verify before changing grammar. |
+| `residual-ambiguity` | Full parse exists but remains ambiguous; this is a correctness issue. |
+| `tree-difference` | Accepted, but the generated tree differs; investigate for full parse fidelity. |
+| `reference-disagreement` | The isolated `swiftc` and SwiftSyntax references disagree; not automatically a grammar bug. |
+| `parse-only` | Parses but cannot be made into a compiling program under the parse-only policy. |
+| `timeout` / `crash` | Harness or parser failure requiring immediate diagnosis. |
+
+The crawler invokes `swiftc -swift-version 6 -parse` without each package's build settings.
+Therefore an isolated compiler rejection is not authoritative for a real project source. Package
+feature flags, availability-macro definitions, imports, and generated configuration can change the
+verdict. Verify every `reference-disagreement` in the originating package build before adding a
+grammar restriction or a `compilerRejects` classification. The concrete failure that established
+this rule was `@available(_uttypesAPI, *)` in swift-testing: bare `swiftc -parse` rejects it, while
+the real package defines `_uttypesAPI` with `-enable-experimental-feature AvailabilityMacro=…` and
+the compiler then accepts it.
+
 ---
 
 ## 7. Known problems, gotchas & stale-test hazards
@@ -462,6 +524,48 @@ compiled `Regex`, the `nonTerminals` table, the `GrammarNode` graph — 100 time
 **6.98 s stall** inside one such walk that made the run look hung mid-suite. `DerivationBuilder`,
 `MessageParser` and `Grammar` now conform to `CustomTestReflectable` with a childless `Mirror`
 (bottom of `TestInfrastructure.swift`), which caps the descent at the engine boundary.
+
+## 8d. Comparing Swift with the Bend twin — `APUS_BEND=1`
+
+`Bend/` holds a proven model of the parser and the Oracle (see `Bend/README.md`). The
+`BendCheck` suite in `ApusApusTests/BendExport.swift` exports each case (grammar, token
+chain, Swift's BSR yields) as a Bend file, runs `bend` on it, and compares Swift's yields with
+the set the proven Bend oracle hands out:
+
+| Test | Compares Swift's yields with |
+|---|---|
+| `againstExactSet` | the exact set (raw parser, no Oracle) |
+| `oraclePhase1IsExact` | the exact set, after Oracle phase 1 |
+| `guardsAgainstBend` | the steps of the admissible trees (lookahead, `@left`/`@right`) |
+| `preferencesAgainstBend` | the steps of the unbeaten trees (`@prefer`/`@avoid`) |
+| `extentsAgainstBend` | the steps of the selected trees (`@longest`/`@shortest`) |
+| `joinAgainstBend` | the joined phase order (a known issue until Swift reorders its passes) |
+
+The suite is **opt-in and silently skipped otherwise**: without the variable every test reports
+"skipped" and xcodebuild still prints `TEST SUCCEEDED`. Pass it to the test runner with the
+`TEST_RUNNER_` prefix:
+
+```bash
+TEST_RUNNER_APUS_BEND=1 xcodebuild test -project ApusApus.xcodeproj -scheme ApusApusTests \
+  -configuration Release -destination "platform=macOS,arch=arm64" \
+  -only-testing:ApusApusTests/BendCheck
+```
+
+`APUS_BEND=1` means `~/.bend/bin/bend`; any other value is the path to `bend`. Check the log for
+`Test case 'BendCheck/…' passed` lines; zero of them means the filter or the variable was wrong.
+A full run takes about 3 minutes. One Bend run may take `APUS_BEND_TIMEOUT` seconds (300 by
+default). A case Bend gives no answer for (fuel shortage, a failed check, a refusal, or the time
+limit) fails: the laws cover only the answers Bend gives (`Bend/README.md`, "What the laws
+promise"), so such a case was not compared.
+
+Reading a failure: "missing" (Swift lacks a step of a tree the Bend oracle keeps) is a real
+Swift bug; so is "dead wood" (Swift keeps steps that lie on no kept tree) after the Oracle.
+Failure details are in the result bundle (`xcrun xcresulttool get test-results tests --path <bundle>`), not on stdout.
+After changing anything under `Bend/`, first run `bend Bend/PROOF.bend --verdict` and
+`bend Bend/EXAMPLES.bend`; the comparison only means something against a proven twin.
+
+To inspect one case by hand, `APUS_EXPORT_BEND=<directory>` runs the `Bend export` suite, which
+writes the generated `.bend` files there (`bend <file>` prints the comparison report).
 
 ## 9. Efficient testing workflow — recommendations
 

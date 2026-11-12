@@ -32,9 +32,6 @@ class Grammar {
     var flavorReport: [String] = []
 
     var root: GrammarNode = GrammarNode(kind: .EOS, name: "○")
-    /// Nonterminals some reachable production body names — the ones a parse can call. A parse
-    /// predicate on any other nonterminal is answered by a recogniser (`LookaheadPredicateRule`).
-    lazy var parsedNonTerminals: Set<String> = computeParsedNonTerminals()
     var isLL1: Bool = true
     /// Number of grammar nodes numbered during `resolveGrammarNodeLinks`; node
     /// numbers are compact per grammar ([0, nodeCount)). Used to size per-parse
@@ -55,7 +52,7 @@ class Grammar {
     
     // MARK: - Integer Symbol Table
     //
-    // The parsing hot path (testSelect, tokenMatch) originally compared strings:
+    // The parsing hot path (viable, tokenMatch) originally compared strings:
     //   slot.first.contains(token.kind)    — hashes a String, probes a Set<String>
     //   cL.name == token.kind              — compares two Strings
     //
@@ -152,7 +149,7 @@ class Grammar {
     // for this grammar node. The annotation seeds an `exclude` set on the terminal.
     //
     // Propagation: the exclude set is propagated upward through the grammar so that
-    // parent nonterminals can reject Schrödinger duals early in `testSelect`,
+    // parent nonterminals can reject Schrödinger duals early in `viable`,
     // before creating descriptors that would fail deep inside the grammar.
     //
     // The propagation rules are:
@@ -173,7 +170,7 @@ class Grammar {
     // separate pass after FIRST/FOLLOW have converged, and stored in `exclude`
     // (Set<String>) / `excludeBS` (BitSet) on each GrammarNode.
     //
-    // At parse time, `testSelect` and `tokenMatch` apply these via per-end
+    // At parse time, `viable` and `tokenMatch` apply these via per-end
     // LCNP checks: if an excluded terminal matches the same end as a candidate,
     // suppress that candidate.
 
@@ -491,6 +488,96 @@ extension Grammar {
         if node.follow.contains("") {
             node.follow.remove("")
             node.follow.formUnion(node.seq!.follow)
+        }
+    }
+}
+
+// MARK: - Parse predicates
+
+extension Grammar {
+    /// Load-time preparation for the parser's probes of `>?>(N)`/`>!>(N)` targets, and of the
+    /// nonterminals `@left`/`@right` ask about
+    /// (documentation/Oracle.md § 4). Runs once FIRST sets have converged:
+    ///   - every predicate gets its target (flavored grammars already bound it in `specializeFlavors`);
+    ///   - an alternate's first slot probes its predicates' targets (`slotProbes`);
+    ///   - a target, and whatever can end one, is `followedByAnything`: N derives a PREFIX of the rest,
+    ///     so a probe of N may be followed by any token, and a nullable alternate that ends N must be
+    ///     predicted whatever comes next.
+    func prepareParsePredicates() {
+        var targets: [GrammarNode] = []
+        var seen = Set<ObjectIdentifier>()
+        func walk(_ node: GrammarNode?) {
+            guard let node, seen.insert(ObjectIdentifier(node)).inserted else { return }
+            if node.kind == .ALT, !node.forwardPredicates.isEmpty {
+                for p in node.forwardPredicates.indices where node.forwardPredicates[p].target == nil {
+                    node.forwardPredicates[p].target = nonTerminals[node.forwardPredicates[p].targetName]
+                }
+                if let first = node.seq, first.kind != .END {
+                    first.slotProbes += node.forwardPredicates.compactMap(\.target)
+                }
+                targets += node.forwardPredicates.compactMap(\.target)
+            }
+            if node.kind != .END { walk(node.seq) }
+            if !node.isRHS { walk(node.alt) }
+        }
+        for production in allProductions { walk(production) }
+
+        // `@left`/`@right` ask the same kind of question about the edge child: does a listed
+        // nonterminal (or, bare, the alternate itself) derive its tokens? The parser probes where
+        // that child starts, so the forest holds the answer. A bare `@right` needs no probe: the
+        // alternate itself is being parsed from where its first child starts.
+        var owners: [GrammarNode] = []
+        var seenOwners = Set<ObjectIdentifier>()
+        func collectOwners(_ node: GrammarNode?) {
+            guard let node, seenOwners.insert(ObjectIdentifier(node)).inserted else { return }
+            if node.isLHS || node.kind.isBracket { owners.append(node) }
+            if node.kind != .END { collectOwners(node.seq) }
+            if !node.isRHS { collectOwners(node.alt) }
+        }
+        for production in allProductions { collectOwners(production) }
+        for owner in owners {
+            var alternate = owner.alt
+            while let alt = alternate {
+                defer { alternate = alt.alt }
+                let body = alt.bodySymbols
+                guard let first = body.first, let last = body.last else { continue }
+                for f in alt.associativityFilters.indices {
+                    if alt.associativityFilters[f].targetNodes.isEmpty {
+                        alt.associativityFilters[f].targetNodes = alt.associativityFilters[f].targets.compactMap { nonTerminals[$0] }
+                    }
+                    let filter = alt.associativityFilters[f]
+                    let edge = filter.direction == .left ? last : first
+                    if filter.targets.isEmpty {
+                        if filter.direction == .left { last.slotProbes.append(owner) }
+                    } else {
+                        edge.slotProbes += filter.targetNodes
+                        targets += filter.targetNodes
+                    }
+                }
+            }
+        }
+
+        var work: [GrammarNode] = []
+        func mark(_ node: GrammarNode) {
+            guard !node.followedByAnything else { return }
+            node.followedByAnything = true
+            work.append(node)
+        }
+        for target in targets { mark(target) }
+        // An element ends its owner when the rest of the alternate can read nothing (positional
+        // FIRST of the rest holds ε).
+        while let owner = work.popLast() {
+            var alternate = owner.alt
+            while let alt = alternate {
+                var element = alt.seq
+                while let e = element, e.kind != .END {
+                    if e.seq?.first.contains("") == true {
+                        if e.kind == .N, let lhs = e.alt { mark(lhs) } else if e.kind.isBracket { mark(e) }
+                    }
+                    element = e.seq
+                }
+                alternate = alt.alt
+            }
         }
     }
 }

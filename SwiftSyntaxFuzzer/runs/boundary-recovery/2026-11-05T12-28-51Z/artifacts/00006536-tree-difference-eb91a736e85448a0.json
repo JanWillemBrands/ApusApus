@@ -1,0 +1,72 @@
+{
+  "event" : {
+    "artifact" : "00006536-tree-difference-eb91a736e85448a0.json",
+    "durationSeconds" : 0.28593504428863525,
+    "exitCode" : 1,
+    "generator" : "boundary:mutation:toggle-newline:token=3\/7",
+    "index" : 6536,
+    "seed" : 168566817,
+    "signalHash" : "3b2fe8cc65da9aa8",
+    "signalSummary" : "tree-difference|line=5|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "eb91a736e85448a0",
+    "sourceLength" : 32,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      UnsafeExpr\n        keyword(SwiftSyntax.Keyword.unsafe) \"unsafe\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n      semicolon \";\"\n    CodeBlockItem\n      ContinueStmt\n        keyword(SwiftSyntax.Keyword.continue) \"continue\"\n        identifier(\"x\") \"x\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7A28CABD-C52F-4038-AB27-EC720A9F59EA.swift:1:12: error: cannot find type 'sending' in scope\n1 | unsafe any sending\n  |            `- error: cannot find type 'sending' in scope\n2 | ;\n3 | continue x;\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7A28CABD-C52F-4038-AB27-EC720A9F59EA.swift:1:1: warning: no unsafe operations occur within 'unsafe' expression [#UnnecessaryEffectMarker::UnnecessaryUnsafe]\n1 | unsafe any sending\n  | `- warning: no unsafe operations occur within 'unsafe' expression [#UnnecessaryEffectMarker::UnnecessaryUnsafe]\n2 | ;\n3 | continue x;\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-7A28CABD-C52F-4038-AB27-EC720A9F59EA.swift:3:10: error: cannot find label 'x' in scope\n1 | unsafe any sending\n2 | ;\n3 | continue x;\n  |          `- error: cannot find label 'x' in scope\n\n[#UnnecessaryEffectMarker]: <https:\/\/docs.swift.org\/compiler\/documentation\/diagnostics\/unnecessary-effect-marker>\n[#UnnecessaryUnsafe]: <https:\/\/docs.swift.org\/compiler\/documentation\/diagnostics\/unnecessary-unsafe>\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any sending\n»"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "labelName\t[identifier]",
+      ".OPT\t[>n< labelName]",
+      "continueStatement\t[\"continue\" ]",
+      "controlTransferStatement\t[continueStatement]",
+      "statement\t[controlTransferStatement]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItemBoundary\t[<+<(\";\")]",
+      ".DO\t[codeBlockItemBoundary codeBlockItem]",
+      ".KLN\t[]",
+      "boxedProtocolKeywordName\t[\"sending\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint >->(\"&\" \"->\" \"async\" \"rethrows\" \"throws\")]",
+      "prefixExpression\t[anyTypeExpression]",
+      "effectMarker\t[\"unsafe\" <s> >n<]",
+      "prefixExpression\t[effectMarker prefixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 103,
+      "descriptorCount" : 242,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 113,
+      "parseSeconds" : 0.0019969940185546875,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 37,
+      "tokenCount" : 7,
+      "yieldCount" : 187
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      UnsafeExpr\n        keyword(SwiftSyntax.Keyword.unsafe) \"unsafe\"\n        TypeExpr\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.any) \"any\"\n            IdentifierType\n              identifier(\"sending\") \"sending\"\n      semicolon \";\"\n    CodeBlockItem\n      ContinueStmt\n        keyword(SwiftSyntax.Keyword.continue) \"continue\"\n        identifier(\"x\") \"x\"\n      semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "source" : "unsafe any sending\n;\ncontinue x;",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      UnsafeExpr\\n        keyword(SwiftSyntax.Keyword.unsafe) \\\"unsafe\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      ContinueStmt\\n        keyword(SwiftSyntax.Keyword.continue) \\\"continue\\\"\\n        identifier(\\\"x\\\") \\\"x\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7A28CABD-C52F-4038-AB27-EC720A9F59EA.swift:1:12: error: cannot find type 'sending' in scope\\n1 | unsafe any sending\\n  |            `- error: cannot find type 'sending' in scope\\n2 | ;\\n3 | continue x;\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7A28CABD-C52F-4038-AB27-EC720A9F59EA.swift:1:1: warning: no unsafe operations occur within 'unsafe' expression [#UnnecessaryEffectMarker::UnnecessaryUnsafe]\\n1 | unsafe any sending\\n  | `- warning: no unsafe operations occur within 'unsafe' expression [#UnnecessaryEffectMarker::UnnecessaryUnsafe]\\n2 | ;\\n3 | continue x;\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-7A28CABD-C52F-4038-AB27-EC720A9F59EA.swift:3:10: error: cannot find label 'x' in scope\\n1 | unsafe any sending\\n2 | ;\\n3 | continue x;\\n  |          `- error: cannot find label 'x' in scope\\n\\n[#UnnecessaryEffectMarker]: <https:\\\/\\\/docs.swift.org\\\/compiler\\\/documentation\\\/diagnostics\\\/unnecessary-effect-marker>\\n[#UnnecessaryUnsafe]: <https:\\\/\\\/docs.swift.org\\\/compiler\\\/documentation\\\/diagnostics\\\/unnecessary-unsafe>\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any sending\\n»\"],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"labelName\\t[identifier]\",\".OPT\\t[>n< labelName]\",\"continueStatement\\t[\\\"continue\\\" ]\",\"controlTransferStatement\\t[continueStatement]\",\"statement\\t[controlTransferStatement]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItemBoundary\\t[<+<(\\\";\\\")]\",\".DO\\t[codeBlockItemBoundary codeBlockItem]\",\".KLN\\t[]\",\"boxedProtocolKeywordName\\t[\\\"sending\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint >->(\\\"&\\\" \\\"->\\\" \\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"prefixExpression\\t[anyTypeExpression]\",\"effectMarker\\t[\\\"unsafe\\\" <s> >n<]\",\"prefixExpression\\t[effectMarker prefixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":103,\"descriptorCount\":242,\"duplicateDescriptorCount\":0,\"oraclePruned\":113,\"parseSeconds\":0.0019969940185546875,\"sourceLength\":32,\"suppressedDescriptorCount\":37,\"tokenCount\":7,\"yieldCount\":187},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      UnsafeExpr\\n        keyword(SwiftSyntax.Keyword.unsafe) \\\"unsafe\\\"\\n        TypeExpr\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n            IdentifierType\\n              identifier(\\\"sending\\\") \\\"sending\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      ContinueStmt\\n        keyword(SwiftSyntax.Keyword.continue) \\\"continue\\\"\\n        identifier(\\\"x\\\") \\\"x\\\"\\n      semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

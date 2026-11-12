@@ -161,6 +161,7 @@ class ApusParser {
             node.detectSchrödingerConflict()
         }
         grammar.isLL1 = isLL1
+        grammar.prepareParsePredicates()
         grammar.propagateExcludeSets()
         grammar.diagnosePredicateTargets()
         // A preference on a cycle that reads no input can remove every parse in the Oracle,
@@ -232,13 +233,7 @@ class ApusParser {
             switch token.stripped {
             case "flavors":
                 cI += 1
-                try expect(["("]); cI += 1
-                repeat {
-                    try expect(["identifier"])
-                    flavorScope |= try grammar.flavorBit(named: String(token.image))
-                    cI += 1
-                } while token.kind == "identifier"
-                try expect([")"]); cI += 1
+                try commaList(["identifier"]) { flavorScope |= try grammar.flavorBit(named: String(token.image)) }
             case "longest", "shortest":
                 try once("extent (@longest/@shortest)")
                 disambiguationAnnotation = Disambiguation(rawValue: token.stripped)
@@ -492,64 +487,52 @@ class ApusParser {
         // to its siblings that are not avoided. The skip of a `[ … ]` or `{ … }` is not a
         // sibling; `@shortest` prefers that. One alternate cannot be both. See `registerPrefer`.
         //
-        // `@cannotParse(N)` / `@canParse(N)` are parse predicates with NONTERMINAL
-        // operands at this alternate start. Captured on this ALT node; the Oracle anchors
-        // the prune on the alternate's first body symbol (yield start = alternate start).
-        // Symbolic `>->`/`>+>` stays reserved for token lookaround.
+        // Parse predicates `>?>( N )` / `>!>( N, … )` are read in the loop below (they sit among the
+        // zero-width items at the alternate's start) and also annotate this ALT node.
         //
         // Node-level EXTENT (`@longest`/`@shortest`) is NOT here — it attaches to the whole
         // group, parsed before the LHS (`production()`) or before the bracket (`factor()`).
         // Associativity (`@left`/`@right`) IS here: it is a per-production attribute.
-        annotationLoop: while token.kind == "pragma" {
-            switch token.stripped {
-            case "prefer":
-                guard !startOfSequence.isAvoided else {
-                    throw ApusParserError.unexpectedToken(explanation: "@prefer: this alternative is already @avoid")
-                }
-                startOfSequence.isPreferred = true
-                cI += 1
-            case "avoid":
-                guard !startOfSequence.isPreferred else {
-                    throw ApusParserError.unexpectedToken(explanation: "@avoid: this alternative is already @prefer")
-                }
-                startOfSequence.isAvoided = true
-                cI += 1
-            case "left", "right":
-                // A child-position filter. Bare, it is associativity as a per-production
-                // attribute (SDF `{left}`/`{right}`): this alternate may not be its own right
-                // (`@left`) / own left (`@right`) child. With an operand list it is SDF's
-                // argument-indexed priority: none of the NAMED nonterminals may be that child.
-                let direction: Disambiguation = token.stripped == "left" ? .left : .right
-                cI += 1
-                var targets: [String] = []
-                if token.kind == "(" {
+        // Read again after a parse predicate, so the alternate's annotations keep any order.
+        func alternateAnnotations() throws {
+            annotationLoop: while token.kind == "pragma" {
+                switch token.stripped {
+                case "prefer":
+                    guard !startOfSequence.isAvoided else {
+                        throw ApusParserError.unexpectedToken(explanation: "@prefer: this alternative is already @avoid")
+                    }
+                    startOfSequence.isPreferred = true
                     cI += 1
-                    repeat {
-                        try expect(["identifier"])
-                        targets.append(String(token.image))
-                        cI += 1
-                    } while token.kind == "identifier"
-                    try expect([")"]); cI += 1
-                }
-                startOfSequence.associativityFilters
-                    .append(ChildPositionFilter(direction: direction, targets: targets))
-            case "cannotParse", "canParse":
-                let negated = token.stripped == "cannotParse"
-                cI += 1
-                try expect(["("]); cI += 1
-                repeat {
-                    try expect(["identifier"])
-                    startOfSequence.forwardPredicates.append(
-                        ForwardPredicate(targetName: String(token.image), negated: negated)
-                    )
+                case "avoid":
+                    guard !startOfSequence.isPreferred else {
+                        throw ApusParserError.unexpectedToken(explanation: "@avoid: this alternative is already @prefer")
+                    }
+                    startOfSequence.isAvoided = true
                     cI += 1
-                } while token.kind == "identifier"
-                try expect([")"]); cI += 1
-            default:
-                break annotationLoop
+                case "left", "right":
+                    // A child-position filter. Bare, it is associativity as a per-production
+                    // attribute (SDF `{left}`/`{right}`): this alternate may not be its own right
+                    // (`@left`) / own left (`@right`) child. With an operand list it is SDF's
+                    // argument-indexed priority: none of the NAMED nonterminals may be that child.
+                    let direction: Disambiguation = token.stripped == "left" ? .left : .right
+                    cI += 1
+                    var targets: [String] = []
+                    if token.kind == "(" {
+                        try commaList(["identifier"]) { targets.append(String(token.image)) }
+                    }
+                    startOfSequence.associativityFilters
+                        .append(ChildPositionFilter(direction: direction, targets: targets))
+                case "cannotParse", "canParse":
+                    throw ApusParserError.unexpectedToken(
+                        explanation: "@\(token.stripped) is now written \(token.stripped == "canParse" ? ">?>( N )" : ">!>( N, … )")")
+                default:
+                    break annotationLoop
+                }
             }
+            
         }
-        
+        try alternateAnnotations()
+
         // leading actions (before first factor)
         termNode.actions = collectActions(at: cI)
         
@@ -562,6 +545,33 @@ class ApusParser {
                 termNode.seq = layoutNode
                 termNode = layoutNode
                 termNode.actions = collectActions(at: cI)
+            case ">?>", ">!>":
+                // A parse predicate: does the nonterminal derive a prefix of the rest from here
+                // (`>?>`), or must none of them (`>!>`)? The parser answers it by probing the
+                // target (`MessageParser.probe`), so it is asked where the ALTERNATE starts: only
+                // zero-width items may come before it. It annotates the alternate, not a slot.
+                var before = startOfSequence.seq
+                while let n = before, n !== termNode.seq {
+                    guard n.kind == .B else {
+                        throw ApusParserError.unexpectedToken(
+                            explanation: "\(token.kind)( … ) must come at the start of an alternative, before anything that reads input")
+                    }
+                    before = n.seq
+                }
+                guard flavorAnnotation.isEmpty else {
+                    throw ApusParserError.unexpectedToken(explanation: "\(token.kind)( … ) takes no flavor annotation")
+                }
+                let negated = token.kind == ">!>"
+                cI += 1
+                var targets: [String] = []
+                try commaList(["identifier"]) { targets.append(String(token.image)) }
+                if !negated, targets.count != 1 {
+                    throw ApusParserError.unexpectedToken(explanation: ">?>( N ) takes one nonterminal")
+                }
+                for target in targets {
+                    startOfSequence.forwardPredicates.append(ForwardPredicate(targetName: target, negated: negated))
+                }
+                try alternateAnnotations()
             case ">+>", ">->", "<+<", "<-<":
                 let lookaroundNode = try tokenLookaround(after: termNode)
                 apply(flavorAnnotation, to: lookaroundNode)
@@ -605,10 +615,10 @@ class ApusParser {
                 termNode = factorNode
                 termNode.actions = collectActions(at: cI)
             default:
-                try expect(["(", "<", "<n>", "<s>", ">>|", ">n<", ">s<", ">+>", ">->", "<+<", "<-<", "[", "identifier", "literal", "regex", "epsilon", "empty", "{", "|<<"])
+                try expect(["(", "<", "<n>", "<s>", ">>|", ">n<", ">s<", ">+>", ">->", "<+<", "<-<", ">?>", ">!>", "[", "identifier", "literal", "regex", "epsilon", "empty", "{", "|<<"])
             }
             
-        } while ["(", "<", "<n>", "<s>", ">>|", ">n<", ">s<", ">+>", ">->", "<+<", "<-<", "[", "epsilon", "empty", "identifier", "literal", "regex", "{", "|<<", "pragma"].contains(token.kind)
+        } while ["(", "<", "<n>", "<s>", ">>|", ">n<", ">s<", ">+>", ">->", "<+<", "<-<", ">?>", ">!>", "[", "epsilon", "empty", "identifier", "literal", "regex", "{", "|<<", "pragma"].contains(token.kind)
         
         termNode.seq = GrammarNode(kind: .END, name: "")
         // the .alt and .seq links of an END node are set in resolveEndNodeLinks()
@@ -633,15 +643,33 @@ class ApusParser {
             }
 
             cI += 1
-            try expect(["("]); cI += 1
-            repeat {
-                try expect(["identifier"])
-                annotation[keyPath: target] |= try grammar.flavorBit(named: String(token.image))
-                cI += 1
-            } while token.kind == "identifier"
-            try expect([")"]); cI += 1
+            try commaList(["identifier"]) { annotation[keyPath: target] |= try grammar.flavorBit(named: String(token.image)) }
         }
         return annotation
+    }
+
+    /// The list of every annotation: `( item, item, … )`, at least one item, separated by commas, with
+    /// an optional comma before the `)`. `item` handles the item at `token` (one of `kinds`); the list
+    /// moves past it. A missing comma is an error: inside these parentheses the items are a set, and
+    /// writing them side by side reads like a sequence (`>->( "open" "(" "set" ")" )` was once meant
+    /// as one). An empty list is an error too: leave the annotation out instead.
+    private func commaList(_ kinds: Set<String>, _ item: () throws -> Void) throws {
+        try expect(["("]); cI += 1
+        if token.kind == ")" {
+            throw ApusParserError.unexpectedToken(explanation: "an empty list: leave the annotation out instead")
+        }
+        while token.kind != ")" {
+            try expect(kinds)
+            try item()
+            cI += 1
+            if kinds.contains(token.kind) {
+                throw ApusParserError.unexpectedToken(
+                    explanation: "list items are separated by commas: add a ',' before \(token.image)")
+            }
+            guard token.kind == "," else { break }
+            cI += 1
+        }
+        try expect([")"]); cI += 1
     }
 
     private func apply(_ annotation: FlavorAnnotation, to node: GrammarNode) {
@@ -669,26 +697,19 @@ class ApusParser {
         let positive = head == ">+>" || head == "<+<"
         let isLookbehind = head == "<+<" || head == "<-<"
         cI += 1
-        try expect(["("])
-        cI += 1
-        
         var kinds: Set<String> = []
-        while token.kind == "literal" || token.kind == "identifier" {
+        try commaList(["literal", "identifier"]) {
             let kind = token.kind == "literal" ? String(token.image) : token.stripped
-            if !token.stripped.isEmpty {
-                let resolvedKind = kind == "EOF" ? "○" : kind
-                if token.kind == "literal", grammar.terminals[resolvedKind] == nil {
-                    let source = token.stripped.escapesRemoved
-                    let regex = Regex { source }
-                    grammar.terminals[resolvedKind] = TokenPattern(source, regex, true, false)
-                    grammar.registerTerminal(resolvedKind)
-                }
-                kinds.insert(resolvedKind)
+            guard !token.stripped.isEmpty else { return }
+            let resolvedKind = kind == "EOF" ? "○" : kind
+            if token.kind == "literal", grammar.terminals[resolvedKind] == nil {
+                let source = token.stripped.escapesRemoved
+                let regex = Regex { source }
+                grammar.terminals[resolvedKind] = TokenPattern(source, regex, true, false)
+                grammar.registerTerminal(resolvedKind)
             }
-            cI += 1
+            kinds.insert(resolvedKind)
         }
-        try expect([")"])
-        cI += 1
         
         let name = "\(head)(\(kinds.sorted().joined(separator: " ")))"
         grammar.registerTerminal(name)
@@ -700,24 +721,6 @@ class ApusParser {
         }
         return node
     }
-    
-    //    func layout() throws -> GrammarNode? {
-    //        switch token.kind {
-    //        case ">>|", "|<<":
-    //            let name = token.kind
-    //            grammar.usesInjectedLayoutTokens = true
-    //            grammar.registerTerminal(name)
-    //            cI += 1
-    //            return GrammarNode(kind: .T, name: name)
-    //        case "<n>", "<s>", ">n<", ">s<":
-    //            let name = token.kind
-    //            grammar.registerTerminal(name)
-    //            cI += 1
-    //            return GrammarNode(kind: .B, name: name)
-    //        default:
-    //            return nil
-    //        }
-    //    }
     
     func regex() throws -> GrammarNode {
         // A named terminal (`-`/`:`) takes its kind from the LHS; an ANONYMOUS inline regex takes its
@@ -885,32 +888,25 @@ class ApusParser {
             node.disambiguation = d
         }
         
-        // check for exclusion annotation: ---("if" "while" ...)
+        // check for exclusion annotation: ---("if", "while", ...)
         if token.kind == "---" {
             cI += 1
-            try expect(["("])
-            cI += 1
-            while token.kind == "literal" || token.kind == "identifier" {
+            try commaList(["literal", "identifier"]) {
                 if token.kind == "identifier" {
                     // A NAMED exclusion set: a nonterminal whose alternatives are all literals,
                     // expanded after the whole grammar is read (`expandExclusionSetReferences`).
                     // Lets one keyword list (e.g. swift-syntax's lexer-classified keywords) be
                     // defined once and shared by every name category.
                     node.excludeSetReferences.append(String(token.image))
-                    cI += 1
-                    continue
+                    return
                 }
                 // Exclusion entries must match Token.kind values in the symbol table.
                 // User-grammar literal terminals are now keyed by their full quoted form
                 // (see literal()), so we record the same form here.
-                let excluded = String(token.image)
                 if !token.stripped.isEmpty {
-                    node.exclude.insert(excluded)
+                    node.exclude.insert(String(token.image))
                 }
-                cI += 1
             }
-            try expect([")"])
-            cI += 1
         }
         
         return node
@@ -940,7 +936,7 @@ class ApusParser {
         }
         // Nonterminals referenced from a production body. A lookaround tests tokens, so it may name a
         // rule only if that rule is a pure set; `>->( A )` for a production `A` is a mistaken parse
-        // predicate (`@cannotParse( A )`) and stays an error.
+        // predicate (`>!>( A )`) and stays an error.
         var productions = Set<String>()
         var walked = Set<ObjectIdentifier>()
         let roots = Set(grammar.nonTerminals.values.map(ObjectIdentifier.init))
@@ -958,7 +954,7 @@ class ApusParser {
                 guard grammar.nonTerminals[kind] != nil else { result.insert(kind); continue }
                 guard !productions.contains(kind) else {
                     throw ApusParserError.invalidExclusionSet(
-                        name: kind, reason: "a lookaround tests tokens; use @cannotParse(\(kind)) for a parse predicate")
+                        name: kind, reason: "a lookaround tests tokens; use >!>(\(kind)) for a parse predicate")
                 }
                 result.formUnion(try members(of: kind))
             }

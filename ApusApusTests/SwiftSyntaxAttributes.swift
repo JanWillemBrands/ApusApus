@@ -96,7 +96,8 @@ let attributeSnippets: [SwiftSnippet] = [
       func f(in: @differentiable(reverse, wrt: a) (Int) -> Int) { }
       """,
         origin: "AttributeTests.testDifferentiableAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "wrt is not permitted on a differentiable function type"
     ),
     SwiftSnippet(
         label: "testQualifiedAttribute#1",
@@ -273,7 +274,7 @@ let attributeSnippets: [SwiftSnippet] = [
         origin: "AttributeTests.testObjcImplementationAttribute",
         syntaxVersion: "603.0.1"
     ),
-    SwiftSnippet(label: "testSpiAttributeWithoutParameter#1", source: "@_spi() class Foo {}", origin: "AttributeTests.testSpiAttributeWithoutParameter", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "testSpiAttributeWithoutParameter#1", source: "@_spi() class Foo {}", origin: "AttributeTests.testSpiAttributeWithoutParameter", syntaxVersion: "603.0.1", compilerRejects: "expected an SPI identifier"),
     SwiftSnippet(label: "testSpiAttributeWithUnderscore#1", source: "@_spi(_) class Foo {}", origin: "AttributeTests.testSpiAttributeWithUnderscore", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "testSpiAttributeWithUnderscore#2", source: "@_spi(_) import Foo", origin: "AttributeTests.testSpiAttributeWithUnderscore", syntaxVersion: "603.0.1"),
     SwiftSnippet(
@@ -335,7 +336,8 @@ let attributeSnippets: [SwiftSnippet] = [
       public func backDeployTopLevelFunc2() -> Int { return 48 }
       """,
         origin: "AttributeTests.testBackDeployed",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number in @backDeployed"
     ),
     SwiftSnippet(
         label: "testBackDeployed#4",
@@ -363,7 +365,8 @@ let attributeSnippets: [SwiftSnippet] = [
       public func backDeployTopLevelFunc2() -> Int { return 48 }
       """,
         origin: "AttributeTests.testBackDeployed",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected version number in @_backDeploy"
     ),
     SwiftSnippet(
         label: "testExpose#1",
@@ -379,7 +382,8 @@ let attributeSnippets: [SwiftSnippet] = [
       @_expose(Cplusplus) func foo() {}
       """,
         origin: "AttributeTests.testExpose",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected _expose option such as Cxx"
     ),
     SwiftSnippet(
         label: "testExpose#3",
@@ -422,7 +426,8 @@ let attributeSnippets: [SwiftSnippet] = [
       struct Vehicle {}
       """,
         origin: "AttributeTests.testOriginallyDefinedIn",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected a platform version in @_originallyDefinedIn"
     ),
     SwiftSnippet(
         label: "testUnavailableFromAsync#1",
@@ -449,7 +454,8 @@ let attributeSnippets: [SwiftSnippet] = [
       func foo() {}
       """,
         origin: "AttributeTests.testUnavailableFromAsync",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "unknown option nope"
     ),
     SwiftSnippet(
         label: "testUnavailableFromAsync#4",
@@ -458,7 +464,8 @@ let attributeSnippets: [SwiftSnippet] = [
       func foo() {}
       """,
         origin: "AttributeTests.testUnavailableFromAsync",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected string literal"
     ),
     SwiftSnippet(
         label: "testEffects#1",
@@ -562,7 +569,8 @@ let attributeSnippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "attached macro role is semantically incompatible"
     ),
     SwiftSnippet(
         label: "testMacroRoleNames#6",
@@ -598,7 +606,8 @@ let attributeSnippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "freestanding macro role is semantically incompatible"
     ),
     SwiftSnippet(
         label: "testMacroRoleNames#10",
@@ -607,7 +616,8 @@ let attributeSnippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "freestanding macro role is semantically incompatible"
     ),
     SwiftSnippet(
         label: "testMacroRoleNames#11",
@@ -658,7 +668,8 @@ let attributeSnippets: [SwiftSnippet] = [
       var fn: @isolated(sdfhsdfi) () -> ()
       """,
         origin: "AttributeTests.testIsolatedTypeAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "expected 'any' as the isolation kind"
     ),
     SwiftSnippet(
         label: "testIsolatedTypeAttribute#3",
@@ -708,7 +719,8 @@ let attributeSnippets: [SwiftSnippet] = [
       associatedtype AssocTy
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "the fixture declares an associated type outside a protocol"
     ),
     SwiftSnippet(
         label: "testABIAttribute#3",
@@ -728,7 +740,8 @@ let attributeSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "enum cases are not permitted in @abi arguments"
     ),
     SwiftSnippet(
         label: "testABIAttribute#5",
@@ -764,7 +777,8 @@ let attributeSnippets: [SwiftSnippet] = [
       typealias Typealias = () -> Void
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type aliases are not permitted in @abi arguments"
     ),
     SwiftSnippet(
         label: "testABIAttribute#9",
@@ -791,7 +805,8 @@ let attributeSnippets: [SwiftSnippet] = [
       associatedtype AssocTy
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "the fixture declares an associated type outside a protocol"
     ),
     SwiftSnippet(
         label: "testABIAttribute#12",
@@ -811,7 +826,8 @@ let attributeSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "enum cases are not permitted in @abi arguments"
     ),
     SwiftSnippet(
         label: "testABIAttribute#14",
@@ -820,7 +836,8 @@ let attributeSnippets: [SwiftSnippet] = [
       func fn()
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "swiftc parser assertion: stub-only function body"
     ),
     SwiftSnippet(
         label: "testABIAttribute#15",
@@ -847,7 +864,8 @@ let attributeSnippets: [SwiftSnippet] = [
       let c1, c2
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "@abi variable and constant stubs cannot contain initializers"
     ),
     SwiftSnippet(
         label: "testABIAttribute#18",
@@ -856,7 +874,8 @@ let attributeSnippets: [SwiftSnippet] = [
       var v1, v2
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "@abi variable and constant stubs cannot contain initializers"
     ),
     SwiftSnippet(
         label: "testABIAttribute#19",
@@ -865,7 +884,8 @@ let attributeSnippets: [SwiftSnippet] = [
       var v3
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "swiftc parser assertion: stub-only accessor body"
     ),
     SwiftSnippet(
         label: "testLifetimeAttribute#1",
@@ -1048,7 +1068,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       func f(in: @differentiable(reverse, wrt: a) (Int) -> Int) { }
       """,
         origin: "AttributeTests.testDifferentiableAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "wrt is not permitted on a differentiable function type"
     ),
     SwiftSnippet(
         label: "testQualifiedAttribute#1",
@@ -1239,7 +1260,7 @@ let attribute604Snippets: [SwiftSnippet] = [
         origin: "AttributeTests.testObjcImplementationAttribute",
         syntaxVersion: "604.0.0-prerelease-2026-06-05"
     ),
-    SwiftSnippet(label: "testSpiAttributeWithoutParameter#1", source: "@_spi() class Foo {}", origin: "AttributeTests.testSpiAttributeWithoutParameter", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+    SwiftSnippet(label: "testSpiAttributeWithoutParameter#1", source: "@_spi() class Foo {}", origin: "AttributeTests.testSpiAttributeWithoutParameter", syntaxVersion: "604.0.0-prerelease-2026-06-05", compilerRejects: "expected an SPI identifier"),
     SwiftSnippet(label: "testSpiAttributeWithUnderscore#1", source: "@_spi(_) class Foo {}", origin: "AttributeTests.testSpiAttributeWithUnderscore", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testSpiAttributeWithUnderscore#2", source: "@_spi(_) import Foo", origin: "AttributeTests.testSpiAttributeWithUnderscore", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(
@@ -1301,7 +1322,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       public func backDeployTopLevelFunc2() -> Int { return 48 }
       """,
         origin: "AttributeTests.testBackDeployed",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number in @backDeployed"
     ),
     SwiftSnippet(
         label: "testBackDeployed#4",
@@ -1329,7 +1351,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       public func backDeployTopLevelFunc2() -> Int { return 48 }
       """,
         origin: "AttributeTests.testBackDeployed",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected version number in @_backDeploy"
     ),
     SwiftSnippet(
         label: "testExpose#1",
@@ -1345,7 +1368,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       @_expose(Cplusplus) func foo() {}
       """,
         origin: "AttributeTests.testExpose",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected _expose option such as Cxx"
     ),
     SwiftSnippet(
         label: "testExpose#3",
@@ -1388,7 +1412,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       struct Vehicle {}
       """,
         origin: "AttributeTests.testOriginallyDefinedIn",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected a platform version in @_originallyDefinedIn"
     ),
     SwiftSnippet(
         label: "testUnavailableFromAsync#1",
@@ -1415,7 +1440,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       func foo() {}
       """,
         origin: "AttributeTests.testUnavailableFromAsync",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "unknown option nope"
     ),
     SwiftSnippet(
         label: "testUnavailableFromAsync#4",
@@ -1424,7 +1450,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       func foo() {}
       """,
         origin: "AttributeTests.testUnavailableFromAsync",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected string literal"
     ),
     SwiftSnippet(
         label: "testEffects#1",
@@ -1528,7 +1555,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "attached macro role is semantically incompatible"
     ),
     SwiftSnippet(
         label: "testMacroRoleNames#6",
@@ -1564,7 +1592,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "freestanding macro role is semantically incompatible"
     ),
     SwiftSnippet(
         label: "testMacroRoleNames#10",
@@ -1573,7 +1602,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       macro m()
       """,
         origin: "AttributeTests.testMacroRoleNames",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "freestanding macro role is semantically incompatible"
     ),
     SwiftSnippet(
         label: "testMacroRoleNames#11",
@@ -1624,7 +1654,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       var fn: @isolated(sdfhsdfi) () -> ()
       """,
         origin: "AttributeTests.testIsolatedTypeAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "expected 'any' as the isolation kind"
     ),
     SwiftSnippet(
         label: "testIsolatedTypeAttribute#3",
@@ -1674,7 +1705,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       associatedtype AssocTy
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "the fixture declares an associated type outside a protocol"
     ),
     SwiftSnippet(
         label: "testABIAttribute#3",
@@ -1694,7 +1726,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "enum cases are not permitted in @abi arguments"
     ),
     SwiftSnippet(
         label: "testABIAttribute#5",
@@ -1730,7 +1763,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       typealias Typealias = () -> Void
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type aliases are not permitted in @abi arguments"
     ),
     SwiftSnippet(
         label: "testABIAttribute#9",
@@ -1757,7 +1791,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       associatedtype AssocTy
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "the fixture declares an associated type outside a protocol"
     ),
     SwiftSnippet(
         label: "testABIAttribute#12",
@@ -1777,7 +1812,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "enum cases are not permitted in @abi arguments"
     ),
     SwiftSnippet(
         label: "testABIAttribute#14",
@@ -1786,7 +1822,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       func fn()
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "swiftc parser assertion: stub-only function body"
     ),
     SwiftSnippet(
         label: "testABIAttribute#15",
@@ -1813,7 +1850,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       let c1, c2
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "@abi variable and constant stubs cannot contain initializers"
     ),
     SwiftSnippet(
         label: "testABIAttribute#18",
@@ -1822,7 +1860,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       var v1, v2
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "@abi variable and constant stubs cannot contain initializers"
     ),
     SwiftSnippet(
         label: "testABIAttribute#19",
@@ -1831,7 +1870,8 @@ let attribute604Snippets: [SwiftSnippet] = [
       var v3
       """,
         origin: "AttributeTests.testABIAttribute",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "swiftc parser assertion: stub-only accessor body"
     ),
     SwiftSnippet(
         label: "testLifetimeAttribute#1",

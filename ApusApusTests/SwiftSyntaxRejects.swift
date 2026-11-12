@@ -9514,6 +9514,16 @@ let allRejectSnippets: [SwiftSnippet] =
     + typeRejectSnippets + patternRejectSnippets + attributeRejectSnippets
     + translatedRejectSnippets
 
+// SwiftSyntax rejects these recovery forms, but swiftc -swift-version 6 -parse accepts them.
+// The compiler is the acceptance authority; keep the SwiftSyntax-reject checks as telemetry.
+private let compilerAcceptedRejectLabels: Set<String> = [
+    "testKeypathExpression#2",
+    "testKeypathExpression#3",
+    "testChainedOptionalUnwrapsWithDot#1",
+    "testChainedOptionalUnwrapsAfterSubscript#1",
+    "testForwardSlashRegex142#1",
+]
+
 extension SwiftSyntax603Tests {
 
 @Suite("Rejects")
@@ -9548,15 +9558,17 @@ struct RejectSyntaxTests {
         #expect(parsed.hasError, "Expected swift-syntax to flag an error: \(snippet.source)")
     }
 
-    // Advent SHOULD reject (no full-span parse). GREEN when it does; the RED cases are
-    // the reject-parity frontier — invalid inputs Advent still wrongly accepts (the
-    // `.basic`/`atValidTrailingClosure` family and other predicate gaps). Track red
-    // against a baseline.
-    @Test("Advent rejects", arguments: allRejectSnippets)
+    // Match swiftc's acceptance decision. Most of this SwiftSyntax-negative corpus is rejected;
+    // the explicit disagreement set above contains compiler-accepted recovery forms.
+    @Test("Advent agrees with swiftc", arguments: allRejectSnippets)
     func adventRejects(_ snippet: SwiftSnippet) throws {
         guard snippet.disabledReason == nil else { return }
         let result = try adventParse(snippet)
-        #expect(result == nil, "Advent wrongly accepted invalid input '\(snippet.diagnosticID)': \(snippet.source)")
+        if compilerAcceptedRejectLabels.contains(snippet.label) {
+            #expect(result != nil, "Advent rejected compiler-accepted input '\(snippet.diagnosticID)': \(snippet.source)")
+        } else {
+            #expect(result == nil, "Advent wrongly accepted compiler-rejected input '\(snippet.diagnosticID)': \(snippet.source)")
+        }
     }
 
 
@@ -19051,11 +19063,15 @@ struct RejectSyntax604Tests {
         #expect(swiftSyntaxReferenceHasError(snippet), "Expected swift-syntax to flag an error: \(snippet.source)")
     }
 
-    @Test("Advent rejects", arguments: all604RejectSnippets)
+    @Test("Advent agrees with swiftc", arguments: all604RejectSnippets)
     func adventRejects(_ snippet: SwiftSnippet) throws {
         guard snippet.disabledReason == nil else { return }
         let result = try adventParse(snippet)
-        #expect(result == nil, "Advent wrongly accepted invalid input '\(snippet.diagnosticID)': \(snippet.source)")
+        if compilerAcceptedRejectLabels.contains(snippet.label) {
+            #expect(result != nil, "Advent rejected compiler-accepted input '\(snippet.diagnosticID)': \(snippet.source)")
+        } else {
+            #expect(result == nil, "Advent wrongly accepted compiler-rejected input '\(snippet.diagnosticID)': \(snippet.source)")
+        }
     }
 }
 }

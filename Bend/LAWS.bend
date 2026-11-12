@@ -7,6 +7,10 @@ import ./PREFER.bend as Prefer
 import ./GUARD.bend as Guard
 import ./UNBEATEN.bend as Unb
 import ./EXTENT.bend as Ext
+import ./SUPPORT.bend as Support
+import ./LL1.bend as LL1
+import ./PSUPPORT.bend as PS
+import ./FIRST.bend as First
 
 # THE LAWS: every claim, and nothing else. `bend PROOF.bend` checks them all.
 #
@@ -14,6 +18,12 @@ import ./EXTENT.bend as Ext
 # pruning (PRUNE.bend) and the witness search (WITNESS.bend) are not trusted: their
 # output is only handed out after a check (CHECK.bend, PRUNE.bend, EXACT.bend). The same
 # goes for the preference oracle (PREFER.bend).
+#
+# WHAT A LAW PROMISES. A law about an algorithm says what its answer means ("whenever
+# `exactSteps` hands out a set, ..."), not that it hands one out: each such law also holds
+# for an algorithm that never answers. An algorithm hands out nothing when it runs out of
+# fuel, when a check fails, or when an oracle refuses a grammar; that it answers at all is
+# not claimed here (README.md, "What the laws promise").
 
 # REWRITING LAWS. Each bracket means its usual BNF rewriting, stated on sentential
 # forms (items followed by `rest`), without ever making a helper nonterminal:
@@ -181,6 +191,111 @@ law gll_every_parse_step:
   for +set: +List<Spec.Bsr>
   for got: {Check.checkedSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
   Spec.EveryParseStep(grammar, start, input, set)
+
+# THE PREDICTING GLL PARSER MISSES NOTHING. The checked parser with prediction (Scott's
+# predict sets: a descriptor is started only where the token there can begin what follows
+# it) hands out a set only when its tables are closed and its final state is closed for
+# the descriptors prediction admits. Prediction never removes a step of a parse tree.
+law predict_every_parse_step:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for got: {Check.predictedSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EveryParseStep(grammar, start, input, set)
+
+# PREDICTION SAVES WORK. A state is supported when each of its facts can be derived from
+# the root by the engine's rules (SUPPORT.bend). Whenever the plain parser's final state is
+# closed and the parser's final state in any mode is supported, every fact of the second
+# is in the first: its descriptors and steps among them, so it has no more of either
+# (COST.bend). For the predicting parser: prediction never does more work.
+law predict_saves_work:
+  for fuelPlain: Nat
+  for fuelOther: Nat
+  for +pr: Gll.Pred
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +plain: Gll.GState
+  for +other: Gll.GState
+  for gotPlain: {Support.closedState(fuelPlain, grammar, start, input) == Some{plain} : Maybe<&2, Gll.GState>}
+  for gotOther: {Support.supportedState(fuelOther, pr, grammar, start, input) == Some{other} : Maybe<&2, Gll.GState>}
+  {Support.factsWithin(Support.factsOf(other), plain) == True{} : Bool}
+
+# LL(1) BY THE TABLES IS LL(1): when the check of LL1.bend finds no conflict in the tables
+# of FIRST.bend, the grammar is LL(1) in SPEC.bend's sense (`LL1`): at no choice point can
+# two different choices begin with the same next token. The tables may be larger than the
+# exact sets, so the check may report a conflict the grammar does not have; never the
+# other way round.
+law tables_ll1_sound:
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +t: Gll.Tables
+  for +ok: {LL1.ll1ByTables(grammar, start, t) == True{} : Bool}
+  Spec.LL1(grammar, start)
+
+# AN LL(1) GRAMMAR IS UNAMBIGUOUS: under SPEC.bend's `LL1`, two parse trees of the same
+# input are the same tree. Where two trees first differ, both choices there would predict
+# the same next token, which LL(1) forbids.
+law ll1_unambiguous:
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for tree1: Spec.Tree
+  for tree2: Spec.Tree
+  for ll1: Spec.LL1(grammar, start)
+  for +fit1: {Spec.fits([tree1], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for +fit2: {Spec.fits([tree2], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for +sp1: {Spec.leaves([tree1]) == input : +List<Nat>}
+  for +sp2: {Spec.leaves([tree2]) == input : +List<Nat>}
+  {tree1 == tree2 : Spec.Tree}
+
+# NO DEAD WOOD FOR AN LL(1) GRAMMAR: when the input is a sentence and the tables of
+# FIRST.bend pass LL1.bend's check, the checked LL(1) parser (PSUPPORT.bend: closed, and
+# supported with prediction) hands out exactly the steps of the parse tree. Brackets
+# included; the engine predicts the rounds of [ ] { } and the later rounds of < > by FIRST
+# only (GLL.bend, predictFor).
+law ll1_no_dead_wood:
+  for fuel: Nat
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +set: +List<Spec.Bsr>
+  for +t: Gll.Tables
+  for +tablesEq: {First.tablesOf(Nat.add(Nat.mul(First.ntCount(grammar), 4n), 4n), grammar, start) == Some{t} : Maybe<&2, Gll.Tables>}
+  for +ll1: {LL1.ll1ByTables(grammar, start, t) == True{} : Bool}
+  for +tree: Spec.Tree
+  for +fit: {Spec.fits([tree], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for +sp: {Spec.leaves([tree]) == input : +List<Nat>}
+  for got: {PS.llSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.IsExactBsr(grammar, start, input, set)
+
+# LL(1) AT ONE CHOICE POINT DECIDES IT: where the grammar is LL(1) at a choice point (SPEC's
+# LL1At, at that point only), two parse trees, of any inputs, that make a choice there at the
+# same position with the same token next make the same choice (SPEC's choicesMade). So a
+# parser may predict by one token at that point, even where the grammar is not LL(1)
+# elsewhere.
+law ll1_at:
+  for +grammar: +List<Spec.Production>
+  for +start: Nat
+  for +input1: +List<Nat>
+  for +input2: +List<Nat>
+  for +tree1: Spec.Tree
+  for +tree2: Spec.Tree
+  for +point: Spec.ChoicePoint
+  for +pos: Nat
+  for +choice1: Nat
+  for +choice2: Nat
+  for ll1: Spec.LL1At(grammar, start, point)
+  for +fit1: {Spec.fits([tree1], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for +sp1: {Spec.leaves([tree1]) == input1 : +List<Nat>}
+  for +fit2: {Spec.fits([tree2], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
+  for +sp2: {Spec.leaves([tree2]) == input2 : +List<Nat>}
+  for +next: {List.get(&2, Nat, input1, pos) == List.get(&2, Nat, input2, pos) : Maybe<&2, Nat>}
+  for made1: Spec.Among(Spec.Made{point, pos, choice1}, Spec.choicesMade(grammar, start, tree1))
+  for made2: Spec.Among(Spec.Made{point, pos, choice2}, Spec.choicesMade(grammar, start, tree2))
+  {choice1 == choice2 : Nat}
 
 # THE EXACT PARSER IS EXACT: whenever `exactSteps` hands out a set, it holds exactly
 # the steps of the parse trees of the input. Nothing is missing, and every element
@@ -399,20 +514,22 @@ law unbeaten_swap_pick:
 #
 # PHASE 3, SELECTED.
 #
-# @longest AND @shortest KEEP EXACTLY THE BEST-EXTENT TREES. Whenever the extent oracle
+# @longest AND @shortest KEEP EXACTLY THE SELECTED TREES. Whenever the extent oracle
 # hands out a set, a parse tree of the input uses only steps of that set exactly when it
-# has the best extent: at every node, pick and round, no other reading of the same
-# children's tokens gives the marked item a longer span (@longest) or a shorter one
-# (@shortest). The comparison is local: it looks at the one sequence the mark sits in.
-# So a tree read from the set took the extent the annotation asks for everywhere, and
-# no tree that did is lost. The oracle refuses two marks in one sequence and a mark on
-# the alternative of a loop.
+# is admissible, unbeaten, and has the best extent: at every node, pick and round, no
+# other reading of the same children's tokens that phases 1 and 2 keep there gives the
+# marked item a longer span (@longest) or a shorter one (@shortest). The comparison is
+# local: it looks at the one sequence the mark sits in. So a tree read from the set took
+# the extent the annotation asks for everywhere, and no tree that did is lost. The
+# oracle refuses two marks in one sequence and a mark on the alternative of a loop.
 law extent_exact:
   for fuel: Nat
   for +grammar: +List<Spec.Production>
+  for +guards: +List<Spec.GuardMark>
+  for +pmarks: +List<Spec.Mark>
   for +marks: +List<Spec.ExtentMark>
   for +start: Nat
   for +input: +List<Nat>
   for +set: +List<Spec.Bsr>
-  for got: {Ext.extentSteps(fuel, grammar, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  Spec.EmbedsExtentBest(grammar, marks, start, input, set)
+  for got: {Ext.extentSteps(fuel, grammar, guards, pmarks, marks, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
+  Spec.EmbedsExtentBest(grammar, guards, pmarks, marks, start, input, set)

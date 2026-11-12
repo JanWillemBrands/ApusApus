@@ -346,11 +346,11 @@ def IsExactBsr(+grammar: +List<Production>, +start: Nat, +inputTokens: +List<Nat
 #      EmbedsExtentBest, and Selected for all three phases together.
 #
 # Each phase has its own oracle and its own laws in LAWS.bend; the final answer is the
-# selected trees. Phase 2 is joined to phase 1: its rivals must be admissible. Not yet
-# joined: phase 3 does not yet ask its rivals to be admissible and unbeaten (README.md,
-# "Still to do").
+# selected trees. The phases are joined: phase 2's rivals must be admissible, and phase
+# 3's rivals admissible and unbeaten, so each phase chooses among what the earlier ones
+# keep.
 
-# PHASE 1, ADMISSIBLE TREES: LOOKAHEAD (@canParse, @cannotParse), @left AND @right.
+# PHASE 1, ADMISSIBLE TREES: LOOKAHEAD (>?>, >!>), @left AND @right.
 #
 # These annotations are hard rules on single nodes, not rankings between siblings: a node
 # that breaks one is out, whether or not a sibling could take its place. So they come
@@ -364,8 +364,9 @@ def IsExactBsr(+grammar: +List<Production>, +start: Nat, +inputTokens: +List<Nat
 # the tokens that follow the forest, up to the end of the input.
 
 # One rule. N... is a list of nonterminals. Ahead{N...}: every N derives some prefix of
-# the input from where the alternative starts; this is Swift Apus's @canParse(N...).
-# NotAhead{N...}: no N does; @cannotParse(N...). LeftAssoc{[]} is a bare @left: the
+# the input from where the alternative starts; Swift Apus's >?>( N ) is Ahead{[N]}, and
+# several are written as several >?>. NotAhead{N...}: no N does; >!>( N, ... ).
+# LeftAssoc{[]} is a bare @left: the
 # alternative may not have, as its last child, something the alternative itself derives.
 # A tree that reads a + b + c as a + (b + c) under E ::= @left E "+" E is out, because
 # its last child, b + c, is again E "+" E. LeftAssoc{N...} is @left(N...): the last child may not
@@ -378,14 +379,15 @@ def IsExactBsr(+grammar: +List<Production>, +start: Nat, +inputTokens: +List<Nat
 # E ::= @left E "+" E | E "+" F | number, it also removes a tree whose last child is an
 # E that went through E "+" F, because E "+" E can derive those tokens as well. (3) Ahead
 # means the language: N derives a prefix, whether or not GLL predicted N there. Swift
-# Apus answers a nonterminal it didn't predict with a recogniser, so it means the same;
-# the comparison with Swift checks this (BendCheck, "unpredicted target").
+# Apus asks the parse itself: it probes N wherever the rule is asked, so it means the
+# same; the comparison with Swift checks this (BendCheck, "unpredicted target").
 #
 # On the names. The literature calls Ahead and NotAhead positive and negative lookahead
-# (the and- and not-predicates of PEG, Ford 2004; ANTLR's syntactic predicates). Apus's
-# token lookaround >+>( … ) and >->( … ) is the case where every N derives just single
-# tokens. Under consideration: letting >+> and >-> take nonterminals, so that one
-# notation covers both, and Ahead/NotAhead are >+>/>-> at the start of an alternative.
+# (the and- and not-predicates of PEG, Ford 2004; ANTLR's syntactic predicates). Apus
+# writes them >?>( N ) and >!>( N, ... ), at the start of an alternative; its token
+# lookaround >+>( ... ) and >->( ... ) is the case where every N derives just single
+# tokens. The two notations stay apart because a predicate is a parse and a lookaround
+# tests one token.
 type Guard is Data:
   Ahead{ids: +List<Nat>}
   NotAhead{ids: +List<Nat>}
@@ -820,8 +822,12 @@ def EmbedsUnbeaten(+grammar: +List<Production>, +guards: +List<GuardMark>, +mark
 # every reading of a sequence. A forest can only be swapped for another over the same
 # tokens, so a node's marked items are compared within the node, never across trees.
 #
-# Not yet joined: the better forest need not be admissible or unbeaten (README.md, "Still
-# to do"), as for the rivals of phase 2.
+# Joined to phases 1 and 2: only a better forest that could take the sequence's place
+# counts. It must keep the hard rules (the sequence's own, over its tokens and the tokens
+# after them, and those of every node, pick and round inside it) and have no outranked
+# node itself, in the same context as the forest it would replace (the tokens after it,
+# and the nodes above it over the same tokens). A better reading that breaks a rule, or
+# makes a choice @prefer or @avoid rules out, beats nothing.
 
 type Extent is Data:
   Longest{}
@@ -916,49 +922,369 @@ def beats(xs: +List<Measure>, ys: +List<Measure>) -> Bool:
       False{}
 
 # A better reading of a sequence: another forest for the same items over the same tokens
-# w, whose marked items beat those of f.
-def ExtentRival(+grammar: +List<Production>, +marks: +List<ExtentMark>, +items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +w: +List<Nat>, +f: +List<Tree>) -> Type:
-  &f2: +List<Tree> -> {fits(f2, grammar, items) == True{} : Bool} & {leaves(f2) == w : +List<Nat>} & {beats(measures(marks, f2, items, index, prefix, 0n), measures(marks, f, items, index, prefix, 0n)) == True{} : Bool}
+# w, whose marked items beat those of f, and that phases 1 and 2 keep where f stands: the
+# sequence's rules `own` hold for it, it is admissible, and no node of it is outranked,
+# with `after` the tokens after it and `above`, `span` as in Unbeaten for f.
+def ExtentRival(+grammar: +List<Production>, +guards: +List<GuardMark>, +pmarks: +List<Mark>, +marks: +List<ExtentMark>, +items: +List<Item>, +own: +List<Guard>, +index: Nat, +prefix: +List<Nat>, +w: +List<Nat>, +after: +List<Nat>, +above: +List<Nat>, +span: +List<Nat>, +f: +List<Tree>) -> Type:
+  &f2: +List<Tree> -> {fits(f2, grammar, items) == True{} : Bool} & {leaves(f2) == w : +List<Nat>} & {beats(measures(marks, f2, items, index, prefix, 0n), measures(marks, f, items, index, prefix, 0n)) == True{} : Bool} &
+    AllHold(grammar, own, items, f2, List.append(&2, Nat, w, after)) & Admissible(grammar, guards, f2, items, index, prefix, 0n, after) & Unbeaten(grammar, guards, pmarks, f2, items, index, prefix, 0n, above, span, after)
 
-# No sequence of the forest has a better reading. The walk is the one of Admissible: the
+# No sequence of the forest has a better reading. The walk is the one of Unbeaten: the
 # children of every node, pick and round are checked against the other forests for their
-# alternative over the same tokens.
-def ExtentBest(+grammar: +List<Production>, +marks: +List<ExtentMark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat) -> Type:
+# alternative over the same tokens, with the same `above`, `span` and `after`.
+def ExtentBest(+grammar: +List<Production>, +guards: +List<GuardMark>, +pmarks: +List<Mark>, +marks: +List<ExtentMark>, forest: +List<Tree>, items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +above: +List<Nat>, +span: +List<Nat>, +after: +List<Nat>) -> Type:
   match forest items:
-    case Con{Node{+q, +children}, +ts} Con{Sym{Nonterminal{x}}, +rest}:
-      (ExtentRival(grammar, marks, rhsOf(grammar, q), q, [], leaves(children), children) -> Empty) & ExtentBest(grammar, marks, children, rhsOf(grammar, q), q, [], 0n) & ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+    case Con{Node{+q, +children}, +ts} Con{Sym{Nonterminal{+x}}, +rest}:
+      +w = leaves(children)
+      +next = List.append(&2, Nat, leaves(ts), after)
+      +xs = {x <> sameAbove(above, span, w) : +List<Nat>}
+      (ExtentRival(grammar, guards, pmarks, marks, rhsOf(grammar, q), prodGuards(guards, q), q, [], w, next, xs, w, children) -> Empty) & ExtentBest(grammar, guards, pmarks, marks, children, rhsOf(grammar, q), q, [], 0n, xs, w, next) & ExtentBest(grammar, guards, pmarks, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case Con{Pick{+a, +children}, +ts} Con{Brack{kind, +alts}, +rest}:
-      +pre = List.append(&2, Nat, List.append(&2, Nat, prefix, [dot]), [a])
-      (ExtentRival(grammar, marks, altOf(alts, a), index, pre, leaves(children), children) -> Empty) & ExtentBest(grammar, marks, children, altOf(alts, a), index, pre, 0n) & ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+      +w = leaves(children)
+      +next = List.append(&2, Nat, leaves(ts), after)
+      +same = sameAbove(above, span, w)
+      +path = List.append(&2, Nat, prefix, [dot])
+      +pre = List.append(&2, Nat, path, [a])
+      (ExtentRival(grammar, guards, pmarks, marks, altOf(alts, a), altGuards(guards, index, path, a), index, pre, w, next, same, w, children) -> Empty) & ExtentBest(grammar, guards, pmarks, marks, children, altOf(alts, a), index, pre, 0n, same, w, next) & ExtentBest(grammar, guards, pmarks, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case Con{Loop{+rounds}, +ts} Con{Brack{kind, +alts}, +rest}:
-      RoundsBest(grammar, marks, rounds, alts, index, List.append(&2, Nat, prefix, [dot])) & ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+      RoundsBest(grammar, guards, pmarks, marks, rounds, alts, index, List.append(&2, Nat, prefix, [dot]), above, span, List.append(&2, Nat, leaves(ts), after)) & ExtentBest(grammar, guards, pmarks, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case Con{t, +ts} Con{it, +rest}:
-      ExtentBest(grammar, marks, ts, rest, index, prefix, 1n+dot)
+      ExtentBest(grammar, guards, pmarks, marks, ts, rest, index, prefix, 1n+dot, above, span, after)
     case _ _:
       Unit
 
 # The rounds of a loop, each a pick of an alternative of the bracket at (index, path).
-def RoundsBest(+grammar: +List<Production>, +marks: +List<ExtentMark>, rounds: +List<Tree>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>) -> Type:
+def RoundsBest(+grammar: +List<Production>, +guards: +List<GuardMark>, +pmarks: +List<Mark>, +marks: +List<ExtentMark>, rounds: +List<Tree>, +alts: +List<+List<Item>>, +index: Nat, +path: +List<Nat>, +above: +List<Nat>, +span: +List<Nat>, +after: +List<Nat>) -> Type:
   match rounds:
     case Nil{}:
       Unit
     case Con{Pick{+a, +children}, +rest}:
+      +w = leaves(children)
+      +next = List.append(&2, Nat, leaves(rest), after)
+      +same = sameAbove(above, span, w)
       +pre = List.append(&2, Nat, path, [a])
-      (ExtentRival(grammar, marks, altOf(alts, a), index, pre, leaves(children), children) -> Empty) & ExtentBest(grammar, marks, children, altOf(alts, a), index, pre, 0n) & RoundsBest(grammar, marks, rest, alts, index, path)
+      (ExtentRival(grammar, guards, pmarks, marks, altOf(alts, a), altGuards(guards, index, path, a), index, pre, w, next, same, w, children) -> Empty) & ExtentBest(grammar, guards, pmarks, marks, children, altOf(alts, a), index, pre, 0n, same, w, next) & RoundsBest(grammar, guards, pmarks, marks, rest, alts, index, path, above, span, after)
     case Con{other, +rest}:
-      RoundsBest(grammar, marks, rest, alts, index, path)
+      RoundsBest(grammar, guards, pmarks, marks, rest, alts, index, path, above, span, after)
 
-# A parse tree of the input with no sequence that has a better reading.
-def ExtentBestTree(+grammar: +List<Production>, +marks: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
-  {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} & {leaves([tree]) == inputTokens : +List<Nat>} & ExtentBest(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n)
+# An admissible, unbeaten tree with no sequence that has a better reading.
+def ExtentBestTree(+grammar: +List<Production>, +guards: +List<GuardMark>, +pmarks: +List<Mark>, +marks: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
+  UnbeatenTree(grammar, guards, pmarks, start, inputTokens, tree) & ExtentBest(grammar, guards, pmarks, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], [])
 
 # A set that embeds exactly the trees of phase 3, as in phases 1 and 2.
-def EmbedsExtentBest(+grammar: +List<Production>, +marks: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
+def EmbedsExtentBest(+grammar: +List<Production>, +guards: +List<GuardMark>, +pmarks: +List<Mark>, +marks: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +set: +List<Bsr>) -> Type:
   @tree: Tree -> {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} -> {leaves([tree]) == inputTokens : +List<Nat>} ->
-    ({allIn(steps(tree, 0n), set) == True{} : Bool} -> ExtentBest(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n)) &
-    (ExtentBest(grammar, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n) -> {allIn(steps(tree, 0n), set) == True{} : Bool})
+    ({allIn(steps(tree, 0n), set) == True{} : Bool} -> Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, []) & Unbeaten(grammar, guards, pmarks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], []) & ExtentBest(grammar, guards, pmarks, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], [])) &
+    (Admissible(grammar, guards, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, []) & Unbeaten(grammar, guards, pmarks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], []) & ExtentBest(grammar, guards, pmarks, marks, [tree], [Sym{Nonterminal{start}}], 0n, [], 0n, [], [], []) -> {allIn(steps(tree, 0n), set) == True{} : Bool})
 
 # THE SELECTED TREES: the answer of all three phases. A selected tree is a parse tree of the
 # input that is admissible, unbeaten and extent-best.
 def Selected(+grammar: +List<Production>, +guards: +List<GuardMark>, +marks: +List<Mark>, +extents: +List<ExtentMark>, +start: Nat, +inputTokens: +List<Nat>, +tree: Tree) -> Type:
-  UnbeatenTree(grammar, guards, marks, start, inputTokens, tree) & ExtentBestTree(grammar, extents, start, inputTokens, tree)
+  ExtentBestTree(grammar, guards, marks, extents, start, inputTokens, tree)
+
+# ======== DERIVED NOTIONS: NULLABLE, FIRST, FOLLOW, PREDICT AND LL(1) ========
+#
+# Defined from `Derives` and the steps of parse trees, and used only by the LL(1) laws in
+# LAWS.bend. Nothing above depends on them. The engine's own tables (FIRST.bend) are an
+# untrusted computation of over-approximations of these sets.
+
+# The items can derive nothing.
+def Nullable(+grammar: +List<Production>, +items: +List<Item>) -> Type:
+  Derives(grammar, items, [])
+
+# The items can derive something that begins with the token.
+def First(+grammar: +List<Production>, +items: +List<Item>, +token: Nat) -> Type:
+  &rest: +List<Nat> -> Derives(grammar, items, token <> rest)
+
+# The item number m of a sequence, and alternative a of a bracket item.
+def itemAt(items: +List<Item>, m: Nat) -> Maybe<&2, Item>:
+  match items m:
+    case Nil{} _:
+      None{}
+    case Con{x, rest} 0n:
+      Some{x}
+    case Con{x, rest} 1n+n:
+      itemAt(rest, n)
+
+def bracketAlternative(item: Maybe<&2, Item>, a: Nat) -> +List<Item>:
+  match item:
+    case Some{Brack{kind, alts}}:
+      altOf(alts, a)
+    case _:
+      []
+
+# The sequence named by a prefix, inside the items: [] is the items themselves, [m, a] the
+# alternative a of the bracket at item m, [m, a, m2, a2] one level deeper, as in a slot's
+# path without its final dot. A prefix of odd length names no sequence.
+#
+# WHY ODD PREFIXES ARE HERE AT ALL (a deliberate shortcut). Nothing builds an odd prefix:
+# the walk, the engine and LL1.bend always add a whole (item, alternative) pair. They only
+# show up because `LL1` says "for every ChoicePoint", and a ChoicePoint's prefix is a plain
+# list of numbers, so the law also ranges over junk such as BracketAt{index, [2], dot}.
+# Mapping an odd prefix to [] makes such a point have no choices, so LL(1) holds there
+# trivially. (Before, the leftover number was ignored, which made [2] a copy of [] and cost
+# the proof a detour.) The clean fix is a path type of whole pairs for ChoicePoint and
+# Choice, with FollowAt flattening it for the steps' slot paths: about 50 lines of SPEC and
+# a third of PROOF_LL1.bend. Doing it for slot paths and the engine too would reopen most
+# proofs. Not worth it while no real path is ever odd.
+def sequenceIn(prefix: +List<Nat>, items: +List<Item>) -> +List<Item>:
+  match prefix:
+    case Nil{}:
+      items
+    case Con{m, Nil{}}:
+      []
+    case Con{m, Con{a, rest}}:
+      sequenceIn(rest, bracketAlternative(itemAt(items, m), a))
+
+def sequenceAt(+grammar: +List<Production>, +index: Nat, prefix: +List<Nat>) -> +List<Item>:
+  sequenceIn(prefix, rhsOf(grammar, index))
+
+# The items of a sequence from the dot on.
+def itemsFrom(n: Nat, items: +List<Item>) -> +List<Item>:
+  match n items:
+    case 0n _:
+      items
+    case 1n+m Nil{}:
+      []
+    case 1n+m Con{x, rest}:
+      itemsFrom(m, rest)
+
+# FOLLOW of a sequence: in a parse tree of some input, the step of the sequence's last slot
+# records that it ended at j, and `next` is the token at j (None: the end of the input).
+# FIRST looks only at the items; FOLLOW is about where the sequence stands: every place it
+# occurs, and what follows those places, up to the start symbol. Read from parse trees,
+# FOLLOW holds exactly what really comes next in some sentence. The textbook equations (FIRST
+# of what follows each occurrence, FOLLOW of the owner when that can be empty) give a set
+# that can be larger: they also count occurrences no sentence uses. FIRST.bend computes those
+# equations; its tables contain this FOLLOW, so they predict safely.
+def FollowAt(+grammar: +List<Production>, +start: Nat, +index: Nat, +prefix: +List<Nat>, +next: Maybe<&2, Nat>) -> Type:
+  &input: +List<Nat> -> &tree: Tree -> &i: Nat -> &k: Nat -> &j: Nat ->
+    {fits([tree], grammar, [Sym{Nonterminal{start}}]) == True{} : Bool} & {leaves([tree]) == input : +List<Nat>} &
+    {bsrMember(at(index, prefix, List.length(&2, Item, sequenceAt(grammar, index, prefix)), i, k, j), steps(tree, 0n)) == True{} : Bool} &
+    {List.get(&2, Nat, input, j) == next : Maybe<&2, Nat>}
+
+def FirstOf(+grammar: +List<Production>, +items: +List<Item>, next: Maybe<&2, Nat>) -> Type:
+  match next:
+    case None{}:
+      Empty
+    case Some{+token}:
+      First(grammar, items, token)
+
+def PredictsBy(viaFirst: Bool, +grammar: +List<Production>, +start: Nat, +items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +next: Maybe<&2, Nat>) -> Type:
+  match viaFirst:
+    case True{}:
+      FirstOf(grammar, items, next)
+    case False{}:
+      Nullable(grammar, items) & FollowAt(grammar, start, index, prefix, next)
+
+# PREDICT: the items, followed by what can come after the sequence at (index, prefix), can
+# begin with `next`: through FIRST, or the items derive nothing and FOLLOW has it.
+def Predicts(+grammar: +List<Production>, +start: Nat, +items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +next: Maybe<&2, Nat>) -> Type:
+  &viaFirst: Bool -> PredictsBy(viaFirst, grammar, start, items, index, prefix, next)
+
+# A CHOICE POINT: a place where a parse tree makes a choice. A nonterminal, expanded by one
+# of its alternates; the bracket item at the dot of the sequence at (index, prefix), entered
+# by one of its alternates or, for [ ] and { }, left for the rest of its sequence (skipped,
+# or its rounds stopped); and, for a < > only, the moment after one of its rounds, when it
+# goes on with another round or is left.
+#
+# A choice may read nothing only where the bracket rule (`roundsOk`) allows an empty round:
+# an alternate of a nonterminal, the one round of ( ), the first round of < > (which is then
+# its only round), and leaving. The rounds of [ ] and { }, and the later rounds of < >,
+# always read something, so those alternates are told apart by FIRST alone. (Scott and
+# Johnstone's EBNF parsers keep every empty round, so there a nullable body of [ ] or { } is
+# a real ambiguity; here such readings are no trees.) For { }, entering and going on are the
+# same choice, so one choice point serves all its rounds; for < > they differ, since leaving
+# is not allowed before the first round. A prefix of odd length names no place (see
+# `sequenceIn`), so a choice point with one has no choices.
+type ChoicePoint is Data:
+  NonterminalAt{nonterminal: Nat}
+  BracketAt{index: Nat, prefix: +List<Nat>, dot: Nat}
+  AfterRoundAt{index: Nat, prefix: +List<Nat>, dot: Nat}
+
+# One choice at a choice point: items, followed by the end of the sequence at (index,
+# prefix), and whether it may read nothing.
+type Choice is Data:
+  Choice{items: +List<Item>, index: Nat, prefix: +List<Nat>, mayBeEmpty: Bool}
+
+def leaveChoice(leave: Bool, +rest: +List<Item>, +index: Nat, +prefix: +List<Nat>) -> Maybe<&2, Choice>:
+  match leave:
+    case True{}:
+      Some{Choice{rest, index, prefix, True{}}}
+    case False{}:
+      None{}
+
+# The choices at a bracket: its alternates, numbered from 0 (as a tree's Pick numbers
+# them), each possibly empty or not; then, if it can be left here, leaving it.
+def bracketAlternate(isAlternate: Bool, +alts: +List<+List<Item>>, +choice: Nat, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +mayBeEmpty: Bool, +leave: Bool, +rest: +List<Item>) -> Maybe<&2, Choice>:
+  match isAlternate:
+    case True{}:
+      Some{Choice{altOf(alts, choice), index, List.append(&2, Nat, prefix, [dot, choice]), mayBeEmpty}}
+    case False{}:
+      leaveChoice(Bool.and(Nat.is_eq(choice, List.length(&2, +List<Item>, alts)), leave), rest, index, prefix)
+
+# Entering a bracket: ( ) and < > must take a round, which may be empty; [ ] and { } may be
+# left, and their rounds read something.
+def enterChoice(kind: Bracket, +alts: +List<+List<Item>>, +choice: Nat, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +rest: +List<Item>) -> Maybe<&2, Choice>:
+  match kind:
+    case Group{}:
+      bracketAlternate(isAlt(alts, choice), alts, choice, index, prefix, dot, True{}, False{}, rest)
+    case Optional{}:
+      bracketAlternate(isAlt(alts, choice), alts, choice, index, prefix, dot, False{}, True{}, rest)
+    case Closure{}:
+      bracketAlternate(isAlt(alts, choice), alts, choice, index, prefix, dot, False{}, True{}, rest)
+    case Positive{}:
+      bracketAlternate(isAlt(alts, choice), alts, choice, index, prefix, dot, True{}, False{}, rest)
+
+# After a round of < >: another round, which reads something, or leaving.
+def afterRoundChoice(kind: Bracket, +alts: +List<+List<Item>>, +choice: Nat, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +rest: +List<Item>) -> Maybe<&2, Choice>:
+  match kind:
+    case Positive{}:
+      bracketAlternate(isAlt(alts, choice), alts, choice, index, prefix, dot, False{}, True{}, rest)
+    case _:
+      None{}
+
+def bracketChoice(item: Maybe<&2, Item>, +afterRound: Bool, +choice: Nat, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +rest: +List<Item>) -> Maybe<&2, Choice>:
+  match item afterRound:
+    case Some{Brack{+kind, +alts}} False{}:
+      enterChoice(kind, alts, choice, index, prefix, dot, rest)
+    case Some{Brack{+kind, +alts}} True{}:
+      afterRoundChoice(kind, alts, choice, index, prefix, dot, rest)
+    case _ _:
+      None{}
+
+def nonterminalAlternate(isOwn: Bool, +grammar: +List<Production>, +choice: Nat) -> Maybe<&2, Choice>:
+  match isOwn:
+    case True{}:
+      Some{Choice{rhsOf(grammar, choice), choice, [], True{}}}
+    case False{}:
+      None{}
+
+# Choice number `choice` at a choice point. A nonterminal's alternates are numbered by their
+# production, since the grammar keeps each alternate of a nonterminal as a production of its
+# own (and a tree's Node names it by that number); a bracket keeps its alternates inside the
+# item, numbered from 0 (as a tree's Pick does), and the choice after them is leaving the
+# bracket, where it can be left. None when there is no such choice.
+def choiceOf(+grammar: +List<Production>, point: ChoicePoint, +choice: Nat) -> Maybe<&2, Choice>:
+  match point:
+    case NonterminalAt{+x}:
+      nonterminalAlternate(lhsIs(grammar, choice, x), grammar, choice)
+    case BracketAt{+index, +prefix, +dot}:
+      +seq = sequenceAt(grammar, index, prefix)
+      bracketChoice(itemAt(seq, dot), False{}, choice, index, prefix, dot, itemsFrom(1n+dot, seq))
+    case AfterRoundAt{+index, +prefix, +dot}:
+      +seq = sequenceAt(grammar, index, prefix)
+      bracketChoice(itemAt(seq, dot), True{}, choice, index, prefix, dot, itemsFrom(1n+dot, seq))
+
+# Can the choice begin with `next`? Through FIRST; or, when it may read nothing, its items
+# derive nothing and FOLLOW of its sequence has `next`.
+def predictsWhen(mayBeEmpty: Bool, +grammar: +List<Production>, +start: Nat, +items: +List<Item>, +index: Nat, +prefix: +List<Nat>, +next: Maybe<&2, Nat>) -> Type:
+  match mayBeEmpty:
+    case True{}:
+      Predicts(grammar, start, items, index, prefix, next)
+    case False{}:
+      FirstOf(grammar, items, next)
+
+def ChoicePredicts(+grammar: +List<Production>, +start: Nat, choice: Maybe<&2, Choice>, +next: Maybe<&2, Nat>) -> Type:
+  match choice:
+    case None{}:
+      Empty
+    case Some{Choice{+items, +index, +prefix, +mayBeEmpty}}:
+      predictsWhen(mayBeEmpty, grammar, start, items, index, prefix, next)
+
+# LL(1) AT A CHOICE POINT: no two different choices can both begin with the same next token.
+# This is strong LL(1): each choice's predict set uses FOLLOW of its own sequence, whatever
+# the tree around it.
+def LL1At(+grammar: +List<Production>, +start: Nat, +point: ChoicePoint) -> Type:
+  @first: Nat -> @second: Nat -> @next: Maybe<&2, Nat> -> {Nat.is_eq(first, second) == False{} : Bool} ->
+    ChoicePredicts(grammar, start, choiceOf(grammar, point, first), next) -> ChoicePredicts(grammar, start, choiceOf(grammar, point, second), next) -> Empty
+
+# An LL(1) grammar: LL(1) at every choice point.
+def LL1(+grammar: +List<Production>, +start: Nat) -> Type:
+  @point: ChoicePoint -> LL1At(grammar, start, point)
+
+# THE CHOICES A TREE MAKES: at which choice point, at which position, which choice. A node
+# is its nonterminal's choice where it starts; a Pick of ( ) or [ ] is the bracket's choice
+# where it starts, and a Skip of [ ] is leaving it there; each round of { } chooses at the
+# bracket where the round starts, and stopping is leaving it where the loop ends; for < >,
+# the first round chooses at the bracket, and every later round, and stopping, choose after
+# the round before (AfterRoundAt). Used only by the law ll1_at.
+type Made is Data:
+  Made{point: ChoicePoint, pos: Nat, choice: Nat}
+
+def nonterminalOf(item: Maybe<&2, Item>) -> Nat:
+  match item:
+    case Some{Sym{Nonterminal{x}}}:
+      x
+    case _:
+      0n
+
+def alternateCount(item: Maybe<&2, Item>) -> Nat:
+  match item:
+    case Some{Brack{kind, alts}}:
+      List.length(&2, +List<Item>, alts)
+    case _:
+      0n
+
+# A Skip leaves a [ ]; a Skip of an ε item makes no choice.
+def skipMade(item: Maybe<&2, Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +k: Nat) -> +List<Made>:
+  match item:
+    case Some{Brack{kind, alts}}:
+      [Made{BracketAt{index, prefix, dot}, k, List.length(&2, +List<Item>, alts)}]
+    case _:
+      []
+
+# Where a round of a loop chooses: after the round before, for a later round of < >.
+def roundPoint(later: Bool, item: Maybe<&2, Item>, +index: Nat, +prefix: +List<Nat>, +dot: Nat) -> ChoicePoint:
+  match later item:
+    case True{} Some{Brack{Positive{}, alts}}:
+      AfterRoundAt{index, prefix, dot}
+    case _ _:
+      BracketAt{index, prefix, dot}
+
+# The choices of a forest for the sequence at (index, prefix) from item dot, starting at k;
+# with rounds = True, the rounds of the loop at item dot (later: a round came before).
+def madeIn(+grammar: +List<Production>, forest: +List<Tree>, rounds: Bool, later: Bool, +index: Nat, +prefix: +List<Nat>, +dot: Nat, +k: Nat) -> +List<Made>:
+  match forest rounds:
+    case Nil{} False{}:
+      []
+    case Con{Leaf{kind}, +ts} False{}:
+      madeIn(grammar, ts, False{}, False{}, index, prefix, 1n+dot, 1n+k)
+    case Con{Node{+q, +children}, +ts} False{}:
+      +end = Nat.add(k, List.length(&2, Nat, leaves(children)))
+      Made{NonterminalAt{nonterminalOf(itemAt(sequenceAt(grammar, index, prefix), dot))}, k, q} <>
+        List.append(&2, Made, madeIn(grammar, children, False{}, False{}, q, [], 0n, k), madeIn(grammar, ts, False{}, False{}, index, prefix, 1n+dot, end))
+    case Con{Pick{+a, +children}, +ts} False{}:
+      +end = Nat.add(k, List.length(&2, Nat, leaves(children)))
+      Made{BracketAt{index, prefix, dot}, k, a} <>
+        List.append(&2, Made, madeIn(grammar, children, False{}, False{}, index, List.append(&2, Nat, prefix, [dot, a]), 0n, k), madeIn(grammar, ts, False{}, False{}, index, prefix, 1n+dot, end))
+    case Con{Skip{}, +ts} False{}:
+      List.append(&2, Made, skipMade(itemAt(sequenceAt(grammar, index, prefix), dot), index, prefix, dot, k), madeIn(grammar, ts, False{}, False{}, index, prefix, 1n+dot, k))
+    case Con{Loop{+rs}, +ts} False{}:
+      +end = Nat.add(k, List.length(&2, Nat, leaves(rs)))
+      List.append(&2, Made, madeIn(grammar, rs, True{}, False{}, index, prefix, dot, k), madeIn(grammar, ts, False{}, False{}, index, prefix, 1n+dot, end))
+    case Nil{} True{}:
+      +item = itemAt(sequenceAt(grammar, index, prefix), dot)
+      [Made{roundPoint(later, item, index, prefix, dot), k, alternateCount(item)}]
+    case Con{Pick{+a, +children}, +ts} True{}:
+      +end = Nat.add(k, List.length(&2, Nat, leaves(children)))
+      Made{roundPoint(later, itemAt(sequenceAt(grammar, index, prefix), dot), index, prefix, dot), k, a} <>
+        List.append(&2, Made, madeIn(grammar, children, False{}, False{}, index, List.append(&2, Nat, prefix, [dot, a]), 0n, k), madeIn(grammar, ts, True{}, True{}, index, prefix, dot, end))
+    case Con{other, ts} True{}:
+      []
+
+# The choices of a parse tree of the start symbol: its root node, and everything below.
+def choicesMade(+grammar: +List<Production>, +start: Nat, tree: Tree) -> +List<Made>:
+  match tree:
+    case Node{+q, +children}:
+      Made{NonterminalAt{start}, 0n, q} <> madeIn(grammar, children, False{}, False{}, q, [], 0n, 0n)
+    case _:
+      []
+
+# x is one of xs.
+def Among(+x: Made, xs: +List<Made>) -> Type:
+  match xs:
+    case Nil{}:
+      Empty
+    case Con{+y, rest}:
+      Either<{x == y : Made}, Among(x, rest)>

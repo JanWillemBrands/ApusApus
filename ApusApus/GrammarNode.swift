@@ -42,13 +42,21 @@ enum Disambiguation: String { case shortest, longest, left, right }
 struct ChildPositionFilter {
     let direction: Disambiguation   // .left = forbid as the RIGHTMOST child, .right = LEFTMOST
     let targets: [String]
+    /// The productions `targets` name, as the parser probes them: the flavor instance a reference at
+    /// the alternate's place would get (`specializeFlavors`), else the original. Set at grammar load
+    /// (`Grammar.prepareParsePredicates`).
+    var targetNodes: [GrammarNode] = []
 }
 
-/// One leading `@cannotParse(N)` / `@canParse(N)` predicate on an alternate, `N` a NONTERMINAL.
+/// One leading `>!>(N)` / `>?>(N)` predicate on an alternate, `N` a NONTERMINAL.
 /// See `GrammarNode.forwardPredicates`.
 struct ForwardPredicate {
     let targetName: String
     let negated: Bool
+    /// The production the parser probes: the flavor instance a reference at the alternate's place
+    /// would get (`specializeFlavors`), else the original. Set at grammar load
+    /// (`Grammar.prepareParsePredicates`); nil only for an undefined target.
+    var target: GrammarNode? = nil
 }
 
 /// Structured predicate for `.B` boundary nodes. Layout boundaries still use `name`
@@ -147,9 +155,19 @@ final class GrammarNode {
     var excludeSetReferences: [String] = []
 
     /// BitSet mirrors of first/follow/etc, populated by `Grammar.populateBitSets()`.
-    /// Used by `testSelect()` and the follow check on the hot path for O(1) membership tests.
+    /// Used by `viable()` and the follow check on the hot path for O(1) membership tests.
     var firstBS:                BitSet = []
     var followBS:               BitSet = []
+    /// A parse predicate's target, or something that can end one: a probe of it may be followed by
+    /// any token, so `viable` lets a nullable alternate through whatever comes next
+    /// (`Grammar.prepareParsePredicates`). FOLLOW itself is left alone; LL(1) diagnostics read it.
+    var followedByAnything = false
+    /// Productions the parser calls as probes when it reaches this slot (`MessageParser.probe`), so
+    /// the forest holds the answer to a question asked here: on an alternate's first slot the targets
+    /// of its `>?>`/`>!>`; on a first body symbol those of `@right( N, … )`; on a last body symbol
+    /// those of `@left( N, … )` and, for a bare `@left`, the alternate's own owner
+    /// (Grammar.prepareParsePredicates).
+    var slotProbes: [GrammarNode] = []
     var ambiguousBS:            BitSet = []
     var excludeBS:              BitSet = []
 
@@ -173,10 +191,10 @@ final class GrammarNode {
     var isAvoided: Bool = false
 
 
-    /// Parse predicate on an alternate — a leading `@cannotParse(N)` / `@canParse(N)` whose
+    /// Parse predicate on an alternate — a leading `>!>(N)` / `>?>(N)` whose
     /// operand `N` is a NONTERMINAL. Captured on the `.ALT` node heading the alternate.
     /// The Oracle prunes the alternate's reading at its start position `i` when `N` does
-    /// derive (`@cannotParse`, negated) or does not derive (`@canParse`, positive) at `i` —
+    /// derive (`>!>`, negated) or does not derive (`>?>`, positive) at `i` —
     /// a Way-1 BSR query.
     /// See `Ambiguity.md`. (Postfix `>->`/`>+>` with a TERMINAL
     /// operand remains the parse-time token gate in `factor()`.)

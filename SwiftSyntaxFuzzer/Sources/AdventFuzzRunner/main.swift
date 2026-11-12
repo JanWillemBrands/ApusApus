@@ -3,6 +3,7 @@ import Foundation
 
 struct RunnerOptions {
     static let defaultArtifactStatuses: Set<String> = [
+        "boundary-recovery-overaccept",
         "advent-underaccept",
         "advent-overaccept",
         "residual-ambiguity",
@@ -25,6 +26,7 @@ struct RunnerOptions {
     var widePercent = 50
     var frontierPercent = 20
     var grammarDirectedPercent = 0
+    var boundaryRecovery = false
     var interestingCorpusPaths: [String] = []
     var interestingPercent = 15
     var includePassingEvents = true
@@ -68,6 +70,8 @@ struct RunnerOptions {
                 options.frontierPercent = try parseValue(iterator.next(), as: Int.self, name: arg)
             case "--grammar-directed-percent":
                 options.grammarDirectedPercent = try parseValue(iterator.next(), as: Int.self, name: arg)
+            case "--boundary-recovery":
+                options.boundaryRecovery = true
             case "--interesting-corpus":
                 options.interestingCorpusPaths = try parsePathList(iterator.next(), name: arg)
             case "--interesting-percent":
@@ -517,24 +521,37 @@ final class PersistentProbe {
         data.append(0x0A)
         stdinHandle.write(data)
 
-        guard let line = stdoutBuffer.nextLine(timeoutSeconds: timeoutSeconds) else {
-            stop(killProcess: true)
-            return ProcessResult(
-                exitCode: -1,
-                timedOut: true,
-                durationSeconds: Date().timeIntervalSince(start),
-                stdout: "",
-                stderr: stderrBuffer.collectedText
-            )
+        var ignoredOutput: [String] = []
+        var responseLine: String?
+        var decoded: ProbeOutput?
+        while decoded == nil {
+            let remaining = timeoutSeconds - Date().timeIntervalSince(start)
+            guard remaining > 0,
+                  let line = stdoutBuffer.nextLine(timeoutSeconds: remaining) else {
+                stop(killProcess: true)
+                return ProcessResult(
+                    exitCode: -1,
+                    timedOut: true,
+                    durationSeconds: Date().timeIntervalSince(start),
+                    stdout: "",
+                    stderr: (ignoredOutput + [stderrBuffer.collectedText]).joined(separator: "\n")
+                )
+            }
+            if let response = try? JSONDecoder().decode(ProbeOutput.self, from: Data(line.utf8)) {
+                responseLine = line
+                decoded = response
+            } else {
+                // Grammar diagnostics must never desynchronise the one-request/one-response protocol.
+                ignoredOutput.append(line)
+            }
         }
 
-        let decoded = try? JSONDecoder().decode(ProbeOutput.self, from: Data(line.utf8))
         return ProcessResult(
             exitCode: decoded?.status == "same" ? 0 : 1,
             timedOut: false,
             durationSeconds: Date().timeIntervalSince(start),
-            stdout: line,
-            stderr: stderrBuffer.collectedText
+            stdout: responseLine ?? "",
+            stderr: (ignoredOutput + [stderrBuffer.collectedText]).joined(separator: "\n")
         )
     }
 
@@ -620,8 +637,11 @@ struct AdventFuzzRunner {
         var rng = SplitMix64(seed: options.seed)
         let wideCorpus = options.wideCorpusPaths.flatMap { SeedCorpus.load(from: URL(fileURLWithPath: $0)).entries }
         let interestingCorpus = InterestingCorpus.load(paths: options.interestingCorpusPaths)
-        let grammarGenerator = options.grammarDirectedPercent > 0
+        let grammarGenerator = options.grammarDirectedPercent > 0 || options.boundaryRecovery
             ? try GrammarDirectedGenerator(grammarURL: grammarURL)
+            : nil
+        let boundaryGenerator = options.boundaryRecovery
+            ? grammarGenerator.map(BoundaryRecoveryGenerator.init)
             : nil
         var generator = SwiftFragmentGenerator(
             seedCorpus: seedCorpus.entries,
@@ -635,7 +655,8 @@ struct AdventFuzzRunner {
         )
         print("wide corpus: \(wideCorpus.count) entries, \(options.widePercent)% of inputs")
         print("frontier lanes: \(options.frontierPercent)% of inputs")
-        print("grammar-directed lane: \(grammarGenerator == nil ? 0 : options.grammarDirectedPercent)% of inputs")
+        print("grammar-directed lane: \(options.boundaryRecovery ? 0 : (grammarGenerator == nil ? 0 : options.grammarDirectedPercent))% of inputs")
+        print("boundary-recovery mode: \(options.boundaryRecovery ? "enabled" : "disabled")")
         print("interesting corpus: \(interestingCorpus.entries.count) entries, \(interestingCorpus.entries.isEmpty ? 0 : options.interestingPercent)% of inputs")
         var counts: [String: Int] = [:]
         var seenKnownIssues = Set<String>()
@@ -691,7 +712,7 @@ struct AdventFuzzRunner {
                 break
             }
 
-            let generated = generator.next(using: &rng)
+            let generated = boundaryGenerator?.next(using: &rng) ?? generator.next(using: &rng)
             let skippedStatus: String? = sourceRequiresDisabledExperimentalFeature(generated.source)
                 ? "skipped-experimental"
                 : (sourceContainsConflictMarker(generated.source) ? "skipped-conflict-marker" : nil)
@@ -756,13 +777,19 @@ struct AdventFuzzRunner {
                 persistentProbe = nil
             }
             let decoded = try? JSONDecoder().decode(ProbeOutput.self, from: Data(result.stdout.utf8))
-            let status: String
+            var status: String
             if result.timedOut {
                 status = "timeout"
             } else if result.exitCode < 0 {
                 status = "crash"
             } else {
                 status = decoded?.status ?? "invalid-probe-output"
+            }
+            boundaryGenerator?.observe(generated, probe: decoded)
+            if generated.label.hasPrefix("boundary:mutation:"),
+               decoded?.compilerAccepted == false,
+               decoded?.adventBuiltTree == true {
+                status = "boundary-recovery-overaccept"
             }
             var knownIssue = knownOveracceptIssue(source: generated.source, status: status, probe: decoded)
             if knownIssue == nil, status == "advent-overaccept" {
@@ -1032,6 +1059,9 @@ struct AdventFuzzRunner {
         if let grammarGenerator {
             summaryLines.append(contentsOf: grammarGenerator.statisticsLines())
         }
+        if let boundaryGenerator {
+            summaryLines.append(contentsOf: boundaryGenerator.statisticsLines())
+        }
         let summary = summaryLines.joined(separator: "\n")
         try? summary.write(to: summaryURL, atomically: true, encoding: .utf8)
         try? writeHeartbeat(
@@ -1248,6 +1278,13 @@ struct NoveltyTracker {
 struct GeneratedSource {
     let label: String
     let source: String
+    let grammarAlternatives: [Int]
+
+    init(label: String, source: String, grammarAlternatives: [Int] = []) {
+        self.label = label
+        self.source = source
+        self.grammarAlternatives = grammarAlternatives
+    }
 }
 
 struct SwiftFragmentGenerator {
@@ -2846,6 +2883,7 @@ func printHelp() {
       --frontier-percent N Share of inputs from recent high-signal frontier lanes (default: 20)
       --grammar-directed-percent N
                            Share generated directly from the parsed Swift.apus graph (default: 0)
+      --boundary-recovery  Generate compiler-valid grammar anchors, then apply one local mutation
       --interesting-corpus PATHS
                            Comma-separated interesting.jsonl files to feed back as a coverage corpus
       --interesting-percent N

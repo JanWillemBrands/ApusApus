@@ -26,8 +26,8 @@ APUS resolves ambiguity in four layers. Each layer has a different job.
 | Layer | When | What it decides | Tools |
 |---|---|---|---|
 | Lexer | during the parse, per terminal | the extent of a token | `@literalMunch`, munch-exempt terminals, `@preempt` |
-| Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, `---()`, flavors |
-| Oracle | after the parse | which completed derivations to keep | `@canParse`, `@prefer`, `@longest`, `@left`, … |
+| Parser gates | during the parse, per position | if a derivation can continue here | `<s>` `>s<` `<n>` `>n<`, token lookaround, parse predicates `>?>` `>!>`, `---()`, flavors |
+| Oracle | after the parse | which completed derivations to keep | `@left`, `@right`, `@prefer`, `@avoid`, `@longest`, `@shortest` |
 | AST generator | after the Oracle | the operator precedence tree | precedence metadata on the operator alternates |
 
 Obey these rules:
@@ -156,9 +156,9 @@ At the end of the input, `<n>` is always true.
 parser tests it at that position, also after a nonterminal.
 
 ```apus
-plainRegularExpressionLiteral = … <-< ( … identifier … ")" "]" "}" closeAngle forceMark optionalMark … ) regexSlash … .
+plainRegularExpressionLiteral = … <-< ( …, identifier, …, ")", "]", "}", closeAngle, forceMark, optionalMark, … ) regexSlash … .
 genericArgumentClause         = openAngle genericArgumentList ","? closeAngle
-                                >+> ( "(" ")" "[" "]" "{" "}" "," ";" ":" "." keyPathDot "?" "!" "&" EOF ) .
+                                >+> ( "(", ")", "[", "]", "{", "}", ",", ";", ":", ".", keyPathDot, "?", "!", "&", EOF ) .
 ```
 
 The first rule is the regex-or-division decision. A regex can start only where the previous
@@ -166,11 +166,28 @@ token cannot end an operand.
 
 ### 4.3 Exclusion sets
 
-`identifier ---("if" "while")` removes a match when a listed terminal matches the same text at
+`identifier ---("if", "while")` removes a match when a listed terminal matches the same text at
 the same position. Use it to exclude a keyword from an identifier position. The test is on the
 text, so `@literalMunch` does not apply to the listed terminals: a `@preempt` split piece is shorter
 than the maximal match that would otherwise suppress the literal (`---( reservedOperatorPiece )` on
 `operator`, and the `=` from `=/0/`).
+
+### 4.4 Parse predicates
+
+`>?>( N )` is true where `N` derives some text that starts here; `>!>( N, … )` where none of the
+listed nonterminals does. They stand at the start of an alternate and read no input. The parser
+answers them itself: it starts `N` at that position as a probe, shares the work with any call of
+`N` the parse makes there, and drops a `>!>` alternate as soon as its target has derived. The Oracle
+repeats the check on the finished forest, for late answers and for `>?>`.
+
+- The meaning is the language: `N`'s own predicates do not count, and it does not matter whether
+  the rest of the input parses, or whether the grammar needed `N` there. This is the speculative
+  `canParseX` test of swift-syntax.
+- A probe is a parse. Keep a target short: it only has to reach the point where the decision is
+  clear (`missingBindingIntroducer = ( identifierToken | "_" ) assignmentOperator .`). When one
+  token decides, use a token lookaround.
+
+See `apus.md` § Parse Predicates for the syntax and `Oracle.md` § 4 for the mechanism.
 
 ## 5. The Oracle
 
@@ -181,41 +198,23 @@ does not build trees.
 
 ### 5.2 Sequence
 
-The Oracle (`Oracle.disambiguate`) does these steps:
+The Oracle (`Oracle.disambiguate`) runs the phases of `Bend/SPEC.bend`, in its order:
 
-1. Remove dead yields. A dead yield is not part of a complete derivation. Repeat until no yield
-   changes.
-2. Run the rules in four passes, in this order. Each pass repeats until no yield changes. After
-   each pass that removed something, remove dead yields again.
-
-| Pass | Rules | What the rule needs to know |
+| Phase | Annotations | What a rule needs to know |
 |---|---|---|
-| filter | `@canParse` `@cannotParse` | only that some witness exists |
-| sameSpan | `@prefer`, `@avoid` between siblings | the legal rivals at the SAME span |
-| structure | `@left` `@right` | which production occupies a span |
-| extent | `@longest` `@shortest` | the legal rivals at DIFFERENT extents |
+| 1. admissible | parse predicates (decided by the parser), `@left( N, … )`, `@right( N, … )`, bare `@left`, `@right` | the grammar and the raw forest; no rival |
+| 2. unbeaten | `@prefer`, `@avoid` | a genuine sibling of higher rank over the SAME span |
+| 3. selected | `@longest`, `@shortest` | the genuine readings, of DIFFERENT lengths |
 
-Step 1 makes sure that each remaining yield is part of a complete derivation. Thus a later
-rule cannot remove the only complete derivation by accident.
+The hard rules of phase 1 never look at a rival, so they go first. `@prefer`, `@avoid` and the
+extent rules remove a yield BECAUSE a rival exists; if that rival is removed later, the removal was
+wrong and cannot be undone. So they run after everything that can remove the rival, and they see
+only genuine rivals: after each phase that removed something, the Oracle removes what no longer has
+a complete subtree (support from below), and before phase 3 what no complete reading reaches
+(reachability from the root). The result is exactly the yields of the selected readings.
 
-**Why this order.** A removal is permanent, so the order follows from one question per rule: if
-OTHER yields disappear later, can this rule's decision become wrong?
-
-- A **filter** keeps a yield only if a witness exists: a same-line derivation or a parse of `N`
-  here. If other yields disappear, a filter can only become stricter.
-  It is never wrong too early, so filters go first and their order does not matter.
-- Every other rule removes a yield **because a rival exists**: a preferred sibling, a longer
-  extent, "production p already occupies this span". If that rival is removed later, the removal
-  was wrong and cannot be undone. Such a rule must wait until every pass that can still remove
-  its rival has run.
-
-Each edge in the order was a real bug:
-
-| Edge | Input | What went wrong when the two ran together |
-|---|---|---|
-| filter → sameSpan | `var x: Int = foo()⏎{ didSet {} }` | `@longest` deleted the short `foo()`; the lookahead then deleted the closure; nothing was left |
-| sameSpan → structure | `f(1) {}⏎{}` | `f(1) {}` has two readings, and `@prefer` deletes the parenless one. Before it did, `@right` took `f(1) {}` for an instance of itself and broke the chain |
-| structure → extent | `x.map { [$0] }⏎{…}(&y[0])` | `@longest` kept the chained initializer; `@right` then deleted the chain; nothing was left |
+`Oracle.md` describes the mechanism: one graph of the yields, built once, and the choices that were
+made where the spec leaves room.
 
 Flavors replaced the old span-containment filters. They are compiled into the grammar at load
 (each flavor-relevant nonterminal gets a copy per scoped flavor, `@flavors`), so they act before
@@ -223,12 +222,8 @@ anything enters the forest and do not depend on later Oracle pruning. See `apus.
 
 ### 5.3 Hard constraints
 
-A hard constraint removes a reading that the language does not permit.
-
-| Annotation | Position | Rule |
-|---|---|---|
-| `@cannotParse(N)` | start of an alternate | Remove the alternate where a yield of `N` starts at the same position. |
-| `@canParse(N)` | start of an alternate | Remove the alternate where no yield of `N` starts at the same position. |
+A hard constraint removes a reading that the language does not permit. The parse predicates
+`>?>`/`>!>` (section 4.4) are hard constraints; so are `@left`/`@right` (section 5.4).
 
 The flavor annotations are NOT Oracle rules. They are parse-time gates, compiled into the grammar
 at load, and are listed here only because they also remove readings the language does not permit:
@@ -243,23 +238,13 @@ at load, and are listed here only because they also remove readings the language
 
 Details:
 
-- `N` is a nonterminal.
-- `@canParse` and `@cannotParse` read the yields of `N` before step 1. Thus a yield of `N`
-  counts also when its own derivation fails later. This is the same as a speculative
-  `canParseX` test in swift-syntax.
-- `@cannotParse(A B)` means: neither `A` nor `B` starts here. `@canParse(A B)` means: both start
-  here.
-- In `@requiresFlavor(A B)`, all listed flavors must be set. In `@rejectsFlavor(A B)`, the
+- In `@requiresFlavor(A, B)`, all listed flavors must be set. In `@rejectsFlavor(A, B)`, the
   occurrence is removed only when all listed flavors are set.
-- The parser must try `N` at the anchor position of `@canParse(N)` or `@cannotParse(N)`. If the
-  grammar never tries `N` there, `N` has no yield there, and `@cannotParse(N)` is always true.
-  This is a specification error, not a false result. `GrammarDiagnostics` reports a target that
-  no reachable production uses. It cannot find all such errors.
 
 Examples:
 
 ```apus
-statement      = @cannotParse(declaration attributes) expression .
+statement      = >!>(declaration, attributes) expression .
 moduleSelector = @rejectsFlavor(bindingIntroducer) identifierToken "::" >n< .
 ```
 
@@ -280,7 +265,7 @@ three properties. Each preference controls one property.
 
 | Property | What is different | Annotation | Rule |
 |---|---|---|---|
-| Extent | the length, from the same start | `@longest` / `@shortest` | Keep the longest / shortest span. |
+| Extent | the length of an item, in one sequence over the same tokens | `@longest` / `@shortest` | Keep the longest / shortest reading of the item. |
 | Nesting | a production, or a named nonterminal, sits directly inside this one | `@left` / `@right` | Delete the forbidden parent/child shape. |
 | Alternate | the alternate, for the same span `(i, j)` | `@prefer` / `@avoid` | Keep the preferred alternate. |
 
@@ -295,14 +280,29 @@ prefixExpression = @shortest [ prefixOperator >s< ] postfixExpression .
 
 Here `@longest` applies to `prefixExpression`, and `@shortest` applies to the bracket.
 
-- On a nonterminal, the rule compares all yields from the same start.
-- On a bracket, the rule compares the length of the bracket in complete derivations of the
-  enclosing alternate. Other symbols in the alternate can take the remaining text. The start
-  of the bracket can move.
+- The rule is local. It compares the readings of one enclosing sequence over the same tokens:
+  the marked item takes its best length among the complete readings of that sequence. Other
+  items in the sequence take the remaining text, and the start of the marked item can move.
+- A mark on a nonterminal marks every reference to it. A reading in another enclosing sequence is
+  no rival: the argless macro `#e` followed by a call `()` and the macro `#e()` with its argument
+  clause sit in different sequences, so `@longest` keeps both. Use `@prefer` to choose between
+  such same-span readings.
 - `@shortest [ X ]` prefers to skip `X`. If the skip does not parse, it prefers the shortest
   match of `X`.
 
 The rule compares the length `j − k`, not the end `j`.
+
+**Several marks in one sequence: first come, first served.** Two marked items in one sequence
+compete for the same tokens. In `A B` with both marked `@longest`, every token that A gains is
+one that B loses, so "A longest" and "B longest" cannot both hold, and someone has to decide who
+wins. The rule is the one a greedy left-to-right parser follows: the first marked item takes the
+best length that still lets the rest of the sequence be read, the next marked item takes the
+best of what is left, and so on. A recursive-descent parser does the same: whatever comes first
+eats first. So with `S = A A . @longest A = { a } .`, the input `a a` reads as `(a a)( )`.
+
+This order always leaves a reading: each step chooses among the readings that the steps before
+it kept, so `@longest` and `@shortest` never remove every reading of a sequence
+(`Bend/SPEC.bend`, phase 3).
 
 #### Nesting: `@left` and `@right`
 
@@ -314,7 +314,8 @@ E = ( @right E "+" E | number ) .   // `1+2+3` is `1+(2+3)`
 ```
 
 `@left` means this production may not be its own RIGHTMOST child. `@right` means it may
-not be its own LEFTMOST child. Read `@left` as "the left side wins, so the right side may
+not be its own LEFTMOST child: where the alternate's own items can derive that child's text
+(plain derives: its own filters do not count; `Oracle.md` § 5). Read `@left` as "the left side wins, so the right side may
 not grow": `1+(2+3)` puts a `+` inside the right slot of a `+`, so `@left` deletes it.
 
 This is associativity the way SDF states it — a per-production attribute that removes a
@@ -425,11 +426,11 @@ In a left-recursive grammar (`E = E "+" E | …`), precedence is an ambiguity. U
 | regex or division; generic-argument follow set | token lookaround |
 | keyword in an identifier position | `---(…)` |
 | a construct that is valid only in a context (swift-syntax `ExprFlavor`) | flavors |
-| a swift-syntax `atStartOfX` or `canParseX` decision | `@canParse` / `@cannotParse`, or token lookaround |
+| a swift-syntax `atStartOfX` or `canParseX` decision | `>?>` / `>!>`, or token lookaround |
 | the same span, two alternates | `@prefer` / `@avoid` |
 | the same start, two lengths | `@longest` / `@shortest` |
 | a production nested directly in itself | `@left` / `@right` |
-| a named nonterminal forbidden as the first/last child | `@left( N … )` / `@right( N … )` |
+| a named nonterminal forbidden as the first/last child | `@left( N, … )` / `@right( N, … )` |
 | a context-sensitive line boundary | a scoped flavor plus layout predicates |
 
 ## 8. Categories of ambiguity
@@ -445,7 +446,7 @@ problem.
 | alternate is too wide | for example, `expression` against `type` | Make the alternate smaller or add a context rule. |
 | pivot | two pivots for the same span | Examine the boundary. The cause is often a terminal, a `>s<` or a lookaround. |
 | self-nesting | one instance of a production sits directly inside another, different spans | `@left` / `@right` on that alternate. |
-| forbidden child | a named nonterminal may not be the first/last child of this alternate | `@left( N … )` / `@right( N … )` on that alternate, matched on extent. |
+| forbidden child | a named nonterminal may not be the first/last child of this alternate | `@left( N, … )` / `@right( N, … )` on that alternate, matched on extent. |
 
 ## 9. Procedure: fix an ambiguity
 
@@ -502,7 +503,7 @@ symbol. `x as!~C` needs `forceMark optionalMark` in the gate before `~`:
 
 ```apus
 suppressedType = <s> "~" >s< type
-               | <+< ( "(" "[" "{" "," ";" ":" "as" "is" forceMark optionalMark ) >s< "~" >s< type .
+               | <+< ( "(", "[", "{", ",", ";", ":", "as", "is", forceMark, optionalMark ) >s< "~" >s< type .
 ```
 
 **Gate the incorrect shape. Do not require trivia everywhere.** `"try" <s>` stops `try!-f()`, but
@@ -510,7 +511,7 @@ it also rejects `try(f())`, `try[0]` and `try.f()`. Name the incorrect shape:
 
 ```apus
 tryOperator = "try" <s>
-            | "try" >s< >-> ( forceMark optionalMark )
+            | "try" >s< >-> ( forceMark, optionalMark )
             | "try" >s< "?"
             | "try" >s< "!" .
 ```
@@ -584,12 +585,12 @@ copy (`SwiftParser/Lookahead.swift`). Some predicates call other predicates.
 | `Statements.swift` | `isStartOfReturnExpr`, `atStartOfStatement`, `atStartOfSwitchCase`, `atStartOfConditionalSwitchCases`, `atStartOfConditionalStatementBody` |
 | `Types.swift` | `canParseType`, `canParseTypeAttributeList`, `canParseTypeScalar`, `canParseSimpleOrCompositionType`, `canParseSimpleType`, `canParseStartOfInlineArrayTypeBody`, `canParseInlineArrayTypeBody`, `canParseCollectionTypeBody`, `canParseTupleBodyType`, `canParseFunctionTypeArrow`, `canParseTypeIdentifier`, `canParseAsGenericArgumentList`, `canParseIntegerLiteral`, `canParseGenericArgument` |
 
-In APUS, the equivalent of such a predicate is a structural grammar rule, a parser gate, or an
-Oracle constraint (section 7).
+In APUS, the equivalent of such a predicate is a structural grammar rule, a parser gate (often a
+parse predicate), or an Oracle constraint (section 7).
 
 Most `atStartOfX` predicates route to the richer reading when it is possible. In APUS, put the
-annotation on the fallback reading, for example `statement = @cannotParse(declaration
-attributes) expression .`
+predicate on the fallback reading, for example `statement = >!>(declaration, attributes)
+expression .`
 
 ### 12.2 Example: `Array<Array<Int>>`
 
@@ -634,7 +635,8 @@ set is the `>+>` gate on `genericArgumentClause` (section 4.2).
   (Kegler) is an Earley parser with events.
 
 In a parser that keeps all derivations, the answer to "can `N` parse here?" is often already in
-the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (section 5.3).
+the forest. The parse predicates `>?>` and `>!>` use that: the parser starts `N` as a probe, which
+shares its work with the calls the parse makes anyway (section 4.4).
 
 ## 13. Code
 
@@ -642,7 +644,8 @@ the BSR. The Oracle constraints `@canParse` and `@cannotParse` read it there (se
 |---|---|
 | `FlavorSpecialization.swift` | `specializeFlavors`: the flavor annotations, compiled into grammar copies at load |
 | `Lexer.swift` | `OnDemandLiteralLexer.lex`: `@literalMunch`, the `@preempt` split points |
-| `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround |
-| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `PreferRule`, `AssociativityFilterRule`, `LongestMatchRule`, `ShortestMatchRule`, `AvoidOptionalRule` |
+| `MessageParser.swift` | `tokenMatch`: the `@preempt` commit, `---()`; `boundaryMatches`: boundary predicates and token lookaround; `acceptingEnds` |
+| `CallReturnForest.swift` | `probe`: the parse predicates and `@left`/`@right` targets |
+| `Oracle.swift` | `disambiguate`; `OraclePass`; the rules `LookaheadPredicateRule`, `AssociativityFilterRule`, `BareAssociativityRule`, `PreferRule`; `YieldGraph` (support, reachability, extent) |
 | `DerivationBuilder.swift` | builds the tree and reports residual ambiguity with a fingerprint |
 | `ApusApusTests/OracleDisambiguationTests.swift` | tests for each Oracle rule |

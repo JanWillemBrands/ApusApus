@@ -42,10 +42,10 @@ Flavors make this context explicit on grammar edges.
 Start with four scoped annotations:
 
 ```apus
-@setFlavor(foo bar) X       // parse X with foo and bar added
-@clearFlavor(foo bar) X     // parse X with foo and bar removed
-@requiresFlavor(foo bar) X  // valid only if all listed flags are active
-@rejectsFlavor(foo bar) X   // invalid if all listed flags are active
+@setFlavor(foo, bar) X       // parse X with foo and bar added
+@clearFlavor(foo, bar) X     // parse X with foo and bar removed
+@requiresFlavor(foo, bar) X  // valid only if all listed flags are active
+@rejectsFlavor(foo, bar) X   // invalid if all listed flags are active
 ```
 
 `@setFlavor` and `@clearFlavor` are set operations. Unnamed flags remain unchanged:
@@ -201,7 +201,7 @@ with:
 ```apus
 closureExpression =
     | samelineOpenedClosure
-    | @rejectsFlavor(stmtCondition trailingClosure) newlineOpenedClosure
+    | @rejectsFlavor(stmtCondition, trailingClosure) newlineOpenedClosure
     .
 ```
 
@@ -226,9 +226,9 @@ Set trailing-closure flavor:
 
 ```apus
 trailingClosures =
-    | @setFlavor(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
+    | @setFlavor(trailingClosure) >!>(willSetDidSetBlock, accessorBlockBrace)
       closureExpression labeledTrailingClosures
-    | @setFlavor(trailingClosure) @cannotParse(willSetDidSetBlock accessorBlockBrace)
+    | @setFlavor(trailingClosure) >!>(willSetDidSetBlock, accessorBlockBrace)
       closureExpression >-> ( "else" )
     .
 ```

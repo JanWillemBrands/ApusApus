@@ -5,7 +5,9 @@ import Foundation
 /// alternate, and every generated sample is rendered directly to source text.
 final class GrammarDirectedGenerator {
     private let grammar: Grammar
-    private var alternateHits: [Int: Int] = [:]
+    private var emittedAlternateHits: [Int: Int] = [:]
+    private var acceptedAlternateHits: [Int: Int] = [:]
+    private var acceptedAlternativePairs = Set<AlternativePair>()
     private let maximumNodes: Int
     private let maximumSearchSteps: Int
     private let reachableAlternativeCount: Int
@@ -40,18 +42,32 @@ final class GrammarDirectedGenerator {
                 emittedNodeTotal += emittedNodes
                 minimumEmittedNodes = min(minimumEmittedNodes, emittedNodes)
                 maximumEmittedNodes = max(maximumEmittedNodes, emittedNodes)
-                for alternate in state.chosenAlternatives {
-                    alternateHits[alternate, default: 0] += 1
-                    emittedAlternatives.insert(alternate)
+                emittedAlternatives.formUnion(state.chosenAlternatives)
+                for alternate in Set(state.chosenAlternatives) {
+                    emittedAlternateHits[alternate, default: 0] += 1
                 }
                 return GeneratedSource(
                     label: "grammar-directed:nodes=\(emittedNodes)",
-                    source: state.source
+                    source: state.source,
+                    grammarAlternatives: state.chosenAlternatives
                 )
             }
         }
         fallbackSamples += 1
         return GeneratedSource(label: "grammar-directed:fallback", source: "let fuzzValue = 0")
+    }
+
+    func observeAccepted(_ generated: GeneratedSource) {
+        let alternatives = Set(generated.grammarAlternatives)
+        for alternate in alternatives {
+            acceptedAlternateHits[alternate, default: 0] += 1
+        }
+        let sorted = alternatives.sorted()
+        for firstIndex in sorted.indices {
+            for second in sorted[sorted.index(after: firstIndex)...] {
+                acceptedAlternativePairs.insert(AlternativePair(sorted[firstIndex], second))
+            }
+        }
     }
 
     func statisticsLines() -> [String] {
@@ -67,6 +83,8 @@ final class GrammarDirectedGenerator {
             "grammar-reachable-alternatives: \(reachableAlternativeCount)",
             "grammar-attempted-alternatives: \(attemptedAlternatives.count) (\(String(format: "%.2f", attemptedCoverage))%)",
             "grammar-emitted-alternatives: \(emittedAlternatives.count) (\(String(format: "%.2f", coverage))%)",
+            "grammar-compiler-accepted-alternatives: \(acceptedAlternateHits.count)",
+            "grammar-compiler-accepted-alternative-pairs: \(acceptedAlternativePairs.count)",
             "grammar-generated-samples: \(generatedSamples)",
             "grammar-generation-attempts: \(generationAttempts)",
             "grammar-fallback-samples: \(fallbackSamples)",
@@ -75,6 +93,16 @@ final class GrammarDirectedGenerator {
             "grammar-recursion-cutoffs: \(recursionCutoffs)",
             "grammar-search-budget-exhaustions: \(searchBudgetExhaustions)",
         ]
+    }
+
+    private struct AlternativePair: Hashable {
+        let first: Int
+        let second: Int
+
+        init(_ first: Int, _ second: Int) {
+            self.first = first
+            self.second = second
+        }
     }
 
     private struct GenerationState {
@@ -205,7 +233,7 @@ final class GrammarDirectedGenerator {
     }
 
     private func chooseInverseHit(from alternatives: [GrammarNode], using rng: inout SplitMix64) -> GrammarNode {
-        let weights = alternatives.map { max(1, 32 / (alternateHits[$0.number, default: 0] + 1)) }
+        let weights = alternatives.map { max(1, 32 / (emittedAlternateHits[$0.number, default: 0] + 1)) }
         var ticket = rng.nextInt(upperBound: weights.reduce(0, +))
         for (index, weight) in weights.enumerated() {
             if ticket < weight { return alternatives[index] }
@@ -262,5 +290,118 @@ final class GrammarDirectedGenerator {
         if lower.contains("whitespace") { return " " }
         if lower.contains("character") { return "x" }
         return "x"
+    }
+}
+
+
+/// Generates compiler-accepted anchors from Swift.apus, then probes the immediate rejection
+/// boundary with exactly one local edit. Anchors are not retained after their mutations are queued.
+final class BoundaryRecoveryGenerator {
+    private let grammarGenerator: GrammarDirectedGenerator
+    private var pending: [GeneratedSource] = []
+    private var anchorsProbed = 0
+    private var anchorsAccepted = 0
+    private var mutationsProbed = 0
+    private var compilerRejectedMutations = 0
+    private var apusOveraccepts = 0
+    private var swiftSyntaxRecoveryOveraccepts = 0
+
+    init(_ grammarGenerator: GrammarDirectedGenerator) {
+        self.grammarGenerator = grammarGenerator
+    }
+
+    func next(using rng: inout SplitMix64) -> GeneratedSource {
+        if !pending.isEmpty {
+            mutationsProbed += 1
+            return pending.removeLast()
+        }
+        while true {
+            let anchor = grammarGenerator.next(using: &rng)
+            guard FuzzTokens(anchor.source).tokens.count >= 3 else { continue }
+            anchorsProbed += 1
+            return GeneratedSource(
+                label: "boundary:anchor:\(anchor.label)",
+                source: anchor.source,
+                grammarAlternatives: anchor.grammarAlternatives
+            )
+        }
+    }
+
+    func observe(_ generated: GeneratedSource, probe: ProbeOutput?) {
+        guard let probe else { return }
+        if generated.label.hasPrefix("boundary:anchor:") {
+            guard probe.compilerAccepted == true, probe.adventBuiltTree else { return }
+            anchorsAccepted += 1
+            grammarGenerator.observeAccepted(generated)
+            pending = mutations(of: generated.source)
+            return
+        }
+        guard generated.label.hasPrefix("boundary:mutation:"),
+              probe.compilerAccepted == false else { return }
+        compilerRejectedMutations += 1
+        guard probe.adventBuiltTree else { return }
+        apusOveraccepts += 1
+        if !probe.swiftSyntaxHasError {
+            swiftSyntaxRecoveryOveraccepts += 1
+        }
+    }
+
+    func statisticsLines() -> [String] {
+        [
+            "boundary-anchors-probed: \(anchorsProbed)",
+            "boundary-anchors-accepted: \(anchorsAccepted)",
+            "boundary-mutations-probed: \(mutationsProbed)",
+            "boundary-compiler-rejections: \(compilerRejectedMutations)",
+            "boundary-apus-overaccepts: \(apusOveraccepts)",
+            "boundary-swiftsyntax-recovery-overaccepts: \(swiftSyntaxRecoveryOveraccepts)",
+        ]
+    }
+
+    private func mutations(of source: String) -> [GeneratedSource] {
+        let original = FuzzTokens(source)
+        let count = original.tokens.count
+        guard count >= 3 else { return [] }
+
+        // Deletion is the strongest recovery probe, so exercise it at every selected site. Pair it
+        // with one different boundary edit; each emitted source still contains exactly one edit.
+        let siteCount = min(8, count)
+        let sites = (0..<siteCount).map { min(count - 1, $0 * count / siteCount) }
+        var results: [GeneratedSource] = []
+        var seen = Set<String>()
+
+        func append(_ stream: FuzzTokens, name: String, index: Int) {
+            let mutated = stream.rendered
+            guard mutated != source, seen.insert(mutated).inserted else { return }
+            results.append(GeneratedSource(
+                label: "boundary:mutation:\(name):token=\(index)/\(count)",
+                source: mutated
+            ))
+        }
+
+        for index in sites {
+            var deleted = original
+            let leading = deleted.tokens[index].leading
+            deleted.tokens.remove(at: index)
+            if index < deleted.tokens.count, deleted.tokens[index].leading.isEmpty {
+                deleted.tokens[index].leading = leading
+            }
+            append(deleted, name: "delete", index: index)
+
+            var secondary = original
+            if secondary.tokens[index].kind == .word {
+                secondary.tokens[index].text = "x"
+                append(secondary, name: "replace-name", index: index)
+            } else if index == count - 1 || secondary.tokens[index].text == ")" ||
+                        secondary.tokens[index].text == "]" || secondary.tokens[index].text == "}" {
+                secondary.tokens = Array(secondary.tokens.prefix(index))
+                secondary.trailing = ""
+                append(secondary, name: "truncate", index: index)
+            } else {
+                secondary.tokens[index].leading =
+                    secondary.tokens[index].leading.contains("\n") ? " " : "\n"
+                append(secondary, name: "toggle-newline", index: index)
+            }
+        }
+        return results.reversed()
     }
 }

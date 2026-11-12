@@ -5,7 +5,7 @@ _top-level-declaration → statements?_
 
 ```apus
 shebang - /#!.*/ .
-topLevelDeclaration = [ >s< shebang ] [ @setFlavor(fileScope) statements ] .
+topLevelDeclaration = [ >s< shebang ] [ @setFlavor(fileScope) codeBlockItems ] .
 ```
 
 
@@ -98,12 +98,12 @@ regexForcingLexerKeyword = "as" | "associatedtype" | "break" | "case" | "catch" 
                           | "typealias" | "var" | "where" | "while" .
 regexSafeLexerKeyword = "Any" | "false" | "func" | "nil" | "operator" | "self" | "Self" | "super" | "true" .
 identifierToken =
-    | identifier ---( "_" lexerClassifiedKeyword )
+    | identifier ---( "_", lexerClassifiedKeyword )
     | escapedIdentifier
     | propertyWrapperProjection
     .
 argumentLabel =
-    | identifier ---( "_" "inout" )
+    | identifier ---( "_", "inout" )
     | escapedIdentifier
     | propertyWrapperProjection
     | "_"
@@ -111,7 +111,7 @@ argumentLabel =
 memberName =
     | regexForcingLexerKeyword
     | regexSafeLexerKeyword
-    | identifier ---( "_" lexerClassifiedKeyword )
+    | identifier ---( "_", lexerClassifiedKeyword )
     | escapedIdentifier
     | propertyWrapperProjection
     .
@@ -245,6 +245,7 @@ stringLiteral =
     | interpolatedStringLiteral
     .
 staticStringLiteral = stringLiteralToken .
+plainStaticStringLiteral = plainStringLiteralToken .
 interpolatedStringLiteral = stringHead labeledExpressionList? { stringPart labeledExpressionList? } stringTail .
 ```
 
@@ -332,7 +333,7 @@ dotOperator - @builder .
 
 reservedOperatorPiece = "=" | "?" | "." | "->" .
 
-operator = @cannotParse( regularExpressionLiteral ) nonArrowOperatorToken ---( reservedOperatorPiece ) .
+operator = >!>( regularExpressionLiteral ) nonArrowOperatorToken ---( reservedOperatorPiece ) .
 
 postfixOperatorToken - @builder .
 
@@ -385,14 +386,12 @@ type =
     | suppressedType
     | parameterModifier >-> ( "~" ) type
     | parameterModifier <s> "~" >n< simpleType
-    | typeAttribute type
+    | typeAttribute ( >!>( parameterModifier ) type )
     .
 
 suppressedType =
-    | <s> "~" simpleType
-    | <+< ( "(" "[" "{" "," ";" ":" "as" "is" "any" "some" forceMark optionalMark ) >s< "~" simpleType
-    | <s> "~" "some"
-    | <+< ( "(" "[" "{" "," ";" ":" "as" "is" "any" "some" forceMark optionalMark ) >s< "~" "some"
+    | <s> "~" ( simpleType | "some" )
+    | <+< ( "(", "[", "{", ",", ";", ":", ")", "as", "is", "any", "some", forceMark, optionalMark ) >s< "~" ( simpleType | "some" )
     .
 ```
 
@@ -415,7 +414,7 @@ _type-name → identifier_
 placeholderType = "_" .
 
 typeIdentifier  =
-    >-> ( "any" "some" "each" ) typeName ( typeGenericArgumentClause | >-> ( openAngle ) )
+    >-> ( "any", "some", "each" ) typeName ( typeGenericArgumentClause | >-> ( openAngle ) )
     .
 typeName =
     | identifierToken
@@ -456,12 +455,17 @@ _argument-label → identifier_
 _throws-clause → **throws** | **throws** **(** type **)**_
 
 ```apus
+@flavors(expressionType)
 functionType = functionTypeArgumentClause typeEffectSpecifiers? "->"
-               >-> ( "async" "throws" "rethrows" "await" "try" "throw" ) type .
+               >-> ( "async", "throws", "rethrows", "await", "try", "throw" ) type .
+@flavors(expressionType)
 functionTypeArgumentClause = "(" ")" | "(" functionTypeArgumentList "..."? ","? ")" .
+@flavors(expressionType)
 functionTypeArgumentList = functionTypeArgument { "," functionTypeArgument } .
-functionTypeArgument        = type
-                            | ( >-> ( "__owned" "__shared" "_const" "borrowing" "consuming" "isolated" "sending" ) externalArgumentLabel )?
+@flavors(expressionType)
+functionTypeArgument        = @requiresFlavor(expressionType) >->( "await" ) type
+                            | @rejectsFlavor(expressionType) type
+                            | ( >-> ( "__owned", "__shared", "_const", "borrowing", "consuming", "isolated", "sending" ) externalArgumentLabel )?
                               localArgumentLabel typeAnnotation .
 externalArgumentLabel       = argumentLabel .
 localArgumentLabel          = argumentLabel .
@@ -475,7 +479,8 @@ _array-type → **[** type **]**_
 
 ```apus
 arrayType = "[" type "]" .
-inlineArrayType = "[" genericArgument >n< "of" genericArgument "]" .
+inlineArrayType = "[" inlineArrayArgument >n< "of" inlineArrayArgument "]" .
+inlineArrayArgument = type | signedIntegerLiteral .
 ```
 
 
@@ -523,7 +528,7 @@ protocolCompositionElement = simpleType | suppressedType .
 _opaque-type → **some** type_
 
 ```apus
-opaqueType = "some" >->( "some" "any" ) type .
+opaqueType = "some" >->( "some", "any", "repeat", "each", "@" ) ( >!>( parameterModifier ) type ) .
 ```
 
 
@@ -533,12 +538,11 @@ _boxed-protocol-type → **any** type_
 ```apus
 boxedProtocolType = "any" boxedProtocolConstraint .
 boxedProtocolConstraint =
-    >-> ( "some" "any" "inout" "borrowing" "consuming" "isolated" "sending" "nonisolated" "_const" "__shared" "__owned" )
-    type
+    >-> ( "some", "any", "repeat", "each", "@" ) ( >!>( parameterModifier ) type )
     .
 boxedProtocolConstraint = boxedProtocolKeywordName .
 boxedProtocolKeywordName = "some" | "any" | "borrowing" | "consuming" | "isolated" | "sending"
-                         | "nonisolated" | "_const" | "__shared" | "__owned" .
+                         | "_const" | "__shared" | "__owned" .
 ```
 
 
@@ -550,11 +554,11 @@ metatypeType = simpleType ( >s< "." >s< | <s> "." ) ( "Type" | "Protocol" ) .
 
 packType = packExpansionType | packElementType .
 packExpansionType = "repeat" >->( "repeat" ) type .
-packElementType = "each" >->( "each" ) type .
+packElementType = "each" >->( "each", "any", "some", "repeat", "@" ) ( >!>( parameterModifier ) type ) .
 
 memberType = simpleType ( >s< "." >s< | <s> "." ) typeMemberName typeGenericArgumentClause .
 memberType = simpleType ( >s< "." >s< | <s> "." ) typeMemberName >->( openAngle ) .
-typeMemberName = >-> ( "Type" "Protocol" ) typeName | "self" .
+typeMemberName = >-> ( "Type", "Protocol" ) typeName | "self" .
 ```
 
 
@@ -581,7 +585,7 @@ _type-inheritance-list → attributes? ~? type-identifier | attributes? ~? type-
 ```apus
 typeInheritanceClause = ":" typeInheritance { "," typeInheritance } .
 typeInheritance =
-    | attributes? "nonisolated" type
+    | attributes? "nonisolated" >-> ( "(" ) type
     | type
     | classRestrictionType
     .
@@ -595,19 +599,25 @@ classRestrictionType = "class" .
 _expression → try-operator? await-operator? prefix-expression infix-expressions?_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
 expression =
     | prefixExpression infixExpressions?
-    | effectfulConditional coercingOperator?
+    | >!>( greedyConditionalCoercion ) effectfulConditional coercingOperator?
     .
-expressionIntroducerBoundary = <s> | >s< >+> ( "(" "[" "." ) .
+expressionIntroducerBoundary = <s> | >s< >+> ( "(", "[", ".", "\\", "#available", "#unavailable" ) .
 effectMarker =
     | tryOperator
     | awaitOperator
     | "unsafe" <s> >n<
+    | "unsafe" >s< >+> ( "\\" )
     .
-@flavors(stmtCondition poundIfDirective)
+@flavors(stmtCondition, poundIfDirective)
 effectfulConditional = conditionalExpression | effectMarker effectfulConditional .
+greedyConditionalCoercion =
+    | { effectMarker } "switch" expressionIntroducerBoundary >-> ( "{" ) expression "{" "}" coercingOperator
+    | { effectMarker } "if" expressionIntroducerBoundary >-> ( "{" )
+      conditionListEndingGreedyBinding codeBlock >-> ( "else" ) coercingOperator
+    .
 ```
 
 
@@ -616,11 +626,11 @@ _prefix-expression → prefix-operator? postfix-expression_
 _prefix-expression → in-out-expression_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
 @longest
 prefixExpression =
-    | @cannotParse(anyBeforeTilde) @shortest [ prefixOperator >s< >n< >->( "@" ) ] postfixExpression
-    | prefixOperator >s< "await"
+    | >!>(anyBeforeTilde) @shortest [ prefixOperator >s< >n< >->( "@" ) ] postfixExpression
+    | prefixOperator >s< contextualAwaitReference
     | @shortest prefixOperator >s< >n< keyPathExpression
     | "!" >s< >n< >->( "@" ) postfixExpression
     | "!" >s< >n< keyPathExpression
@@ -628,17 +638,19 @@ prefixExpression =
     | keyPathExpression
     | packExpansionExpression
     | packElementExpression
-    | "consume" >->( "(" "[" "." "{" ) <s> >n< prefixExpression
-    | "copy"    >->( "(" "[" "." "{" ) <s> >n< prefixExpression
+    | "consume" >->( "(", "[", ".", "{" ) <s> >n< prefixExpression
+    | "copy"    >->( "(", "[", ".", "{" ) <s> >n< prefixExpression
     | anyTypeExpression
     | @prefer effectMarker prefixExpression
     .
-anyTypeExpression = "any" >->( "(" "[" "." "{" ) >n< boxedProtocolConstraint .
+contextualAwaitReference = "await" .
+anyTypeExpression = "any" >->( "(", "[", ".", "{" ) >n< boxedProtocolConstraint
+                    >->( "&", "async", "throws", "rethrows", "->" ) .
 anyBeforeTilde = "any" >+>( "~" ) .
-@flavors(stmtCondition)
-packExpansionExpression = "repeat" expressionIntroducerBoundary >->( "{" ) expression .
-@flavors(stmtCondition)
-packElementExpression = "each" >->( "(" "[" "." "{" ) <s> >n< prefixExpression .
+@flavors(stmtCondition, poundIfDirective)
+packExpansionExpression = @rejectsFlavor(poundIfDirective) "repeat" expressionIntroducerBoundary >->( "{" ) expression .
+@flavors(stmtCondition, poundIfDirective)
+packElementExpression = @rejectsFlavor(poundIfDirective) "each" >->( "(", "[", ".", "{" ) <s> >n< prefixExpression .
 ```
 
 
@@ -647,7 +659,7 @@ _in-out-expression → **&** primary-expression_
 
 ```apus
 @flavors(stmtCondition)
-inOutExpression = "&" >s< postfixExpression .
+inOutExpression = "&" >s< >->( "inout" ) postfixExpression .
 ```
 
 
@@ -656,8 +668,7 @@ _try-operator → **try** | **try** **?** | **try** **!**_
 
 ```apus
 tryOperator =
-    | "try" <s>
-    | "try" >s< >+> ( "(" "[" "." )
+    | "try" expressionIntroducerBoundary
     | "try" >s< "?"
     | "try" >s< "!"
     .
@@ -669,8 +680,7 @@ _await-operator → **await**_
 
 ```apus
 awaitOperator =
-    | "await" <s>
-    | "await" >s< >+> ( "(" "[" "." )
+    "await" expressionIntroducerBoundary
     .
 ```
 
@@ -683,19 +693,18 @@ _infix-expression → type-casting-operator_
 _infix-expressions → infix-expression infix-expressions?_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
 @longest
 infixExpression =
     | <s> infixOperator <s> ifConfigSameLine prefixExpression
     | <s> infixOperator <s> ifConfigSameLine effectfulConditional
-    | arrowExpr ifConfigSameLine prefixExpression
     | assignmentOperator ifConfigSameLine expression
     | conditionalOperator ifConfigSameLine expression
     | typeCastingOperator
-    | @cannotParse( genericArgumentClause )
+    | >!>( genericArgumentClause )
       >s< ( postfixOperatorToken | dotOperator | "&" ) >-> ( "." ) >s< ifConfigSameLine prefixExpression
     .
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
 infixExpressions = < ifConfigSameLine infixExpression > .
 
 @flavors(poundIfDirective)
@@ -704,8 +713,7 @@ ifConfigSameLine =
     | @rejectsFlavor(poundIfDirective) ε
     .
 
-arrowExpr = typeEffectSpecifiers? "->" >->( "async" "throws" "rethrows" "await" "try" "throw" ) .
-typeEffectSpecifiers = ( "async" throwsClause? | throwsClause ) >-> ( "async" "reasync" "throws" "rethrows" ) .
+typeEffectSpecifiers = ( "async" throwsClause? | throwsClause ) >-> ( "async", "reasync", "throws", "rethrows" ) .
 ```
 
 
@@ -721,7 +729,7 @@ assignmentOperator = <s> "=" <s> | >s< "=" >s< .
 _conditional-operator → **?** expression **:**_
 
 ```apus
-@flavors(stmtCondition poundIfDirective)
+@flavors(stmtCondition, poundIfDirective)
 conditionalOperator = <s> "?" ifConfigSameLine expression ":" .
 ```
 
@@ -765,19 +773,19 @@ _primary-expression → selector-expression_
 _primary-expression → key-path-string-expression_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
 @longest
 primaryExpression =
     | genericIdentifier
     | moduleGenericIdentifier
-    | moduleSelector propertyWrapperProjection
+    | moduleReferenceBase >n< "(" argumentNames ")"
     | compoundNameBase >n< "(" argumentNames ")"
     | implicitParameterName
     | literalExpression
     | selfExpression
     | superclassExpression
     | closureExpression
-    | @prefer @cannotParse( parenthesisedExpressionSpecifierType ) parenthesizedExpression
+    | @prefer >!>( parenthesisedExpressionSpecifierType ) parenthesizedExpression
     | tupleExpression
     | implicitMemberExpression
     | wildcardExpression
@@ -787,22 +795,25 @@ primaryExpression =
 typePrimaryExpression =
     | selfType
     | anyType
-    | @avoid "inout" type
     | typeAttribute type
     | inlineArrayType
     | "(" functionType ")"
+    | @setFlavor(expressionType) functionType
     | parenthesisedExpressionSpecifierType
+    | @avoid "inout" >-> ( "~" ) type
     .
 
 expressionIdentifier =
-    | identifier ---( "_" "await" lexerClassifiedKeyword )
+    | identifier ---( "_", "await", lexerClassifiedKeyword )
     | escapedIdentifier
     | propertyWrapperProjection
     .
 genericIdentifier = expressionIdentifier genericArgumentClause? .
 
 @flavors(bindingIntroducer)
-moduleGenericIdentifier = moduleSelector identifier ---( "_" ) genericArgumentClause? .
+moduleReferenceBase = moduleSelector ( identifier ---( "_" ) | escapedIdentifier | propertyWrapperProjection ) .
+@flavors(bindingIntroducer)
+moduleGenericIdentifier = moduleReferenceBase genericArgumentClause? .
 
 compoundNameBase = expressionIdentifier | "init" | "self" | "Self" .
 
@@ -828,14 +839,14 @@ _playground-literal → **#imageLiteral** **(** resourceName **:** expression **
 literalExpression = literal | arrayLiteral | dictionaryLiteral .
 
 @flavors(stmtCondition)
-arrayLiteral = "[" arrayLiteralItems? ","? "]" .
+arrayLiteral = "[" [ arrayLiteralItems ","? ] "]" .
 @flavors(stmtCondition)
 arrayLiteralItems = arrayLiteralItem { "," arrayLiteralItem } .
 @flavors(stmtCondition)
-arrayLiteralItem = @prefer @cannotParse( parenthesisedTypeSpecifier ) expression .
+arrayLiteralItem = @prefer >!>( parenthesisedTypeSpecifier ) expression .
 arrayLiteralItem = typeExpression .
-typeExpression = @cannotParse( awaitTupleFunctionType )
-    ( >+> ( "(" "@" "inout" "borrowing" "consuming" "isolated" "sending" "nonisolated" "_const" "__shared" "__owned" ) type
+typeExpression = >!>( awaitTupleFunctionType )
+    ( >+> ( "(", "@", "inout", "borrowing", "consuming", "isolated", "sending", "nonisolated", "_const", "__shared", "__owned" ) type
     | awaitTupleFunctionType ) .
 awaitTupleFunctionType = "(" [ functionTypeArgumentList "," ] "await" [ "," functionTypeArgumentList ] ","? ")" typeEffectSpecifiers? "->" type .
 
@@ -891,27 +902,25 @@ conditionalExpression = ifExpression | switchExpression .
 ```
 
 ```apus
-ifExpression = "if" expressionIntroducerBoundary >-> ( "{" ) conditionList codeBlock elseClause? .
+ifExpression = "if" expressionIntroducerBoundary >-> ( "{" ) conditionList codeBlock ( elseClause | >-> ( "else" ) ) .
 elseClause = "else" codeBlock | "else" ifExpression .
 
 @flavors(stmtCondition)
 switchExpression = "switch" expressionIntroducerBoundary >-> ( "{" ) expression "{" { switchCase } "}" .
 switchCase =
-    | caseLabel statements?
-    | defaultLabel statements?
+    | caseLabel codeBlockItems
+    | defaultLabel codeBlockItems
     | conditionalSwitchCase
     .
-```
 
-```apus
 caseLabel = switchCaseAttribute? "case" caseItemList ":" .
 caseItemList = matchPattern whereClause? { "," matchPattern whereClause? } .
 
 defaultLabel = switchCaseAttribute? "default" ":" .
 
-switchCaseAttribute = "@" >-> ( "Self" ) attributeName .
+switchCaseAttribute = "@" "unknown" .
 
-whereClause = "where" whereExpression .
+whereClause = "where" expressionIntroducerBoundary whereExpression .
 whereExpression = @setFlavor(stmtCondition) expression .
 
 conditionalSwitchCase = switchIfDirectiveClause switchElseifDirectiveClauses? switchElseDirectiveClause? endifDirective .
@@ -942,14 +951,13 @@ _capture-specifier → **weak** | **unowned** | **unowned**(**safe**) | **unowne
 closureExpression = samelineOpenedClosure | newlineOpenedClosure .
 @flavors(stmtCondition)
 trailingClosure = samelineOpenedClosure | @rejectsFlavor(stmtCondition) newlineOpenedClosure .
-samelineOpenedClosure = "{" >n< closureSignature? statements? "}" .
-newlineOpenedClosure  = "{" <n> closureSignature? statements? "}" .
+samelineOpenedClosure = "{" >n< ( closureSignature codeBlockItems? | >!>(closureSignatureStart) codeBlockItems? ) "}" .
+newlineOpenedClosure  = "{" <n> ( closureSignature codeBlockItems? | >!>(closureSignatureStart) codeBlockItems? ) "}" .
 
 closureSignature =
     | @prefer attributes? captureList? closureParameterClause typeEffectSpecifiers? functionResult? "in"
     | attributes? captureList "in"
     | attributes "in"
-    | @avoid closureSignatureStart "in"
     .
 
 closureSignatureStart = closureParameterClause typeEffectSpecifiers? functionResult .
@@ -964,8 +972,8 @@ closureShorthandName = identifierToken | "_" .
 closureParameterList = closureParameter { "," closureParameter } .
 
 closureParameter =
-    | attributes? @shortest [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation?
-    | attributes? [ parameterDeclarationModifiers ] closureParameterNames typeAnnotation "..."
+    | attributes? closureParameterNames typeAnnotation?
+    | attributes? closureParameterNames typeAnnotation "..."
     .
 closureParameterNames = [ "_" ] closureParameterName .
 closureParameterName = argumentLabel .
@@ -974,7 +982,7 @@ captureList = "[" "]" | "[" captureListItems ","? "]" .
 captureListItems = captureListItem { "," captureListItem } .
 captureListItem     = captureHead [ assignmentOperator expression ] .
 captureHead         = captureSpecifier captureName
-                    | >-> ( "weak" "unowned" ) captureName .
+                    | >-> ( "weak", "unowned" ) captureName .
 captureName = identifierToken | "self" .
 captureSpecifier = "weak" | "unowned" | "unowned" "(" "safe" ")" | "unowned" "(" "unsafe" ")" .
 ```
@@ -989,7 +997,7 @@ _implicit-member-expression → **.** identifier **.** postfix-expression_
 implicitMemberExpression =
     | "." moduleSelector? memberName
     | "." moduleSelector? memberName >n< "(" argumentNames ")"
-    | "." moduleSelector? memberName "." >n< >+> ( identifier escapedIdentifier propertyWrapperProjection decimalDigits ) postfixExpression
+    | "." moduleSelector? memberName "." >n< >+> ( identifier, escapedIdentifier, propertyWrapperProjection, decimalDigits ) postfixExpression
     .
 ```
 
@@ -998,7 +1006,7 @@ implicitMemberExpression =
 _parenthesized-expression → **(** expression **)**_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer) parenthesizedExpression = "(" expression ")" .
+@flavors(stmtCondition, bindingIntroducer) parenthesizedExpression = "(" expression ")" .
 ```
 
 
@@ -1008,7 +1016,7 @@ _tuple-element-list → tuple-element | tuple-element **,** tuple-element-list_
 _tuple-element → expression | identifier **:** expression_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer)
+@flavors(stmtCondition, bindingIntroducer)
 tupleExpression =
     | "(" ")"
     | "(" [ argumentLabel ":" ] operatorReference ")"
@@ -1049,8 +1057,10 @@ keyPathMarkRunStart         - /[?!](?=[?!])/ .
 keyPathMarkRunOptional      - /\?(?=[?!])/ .
 keyPathMarkRunForce         - /!(?=[?!])/ .
 keyPathDotSubscriptStart    - /\.(?=\[)/ .
+keyPathNumericDot             - /\.(?=[0-9])/ .
 keyPathMetatypeStart        - /\.(?=[ \t]*(?:Type|Protocol)(?!\w))/ .
 
+@flavors(poundIfDirective)
 keyPathExpression =
     | @prefer "\\" keyPathRootType keyPathComponents
     | @prefer "\\" keyPathRootType keyPathExpressionStop
@@ -1077,19 +1087,19 @@ keyPathRootBase =
     | inlineArrayType
     | dictionaryType
     | anyType
-    | keyPathRootSuppressed
     | "(" tupleTypeElement ")"
     .
 keyPathRootSuppressed = "~" keyPathRootBase .
 
+@flavors(poundIfDirective)
 keyPathComponents =
     | keyPathProperty { keyPathProperty } keyPathExpressionStop
     | keyPathProperty { keyPathProperty } keyPathPivot keyPathBareTail? keyPathBareStop
     | keyPathPivotFirst keyPathBareTail? keyPathBareStop
     .
 
-keyPathExpressionStop = >-> ( keyPathMarkRunStart keyPathDot ) .
-keyPathBareStop = >-> ( keyPathMarkRunStart keyPathDotSubscriptStart ) .
+keyPathExpressionStop = >-> ( keyPathMarkRunStart, keyPathDot ) .
+keyPathBareStop = >-> ( keyPathMarkRunStart, keyPathDotSubscriptStart ) .
 
 keyPathMemberName =
     | decimalDigits
@@ -1099,7 +1109,13 @@ keyPathMemberName =
     .
 keyPathArgumentLabels = keyPathArgumentLabel { keyPathArgumentLabel } .
 keyPathArgumentLabel = argumentLabel ":" .
-keyPathProperty = ( >s< "." >s< | <s> "." ) keyPathMemberName .
+@flavors(poundIfDirective)
+keyPathProperty = ( >s< "." >s< | <s> keyPathSpacedDot ) keyPathMemberName .
+@flavors(poundIfDirective)
+keyPathSpacedDot =
+    | >-> ( keyPathNumericDot ) "."
+    | >+> ( keyPathNumericDot ) ifConfigSameLine "."
+    .
 
 keyPathPivotFirst =
     | keyPathDot >s< optionalMark
@@ -1107,7 +1123,7 @@ keyPathPivotFirst =
     | "." >n< "[" labeledExpressionList? "]"
     | >n< "[" labeledExpressionList? "]"
     | keyPathMarkRunOperator
-    | <s> "!"
+    | <s> "!" >+> ( ".", ")", "]", "}", ",", ";", ":", EOF )
     .
 
 keyPathPivot =
@@ -1124,7 +1140,7 @@ keyPathBareComponent =
     | >s< optionalMark
     | keyPathMarkRunOperator
     | >s< forceMark
-    | <s> "!"
+    | <s> "!" >+> ( ".", ")", "]", "}", ",", ";", ":", EOF )
     | >n< "[" labeledExpressionList? "]"
     .
 ```
@@ -1151,11 +1167,11 @@ _postfix-expression → forced-value-expression_
 _postfix-expression → optional-chaining-expression_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
 postfixExpression =
     | primaryExpression
     | @prefer postfixExpression ifConfigSameLine >s< postfixOperator <s>
-    | postfixExpression ifConfigSameLine >s< postfixOperator >+> ( "." ")" "]" "}" "," ";" ":" EOF )
+    | postfixExpression ifConfigSameLine >s< postfixOperator >+> ( ".", ")", "]", "}", ",", ";", ":", EOF )
     | functionCallExpression
     | initializerExpression
     | explicitMemberExpression
@@ -1178,10 +1194,12 @@ _labeled-trailing-closures → labeled-trailing-closure labeled-trailing-closure
 _labeled-trailing-closure → identifier **:** closure-expression_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective)
-functionCallExpression = postfixExpression >n< functionCallArgumentClause .
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
+functionCallExpression = argumentCall .
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
+argumentCall = postfixExpression >n< functionCallArgumentClause .
 functionCallExpression = @prefer postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures
-                       | @right @right( literalExpression typePrimaryExpression ) postfixExpression ifConfigSameLine trailingClosures .
+                       | @right @right( literalExpression, typePrimaryExpression, argumentCall ) postfixExpression ifConfigSameLine trailingClosures .
 functionCallExpression = collectionLiteralCallee ifConfigSameLine trailingClosures .
 functionCallExpression = selfType ifConfigSameLine trailingClosures .
 
@@ -1198,12 +1216,12 @@ operatorReference = moduleSelector? ( operator | "&" | "!" ) .
 
 ```apus
 @flavors(stmtCondition)
-trailingClosures = @cannotParse(observerBlockStart) trailingClosure labeledTrailingClosures
-                 | @cannotParse(observerBlockStart) trailingClosure >-> ( "else" ) .
+trailingClosures = >!>(observerBlockStart) trailingClosure labeledTrailingClosures
+                 | >!>(observerBlockStart) trailingClosure >-> ( "else" ) .
 observerBlockStart = "{" attributes? ( "willSet" | "didSet" ) .
 @flavors(stmtCondition)
 labeledTrailingClosures = labeledTrailingClosure labeledTrailingClosures? .
-trailingClosureLabel = identifier ---( "_" "inout" "default" ) | escapedIdentifier | "_" .
+trailingClosureLabel = identifier ---( "_", "inout", "default" ) | escapedIdentifier | "_" .
 @flavors(stmtCondition)
 labeledTrailingClosure = trailingClosureLabel ":" closureExpression .
 ```
@@ -1227,8 +1245,8 @@ _argument-names → argument-name argument-names?_
 _argument-name → identifier **:**_
 
 ```apus
-@flavors(stmtCondition poundIfDirective)
-explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
+@flavors(stmtCondition, poundIfDirective)
+explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral, octalLiteral, decimalLiteral, hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
 explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< "." >s< | <s> "." ) moduleSelector? memberName
                            [ genericArgumentClause | >n< "(" argumentNames ")" ] .
 explicitMemberExpression = postfixExpression ifConfigSameLine postfixConditionalCompilationBlock .
@@ -1245,7 +1263,7 @@ _postfix-self-expression → postfix-expression **.** **self**_
 _subscript-expression → postfix-expression **[** function-call-argument-list **]**_
 
 ```apus
-@flavors(stmtCondition poundIfDirective)
+@flavors(stmtCondition, poundIfDirective)
 subscriptExpression = postfixExpression >n< subscriptArgumentClause .
 subscriptArgumentClause = "[" "]" | "[" labeledExpressionList ","? "]" .
 ```
@@ -1255,7 +1273,7 @@ subscriptArgumentClause = "[" "]" | "[" labeledExpressionList ","? "]" .
 _forced-value-expression → postfix-expression **!**_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective) forcedValueExpression = postfixExpression >s< forceMark .
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective) forcedValueExpression = postfixExpression >s< forceMark .
 ```
 
 
@@ -1263,7 +1281,7 @@ _forced-value-expression → postfix-expression **!**_
 _optional-chaining-expression → postfix-expression **?**_
 
 ```apus
-@flavors(stmtCondition bindingIntroducer poundIfDirective) optionalChainingExpression = postfixExpression >s< optionalMark .
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective) optionalChainingExpression = postfixExpression >s< optionalMark .
 ```
 
 
@@ -1288,20 +1306,17 @@ operatorDeclarationStart = operatorFixity "operator" .
 invalidOperatorDeclarationStart = declarationModifier { declarationModifier } operatorFixity "operator" .
 actorDeclarationStart = attributes? declarationModifiers? "actor" >+>( identifier ) .
 typeMemberIntroducer =
-    | attributes? { declarationModifier } ( "static" | "class" >+> ( "func" "var" "let" "subscript" ) )
+    | attributes? { declarationModifier } ( "static" >-> ( "#" ) | "class" >+> ( "func", "var", "let", "subscript" ) )
     | attributes? declarationModifier { declarationModifier } "open" "(" "set" ")" ( "var" | "let" | "func" | "subscript" )
     | attributes? "open" ( "var" | "let" | "func" | "subscript" )
     .
 localSetterAccessModifier = "open" "(" "set" ")" .
-committingStatementDeclaration =
-    | >-> ( "open" "(" "set" ")" ) declaration
-    | >-> ( "open" ) declaration
-    .
+committingStatementDeclaration = >-> ( "open" ) declaration .
 
-@flavors(ifConfigBody fileScope)
-statement = @cannotParse(committingStatementDeclaration attributes initializerIntroducer macroIntroducer closureSignatureStart operatorDeclarationStart invalidOperatorDeclarationStart actorDeclarationStart)
+@flavors(ifConfigBody, fileScope)
+statement = >!>(committingStatementDeclaration, attributes, initializerIntroducer, macroIntroducer, operatorDeclarationStart, invalidOperatorDeclarationStart, actorDeclarationStart)
             ( @requiresFlavor(fileScope) >->( "{" ) | @rejectsFlavor(fileScope) ε ) expression .
-statement = @cannotParse(typeMemberIntroducer localSetterAccessModifier) declaration .
+statement = >!>(typeMemberIntroducer, localSetterAccessModifier) declaration .
 
 statement = loopStatement .
 statement = branchStatement .
@@ -1309,16 +1324,22 @@ statement = labeledStatement .
 statement = controlTransferStatement .
 statement = deferStatement .
 statement = doStatement .
-statement = compilerControlStatement .
 statement = yieldStatement .
 statement = discardStatement .
 
-yieldStatement = "yield" >-> ( "(" "[" "." ) <s> >n< expression .
+yieldStatement = "yield" >-> ( "(", "[", "." ) <s> >n< expression .
 
-discardStatement = "discard" >-> ( "(" "[" "." ) <s> >n< expression .
+discardStatement = "discard" >n< >+> ( "self", "Self" ) expression .
+discardStatement =
+    >!>( discardClassifiedKeywordStart )
+    "discard" >n< >+> ( identifier, escapedIdentifier ) expression .
+discardClassifiedKeywordStart = "discard" >n< lexerClassifiedKeyword .
 
-@flavors(ifConfigBody fileScope)
-statements = statement { statementSeparator @clearFlavor(ifConfigBody) statement } ";"? .
+@flavors(ifConfigBody, fileScope)
+codeBlockItems = codeBlockItem { codeBlockItemBoundary @clearFlavor(ifConfigBody) codeBlockItem } .
+@flavors(ifConfigBody, fileScope)
+codeBlockItem = statement ";"? | compilerControlDeclaration .
+codeBlockItemBoundary = <+< ( ";" ) | <-< ( ";" ) <n> .
 statementSeparator = <n> | ";" .
 ```
 
@@ -1340,7 +1361,7 @@ _for-in-statement → **for** **case**? pattern **in** expression where-clause? 
 
 ```apus
 forInStatement = "for" "try"? "await"? "unsafe"? "case" matchPattern "in" expressionIntroducerBoundary expression whereClause? codeBlock .
-forInStatement = "for" "try"? "await"? "unsafe"? >-> ( "await" ) bindingPattern "in" expressionIntroducerBoundary expression whereClause? codeBlock .
+forInStatement = "for" "try"? "await"? "unsafe"? >-> ( "await" ) forBindingPattern "in" expressionIntroducerBoundary expression whereClause? codeBlock .
 forInStatement = "for" "try"? "await"? "unsafe"? ( "var" | "let" ) bindingPattern "in" expressionIntroducerBoundary expression whereClause? codeBlock .
 ```
 
@@ -1357,19 +1378,29 @@ whileStatement = "while" expressionIntroducerBoundary >-> ( "{" ) conditionList 
 
 conditionList = bindingCondition [ "," conditionListAfterBinding ]
               | condition [ "," conditionList ] .
-conditionListAfterBinding =
-    | @cannotParse(missingBindingIntroducer) conditionList
-    | @cannotParse(missingBindingIntroducer) missingBindingIntroducer
-    .
+conditionListAfterBinding = >!>(missingBindingIntroducer) conditionList .
 missingBindingIntroducer = ( identifierToken | "_" ) assignmentOperator .
 
 bindingCondition = optionalBindingCondition | caseCondition .
 condition = @setFlavor(stmtCondition) expression
           | availabilityCondition .
 
+conditionListEndingGreedyBinding =
+    | greedyBindingCondition
+    | ( bindingCondition | condition ) "," conditionListEndingGreedyBinding
+    .
+greedyBindingCondition = caseCondition | greedyOptionalBindingCondition .
+greedyOptionalBindingCondition =
+    ( "let" | "var" ) @setFlavor(optionalBinding)
+    ( identifierPattern | bindingPattern initializer )
+    .
+
 caseCondition = "case" matchPattern initializer .
 
-optionalBindingCondition = ( "let" | "var" ) @setFlavor(optionalBinding) bindingPattern initializer? .
+optionalBindingCondition =
+    ( "let" | "var" ) @setFlavor(optionalBinding)
+    ( identifierPattern typeAnnotation? | bindingPattern initializer )
+    .
 ```
 
 
@@ -1434,7 +1465,7 @@ labeledStatement = statementLabel conditionalExpression .
 labeledStatement = statementLabel doStatement .
 
 statementLabel = labelName ":" .
-labelName = identifier ---( "_" "_borrowing" lexerClassifiedKeyword ) | escapedIdentifier .
+labelName = identifier ---( "_", "_borrowing", lexerClassifiedKeyword ) | escapedIdentifier .
 ```
 
 
@@ -1483,7 +1514,7 @@ _return-statement → **return** expression?_
 
 ```apus
 @longest
-returnStatement = "return" expression? .
+returnStatement = "return" [ expressionIntroducerBoundary >-> ( "init" ) expression ] .
 ```
 
 
@@ -1511,11 +1542,11 @@ _catch-pattern-list → catch-pattern | catch-pattern **,** catch-pattern-list_
 _catch-pattern → pattern where-clause?_
 
 ```apus
-doStatement = "do" throwsClause? codeBlock catchClauses? .
+doStatement = "do" codeBlock catchClauses? | "do" throwsClause codeBlock catchClauses .
 catchClauses = catchClause catchClauses? .
 catchClause = "catch" catchPatternList? codeBlock .
 
-catchPatternList = catchPattern { "," catchPattern } .
+catchPatternList = >-> ( "{" ) catchPattern { "," catchPattern } .
 
 catchPattern = matchPattern whereClause? .
 catchPattern = whereClause .
@@ -1528,9 +1559,9 @@ _compiler-control-statement → line-control-statement_
 _compiler-control-statement → diagnostic-statement_
 
 ```apus
-@flavors(ifConfigBody fileScope) compilerControlStatement = lineControlStatement | conditionalCompilationBlock .
+@flavors(ifConfigBody, fileScope) compilerControlDeclaration = lineControlStatement | conditionalCompilationBlock .
 
-@flavors(concreteTypeBody protocolBody) memberCompilerControlStatement = lineControlStatement | memberConditionalCompilationBlock .
+@flavors(concreteTypeBody, protocolBody) memberCompilerControlDeclaration = lineControlStatement | memberConditionalCompilationBlock .
 ```
 
 
@@ -1564,15 +1595,15 @@ _swift-version-continuation → **.** decimal-digits swift-version-continuation?
 _environment → simulator | macCatalyst_
 
 ```apus
-@flavors(ifConfigBody fileScope) conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
+@flavors(ifConfigBody, fileScope) conditionalCompilationBlock = ifDirectiveClause elseifDirectiveClauses? elseDirectiveClause? endifDirective .
 
-@flavors(ifConfigBody fileScope) ifConfigStatements = @setFlavor(ifConfigBody) statements .
+@flavors(ifConfigBody, fileScope) ifConfigCodeBlockItems = @setFlavor(ifConfigBody) codeBlockItems .
 
-@flavors(concreteTypeBody protocolBody) memberConditionalCompilationBlock = memberIfDirectiveClause memberElseifDirectiveClauses? memberElseDirectiveClause? endifDirective .
-@flavors(concreteTypeBody protocolBody) memberIfDirectiveClause = ifDirective compilationCondition <n> members? .
-@flavors(concreteTypeBody protocolBody) memberElseifDirectiveClauses = memberElseifDirectiveClause memberElseifDirectiveClauses? .
-@flavors(concreteTypeBody protocolBody) memberElseifDirectiveClause = elseifDirective compilationCondition <n> members? .
-@flavors(concreteTypeBody protocolBody) memberElseDirectiveClause = elseDirective members? .
+@flavors(concreteTypeBody, protocolBody) memberConditionalCompilationBlock = memberIfDirectiveClause memberElseifDirectiveClauses? memberElseDirectiveClause? endifDirective .
+@flavors(concreteTypeBody, protocolBody) memberIfDirectiveClause = ifDirective compilationCondition <n> members? .
+@flavors(concreteTypeBody, protocolBody) memberElseifDirectiveClauses = memberElseifDirectiveClause memberElseifDirectiveClauses? .
+@flavors(concreteTypeBody, protocolBody) memberElseifDirectiveClause = elseifDirective compilationCondition <n> members? .
+@flavors(concreteTypeBody, protocolBody) memberElseDirectiveClause = elseDirective members? .
 ```
 
 ```apus
@@ -1580,7 +1611,7 @@ postfixConditionalCompilationBlock = postfixIfDirectiveClause postfixElseifDirec
 ```
 
 ```apus
-postfixIfDirectiveClause = ifDirective compilationCondition >+>( "." "#if" ) <n> postfixIfBody .
+postfixIfDirectiveClause = ifDirective compilationCondition >+>( ".", "#if" ) <n> postfixIfBody .
 
 postfixElseifDirectiveClauses = postfixElseifDirectiveClause postfixElseifDirectiveClauses? .
 postfixElseifDirectiveClause = elseifDirective compilationCondition <n> postfixIfBody? .
@@ -1591,23 +1622,23 @@ postfixNestedBlocks = postfixConditionalCompilationBlock postfixNestedBlocks? .
 ```
 
 ```apus
-@flavors(ifConfigBody fileScope) ifDirectiveClause =
-    ifDirective compilationCondition >->( "." ) <n> ifConfigStatements? .
+@flavors(ifConfigBody, fileScope) ifDirectiveClause =
+    ifDirective compilationCondition >->( "." ) <n> ifConfigCodeBlockItems? .
 ```
 
 ```apus
 ifDirectiveClause =
-    @rejectsFlavor(ifConfigBody) <-< ( identifier implicitParameterName propertyWrapperProjection binaryLiteral octalLiteral decimalLiteral hexadecimalLiteral decimalFloatingPointLiteral hexadecimalFloatingPointLiteral "true" "false" "nil" ")" "]" forceMark optionalMark )
-    ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+    @rejectsFlavor(ifConfigBody) <-< ( identifier, implicitParameterName, propertyWrapperProjection, binaryLiteral, octalLiteral, decimalLiteral, hexadecimalLiteral, decimalFloatingPointLiteral, hexadecimalFloatingPointLiteral, "true", "false", "nil", ")", "]", forceMark, optionalMark )
+    ifDirective compilationCondition >+>( "." ) <n> ifConfigCodeBlockItems? .
 ifDirectiveClause =
-    @rejectsFlavor(ifConfigBody) <+< ( "#endif" ) ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+    @rejectsFlavor(ifConfigBody) <+< ( "#endif" ) ifDirective compilationCondition >+>( "." ) <n> ifConfigCodeBlockItems? .
 
 ifDirectiveClause =
-    @requiresFlavor(ifConfigBody) ifDirective compilationCondition >+>( "." ) <n> ifConfigStatements? .
+    @requiresFlavor(ifConfigBody) ifDirective compilationCondition >+>( "." ) <n> ifConfigCodeBlockItems? .
 
-@flavors(ifConfigBody fileScope) elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
-@flavors(ifConfigBody fileScope) elseifDirectiveClause = elseifDirective compilationCondition <n> ifConfigStatements? .
-@flavors(ifConfigBody fileScope) elseDirectiveClause = elseDirective ifConfigStatements? .
+@flavors(ifConfigBody, fileScope) elseifDirectiveClauses = elseifDirectiveClause elseifDirectiveClauses? .
+@flavors(ifConfigBody, fileScope) elseifDirectiveClause = elseifDirective compilationCondition <n> ifConfigCodeBlockItems? .
+@flavors(ifConfigBody, fileScope) elseDirectiveClause = elseDirective ifConfigCodeBlockItems? .
 ifDirective = "#if" expressionIntroducerBoundary .
 elseifDirective = "#elseif" expressionIntroducerBoundary .
 elseDirective = "#else" <n> .
@@ -1628,10 +1659,10 @@ _file-path → static-string-literal_
 ```apus
 lineNumber - /0*[1-9][0-9]*/ .
 
-filePath = staticStringLiteral .
+filePath = plainStaticStringLiteral .
 
-lineControlStatement = "#sourceLocation" "(" ")" .
-lineControlStatement = "#sourceLocation" "(" "file" ":" filePath "," "line" ":" lineNumber ")" .
+lineControlStatement = "#sourceLocation" "(" /\)[ \t]*(?=\r\n|\r|\n|$)/ .
+lineControlStatement = "#sourceLocation" "(" "file" ":" filePath "," "line" ":" lineNumber /\)[ \t]*(?=\r\n|\r|\n|$)/ .
 ```
 
 
@@ -1652,14 +1683,14 @@ _platform-version → decimal-digits **.** decimal-digits_
 _platform-version → decimal-digits **.** decimal-digits **.** decimal-digits_
 
 ```apus
-availabilityCondition = ( "#available" | "#unavailable" ) "(" availabilityArguments ")" .
+availabilityCondition = ( "#available" | "#unavailable" ) >n< "(" availabilityArguments ")" .
 availabilityArguments = availabilityArgument { "," availabilityArgument } .
-availabilityArgument = "*" | platformName platformVersion? .
-
+availabilityArgument = "*" | platformName platformVersion .
 platformName = identifierToken .
-platformVersion = decimalDigits .
-platformVersion = decimalDigits "." >n< decimalDigits .
-platformVersion = decimalDigits "." >n< decimalDigits "." >n< decimalDigits .
+zeroPlatformVersion = /0+(?:\\.0+){0,2}/ >+> ( ",", ")" ) .
+platformVersion = >!>( zeroPlatformVersion ) decimalDigits .
+platformVersion = >!>( zeroPlatformVersion ) decimalDigits "." >n< decimalDigits .
+platformVersion = >!>( zeroPlatformVersion ) decimalDigits "." >n< decimalDigits "." >n< decimalDigits .
 ```
 
 
@@ -1685,7 +1716,7 @@ _declaration → operator-declaration_
 _declaration → precedence-group-declaration_
 
 ```apus
-@flavors(fileScope memberDecl concreteTypeBody protocolBody)
+@flavors(fileScope, memberDecl, concreteTypeBody, protocolBody)
 declaration =
     | @requiresFlavor(fileScope) importDeclaration
     | constantDeclaration
@@ -1707,23 +1738,23 @@ declaration =
     | @requiresFlavor(fileScope) precedenceGroupDeclaration
     | associatedTypeDeclaration
     .
-@flavors(memberDecl concreteTypeBody protocolBody)
+@flavors(memberDecl, concreteTypeBody, protocolBody)
 memberDeclaration = declaration | enumCaseDeclaration | freestandingMacroExpansionDeclaration .
 
-@flavors(concreteTypeBody protocolBody)
+@flavors(concreteTypeBody, protocolBody)
 members = member { statementSeparator member } ";"? .
-@flavors(concreteTypeBody protocolBody)
-member = @setFlavor(memberDecl) memberDeclaration | memberCompilerControlStatement .
+@flavors(concreteTypeBody, protocolBody)
+member = @setFlavor(memberDecl) memberDeclaration | memberCompilerControlDeclaration .
 declaration = macroExpansionDeclaration .
 
 macroExpansionDeclaration =
-    | attributes declarationModifiers? macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures?
-    | declarationModifiers macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures?
+    | attributes declarationModifiers? <-< ( "class" ) macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures?
+    | declarationModifiers <-< ( "class" ) macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures?
     .
 freestandingMacroExpansionDeclaration = macroHead genericArgumentClause? [ >n< functionCallArgumentClause ] trailingClosures? .
 poundName - @builder .
 macroHead =
-    | poundName ---( "#_" "#available" "#unavailable" "#if" "#elseif" "#else" "#endif" "#sourceLocation" )
+    | poundName ---( "#_", "#available", "#unavailable", "#if", "#elseif", "#else", "#endif", "#line", "#sourceLocation" )
     | "#" >s< ( propertyWrapperProjection | escapedIdentifier )
     | "#" >s< moduleSelector identifier ---( "_" )
     .
@@ -1734,7 +1765,7 @@ macroHead =
 _code-block → **{** statements? **}**_
 
 ```apus
-codeBlock = "{" statements? "}" .
+codeBlock = "{" codeBlockItems? "}" .
 ```
 
 
@@ -1745,12 +1776,14 @@ _import-path → identifier | identifier **.** import-path_
 
 ```apus
 importDeclaration =
-    | attributes? declarationModifiers? "import" importKind? importPath
+    | attributes? declarationModifiers? "import" importPath
+    | attributes? declarationModifiers? "import" importKind kindedImportPath
     | attributes? "import" importKind moduleSelector ( identifierToken | nonArrowOperatorToken )
     .
 importKind = "typealias" | "struct" | "class" | "enum" | "protocol" | "let" | "var" | "func" .
 @longest
-importPath = identifierToken { "." identifierToken } .
+importPath = identifierToken { >s< "." >s< identifierToken } .
+kindedImportPath = identifierToken >s< "." >s< identifierToken { >s< "." >s< identifierToken } .
 ```
 
 
@@ -1768,7 +1801,7 @@ patternInitializerList = patternInitializer { "," patternInitializer } .
 @flavors(protocolBody)
 patternInitializer =
     | bindingPattern >->( "{" )
-    | bindingPattern accessorBlock
+    | identifierPattern typeAnnotation accessorBlock
     | bindingPattern initializer observerBlock? .
 initializer = assignmentOperator expression .
 ```
@@ -1809,16 +1842,18 @@ accessorBlock =
     | @rejectsFlavor(protocolBody) "{" implicitGetter "}"
     | "{" "}"
     .
-implicitGetter = @cannotParse(accessorIntroducer) statements .
+implicitGetter = >!>(accessorIntroducer) codeBlockItems .
 @flavors(protocolBody)
 accessorDeclarations = accessorDeclaration accessorDeclarations? .
 @flavors(protocolBody)
-accessorDeclaration = accessorIntroducer accessorEffects? ( @rejectsFlavor(protocolBody) codeBlock | @requiresFlavor(protocolBody) ε ) .
+accessorDeclaration = accessorIntroducer ( @rejectsFlavor(protocolBody) codeBlock | @requiresFlavor(protocolBody) ε ) .
 @flavors(protocolBody)
 accessorIntroducer =
+    | @rejectsFlavor(protocolBody) attributes? accessorModifiers? "get" accessorEffects?
     | @rejectsFlavor(protocolBody) attributes? accessorModifiers? ( accessorKeyword | parameterizedAccessorKeyword setterName? )
-    | @requiresFlavor(protocolBody) attributes? accessorModifiers? ( "get" | "set" | "borrow" | "mutate" ) .
-accessorKeyword = "get" | "_read" | "_modify" | "borrow" | "mutate"
+    | @requiresFlavor(protocolBody) attributes? accessorModifiers? "get" accessorEffects?
+    | @requiresFlavor(protocolBody) attributes? accessorModifiers? ( "set" | "borrow" | "mutate" ) .
+accessorKeyword = "_read" | "_modify" | "borrow" | "mutate"
                 | "unsafeAddress" | "addressWithOwner" | "addressWithNativeOwner"
                 | "unsafeMutableAddress" | "mutableAddressWithOwner" | "mutableAddressWithNativeOwner" .
 parameterizedAccessorKeyword = "set" | observerKeyword .
@@ -1867,36 +1902,38 @@ _parameter-type-annotation → **:** attributes? parameter-modifier? type_
 _parameter-modifier → **inout** | **borrowing** | **consuming** default-argument-clause → **=** expression_
 
 ```apus
-@longest
-functionDeclaration = functionHead functionName genericParameterClause? functionSignature genericWhereClause? functionBody? .
-functionHead = attributes? declarationModifiers? "func" ( <s> | >s< >->( optionalMark forceMark ) ) .
+@flavors(protocolBody) @longest
+functionDeclaration = functionHead functionName genericParameterClause? functionSignature genericWhereClause?
+                      ( @requiresFlavor(protocolBody) ε | @rejectsFlavor(protocolBody) functionBody? ) .
+functionHead = attributes? declarationModifiers? "func" ( <s> | >s< >->( optionalMark, forceMark ) ) .
 functionName = identifierToken | functionNameOperator | operatorNameExtra .
 operatorNameExtra = dotOperator | "!" | "&" .
-functionSignature = parameterClause functionEffectSpecifiers? declarationFunctionResult? >->( "async" "reasync" ) .
+functionSignature = parameterClause functionEffectSpecifiers? declarationFunctionResult? >->( "async", "reasync" ) .
 functionAsyncSpecifier = "async" .
-functionEffectSpecifiers = ( functionAsyncSpecifier declarationThrowsClause? | declarationThrowsClause ) >-> ( "async" "reasync" "throws" "rethrows" ) .
+functionEffectSpecifiers = ( functionAsyncSpecifier declarationThrowsClause? | declarationThrowsClause ) >-> ( "async", "reasync", "throws", "rethrows" ) .
 functionResult = "->" resultType .
-declarationFunctionResult = "->" >-> ( "async" "throws" "rethrows" "await" "try" "throw" ) resultType .
+declarationFunctionResult = "->" >-> ( "async", "throws", "rethrows", "await", "try", "throw" ) resultType .
 functionBody = codeBlock .
 parameterClause = "(" ")" | "(" parameterList ","? ")" .
 parameterList = parameter { "," parameter } .
 parameter =
-    | attributes? @shortest [ parameterDeclarationModifiers ] parameterNames typeAnnotation defaultArgumentClause?
-    | attributes? [ parameterDeclarationModifiers ] parameterNames typeAnnotation "..."
+    | attributes? parameterNames typeAnnotation defaultArgumentClause?
+    | attributes? parameterNames typeAnnotation "..."
     .
 parameterNames = externalParameterName localParameterName | localParameterName .
 externalParameterName = argumentLabel .
 localParameterName = argumentLabel .
 parameterModifiers = parameterModifier parameterModifiers? .
 parameterModifier =
+    | bareParameterModifier
+    | parenthesisedTypeSpecifier
+    .
+bareParameterModifier =
     | "inout" | "borrowing" | "consuming" | "isolated" | "sending"
     | "_const" | "__shared" | "__owned"
-    | parenthesisedTypeSpecifier
     .
 parenthesisedTypeSpecifier = expressionParenthesisedTypeSpecifier .
 expressionParenthesisedTypeSpecifier = "nonisolated" >s< "(" "nonsending" ")" .
-parameterDeclarationModifiers = parameterDeclarationModifier parameterDeclarationModifiers? .
-parameterDeclarationModifier = "_const" | "isolated" .
 defaultArgumentClause = assignmentOperator expression .
 ```
 
@@ -1923,7 +1960,7 @@ _raw-value-literal → numeric-literal | static-string-literal | boolean-literal
 
 ```apus
 enumDeclaration = attributes? declarationModifiers? "enum" enumName genericParameterClause? typeInheritanceClause? genericWhereClause? "{" [ @setFlavor(concreteTypeBody) members ] "}" .
-associatedValues = "(" enumCaseParameterList? ")" .
+associatedValues = "(" enumCaseParameterList ")" .
 enumCaseParameterList = enumCaseParameter { "," enumCaseParameter } .
 enumCaseParameter =
     | type defaultArgumentClause?
@@ -1932,8 +1969,9 @@ enumName = identifierToken .
 enumCaseName = identifierToken .
 enumCaseDeclaration = attributes? "indirect"? "case" enumCaseElementList .
 enumCaseElementList = enumCaseElement { "," enumCaseElement } .
-enumCaseElement = enumCaseName associatedValues? enumCaseRawValueInitializer? .
-enumCaseRawValueInitializer = assignmentOperator expression .
+enumCaseElement = enumCaseName [ >n< associatedValues ] enumCaseRawValueInitializer? .
+enumCaseRawValueInitializer = assignmentOperator rawValueLiteral .
+rawValueLiteral = numericLiteral | staticStringLiteral | booleanLiteral | nilLiteral .
 ```
 
 
@@ -2029,7 +2067,9 @@ _initializer-head → attributes? declaration-modifiers? **init** **!**_
 _initializer-body → code-block_
 
 ```apus
-initializerDeclaration = initializerHead genericParameterClause? parameterClause functionEffectSpecifiers? declarationFunctionResult? genericWhereClause? codeBlock? .
+@flavors(protocolBody)
+initializerDeclaration = initializerHead genericParameterClause? parameterClause functionEffectSpecifiers? genericWhereClause?
+                         ( @requiresFlavor(protocolBody) ε | @rejectsFlavor(protocolBody) codeBlock? ) .
 initializerHead =
     | attributes? declarationModifiers? "init"
     | attributes? declarationModifiers? "init" optionalMark
@@ -2042,7 +2082,7 @@ initializerHead =
 _deinitializer-declaration → attributes? **deinit** code-block_
 
 ```apus
-deinitializerDeclaration = attributes? declarationModifiers? "deinit" "async"? codeBlock? .
+deinitializerDeclaration = attributes? declarationModifiers? "deinit" codeBlock .
 ```
 
 
@@ -2066,7 +2106,7 @@ _subscript-result → **->** attributes? type_
 
 ```apus
 @flavors(protocolBody)
-subscriptDeclaration = subscriptHead subscriptResult genericWhereClause? accessorBlock? .
+subscriptDeclaration = subscriptHead subscriptResult genericWhereClause? accessorBlock .
 subscriptHead = attributes? declarationModifiers? "subscript" genericParameterClause? parameterClause .
 subscriptResult = "->" type .
 ```
@@ -2196,19 +2236,20 @@ _balanced-token → **Any** punctuation except (, ), [, ], {, or **}**_
 ```apus
 attribute = "@" >s< "abi" >s< "(" abiDeclaration ")" .
 
-abiDeclaration = associatedTypeDeclaration | deinitializerDeclaration | enumCaseDeclaration
+abiDeclaration = associatedTypeDeclaration | deinitializerDeclaration
                | functionDeclaration | initializerDeclaration
                | subscriptDeclaration
-               | typealiasDeclaration | variableDeclaration | constantDeclaration .
+               | variableDeclaration | constantDeclaration .
 ```
 
 ```apus
-attribute = "@" >s< "isolated" >s< "(" identifier ")" .
+isolatedAttribute = "@" >s< "isolated" >s< "(" "any" ")" .
+attribute = isolatedAttribute .
 ```
 
 ```apus
-attribute = "@" >s< "attached"     >s< "(" macroRoleArguments? ")" .
-attribute = "@" >s< "freestanding" >s< "(" macroRoleArguments? ")" .
+attribute = "@" >s< "attached"     >s< "(" macroRoleArguments ")" .
+attribute = "@" >s< "freestanding" >s< "(" macroRoleArguments ")" .
 
 attribute = availableAttribute .
 ```
@@ -2224,8 +2265,7 @@ availabilityAttributeArgument = "obsoleted" ":" platformVersion .
 availabilityAttributeArgument = ( "message" | "renamed" ) ":" availabilityStringLiteral .
 availabilityAttributeArgument = "unavailable" | "noasync" .
 availabilityAttributePlatformName =
-    | identifier ---( "_" "message" "renamed" "introduced" "deprecated" "obsoleted" "unavailable" "noasync"
-                      "await" "mutating" "nonmutating" "consuming" "borrowing" lexerClassifiedKeyword )
+    | identifier ---( "_", "message", "renamed", "introduced", "deprecated", "obsoleted", "unavailable", "noasync", "await", "mutating", "nonmutating", "consuming", "borrowing", lexerClassifiedKeyword )
     | escapedIdentifier
     | propertyWrapperProjection
     .
@@ -2233,7 +2273,7 @@ availabilityStringLiteral = plainStringLiteralToken .
 attribute = "@" >s< "convention" >s< "(" conventionArguments ")" .
 conventionArguments = conventionArgument { "," conventionArgument } .
 conventionArgument = identifierToken | identifierToken ":" conventionValue .
-conventionValue = identifierToken | staticStringLiteral .
+conventionValue = identifierToken | plainStaticStringLiteral .
 
 attribute = "@" >s< "objc" .
 attribute = "@" >s< "objc" >s< "(" objcSelector ")" .
@@ -2272,16 +2312,22 @@ attribute = "@" >s< "backDeployed" >s< "(" "before" ":" backDeployedPlatforms ")
 attribute = "@" >s< "_backDeploy" >s< "(" "before" ":" backDeployedPlatforms ")" .
 
 attribute = "@" >s< "_effects" >s< "(" < effectsToken > ")" .
-effectsToken  = identifier | escapedIdentifier | nonWordToken | literal | operator .
+effectsToken  = identifier | escapedIdentifier | nonWordToken
+              | integerLiteral | floatingPointLiteral | stringLiteral | regularExpressionLiteral
+              | operator .
 backDeployedPlatforms = backDeployedPlatform { "," backDeployedPlatform } .
 
-attribute = "@" >s< "_originallyDefinedIn" >s< "(" "module" ":" staticStringLiteral "," originallyDefinedInPlatforms ")" .
+attribute = "@" >s< "_originallyDefinedIn" >s< "(" "module" ":" plainStaticStringLiteral "," originallyDefinedInPlatforms ")" .
 
 attribute = "@" >s< "_documentation" >s< "(" documentationArguments ")" .
 
 attribute = "@" >s< "_dynamicReplacement" >s< "(" "for" ":" attributeDeclName ")" .
 
-attribute = "@" >s< "_implements" >s< "(" type "," implementsDeclName ")" .
+attribute = "@" >s< "_implements" >s< "(" identifierToken "," implementsDeclName ")" .
+attribute = "@" >s< "_spi" >s< "(" ( identifierToken | "_" ) ")" .
+attribute = "@" >s< "_unavailableFromAsync" [ >s< "(" "message" ":" staticStringLiteral ")" ] .
+attribute = "@" >s< "_expose" >s< "(" "!"? "Cxx" [ "," staticStringLiteral ] ")" .
+attribute = "@" >s< "_swift_native_objc_runtime_base" >s< "(" identifierToken ")" .
 
 attributeDeclName = moduleSelector? attributeDeclBase declNameArguments? .
 attributeDeclBase = memberName | operator | "_" .
@@ -2294,8 +2340,8 @@ documentationArgument  = "visibility" ":" documentationVisibility
                        | "metadata" ":" staticStringLiteral .
 documentationVisibility = "private" | "fileprivate" | "internal" | "package" | "public" | "open" .
 originallyDefinedInPlatforms = originallyDefinedInPlatform { "," originallyDefinedInPlatform } .
-originallyDefinedInPlatform  = platformName platformVersion? | "*" platformVersion? .
-backDeployedPlatform  = platformName platformVersion? .
+originallyDefinedInPlatform = ( platformName | "*" ) platformVersion .
+backDeployedPlatform = platformName platformVersion .
 ```
 
 ```apus
@@ -2306,13 +2352,13 @@ differentiableArguments = differentiableKind
                         | differentiableKind genericWhereClause
                         | differentiableKind "," differentiableWrt genericWhereClause
                         | differentiableWrt genericWhereClause .
-differentiableKind = identifierToken .
+differentiableKind = "reverse" .
 differentiableWrt  = "wrt" ":" differentiabilityArgument
                    | "wrt" ":" "(" differentiabilityArgumentList ")" .
 
 differentiabilityArgumentList = differentiabilityArgument { "," differentiabilityArgument } ","? .
 
-differentiabilityArgument = identifierToken | "self" | selfType | decimalDigits .
+differentiabilityArgument = identifierToken | "self" | decimalDigits .
 ```
 
 ```apus
@@ -2328,18 +2374,18 @@ specializeArgument  = "target" ":" attributeDeclName ","?
                     | "spiModule" ":" effectsToken ","? .
 
 attribute = "@"
-            >-> ( "abi" "attached" "available" "convention" "freestanding" "isolated" "backDeployed" "derivative" "differentiable" "lifetime" "_lifetime" "objc" "specialized" "transpose" "_originallyDefinedIn" "_documentation" "_dynamicReplacement" "_implements" "_backDeploy" "_effects" "_specialize" )
-            >s< attributeName attributeArgumentExprClause? .
+            >-> ( "abi", "attached", "available", "convention", "freestanding", "isolated", "backDeployed", "derivative", "differentiable", "lifetime", "_lifetime", "objc", "specialized", "transpose", "_originallyDefinedIn", "_documentation", "_dynamicReplacement", "_implements", "_spi", "_unavailableFromAsync", "_expose", "_swift_native_objc_runtime_base", "_backDeploy", "_effects", "_specialize" )
+            >s< ( >!>( declarationModifier ) attributeName ) attributeArgumentExprClause? .
 
 attribute = "@"
-            >-> ( "abi" "attached" "available" "convention" "freestanding" "isolated" "backDeployed" "derivative" "differentiable" "lifetime" "_lifetime" "objc" "specialized" "transpose" "_originallyDefinedIn" "_documentation" "_dynamicReplacement" "_implements" "_backDeploy" "_effects" "_specialize" )
+            >-> ( "abi", "attached", "available", "convention", "freestanding", "isolated", "backDeployed", "derivative", "differentiable", "lifetime", "_lifetime", "objc", "specialized", "transpose", "_originallyDefinedIn", "_documentation", "_dynamicReplacement", "_implements", "_backDeploy", "_effects", "_specialize" )
             >s< moduleSelector attributeName attributeArgumentExprClause? .
 
 attributeArgumentExprClause = >s< "(" labeledExpressionList? ","? ")" .
 
-macroRoleArguments = macroRoleArgument { "," macroRoleArgument } .
+macroRoleArguments = macroRole { "," macroRoleArgument } .
 macroRole          = identifierToken | "extension" .
-macroRoleArgument  = macroRole | macroRoleCall | identifierToken ":" macroRoleName .
+macroRoleArgument  = identifierToken ":" macroRoleName .
 macroRoleName      = identifierToken | macroRoleCall .
 macroRoleCall      = identifierToken "(" introducedName ")" .
 introducedName     = attributeDeclBase [ "(" argumentNames ")" ] .
@@ -2354,15 +2400,10 @@ attributeHeadName = identifierToken | selfType .
 typeAttribute = "@" >s< typeAttributeNameWithoutArguments .
 typeAttributeNameWithoutArguments = "_local" | "_noMetadata" | "async" | "escaping" | "noDerivative" | "noescape"
                                   | "preconcurrency" | "retroactive" | "Sendable" | "unchecked" | "autoclosure" .
-typeAttribute = "@" >s< "isolated" >s< "(" identifier ")" .
+typeAttribute = isolatedAttribute .
 typeAttribute = "@" >s< "differentiable" >s< "(" differentiableArguments ")" .
 typeAttribute = "@" >s< "convention" >s< "(" conventionArguments ")" .
-typeAttribute = "@" >-> ( "_local" "_noMetadata" "async" "escaping" "noDerivative" "noescape"
-                           "preconcurrency" "retroactive" "Sendable" "unchecked" "autoclosure"
-                           "isolated" "differentiable" "convention" "rethrows" "abi" "attached"
-                           "available" "backDeployed" "derivative" "freestanding" "lifetime" "objc"
-                           "specialized" "transpose" "_backDeploy" "_documentation" "_dynamicReplacement"
-                           "_effects" "_implements" "_lifetime" "_originallyDefinedIn" "_specialize" )
+typeAttribute = "@" >-> ( "_local", "_noMetadata", "async", "escaping", "noDerivative", "noescape", "preconcurrency", "retroactive", "Sendable", "unchecked", "autoclosure", "isolated", "differentiable", "convention", "rethrows", "abi", "attached", "available", "backDeployed", "derivative", "freestanding", "lifetime", "objc", "specialized", "transpose", "_backDeploy", "_documentation", "_dynamicReplacement", "_effects", "_implements", "_lifetime", "_originallyDefinedIn", "_specialize" )
                 >s< typeAttributeName attributeArgumentExprClause? .
 
 typeAttributeName = attributeHeadName typeGenericArgumentClause?
@@ -2377,7 +2418,7 @@ elseifDirectiveAttributeClause = elseifDirective compilationCondition attributes
 elseDirectiveAttributes = elseDirective attributes? .
 
 nonWordToken = "#available" | "#colorLiteral" | "#elseif" | "#else" | "#endif" | "#error" | "#fileLiteral" | "#if" | "#imageLiteral" | "#keyPath" | "#selector" | "#sourceLocation" | "#unavailable" | "#warning" | "." | "," | ":" | ";" | "=" | "&" | "?" | "!" | "_" | "@".
-nonWordToken = "#" >-> ( "#" "\"" ) .
+nonWordToken = "#" >-> ( "#", "\"" ) .
 ```
 
 
@@ -2409,16 +2450,30 @@ tupleBindingLabel = identifierToken .
 @flavors(optionalBinding)
 tupleBindingElement = [ tupleBindingLabel ":" ] bindingSubpattern .
 @flavors(optionalBinding)
-bindingSubpattern =
-    | wildcardPattern | identifierPattern | tupleBindingPattern
-    | ( "var" | "let" ) ( wildcardPattern | identifierPattern | tupleBindingPattern )
+bindingSubpattern = wildcardPattern | identifierPattern | tupleBindingPattern .
+
+@flavors(optionalBinding)
+forBindingPattern =
+    | wildcardPattern typeAnnotation?
+    | identifierPattern typeAnnotation?
+    | tupleForBindingPattern typeAnnotation?
+    .
+@flavors(optionalBinding)
+tupleForBindingPattern = "(" [ tupleForBindingElementList ","? ] ")" .
+@flavors(optionalBinding)
+tupleForBindingElementList = tupleForBindingElement { "," tupleForBindingElement } .
+@flavors(optionalBinding)
+tupleForBindingElement = [ tupleBindingLabel ":" ] forBindingSubpattern .
+@flavors(optionalBinding)
+forBindingSubpattern =
+    | wildcardPattern | identifierPattern | tupleForBindingPattern
+    | ( "var" | "let" ) ( wildcardPattern | identifierPattern | tupleForBindingPattern )
     .
 ```
 
 ```apus
 matchIdentifierPattern =
-    | identifier ---( "_" "await" lexerClassifiedKeyword )
-    | "deinit" | "subscript"
+    | identifier ---( "_", "await", lexerClassifiedKeyword )
     | escapedIdentifier
     | propertyWrapperProjection
     .
@@ -2463,8 +2518,8 @@ _value-binding-pattern → **var** pattern | **let** pattern_
 valueBindingPattern =
     | "var" @setFlavor(bindingIntroducer) matchPattern
     | "let" @setFlavor(bindingIntroducer) matchPattern
-    | "borrowing" >+> ( identifier "_" ) @setFlavor(bindingIntroducer) matchPattern
-    | "_borrowing" >+> ( identifier "_" ) @setFlavor(bindingIntroducer) matchPattern
+    | "borrowing" >+> ( identifier, "_" ) @setFlavor(bindingIntroducer) matchPattern
+    | "_borrowing" >+> ( identifier, "_" ) @setFlavor(bindingIntroducer) matchPattern
     .
 ```
 
@@ -2560,13 +2615,13 @@ genericParameter =
     | attributes? >-> ( "each" )
                   genericParameterName
     | attributes? "each" genericParameterName ":"
-                  >+> ( identifier escapedIdentifier "Any" "protocol" "~" )
-                  >-> ( "Self" "_" "repeat" )
+                  >+> ( identifier, escapedIdentifier, "Any", "protocol", "~" )
+                  >-> ( "Self", "_", "repeat" )
                   type
     | attributes? >-> ( "each" )
                   genericParameterName ":"
-                  >+> ( identifier escapedIdentifier "Any" "protocol" "~" )
-                  >-> ( "Self" "_" "repeat" )
+                  >+> ( identifier, escapedIdentifier, "Any", "protocol", "~" )
+                  >-> ( "Self", "_", "repeat" )
                   type
     .
 
@@ -2577,9 +2632,7 @@ requirementList = requirement { "," requirement } .
 requirement = conformanceRequirement | sameTypeRequirement | layoutRequirement .
 
 conformanceRequirement = type ":" conformanceRequirementRHS .
-conformanceRequirementRHS = >-> ( "_Trivial" "_TrivialAtMost" "_TrivialStride"
-                                  "_UnknownLayout" "_RefCountedObject" "_NativeRefCountedObject"
-                                  "_Class" "_NativeClass" "_BridgeObject" )
+conformanceRequirementRHS = >-> ( "_Trivial", "_TrivialAtMost", "_TrivialStride", "_UnknownLayout", "_RefCountedObject", "_NativeRefCountedObject", "_Class", "_NativeClass", "_BridgeObject" )
                           type .
 sameTypeRequirement = type "==" ( type | signedIntegerLiteral ) .
 layoutRequirement = type ":" layoutSpecifier layoutRequirementArguments? .
@@ -2600,11 +2653,11 @@ _generic-argument → type | signed-integer-literal_
 ```apus
 genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle >n< >+> ( "(" ) .
 genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle
-                        >+> ( ")" "[" "]" "{" "}" "," ";" ":" "." keyPathDot "?" "!" "&" EOF ) .
+                        >+> ( ")", "[", "]", "{", "}", ",", ";", ":", ".", keyPathDot, "?", "!", "&", EOF ) .
 typeGenericArgumentClause = openAngle [ genericArgumentList ","? ] closeAngle .
 genericArgumentList = genericArgument { "," genericArgument } .
 genericArgument =
-    | @prefer @cannotParse(spacedSuppressedGenericArgument) type
+    | @prefer >!>(spacedSuppressedGenericArgument) type
     | signedIntegerLiteral
     | parenthesizedExpression
     .

@@ -100,7 +100,8 @@ let declarationSnippets: [SwiftSnippet] = [
       var x: Double = z
       """,
         origin: "DeclarationTests.testVariableDeclarations",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a setter requires a getter in the same accessor block"
     ),
     SwiftSnippet(
         label: "testVariableDeclarations#2",
@@ -171,7 +172,8 @@ let declarationSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testVariableDeclarations",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "a variable with a setter must also have a getter"
     ),
     SwiftSnippet(label: "testTypealias#1", source: "typealias Foo = Int", origin: "DeclarationTests.testTypealias", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "testTypealias#2", source: "typealias MyAlias = (_ a: Int, _ b: Double, _ c: Bool, _ d: String) -> Bool", origin: "DeclarationTests.testTypealias", syntaxVersion: "603.0.1"),
@@ -245,7 +247,13 @@ let declarationSnippets: [SwiftSnippet] = [
         origin: "DeclarationTests.testDifferentiableAttribute",
         syntaxVersion: "603.0.1"
     ),
-    SwiftSnippet(label: "testParsePoundError#1", source: #"#error("Unsupported platform")"#, origin: "DeclarationTests.testParsePoundError", syntaxVersion: "603.0.1"),
+    SwiftSnippet(
+        label: "testParsePoundError#1",
+        source: #"#error("Unsupported platform")"#,
+        origin: "DeclarationTests.testParsePoundError",
+        syntaxVersion: "603.0.1",
+        compilerRejects: "#error intentionally emits the supplied error diagnostic"
+    ),
     SwiftSnippet(label: "testParsePoundWarning#1", source: #"#warning("Unsupported platform")"#, origin: "DeclarationTests.testParsePoundWarning", syntaxVersion: "603.0.1"),
     SwiftSnippet(
         label: "testParseSpecializeAttribute#1",
@@ -494,7 +502,8 @@ let declarationSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAccessors",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "only a get accessor may carry effect specifiers"
     ),
     SwiftSnippet(
         label: "testAccessors#2",
@@ -613,7 +622,8 @@ let declarationSnippets: [SwiftSnippet] = [
       func const(_const _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#2",
@@ -621,7 +631,8 @@ let declarationSnippets: [SwiftSnippet] = [
       func isolated(isolated _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#3",
@@ -629,7 +640,8 @@ let declarationSnippets: [SwiftSnippet] = [
       func isolatedConst(isolated _const _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#4",
@@ -637,7 +649,8 @@ let declarationSnippets: [SwiftSnippet] = [
       func nonEphemeralIsolatedConst(@_nonEmphemeral isolated _const _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#5",
@@ -661,7 +674,8 @@ let declarationSnippets: [SwiftSnippet] = [
       func isolatedConst(isolated _const map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#8",
@@ -790,7 +804,8 @@ let declarationSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAttributedMacroExpansionDeclaration",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "public access is not permitted in local scope"
     ),
     SwiftSnippet(
         label: "testAttributedMacroExpansionDeclaration#9",
@@ -813,7 +828,8 @@ let declarationSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAttributedMacroExpansionDeclaration",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "public access is not permitted in local scope"
     ),
     SwiftSnippet(
         label: "testAttributedMacroExpansionDeclaration#11",
@@ -877,7 +893,8 @@ let declarationSnippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testClassWithPrivateSet",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "class properties are restricted to class scope"
     ),
     SwiftSnippet(
         label: "testAttributeInPoundIf#1",
@@ -1090,7 +1107,7 @@ let declarationSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "testVarDeclTuple2#1", source: "func testVarDeclTuple2(_ x: (sending String, String)) {}", origin: "DeclarationTests.testVarDeclTuple2", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "testConstAsArgumentLabel#1", source: "func const(_const: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "testConstAsArgumentLabel#2", source: "func const(_const map: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "603.0.1"),
-    SwiftSnippet(label: "testConstAsArgumentLabel#3", source: "func const(_const x y: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "testConstAsArgumentLabel#3", source: "func const(_const x y: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "603.0.1", compilerRejects: "type specifier before a parameter name is not allowed"),
     SwiftSnippet(
         label: "testCoroutineAccessors#1",
         source: """
@@ -1412,7 +1429,7 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testProtocolParsing",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05", compilerRejects: "subscript in protocol must have explicit { get } or { get set } specif"
     ),
     SwiftSnippet(
         label: "testVariableDeclarations#1",
@@ -1422,7 +1439,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       var x: Double = z
       """,
         origin: "DeclarationTests.testVariableDeclarations",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a setter requires a getter in the same accessor block"
     ),
     SwiftSnippet(
         label: "testVariableDeclarations#2",
@@ -1493,7 +1511,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testVariableDeclarations",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "a variable with a setter must also have a getter"
     ),
     SwiftSnippet(label: "testTypealias#1", source: "typealias Foo = Int", origin: "DeclarationTests.testTypealias", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testTypealias#2", source: "typealias MyAlias = (_ a: Int, _ b: Double, _ c: Bool, _ d: String) -> Bool", origin: "DeclarationTests.testTypealias", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
@@ -1567,7 +1586,13 @@ let declaration604Snippets: [SwiftSnippet] = [
         origin: "DeclarationTests.testDifferentiableAttribute",
         syntaxVersion: "604.0.0-prerelease-2026-06-05"
     ),
-    SwiftSnippet(label: "testParsePoundError#1", source: #"#error("Unsupported platform")"#, origin: "DeclarationTests.testParsePoundError", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+    SwiftSnippet(
+        label: "testParsePoundError#1",
+        source: #"#error("Unsupported platform")"#,
+        origin: "DeclarationTests.testParsePoundError",
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "#error intentionally emits the supplied error diagnostic"
+    ),
     SwiftSnippet(label: "testParsePoundWarning#1", source: #"#warning("Unsupported platform")"#, origin: "DeclarationTests.testParsePoundWarning", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(
         label: "testParseSpecializeAttribute#1",
@@ -1817,7 +1842,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAccessors",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "only a get accessor may carry effect specifiers"
     ),
     SwiftSnippet(
         label: "testAccessors#2",
@@ -1936,7 +1962,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       func const(_const _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#2",
@@ -1944,7 +1971,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       func isolated(isolated _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#3",
@@ -1952,7 +1980,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       func isolatedConst(isolated _const _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#4",
@@ -1960,7 +1989,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       func nonEphemeralIsolatedConst(@_nonEmphemeral isolated _const _ map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#5",
@@ -1984,7 +2014,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       func isolatedConst(isolated _const map: String) {}
       """,
         origin: "DeclarationTests.testModifiedParameter",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type specifier before a parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testModifiedParameter#8",
@@ -2112,7 +2143,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAttributedMacroExpansionDeclaration",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "public access is not permitted in local scope"
     ),
     SwiftSnippet(
         label: "testAttributedMacroExpansionDeclaration#9",
@@ -2135,7 +2167,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testAttributedMacroExpansionDeclaration",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "public access is not permitted in local scope"
     ),
     SwiftSnippet(
         label: "testAttributedMacroExpansionDeclaration#11",
@@ -2199,7 +2232,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testClassWithPrivateSet",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "class properties are restricted to class scope"
     ),
     SwiftSnippet(
         label: "testAttributeInPoundIf#1",
@@ -2411,7 +2445,7 @@ let declaration604Snippets: [SwiftSnippet] = [
     SwiftSnippet(label: "testVarDeclTuple2#1", source: "func testVarDeclTuple2(_ x: (sending String, String)) {}", origin: "DeclarationTests.testVarDeclTuple2", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testConstAsArgumentLabel#1", source: "func const(_const: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
     SwiftSnippet(label: "testConstAsArgumentLabel#2", source: "func const(_const map: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
-    SwiftSnippet(label: "testConstAsArgumentLabel#3", source: "func const(_const x y: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "604.0.0-prerelease-2026-06-05"),
+    SwiftSnippet(label: "testConstAsArgumentLabel#3", source: "func const(_const x y: String) {}", origin: "DeclarationTests.testConstAsArgumentLabel", syntaxVersion: "604.0.0-prerelease-2026-06-05", compilerRejects: "type specifier before a parameter name is not allowed"),
     SwiftSnippet(
         label: "testCoroutineAccessors#1",
         source: """
@@ -2425,7 +2459,8 @@ let declaration604Snippets: [SwiftSnippet] = [
       }
       """,
         origin: "DeclarationTests.testCoroutineAccessors",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "requires the experimental CoroutineAccessors feature"
     ),
     SwiftSnippet(
         label: "testCoroutineAccessorsLegacyFormat#1",

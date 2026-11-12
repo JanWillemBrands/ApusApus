@@ -202,7 +202,7 @@ let expressionSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "testKeyPathMethodAndInitializers#1", source: #"\Foo.method()"#, origin: "ExpressionTests.testKeyPathMethodAndInitializers", syntaxVersion: "603.0.1", disabledReason: "experimental feature"),
     SwiftSnippet(label: "testKeyPathMethodAndInitializers#2", source: #"\Foo.method(10)"#, origin: "ExpressionTests.testKeyPathMethodAndInitializers", syntaxVersion: "603.0.1", disabledReason: "experimental feature"),
     // PROBE (TODO 39): does swift-syntax PARSE a parenthesized key-path with outer postfix?
-    // The `@cannotParse(keyPathExpression)` proposal relies on this staying legal as the escape
+    // The `>!>(keyPathExpression)` proposal relies on this staying legal as the escape
     // hatch; nothing in the corpus covered it.
     SwiftSnippet(label: "probeParenKeyPathPostfix#1", source: #"(\Foo).method<Int>()"#,
                  origin: "TODO39 probe", syntaxVersion: "603.0.1"),
@@ -1147,7 +1147,8 @@ let expressionSnippets: [SwiftSnippet] = [
       _ = { (_const x: Int) in }
       """,
         origin: "ExpressionTests.testClosureParameterWithModifier",
-        syntaxVersion: "603.0.1"
+        syntaxVersion: "603.0.1",
+        compilerRejects: "type specifier before a closure parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testClosureWithExternalParameterName#1",
@@ -2523,7 +2524,8 @@ let expression604Snippets: [SwiftSnippet] = [
       _ = { (_const x: Int) in }
       """,
         origin: "ExpressionTests.testClosureParameterWithModifier",
-        syntaxVersion: "604.0.0-prerelease-2026-06-05"
+        syntaxVersion: "604.0.0-prerelease-2026-06-05",
+        compilerRejects: "type specifier before a closure parameter name is not allowed"
     ),
     SwiftSnippet(
         label: "testClosureWithExternalParameterName#1",

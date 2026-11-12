@@ -6,7 +6,7 @@ Make token lookaround a first-class zero-width sequence predicate, in the same
 placement class as layout boundaries:
 
 ```apus
-A = X >+>(")" EOF) Y .
+A = X >+>(")", EOF) Y .
 A = X >->("(") Y .
 A = X <+<(identifier) Y .
 A = X <-<(operator) Y .
@@ -38,7 +38,7 @@ Core token lookaround has been moved into sequence-boundary nodes:
 - `>+>`, `>->`, `<+<`, and `<-<` in production bodies are `.B` boundary nodes
   with a structured `BoundaryPredicate`, parsed in sequence position and
   evaluated by `MessageParser.boundaryMatches(_ node:at:)`.
-- Leading alternate `@canParse` / `@cannotParse` with nonterminal operands is
+- Leading alternate `>?>` / `>!>` with nonterminal operands is
   stored on the `.ALT` node as `forwardPredicates`, then evaluated by the Oracle
   as a parse-forest predicate.
 
@@ -96,7 +96,7 @@ Operand resolution rules:
 - bare `EOF` resolves to the end-of-input sentinel;
 - unknown operands should be grammar errors.
 
-Keep leading alternate `@canParse(N)` / `@cannotParse(N)` with nonterminal operands
+Keep leading alternate `>?>(N)` / `>!>(N)` with nonterminal operands
 as a distinct Oracle predicate. It is not token lookaround.
 
 ## Runtime Evaluation

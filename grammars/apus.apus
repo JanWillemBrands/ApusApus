@@ -11,7 +11,7 @@ literal     - /\"(?:[^\"\\]|\\.)+\"/ .
 regex       - /\/(?!\*)(?:[^\/\\]|\\.)+\// .
 
 // Grammar of pragmas
-pragma      - /@\p{XID_Start}\p{XID_Continue}*/ .
+pragmaHead  - /@\p{XID_Start}\p{XID_Continue}*/ .
 
 // Grammar of test messages
 message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
@@ -43,12 +43,16 @@ terminal    = identifier [ exclusion ]
             .
 
 // Grammar of annotations
+pragma      = pragmaHead [ "(" identifier { "," identifier } ","? ")" ] .
 
-exclusion   = "---" "(" < literal > ")" .
+exclusion   = "---" "(" ( literal | identifier ) { "," ( literal | identifier ) } ","? ")" .
 
 spacing     = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
 
-lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EOF" > ")" .
+lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" ( literal | identifier ) { "," ( literal | identifier ) } ","? ")"
+            | ( ">?>" | ">!>" ) "(" identifier { "," identifier } ","? ")" // canParse? cannotParse!
+            .
+
 
 // Grammar of pragma placement — SUBSTITUTE PRODUCTIONS, COMMENTED OUT
 //
@@ -126,7 +130,7 @@ literal     - /\"(?:[^\"\\]|\\.)+\"/ .
 regex       - /\/(?!\*)(?:[^\/\\]|\\.)+\// .
 
 // Grammar of pragmas
-pragma      - /@\p{XID_Start}\p{XID_Continue}*/ .
+pragmaHead  - /@\p{XID_Start}\p{XID_Continue}*/ .
 
 // Grammar of test messages
 message     - /\^\^\^(?:(?s).*?)(?=\^\^\^|$)/ .
@@ -158,12 +162,16 @@ terminal    = identifier [ exclusion ]
             .
 
 // Grammar of annotations
+pragma      = pragmaHead [ "(" identifier { "," identifier } ","? ")" ] .
 
-exclusion   = "---" "(" < literal > ")" .
+exclusion   = "---" "(" ( literal | identifier ) { "," ( literal | identifier ) } ","? ")" .
 
 spacing     = ">>|" | "|<<" | "<n>" | "<s>" | ">n<" | ">s<" .
 
-lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" < literal | identifier | "EOF" > ")" .
+lookaround  = ( "<+<" | "<-<" | ">+>" | ">->" ) "(" ( literal | identifier ) { "," ( literal | identifier ) } ","? ")"
+            | ( ">?>" | ">!>" ) "(" identifier { "," identifier } ","? ")" // canParse? cannotParse!
+            .
+
 
 // Grammar of pragma placement — SUBSTITUTE PRODUCTIONS, COMMENTED OUT
 //

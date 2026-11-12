@@ -129,7 +129,7 @@ struct SpecialTokenTests {
                 label: "negative token lookbehind boundary"
             ),
             TestCase(
-                grammar: #"S = ( "a" | "c" | "d" ) <-<( blocked "d" ) "b" . blocked = "c" ."#,
+                grammar: #"S = ( "a" | "c" | "d" ) <-<( blocked, "d" ) "b" . blocked = "c" ."#,
                 pass: ["ab", "a b"],
                 fail: ["cb", "db"],
                 label: "token lookbehind names a set, mixed with a literal"
@@ -184,7 +184,7 @@ struct SpecialTokenTests {
 
         static let cases: [TestCase] = [
             TestCase(
-                grammar: #"id - /[a-z]+/. S = "if" safeId "end" | safeId. safeId = id ---("if" "end")."#,
+                grammar: #"id - /[a-z]+/. S = "if" safeId "end" | safeId. safeId = id ---("if", "end")."#,
                 pass: ["if foo end", "foo"],
                 fail: ["if", "end"],
                 label: "basic exclusion suppresses keyword as identifier"
@@ -214,8 +214,8 @@ struct SpecialTokenTests {
             ),
             TestCase(
                 grammar: #"id - /[a-z]+/. S = "if" bareId | bareId. bareId = id ---()."#,
-                pass: ["foo", "if", "if foo"],
-                label: "empty exclusion list"
+                illegalGrammar: true,
+                label: "empty exclusion list is an error"
             ),
             TestCase(
                 grammar: #"id - /[a-z]+/. S = "if" | safeId. safeId = id ---("if")."#,
@@ -223,13 +223,13 @@ struct SpecialTokenTests {
                 label: "exclusion does not suppress keyword terminal"
             ),
             TestCase(
-                grammar: #"id - /[a-z]+/. S = "if" atom "end" | atom. atom = safeId. safeId = id ---("if" "end")."#,
+                grammar: #"id - /[a-z]+/. S = "if" atom "end" | atom. atom = safeId. safeId = id ---("if", "end")."#,
                 pass: ["if foo end", "foo"],
                 fail: ["if", "end"],
                 label: "exclusion through nonterminal"
             ),
             TestCase(
-                grammar: #"id - /[a-z]+/. S = "if" safeId | "do" safeId | "for" safeId | safeId. safeId = id ---("if" "do" "for")."#,
+                grammar: #"id - /[a-z]+/. S = "if" safeId | "do" safeId | "for" safeId | safeId. safeId = id ---("if", "do", "for")."#,
                 pass: ["foo", "if foo", "do foo", "for foo"],
                 fail: ["if", "do", "for"],
                 label: "multiple keywords all excluded"
@@ -249,8 +249,8 @@ struct SpecialTokenTests {
 
         @Test("exclusion reduces descriptors")
         func testDescriptorReduction() throws {
-            let grammarWithout = #"id - /[a-z]+/. S = "if" safeId "end" | safeId. safeId = id ---()."#
-            let grammarWith    = #"id - /[a-z]+/. S = "if" safeId "end" | safeId. safeId = id ---("if" "end")."#
+            let grammarWithout = #"id - /[a-z]+/. S = "if" safeId "end" | safeId. safeId = id ."#
+            let grammarWith    = #"id - /[a-z]+/. S = "if" safeId "end" | safeId. safeId = id ---("if", "end")."#
 
             let (matchedWithout, descWithout) = try Self.parseWithStats(grammar: grammarWithout, message: "if foo end")
             let (matchedWith, descWith) = try Self.parseWithStats(grammar: grammarWith, message: "if foo end")

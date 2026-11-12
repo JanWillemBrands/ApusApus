@@ -11,7 +11,7 @@
 // Paper: cU — current cluster index (identifies a CRF cluster node together with the nonterminal; its value is the input position where the nonterminal was called)
 // Paper: R = pending descriptors, U = processed descriptors
 // Paper: dscAdd/dscGet = descriptor operations, ntAdd = nonterminal alternates
-// Paper: call = enter nonterminal, rtn = return from nonterminal
+// Paper: call = enter (nonterminal), rtn = leave (return from nonterminal)
 // Paper: bsrAdd = add BSR element
 
 import OSLog
@@ -100,7 +100,7 @@ class MessageParser {
 
     // MARK: - LCNP lex API
     /// Per-terminal lex queries the parser issues at every `.T`/`.TI`/`.C` slot
-    /// and every `testSelect` / `continuationViable` callsite.
+    /// and every `viable` / `continuationViable` callsite.
     /// Backed by `OnDemandLiteralLexer` against `input` directly: literals via
     /// `hasPrefix`, regex via `prefixMatch`, trivia (whitespace + structured `:`
     /// non-terminal recognisers) via `skipTrivia`.
@@ -116,32 +116,6 @@ class MessageParser {
     weak var outerLookbehindParser: MessageParser?
     var outerLookbehindLocalStart: CharPosition?
     var outerLookbehindAnchor: CharPosition?
-
-    /// Recogniser for parse predicates on a nonterminal the grammar never parses (`Oracle`
-    /// `LookaheadPredicateRule`). Built on first use; memoised per (target, position).
-    private var predicateRecogniser: MessageParser?
-    private var predicateMemo: [ParsePosition: Bool] = [:]
-
-    /// swift-syntax `canParseAsXxx`: can `target` derive starting at `pos`? A speculative sub-parse
-    /// with the main parse's own lexer (trivia, structured tokens, `@preempt`), so it answers the
-    /// question a raw-forest yield would have answered, had the parse called `target` there. No root
-    /// is FOLLOW-gated, so a derivation that stops short of the input end still counts.
-    func canDerive(_ target: GrammarNode, at pos: CharPosition) -> Bool {
-        let key = ParsePosition(slot: target, index: pos)
-        if let hit = predicateMemo[key] { return hit }
-        let recogniser: MessageParser
-        if let existing = predicateRecogniser {
-            recogniser = existing
-        } else {
-            recogniser = MessageParser(grammar: grammar)
-            recogniser.prepareInput(input: input)
-            predicateRecogniser = recogniser
-        }
-        recogniser.runGLL(root: target, start: pos)
-        let derives = recogniser.yield(of: target).contains { $0.i == pos }
-        predicateMemo[key] = derives
-        return derives
-    }
 
     /// True when this parser instance is a recogniser sub-parser (structured `:` trivia or
     /// structured `-` lexical nonterminal, prepared with `isSubParser: true`). Such a root is a RECOGNISER: it may
@@ -160,7 +134,7 @@ class MessageParser {
     // MARK: - Lex memoization
     /// `(pos, terminalID) → [LexMatch]` cache. Lex queries are pure given the
     /// input; the same (pos, terminalID) is asked many times during a parse
-    /// (one query per terminal in `firstBS` per `testSelect` invocation; plus
+    /// (one query per terminal in `firstBS` per `viable` invocation; plus
     /// dual visits to the same position via descriptor re-entry). Without
     /// memoization the per-terminal LCNP migration would re-run pattern
     /// matching tens of thousands of times.
@@ -216,7 +190,7 @@ class MessageParser {
     /// Where the real token starts at `pos`, i.e. `skipTrivia(from: pos)` — remembered for the LAST
     /// position only.
     ///
-    /// Deliberately ONE pair rather than a dictionary. `testSelect` asks every terminal in a FIRST
+    /// Deliberately ONE pair rather than a dictionary. `viable` asks every terminal in a FIRST
     /// set about the same position, consecutively, so a single remembered pair collapses that whole
     /// ~100× fan-out with no allocation and no `String.Index` hashing. A full memo table would pay a
     /// dictionary probe on every lex call to cache a value nothing reads afterwards — the answer is
@@ -282,6 +256,11 @@ class MessageParser {
     var descriptorCount = 0
     var duplicateDescriptorCount = 0
     var suppressedDescriptorCount = 0
+    /// `APUS_DECISION_STATS=1` (Descriptor.swift): calls that selected an alternative, and the
+    /// calls that selected more than one, of the last full parse.
+    var decisionCalls = 0
+    var decisionLog: [Decision] = []
+    var emptyCalls: Set<ParsePosition> = []
 
     // MARK: - Call Return Forest (Paper: CRF)
     var crf: [ParsePosition: ParseCluster] = [:]
@@ -294,9 +273,22 @@ class MessageParser {
     /// `MessageParser` instance with its own `yields` array.
     var yields: [Set<BinarySpan>] = []
     /// The nodes whose yield set may be non-empty, so a new run empties only those. A recogniser
-    /// (`canDerive`) runs once per anchor over a few tokens; emptying every node's set each time
-    /// (thousands of them, with flavors) cost more than the sub-parse itself.
+    /// sub-parse runs over a few tokens; emptying every node's set each time (thousands of them,
+    /// with flavors) cost more than the sub-parse itself.
     var touchedYieldNodes: [Int] = []
+
+    /// The ends of `root`'s readings from `origin` that accept the input: the input's end, or an end
+    /// followed only by trivia (an EOS lex at `j` trivia-skips and matches iff it reaches the end).
+    /// This makes comment-only and trailing-comment inputs succeed against rules like
+    /// `topLevelDeclaration = statements?`. The one definition of "the parse accepts": the parse
+    /// count, the Oracle, `DerivationBuilder` and the tests all use it.
+    func acceptingEnds(of root: GrammarNode, from origin: CharPosition) -> Set<CharPosition> {
+        var ends = Set<CharPosition>()
+        for y in yield(of: root) where y.i == origin {
+            if y.j == input.endIndex || !lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty { ends.insert(y.j) }
+        }
+        return ends
+    }
 
     /// Read accessor for consumers (Oracle, diagrams, tests). Inside the
     /// parser/BSR hot path we use direct `yields[node.number]` access.
@@ -560,8 +552,6 @@ class MessageParser {
         // Mirrors swift's `scanRegexLiteral`. Memoised per position, so the cost is one sub-parse per
         // distinct candidate split point. Skipped for sub-parsers (would recurse).
         preemptViable.removeAll(keepingCapacity: true)
-        predicateRecogniser = nil
-        predicateMemo.removeAll(keepingCapacity: true)
         if !isSubParser {
             for (name, pat) in grammar.terminals {
                 guard let tid = grammar.symbolToID[name],
@@ -647,6 +637,7 @@ class MessageParser {
         unique = []; remaining = []
         failedParses = 0; successfullParses = 0
         descriptorCount = 0; duplicateDescriptorCount = 0; suppressedDescriptorCount = 0
+        if root === grammar.root { decisionCalls = 0; decisionLog.removeAll(keepingCapacity: true); emptyCalls.removeAll(keepingCapacity: true) }
         crf = [:]; yieldCount = 0
         // Size the BSR yields array to THIS grammar's node count. Node numbers
         // are compact per grammar ([0, nodeCount)), assigned by a per-load
@@ -672,19 +663,11 @@ class MessageParser {
         addDescriptorsForAlternates(X: rootNode, k: origin, i: origin)
 
         // Run GLL algorithm
-        var progressCounter = 0
-        let progressInterval = 10_000
         nextDescriptor: while getDescriptor() {
-            progressCounter += 1
-            if progressCounter % progressInterval == 0 {
-//                print("  progress: \(progressCounter) descriptors processed, token \(cI.tokenIndex)/\(totalTokens), pending \(remaining.count), crf \(crf.count)")
-            }
-
             while true {
-
-//                trace = false
-//                trace("slot: \(String(format: "%2d", cL.number)) \(cL.ebnfDot()) first \(cL.first) follow \(cL.follow) at: \(input.linePosition(of: cI))")
-
+                // A parse predicate or `@left`/`@right` question is asked where this slot starts
+                // (`slotProbes`).
+                if !cL.slotProbes.isEmpty { for target in cL.slotProbes { probe(target, at: cI) } }
                 switch cL.kind {
                 case .EPS:
                     addYield(L: cL, i: cU, k: cI, j: cI)
@@ -725,17 +708,13 @@ class MessageParser {
                         continue nextDescriptor
                     }
                 case .N:
-                    call()
+                    enter()
                     continue nextDescriptor
                 case .ALT:
-                    print("ERROR: Unexpected .ALT node in cL")
-                    print("  cL.number: \(cL.number)")
-                    print("  cL.name: '\(cL.name)'")
-                    print("  cL.seq: \(String(describing: cL.seq))")
-                    print("  cL.alt: \(String(describing: cL.alt))")
-                    fatalError(#function + ": ALT should not happen here")
+                    // ALT nodes are always skipped by e.g. cL = cL.seq!
+                    fatalError(#function + ": ALT should not happen in \(String(describing: cL))")
                 case .DO, .POS:
-                    bracketCall(bracket: cL)
+                    enterBracket(bracket: cL)
                     continue nextDescriptor
                 case .OPT, .KLN:
                     // OPT/KLN: also offer skip-past-bracket path (they're nullable).
@@ -747,7 +726,7 @@ class MessageParser {
                     } else {
                         recordSuppressedContinuation(cL.seq!, at: cI)
                     }
-                    bracketCall(bracket: cL)
+                    enterBracket(bracket: cL)
                     continue nextDescriptor
                 case .END:
                     // the seq link of an END node always points back to a starting bracket node (N, DO, OPT, POS, KLN)
@@ -766,11 +745,11 @@ class MessageParser {
                         //     end-of-rule step as PER-CHILD: "For each child (Y ::= νX · µ, l) of
                         //     (X, cU), provided that valid(cI, predict(µ, Y)) is true, a descriptor
                         //     … is created". `predict(µ, Y)` is the CONTINUATION's predict set —
-                        //     that is `continuationViable`, applied inside `rtn`. LCNP has no
+                        //     that is `continuationViable`, applied inside `leave`. LCNP has no
                         //     global-`follow(X)` gate here. (The `I[cI] ∈ follow(X)` pop guard is
                         //     from the EBNF paper, a different variant; ApusApus follows LCNP.)
                         //   • The global test was also strictly weaker: `FIRST(continuation) ⊆
-                        //     FOLLOW(X)`, so it pruned nothing `rtn` does not, and it cost 2.882s of
+                        //     FOLLOW(X)`, so it pruned nothing `leave` does not, and it cost 2.882s of
                         //     a 3.76s `Oracle.swift` parse because ApusApus has no precomputed `tΣᵢ`
                         //     and must probe `follow(X)` one terminal at a time.
                         //
@@ -779,14 +758,14 @@ class MessageParser {
                         // 391,857, because per-edge FIRST sets are subsets of the FOLLOW union and
                         // `cachedLex` dedupes them. `Oracle.swift` 3.77s → 1.03s.
                         //
-                        // Diagnostics are not lost: `rtn` records `recordSuppressedContinuation`
+                        // Diagnostics are not lost: `leave` records `recordSuppressedContinuation`
                         // per rejected edge, which is finer-grained than the old whole-completion
                         // `recordMismatch`.
                         addYield(L: bracket, i: cU, k: cU, j: cI)
-                        rtn(X: bracket)
+                        leave(X: bracket)
                         continue nextDescriptor
                     case .DO, .OPT, .KLN, .POS:
-                        bracketRtn(bracket: bracket)
+                        leaveBracket(bracket: bracket)
                         continue nextDescriptor
                    default:
                         fatalError("\(#function) unexpected bracket kind at END seq link \(bracket.kind)")
@@ -796,25 +775,15 @@ class MessageParser {
                     // overwrites `grammar.root` with the start nonterminal. A bare `break`
                     // here would leave the switch but not the `while true`, i.e. hang
                     // silently — fail loudly instead, as the .ALT arm does.
-                    fatalError(#function + ": EOS should not happen here")
+                    fatalError(#function + ": EOS should not happen in \(String(describing: cL))")
                 }
             }
         }
 
-        // For a full parse this counts root yields covering [origin..input.endIndex].
-        // For a sub-parse (root != grammar.root), the caller will read yield(of: root)
-        // directly to discover accepting end positions.
-        // A yield ending at `y.j` also counts when only trivia separates `y.j` from
-        // `input.endIndex`: ask the lexer for EOS at `y.j`, which internally trivia-skips
-        // and returns a match iff the scan reaches `input.endIndex`. This makes
-        // comment-only / trailing-comment inputs succeed against rules like
-        // `topLevelDeclaration = statements?`.
-        successfullParses = yield(of: currentParseRoot).filter { y in
-            guard y.i == origin else { return false }
-            if y.j == input.endIndex { return true }
-            return !lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty
-        }.count
-//        trace = false
+        // For a sub-parse (root != grammar.root), the caller reads yield(of: root) directly to
+        // discover accepting end positions.
+        successfullParses = acceptingEnds(of: currentParseRoot, from: origin).count
+
         // Skip the diagnostic prints for sub-parses (structured recogniser runs);
         // they fire at every trivia-skip position and drown out the console.
         guard root === grammar.root else { return }
@@ -866,7 +835,6 @@ class MessageParser {
     /// Every terminal in the grammar that matches at `pos`, with its extents. This is the
     /// multi-lexicalisation fan at a single position.
     func dumpLexicalisations(at pos: CharPosition, label: String = "") {
-        let idToName = Dictionary(grammar.symbolToID.map { ($0.value, $0.key) }, uniquingKeysWith: { a, _ in a })
         print("lex-trace: lexicalisations at \(input.linePosition(of: pos))\(label.isEmpty ? "" : " (\(label))"):")
         var rows: [(String, String)] = []
         for (name, _) in grammar.terminals {
@@ -944,7 +912,7 @@ class MessageParser {
         let posStr = input.linePosition(of: pos)
         print("Match explanation for '\(slot.name)' (id=\(id)) at \(posStr):")
 
-        let raw = cachedLex(at: pos, terminalID: id)
+        let raw = cachedLex(at: pos, terminalID: id, suppressesLeadingTrivia: slot.suppressesLeadingTrivia)
         print("  lex: \(raw.count) match(es)")
         for m in raw {
             print("    start=\(input.linePosition(of: m.start)) end=\(input.linePosition(of: m.end)) triviaEnd=\(input.linePosition(of: m.triviaEnd)) image='\(input[m.start..<m.end])'")
@@ -956,10 +924,14 @@ class MessageParser {
 
         var survivors = raw
 
+        // The same exclusion test as `tokenMatch`. (`tokenMatch` applies no FOLLOW-based
+        // predict filter, so neither does this explanation.)
         if !slot.excludeBS.isEmpty {
             survivors = survivors.filter { m in
                 for eID in slot.excludeBS where eID != id && eID != grammar.epsilonID {
-                    for em in cachedLex(at: pos, terminalID: eID) where em.triviaEnd == m.triviaEnd {
+                    let excluded = exclusionLex(at: pos, terminalID: eID,
+                                                suppressesLeadingTrivia: slot.suppressesLeadingTrivia)
+                    for em in excluded where em.start == m.start && em.end == m.end {
                         return false
                     }
                 }
@@ -969,28 +941,6 @@ class MessageParser {
             if survivors.isEmpty { return }
         } else {
             print("  after exclude:    \(survivors.count)  (no exclude on this terminal)")
-        }
-
-        let predictBS = slot.followBS
-        if !predictBS.isEmpty && !predictBS.contains(grammar.epsilonID) {
-            let idToName = Dictionary(uniqueKeysWithValues: grammar.symbolToID.map { ($0.value, $0.key) })
-            let names = predictBS.compactMap { idToName[$0] }.sorted()
-            print("  predict (followBS): \(names.joined(separator: ","))")
-            survivors = survivors.filter { m in
-                if m.triviaEnd >= input.endIndex { return true }
-                for fID in predictBS where fID != grammar.epsilonID {
-                    if !cachedLex(at: m.triviaEnd, terminalID: fID).isEmpty { return true }
-                }
-                return false
-            }
-            print("  after predict:    \(survivors.count)")
-            if survivors.isEmpty {
-                let triedAt = raw.first.map { input.linePosition(of: $0.triviaEnd) } ?? "?"
-                let next = raw.first.map { sourceSnippet(at: $0.triviaEnd) } ?? ""
-                print("    -> nothing in predict set lexes at \(triedAt); next content is '\(next)'")
-            }
-        } else {
-            print("  predict: skipped (empty or nullable)")
         }
 
         if !survivors.isEmpty {
@@ -1198,15 +1148,26 @@ class MessageParser {
         }
     }
 
-    /// Test whether the current token is in the selection set for a grammar slot.
-    /// Returns true if some terminal that LCNP can lex at `cI` is in
-    ///   FIRST(slot)  ∨  (ε ∈ FIRST(slot) ∧ FOLLOW(bracket))
+    /// Can the alternate `slot` of `bracket` start at `cI`? Its leading gates must hold, and
+    /// some terminal that LCNP can lex at `cI` is in
+    ///   FIRST(slot)  ∨  (mayBeEmpty ∧ ε ∈ FIRST(slot) ∧ FOLLOW(bracket))
+    /// `mayBeEmpty` is false where the bracket rule forbids an empty round (see
+    /// `addDescriptorsForAlternates`).
     ///
     /// Phase D Step 3: the Schrödinger `---(…)` exclude semantic is now a
     /// per-end LCNP filter — for each candidate terminal in the predict set,
     /// suppress its matches whose end coincides with an excluded terminal's
     /// match at this position.
-    func testSelect(slot: GrammarNode, bracket: GrammarNode) -> Bool {
+    func viable(slot: GrammarNode, bracket: GrammarNode, mayBeEmpty: Bool) -> Bool {
+        // The alternate's leading zero-width gates (`>n<`, `<s>`, `>+>(…)`, …) must hold here. FIRST
+        // looks through them, so without this an alternate whose gate fails is selected and dies at
+        // the gate. Exact: the parse loop applies the same `boundaryMatches` (and records the
+        // gate's yield there, which is why the gate is evaluated again).
+        var gate = slot.seq
+        while let g = gate, g.kind == .B {
+            if !boundaryMatches(g, at: cI) { return false }
+            gate = g.seq
+        }
         func anyTerminalMatches(in bs: BitSet) -> Bool {
             for kID in bs {
                 if kID == grammar.epsilonID { continue }
@@ -1231,8 +1192,8 @@ class MessageParser {
         }
 
         if anyTerminalMatches(in: slot.firstBS) { return true }
-        if slot.firstBS.contains(grammar.epsilonID),
-           anyTerminalMatches(in: bracket.followBS) { return true }
+        if mayBeEmpty, slot.firstBS.contains(grammar.epsilonID),
+           bracket.followedByAnything || anyTerminalMatches(in: bracket.followBS) { return true }
         return false
     }
 
@@ -1307,10 +1268,16 @@ class MessageParser {
     }
 
     /// Test whether a continuation grammar slot can proceed with input at the
-    /// given position. Used to suppress descriptors in rtn/bracketRtn/pop replay
+    /// given position. Used to suppress descriptors in leave/leaveBracket/pop replay
     /// when the continuation cannot match. Conservative: returns true for
     /// nullable, END, EPS, and zero-width boundaries to avoid false rejections.
-    func continuationViable(continuation: GrammarNode, at position: CharPosition) -> Bool {
+    func continuationViable(continuation start: GrammarNode, at position: CharPosition) -> Bool {
+        var continuation = start
+        // Leading zero-width gates must hold here (exact, as in the parse loop).
+        while continuation.kind == .B {
+            if !boundaryMatches(continuation, at: position) { return false }
+            continuation = continuation.seq!
+        }
         // Structural nodes that don't consume input are always viable
         if continuation.kind == .END || continuation.kind == .EPS || continuation.kind == .B { return true }
         // Nullable continuation: can't determine without enclosing FOLLOW context

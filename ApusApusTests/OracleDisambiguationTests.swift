@@ -55,9 +55,168 @@ struct OracleDisambiguationTests {
             // Control: without @prefer, @left(P) removes A's readings and S -> B stays.
             let control = try parseOracleAmbiguity(grammar: g.replacingOccurrences(of: "@prefer ", with: ""), message: "1 + 2 + 3")
             #expect(control.postMatch && control.isUnambiguous, "without @prefer, S -> B is the one reading")
-            withKnownIssue("Swift runs @prefer before @left/@right (Bend/SPEC.bend puts hard rules first)") {
-                #expect(r.postMatch, "the spec keeps S -> B; Swift removed every reading")
+            #expect(r.postMatch, "the spec keeps S -> B: @left/@right run before @prefer")
+        }
+    }
+
+    // MARK: - Decided semantics (2026-11-09, documentation/Oracle.md § 5)
+
+    /// The meanings that were chosen rather than derived, and the edge cases of the Oracle's
+    /// graph pipeline, each as one small grammar. If one of these changes, a design decision
+    /// changed: update documentation/Oracle.md § 5 and Bend/README.md ("Design choices") with it.
+    @Suite("Decided semantics", .serialized)
+    struct DecidedSemantics {
+
+        /// The `f(1) {}⏎{}` pattern of Swift.apus. `P K` is a parenless closure call; its callee
+        /// may not be an argument call (`@right(AC)`) nor itself (`@right`). Bare `@right` asks
+        /// plain "derives" (Bend/SPEC.bend `EdgeOk`): `P K` derives `f ( ) { }` with the callee
+        /// `f ( )`, its own `@right(AC)` notwithstanding, so the chain `f ( ) { } { }` is forbidden.
+        /// swift-syntax chains it (TODO.md, "Grammar rework for the Oracle").
+        static let closureCall = #"S = F . F = AC | P "(" ")" K | @right @right(AC) P K . AC = P "(" ")" . P = "f" | F . K = "{" "}" ."#
+
+        @Test("bare @right: plain derives, the alternative's own filters do not count")
+        func bareRightPlainDerives() throws {
+            let r = try parseOracleAmbiguity(grammar: Self.closureCall, message: "f ( ) { } { }")
+            #expect(r.rawMatch, "GLL reads the chain")
+            #expect(!r.postMatch, "`P K` derives `f ( ) { }`, so it may not be the callee of `P K`")
+        }
+
+        @Test("bare @right: a parenless closure call may not be its own callee")
+        func bareRightForbidsItself() throws {
+            let r = try parseOracleAmbiguity(grammar: Self.closureCall, message: "f { } { }")
+            #expect(r.rawMatch, "GLL reads the chain")
+            #expect(!r.postMatch, "the parenless call `f { }` may not be the callee of another parenless call")
+        }
+
+        /// Nonterminal `@longest` is local, as for brackets (Bend/SPEC.bend `ExtentBest`): a reading
+        /// of a marked nonterminal loses only to a longer reading of the SAME enclosing sequence. The
+        /// argless macro `# e` followed by a call `( )` and the macro with its argument clause
+        /// `# e ( )` sit in different enclosing sequences, so `@longest` keeps both (until 2026-11-10
+        /// it was global per start and kept only the second). A same-span `@prefer` decides it, as
+        /// Swift.apus does on `postfixExpression`.
+        @Test("nonterminal @longest is local: different enclosing sequences are no rivals")
+        func nonterminalExtentLocal() throws {
+            let g = ##"S = P . P = M | P "(" ")" . @longest M = "#" "e" [ "(" ")" ] ."##
+            let r = try parseOracleAmbiguity(grammar: g, message: "# e ( )")
+            #expect(r.postMatch)
+            #expect(!r.isUnambiguous, "both readings stay: \(r.diagnostics)")
+            let preferred = try parseOracleAmbiguity(grammar: g.replacingOccurrences(of: "P = M |", with: "P = @prefer M |"), message: "# e ( )")
+            #expect(preferred.postMatch)
+            #expect(preferred.isUnambiguous, "\(preferred.diagnostics)")
+        }
+
+        /// Several marks in one sequence are served left to right (Bend/SPEC.bend, phase 3): the
+        /// first marked item takes the best length that still lets the sequence be read, the next
+        /// takes the best of what is left. Applied all at once, the first `A` wanted `(a a)( )` and
+        /// the second `( )(a a)`, and no reading survived.
+        @Test("several marks in one sequence: first come, first served", arguments: ["@longest", "@shortest"])
+        func severalMarksLeftToRight(_ mark: String) throws {
+            let g = "S = A A . \(mark) A = { \"a\" } ."
+            let r = try parseOracleAmbiguity(grammar: g, message: "a a")
+            #expect(r.rawMatch)
+            #expect(r.postMatch, "a reading stays")
+            #expect(r.isUnambiguous, "\(r.diagnostics)")
+        }
+
+        /// Bare `@left` asks whether the alternate could derive the last child's TEXT, not whether
+        /// the last child IS such a node (Bend/SPEC.bend, Guard, note 2). On `1 + 2 + 3` the last
+        /// child `2 + 3` of `E "+" E` is out also where it was read via `E "+" F`; that tree was the
+        /// last to read `2 + 3` as an `E`, so afterwards no `E` spans it.
+        @Test("bare @left goes by the text, not the node")
+        func bareLeftByText() throws {
+            let input = "1 + 2 + 3"
+            let (raw, post, matched) = try withParserIsolation { () -> (Bool, Bool, Bool) in
+                let parser = try ApusParser(fromString: "whitespace : /\\s+/.\n" + #"n - /[0-9]+/ . E = @left E "+" E | E "+" F | n . F = n ."#)
+                let grammar = try parser.parse(explicitStartSymbol: "")
+                let mp = MessageParser(grammar: grammar)
+                mp.parse(input: input)
+                let e = try #require(grammar.nonTerminals["E"])
+                let two = input.firstIndex(of: "2")!
+                func spansTwoPlusThree() -> Bool { mp.yield(of: e).contains { $0.i == two && $0.j == input.endIndex } }
+                let raw = spansTwoPlusThree()
+                Oracle(parser: mp, input: input).disambiguate()
+                return (raw, spansTwoPlusThree(), !mp.acceptingEnds(of: grammar.root, from: input.startIndex).isEmpty)
             }
+            #expect(raw, "GLL reads `2 + 3` as an E")
+            #expect(!post, "no remaining tree reads `2 + 3` as the last child of `E \"+\" E`")
+            #expect(matched, "the left-grouped readings stay")
+        }
+
+        /// `@left( N )` asks whether `N` derives the last child's tokens, also where the parse never
+        /// called `N`: the parser probes it there. Here `A` derives every possible last child of
+        /// `"a" S` (`""` and `"a" S`), so no round is admissible and `a a a` has no tree.
+        /// BendDifferential seed 110.
+        @Test("@left( N ): a listed nonterminal counts where the parse never called it")
+        func listedLeftProbed() throws {
+            let g = #"S = { "c" B | @left(A) "a" S } . A = A "a" @shortest ( S | "c" ) | @avoid "a" "b" "c" | "" . B = B "c" ."#
+            for input in ["a", "a a", "a a a"] {
+                let r = try parseOracleAmbiguity(grammar: g, message: input)
+                #expect(r.rawMatch, "GLL reads \(input)")
+                #expect(!r.postMatch, "every reading of \(input) has a last child A derives")
+            }
+        }
+
+        /// Bare `@left` asks whether the alternate's own items derive the last child's tokens, also
+        /// where the parse never started the alternate there: the parser probes its owner. Here
+        /// `"c" A` derives the second `c` (with `A = ""`), so `c c` has no tree. BendDifferential
+        /// seed 119.
+        @Test("bare @left: the alternate counts where the parse never started it")
+        func bareLeftProbed() throws {
+            let g = #"S = [ >?>( B ) "a" | @left "c" A ] . A = "c" | @prefer "b" B "c" | "" . B = @prefer "a" ( "c" "a" ) S | "a" ."#
+            let r = try parseOracleAmbiguity(grammar: g, message: "c c")
+            #expect(r.rawMatch, "GLL reads c c")
+            #expect(!r.postMatch, "the last child c is something \"c\" A derives")
+        }
+
+        /// A preferred rival counts only when it is genuine: here B's reading of `a` dies deep below
+        /// (`>!>(E)` on D), and support from below must remove B before `@prefer` looks.
+        @Test("@prefer: a rival removed deep inside by a hard rule does not win")
+        func preferRivalDeadBelow() throws {
+            let g = #"S = A . A = @prefer B | C . B = D . D = >!>(E) "a" . E = "a" . C = "a" ."#
+            let r = try parseOracleAmbiguity(grammar: g, message: "a")
+            #expect(r.rawMatch)
+            #expect(r.postMatch, "C stays: the preferred B has no admissible reading")
+            #expect(r.isUnambiguous, "\(r.diagnostics)")
+        }
+
+        /// The Oracle disambiguates every reading the parse accepts, also one that ends before
+        /// trailing trivia (`MessageParser.acceptingEnds`): here the input is only a comment, so the
+        /// root's readings end at the start, and `@prefer` ranks the two.
+        @Test("a reading that ends before trailing trivia is disambiguated too")
+        func readingBeforeTrailingTrivia() throws {
+            let (ends, built, diagnostics) = try withParserIsolation { () -> (Int, Bool, [String]) in
+                let parser = try ApusParser(fromString: "whitespace : /\\s+/.\ncomment : /#[^\\n]*/.\n" + #"S = @prefer A | B . A = [ "x" ] . B = [ "x" ] ."#)
+                let grammar = try parser.parse(explicitStartSymbol: "")
+                let input = "# only a comment"
+                let mp = MessageParser(grammar: grammar)
+                mp.parse(input: input)
+                let ends = mp.acceptingEnds(of: grammar.root, from: input.startIndex).count
+                Oracle(parser: mp, input: input).disambiguate()
+                let builder = DerivationBuilder(parser: mp, input: input)
+                let tree = builder.buildAST()
+                return (ends, tree != nil, builder.diagnostics.map(\.fingerprint))
+            }
+            #expect(ends == 1, "the comment-only input is accepted")
+            #expect(built, "the reading survives the Oracle")
+            #expect(diagnostics.isEmpty, "@prefer A decides: \(diagnostics)")
+        }
+
+        /// The result keeps every step of the parse, ε steps of empty alternatives included (the
+        /// graph links an empty alternative's ε as content that needs nothing).
+        @Test("an empty alternative keeps its ε step after the Oracle")
+        func emptyAlternativeKeepsEpsilon() throws {
+            let kept = try withParserIsolation { () -> Bool in
+                let parser = try ApusParser(fromString: "whitespace : /\\s+/.\n" + #"S = "x" | "" ."#)
+                let grammar = try parser.parse(explicitStartSymbol: "")
+                let mp = MessageParser(grammar: grammar)
+                mp.parse(input: "")
+                Oracle(parser: mp, input: "").disambiguate()
+                var epsilons: [GrammarNode] = []
+                var alt = grammar.nonTerminals["S"]?.alt
+                while let a = alt { epsilons += a.bodySymbols.filter { $0.kind == .EPS }; alt = a.alt }
+                return !epsilons.isEmpty && epsilons.allSatisfy { !mp.yield(of: $0).isEmpty }
+            }
+            #expect(kept, "the ε step of `S = \"\"` on the empty input is part of the parse")
         }
     }
 
@@ -536,7 +695,9 @@ struct OracleDisambiguationTests {
     // A preference on a cycle that reads no input can remove every parse: in
     // `A = @prefer A | "a"` every tree ends in `"a"`, which `A → A` outranks over the same
     // tokens. `diagnosePreferenceCycles` finds such alternatives, and grammar loading refuses
-    // the grammar.
+    // the grammar. This is why the Oracle needs no version of the spec's cycle condition (a rival
+    // may not come back to a nonterminal above it, `ProdRival`/`AltRival` `xs`): such a rival is an
+    // outranking alternative on an input-free cycle, so its grammar never loads.
     @Suite("Preference cycles", .serialized)
     struct PreferenceCycles {
 
@@ -545,6 +706,11 @@ struct OracleDisambiguationTests {
             for g in [#"S = A . A = @prefer A | "a" ."#,
                       #"S = A . A = A | @avoid "a" ."#,
                       #"S = A . A = @prefer B | "a" . B = A ."#,
+                      // The rival reaches T, a nonterminal ABOVE the choice over the same tokens
+                      // (Bend/SPEC.bend `xs`); that too is an input-free cycle through it.
+                      #"S = T . T = A . A = @prefer T | "a" ."#,
+                      // A virtual layout token matches zero characters, so it reads nothing.
+                      #"S = A . A = @prefer >>| A | "a" ."#,
                       #"S = A . A = @prefer N A | "a" . N = "n" | "" ."#,
                       #"S = A . A = ( @prefer A | "a" ) ."#] {
                 do {
@@ -587,14 +753,14 @@ struct OracleDisambiguationTests {
 
         @Test("an undefined predicate target is reported")
         func undefinedTargetIsReported() throws {
-            let g = #"a - /a/ . S = @cannotParse(Missing) "a" ."#
+            let g = #"a - /a/ . S = >!>(Missing) "a" ."#
             let findings = try parseGrammar(g).diagnosePredicateTargets()
             #expect(findings.contains { $0.contains("'Missing'") }, "expected a finding for 'Missing', got: \(findings)")
         }
 
         @Test("a defined predicate target is not reported")
         func definedTargetIsClean() throws {
-            let g = #"a - /a/ . S = @cannotParse(A) "a" . A = "a" ."#
+            let g = #"a - /a/ . S = >!>(A) "a" . A = "a" ."#
             let findings = try parseGrammar(g).diagnosePredicateTargets()
             #expect(findings.isEmpty, "expected no findings, got: \(findings)")
         }
@@ -605,21 +771,40 @@ struct OracleDisambiguationTests {
             #expect(findings.isEmpty, "Swift.apus has undefined predicate targets: \(findings)")
         }
 
-        @Test("a predicate target the parse never calls is answered by a recogniser")
-        func uncalledPredicateTargetIsRecognised() throws {
-            // `X` appears in no production body, so the parse never calls it; the predicate must
-            // still see that `X` derives at the start of "a b".
-            let g = #"S = @cannotParse(X) "a" B | "a" "c" . B = "b" . X = "a" "b" ."#
+        @Test("a predicate target no production names is probed by the parser")
+        func uncalledPredicateTargetIsProbed() throws {
+            // `X` appears in no production body; the parser probes it at the alternate's start
+            // (`MessageParser.probe`), and the Oracle drops the alternate where it derives.
+            let g = #"S = >!>(X) "a" B | "a" "c" . B = "b" . X = "a" "b" ."#
             let accepted = try parseOracleAmbiguity(grammar: g, message: "a c")
             #expect(accepted.postMatch)
             let rejected = try parseOracleAmbiguity(grammar: g, message: "a b")
-            #expect(rejected.rawMatch)
+            #expect(rejected.rawMatch, "GLL reads the guarded alternate")
             #expect(!rejected.postMatch)
         }
 
-        @Test("@canParse is the positive Oracle predicate spelling")
+        @Test("a predicate target derives by reading nothing, whatever follows")
+        func nullablePredicateTargetDerives() throws {
+            // `B` derives here by reading nothing, though `c` is not in FOLLOW(B): a probe may be
+            // followed by anything (`followedByAnything`). BendDifferential seed 18.
+            let g = #"S = "c" | >?>(B) "c" "c" . B = { "b" } | "a" ."#
+            let r = try parseOracleAmbiguity(grammar: g, message: "c c")
+            #expect(r.postMatch)
+        }
+
+        @Test("a predicate asks whether the target derives here, not whether the parse called it")
+        func predicateIsAboutTheLanguage() throws {
+            // `A` always derives (it has an empty alternate), so the guarded alternate is never
+            // allowed, also at the start where the parse never called `A`. BendDifferential seed 2.
+            let g = #"S = "b" S | >!>(A) S "b" | "b" [ "c" ] "b" . A = "b" "c" | "" ."#
+            let r = try parseOracleAmbiguity(grammar: g, message: "b b b")
+            #expect(r.postMatch)
+            #expect(r.isUnambiguous, "only `b S` remains: \(r.diagnostics)")
+        }
+
+        @Test(">?> is the positive Oracle predicate spelling")
         func canParseKeepsAlternate() throws {
-            let g = #"a - /a/ . S = @canParse(A) B | "b" . B = A . A = "a" ."#
+            let g = #"a - /a/ . S = >?>(A) B | "b" . B = A . A = "a" ."#
             let r = try parseOracleAmbiguity(grammar: g, message: "a")
             #expect(r.postMatch)
             #expect(r.isUnambiguous)
@@ -636,7 +821,7 @@ struct OracleDisambiguationTests {
 
         @Test("alternate annotations are order-independent")
         func alternateAnnotationsAreOrderIndependent() throws {
-            let g = #"a - /a/ . S = @cannotParse(B) @prefer A | B . A = "a" . B = "b" ."#
+            let g = #"a - /a/ . S = >!>(B) @prefer A | B . A = "a" . B = "b" ."#
             let r = try parseOracleAmbiguity(grammar: g, message: "a")
             #expect(r.postMatch)
             #expect(r.isUnambiguous)

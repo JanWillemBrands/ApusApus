@@ -49,3 +49,56 @@ struct FuzzSeedExport {
         print("wrote \(seen.count) seeds to \(path)")
     }
 }
+
+private struct CorpusAuditRecord: Encodable {
+    let collection: String
+    let label: String
+    let source: String
+    let origin: String
+    let syntaxVersion: String
+    let gapReason: String?
+    let compilerRejects: String?
+    let disabledReason: String?
+}
+
+/// Exports every SwiftSnippet classification for an external swiftc audit. This is deliberately
+/// opt-in because replaying the entire corpus through a compiler process takes substantial time.
+@Suite("SwiftSyntax corpus audit export",
+       .enabled(if: ProcessInfo.processInfo.environment["APUS_EXPORT_CORPUS_AUDIT"] != nil,
+                "opt-in: set APUS_EXPORT_CORPUS_AUDIT=<output path>"))
+struct CorpusAuditExport {
+    @Test func exportCorpus() throws {
+        let path = try #require(ProcessInfo.processInfo.environment["APUS_EXPORT_CORPUS_AUDIT"])
+        let collections: [(String, [SwiftSnippet])] = [
+            ("603-translated", translatedSnippets), ("603-attribute", attributeSnippets),
+            ("603-declaration", declarationSnippets), ("603-expression", expressionSnippets),
+            ("603-statement", statementSnippets), ("603-type", typeSnippets),
+            ("603-pattern", patternSnippets), ("603-reject", allRejectSnippets),
+            ("604-translated", translated604Snippets), ("604-attribute", attribute604Snippets),
+            ("604-declaration", declaration604Snippets), ("604-expression", expression604Snippets),
+            ("604-statement", statement604Snippets), ("604-type", type604Snippets),
+            ("604-pattern", pattern604Snippets), ("604-reject", all604RejectSnippets),
+            ("fuzz-harvest", fuzzHarvestSnippets), ("fuzz-harvest-reject", fuzzHarvestRejectSnippets),
+        ]
+        let encoder = JSONEncoder()
+        var output = Data()
+        for (collection, snippets) in collections {
+            for snippet in snippets {
+                let record = CorpusAuditRecord(
+                    collection: collection,
+                    label: snippet.label,
+                    source: snippet.source,
+                    origin: snippet.origin,
+                    syntaxVersion: snippet.syntaxVersion,
+                    gapReason: snippet.gapReason,
+                    compilerRejects: snippet.compilerRejects,
+                    disabledReason: snippet.disabledReason
+                )
+                output.append(try encoder.encode(record))
+                output.append(0x0A)
+            }
+        }
+        try output.write(to: URL(fileURLWithPath: path), options: .atomic)
+    }
+}
+

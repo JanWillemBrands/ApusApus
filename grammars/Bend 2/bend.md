@@ -6,24 +6,22 @@ Comment     : /#.*/ .
 
 CHAR    - /'([^'\\\n]|\\.)'/ .
 STRING  - /"[^"\\]*(?:\\.[^"\\]*)*"/ .
-F32Lit  - /[0-9]+\.[0-9]+(?:[eE][+-]?[0-9]+)?(?![a-zA-Z0-9._-])/ .
-NatSucc - /[0-9]+n\+/ .
 NatLit  - /[0-9]+n(?![a-zA-Z0-9._-])/ .
+NatSucc - /[0-9]+n\+/ .
 U32Lit  - /[0-9]+(?![a-zA-Z0-9._-])/ .
+F32Lit  - /[0-9]+\.[0-9]+(?:[eE][+-]?[0-9]+)?(?![a-zA-Z0-9._-])/ .
 Name    - /[a-zA-Z_][a-zA-Z0-9._-]*/ .
 
 FilePath    - /\.\/[a-zA-Z0-9_-]+\.bend/ .
 PackagePath - /[a-zA-Z0-9_-]+(@[0-9.]+)?\/[a-zA-Z0-9_-]+\.bend/ .
 HashPath    - /0x[a-fA-F0-9]+\/[a-zA-Z0-9_-]+\.bend/ .
+```
 
-Quant = [ "-" | "+" ] .
+```apus
+Bind = [ "-" | "+" | "~" ] Name [ ":" Term ] .
+```
 
-Bind =
-    | Quant Name ":" Term
-    | "~" Name ":" Term
-    | Name
-    .
-
+```apus
 Term =
     | Var
     | Ref
@@ -131,9 +129,12 @@ Case    = "case" { Term } ":" Block .
 Match   = "match" { Term } ":" ( >n< Case+
                                | <n> >>| Case+ |<<
                                ) .
-Local   = < Quant Name | Term > "=" Term+ ( ";" | <n> ) Body .
-Reply   = Term .
-Body    = Match | Local | Reply .
+Body =
+    | Match
+    | < [ "-" | "+" ] Name >  "=" < Term > ( ";" | <n> ) Body
+    | Term [ { Term } "=" < Term > ( ";" | <n> ) Body ]
+    .
+
 Block   = >n< Body
         | <n> >>| Body |<<
         .
@@ -141,13 +142,13 @@ CtrDecl = Name "{" { Bind ","? } "}" .
 ADTDecl = "type" Name [ "<" { Bind ","? } ">" ] "is" Term ":" [ >n< < CtrDecl >
                                                               | <n> >>| < CtrDecl <n> > |<<
                                                               ] .
-Clause  = ( "for" ( Quant | "~" ) | "exs" ) Name ":" Term [ "where" Term ] .
+Clause  = ( "for" [ "-" | "+" | "~" ] | "exs" ) Name ":" Term [ "where" Term ] .
 Law     = "law" Name ":" ( >n< { Clause } Body
                          | <n> >>| { Clause <n> } Body |<<
                          ) .
 Def     = [ "@unsafe" ] "def" Name "?"? "(" { Bind ","? } ")" [ "->" Term ] ":" ( Block | < "import" STRING > ) .
 TLD     = ADTDecl | Law | Def .
-Import  = "import" "Base" | "import" Path "as" Name .
+Import  = "import" ( "Base" | Path "as" Name ) .
 Path    = FilePath | PackagePath | HashPath .
 ```
 

@@ -62,7 +62,7 @@ callee of the parenless alternate.
 **Replaced (2026-10-03):** the two clones had drifted from `primaryExpression` /
 `postfixExpression` — they were missing `inlineArrayType` and `parenthesisedSpecifierType`,
 and had lost the `@prefer` on the postfix-operator alternate and the
-`@prefer @cannotParse(parenthesisedSpecifierType)` on `parenthesizedExpression`. Both are
+`@prefer >!>(parenthesisedSpecifierType)` on `parenthesizedExpression`. Both are
 gone; the callee is plain `postfixExpression` again and B1 is one annotation:
 
 ```
@@ -305,7 +305,7 @@ The duplicate source in 14a vs 14b is a harvesting artefact.
 
 **Fix (2026-08-01):** Added `trailingClosureLabel` non-terminal used in
 `labeledTrailingClosure` — mirrors `argumentLabel` (`softIdentifier | "_"`) but also
-excludes `default`. The exclusion set is `---("_" "let" "var" "inout" "default")`.
+excludes `default`. The exclusion set is `---("_", "let", "var", "inout", "default")`.
 
 **Status:** Both tests passing. ✓
 
@@ -1202,7 +1202,7 @@ built. Fix the gap first.
 ### ✓ RESOLVED 2026-09-02 — `testUsing#1`, and the accessor-block gap behind it
 
 `var x: T = foo() { <accessors> }` now binds the block as an ACCESSOR BLOCK, not as a trailing
-closure on the initializer, so `>->(declaration attributes)` on `statement` could finally go in and
+closure on the initializer, so `>->(declaration, attributes)` on `statement` could finally go in and
 reject `@MainActor⏎using`.
 
 **What swift-syntax does.** SwiftParser is deterministic recursive descent and decides once, at
@@ -1214,7 +1214,7 @@ opens an accessor block (`atStartOfGetSetAccessor`, Lookahead.swift:252). So swi
 the competing reading.
 
 **The grammar half** (`trailingClosures`, both alternates):
-`>->(willSetDidSetBlock accessorBlockBrace)` is that lookahead. `accessorBlockBrace` is factored out
+`>->(willSetDidSetBlock, accessorBlockBrace)` is that lookahead. `accessorBlockBrace` is factored out
 as a named nonterminal precisely so the lookahead can anchor on the opening `{` — anchoring on
 `accessorClauseList` fails because that is the block CONTENT and derives one token later, and
 `getterSetterBlock` is unusable because its `codeBlock` alternate matches ANY block. The target appears in real productions, and GLL only creates its yields where a rule
@@ -1313,7 +1313,7 @@ anywhere.
 `variableDeclaration = … typeAnnotation initializer getterSetterBlock` to a restricted
 `initializedAccessorBlock` (no `init`, or `init` first) removes the only production that calls the
 UNRESTRICTED accessor block at that `{`. The accessor-commitment lookahead
-(`>->(willSetDidSetBlock accessorBlockBrace)` on `trailingClosures`) then has no target yield there
+(`>->(willSetDidSetBlock, accessorBlockBrace)` on `trailingClosures`) then has no target yield there
 and silently no-ops, so the block goes back to being a trailing closure on `(42, 0)` and the input
 is accepted anyway. Traced: `INITTRACE accept trailingClosures,patternInitializerList`. This is the
 documented "target reachable only from an annotation is snapshot-empty" trap.
@@ -1385,7 +1385,7 @@ the generic argument to be mis-parsed. Swift-syntax rejects these forms (sets `h
 | `testABIAttribute#6` | `@abi\nfunc fn3() {}` | `@abi` with no argument at all |
 
 **Fix (2026-08-04):** Added dedicated `attribute` rules in `Swift.apus`, with the general rule
-using `>->("abi" "attached" "freestanding")` to skip the three names that have dedicated rules.
+using `>->("abi", "attached", "freestanding")` to skip the three names that have dedicated rules.
 
 **Accept-regression + hybrid repair (2026-08-05):** The first cut over-tightened both arms and
 **wrongly rejected 34 valid attribute snippets** (ACCEPT suite was at 0 before this work). Fixed by

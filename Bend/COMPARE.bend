@@ -112,10 +112,11 @@ def admittedSteps(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, 
 def guardReport(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +start: Nat, +input: +List<Nat>, +swift: +List<Spec.Bsr>) -> Report:
   reportOf(admittedSteps(grammar, gm, start, input), swift)
 
-# AFTER @longest AND @shortest (phase 3). The same, with the extent oracle: the steps of
-# the best-extent trees (`extent_exact`), or nothing when the oracle refuses.
-def extentBestSteps(+grammar: +List<Spec.Production>, +em: +List<Spec.ExtentMark>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
-  unbeatenFrom(Ext.extentSteps(fuel(), grammar, em, start, input), grammar, start, input)
+# AFTER @longest AND @shortest (phase 3, on top of phases 1 and 2). The same, with the
+# extent oracle: the steps of the selected trees (`extent_exact`), or nothing when the
+# oracle refuses.
+def extentBestSteps(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +pm: +List<Spec.Mark>, +em: +List<Spec.ExtentMark>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+  unbeatenFrom(Ext.extentSteps(fuel(), grammar, gm, pm, em, start, input), grammar, start, input)
 
-def extentReport(+grammar: +List<Spec.Production>, +em: +List<Spec.ExtentMark>, +start: Nat, +input: +List<Nat>, +swift: +List<Spec.Bsr>) -> Report:
-  reportOf(extentBestSteps(grammar, em, start, input), swift)
+def extentReport(+grammar: +List<Spec.Production>, +gm: +List<Spec.GuardMark>, +pm: +List<Spec.Mark>, +em: +List<Spec.ExtentMark>, +start: Nat, +input: +List<Nat>, +swift: +List<Spec.Bsr>) -> Report:
+  reportOf(extentBestSteps(grammar, gm, pm, em, start, input), swift)

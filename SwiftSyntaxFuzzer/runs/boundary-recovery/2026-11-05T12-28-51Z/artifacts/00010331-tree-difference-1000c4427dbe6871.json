@@ -1,0 +1,64 @@
+{
+  "event" : {
+    "artifact" : "00010331-tree-difference-1000c4427dbe6871.json",
+    "durationSeconds" : 0.28488099575042725,
+    "exitCode" : 1,
+    "generator" : "boundary:mutation:toggle-newline:token=1\/4",
+    "index" : 10331,
+    "seed" : 168566817,
+    "signalHash" : "4ac2084d561d9edc",
+    "signalSummary" : "tree-difference|line=5|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "1000c4427dbe6871",
+    "sourceLength" : 13,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ThrowStmt\n        keyword(SwiftSyntax.Keyword.throw) \"throw\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-26909F86-2B04-4096-B9DA-641F5A24C5E4.swift:2:2: error: cannot find 'await' in scope\n1 | throw\n2 | -await;\n  |  `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "throwStatement\t[\"throw\" expressionIntroducerBoundary expression]",
+      "controlTransferStatement\t[throwStatement]",
+      "statement\t[controlTransferStatement]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 54,
+      "descriptorCount" : 112,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 25,
+      "parseSeconds" : 0.0012470483779907227,
+      "sourceLength" : 13,
+      "suppressedDescriptorCount" : 4,
+      "tokenCount" : 4,
+      "yieldCount" : 57
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ThrowStmt\n        keyword(SwiftSyntax.Keyword.throw) \"throw\"\n        PrefixOperatorExpr\n          prefixOperator(\"-\") \"-\"\n          DeclReferenceExpr\n            identifier(\"await\") \"await\"\n      semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "source" : "throw\n-await;",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ThrowStmt\\n        keyword(SwiftSyntax.Keyword.throw) \\\"throw\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-26909F86-2B04-4096-B9DA-641F5A24C5E4.swift:2:2: error: cannot find 'await' in scope\\n1 | throw\\n2 | -await;\\n  |  `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «-await»\"],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"throwStatement\\t[\\\"throw\\\" expressionIntroducerBoundary expression]\",\"controlTransferStatement\\t[throwStatement]\",\"statement\\t[controlTransferStatement]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":54,\"descriptorCount\":112,\"duplicateDescriptorCount\":0,\"oraclePruned\":25,\"parseSeconds\":0.0012470483779907227,\"sourceLength\":13,\"suppressedDescriptorCount\":4,\"tokenCount\":4,\"yieldCount\":57},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ThrowStmt\\n        keyword(SwiftSyntax.Keyword.throw) \\\"throw\\\"\\n        PrefixOperatorExpr\\n          prefixOperator(\\\"-\\\") \\\"-\\\"\\n          DeclReferenceExpr\\n            identifier(\\\"await\\\") \\\"await\\\"\\n      semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

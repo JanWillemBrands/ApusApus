@@ -18,16 +18,12 @@ import Foundation
 
 // Lightweight value type for CRF dictionary keys and return edges.
 // Matches the paper's crfNode (L, i).
-struct ParsePosition: Hashable, Comparable, CustomStringConvertible {
+struct ParsePosition: Hashable, CustomStringConvertible {
     let slot: GrammarNode
     let index: CharPosition
 
     var description: String { "\(slot).\(index)" }
     var ebnfDot: String { "\(slot.ebnfDot()),\(index)" }
-
-    static func < (lhs: ParsePosition, rhs: ParsePosition) -> Bool {
-        lhs.description < rhs.description
-    }
 }
 
 // Cluster node in the CRF. Mutable, identity-based.
@@ -49,38 +45,64 @@ extension MessageParser {
         // Hot path: a `switch`, not `[…].contains`, so the always-on check allocates nothing.
         let isBracket: Bool
         switch X.kind {
-        case .N, .DO, .OPT, .ALT, .KLN, .POS: isBracket = true
+        case .N, .DO, .OPT, .KLN, .POS: isBracket = true
         default: isBracket = false
         }
         checkInvariant(isBracket, "Called \(#function) on a GrammarNode \(X) which is not a bracket")
-        var selectedAlternate = false
+        // The bracket rule (Bend/SPEC.bend `roundsOk`, GLL.bend `predictFor`): a round of
+        // `[ ]` or `{ }`, and a later round of `< >`, must read something, so FOLLOW cannot
+        // predict it; only FIRST can. Such an empty round is in no parse tree: predicting it
+        // only made work for the Oracle's sweep. The round group of a `< >` stays as it was: it
+        // is a cluster keyed by the round's start, shared by first and later rounds of
+        // different loop instances, so restricting it would depend on which arrived first.
+        let mayBeEmpty: Bool
+        switch X.kind {
+        case .OPT, .KLN: mayBeEmpty = false
+        case .POS: mayBeEmpty = k == i
+        case .DO: mayBeEmpty = !(X.isLoopRound && X.seq?.seq?.kind == .KLN)
+        default: mayBeEmpty = true
+        }
+        var selected: [GrammarNode] = []
         var current = X.alt
         while let alt = current {
-            if testSelect(slot: alt, bracket: X) {
-                selectedAlternate = true
+            if viable(slot: alt, bracket: X, mayBeEmpty: mayBeEmpty) {
                 addDescriptor(L: alt.seq!, k: k, i: i)
+                selected.append(alt)
             }
             current = alt.alt
         }
-
-        if !selectedAlternate, X.kind == .N {
+        if decisionStats { recordDecision(owner: X, position: i, selected: selected) }
+        if selected.isEmpty, X.kind == .N {
             recordMismatch(expected: X.first, at: i, slot: X)
         }
     }
 
-    // Paper: call(L, i, j) — enter a nonterminal (paper §5.3.1, where "L is Y ::= αX·β":
+    /// A parse predicate's question "does `target` derive a prefix of the rest from `i`?", asked of
+    /// the main parse: a call of `target` at `i` with no return edge. If the parse already called it
+    /// there, the cluster answers already; otherwise it is created and predicted like any call. Its
+    /// pops are the answer (`leave` records a pop whatever the continuations), read by the Oracle
+    /// (`LookaheadPredicateRule`, `AssociativityFilterRule`). Its yields are dead wood
+    /// unless the parse uses them, and `YieldGraph` removes them.
+    func probe(_ target: GrammarNode, at i: CharPosition) {
+        let key = ParsePosition(slot: target, index: i)
+        guard crf[key] == nil else { return }
+        crf[key] = ParseCluster()
+        addDescriptorsForAlternates(X: target, k: i, i: i)
+    }
+
+    // Paper: call(L, i, j) — `enter()`: enter a nonterminal (paper §5.3.1, where "L is Y ::= αX·β":
     // the slot with the dot AFTER the called nonterminal). The paper labels both the CRF
     // node and the BSR element with that slot.
     //
     // The return edge here stores the RHS nonterminal node itself — the dot BEFORE — so
-    // that one stored node serves both uses on the way back out (see rtn):
+    // that one stored node serves both uses on the way back out (see leave):
     //   edge.slot        is the yield key   (paper: bsrAdd(L, ...))
     //   edge.slot.seq!   is the paper's L   (paper: dscAdd(L, ...))
     // Storing the paper's L instead would need a backward link to recover the nonterminal
     // for the yield. node ↔ node.seq is a bijection, so this is a relabeling, not a
     // difference — but note that yields are therefore keyed one `.seq` link earlier than
     // the BSR elements in the paper's worked examples.
-    func call() {
+    func enter() {
         // cL points to the RHS nonterminal node
         // cL.alt points to the LHS nonterminal node
 
@@ -110,8 +132,8 @@ extension MessageParser {
         }
     }
 
-    // Paper: rtn(X, k, j) — return from a nonterminal
-    func rtn(X: GrammarNode) {
+    // Paper: rtn(X, k, j) — `leave(X:)`: return from a nonterminal
+    func leave(X: GrammarNode) {
         let clusterKey = ParsePosition(slot: X, index: cU)
         guard let cluster = crf[clusterKey] else { return }
 
@@ -128,9 +150,9 @@ extension MessageParser {
         }
     }
 
-    // bracketCall — enter a bracket (DO, OPT, KLN, POS)
-    // Similar to call() but the bracket node IS the "nonterminal" — no indirection through .alt
-    func bracketCall(bracket: GrammarNode) {
+    // enterBracket — enter a bracket (DO, OPT, KLN, POS)
+    // Similar to enter() but the bracket node IS the "nonterminal" — no indirection through .alt
+    func enterBracket(bracket: GrammarNode) {
         let returnEdge = ParsePosition(slot: bracket, index: cU)
         let clusterKey = ParsePosition(slot: bracket, index: cI)
 
@@ -154,9 +176,9 @@ extension MessageParser {
         }
     }
 
-    // bracketRtn — return from a bracket
-    // Similar to rtn() but also handles KLN/POS re-entry
-    func bracketRtn(bracket: GrammarNode) {
+    // leaveBracket — return from a bracket
+    // Similar to leave() but also handles KLN/POS re-entry
+    func leaveBracket(bracket: GrammarNode) {
         let clusterKey = ParsePosition(slot: bracket, index: cU)
         guard let cluster = crf[clusterKey] else { return }
 

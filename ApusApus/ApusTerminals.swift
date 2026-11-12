@@ -49,6 +49,10 @@ let apusTerminals: [String:TokenPattern] = [
     ">->":          TokenPattern(">->",                     Regex { ">->" },                    true,  false),   // negative lookahead:  next token MUST NOT be in set
     "<+<":          TokenPattern("<+<",                     Regex { "<+<" },                    true,  false),   // positive lookbehind: prev token MUST be in set
     "<-<":          TokenPattern("<-<",                     Regex { "<-<" },                    true,  false),   // negative lookbehind: prev token MUST NOT be in set
+    // Parse predicates: a nonterminal must (`>?>`) / none of the nonterminals may (`>!>`) derive a
+    // prefix of the rest. A different operator because the check is a parse, not one token.
+    ">?>":          TokenPattern(">?>",                     Regex { ">?>" },                    true,  false),
+    ">!>":          TokenPattern(">!>",                     Regex { ">!>" },                    true,  false),
     ",":            TokenPattern(",",                       Regex { "," },                      true,  false),
     ">n<":          TokenPattern(">n<",                     Regex { ">n<" },                    true,  false),
     ">s<":          TokenPattern(">s<",                     Regex { ">s<" },                    true,  false),

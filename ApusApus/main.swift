@@ -165,20 +165,20 @@ for (mi, message) in grammar.messages.enumerated() {
     }
     
     
-    let generateParser = false
+    let generateParser = true
+    var info = "LL1 is \(grammar.isLL1)\n"
     if generateParser && grammar.nonTerminals.count < 1000 && messageParser.crf.count < 1000 {
         let parserFile = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .appendingPathComponent("ApusApus-generated")
             .appendingPathComponent(grammar.startSymbol + "_parser")
             .appendingPathExtension("swift")
-        var info = "LL1 is \(grammar.isLL1)\n"
         if grammar.isLL1 {
             let parserGenerator = ParserGenerator(outputFile: parserFile, grammar: grammar)
             try parserGenerator.generate()
             info += "LL1 recursive descent parser written to \(parserFile.lastPathComponent)\n"
         }
-        Logger.ui.info("\(info, privacy: .public)")
     }
+    Logger.ui.info("\(info, privacy: .public)")
 
 }

@@ -361,7 +361,7 @@ struct AdventRunSnapshot {
 //
 // Cached across snippets. The exclude/Schrödinger order-dependence that
 // originally forced fresh-loads retired in LCNP Phase D — exclude is now a
-// per-end LCNP filter in `testSelect`/`tokenMatch`, and `yields` moved off
+// per-end LCNP filter in `viable`/`tokenMatch`, and `yields` moved off
 // `GrammarNode` into `MessageParser.yields[node.number]`, so the grammar is
 // load-time immutable and safely shareable. Cutting the per-snippet
 // reload (ApusParser + first/follow fixpoint + verifyLL1 + populateBitSets)
@@ -496,16 +496,8 @@ private func runAdventOnce(
                 parser.parse(input: input)
             }
 
-            let extent = input.endIndex
-            let origin = input.startIndex
-            // Accept yields whose end is the input end OR is followed only by trivia —
-            // EOS lex at y.j does the trivia skip and matches iff scan reaches `extent`.
-            // This lets comment-only sources and trailing-comment sources pass.
-            let matched = parser.yield(of: parser.currentParseRoot).contains { y in
-                guard y.i == origin else { return false }
-                if y.j == extent { return true }
-                return !parser.lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty
-            }
+            // Also a reading followed only by trivia (comment-only and trailing-comment sources).
+            let matched = !parser.acceptingEnds(of: parser.currentParseRoot, from: input.startIndex).isEmpty
 
             var oraclePruned = 0
             var parseResult: AdventParseResult? = nil
@@ -666,12 +658,7 @@ func adventAcceptsFile(_ text: String) -> Bool {
     let grammar = loadFreshSwiftGrammar()
     let parser = MessageParser(grammar: grammar)
     parser.parse(input: text)
-    let root = parser.currentParseRoot ?? grammar.root
-    return parser.yield(of: root).contains { y in
-        guard y.i == text.startIndex else { return false }
-        if y.j == text.endIndex { return true }
-        return !parser.lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty
-    }
+    return !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: text.startIndex).isEmpty
 }
 
 @Suite("SwiftSyntax - Advent source files", .enabled(if: SourceFileCorpus.enabled, "opt-in and slow: set APUS_SOURCE_FILE_SUITES=1 (scheme Test > Arguments > Environment Variables)"))
@@ -793,7 +780,13 @@ enum NamePositionCorpus {
         NamePosition(name: "statement-label") { "\($0): while true {}" },
         NamePosition(name: "closure-param")   { "let c = { \($0) in 1 }" },
         NamePosition(name: "for-in-pattern")  { "for \($0) in xs {}" },
-        NamePosition(name: "case-let-binding") { "if case let \($0) = x {}" },
+        NamePosition(
+            name: "case-let-binding",
+            swiftcAccepts: { word in
+                guard word != "deinit", word != "subscript" else { return false }
+                return !Parser.parse(source: "if case let \(word) = x {}").hasError
+            }
+        ) { "if case let \($0) = x {}" },
         NamePosition(name: "import-path")     { "import \($0)" },
         // Added 2026-09-26 for the remaining `softIdentifier` / `macroRoleDeclName` sites.
         NamePosition(name: "fntype-label-single")   { "let f: (\($0): Int) -> Void" },
@@ -849,7 +842,7 @@ struct NamePositionTests {
 /// names, the tight mark-run split, the spaced-`!` component, and the structural postfix island.
 ///
 /// TWO measures of "Advent accepts" exist and they are NOT the same:
-///   * yield — a parse yield spans the input. PRE-Oracle, so `@cannotParse`/`@prefer`/`@longest`
+///   * yield — a parse yield spans the input. PRE-Oracle, so `>!>`/`@prefer`/`@longest`
 ///     do not affect it.
 ///   * tree  — the Oracle ran and a tree was built. This is what `runAdventOnce` does, so it is the
 ///     criterion the accept/reject suites actually use, and it is what this suite asserts on.
@@ -872,11 +865,20 @@ struct KeyPathGrammarTests {
                 let suffix = acc.joined()
                 let src = "let v = " + root + suffix
                 let model = KeyPathModel.parsesCleanly(suffix: suffix, rootWasPresent: root != "\\")
+                // Compiler-first exception: swiftc accepts one tight postfix operator after a
+                // clean key path, while SwiftSyntax reports an error for the same source.
+                let compilerPostfixRecovery =
+                    (acc.last == ".?" || acc.last == ".!")
+                    && KeyPathModel.parsesCleanly(
+                        suffix: acc.dropLast().joined(),
+                        rootWasPresent: root != "\\"
+                    )
+                let reference = model || compilerPostfixRecovery
                 let tree = adventTreeForFile(src) != nil
-                if model != tree {
+                if reference != tree {
                     if tree { over.append(src) } else { under.append(src) }
                 }
-                if !model, !tree, adventAcceptsFile(src) { pruned.append(src) }
+                if !reference, !tree, adventAcceptsFile(src) { pruned.append(src) }
                 return
             }
             for it in items { rec(root, acc + [it]) }
@@ -1252,22 +1254,28 @@ struct KeyPathGrammarTests {
         #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted `\(src)`")
     }
 
-    /// 3 — nested value bindings in a tuple binding pattern. swift-syntax ACCEPTS these and models
-    /// the inner specifier as a `ValueBindingPattern`; the old TODO item's premise (that swift rejects
-    /// them) was wrong. Whole statements, so they cannot share the `let v = …` harness above.
-    @Test("TODO 3 nested binding fixtures", arguments: [
-        "var (b, var c) = t", "let (a, let b) = t", "var (b, c) = t", "let (a, b) = t",
-        "var (b, _) = t", "for (position, var lineIdx, raw) in xs {}",
-    ])
-    func nestedBindingFixtures(_ src: String) throws {
-        let swiftClean = swiftSyntaxParsesCleanly(src)
-        let tree = adventTreeForFile(src)
-        #expect((tree != nil) == swiftClean,
-                "acceptance differs from swift-syntax for `\(src)` (swift \(swiftClean ? "clean" : "recovers"))")
-        if let tree, swiftClean {
-            #expect(dumpSwiftSyntaxNode(Syntax(tree), indent: 0)
-                    == dumpSwiftSyntaxNode(Syntax(Parser.parse(source: src)), indent: 0),
-                    "trees differ for `\(src)`")
+    @Test("nested value bindings follow compiler context")
+    func nestedBindingFixtures() throws {
+        for source in [
+            "var (b, var c) = t",
+            "let (a, let b) = t",
+        ] {
+            #expect(swiftSyntaxParsesCleanly(source), "expected the known SwiftSyntax/compiler disagreement")
+            #expect(adventTreeForFile(source) == nil, "accepted compiler-rejected nested declaration binding")
+        }
+        for source in [
+            "var (b, c) = t",
+            "let (a, b) = t",
+            "var (b, _) = t",
+            "for (position, var lineIdx, raw) in xs {}",
+        ] {
+            let tree = adventTreeForFile(source)
+            #expect(tree != nil, "rejected compiler-accepted binding pattern: \(source)")
+            if let tree {
+                #expect(dumpSwiftSyntaxNode(Syntax(tree), indent: 0)
+                        == dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0),
+                        "trees differ for `\(source)`")
+            }
         }
     }
 
@@ -1579,12 +1587,7 @@ struct KeyPathTailTests {
         let grammar = loadFreshSwiftGrammar()
         let parser = MessageParser(grammar: grammar)
         parser.parse(input: source)
-        let root = parser.currentParseRoot ?? grammar.root
-        let matched = parser.yield(of: root).contains { y in
-            guard y.i == source.startIndex else { return false }
-            if y.j == source.endIndex { return true }
-            return !parser.lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty
-        }
+        let matched = !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: source.startIndex).isEmpty
         #expect(!matched, "Advent raw recognizer matched SwiftSyntax recovery input: \(source)")
     }
 
@@ -2620,7 +2623,7 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "trailing-closure-same-line-still-works", source: "func f(a: Int, _ c: () -> Void, b: () -> Void) {}\nf(a: 1) { } b: { }", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // The brace after a CONDITION is still the statement body, never a trailing closure —
     // `atValidTrailingClosure`'s `.stmtCondition` branch, which we get from
-    // `@rejectsFlavor(stmtCondition trailingClosure)` on `closureExpression`. The `for`-`in` case is
+    // `@rejectsFlavor(stmtCondition, trailingClosure)` on `closureExpression`. The `for`-`in` case is
     // the reference's own example.
     SwiftSnippet(label: "condition-brace-is-not-trailing-closure", source: "func g(f: (Int) -> Bool, y: [Int]) {\n  if y.isEmpty { }\n  while y.isEmpty { }\n  for x in y.filter { $0 > 4 } { _ = x }\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // The other side of that split, and the reason `>n<` stays on the PARENLESS alternate: a
@@ -2830,6 +2833,7 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "accessors-with-bodies", source: "struct S {\n  var x: Int { mutating get async throws { 1 } }\n  subscript(i: Int) -> Int { get { 0 } set(v) {} }\n}\nvar y = 0 { willSet {} didSet {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
+    SwiftSnippet(label: "return-bare-init", source: "return init", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // swiftc commits `inout x` to a binding declaration (TODO #9, #18): these are errors, not an
     // expression plus a declaration. Removing the `inout` declaration alternative regressed them silently.
     SwiftSnippet(label: "inout-binding-call-body", source: "inout f() {}",                  origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -2947,6 +2951,22 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "arrow-split-before-regex", source: "f(->/0/)", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // 2026-10-23 (TODO #7): outside a protocol every accessor has a body.
     SwiftSnippet(label: "accessor-without-body-before-accessor", source: "var x: Int { get get {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-11-04 campaign TODO #18/#23: malformed key paths and separated prefix operators.
+    SwiftSnippet(label: "keypath-tilde-async-bang-init", source: "\\~async ! init", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "keypath-separated-bangs", source: "\\Protocol ! ! x", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "inline-array-missing-separator", source: "[(init)of _]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    // 2026-11-04 campaign TODO #19–#20: empty collection elements, type-only parenthesized
+    // expressions, and unlabelled additional macro-role arguments are compiler errors.
+    SwiftSnippet(label: "array-literal-missing-element", source: "[,]", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "parenthesized-inout-type", source: "(inout ~[~some])", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "attached-unlabelled-extra-roles", source: "@attached(extension,extension,x(==(x:)),value)import x", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "transpose-wrt-Self", source: "@transpose(of:async,wrt:(Self,0,1)) typealias async = _", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "ifconfig-pack-prefix-extra-tokens", source: "#if each Self()\n#endif\n;", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "unavailable-zero-version", source: "guard if #unavailable(x 0.0,x ){}else{}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "catch-where-missing-expression", source: "do throws(~some){}catch where??await{}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "guard-nested-if-consumes-else", source: "guard if (x){}else{}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "differentiable-unknown-kind", source: "do throws(@differentiable(x) __shared){}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "isolated-unknown-kind", source: "do throws(@isolated(x)__owned _x){}", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 
 @Suite("SwiftSyntax - fuzz harvest fixes")
@@ -2982,6 +3002,32 @@ struct FuzzHarvestTests {
     func adventRejects(_ snippet: SwiftSnippet) throws {
         #expect(Parser.parse(source: snippet.source).hasError, "premise failed — swift-syntax accepts '\(snippet.source)'")
         #expect(try adventParse(snippet.source) == nil, "accepted: \(snippet.source)")
+    }
+
+    @Test("campaign TODO #18–#27 reject cases")
+    func campaignRejectCases() throws {
+        let labels: Set<String> = [
+            "keypath-tilde-async-bang-init", "keypath-separated-bangs",
+            "inline-array-missing-separator", "array-literal-missing-element",
+            "parenthesized-inout-type", "attached-unlabelled-extra-roles",
+            "transpose-wrt-Self", "ifconfig-pack-prefix-extra-tokens",
+            "unavailable-zero-version", "catch-where-missing-expression",
+            "guard-nested-if-consumes-else", "differentiable-unknown-kind",
+            "isolated-unknown-kind",
+        ]
+        let snippets = fuzzHarvestRejectSnippets.filter { labels.contains($0.label) }
+        #expect(snippets.count == labels.count)
+        for snippet in snippets {
+            #expect(Parser.parse(source: snippet.source).hasError, "premise failed — SwiftSyntax accepts \(snippet.label)")
+            #expect(try adventParse(snippet.source) == nil, "accepted: \(snippet.label)")
+        }
+    }
+
+    @Test("TODO #24 typed do requires catch even though SwiftSyntax recovers")
+    func typedDoRequiresCatch() throws {
+        let source = "do throws(_.Type){}"
+        #expect(!Parser.parse(source: source).hasError, "premise failed — SwiftSyntax no longer accepts recovery syntax")
+        #expect(try adventParse(source) == nil, "accepted: \(source)")
     }
 
     @Test("TODO #9 attributed type expressions are not trailing-closure callees")
@@ -3222,6 +3268,9 @@ struct FuzzHarvestTests {
             "{ }",
             "let a = 1\n{ }()",
             "#if X\n{ }\n#endif",
+            "var x {}",
+            "var _: Int {}",
+            "var (x, y): (Int, Int) {}",
             "struct S { var x: Int { get set } }",
             "var y = 0 { didSet }",
             "protocol P { var x: Int { get {} } }",
@@ -3229,8 +3278,163 @@ struct FuzzHarvestTests {
             "protocol P { var x: Int { _read } }",
             "f()\n!/^/",
             "func f() reasync {}",
+            "if #available\n(*) {}",
+            "if #unavailable/*\n*/(*) {}",
+            "discard -x;",
+            "discard &x;",
+            "discard try x;",
+            "discard 1;",
+            "#if !\\\n.1\n#endif",
+            "import enum x",
+            "import enum x\n.T",
+            "import x .T",
+            "import x. T",
+            "if let x {} as Int",
+            "if let x = y {} as Int",
+            "if true, let x {} as Int",
+            "if case let x = y {} as Int",
         ] {
             #expect(try adventParse(source) == nil, "accepted a compiler-rejected source: \(source)")
+        }
+        for source in [
+            "discard x;",
+            "discard self;",
+            "discard(x);",
+            "discard [x];",
+            "#if !\\\n.x\n#endif",
+            "let keyPath = \\\n.1",
+            "import x.T",
+            "import enum x.T",
+            "import enum\nx.T",
+            "import x\n.T",
+            "if let x {}",
+            "if let x {} else {} as Int",
+            "if let x: Int {} as Int",
+            "if let x, true {} as Int",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected a compiler-accepted source: \(source)")
+        }
+    }
+
+    @Test("boxed protocol contextual names have one derivation")
+    func boxedProtocolContextualNameIsUnambiguous() throws {
+        let source = "let value: any nonisolated"
+        let result = try adventParse(source)
+        #expect(result != nil, "rejected a compiler-accepted contextual protocol name")
+        #expect(result?.isUnambiguous == true, "left two routes to the same boxed protocol type")
+    }
+
+    @Test("module-selected operator import matches SwiftSyntax")
+    func moduleSelectedOperatorImport() throws {
+        let source = "import class x::-;"
+        let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
+        guard let tree = try adventSwiftSyntaxTree(source) else {
+            Issue.record("Advent produced no SwiftSyntax tree")
+            return
+        }
+        let actual = dumpSwiftSyntaxNode(Syntax(tree), indent: 0)
+        #expect(actual == reference, """
+            --- swift-syntax ---
+            \(reference.text)
+            --- advent ---
+            \(actual.text)
+            """)
+    }
+
+    @Test("contextual boxed protocol type expression matches SwiftSyntax")
+    func contextualBoxedProtocolTypeExpression() throws {
+        let source = "any any;"
+        let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
+        guard let tree = try adventSwiftSyntaxTree(source) else {
+            Issue.record("Advent produced no SwiftSyntax tree")
+            return
+        }
+        let actual = dumpSwiftSyntaxNode(Syntax(tree), indent: 0)
+        #expect(actual == reference, """
+            --- swift-syntax ---
+            \(reference.text)
+            --- advent ---
+            \(actual.text)
+            """)
+    }
+
+    @Test("prefix operator before bare await matches SwiftSyntax")
+    func prefixOperatorBeforeBareAwait() throws {
+        let source = "??await;"
+        let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
+        guard let tree = try adventSwiftSyntaxTree(source) else {
+            Issue.record("Advent produced no SwiftSyntax tree")
+            return
+        }
+        let actual = dumpSwiftSyntaxNode(Syntax(tree), indent: 0)
+        #expect(actual == reference, """
+            --- swift-syntax ---
+            \(reference.text)
+            --- advent ---
+            \(actual.text)
+            """)
+    }
+
+    @Test("parenthesized type specifier owns suppression")
+    func parenthesizedTypeSpecifierSuppression() throws {
+        let source = "typealias X = nonisolated(nonsending) ~_"
+        let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
+        let result = try adventParse(source)
+        #expect(result?.isUnambiguous == true, "left overlapping attributed and suppressed type routes")
+        guard let tree = try adventSwiftSyntaxTree(source) else {
+            Issue.record("Advent produced no SwiftSyntax tree")
+            return
+        }
+        #expect(dumpSwiftSyntaxNode(Syntax(tree), indent: 0) == reference)
+    }
+
+    @Test("switch expressions keep subject and case boundaries")
+    func switchExpressionBoundaries() throws {
+        for source in [
+            "switch initxx{}as _x",
+            "switch any{@rethrows default:@rethrows case ():}",
+            "switch x {} as T",
+            "switch x { @rethrows default: break }",
+            "switch x { @foo default: break }",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted a compiler-rejected switch: \(source)")
+        }
+        for source in [
+            "switch x {}",
+            "switch f {} { default: 1 }",
+            "switch x { default: 1 } as Int",
+            "switch x { @unknown default: break }",
+            "switch x { @unknown case _: break }",
+            "if true { 1 } else { 2 } as Int",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected a compiler-accepted conditional: \(source)")
+        }
+    }
+
+    @Test("binding patterns respect their syntactic context")
+    func bindingPatternContexts() throws {
+        for source in [
+            "if var () {}",
+            "if let _ {}",
+            "if let (x, y) {}",
+            "do {} catch deinit {}",
+            "do {} catch {} {}",
+            "switch x { case let subscript: break }",
+            "let (x, var y) = z",
+            "for var (x, var y) in z {}",
+        ] {
+            #expect(try adventParse(source) == nil, "accepted a compiler-rejected binding pattern: \(source)")
+        }
+        for source in [
+            "if var () = x {}",
+            "if let _ = x {}",
+            "if let (x, y) = z {}",
+            "if let x: Int {}",
+            "do {} catch `deinit` {}",
+            "for (x, var y) in z {}",
+            "if case (let x, var y) = z {}",
+        ] {
+            #expect(try adventParse(source) != nil, "rejected a compiler-accepted binding pattern: \(source)")
         }
     }
 
@@ -3295,6 +3499,26 @@ struct FuzzHarvestTests {
         let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
         let advent = dumpSwiftSyntaxNode(Syntax(try #require(try adventSwiftSyntaxTree(source))), indent: 0)
         #expect(reference == advent, "reference:\n\(reference.text)\nAdvent:\n\(advent.text)")
+    }
+
+    /// swift-syntax `consumeIfConfigOfAttributes`: an attribute `#if` needs one attribute, in ANY
+    /// clause (Swift.apus `attributeDirectiveStart`); an empty one stays an item of its own.
+    @Test("attribute #if: the attribute may be in a later clause", arguments: [
+        "#if A\n#else\n@objc\n#endif\nclass C {}\n",
+        "#if A\n#elseif B\n#else\n@available(*, deprecated)\n#endif\nfunc f() {}\n",
+        "#if A\n@objc\n#else\n#endif\nclass C {}\n",
+        "#if A\n#endif\nfunc f() {}\n",
+        "struct S {\n#if A\n#else\n@objc\n#endif\nfunc f() {}\n}\n",
+    ])
+    func attributeIfLaterClause(_ source: String) throws {
+        let reference = dumpSwiftSyntaxNode(Syntax(Parser.parse(source: source)), indent: 0)
+        let advent = dumpSwiftSyntaxNode(Syntax(try #require(try adventSwiftSyntaxTree(source))), indent: 0)
+        #expect(reference == advent, "reference:\n\(reference.text)\nAdvent:\n\(advent.text)")
+    }
+
+    @Test("attribute #if: rejected without a declaration after it")
+    func attributeIfNeedsDeclaration() throws {
+        #expect(try adventParse("#if A\n#else\n@objc\n#endif\n") == nil)
     }
 }
 

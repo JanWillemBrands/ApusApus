@@ -1,0 +1,69 @@
+{
+  "event" : {
+    "artifact" : "00015245-boundary-recovery-overaccept-996d3247a899482e.json",
+    "durationSeconds" : 0.15318691730499268,
+    "exitCode" : 1,
+    "generator" : "boundary:mutation:toggle-newline:token=3\/6",
+    "index" : 15245,
+    "seed" : 168566817,
+    "signalHash" : "673646942bafae1a",
+    "signalSummary" : "boundary-recovery-overaccept|<none>|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/IfConfigDecl\/IfConfigClauseList\/IfConfigClause\/poundIf\/PrefixOperatorExpr\/prefixOperator()\/KeyPathExpr\/backslash\/KeyPathComponentList\/KeyPathComponent\/peri",
+    "sourceHash" : "996d3247a899482e",
+    "sourceLength" : 17,
+    "status" : "boundary-recovery-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            PrefixOperatorExpr\n              prefixOperator(\"!\") \"!\"\n              KeyPathExpr\n                backslash \"\\\"\n                KeyPathComponentList\n                  KeyPathComponent\n                    period \".\"\n                    KeyPathPropertyComponent\n                      DeclReferenceExpr\n                        integerLiteral(\"1\") \"1\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-895A9E64-E10D-490D-B426-03D6D0282F79.swift:2:1: error: '.1' is not a valid floating point literal; it must be written '0.1'\n1 | #if !\\\n2 | .1\n  | `- error: '.1' is not a valid floating point literal; it must be written '0.1'\n3 | #endif\n4 | \n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "keyPathExpressionStop\t[>->(keyPathDot keyPathMarkRunStart)]",
+      "keyPathMemberName\t[decimalDigits]",
+      ".DO\t[<s> \".\"]",
+      "keyPathProperty\t[ keyPathMemberName]",
+      "keyPathComponents\t[keyPathProperty  keyPathExpressionStop]",
+      "keyPathExpression\t[\"\\\\\" >+>(keyPathDot) keyPathComponents]",
+      "prefixExpression\t[\"!\" >s< >n< keyPathExpression]",
+      "expression\t[prefixExpression ]",
+      "compilationCondition\t[>n< expression]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "ifDirective\t[\"#if\" expressionIntroducerBoundary]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlDeclaration\t[conditionalCompilationBlock]",
+      "codeBlockItem\t[compilerControlDeclaration]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 104,
+      "descriptorCount" : 174,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 35,
+      "parseSeconds" : 0.0025970935821533203,
+      "sourceLength" : 17,
+      "suppressedDescriptorCount" : 4,
+      "tokenCount" : 7,
+      "yieldCount" : 93
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            PrefixOperatorExpr\n              prefixOperator(\"!\") \"!\"\n              KeyPathExpr\n                backslash \"\\\"\n                KeyPathComponentList\n                  KeyPathComponent\n                    period \".\"\n                    KeyPathPropertyComponent\n                      DeclReferenceExpr\n                        integerLiteral(\"1\") \"1\"\n            CodeBlockItemList\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "reference-disagreement",
+    "swiftSyntaxHasError" : false
+  },
+  "source" : "#if !\\\n.1\n#endif\n",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"!\\\") \\\"!\\\"\\n              KeyPathExpr\\n                backslash \\\"\\\\\\\"\\n                KeyPathComponentList\\n                  KeyPathComponent\\n                    period \\\".\\\"\\n                    KeyPathPropertyComponent\\n                      DeclReferenceExpr\\n                        integerLiteral(\\\"1\\\") \\\"1\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-895A9E64-E10D-490D-B426-03D6D0282F79.swift:2:1: error: '.1' is not a valid floating point literal; it must be written '0.1'\\n1 | #if !\\\\\\n2 | .1\\n  | `- error: '.1' is not a valid floating point literal; it must be written '0.1'\\n3 | #endif\\n4 | \\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"keyPathExpressionStop\\t[>->(keyPathDot keyPathMarkRunStart)]\",\"keyPathMemberName\\t[decimalDigits]\",\".DO\\t[<s> \\\".\\\"]\",\"keyPathProperty\\t[ keyPathMemberName]\",\"keyPathComponents\\t[keyPathProperty  keyPathExpressionStop]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" >+>(keyPathDot) keyPathComponents]\",\"prefixExpression\\t[\\\"!\\\" >s< >n< keyPathExpression]\",\"expression\\t[prefixExpression ]\",\"compilationCondition\\t[>n< expression]\",\"expressionIntroducerBoundary\\t[<s>]\",\"ifDirective\\t[\\\"#if\\\" expressionIntroducerBoundary]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlDeclaration\\t[conditionalCompilationBlock]\",\"codeBlockItem\\t[compilerControlDeclaration]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":104,\"descriptorCount\":174,\"duplicateDescriptorCount\":0,\"oraclePruned\":35,\"parseSeconds\":0.0025970935821533203,\"sourceLength\":17,\"suppressedDescriptorCount\":4,\"tokenCount\":7,\"yieldCount\":93},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            PrefixOperatorExpr\\n              prefixOperator(\\\"!\\\") \\\"!\\\"\\n              KeyPathExpr\\n                backslash \\\"\\\\\\\"\\n                KeyPathComponentList\\n                  KeyPathComponent\\n                    period \\\".\\\"\\n                    KeyPathPropertyComponent\\n                      DeclReferenceExpr\\n                        integerLiteral(\\\"1\\\") \\\"1\\\"\\n            CodeBlockItemList\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"reference-disagreement\",\"swiftSyntaxHasError\":false}"
+}

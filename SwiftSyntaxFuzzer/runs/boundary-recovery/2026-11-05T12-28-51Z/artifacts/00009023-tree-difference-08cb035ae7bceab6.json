@@ -1,0 +1,65 @@
+{
+  "event" : {
+    "artifact" : "00009023-tree-difference-08cb035ae7bceab6.json",
+    "durationSeconds" : 0.2858849763870239,
+    "exitCode" : 1,
+    "generator" : "boundary:mutation:delete:token=6\/7",
+    "index" : 9023,
+    "seed" : 168566817,
+    "signalHash" : "9c4ed70721184e3e",
+    "signalSummary" : "tree-difference|line=10|ref=TypeExpr|advent=MissingExpr",
+    "sourceHash" : "08cb035ae7bceab6",
+    "sourceLength" : 25,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        MissingExpr\n          identifier(\"<#expression#>\") \"<#expression#>\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CA443C3F-A730-4614-8CAD-6233366C1F07.swift:1:19: error: cannot find type '__owned' in scope\n1 | repeat{}while any __owned\n  |                   `- error: cannot find type '__owned' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CA443C3F-A730-4614-8CAD-6233366C1F07.swift:1:15: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n1 | repeat{}while any __owned\n  |               `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __owned»"
+    ],
+    "grammarCoverage" : [
+      "boxedProtocolKeywordName\t[\"__owned\"]",
+      "boxedProtocolConstraint\t[boxedProtocolKeywordName]",
+      "anyTypeExpression\t[\"any\" >->(\"(\" \".\" \"[\" \"{\") >n< boxedProtocolConstraint >->(\"&\" \"->\" \"async\" \"rethrows\" \"throws\")]",
+      "prefixExpression\t[anyTypeExpression]",
+      "expression\t[prefixExpression ]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "codeBlock\t[\"{\"  \"}\"]",
+      "repeatWhileStatement\t[\"repeat\" codeBlock \"while\" expressionIntroducerBoundary >->(\"{\") expression]",
+      "loopStatement\t[repeatWhileStatement]",
+      "statement\t[loopStatement]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 69,
+      "descriptorCount" : 146,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 62,
+      "parseSeconds" : 0.0013740062713623047,
+      "sourceLength" : 25,
+      "suppressedDescriptorCount" : 22,
+      "tokenCount" : 6,
+      "yieldCount" : 104
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      RepeatStmt\n        keyword(SwiftSyntax.Keyword.repeat) \"repeat\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n        keyword(SwiftSyntax.Keyword.while) \"while\"\n        TypeExpr\n          SomeOrAnyType\n            keyword(SwiftSyntax.Keyword.any) \"any\"\n            IdentifierType\n              identifier(\"__owned\") \"__owned\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "source" : "repeat{}while any __owned",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        MissingExpr\\n          identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CA443C3F-A730-4614-8CAD-6233366C1F07.swift:1:19: error: cannot find type '__owned' in scope\\n1 | repeat{}while any __owned\\n  |                   `- error: cannot find type '__owned' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CA443C3F-A730-4614-8CAD-6233366C1F07.swift:1:15: error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n1 | repeat{}while any __owned\\n  |               `- error: cannot convert value of type '_.Type' to expected condition type 'Bool'\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «any __owned»\"],\"grammarCoverage\":[\"boxedProtocolKeywordName\\t[\\\"__owned\\\"]\",\"boxedProtocolConstraint\\t[boxedProtocolKeywordName]\",\"anyTypeExpression\\t[\\\"any\\\" >->(\\\"(\\\" \\\".\\\" \\\"[\\\" \\\"{\\\") >n< boxedProtocolConstraint >->(\\\"&\\\" \\\"->\\\" \\\"async\\\" \\\"rethrows\\\" \\\"throws\\\")]\",\"prefixExpression\\t[anyTypeExpression]\",\"expression\\t[prefixExpression ]\",\"expressionIntroducerBoundary\\t[<s>]\",\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"repeatWhileStatement\\t[\\\"repeat\\\" codeBlock \\\"while\\\" expressionIntroducerBoundary >->(\\\"{\\\") expression]\",\"loopStatement\\t[repeatWhileStatement]\",\"statement\\t[loopStatement]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":69,\"descriptorCount\":146,\"duplicateDescriptorCount\":0,\"oraclePruned\":62,\"parseSeconds\":0.0013740062713623047,\"sourceLength\":25,\"suppressedDescriptorCount\":22,\"tokenCount\":6,\"yieldCount\":104},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      RepeatStmt\\n        keyword(SwiftSyntax.Keyword.repeat) \\\"repeat\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n        keyword(SwiftSyntax.Keyword.while) \\\"while\\\"\\n        TypeExpr\\n          SomeOrAnyType\\n            keyword(SwiftSyntax.Keyword.any) \\\"any\\\"\\n            IdentifierType\\n              identifier(\\\"__owned\\\") \\\"__owned\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,74 @@
+{
+  "event" : {
+    "artifact" : "00007285-boundary-recovery-overaccept-ce597c30f1cdbbe5.json",
+    "durationSeconds" : 0.14977800846099854,
+    "exitCode" : 1,
+    "generator" : "boundary:mutation:toggle-newline:token=2\/18",
+    "index" : 7285,
+    "seed" : 168566817,
+    "signalHash" : "7907db071e9766ff",
+    "signalSummary" : "boundary-recovery-overaccept|<none>|shape=SourceFile\/CodeBlockItemList\/CodeBlockItem\/GuardStmt\/keyword()\/ConditionElementList\/ConditionElement\/AvailabilityCondition\/poundAvailable\/leftParen\/AvailabilityArgumentList\/AvailabilityArgument\/Plat",
+    "sourceHash" : "ce597c30f1cdbbe5",
+    "sourceLength" : 47,
+    "status" : "boundary-recovery-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            AvailabilityCondition\n              poundAvailable \"#available\"\n              leftParen \"(\"\n              AvailabilityArgumentList\n                AvailabilityArgument\n                  PlatformVersion\n                    identifier(\"x\") \"x\"\n                  comma \",\"\n                AvailabilityArgument\n                  binaryOperator(\"*\") \"*\"\n                  comma \",\"\n                AvailabilityArgument\n                  binaryOperator(\"*\") \"*\"\n              rightParen \")\"\n            comma \",\"\n          ConditionElement\n            AvailabilityCondition\n              poundAvailable \"#available\"\n              leftParen \"(\"\n              AvailabilityArgumentList\n                AvailabilityArgument\n                  PlatformVersion\n                    identifier(\"x\") \"x\"\n                    VersionTuple\n                      integerLiteral(\"42\") \"42\"\n                      VersionComponentList\n              rightParen \")\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-E79FA602-79B4-44B9-8C8C-F54B47312423.swift:1:17: error: expected availability condition\n1 | guard #available\n  |                 `- error: expected availability condition\n2 | (x,*,*),#available(x 42)else{}\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "codeBlock\t[\"{\"  \"}\"]",
+      "platformVersion\t[decimalDigits]",
+      "conditionPlatformVersion\t[platformVersion]",
+      ".OPT\t[conditionPlatformVersion]",
+      "identifierToken\t[identifier]",
+      "platformName\t[identifierToken]",
+      "availabilityArgument\t[platformName ]",
+      "availabilityArguments\t[availabilityArgument ]",
+      ".DO\t[\"#available\"]",
+      "availabilityCondition\t[ \"(\" availabilityArguments \")\"]",
+      "condition\t[availabilityCondition]",
+      "conditionList\t[condition ]",
+      ".OPT\t[\",\" conditionList]",
+      "availabilityArgument\t[\"*\"]",
+      ".DO\t[\",\" availabilityArgument]",
+      ".KLN\t[]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "guardStatement\t[\"guard\" expressionIntroducerBoundary >->(\"{\") conditionList \"else\" codeBlock]",
+      "branchStatement\t[guardStatement]",
+      "statement\t[branchStatement]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 83,
+      "descriptorCount" : 161,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 31,
+      "parseSeconds" : 0.002200007438659668,
+      "sourceLength" : 47,
+      "suppressedDescriptorCount" : 6,
+      "tokenCount" : 20,
+      "yieldCount" : 118
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      GuardStmt\n        keyword(SwiftSyntax.Keyword.guard) \"guard\"\n        ConditionElementList\n          ConditionElement\n            AvailabilityCondition\n              poundAvailable \"#available\"\n              leftParen \"(\"\n              AvailabilityArgumentList\n                AvailabilityArgument\n                  PlatformVersion\n                    identifier(\"x\") \"x\"\n                  comma \",\"\n                AvailabilityArgument\n                  binaryOperator(\"*\") \"*\"\n                  comma \",\"\n                AvailabilityArgument\n                  binaryOperator(\"*\") \"*\"\n              rightParen \")\"\n            comma \",\"\n          ConditionElement\n            AvailabilityCondition\n              poundAvailable \"#available\"\n              leftParen \"(\"\n              AvailabilityArgumentList\n                AvailabilityArgument\n                  PlatformVersion\n                    identifier(\"x\") \"x\"\n                    VersionTuple\n                      integerLiteral(\"42\") \"42\"\n                      VersionComponentList\n              rightParen \")\"\n        keyword(SwiftSyntax.Keyword.else) \"else\"\n        CodeBlock\n          leftBrace \"{\"\n          CodeBlockItemList\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "reference-disagreement",
+    "swiftSyntaxHasError" : false
+  },
+  "source" : "guard #available\n(x,*,*),#available(x 42)else{}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            AvailabilityCondition\\n              poundAvailable \\\"#available\\\"\\n              leftParen \\\"(\\\"\\n              AvailabilityArgumentList\\n                AvailabilityArgument\\n                  PlatformVersion\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  comma \\\",\\\"\\n                AvailabilityArgument\\n                  binaryOperator(\\\"*\\\") \\\"*\\\"\\n                  comma \\\",\\\"\\n                AvailabilityArgument\\n                  binaryOperator(\\\"*\\\") \\\"*\\\"\\n              rightParen \\\")\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            AvailabilityCondition\\n              poundAvailable \\\"#available\\\"\\n              leftParen \\\"(\\\"\\n              AvailabilityArgumentList\\n                AvailabilityArgument\\n                  PlatformVersion\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                    VersionTuple\\n                      integerLiteral(\\\"42\\\") \\\"42\\\"\\n                      VersionComponentList\\n              rightParen \\\")\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-E79FA602-79B4-44B9-8C8C-F54B47312423.swift:1:17: error: expected availability condition\\n1 | guard #available\\n  |                 `- error: expected availability condition\\n2 | (x,*,*),#available(x 42)else{}\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"codeBlock\\t[\\\"{\\\"  \\\"}\\\"]\",\"platformVersion\\t[decimalDigits]\",\"conditionPlatformVersion\\t[platformVersion]\",\".OPT\\t[conditionPlatformVersion]\",\"identifierToken\\t[identifier]\",\"platformName\\t[identifierToken]\",\"availabilityArgument\\t[platformName ]\",\"availabilityArguments\\t[availabilityArgument ]\",\".DO\\t[\\\"#available\\\"]\",\"availabilityCondition\\t[ \\\"(\\\" availabilityArguments \\\")\\\"]\",\"condition\\t[availabilityCondition]\",\"conditionList\\t[condition ]\",\".OPT\\t[\\\",\\\" conditionList]\",\"availabilityArgument\\t[\\\"*\\\"]\",\".DO\\t[\\\",\\\" availabilityArgument]\",\".KLN\\t[]\",\"expressionIntroducerBoundary\\t[<s>]\",\"guardStatement\\t[\\\"guard\\\" expressionIntroducerBoundary >->(\\\"{\\\") conditionList \\\"else\\\" codeBlock]\",\"branchStatement\\t[guardStatement]\",\"statement\\t[branchStatement]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":83,\"descriptorCount\":161,\"duplicateDescriptorCount\":0,\"oraclePruned\":31,\"parseSeconds\":0.002200007438659668,\"sourceLength\":47,\"suppressedDescriptorCount\":6,\"tokenCount\":20,\"yieldCount\":118},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      GuardStmt\\n        keyword(SwiftSyntax.Keyword.guard) \\\"guard\\\"\\n        ConditionElementList\\n          ConditionElement\\n            AvailabilityCondition\\n              poundAvailable \\\"#available\\\"\\n              leftParen \\\"(\\\"\\n              AvailabilityArgumentList\\n                AvailabilityArgument\\n                  PlatformVersion\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                  comma \\\",\\\"\\n                AvailabilityArgument\\n                  binaryOperator(\\\"*\\\") \\\"*\\\"\\n                  comma \\\",\\\"\\n                AvailabilityArgument\\n                  binaryOperator(\\\"*\\\") \\\"*\\\"\\n              rightParen \\\")\\\"\\n            comma \\\",\\\"\\n          ConditionElement\\n            AvailabilityCondition\\n              poundAvailable \\\"#available\\\"\\n              leftParen \\\"(\\\"\\n              AvailabilityArgumentList\\n                AvailabilityArgument\\n                  PlatformVersion\\n                    identifier(\\\"x\\\") \\\"x\\\"\\n                    VersionTuple\\n                      integerLiteral(\\\"42\\\") \\\"42\\\"\\n                      VersionComponentList\\n              rightParen \\\")\\\"\\n        keyword(SwiftSyntax.Keyword.else) \\\"else\\\"\\n        CodeBlock\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"reference-disagreement\",\"swiftSyntaxHasError\":false}"
+}

@@ -1,0 +1,67 @@
+{
+  "event" : {
+    "artifact" : "00002741-tree-difference-8dc2f210ce593223.json",
+    "durationSeconds" : 0.3060389757156372,
+    "exitCode" : 1,
+    "generator" : "boundary:mutation:toggle-newline:token=1\/5",
+    "index" : 2741,
+    "seed" : 168566817,
+    "signalHash" : "54a24e5205cef44e",
+    "signalSummary" : "tree-difference|line=7|ref=PrefixOperatorExpr|advent=MissingExpr",
+    "sourceHash" : "8dc2f210ce593223",
+    "sourceLength" : 18,
+    "status" : "tree-difference"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ContinueStmt\n        keyword(SwiftSyntax.Keyword.continue) \"continue\"\n      semicolon \";\"\n    CodeBlockItem\n      MissingExpr\n        identifier(\"<#expression#>\") \"<#expression#>\"\n      semicolon \";\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A7C6A317-A94C-402D-957D-2C66265F5C73.swift:1:1: error: 'continue' is only allowed inside a loop\n1 | continue\n  | `- error: 'continue' is only allowed inside a loop\n2 | ;\n3 | +await;\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-A7C6A317-A94C-402D-957D-2C66265F5C73.swift:3:2: error: cannot find 'await' in scope\n1 | continue\n2 | ;\n3 | +await;\n  |  `- error: cannot find 'await' in scope\n",
+    "generatorDiagnostics" : [
+      "unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»"
+    ],
+    "grammarCoverage" : [
+      ".OPT\t[\";\"]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      "prefixExpression\t[prefixOperator >s< \"await\"]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItemBoundary\t[<+<(\";\")]",
+      ".DO\t[codeBlockItemBoundary codeBlockItem]",
+      ".KLN\t[]",
+      "continueStatement\t[\"continue\" ]",
+      "controlTransferStatement\t[continueStatement]",
+      "statement\t[controlTransferStatement]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 46,
+      "descriptorCount" : 106,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 29,
+      "parseSeconds" : 0.0013500452041625977,
+      "sourceLength" : 18,
+      "suppressedDescriptorCount" : 2,
+      "tokenCount" : 5,
+      "yieldCount" : 76
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ContinueStmt\n        keyword(SwiftSyntax.Keyword.continue) \"continue\"\n      semicolon \";\"\n    CodeBlockItem\n      PrefixOperatorExpr\n        prefixOperator(\"+\") \"+\"\n        DeclReferenceExpr\n          identifier(\"await\") \"await\"\n      semicolon \";\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "tree-difference",
+    "swiftSyntaxHasError" : false
+  },
+  "source" : "continue\n;\n+await;",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ContinueStmt\\n        keyword(SwiftSyntax.Keyword.continue) \\\"continue\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      MissingExpr\\n        identifier(\\\"<#expression#>\\\") \\\"<#expression#>\\\"\\n      semicolon \\\";\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A7C6A317-A94C-402D-957D-2C66265F5C73.swift:1:1: error: 'continue' is only allowed inside a loop\\n1 | continue\\n  | `- error: 'continue' is only allowed inside a loop\\n2 | ;\\n3 | +await;\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-A7C6A317-A94C-402D-957D-2C66265F5C73.swift:3:2: error: cannot find 'await' in scope\\n1 | continue\\n2 | ;\\n3 | +await;\\n  |  `- error: cannot find 'await' in scope\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[\"unhandled in convertPrefixExpression(_:from:to:): prefixExpression without postfixExpression child — «+await»\"],\"grammarCoverage\":[\".OPT\\t[\\\";\\\"]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\"prefixExpression\\t[prefixOperator >s< \\\"await\\\"]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItemBoundary\\t[<+<(\\\";\\\")]\",\".DO\\t[codeBlockItemBoundary codeBlockItem]\",\".KLN\\t[]\",\"continueStatement\\t[\\\"continue\\\" ]\",\"controlTransferStatement\\t[continueStatement]\",\"statement\\t[controlTransferStatement]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":46,\"descriptorCount\":106,\"duplicateDescriptorCount\":0,\"oraclePruned\":29,\"parseSeconds\":0.0013500452041625977,\"sourceLength\":18,\"suppressedDescriptorCount\":2,\"tokenCount\":5,\"yieldCount\":76},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ContinueStmt\\n        keyword(SwiftSyntax.Keyword.continue) \\\"continue\\\"\\n      semicolon \\\";\\\"\\n    CodeBlockItem\\n      PrefixOperatorExpr\\n        prefixOperator(\\\"+\\\") \\\"+\\\"\\n        DeclReferenceExpr\\n          identifier(\\\"await\\\") \\\"await\\\"\\n      semicolon \\\";\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"tree-difference\",\"swiftSyntaxHasError\":false}"
+}

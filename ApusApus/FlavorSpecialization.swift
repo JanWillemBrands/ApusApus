@@ -142,6 +142,18 @@ extension Grammar {
             var rel: [String: UInt64] = [:]
             func ownerRelevance(_ owner: GrammarNode) -> UInt64 {
                 var bits: UInt64 = 0
+                // A parse predicate's target is probed as if referenced at the alternate's start, so
+                // its language depends on the flavor there too.
+                var alternate = owner.alt
+                while let alt = alternate {
+                    for predicate in alt.forwardPredicates {
+                        bits |= (rel[predicate.targetName] ?? 0) & (scoped ? flavorScopeOf(predicate.targetName) : ~0)
+                    }
+                    for filter in alt.associativityFilters {
+                        for name in filter.targets { bits |= (rel[name] ?? 0) & (scoped ? flavorScopeOf(name) : ~0) }
+                    }
+                    alternate = alt.alt
+                }
                 Self.forEachElement(of: owner) { e in
                     var inner = Self.tests(e)
                     if e.kind == .N { inner |= (rel[e.name] ?? 0) & (scoped ? flavorScopeOf(e.name) : ~0) }
@@ -211,6 +223,20 @@ extension Grammar {
         }
 
         func bind(_ owner: GrammarNode, _ flavors: UInt64) {
+            // A parse predicate's target: the instance a reference at the alternate's start would get.
+            var alternate = owner.alt
+            while let alt = alternate {
+                for p in alt.forwardPredicates.indices {
+                    let name = alt.forwardPredicates[p].targetName
+                    alt.forwardPredicates[p].target = instance(name, flavors & flavorScopeOf(name))
+                }
+                for f in alt.associativityFilters.indices {
+                    alt.associativityFilters[f].targetNodes = alt.associativityFilters[f].targets.compactMap {
+                        instance($0, flavors & flavorScopeOf($0))
+                    }
+                }
+                alternate = alt.alt
+            }
             Self.forEachElement(of: owner) { e in
                 let child = Self.childFlavors(e, from: flavors)
                 guard Self.allows(e, in: child) else {
