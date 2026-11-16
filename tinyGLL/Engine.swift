@@ -83,6 +83,7 @@ nonisolated struct Descriptor: Hashable {
     let L: GrammarNode          // grammar slot
     let k: Int                  // cluster index: where the containing nonterminal was entered
     let i: Int                  // input index: how far this attempt has got
+    // TODO: simplify has as hash.into(L.number << 48 | k << 24 | i)
 }
 
 // The (ambiguous) parse tree is stored as a set of binary spans a.k.a. Binary Subtree Representation, not in an SPPF.

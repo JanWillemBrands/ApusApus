@@ -1,0 +1,80 @@
+{
+  "event" : {
+    "artifact" : "00103939-residual-ambiguity-7ec622bbb3e9cabe.json",
+    "durationSeconds" : 0.5330209732055664,
+    "exitCode" : 1,
+    "generator" : "wide:before-statement:splice:attribute:testEffects#1",
+    "index" : 103939,
+    "seed" : 4354586688115271013,
+    "signalHash" : "83b8f10ace85816c",
+    "signalSummary" : "residual-ambiguity|effectsToken\tambiguous alternate\t[identifier] | [nonWordToken]",
+    "sourceHash" : "7ec622bbb3e9cabe",
+    "sourceLength" : 64,
+    "status" : "residual-ambiguity"
+  },
+  "originalSource" : "@_effects(notEscaping _.value**)\nfunc foo() {}\nlet after = value",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n          Attribute\n            atSign \"@\"\n            IdentifierType\n              identifier(\"_effects\") \"_effects\"\n            leftParen \"(\"\n            EffectsAttributeArgumentList\n              identifier(\"notEscaping\") \"notEscaping\"\n              identifier(\"_\") \"_\"\n            rightParen \")\"\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"after\") \"after\"\n            InitializerClause\n              equal \"=\"\n              DeclReferenceExpr\n                identifier(\"value\") \"value\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : true,
+    "compilerChecked" : true,
+    "compilerTypecheckAccepted" : false,
+    "compilerTypecheckChecked" : true,
+    "compilerTypecheckStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B47EC723-37F7-466D-ACD6-32D1966D0AE0.swift:2:13: error: cannot find 'value' in scope\n1 | @_effects(notEscaping _)\n2 | let after = value\n  |             `- error: cannot find 'value' in scope\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-B47EC723-37F7-466D-ACD6-32D1966D0AE0.swift:1:2: error: '@_effects' attribute cannot be applied to this declaration\n1 | @_effects(notEscaping _)\n  |  `- error: '@_effects' attribute cannot be applied to this declaration\n2 | let after = value\n",
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "assignmentOperator\t[<s> \"=\" <s>]",
+      "initializer\t[assignmentOperator expression]",
+      "identifierToken\t[identifier]",
+      "identifierPattern\t[identifierToken]",
+      "bindingPattern\t[identifierPattern ]",
+      "patternInitializer\t[bindingPattern initializer ]",
+      "patternInitializerList\t[patternInitializer ]",
+      "nonWordToken\t[\"_\"]",
+      "effectsToken\t[identifier]",
+      ".DO\t[effectsToken]",
+      ".POS\t[]",
+      "attribute\t[\"@\" >s< \"_effects\" >s< \"(\"  \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "constantDeclaration\t[  \"let\" patternInitializerList]",
+      "declaration\t[constantDeclaration]",
+      "statement\t[declaration]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 129,
+      "descriptorCount" : 280,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 122,
+      "parseSeconds" : 0.0024640560150146484,
+      "sourceLength" : 42,
+      "suppressedDescriptorCount" : 39,
+      "tokenCount" : 10,
+      "yieldCount" : 200
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      VariableDecl\n        AttributeList\n          Attribute\n            atSign \"@\"\n            IdentifierType\n              identifier(\"_effects\") \"_effects\"\n            leftParen \"(\"\n            EffectsAttributeArgumentList\n              identifier(\"notEscaping\") \"notEscaping\"\n              wildcard \"_\"\n            rightParen \")\"\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.let) \"let\"\n        PatternBindingList\n          PatternBinding\n            IdentifierPattern\n              identifier(\"after\") \"after\"\n            InitializerClause\n              equal \"=\"\n              DeclReferenceExpr\n                identifier(\"value\") \"value\"\n",
+    "residualAmbiguities" : [
+      "effectsToken\tambiguous alternate\t[identifier] | [nonWordToken]"
+    ],
+    "status" : "residual-ambiguity",
+    "swiftSyntaxHasError" : false
+  },
+  "reductionProbes" : 37,
+  "source" : "@_effects(notEscaping _)\nlet after = value",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n          Attribute\\n            atSign \\\"@\\\"\\n            IdentifierType\\n              identifier(\\\"_effects\\\") \\\"_effects\\\"\\n            leftParen \\\"(\\\"\\n            EffectsAttributeArgumentList\\n              identifier(\\\"notEscaping\\\") \\\"notEscaping\\\"\\n              identifier(\\\"_\\\") \\\"_\\\"\\n            rightParen \\\")\\\"\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"after\\\") \\\"after\\\"\\n            InitializerClause\\n              equal \\\"=\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"value\\\") \\\"value\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":true,\"compilerChecked\":true,\"compilerTypecheckAccepted\":false,\"compilerTypecheckChecked\":true,\"compilerTypecheckStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B47EC723-37F7-466D-ACD6-32D1966D0AE0.swift:2:13: error: cannot find 'value' in scope\\n1 | @_effects(notEscaping _)\\n2 | let after = value\\n  |             `- error: cannot find 'value' in scope\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-B47EC723-37F7-466D-ACD6-32D1966D0AE0.swift:1:2: error: '@_effects' attribute cannot be applied to this declaration\\n1 | @_effects(notEscaping _)\\n  |  `- error: '@_effects' attribute cannot be applied to this declaration\\n2 | let after = value\\n\",\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"assignmentOperator\\t[<s> \\\"=\\\" <s>]\",\"initializer\\t[assignmentOperator expression]\",\"identifierToken\\t[identifier]\",\"identifierPattern\\t[identifierToken]\",\"bindingPattern\\t[identifierPattern ]\",\"patternInitializer\\t[bindingPattern initializer ]\",\"patternInitializerList\\t[patternInitializer ]\",\"nonWordToken\\t[\\\"_\\\"]\",\"effectsToken\\t[identifier]\",\".DO\\t[effectsToken]\",\".POS\\t[]\",\"attribute\\t[\\\"@\\\" >s< \\\"_effects\\\" >s< \\\"(\\\"  \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"constantDeclaration\\t[  \\\"let\\\" patternInitializerList]\",\"declaration\\t[constantDeclaration]\",\"statement\\t[declaration]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":129,\"descriptorCount\":280,\"duplicateDescriptorCount\":0,\"oraclePruned\":122,\"parseSeconds\":0.0024640560150146484,\"sourceLength\":42,\"suppressedDescriptorCount\":39,\"tokenCount\":10,\"yieldCount\":200},\"parseOnly\":false,\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      VariableDecl\\n        AttributeList\\n          Attribute\\n            atSign \\\"@\\\"\\n            IdentifierType\\n              identifier(\\\"_effects\\\") \\\"_effects\\\"\\n            leftParen \\\"(\\\"\\n            EffectsAttributeArgumentList\\n              identifier(\\\"notEscaping\\\") \\\"notEscaping\\\"\\n              wildcard \\\"_\\\"\\n            rightParen \\\")\\\"\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.let) \\\"let\\\"\\n        PatternBindingList\\n          PatternBinding\\n            IdentifierPattern\\n              identifier(\\\"after\\\") \\\"after\\\"\\n            InitializerClause\\n              equal \\\"=\\\"\\n              DeclReferenceExpr\\n                identifier(\\\"value\\\") \\\"value\\\"\\n\",\"residualAmbiguities\":[\"effectsToken\\tambiguous alternate\\t[identifier] | [nonWordToken]\"],\"status\":\"residual-ambiguity\",\"swiftSyntaxHasError\":false}"
+}

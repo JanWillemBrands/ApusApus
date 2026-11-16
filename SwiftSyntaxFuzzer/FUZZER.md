@@ -83,7 +83,10 @@ SwiftSyntaxFuzzer/.build/advent-fuzz-runner \
 ```
 
 This mode does not retain or recombine anchors. It keeps mutations only until the current accepted
-anchor is exhausted. A compiler-rejected mutation for which ApusApus still builds a complete tree is
+anchor is exhausted. At up to eight token boundaries it tries deletion plus the complete trivia
+matrix: tight, space, newline, line comment, single-line block comment, and multiline block comment.
+This continuously exercises `.apus` layout predicates without reloading or mutating the grammar.
+A compiler-rejected mutation for which ApusApus still builds a complete tree is
 stored as `boundary-recovery-overaccept`, even when SwiftSyntax accepts it through recovery. The
 summary separates anchors, mutations, compiler rejections, ApusApus overaccepts, and the subset on
 which SwiftSyntax recovered.
@@ -190,7 +193,9 @@ be revisited later if the project chooses a single final acceptance oracle.
   error is not context (an undeclared name, module, member, experimental feature, or a placement
   that is fine elsewhere), the grammar need not follow swiftc there. Counted, not an artifact; listed
   in `events.jsonl` for spot checks. Because the reducer keeps the status, it no longer shrinks a real
-  mismatch into a never-compiling sample. Overaccepts are never triaged.
+  mismatch into a never-compiling sample. When the mismatch is inside simple positive `#if FLAG`
+  branches, the probe repeats type-checking with those flags defined so an inactive branch cannot
+  conceal recovery-only syntax. Overaccepts are never triaged.
 - `advent-overaccept`: compiler and SwiftSyntax both reject, but ApusApus builds a tree.
 - `residual-ambiguity`: compiler, SwiftSyntax, and ApusApus accept, but the post-Oracle derivation is
   still ambiguous.

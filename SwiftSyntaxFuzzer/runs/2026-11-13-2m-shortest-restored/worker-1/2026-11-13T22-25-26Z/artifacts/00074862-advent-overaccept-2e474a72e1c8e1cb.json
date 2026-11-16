@@ -1,0 +1,77 @@
+{
+  "event" : {
+    "artifact" : "00074862-advent-overaccept-2e474a72e1c8e1cb.json",
+    "durationSeconds" : 0.9583760499954224,
+    "exitCode" : 1,
+    "generator" : "wide:top:keyword:reject:testMacroRoleNames#1",
+    "index" : 74862,
+    "seed" : 4354586688115271013,
+    "signalHash" : "21dadc01409bd5ed",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|unknown introduced name kind '<value>'",
+    "sourceHash" : "2e474a72e1c8e1cb",
+    "sourceLength" : 50,
+    "status" : "advent-overaccept"
+  },
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      MacroDecl\n        AttributeList\n          Attribute\n            atSign \"@\"\n            IdentifierType\n              identifier(\"attached\") \"attached\"\n            leftParen \"(\"\n            LabeledExprList\n              LabeledExpr\n                DeclReferenceExpr\n                  identifier(\"member\") \"member\"\n                comma \",\"\n              LabeledExpr\n                identifier(\"names\") \"names\"\n                colon \":\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"discard\") \"discard\"\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      DeclReferenceExpr\n                        identifier(\"class\") \"class\"\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n            rightParen \")\"\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.macro) \"macro\"\n        identifier(\"m\") \"m\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-CA5C7088-FAEE-4EE0-B4B7-2199433B3D39.swift:1:26: error: unknown introduced name kind 'discard'\n1 | @attached(member, names: discard(class))\n  |                          `- error: unknown introduced name kind 'discard'\n2 | macro m()\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "parameterClause\t[\"(\" \")\"]",
+      "macroSignature\t[parameterClause ]",
+      "identifierToken\t[identifier]",
+      "regexForcingLexerKeyword\t[\"class\"]",
+      "memberName\t[regexForcingLexerKeyword]",
+      "attributeDeclBase\t[memberName]",
+      "introducedName\t[attributeDeclBase ]",
+      "macroRoleCall\t[identifierToken \"(\" introducedName \")\"]",
+      "macroRoleName\t[macroRoleCall]",
+      "macroRoleArgumentGroup\t[identifierToken \":\" macroRoleName ]",
+      ".DO\t[\",\" macroRoleArgumentGroup]",
+      ".KLN\t[]",
+      "macroRole\t[identifierToken]",
+      "macroRoleArguments\t[macroRole ]",
+      "attribute\t[\"@\" >s< \"attached\" >s< \"(\" macroRoleArguments \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "macroDeclarationHead\t[  \"macro\"]",
+      "macroIntroducer\t[macroDeclarationHead identifierToken]",
+      "macroDeclaration\t[macroIntroducer  macroSignature  ]",
+      "declaration\t[macroDeclaration]",
+      "statement\t[declaration]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 111,
+      "descriptorCount" : 241,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 105,
+      "parseSeconds" : 0.0046759843826293945,
+      "sourceLength" : 50,
+      "suppressedDescriptorCount" : 25,
+      "tokenCount" : 16,
+      "yieldCount" : 187
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      ClassDecl\n        AttributeList\n          Attribute\n            atSign \"@\"\n            IdentifierType\n              identifier(\"attached\") \"attached\"\n            leftParen \"(\"\n            LabeledExprList\n              LabeledExpr\n                DeclReferenceExpr\n                  identifier(\"member\") \"member\"\n                comma \",\"\n              LabeledExpr\n                identifier(\"names\") \"names\"\n                colon \":\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"discard\") \"discard\"\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      MissingExpr\n                  MultipleTrailingClosureElementList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.class) \"class\"\n        MemberBlock\n          MemberBlockItemList\n            MemberBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  rightParen \")\"\n                  rightParen \")\"\n            MemberBlockItem\n              MacroDecl\n                AttributeList\n                DeclModifierList\n                keyword(SwiftSyntax.Keyword.macro) \"macro\"\n                identifier(\"m\") \"m\"\n                FunctionSignature\n                  FunctionParameterClause\n                    leftParen \"(\"\n                    FunctionParameterList\n                    rightParen \")\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 32,
+  "source" : "@attached(member, names: discard(class))\nmacro m()",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      MacroDecl\\n        AttributeList\\n          Attribute\\n            atSign \\\"@\\\"\\n            IdentifierType\\n              identifier(\\\"attached\\\") \\\"attached\\\"\\n            leftParen \\\"(\\\"\\n            LabeledExprList\\n              LabeledExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"member\\\") \\\"member\\\"\\n                comma \\\",\\\"\\n              LabeledExpr\\n                identifier(\\\"names\\\") \\\"names\\\"\\n                colon \\\":\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"discard\\\") \\\"discard\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      DeclReferenceExpr\\n                        identifier(\\\"class\\\") \\\"class\\\"\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n            rightParen \\\")\\\"\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n        identifier(\\\"m\\\") \\\"m\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-CA5C7088-FAEE-4EE0-B4B7-2199433B3D39.swift:1:26: error: unknown introduced name kind 'discard'\\n1 | @attached(member, names: discard(class))\\n  |                          `- error: unknown introduced name kind 'discard'\\n2 | macro m()\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"macroSignature\\t[parameterClause ]\",\"identifierToken\\t[identifier]\",\"regexForcingLexerKeyword\\t[\\\"class\\\"]\",\"memberName\\t[regexForcingLexerKeyword]\",\"attributeDeclBase\\t[memberName]\",\"introducedName\\t[attributeDeclBase ]\",\"macroRoleCall\\t[identifierToken \\\"(\\\" introducedName \\\")\\\"]\",\"macroRoleName\\t[macroRoleCall]\",\"macroRoleArgumentGroup\\t[identifierToken \\\":\\\" macroRoleName ]\",\".DO\\t[\\\",\\\" macroRoleArgumentGroup]\",\".KLN\\t[]\",\"macroRole\\t[identifierToken]\",\"macroRoleArguments\\t[macroRole ]\",\"attribute\\t[\\\"@\\\" >s< \\\"attached\\\" >s< \\\"(\\\" macroRoleArguments \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"macroDeclarationHead\\t[  \\\"macro\\\"]\",\"macroIntroducer\\t[macroDeclarationHead identifierToken]\",\"macroDeclaration\\t[macroIntroducer  macroSignature  ]\",\"declaration\\t[macroDeclaration]\",\"statement\\t[declaration]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":111,\"descriptorCount\":241,\"duplicateDescriptorCount\":0,\"oraclePruned\":105,\"parseSeconds\":0.0046759843826293945,\"sourceLength\":50,\"suppressedDescriptorCount\":25,\"tokenCount\":16,\"yieldCount\":187},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      ClassDecl\\n        AttributeList\\n          Attribute\\n            atSign \\\"@\\\"\\n            IdentifierType\\n              identifier(\\\"attached\\\") \\\"attached\\\"\\n            leftParen \\\"(\\\"\\n            LabeledExprList\\n              LabeledExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"member\\\") \\\"member\\\"\\n                comma \\\",\\\"\\n              LabeledExpr\\n                identifier(\\\"names\\\") \\\"names\\\"\\n                colon \\\":\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"discard\\\") \\\"discard\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      MissingExpr\\n                  MultipleTrailingClosureElementList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.class) \\\"class\\\"\\n        MemberBlock\\n          MemberBlockItemList\\n            MemberBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n            MemberBlockItem\\n              MacroDecl\\n                AttributeList\\n                DeclModifierList\\n                keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n                identifier(\\\"m\\\") \\\"m\\\"\\n                FunctionSignature\\n                  FunctionParameterClause\\n                    leftParen \\\"(\\\"\\n                    FunctionParameterList\\n                    rightParen \\\")\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

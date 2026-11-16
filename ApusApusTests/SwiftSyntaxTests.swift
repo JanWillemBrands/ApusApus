@@ -1045,6 +1045,24 @@ struct KeyPathGrammarTests {
         #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected regex extent: \(src)")
     }
 
+    @Test("line-start regex opening-slash boundness", arguments: [
+        "let r = /}/",
+        "let x = 2\n/x/",
+    ])
+    func lineStartRegexBoundnessAcceptsLikeSwiftc(_ src: String) throws {
+        #expect(try adventParse(src) != nil, "Advent rejected compiler-accepted slash boundary: \(src)")
+    }
+
+    @Test("line-start non-right-bound slash remains an operator", arguments: [
+        "let x = 2\n/}/",
+        "let x = 2\n/]/",
+        "let x = 2\n/,/",
+        "let x = 2\n/:/",
+    ])
+    func lineStartRegexBoundnessRejectsLikeSwiftc(_ src: String) throws {
+        #expect(try adventParse(src) == nil, "Advent accepted compiler-rejected slash boundary: \(src)")
+    }
+
     @Test("expression introducer rejects tight operators", arguments: [
         "discard switch==x{}",
         "discard try+await",
@@ -2833,6 +2851,10 @@ let fuzzHarvestSnippets: [SwiftSnippet] = [
     SwiftSnippet(label: "accessors-with-bodies", source: "struct S {\n  var x: Int { mutating get async throws { 1 } }\n  subscript(i: Int) -> Int { get { 0 } set(v) {} }\n}\nvar y = 0 { willSet {} didSet {} }", origin: "Fuzz", syntaxVersion: "603.0.1"),
 ]
 let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
+    // `parseSimpleOrCompositionType` commits a composition-classified `&` after a cast type.
+    SwiftSnippet(label: "cast-malformed-composition", source: "_ = x as Any & &x;", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "cast-malformed-composition-original", source: "yield ==\\ x as Any & &{}??&;", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "cast-right-bound-ampersand", source: "_ = x as P &Q", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "return-bare-init", source: "return init", origin: "Fuzz", syntaxVersion: "603.0.1"),
     // swiftc commits `inout x` to a binding declaration (TODO #9, #18): these are errors, not an
     // expression plus a declaration. Removing the `inout` declaration alternative regressed them silently.
@@ -2943,6 +2965,7 @@ let fuzzHarvestRejectSnippets: [SwiftSnippet] = [
     // 2026-10-11 (TODO #16): a `@preempt` split piece `=` / `?` before a regex is reserved
     // punctuation, never a prefix operator (swift-syntax Cursor.swift `classifyOperatorToken`).
     SwiftSnippet(label: "equal-split-before-regex-statement", source: "do {\n=/0/\n}", origin: "Fuzz", syntaxVersion: "603.0.1"),
+    SwiftSnippet(label: "equal-split-before-regex-after-statement", source: "x\n=/0/", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "equal-split-before-regex-initializer", source: "let y = =/0/", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "question-split-before-regex", source: "let y = ?/0/", origin: "Fuzz", syntaxVersion: "603.0.1"),
     SwiftSnippet(label: "left-bound-equal-slash-binding", source: "let r=/a/", origin: "Fuzz", syntaxVersion: "603.0.1"),
@@ -3002,6 +3025,18 @@ struct FuzzHarvestTests {
     func adventRejects(_ snippet: SwiftSnippet) throws {
         #expect(Parser.parse(source: snippet.source).hasError, "premise failed — swift-syntax accepts '\(snippet.source)'")
         #expect(try adventParse(snippet.source) == nil, "accepted: \(snippet.source)")
+    }
+
+    @Test("cast composition commitment preserves valid boundaries", arguments: [
+        "_ = (x as P) & y",
+        "_ = (x as P) & &x",
+        "_ = x as P&Q",
+        "_ = x as P & Q",
+        "_ = x as P& Q",
+    ])
+    func castCompositionCommitmentAccepts(_ source: String) throws {
+        #expect(!Parser.parse(source: source).hasError, "premise failed — swift-syntax rejects '\(source)'")
+        #expect(try adventParse(source) != nil, "rejected: \(source)")
     }
 
     @Test("campaign TODO #18–#27 reject cases")

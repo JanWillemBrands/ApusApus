@@ -1,0 +1,79 @@
+{
+  "event" : {
+    "artifact" : "00104488-advent-overaccept-4325fa29c08737e9.json",
+    "durationSeconds" : 1.0146290063858032,
+    "exitCode" : 1,
+    "generator" : "wide:ifconfig:newline:fuzz-harvest-reject:left-bound-equal-slash-binding",
+    "index" : 104488,
+    "seed" : 4354586688115271013,
+    "signalHash" : "181546bab43e3bf3",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|'<value>' must have consistent whitespace on both sides",
+    "sourceHash" : "4325fa29c08737e9",
+    "sourceLength" : 25,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "#if FOO\nlet r\n=\/a\/\n#endif",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                PrefixOperatorExpr\n                  prefixOperator(\"=\/\") \"=\/\"\n                  PostfixOperatorExpr\n                    DeclReferenceExpr\n                      identifier(\"a\") \"a\"\n                    postfixOperator(\"\/\") \"\/\"\n        poundEndif \"#endif\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-37E44392-1CF2-4312-89E0-65D004AD9C36.swift:2:1: error: '=' must have consistent whitespace on both sides\n1 | #if FOO\n2 | =\/a\/\n  | `- error: '=' must have consistent whitespace on both sides\n3 | #endif\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-37E44392-1CF2-4312-89E0-65D004AD9C36.swift:2:1: error: expected expression\n1 | #if FOO\n2 | =\/a\/\n  | `- error: expected expression\n3 | #endif\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "endifDirective\t[\"#endif\" <n>]",
+      "postfixOperator\t[postfixOperatorToken]",
+      "ifConfigSameLine\t[]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "postfixExpression\t[postfixExpression ifConfigSameLine >s< postfixOperator <s>]",
+      "operator\t[nonArrowOperatorToken]",
+      "prefixOperator\t[operator]",
+      ".OPT\t[prefixOperator >s< >n< >->(\"@\")]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      "ifConfigCodeBlockItems\t[codeBlockItems]",
+      ".OPT\t[ifConfigCodeBlockItems]",
+      "compilationCondition\t[>n< expression]",
+      "expressionIntroducerBoundary\t[<s>]",
+      "ifDirective\t[\"#if\" expressionIntroducerBoundary]",
+      "ifDirectiveClause\t[ifDirective compilationCondition >->(\".\") <n> ]",
+      "conditionalCompilationBlock\t[ifDirectiveClause   endifDirective]",
+      "compilerControlDeclaration\t[conditionalCompilationBlock]",
+      "codeBlockItem\t[compilerControlDeclaration]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 212,
+      "descriptorCount" : 345,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 72,
+      "parseSeconds" : 0.0037609338760375977,
+      "sourceLength" : 19,
+      "suppressedDescriptorCount" : 57,
+      "tokenCount" : 7,
+      "yieldCount" : 166
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      IfConfigDecl\n        IfConfigClauseList\n          IfConfigClause\n            poundIf \"#if\"\n            DeclReferenceExpr\n              identifier(\"FOO\") \"FOO\"\n            CodeBlockItemList\n              CodeBlockItem\n                UnexpectedCodeDecl\n                  UnexpectedNodes\n                    equal \"=\"\n                    regexSlash \"\/\"\n                    regexLiteralPattern(\"a\") \"a\"\n                    regexSlash \"\/\"\n        poundEndif \"#endif\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 18,
+  "source" : "#if FOO\n=\/a\/\n#endif",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                PrefixOperatorExpr\\n                  prefixOperator(\\\"=\\\/\\\") \\\"=\\\/\\\"\\n                  PostfixOperatorExpr\\n                    DeclReferenceExpr\\n                      identifier(\\\"a\\\") \\\"a\\\"\\n                    postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-37E44392-1CF2-4312-89E0-65D004AD9C36.swift:2:1: error: '=' must have consistent whitespace on both sides\\n1 | #if FOO\\n2 | =\\\/a\\\/\\n  | `- error: '=' must have consistent whitespace on both sides\\n3 | #endif\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-37E44392-1CF2-4312-89E0-65D004AD9C36.swift:2:1: error: expected expression\\n1 | #if FOO\\n2 | =\\\/a\\\/\\n  | `- error: expected expression\\n3 | #endif\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"endifDirective\\t[\\\"#endif\\\" <n>]\",\"postfixOperator\\t[postfixOperatorToken]\",\"ifConfigSameLine\\t[]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"postfixExpression\\t[postfixExpression ifConfigSameLine >s< postfixOperator <s>]\",\"operator\\t[nonArrowOperatorToken]\",\"prefixOperator\\t[operator]\",\".OPT\\t[prefixOperator >s< >n< >->(\\\"@\\\")]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\"ifConfigCodeBlockItems\\t[codeBlockItems]\",\".OPT\\t[ifConfigCodeBlockItems]\",\"compilationCondition\\t[>n< expression]\",\"expressionIntroducerBoundary\\t[<s>]\",\"ifDirective\\t[\\\"#if\\\" expressionIntroducerBoundary]\",\"ifDirectiveClause\\t[ifDirective compilationCondition >->(\\\".\\\") <n> ]\",\"conditionalCompilationBlock\\t[ifDirectiveClause   endifDirective]\",\"compilerControlDeclaration\\t[conditionalCompilationBlock]\",\"codeBlockItem\\t[compilerControlDeclaration]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":212,\"descriptorCount\":345,\"duplicateDescriptorCount\":0,\"oraclePruned\":72,\"parseSeconds\":0.0037609338760375977,\"sourceLength\":19,\"suppressedDescriptorCount\":57,\"tokenCount\":7,\"yieldCount\":166},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      IfConfigDecl\\n        IfConfigClauseList\\n          IfConfigClause\\n            poundIf \\\"#if\\\"\\n            DeclReferenceExpr\\n              identifier(\\\"FOO\\\") \\\"FOO\\\"\\n            CodeBlockItemList\\n              CodeBlockItem\\n                UnexpectedCodeDecl\\n                  UnexpectedNodes\\n                    equal \\\"=\\\"\\n                    regexSlash \\\"\\\/\\\"\\n                    regexLiteralPattern(\\\"a\\\") \\\"a\\\"\\n                    regexSlash \\\"\\\/\\\"\\n        poundEndif \\\"#endif\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

@@ -21,6 +21,7 @@ struct Descriptor: Hashable {
     let k: CharPosition         // cluster index
     let i: CharPosition         // input index
 }   // this is three 64-bit words (24 bytes)
+// TODO: pack the descriptor and simplify the hash: L.id << 48 | k << 24 | i.
 
 // MARK: - MessageParser Descriptor Operations
 

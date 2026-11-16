@@ -362,10 +362,12 @@ final class BoundaryRecoveryGenerator {
         let count = original.tokens.count
         guard count >= 3 else { return [] }
 
-        // Deletion is the strongest recovery probe, so exercise it at every selected site. Pair it
-        // with one different boundary edit; each emitted source still contains exactly one edit.
-        let siteCount = min(8, count)
-        let sites = (0..<siteCount).map { min(count - 1, $0 * count / siteCount) }
+        let boundaryCount = count - 1
+        let siteCount = min(8, boundaryCount)
+        // A boundary is the trivia before token `index`; token zero has no left-hand token.
+        let sites = (0..<siteCount).map {
+            1 + min(boundaryCount - 1, $0 * boundaryCount / siteCount)
+        }
         var results: [GeneratedSource] = []
         var seen = Set<String>()
 
@@ -387,19 +389,23 @@ final class BoundaryRecoveryGenerator {
             }
             append(deleted, name: "delete", index: index)
 
-            var secondary = original
-            if secondary.tokens[index].kind == .word {
-                secondary.tokens[index].text = "x"
-                append(secondary, name: "replace-name", index: index)
-            } else if index == count - 1 || secondary.tokens[index].text == ")" ||
-                        secondary.tokens[index].text == "]" || secondary.tokens[index].text == "}" {
-                secondary.tokens = Array(secondary.tokens.prefix(index))
-                secondary.trailing = ""
-                append(secondary, name: "truncate", index: index)
-            } else {
-                secondary.tokens[index].leading =
-                    secondary.tokens[index].leading.contains("\n") ? " " : "\n"
-                append(secondary, name: "toggle-newline", index: index)
+            let triviaMatrix: [(String, String)] = [
+                ("tight", ""),
+                ("space", " "),
+                ("newline", "\n"),
+                ("line-comment", "// boundary\n"),
+                ("block-comment", "/* boundary */"),
+                ("multiline-block-comment", "/* boundary\n */"),
+            ]
+            for (name, trivia) in triviaMatrix {
+                var boundary = original
+                boundary.tokens[index].leading = trivia
+                let mutated = boundary.boundaryRendered
+                guard mutated != source, seen.insert(mutated).inserted else { continue }
+                results.append(GeneratedSource(
+                    label: "boundary:mutation:trivia-\(name):token=\(index)/\(count)",
+                    source: mutated
+                ))
             }
         }
         return results.reversed()

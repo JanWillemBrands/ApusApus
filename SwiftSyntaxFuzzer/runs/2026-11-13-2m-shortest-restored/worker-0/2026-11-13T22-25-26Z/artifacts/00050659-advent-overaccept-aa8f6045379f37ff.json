@@ -1,0 +1,73 @@
+{
+  "event" : {
+    "artifact" : "00050659-advent-overaccept-aa8f6045379f37ff.json",
+    "durationSeconds" : 1.7280009984970093,
+    "exitCode" : 1,
+    "generator" : "wide:closure:block-comment+line-comment+splice:fuzz-harvest:keypath-rootless-double-dot-operator",
+    "index" : 50659,
+    "seed" : 11400602211485475162,
+    "signalHash" : "ad44a58221c107e1",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected member name following '<value>'",
+    "sourceHash" : "aa8f6045379f37ff",
+    "sourceLength" : 49,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let fuzzClosure = {\nfuzzValue = \/*c*\/\\.. \/\/ c\ny\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              PostfixOperatorExpr\n                KeyPathExpr\n                  backslash \"\\\"\n                  KeyPathComponentList\n                postfixOperator(\"..\") \"..\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-DAAC90D2-8C58-46AF-A079-EB1DF81D09B7.swift:1:18: error: expected member name following '.'\n1 |  fuzzClosure { \\..\n  |                  `- error: expected member name following '.'\n2 | }\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "postfixOperator\t[dotOperator]",
+      "ifConfigSameLine\t[]",
+      "keyPathExpression\t[\"\\\\\" >+>(keyPathDotOperatorStart)]",
+      "postfixExpression\t[keyPathExpression ifConfigSameLine >s< postfixOperator <s>]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      ".DO\t[]",
+      "samelineOpenedClosure\t[\"{\" >n<  \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "postfixExpression\t[primaryExpression]",
+      "functionCallExpression\t[postfixExpression ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 99,
+      "descriptorCount" : 165,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 59,
+      "parseSeconds" : 0.0020819902420043945,
+      "sourceLength" : 20,
+      "suppressedDescriptorCount" : 42,
+      "tokenCount" : 5,
+      "yieldCount" : 137
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzzClosure\") \"fuzzClosure\"\n        LabeledExprList\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              KeyPathExpr\n                backslash \"\\\"\n                KeyPathComponentList\n            CodeBlockItem\n              UnexpectedCodeDecl\n                UnexpectedNodes\n                  postfixOperator(\"..\") \"..\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 32,
+  "source" : " fuzzClosure { \\..\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              PostfixOperatorExpr\\n                KeyPathExpr\\n                  backslash \\\"\\\\\\\"\\n                  KeyPathComponentList\\n                postfixOperator(\\\"..\\\") \\\"..\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-DAAC90D2-8C58-46AF-A079-EB1DF81D09B7.swift:1:18: error: expected member name following '.'\\n1 |  fuzzClosure { \\\\..\\n  |                  `- error: expected member name following '.'\\n2 | }\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"postfixOperator\\t[dotOperator]\",\"ifConfigSameLine\\t[]\",\"keyPathExpression\\t[\\\"\\\\\\\\\\\" >+>(keyPathDotOperatorStart)]\",\"postfixExpression\\t[keyPathExpression ifConfigSameLine >s< postfixOperator <s>]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\".DO\\t[]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<  \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"postfixExpression\\t[primaryExpression]\",\"functionCallExpression\\t[postfixExpression ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":99,\"descriptorCount\":165,\"duplicateDescriptorCount\":0,\"oraclePruned\":59,\"parseSeconds\":0.0020819902420043945,\"sourceLength\":20,\"suppressedDescriptorCount\":42,\"tokenCount\":5,\"yieldCount\":137},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzzClosure\\\") \\\"fuzzClosure\\\"\\n        LabeledExprList\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              KeyPathExpr\\n                backslash \\\"\\\\\\\"\\n                KeyPathComponentList\\n            CodeBlockItem\\n              UnexpectedCodeDecl\\n                UnexpectedNodes\\n                  postfixOperator(\\\"..\\\") \\\"..\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

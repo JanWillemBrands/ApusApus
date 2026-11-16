@@ -265,7 +265,17 @@ struct AdventProbe {
         // context, any other error means no program compiles it, so the grammar need not follow swiftc.
         var parseOnly: Bool? = nil
         if Self.parseOnlyCandidateStatuses.contains(status) || (checkParseOnly && compilerResult.accepted == true) {
-            let result = runCompilerTypecheck(source: source)
+            var result = runCompilerTypecheck(source: source)
+            // A malformed construct in an inactive `#if FLAG` branch makes the whole file appear to
+            // type-check. If the mismatch is inside simple positive custom-flag branches, activate
+            // those branches and type-check again. This keeps recovery-only syntax such as `a->b`
+            // from masquerading as a compilable grammar underaccept merely because fuzzing wrapped it.
+            if result.accepted == true,
+               let failureLine = failureSite?.line,
+               let flags = Self.simpleConditionalCompilationFlags(at: failureLine, in: source),
+               !flags.isEmpty {
+                result = runCompilerTypecheck(source: source, defining: flags)
+            }
             compilerTypecheckResult = result
             if !result.timedOut {
                 parseOnly = result.accepted == false && Self.hasStructuralTypecheckError(result.stderr)
@@ -396,9 +406,42 @@ struct AdventProbe {
 
     /// No prelude: a declared name could collide with the source's own, and an undeclared one is
     /// context anyway (`contextTypecheckErrors`).
-    private static func runCompilerTypecheck(source: String) -> CompilerResult {
+    private static func runCompilerTypecheck(source: String, defining flags: [String] = []) -> CompilerResult {
         let sdk = sdkPath.map { ["-sdk", $0] } ?? []
-        return runCompiler(source: source, arguments: ["swiftc", "-swift-version", "6", "-typecheck"] + sdk, description: "compiler typecheck")
+        let definitions = flags.flatMap { ["-D", $0] }
+        return runCompiler(source: source, arguments: ["swiftc", "-swift-version", "6", "-typecheck"] + definitions + sdk, description: "compiler typecheck")
+    }
+
+    /// Returns the simple positive `#if FLAG` / `#elseif FLAG` branches enclosing `line`.
+    /// Complex conditions are deliberately ignored: guessing a satisfying assignment could hide a
+    /// real mismatch, while a missed activation merely leaves the existing conservative verdict.
+    private static func simpleConditionalCompilationFlags(at line: Int, in source: String) -> [String]? {
+        let flagPattern = try! NSRegularExpression(pattern: "^[A-Za-z_][A-Za-z0-9_]*$")
+        var stack: [String?] = []
+
+        for (index, sourceLine) in source.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
+            guard index + 1 <= line else { break }
+            let text = sourceLine.trimmingCharacters(in: .whitespaces)
+
+            func simpleFlag(after directive: String) -> String? {
+                let candidate = text.dropFirst(directive.count).trimmingCharacters(in: .whitespaces)
+                let range = NSRange(candidate.startIndex..., in: candidate)
+                return flagPattern.firstMatch(in: candidate, range: range) == nil ? nil : candidate
+            }
+
+            if text.hasPrefix("#if ") {
+                stack.append(simpleFlag(after: "#if"))
+            } else if text.hasPrefix("#elseif "), !stack.isEmpty {
+                stack[stack.count - 1] = simpleFlag(after: "#elseif")
+            } else if text == "#else", !stack.isEmpty {
+                stack[stack.count - 1] = nil
+            } else if text == "#endif", !stack.isEmpty {
+                stack.removeLast()
+            }
+        }
+
+        guard !stack.isEmpty, stack.allSatisfy({ $0 != nil }) else { return nil }
+        return stack.compactMap { $0 }
     }
 
     /// Accept-side mismatches, the only ones a never-compiling source makes moot. Overaccepts are not

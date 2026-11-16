@@ -1,0 +1,18 @@
+{
+  "event" : {
+    "artifact" : "00029099-timeout-ce4f049708a1c161.json",
+    "durationSeconds" : 10.07927405834198,
+    "exitCode" : -1,
+    "generator" : "wide:closure:line-comment+keyword:real:Names:19+translated:testIdentifiers2#1",
+    "index" : 29099,
+    "seed" : 11400602211485475162,
+    "signalHash" : "2aedf4d522a2bf4d",
+    "signalSummary" : "timeout|generator=wide:closure:line-comment+keyword:real:Names:19+translated:testIdentifiers2#1",
+    "sourceHash" : "ce4f049708a1c161",
+    "sourceLength" : 1095,
+    "status" : "timeout"
+  },
+  "source" : "let fuzzClosure = {\nextension Parser {\n  mutating func parseAnyIdentifier() -> RawTokenSyntax {\n    if let token = self.consume(if: .identifier) {\n      return token\n    } else if let (_, handle) = self.at(anyIn: Operator.self) {\n      return self.eat(handle)\n    } else {\n      return RawTokenSyntax(missing: .identifier, arena: arena)\n    }\n  }\n\n  mutating func parseArgumentLabel() -> (RawUnexpectedNodesSyntax?, RawTokenSyntax) {\n    guard self.atArgumentLabel(allowDollarIdentifier: true) else {\n      return (nil, missingToken(.identifier))\n    }\n    if let dollarIdent = self.consume(if: .dollarIdentifier) {\n      return (\n        RawUnexpectedNodesSyntax([dollarIdent], arena: self.arena),\n        self.missingToken(.identifier)\n      )\n    } else {\n      if let wildcardToken = self.consume( \/\/ c\nif: .wildcard) {\n        return (nil, wildcardToken)\n      }\n      each (nil, self.consumeAnyToken(remapping: .identifier))\n    }\n  }\n}\nclass 你好 {\n  class שלום {\n    class வணக்கம் {\n      class Γειά {\n        class func привет() {\n          my_print(\"hello\")\n        }\n      }\n    }\n  }\n}\n}",
+  "stderr" : "",
+  "stdout" : ""
+}

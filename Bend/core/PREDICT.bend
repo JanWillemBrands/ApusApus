@@ -4,6 +4,7 @@ import ./SETS.bend as Sets
 import ./GLL.bend as Gll
 import ./CHECK.bend as Check
 import ./TABLES.bend as T
+import ./SUPPORT.bend as Sup
 
 # THE PREDICTING PARSER: the GLL engine with Scott's predict sets. A cluster of x at i
 # starts a production of x only when the token at i is in the production's predict set, by
@@ -42,3 +43,33 @@ def predictedSteps(fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +in
   +nulls = Sets.growNulls(f, grammar, [])
   +firsts = T.growFirsts(f, grammar, nulls, [])
   predictWith(f, grammar, start, input, nulls, firsts, T.growFollows(f, grammar, firsts, nulls, [T.FollowFact{start, None{}}]))
+
+# ======== THE LL(1) PARSER ========
+
+# The predicting engine's final state, handed out when it is closed for the descriptors
+# prediction admits, has the start symbol's cluster, and is supported: every fact of it
+# derivable by the engine's rules with prediction (SUPPORT.bend).
+def ll1Run(r: Gll.GRun, +fuel: Nat, +pred: Gll.Pred, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
+  match r:
+    case Gll.GDone{+s}:
+      Check.checkPick(Bool.and(Bool.and(Check.closedWith(pred, grammar, input, s), Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s))), Sup.supported(fuel, pred, grammar, start, input, s)), s)
+    case Gll.OutOfFuel{s}:
+      None{}
+
+def ll1Pick(ok: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +sets: +List<+List<Maybe<&2, Nat>>>) -> Maybe<&2, +List<Core.Bsr>>:
+  match ok:
+    case True{}:
+      ll1Run(Gll.parseWith(fuel, Gll.Allowed{sets}, grammar, start, input), fuel, Gll.Allowed{sets}, grammar, start, input)
+    case False{}:
+      None{}
+
+def ll1With(+fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +nulls: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>) -> Maybe<&2, +List<Core.Bsr>>:
+  ll1Pick(T.checkWith(grammar, start, nulls, firsts, follows), fuel, grammar, start, input, predictSets(grammar, firsts, follows, nulls))
+
+# THE LL(1) PARSER: tables grown with `fuel` rounds each and passing the LL(1) check, the
+# predicting engine run with `fuel` steps, its final state closed and supported.
+def ll1Steps(fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
+  +f = fuel
+  +nulls = Sets.growNulls(f, grammar, [])
+  +firsts = T.growFirsts(f, grammar, nulls, [])
+  ll1With(f, grammar, start, input, nulls, firsts, T.growFollows(f, grammar, firsts, nulls, [T.FollowFact{start, None{}}]))

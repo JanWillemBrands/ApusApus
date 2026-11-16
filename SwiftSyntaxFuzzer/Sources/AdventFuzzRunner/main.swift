@@ -1381,6 +1381,8 @@ struct SwiftFragmentGenerator {
         "consume value",
         "copy value",
         "value as? (any P)? ?? fallback",
+        "inout Int",
+        "inout ~Copyable",
         "value[keyPath: \\.foo!.bar]",
         "items.map { $0 }.filter { _ in true }",
         "f { value }\n.member",
@@ -1432,7 +1434,7 @@ struct SwiftFragmentGenerator {
         if widePercent > 0, rng.nextInt(upperBound: 100) < widePercent {
             return wideSource(using: &rng)
         }
-        let curatedLaneCount = 60
+        let curatedLaneCount = 62
         let choice = rng.nextInt(upperBound: seedCorpus.isEmpty ? curatedLaneCount : curatedLaneCount + 4)
         switch choice {
         case 0:
@@ -1564,12 +1566,16 @@ struct SwiftFragmentGenerator {
         case 59:
             return GeneratedSource(label: "tspl-divergence-pattern-shape", source: tsplDivergencePatternShape(using: &rng))
         case 60:
-            return seedCorpusSource(using: &rng, mutated: false)
+            return GeneratedSource(label: "dot-operator-literal-overlap", source: dotOperatorLiteralOverlap(using: &rng))
         case 61:
-            return seedCorpusSource(using: &rng, mutated: true)
+            return GeneratedSource(label: "generic-operator-function-boundary", source: genericOperatorFunctionBoundary(using: &rng))
         case 62:
-            return wrappedSeedCorpusSource(using: &rng)
+            return seedCorpusSource(using: &rng, mutated: false)
         case 63:
+            return seedCorpusSource(using: &rng, mutated: true)
+        case 64:
+            return wrappedSeedCorpusSource(using: &rng)
+        case 65:
             return structuralSeedSplice(using: &rng)
         default:
             return seedCorpusCrossover(using: &rng)
@@ -1813,6 +1819,39 @@ struct SwiftFragmentGenerator {
         return "let \(lhs) = \(rhs)\nlet fuzzValue = \(lhs)\(op)\(rhs)"
     }
 
+    // Exercises the overlap between a literal `.` and longer dot-operator tokens. This lane guards
+    // the decision not to give `dotOperator` literal-munch priority in Swift.apus.
+    private func dotOperatorLiteralOverlap(using rng: inout SplitMix64) -> String {
+        [
+            "let fuzzValue = lower...upper",
+            "let fuzzValue = lower..<upper",
+            "postfix operator .?\npostfix func .? (value: Int) -> Int { value }\nlet fuzzValue = 0.?",
+            "postfix operator .!\npostfix func .! (value: Int) -> Int { value }\nlet fuzzValue = 0.!",
+            "postfix operator .??\npostfix func .?? (value: Int) -> Int { value }\nlet fuzzValue = 0.??",
+            "struct Foo { static var p: Foo { Foo() } }\nlet fuzzValue = \\Foo.p<Int>.?",
+            "struct Foo { static var p: Foo { Foo() } }\nlet fuzzValue = \\Foo.p<Int>.!",
+            "struct Foo { static var p: Foo { Foo() } }\nlet fuzzValue = \\Foo.p<Int>.??",
+            "let fuzzValue = \\Foo.?.?[0]",
+            "let fuzzValue = \\Foo.!.![0]",
+            "let fuzzValue = value.?.member",
+            "let fuzzValue = value.!.member",
+            "let fuzzValue = value.??.member"
+        ].random(using: &rng)
+    }
+
+    // The lexer initially sees the operator and a tight generic `<` as one operator token. Swift's
+    // parser peels the `<` back off when the token occupies a function-name slot.
+    private func genericOperatorFunctionBoundary(using rng: inout SplitMix64) -> String {
+        [
+            "infix operator %%%%\nfunc %%%%<T, U>(x: T, y: U) -> Int { 0 }",
+            "infix operator %%%\nfunc %%%<T, U>(x: T, y: U) -> Int { 1 }",
+            "prefix operator %\nprefix func %<T>(x: T) -> T { x }",
+            "infix operator <~>\nfunc <~><T>(lhs: T, rhs: T) -> T { lhs }",
+            "prefix operator ^/\nprefix func ^/<T>(x: T) -> T { x }",
+            "postfix operator ++\npostfix func ++<T>(value: inout T) -> T { value }"
+        ].random(using: &rng)
+    }
+
     private func tryBoundary(using rng: inout SplitMix64) -> String {
         let tail = postfixTails.random(using: &rng)
         let marker = ["try", "try?", "try!"].random(using: &rng)
@@ -1870,6 +1909,10 @@ struct SwiftFragmentGenerator {
     }
 
     private func genericWhere(using rng: inout SplitMix64) -> String {
+        if rng.nextInt(upperBound: 4) == 0 {
+            let relation = ["T: P", "T: ~Copyable", "T == Foo.Bar"].random(using: &rng)
+            return "struct Foo { struct Bar {} }\nprotocol P {}\ntypealias Fuzz<T> = Array<T> where \(relation)"
+        }
         let relation = [
             "T.Element == Foo.Bar",
             "T.Element: P",
@@ -1883,8 +1926,9 @@ struct SwiftFragmentGenerator {
 
     private func keyPathBoundary(using rng: inout SplitMix64) -> String {
         let base = ["\\Foo.bar", "\\Foo.Bar.default", "\\.default", "\\.foo?.bar", "\\.foo!.bar"].random(using: &rng)
+        let prefix = ["", "-", "+", "~", "++"].random(using: &rng)
         let suffix = ["", " as KeyPath<Foo, Int>", " ?? fallback", ".self", " / value"].random(using: &rng)
-        return "\(base)\(suffix)"
+        return "\(prefix)\(base)\(suffix)"
     }
 
     private func interpolationBoundary(using rng: inout SplitMix64) -> String {
@@ -2199,7 +2243,12 @@ struct SwiftFragmentGenerator {
             "let value = 1\nlet s = \"abc\"\nlet fuzzValue = try? \(slashExpr).wholeMatch(in: s) ?? nil",
             "let value = 1\nlet fuzzValue = value /\n\(slashExpr)",
             "let s = \"abc\"\nlet regex = \(slashExpr)\nlet fuzzValue = regex.wholeMatch(in: s)",
-            "let value = 1\nlet fuzzValue = value /* comment */ / value"
+            "let value = 1\nlet fuzzValue = value /* comment */ / value",
+            "let value = 2\n/value/",
+            "let value = 2\n/}/\n.bitWidth",
+            "let value = 2\n/]/\n.bitWidth",
+            "let value = 2\n/,/\n.bitWidth",
+            "let value = 2\n/:/\n.bitWidth"
         ]
         return shape.random(using: &rng)
     }

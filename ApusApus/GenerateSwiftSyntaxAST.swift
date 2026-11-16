@@ -1327,9 +1327,10 @@ struct SwiftSyntaxGenerator {
         types.append(InheritedTypeSyntax(type: type))
     }
 
-    /// memberDeclaration = declaration | enumCaseDeclaration | freestandingMacroExpansionDeclaration .
+    /// memberDeclaration = declaration | initializerDeclaration | subscriptDeclaration
+    ///                   | enumCaseDeclaration | freestandingMacroExpansionDeclaration .
     ///
-    /// The two non-`declaration` alternates are MEMBER-ONLY, so `convertDeclaration` never sees
+    /// The non-`declaration` alternates are MEMBER-ONLY, so `convertDeclaration` never sees
     /// them and they were reported as "no converter" even though both map cleanly.
     private mutating func memberOnlyDeclaration(
         _ spans: [(GrammarNode, CharPosition, CharPosition)], from: CharPosition, to: CharPosition
@@ -1354,6 +1355,16 @@ struct SwiftSyntaxGenerator {
         }
         if let caseNT = find("enumCaseDeclaration", in: spans) {
             return DeclSyntax(convertEnumCaseDeclaration(caseNT.nt, from: caseNT.from, to: caseNT.to))
+        }
+        if let initializerNT = find("initializerDeclaration", in: spans) {
+            return DeclSyntax(convertInitializerDeclaration(
+                initializerNT.nt, from: initializerNT.from, to: initializerNT.to
+            ))
+        }
+        if let subscriptNT = find("subscriptDeclaration", in: spans) {
+            return DeclSyntax(convertSubscriptDeclaration(
+                subscriptNT.nt, from: subscriptNT.from, to: subscriptNT.to
+            ))
         }
         return nil
     }
@@ -5695,7 +5706,15 @@ struct SwiftSyntaxGenerator {
             elements.append(ExprSyntax(UnresolvedIsExprSyntax(isKeyword: .keyword(.is))))
         }
 
-        if let typeNT = find("type", in: spans) {
+        let typeNT: NTSpan? = if let direct = find("type", in: spans) {
+            direct
+        } else if let committed = find("committedCastType", in: spans),
+                  let (_, committedSpans) = tileAlternate(committed.nt, from: committed.from, to: committed.to) {
+            find("type", in: committedSpans)
+        } else {
+            nil
+        }
+        if let typeNT {
             let type = convertType(typeNT.nt, from: typeNT.from, to: typeNT.to)
             elements.append(ExprSyntax(TypeExprSyntax(type: type)))
         } else {

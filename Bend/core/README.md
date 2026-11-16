@@ -39,11 +39,14 @@ files stay until their replacements check.
 | `TABLES.bend` | The LL(1) tables (nullable, FIRST, FOLLOW) grown untrusted and checked closed, the predict sets, and the check `ll1ByTables` |
 | `TABLES_EX.bend` | The LL(1) check on examples, including clashes only FOLLOW shows |
 | `PROOF_TABLES.bend` | LL(1) by the tables is LL(1): `tables_ll1_sound` |
-| `PREDICT.bend` | The predicting parser `predictedSteps`: predict sets from the checked tables, the engine run with them, the final state checked closed for what prediction admits |
+| `PREDICT.bend` | The predicting parser `predictedSteps`: predict sets from the checked tables, the engine run with them, the final state checked closed for what prediction admits; the LL(1) parser `ll1Steps`: tables that pass the LL(1) check, and a final state also supported |
 | `PROOF_PREDICT.bend` | Prediction admits every node of every parse tree, so the predicting parser misses nothing: `predict_every_parse_step` |
-| `PREDICT_EX.bend` | The predicting parser on examples, including a production predicted only by FOLLOW |
+| `PREDICT_EX.bend` | The predicting parser on examples, including a production predicted only by FOLLOW; the LL(1) parser's set is exactly the tree's steps where the plain parser has dead wood, and a grammar that is not LL(1) gets no answer |
 | `SUPPORT.bend` | Support: the facts of an engine state, the engine's rules on facts (with its predictor), the facts reached from the root, and `supported` (every fact of the state is reached) |
 | `SUPPORT_EX.bend` | Support on examples: plain and predicting runs are supported, and the predicting run's facts lie inside the plain run |
-| `PROOF_SUPPORT.bend` | Every fact of a supported state keeps what the rules keep; with the goal "in a closed plain state": `predict_saves_work` |
+| `PROOF_HOLD.bend` | Goals for the facts reached: in a closed plain state, or on a parse tree (a Bool search over the tree's steps); lists of facts |
+| `PROOF_STATE.bend` | Every rule keeps the goal "in a closed plain state" |
+| `PROOF_TREE.bend` | Every rule of the predicting engine keeps the goal "on a parse tree of an LL(1) grammar": the node of a step, cursors, seeds by table conflicts, resumes by `compare` |
+| `PROOF_SUPPORT.bend` | Every fact of a supported state holds the goal (one induction): `predict_saves_work`, and `ll1_no_dead_wood` (the LL(1) parser's set is exact) |
 
 Run each with `bend <file>`; each prints ALL PROOFS CHECK.

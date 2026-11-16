@@ -458,9 +458,14 @@ enum ApusRegexLibrary {
         typealias RegexOutput = Substring
 
         let allowImmediatelyClosedLeadingRightParen: Bool
+        let requireRightBoundOpeningSlash: Bool
 
-        init(allowImmediatelyClosedLeadingRightParen: Bool = false) {
+        init(
+            allowImmediatelyClosedLeadingRightParen: Bool = false,
+            requireRightBoundOpeningSlash: Bool = false
+        ) {
             self.allowImmediatelyClosedLeadingRightParen = allowImmediatelyClosedLeadingRightParen
+            self.requireRightBoundOpeningSlash = requireRightBoundOpeningSlash
         }
 
         func consuming(_ input: String, startingAt index: String.Index, in bounds: Range<String.Index>) throws -> (upperBound: String.Index, output: Substring)? {
@@ -468,6 +473,13 @@ enum ApusRegexLibrary {
 
             var i = input.index(after: index)
             guard i < bounds.upperBound else { return nil }
+            if requireRightBoundOpeningSlash {
+                // SwiftSyntax Cursor.isRightBound(isLeftBound: false). The caller uses this
+                // variant only at a line start, where the opening slash is not left-bound.
+                guard ![" ", "\t", "\n", "\r", ")", "]", "}", ",", ";", ":", "\u{00A0}"].contains(input[i]) else {
+                    return nil
+                }
+            }
             guard input[i] != "/", input[i] != "*" else { return nil }
             guard input[i] != " ", input[i] != "\t", input[i] != "\n", input[i] != "\r" else { return nil }
 
@@ -549,6 +561,10 @@ enum ApusRegexLibrary {
         PlainRegexLiteral()
     }.matchingSemantics(.unicodeScalar)
 
+    static let rightBoundRegexLiteralToken = Regex {
+        PlainRegexLiteral(requireRightBoundOpeningSlash: true)
+    }.matchingSemantics(.unicodeScalar)
+
     static let operatorRegexLiteralToken = Regex {
         PlainRegexLiteral(allowImmediatelyClosedLeadingRightParen: true)
     }.matchingSemantics(.unicodeScalar)
@@ -585,6 +601,7 @@ enum ApusRegexLibrary {
         "propertyWrapperProjection":   Regex<AnyRegexOutput>(propertyWrapperProjection.regex),
         "escapedIdentifier":           Regex<AnyRegexOutput>(escapedIdentifier.regex),
         "regexLiteralToken":           Regex<AnyRegexOutput>(regexLiteralToken.regex),
+        "rightBoundRegexLiteralToken": Regex<AnyRegexOutput>(rightBoundRegexLiteralToken.regex),
         "operatorRegexLiteralToken":   Regex<AnyRegexOutput>(operatorRegexLiteralToken.regex),
         "extendedRegularExpressionLiteral": Regex<AnyRegexOutput>(extendedRegularExpressionLiteral.regex),
     ]

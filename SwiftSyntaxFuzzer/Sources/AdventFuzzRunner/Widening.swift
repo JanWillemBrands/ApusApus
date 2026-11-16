@@ -30,6 +30,13 @@ struct FuzzTokens {
         return out + trailing
     }
 
+    /// Renders exactly the stored trivia, including intentionally glued word/operator tokens.
+    /// Boundary fuzzing needs those lexically disruptive cases; ordinary token mutation uses
+    /// `rendered` to keep accidental token fusion from dominating its samples.
+    var boundaryRendered: String {
+        tokens.map { $0.leading + $0.text }.joined() + trailing
+    }
+
     private func gluesToPrevious(_ index: Int) -> Bool {
         let previous = tokens[index - 1].kind, current = tokens[index].kind
         let wordLike: Set<FuzzToken.Kind> = [.word, .number]

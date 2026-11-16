@@ -1,0 +1,82 @@
+{
+  "event" : {
+    "artifact" : "00002624-advent-overaccept-96d069cbc17a6aee.json",
+    "durationSeconds" : 2.0202280282974243,
+    "exitCode" : 1,
+    "generator" : "wide:after-statement:line-comment+keyword:attribute:testMacroRoleNames#10",
+    "index" : 2624,
+    "seed" : 4354586688115271013,
+    "signalHash" : "97ad020b87d0efa8",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|a freestanding macro cannot have the '<value>' role",
+    "sourceHash" : "96d069cbc17a6aee",
+    "sourceLength" : 86,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "let prior = value\n@freestanding(member, names: await(subscript(a:b:) \/\/ c\n))\nmacro m()",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      MacroDecl\n        AttributeList\n          Attribute\n            atSign \"@\"\n            IdentifierType\n              identifier(\"freestanding\") \"freestanding\"\n            leftParen \"(\"\n            LabeledExprList\n              LabeledExpr\n                DeclReferenceExpr\n                  identifier(\"member\") \"member\"\n                comma \",\"\n              LabeledExpr\n                identifier(\"names\") \"names\"\n                colon \":\"\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"await\") \"await\"\n                  leftParen \"(\"\n                  LabeledExprList\n                    LabeledExpr\n                      DeclReferenceExpr\n                        keyword(SwiftSyntax.Keyword.subscript) \"subscript\"\n                        DeclNameArguments\n                          leftParen \"(\"\n                          DeclNameArgumentList\n                            DeclNameArgument\n                              identifier(\"a\") \"a\"\n                              colon \":\"\n                          rightParen \")\"\n                  rightParen \")\"\n                  MultipleTrailingClosureElementList\n            rightParen \")\"\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.macro) \"macro\"\n        identifier(\"m\") \"m\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4F7A5C8E-7A95-4F43-B903-2D9B35B6F778.swift:1:15: error: a freestanding macro cannot have the 'member' role\n1 | @freestanding(member, names: await(subscript(a:)\n  |               `- error: a freestanding macro cannot have the 'member' role\n2 | ))\n3 | macro m()\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-4F7A5C8E-7A95-4F43-B903-2D9B35B6F778.swift:1:30: error: unknown introduced name kind 'await'\n1 | @freestanding(member, names: await(subscript(a:)\n  |                              `- error: unknown introduced name kind 'await'\n2 | ))\n3 | macro m()\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "parameterClause\t[\"(\" \")\"]",
+      "macroSignature\t[parameterClause ]",
+      "identifierToken\t[identifier]",
+      "argumentLabel\t[identifier]",
+      "argumentName\t[argumentLabel \":\"]",
+      "argumentNames\t[argumentName ]",
+      ".OPT\t[\"(\" argumentNames \")\"]",
+      "regexForcingLexerKeyword\t[\"subscript\"]",
+      "memberName\t[regexForcingLexerKeyword]",
+      "attributeDeclBase\t[memberName]",
+      "introducedName\t[attributeDeclBase ]",
+      "macroRoleCall\t[identifierToken \"(\" introducedName \")\"]",
+      "macroRoleName\t[macroRoleCall]",
+      "macroRoleArgumentGroup\t[identifierToken \":\" macroRoleName ]",
+      ".DO\t[\",\" macroRoleArgumentGroup]",
+      ".KLN\t[]",
+      "macroRole\t[identifierToken]",
+      "macroRoleArguments\t[macroRole ]",
+      "attribute\t[\"@\" >s< \"freestanding\" >s< \"(\" macroRoleArguments \")\"]",
+      "attributes\t[attribute ]",
+      ".OPT\t[attributes]",
+      "macroDeclarationHead\t[  \"macro\"]",
+      "macroIntroducer\t[macroDeclarationHead identifierToken]",
+      "macroDeclaration\t[macroIntroducer  macroSignature  ]",
+      "declaration\t[macroDeclaration]",
+      "statement\t[declaration]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      ".OPT\t[codeBlockItems]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 115,
+      "descriptorCount" : 250,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 107,
+      "parseSeconds" : 0.0024290084838867188,
+      "sourceLength" : 61,
+      "suppressedDescriptorCount" : 26,
+      "tokenCount" : 20,
+      "yieldCount" : 200
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      SubscriptDecl\n        AttributeList\n          Attribute\n            atSign \"@\"\n            IdentifierType\n              identifier(\"freestanding\") \"freestanding\"\n            leftParen \"(\"\n            LabeledExprList\n              LabeledExpr\n                DeclReferenceExpr\n                  identifier(\"member\") \"member\"\n                comma \",\"\n              LabeledExpr\n                identifier(\"names\") \"names\"\n                colon \":\"\n                AwaitExpr\n                  keyword(SwiftSyntax.Keyword.await) \"await\"\n                  TupleExpr\n                    leftParen \"(\"\n                    LabeledExprList\n                      LabeledExpr\n                        DeclReferenceExpr\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.subscript) \"subscript\"\n        FunctionParameterClause\n          leftParen \"(\"\n          FunctionParameterList\n            FunctionParameter\n              AttributeList\n              DeclModifierList\n              identifier(\"a\") \"a\"\n              colon \":\"\n              MissingType\n          rightParen \")\"\n        ReturnClause\n          MissingType\n    CodeBlockItem\n      UnexpectedCodeDecl\n        UnexpectedNodes\n          rightParen \")\"\n          rightParen \")\"\n    CodeBlockItem\n      MacroDecl\n        AttributeList\n        DeclModifierList\n        keyword(SwiftSyntax.Keyword.macro) \"macro\"\n        identifier(\"m\") \"m\"\n        FunctionSignature\n          FunctionParameterClause\n            leftParen \"(\"\n            FunctionParameterList\n            rightParen \")\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 49,
+  "source" : "@freestanding(member, names: await(subscript(a:)\n))\nmacro m()",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      MacroDecl\\n        AttributeList\\n          Attribute\\n            atSign \\\"@\\\"\\n            IdentifierType\\n              identifier(\\\"freestanding\\\") \\\"freestanding\\\"\\n            leftParen \\\"(\\\"\\n            LabeledExprList\\n              LabeledExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"member\\\") \\\"member\\\"\\n                comma \\\",\\\"\\n              LabeledExpr\\n                identifier(\\\"names\\\") \\\"names\\\"\\n                colon \\\":\\\"\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"await\\\") \\\"await\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                    LabeledExpr\\n                      DeclReferenceExpr\\n                        keyword(SwiftSyntax.Keyword.subscript) \\\"subscript\\\"\\n                        DeclNameArguments\\n                          leftParen \\\"(\\\"\\n                          DeclNameArgumentList\\n                            DeclNameArgument\\n                              identifier(\\\"a\\\") \\\"a\\\"\\n                              colon \\\":\\\"\\n                          rightParen \\\")\\\"\\n                  rightParen \\\")\\\"\\n                  MultipleTrailingClosureElementList\\n            rightParen \\\")\\\"\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n        identifier(\\\"m\\\") \\\"m\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4F7A5C8E-7A95-4F43-B903-2D9B35B6F778.swift:1:15: error: a freestanding macro cannot have the 'member' role\\n1 | @freestanding(member, names: await(subscript(a:)\\n  |               `- error: a freestanding macro cannot have the 'member' role\\n2 | ))\\n3 | macro m()\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-4F7A5C8E-7A95-4F43-B903-2D9B35B6F778.swift:1:30: error: unknown introduced name kind 'await'\\n1 | @freestanding(member, names: await(subscript(a:)\\n  |                              `- error: unknown introduced name kind 'await'\\n2 | ))\\n3 | macro m()\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"parameterClause\\t[\\\"(\\\" \\\")\\\"]\",\"macroSignature\\t[parameterClause ]\",\"identifierToken\\t[identifier]\",\"argumentLabel\\t[identifier]\",\"argumentName\\t[argumentLabel \\\":\\\"]\",\"argumentNames\\t[argumentName ]\",\".OPT\\t[\\\"(\\\" argumentNames \\\")\\\"]\",\"regexForcingLexerKeyword\\t[\\\"subscript\\\"]\",\"memberName\\t[regexForcingLexerKeyword]\",\"attributeDeclBase\\t[memberName]\",\"introducedName\\t[attributeDeclBase ]\",\"macroRoleCall\\t[identifierToken \\\"(\\\" introducedName \\\")\\\"]\",\"macroRoleName\\t[macroRoleCall]\",\"macroRoleArgumentGroup\\t[identifierToken \\\":\\\" macroRoleName ]\",\".DO\\t[\\\",\\\" macroRoleArgumentGroup]\",\".KLN\\t[]\",\"macroRole\\t[identifierToken]\",\"macroRoleArguments\\t[macroRole ]\",\"attribute\\t[\\\"@\\\" >s< \\\"freestanding\\\" >s< \\\"(\\\" macroRoleArguments \\\")\\\"]\",\"attributes\\t[attribute ]\",\".OPT\\t[attributes]\",\"macroDeclarationHead\\t[  \\\"macro\\\"]\",\"macroIntroducer\\t[macroDeclarationHead identifierToken]\",\"macroDeclaration\\t[macroIntroducer  macroSignature  ]\",\"declaration\\t[macroDeclaration]\",\"statement\\t[declaration]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\".OPT\\t[codeBlockItems]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":115,\"descriptorCount\":250,\"duplicateDescriptorCount\":0,\"oraclePruned\":107,\"parseSeconds\":0.0024290084838867188,\"sourceLength\":61,\"suppressedDescriptorCount\":26,\"tokenCount\":20,\"yieldCount\":200},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      SubscriptDecl\\n        AttributeList\\n          Attribute\\n            atSign \\\"@\\\"\\n            IdentifierType\\n              identifier(\\\"freestanding\\\") \\\"freestanding\\\"\\n            leftParen \\\"(\\\"\\n            LabeledExprList\\n              LabeledExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"member\\\") \\\"member\\\"\\n                comma \\\",\\\"\\n              LabeledExpr\\n                identifier(\\\"names\\\") \\\"names\\\"\\n                colon \\\":\\\"\\n                AwaitExpr\\n                  keyword(SwiftSyntax.Keyword.await) \\\"await\\\"\\n                  TupleExpr\\n                    leftParen \\\"(\\\"\\n                    LabeledExprList\\n                      LabeledExpr\\n                        DeclReferenceExpr\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.subscript) \\\"subscript\\\"\\n        FunctionParameterClause\\n          leftParen \\\"(\\\"\\n          FunctionParameterList\\n            FunctionParameter\\n              AttributeList\\n              DeclModifierList\\n              identifier(\\\"a\\\") \\\"a\\\"\\n              colon \\\":\\\"\\n              MissingType\\n          rightParen \\\")\\\"\\n        ReturnClause\\n          MissingType\\n    CodeBlockItem\\n      UnexpectedCodeDecl\\n        UnexpectedNodes\\n          rightParen \\\")\\\"\\n          rightParen \\\")\\\"\\n    CodeBlockItem\\n      MacroDecl\\n        AttributeList\\n        DeclModifierList\\n        keyword(SwiftSyntax.Keyword.macro) \\\"macro\\\"\\n        identifier(\\\"m\\\") \\\"m\\\"\\n        FunctionSignature\\n          FunctionParameterClause\\n            leftParen \\\"(\\\"\\n            FunctionParameterList\\n            rightParen \\\")\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}

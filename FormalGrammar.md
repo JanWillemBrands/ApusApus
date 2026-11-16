@@ -2,7 +2,8 @@
 
 Version 3, 2026-11-13. A plan in progress: step 0 (measurements), step 1 (the core and the
 translation) and step 2 (the parser, pruning and the exact set) are done, in `Bend/core/`, and
-so are step 4 (all three phases) and step 5 (rule 2; rule 1 dropped).
+so are step 4 (all three phases), step 5 (rule 2; rule 1 dropped) and step 6 (the LL(1) laws on
+the core).
 Version 1 (2026-11-11) proposed well-formedness rules on today's specification; version 2 put
 them on a smaller core; version 3 keeps the LL(1) laws on that core, with a second
 translation of loops. Section 11 lists the changes.
@@ -449,13 +450,21 @@ site that returns nothing, classified).
      predicting one follows from `predicts_node` and `predicts_in`. `PREDICT.bend` 44 and
      `PROOF_PREDICT.bend` 242 lines (today `PROOF_PRED.bend` 431, on top of the engine's
      prediction). A negative check: predict sets without FOLLOW make the proof fail.
-   - Support and `predict_saves_work` are done (`SUPPORT.bend` 327, `PROOF_SUPPORT.bend` 580
-     lines; today `SUPPORT.bend` 255, `PROOF_SUPPORT.bend` 2,212 and `PROOF_SAVES.bend` 685).
-     One induction over the reached facts with a goal given as data; the goal "in a closed
-     plain state" gives the law. A negative check: rules that resume without the need check
-     make the proof fail.
-   - Left: `ll1_no_dead_wood`, as a second goal ("on the parse tree") for the same induction.
-     No generator is needed so far.
+   - Support and `predict_saves_work` are done (`SUPPORT.bend` 327 lines; today `SUPPORT.bend`
+     255, `PROOF_SUPPORT.bend` 2,212 and `PROOF_SAVES.bend` 685). One induction over the
+     reached facts with a goal given as data; the goal "in a closed plain state" gives the
+     law. A negative check: rules that resume without the need check make the proof fail.
+   - `ll1_no_dead_wood` is done, as a second goal ("on the parse tree") for the same induction.
+     The LL(1) parser `ll1Steps` (`PREDICT.bend`) hands out the steps of a predicting run
+     whose tables pass the LL(1) check and whose final state is closed and supported. A fact
+     is on the tree when a step of the tree witnesses it (a Bool search over the tree's steps,
+     no node list); a step's node gives a cursor (the children still to read), and the rules
+     follow the cursor; a seed is the tree's production or a table conflict (`pairs_at`); a
+     resume ends where the pop says because the tree has one node of x at a position
+     (`compare`). `PROOF_HOLD.bend` 278, `PROOF_STATE.bend` 208, `PROOF_TREE.bend` 1,436 and
+     `PROOF_SUPPORT.bend` 436 lines (today `PROOF_NODEAD.bend` 1,620 and `PROOF_NODEAD2.bend`
+     about 4,030). A negative check: a resumed descriptor at the wrong dot fails. No generator
+     was needed. Step 6 is done.
 7. **The inventory, complete**, and the algorithmic refusals (C3, C7).
 8. **The twin answers.** On a well-formed grammar, with enough fuel, each oracle hands out a
    set (TODO.md, "Bend twin: answers"). This closes the escape hatch of section 1; its argument

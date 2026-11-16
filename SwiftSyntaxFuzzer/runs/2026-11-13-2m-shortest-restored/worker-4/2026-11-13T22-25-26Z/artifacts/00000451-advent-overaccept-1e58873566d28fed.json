@@ -1,0 +1,81 @@
+{
+  "event" : {
+    "artifact" : "00000451-advent-overaccept-1e58873566d28fed.json",
+    "durationSeconds" : 2.680227041244507,
+    "exitCode" : 1,
+    "generator" : "wide:func-body:newline+block-comment+swap:reject:testForwardSlashRegexSkippingInvalid13#1",
+    "index" : 451,
+    "seed" : 1663247083238453542,
+    "signalHash" : "912af4ed03eaaa90",
+    "signalSummary" : "advent-overaccept|compiler=false|swiftSyntaxHasError=true|expected expression after operator",
+    "sourceHash" : "1e58873566d28fed",
+    "sourceLength" : 41,
+    "status" : "advent-overaccept"
+  },
+  "originalSource" : "func fuzz() {\nfunc n() { \"{\"\n\/*c*\/\/}\/ }\n}",
+  "probe" : {
+    "adventBuiltTree" : true,
+    "adventDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              FunctionCallExpr\n                DeclReferenceExpr\n                  identifier(\"n\") \"n\"\n                leftParen \"(\"\n                LabeledExprList\n                rightParen \")\"\n                ClosureExpr\n                  leftBrace \"{\"\n                  CodeBlockItemList\n                    CodeBlockItem\n                      StringLiteralExpr\n                        stringQuote \"\"\"\n                        StringLiteralSegmentList\n                          StringSegment\n                            stringSegment(\"{\") \"{\"\n                        stringQuote \"\"\"\n                    CodeBlockItem\n                      RegexLiteralExpr\n                        regexSlash \"\/\"\n                        regexLiteralPattern(\"}\") \"}\"\n                        regexSlash \"\/\"\n                  rightBrace \"}\"\n                MultipleTrailingClosureElementList\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n",
+    "adventGeneratedSwiftSyntax" : true,
+    "adventMatched" : true,
+    "compilerAccepted" : false,
+    "compilerChecked" : true,
+    "compilerStderr" : "\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-F05F015B-0005-45D5-BB1E-502B7FAE7645.swift:2:7: error: expected expression after operator\n1 |  fuzz() { n() { \"{\"\n2 | \/*c*\/\/}\/ }\n  |       `- error: expected expression after operator\n3 | }\n\n\/var\/folders\/bg\/t20_gl712tj3g9tx5yn730740000gn\/T\/advent-fuzzer-F05F015B-0005-45D5-BB1E-502B7FAE7645.swift:3:1: error: extraneous '}' at top level\n1 |  fuzz() { n() { \"{\"\n2 | \/*c*\/\/}\/ }\n3 | }\n  | `- error: extraneous '}' at top level\n",
+    "compilerTypecheckChecked" : false,
+    "generatorDiagnostics" : [
+
+    ],
+    "grammarCoverage" : [
+      "plainRegularExpressionLiteral\t[<-<(regexBlockingToken) regexLiteralToken]",
+      "regularExpressionLiteral\t[plainRegularExpressionLiteral]",
+      "literal\t[regularExpressionLiteral]",
+      "literalExpression\t[literal]",
+      "primaryExpression\t[literalExpression]",
+      "postfixExpression\t[primaryExpression]",
+      "prefixExpression\t[ postfixExpression]",
+      "expression\t[prefixExpression ]",
+      "statement\t[ expression]",
+      "codeBlockItem\t[statement ]",
+      "codeBlockItems\t[codeBlockItem ]",
+      "codeBlockItemBoundary\t[<-<(\";\") <n>]",
+      ".OPT\t[codeBlockItemBoundary codeBlockItems]",
+      "staticStringLiteral\t[stringLiteralToken]",
+      "stringLiteral\t[staticStringLiteral]",
+      "literal\t[stringLiteral]",
+      ".OPT\t[codeBlockItems]",
+      ".DO\t[]",
+      "samelineOpenedClosure\t[\"{\" >n<  \"}\"]",
+      "trailingClosure\t[samelineOpenedClosure]",
+      "trailingClosures\t[trailingClosure >->(\"else\")]",
+      "ifConfigSameLine\t[]",
+      "functionCallArgumentClause\t[\"(\" \")\"]",
+      "expressionIdentifier\t[identifier]",
+      "genericIdentifier\t[expressionIdentifier ]",
+      "primaryExpression\t[genericIdentifier]",
+      "functionCallExpression\t[postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures]",
+      "postfixExpression\t[functionCallExpression]",
+      "topLevelDeclaration\t[ ]"
+    ],
+    "metrics" : {
+      "crfCount" : 203,
+      "descriptorCount" : 364,
+      "duplicateDescriptorCount" : 0,
+      "oraclePruned" : 154,
+      "parseSeconds" : 0.007504940032958984,
+      "sourceLength" : 32,
+      "suppressedDescriptorCount" : 108,
+      "tokenCount" : 12,
+      "yieldCount" : 320
+    },
+    "referenceDump" : "SourceFile\n  CodeBlockItemList\n    CodeBlockItem\n      FunctionCallExpr\n        DeclReferenceExpr\n          identifier(\"fuzz\") \"fuzz\"\n        leftParen \"(\"\n        LabeledExprList\n        rightParen \")\"\n        ClosureExpr\n          leftBrace \"{\"\n          CodeBlockItemList\n            CodeBlockItem\n              PostfixOperatorExpr\n                FunctionCallExpr\n                  DeclReferenceExpr\n                    identifier(\"n\") \"n\"\n                  leftParen \"(\"\n                  LabeledExprList\n                  rightParen \")\"\n                  ClosureExpr\n                    leftBrace \"{\"\n                    CodeBlockItemList\n                      CodeBlockItem\n                        SequenceExpr\n                          ExprList\n                            StringLiteralExpr\n                              stringQuote \"\"\"\n                              StringLiteralSegmentList\n                                StringSegment\n                                  stringSegment(\"{\") \"{\"\n                              stringQuote \"\"\"\n                            BinaryOperatorExpr\n                              binaryOperator(\"\/\") \"\/\"\n                            MissingExpr\n                    rightBrace \"}\"\n                  MultipleTrailingClosureElementList\n                postfixOperator(\"\/\") \"\/\"\n          rightBrace \"}\"\n        MultipleTrailingClosureElementList\n    CodeBlockItem\n      UnexpectedCodeDecl\n        UnexpectedNodes\n          rightBrace \"}\"\n",
+    "residualAmbiguities" : [
+
+    ],
+    "status" : "advent-overaccept",
+    "swiftSyntaxHasError" : true
+  },
+  "reductionProbes" : 51,
+  "source" : " fuzz() { n() { \"{\"\n\/*c*\/\/}\/ }\n}",
+  "stderr" : "",
+  "stdout" : "{\"adventBuiltTree\":true,\"adventDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              FunctionCallExpr\\n                DeclReferenceExpr\\n                  identifier(\\\"n\\\") \\\"n\\\"\\n                leftParen \\\"(\\\"\\n                LabeledExprList\\n                rightParen \\\")\\\"\\n                ClosureExpr\\n                  leftBrace \\\"{\\\"\\n                  CodeBlockItemList\\n                    CodeBlockItem\\n                      StringLiteralExpr\\n                        stringQuote \\\"\\\"\\\"\\n                        StringLiteralSegmentList\\n                          StringSegment\\n                            stringSegment(\\\"{\\\") \\\"{\\\"\\n                        stringQuote \\\"\\\"\\\"\\n                    CodeBlockItem\\n                      RegexLiteralExpr\\n                        regexSlash \\\"\\\/\\\"\\n                        regexLiteralPattern(\\\"}\\\") \\\"}\\\"\\n                        regexSlash \\\"\\\/\\\"\\n                  rightBrace \\\"}\\\"\\n                MultipleTrailingClosureElementList\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n\",\"adventGeneratedSwiftSyntax\":true,\"adventMatched\":true,\"compilerAccepted\":false,\"compilerChecked\":true,\"compilerStderr\":\"\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-F05F015B-0005-45D5-BB1E-502B7FAE7645.swift:2:7: error: expected expression after operator\\n1 |  fuzz() { n() { \\\"{\\\"\\n2 | \\\/*c*\\\/\\\/}\\\/ }\\n  |       `- error: expected expression after operator\\n3 | }\\n\\n\\\/var\\\/folders\\\/bg\\\/t20_gl712tj3g9tx5yn730740000gn\\\/T\\\/advent-fuzzer-F05F015B-0005-45D5-BB1E-502B7FAE7645.swift:3:1: error: extraneous '}' at top level\\n1 |  fuzz() { n() { \\\"{\\\"\\n2 | \\\/*c*\\\/\\\/}\\\/ }\\n3 | }\\n  | `- error: extraneous '}' at top level\\n\",\"compilerTypecheckChecked\":false,\"failureExpected\":[],\"generatorDiagnostics\":[],\"grammarCoverage\":[\"plainRegularExpressionLiteral\\t[<-<(regexBlockingToken) regexLiteralToken]\",\"regularExpressionLiteral\\t[plainRegularExpressionLiteral]\",\"literal\\t[regularExpressionLiteral]\",\"literalExpression\\t[literal]\",\"primaryExpression\\t[literalExpression]\",\"postfixExpression\\t[primaryExpression]\",\"prefixExpression\\t[ postfixExpression]\",\"expression\\t[prefixExpression ]\",\"statement\\t[ expression]\",\"codeBlockItem\\t[statement ]\",\"codeBlockItems\\t[codeBlockItem ]\",\"codeBlockItemBoundary\\t[<-<(\\\";\\\") <n>]\",\".OPT\\t[codeBlockItemBoundary codeBlockItems]\",\"staticStringLiteral\\t[stringLiteralToken]\",\"stringLiteral\\t[staticStringLiteral]\",\"literal\\t[stringLiteral]\",\".OPT\\t[codeBlockItems]\",\".DO\\t[]\",\"samelineOpenedClosure\\t[\\\"{\\\" >n<  \\\"}\\\"]\",\"trailingClosure\\t[samelineOpenedClosure]\",\"trailingClosures\\t[trailingClosure >->(\\\"else\\\")]\",\"ifConfigSameLine\\t[]\",\"functionCallArgumentClause\\t[\\\"(\\\" \\\")\\\"]\",\"expressionIdentifier\\t[identifier]\",\"genericIdentifier\\t[expressionIdentifier ]\",\"primaryExpression\\t[genericIdentifier]\",\"functionCallExpression\\t[postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures]\",\"postfixExpression\\t[functionCallExpression]\",\"topLevelDeclaration\\t[ ]\"],\"metrics\":{\"crfCount\":203,\"descriptorCount\":364,\"duplicateDescriptorCount\":0,\"oraclePruned\":154,\"parseSeconds\":0.007504940032958984,\"sourceLength\":32,\"suppressedDescriptorCount\":108,\"tokenCount\":12,\"yieldCount\":320},\"referenceDump\":\"SourceFile\\n  CodeBlockItemList\\n    CodeBlockItem\\n      FunctionCallExpr\\n        DeclReferenceExpr\\n          identifier(\\\"fuzz\\\") \\\"fuzz\\\"\\n        leftParen \\\"(\\\"\\n        LabeledExprList\\n        rightParen \\\")\\\"\\n        ClosureExpr\\n          leftBrace \\\"{\\\"\\n          CodeBlockItemList\\n            CodeBlockItem\\n              PostfixOperatorExpr\\n                FunctionCallExpr\\n                  DeclReferenceExpr\\n                    identifier(\\\"n\\\") \\\"n\\\"\\n                  leftParen \\\"(\\\"\\n                  LabeledExprList\\n                  rightParen \\\")\\\"\\n                  ClosureExpr\\n                    leftBrace \\\"{\\\"\\n                    CodeBlockItemList\\n                      CodeBlockItem\\n                        SequenceExpr\\n                          ExprList\\n                            StringLiteralExpr\\n                              stringQuote \\\"\\\"\\\"\\n                              StringLiteralSegmentList\\n                                StringSegment\\n                                  stringSegment(\\\"{\\\") \\\"{\\\"\\n                              stringQuote \\\"\\\"\\\"\\n                            BinaryOperatorExpr\\n                              binaryOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n                            MissingExpr\\n                    rightBrace \\\"}\\\"\\n                  MultipleTrailingClosureElementList\\n                postfixOperator(\\\"\\\/\\\") \\\"\\\/\\\"\\n          rightBrace \\\"}\\\"\\n        MultipleTrailingClosureElementList\\n    CodeBlockItem\\n      UnexpectedCodeDecl\\n        UnexpectedNodes\\n          rightBrace \\\"}\\\"\\n\",\"residualAmbiguities\":[],\"status\":\"advent-overaccept\",\"swiftSyntaxHasError\":true}"
+}
