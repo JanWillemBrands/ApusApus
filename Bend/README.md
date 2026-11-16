@@ -58,6 +58,7 @@ there for intuition.
 | `PROOF_PLUG.bend` | Plugging: a forest swapped into a tree, where it fits, reads the same tokens and keeps phases 1 and 2, leaves the tree unbeaten, and its steps are the tree's | no |
 | `FITS.bend` | Facts about `fits`: of a list, of its head and tail, of a join | no |
 | `LEMMAS.bend` | Facts about Bool, Nat and lists | no |
+| `core/` | Work in progress: the specification on a BNF core, as planned in `FormalGrammar.md` (core/README.md); not in the gate yet | optional |
 | `bnf/` | The earlier BNF specification with a proven CYK parser, frozen | history |
 
 ## How to check

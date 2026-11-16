@@ -729,7 +729,10 @@ struct OracleDisambiguationTests {
             for g in [#"S = A . A = @prefer "a" | A ."#,
                       #"S = A . A = A | "a" ."#,
                       #"S = A . A = @prefer "x" A | "a" ."#,
-                      #"S = A . A = @prefer B | C . B = "b" . C = "b" ."#] {
+                      #"S = A . A = @prefer B | C . B = "b" . C = "b" ."#,
+                      // The bracket's alternative A reaches A, but A reaches the bracket only
+                      // with "b" after it, so the bracket's choice is on no input-free cycle.
+                      #"S = A . A = ( @prefer A | "a" ) "b" | "c" ."#] {
                 let findings = try parseGrammar(g).diagnosePreferenceCycles()
                 #expect(findings.isEmpty, "\(g) must not be reported: \(findings)")
             }

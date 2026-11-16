@@ -1,0 +1,375 @@
+import Base
+import ../LEMMAS.bend as Lemma
+import ../SPEC.bend as Spec
+import ./CORE.bend as Core
+import ./GLL.bend as Gll
+import ./EBNF.bend as E
+import ./EXACT.bend as Exact
+import ./GUARD.bend as Guard
+
+# PHASE 2 ON THE CORE: @prefer AND @avoid.
+#
+# Every production has a rank: @prefer high, @avoid low, unmarked in between (a mark on a
+# bracket alternative sits on that alternative's group production). A completed step of
+# production q over i .. j is beaten when a production of the same nonterminal with a higher
+# rank has a rival there: a forest over the same tokens whose steps, placed at i, keep their
+# rules (phase 1). A tree is unbeaten when none of its completed steps is beaten.
+#
+# A rival that goes round a cycle back to where it competes, over the same tokens, would
+# only say "the same again", and could beat every reading. A well-formed grammar has no
+# such rival: an outranking production lies on no cycle that reads no input (the rule at
+# the end of this file, and `no_self_rival` in PROOF_PREFER.bend).
+
+# ======== THE MEANING ========
+
+type Rank is Data:
+  Avoided{}
+  Plain{}
+  Preferred{}
+
+def rankNat(r: Rank) -> Nat:
+  match r:
+    case Avoided{}:
+      0n
+    case Plain{}:
+      1n
+    case Preferred{}:
+      2n
+
+def outranks(a: Rank, b: Rank) -> Bool:
+  Nat.is_lt(rankNat(b), rankNat(a))
+
+type RankMark is Data:
+  RankMark{index: Nat, rank: Rank}
+
+def rankPick(hit: Bool, +r: Rank, +later: Rank) -> Rank:
+  match hit:
+    case True{}:
+      r
+    case False{}:
+      later
+
+# The rank of production q: from the first mark for it, and Plain without one.
+def rankOf(marks: +List<RankMark>, +q: Nat) -> Rank:
+  match marks:
+    case Nil{}:
+      Plain{}
+    case Con{RankMark{+p, +r}, rest}:
+      rankPick(Nat.is_eq(p, q), r, rankOf(rest, q))
+
+# Production m is another production of q's nonterminal, of higher rank.
+def outranking(+grammar: +List<Core.Production>, +marks: +List<RankMark>, +q: Nat, +m: Nat) -> Bool:
+  Bool.and(Core.lhsIs(grammar, m, Gll.lhsOf(grammar, q)), outranks(rankOf(marks, m), rankOf(marks, q)))
+
+def ntOf(s: Core.Sym) -> Maybe<&2, Nat>:
+  match s:
+    case Core.Terminal{k}:
+      None{}
+    case Core.Nonterminal{+id, need}:
+      Some{id}
+
+def ntAt(items: +List<Core.Sym>, e: Nat) -> Maybe<&2, Nat>:
+  match items e:
+    case Nil{} _:
+      None{}
+    case Con{+s, rest} 0n:
+      ntOf(s)
+    case Con{s, +rest} 1n+(+m):
+      ntAt(rest, m)
+
+# The nonterminal of the item before dot d, if that item is a nonterminal.
+def before(+items: +List<Core.Sym>, d: Nat) -> Maybe<&2, Nat>:
+  match d:
+    case 0n:
+      None{}
+    case 1n+(+e):
+      ntAt(items, e)
+
+def isNt(m: Maybe<&2, Nat>, +y: Nat) -> Bool:
+  match m:
+    case Some{+v}:
+      Nat.is_eq(v, y)
+    case None{}:
+      False{}
+
+# A rival of production m over i .. j: children for m that spell the same tokens, and whose
+# steps, placed at i, keep their rules.
+def Rival(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Type:
+  &ch: +List<Core.Tree> -> {Core.fits(ch, grammar, Core.rhsOf(grammar, m)) == True{} : Bool} & {Core.leaves(ch) == Lemma.slice(input, i, Nat.sub(j, i)) : +List<Nat>} & Guard.AllStepsOk(grammar, gmarks, input, Core.steps([Core.Node{m, ch}], i))
+
+def Beaten(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<RankMark>, +input: +List<Nat>, +q: Nat, +i: Nat, +j: Nat) -> Type:
+  &m: Nat -> {outranking(grammar, rmarks, q, m) == True{} : Bool} & Rival(grammar, gmarks, input, m, i, j)
+
+# A step is free when it completes no beaten node.
+def Free(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<RankMark>, +input: +List<Nat>, x: Core.Bsr) -> Type:
+  match x:
+    case Core.Bsr{+q, +d, +i, +k, +j}:
+      Guard.When(Nat.is_eq(d, List.length(&2, Core.Sym, Core.rhsOf(grammar, q))), Beaten(grammar, gmarks, rmarks, input, q, i, j) -> Empty)
+
+# ======== THE MARKS AS WRITTEN, ON THE CORE ========
+
+def rankFrom(r: Spec.Rank) -> Rank:
+  match r:
+    case Spec.Avoided{}:
+      Avoided{}
+    case Spec.Plain{}:
+      Plain{}
+    case Spec.Preferred{}:
+      Preferred{}
+
+def rankAt(m: Maybe<&2, Nat>, +r: Spec.Rank, +rest: +List<RankMark>) -> +List<RankMark>:
+  match m:
+    case Some{+q}:
+      RankMark{q, rankFrom(r)} <> rest
+    case None{}:
+      rest
+
+# A mark on production `index` stays there; a mark on alternative a of the bracket at
+# (index, path) moves to the production whose origin is that alternative's sequence.
+def rankMarksOf(ms: +List<Spec.Mark>, +origins: +List<E.Origin>) -> +List<RankMark>:
+  match ms:
+    case Nil{}:
+      []
+    case Con{Spec.ProdMark{+index, +r}, rest}:
+      RankMark{index, rankFrom(r)} <> rankMarksOf(rest, origins)
+    case Con{Spec.AltMark{+index, +path, +a, +r}, rest}:
+      rankAt(Guard.productionAt(origins, index, List.append(&2, Nat, path, [a]), 0n), r, rankMarksOf(rest, origins))
+
+# ======== THE VERDICT ON A STEP ========
+#
+# A completed step of q over i .. j is asked about each production m that outranks q. Yes
+# (not beaten by m) when the exact parser says m's right side does not derive the tokens;
+# No (beaten) with a certificate: children for m over the tokens, checked with `reads`,
+# whose steps at i are each answered Yes by phase 1. Unknown otherwise.
+
+# Children for m over w (not trusted; checked below).
+def rivalIn(found: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +m: Nat) -> +List<Core.Tree>:
+  match found:
+    case Some{+set}:
+      Guard.forestFor(fuel, grammar, w, set, m)
+    case None{}:
+      []
+
+def rivalFor(+fuel: Nat, +grammar: +List<Core.Production>, +m: Nat, +w: +List<Nat>) -> +List<Core.Tree>:
+  rivalIn(Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, m), w), fuel, grammar, w, m)
+
+def allYes(xs: +List<Core.Bsr>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>) -> Bool:
+  match xs:
+    case Nil{}:
+      True{}
+    case Con{+x, rest}:
+      Bool.and(Guard.isYes(Guard.stepTri(fuel, grammar, gmarks, input, x)), allYes(rest, fuel, grammar, gmarks, input))
+
+def certWith(+ch: +List<Core.Tree>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Bool:
+  Bool.and(Guard.forestOk(grammar, m, Lemma.slice(input, i, Nat.sub(j, i)), ch), allYes(Core.steps([Core.Node{m, ch}], i), fuel, grammar, gmarks, input))
+
+def certFor(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Bool:
+  certWith(rivalFor(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j)
+
+def certTri(b: Bool) -> Guard.Tri:
+  match b:
+    case True{}:
+      Guard.No{}
+    case False{}:
+      Guard.Unknown{}
+
+def rivalPick(t: Guard.Tri, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
+  match t:
+    case Guard.No{}:
+      Guard.Yes{}
+    case Guard.Yes{}:
+      certTri(certFor(fuel, grammar, gmarks, input, m, i, j))
+    case Guard.Unknown{}:
+      certTri(certFor(fuel, grammar, gmarks, input, m, i, j))
+
+def candTri(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
+  match b:
+    case False{}:
+      Guard.Yes{}
+    case True{}:
+      rivalPick(Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j)
+
+def candsFrom(prods: +List<Core.Production>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<RankMark>, +input: +List<Nat>, +q: Nat, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
+  match prods:
+    case Nil{}:
+      Guard.Yes{}
+    case Con{p, rest}:
+      Guard.andTri(candTri(outranking(grammar, rmarks, q, m), fuel, grammar, gmarks, input, m, i, j), candsFrom(rest, fuel, grammar, gmarks, rmarks, input, q, 1n+m, i, j))
+
+# Yes: the step is free; No: it completes a beaten node.
+def rankTri(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<RankMark>, +input: +List<Nat>, x: Core.Bsr) -> Guard.Tri:
+  match x:
+    case Core.Bsr{+q, +d, +i, +k, +j}:
+      Guard.only(Nat.is_eq(d, List.length(&2, Core.Sym, Core.rhsOf(grammar, q))), candsFrom(grammar, fuel, grammar, gmarks, rmarks, input, q, 0n, i, j))
+
+# ======== THE RULE: NO PREFERENCE CYCLE ========
+#
+# NO PREFERENCE CYCLE. A production of A reaches nonterminal B when one of its items is B
+# and every other item can read nothing. A cycle that reads no input is a path of such
+# steps from a nonterminal back to itself. A production that outranks a sibling (Preferred
+# over Plain or Avoided, Plain over Avoided) lies on no such cycle: it would be a rival
+# that only comes back to where it competes, over the same tokens.
+#
+# Decided with closed sets, each grown (not trusted) and then checked closed: the
+# nonterminals that can read nothing, and, for each outranking production, the
+# nonterminals it reaches.
+
+def natIn(+x: Nat, xs: +List<Nat>) -> Bool:
+  match xs:
+    case Nil{}:
+      False{}
+    case Con{+y, rest}:
+      Bool.or(Nat.is_eq(x, y), natIn(x, rest))
+
+def allNatIn(xs: +List<Nat>, +c: +List<Nat>) -> Bool:
+  match xs:
+    case Nil{}:
+      True{}
+    case Con{+x, rest}:
+      Bool.and(natIn(x, c), allNatIn(rest, c))
+
+def joinNats(a: +List<Nat>, +b: +List<Nat>) -> +List<Nat>:
+  match a:
+    case Nil{}:
+      b
+    case Con{+x, rest}:
+      x <> joinNats(rest, b)
+
+def addIf(b: Bool, +x: Nat, +c: +List<Nat>) -> +List<Nat>:
+  match b:
+    case True{}:
+      x <> c
+    case False{}:
+      c
+
+# Can the item read nothing? Never a terminal, nor an occurrence that needs something.
+def needNull(need: Core.Need, +x: Nat, +nulls: +List<Nat>) -> Bool:
+  match need:
+    case Core.Something{}:
+      False{}
+    case Core.Anything{}:
+      natIn(x, nulls)
+    case Core.Nothing{}:
+      natIn(x, nulls)
+
+def itemNull(s: Core.Sym, +nulls: +List<Nat>) -> Bool:
+  match s:
+    case Core.Terminal{k}:
+      False{}
+    case Core.Nonterminal{+x, +need}:
+      needNull(need, x, nulls)
+
+def allNull(items: +List<Core.Sym>, +nulls: +List<Nat>) -> Bool:
+  match items:
+    case Nil{}:
+      True{}
+    case Con{+s, rest}:
+      Bool.and(itemNull(s, nulls), allNull(rest, nulls))
+
+def nullsOnce(prods: +List<Core.Production>, +acc: +List<Nat>) -> +List<Nat>:
+  match prods:
+    case Nil{}:
+      acc
+    case Con{Core.Production{+lhs, +rhs}, rest}:
+      nullsOnce(rest, addIf(Bool.and(allNull(rhs, acc), Bool.not(natIn(lhs, acc))), lhs, acc))
+
+def growNulls(n: Nat, +grammar: +List<Core.Production>, +nulls: +List<Nat>) -> +List<Nat>:
+  match n:
+    case 0n:
+      nulls
+    case 1n+(+p):
+      growNulls(p, grammar, nullsOnce(grammar, nulls))
+
+def nullsClosed(prods: +List<Core.Production>, +nulls: +List<Nat>) -> Bool:
+  match prods:
+    case Nil{}:
+      True{}
+    case Con{Core.Production{+lhs, +rhs}, rest}:
+      Bool.and(Bool.or(Bool.not(allNull(rhs, nulls)), natIn(lhs, nulls)), nullsClosed(rest, nulls))
+
+def ntList(s: Core.Sym) -> +List<Nat>:
+  match s:
+    case Core.Terminal{k}:
+      []
+    case Core.Nonterminal{+x, need}:
+      [x]
+
+def edgeIf(b: Bool, s: Core.Sym) -> +List<Nat>:
+  match b:
+    case True{}:
+      ntList(s)
+    case False{}:
+      []
+
+# The nonterminals a right side reaches: its items whose other items can all read nothing.
+# pre: every item before this one can read nothing.
+def edgesFrom(items: +List<Core.Sym>, +pre: Bool, +nulls: +List<Nat>) -> +List<Nat>:
+  match items:
+    case Nil{}:
+      []
+    case Con{+s, +rest}:
+      joinNats(edgeIf(Bool.and(pre, allNull(rest, nulls)), s), edgesFrom(rest, Bool.and(pre, itemNull(s, nulls)), nulls))
+
+def addAll(xs: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
+  match xs:
+    case Nil{}:
+      acc
+    case Con{+x, rest}:
+      addAll(rest, addIf(Bool.not(natIn(x, acc)), x, acc))
+
+def addAllIf(b: Bool, +xs: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
+  match b:
+    case True{}:
+      addAll(xs, acc)
+    case False{}:
+      acc
+
+def reachOnce(prods: +List<Core.Production>, +nulls: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
+  match prods:
+    case Nil{}:
+      acc
+    case Con{Core.Production{+lhs, +rhs}, rest}:
+      reachOnce(rest, nulls, addAllIf(natIn(lhs, acc), edgesFrom(rhs, True{}, nulls), acc))
+
+def growReach(n: Nat, +grammar: +List<Core.Production>, +nulls: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
+  match n:
+    case 0n:
+      acc
+    case 1n+(+p):
+      growReach(p, grammar, nulls, reachOnce(grammar, nulls, acc))
+
+def reachClosed(prods: +List<Core.Production>, +nulls: +List<Nat>, +r: +List<Nat>) -> Bool:
+  match prods:
+    case Nil{}:
+      True{}
+    case Con{Core.Production{+lhs, +rhs}, rest}:
+      Bool.and(Bool.or(Bool.not(natIn(lhs, r)), allNatIn(edgesFrom(rhs, True{}, nulls), r)), reachClosed(rest, nulls, r))
+
+# Production m lies on no cycle that reads no input: r holds what m reaches, is closed, and
+# does not hold m's own nonterminal.
+def cycleFreeWith(+r: +List<Nat>, +grammar: +List<Core.Production>, +nulls: +List<Nat>, +m: Nat) -> Bool:
+  Bool.and(reachClosed(grammar, nulls, r), Bool.and(allNatIn(edgesFrom(Core.rhsOf(grammar, m), True{}, nulls), r), Bool.not(natIn(Gll.lhsOf(grammar, m), r))))
+
+def cycleFree(+grammar: +List<Core.Production>, +nulls: +List<Nat>, +m: Nat) -> Bool:
+  cycleFreeWith(growReach(1n+List.length(&2, Core.Production, grammar), grammar, nulls, edgesFrom(Core.rhsOf(grammar, m), True{}, nulls)), grammar, nulls, m)
+
+# Does production m outrank a sibling?
+def belowFrom(prods: +List<Core.Production>, +grammar: +List<Core.Production>, +marks: +List<RankMark>, +m: Nat, +q: Nat) -> Bool:
+  match prods:
+    case Nil{}:
+      False{}
+    case Con{p, rest}:
+      Bool.or(outranking(grammar, marks, q, m), belowFrom(rest, grammar, marks, m, 1n+q))
+
+def prodsOk(prods: +List<Core.Production>, +grammar: +List<Core.Production>, +marks: +List<RankMark>, +nulls: +List<Nat>, +m: Nat) -> Bool:
+  match prods:
+    case Nil{}:
+      True{}
+    case Con{p, rest}:
+      Bool.and(Bool.or(Bool.not(belowFrom(grammar, grammar, marks, m, 0n)), cycleFree(grammar, nulls, m)), prodsOk(rest, grammar, marks, nulls, 1n+m))
+
+def noCycleWith(+nulls: +List<Nat>, +grammar: +List<Core.Production>, +marks: +List<RankMark>) -> Bool:
+  Bool.and(nullsClosed(grammar, nulls), prodsOk(grammar, grammar, marks, nulls, 0n))
+
+def noPreferenceCycle(+grammar: +List<Core.Production>, +marks: +List<RankMark>) -> Bool:
+  noCycleWith(growNulls(1n+List.length(&2, Core.Production, grammar), grammar, []), grammar, marks)

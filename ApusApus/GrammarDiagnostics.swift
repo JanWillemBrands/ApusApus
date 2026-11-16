@@ -216,10 +216,11 @@ extension Grammar {
     /// tree is left (Bend/SPEC.bend, preferences). A cycle through an alternative that
     /// outranks nothing is harmless: `A = @prefer "a" | A`.
     ///
-    /// An alternative reaches a nonterminal over its own span when the nonterminal (or a
-    /// bracket holding it) can be the whole of the alternative: every other item can read
-    /// nothing. A bracket's alternative is checked against the nonterminal that holds the
-    /// bracket, which may report a cycle the bracket cannot actually close.
+    /// An alternative reaches a nonterminal or a bracket over its own span when that item can
+    /// be the whole of the alternative: every other item can read nothing. A bracket is a choice
+    /// of its own (on the BNF core it is a nonterminal), so a bracket's alternative is checked
+    /// against the bracket itself. This is the rule `noPreferenceCycle` of Bend/core/PREFER.bend,
+    /// exactly.
     ///
     /// Grammar loading refuses a grammar with findings (`ApusParserError.preferenceCycle`).
     /// Returns one message per bad alternative (empty = clean) as well as logging.
@@ -258,33 +259,29 @@ extension Grammar {
             }
         }
 
-        // The nonterminals (LHS nodes) an alternative body can be entirely, over its own span.
-        func sameSpanTargets(_ body: [GrammarNode], into targets: inout [GrammarNode], seen: inout Set<ObjectIdentifier>) {
+        // The choices (LHS nodes and brackets) an alternative body can be entirely, over its own span.
+        func targets(ofBody body: [GrammarNode]) -> [GrammarNode] {
+            var out: [GrammarNode] = []
             for (k, s) in body.enumerated()
             where body.indices.allSatisfy({ $0 == k || readsNothing(body[$0]) }) {
                 if s.kind == .N, let lhs = s.alt {
-                    targets.append(lhs)
-                } else if s.kind.isBracket, seen.insert(ObjectIdentifier(s)).inserted {
-                    var scan = s.alt
-                    while let a = scan { sameSpanTargets(a.bodySymbols, into: &targets, seen: &seen); scan = a.alt }
+                    out.append(lhs)
+                } else if s.kind.isBracket {
+                    out.append(s)
                 }
             }
-        }
-        func targets(ofBody body: [GrammarNode]) -> [GrammarNode] {
-            var out: [GrammarNode] = []
-            var seen = Set<ObjectIdentifier>()
-            sameSpanTargets(body, into: &out, seen: &seen)
             return out
         }
 
-        // Edges LHS → LHS over the same span, and whether `goal` is reachable from `start`.
+        // Edges choice → choice over the same span, and whether `goal` is reachable from `start`.
+        // A choice's alternatives are its `.alt` chain, for an LHS and a bracket alike.
         var edges: [ObjectIdentifier: [GrammarNode]] = [:]
-        func edgesOf(_ lhs: GrammarNode) -> [GrammarNode] {
-            if let known = edges[ObjectIdentifier(lhs)] { return known }
+        func edgesOf(_ choice: GrammarNode) -> [GrammarNode] {
+            if let known = edges[ObjectIdentifier(choice)] { return known }
             var out: [GrammarNode] = []
-            var scan = lhs.alt
+            var scan = choice.alt
             while let a = scan { out += targets(ofBody: a.bodySymbols); scan = a.alt }
-            edges[ObjectIdentifier(lhs)] = out
+            edges[ObjectIdentifier(choice)] = out
             return out
         }
         func reaches(_ from: [GrammarNode], _ goal: GrammarNode) -> Bool {
@@ -301,27 +298,28 @@ extension Grammar {
         func rank(_ a: GrammarNode) -> Int { a.isPreferred ? 2 : (a.isAvoided ? 0 : 1) }
 
         var findings: [String] = []
-        // One choice point: the alternative chain from `head`, held by nonterminal `owner`.
-        func check(chain head: GrammarNode?, owner: GrammarNode) {
+        // One choice: the alternative chain of `choice` (an LHS or a bracket inside `owner`'s rule).
+        func check(choice: GrammarNode, owner: GrammarNode) {
             var alts: [GrammarNode] = []
-            var scan = head
+            var scan = choice.alt
             while let a = scan { alts.append(a); scan = a.alt }
             guard let lowest = alts.map(rank).min() else { return }
+            let what = choice === owner ? "'\(owner.name)'" : "a bracket in '\(owner.name)'"
             for (n, a) in alts.enumerated() where rank(a) > lowest {
-                if reaches(targets(ofBody: a.bodySymbols), owner) {
-                    findings.append("'\(owner.name)': alternative \(n + 1) outranks a sibling and can derive '\(owner.name)' again without reading input, so the preference can remove every parse")
+                if reaches(targets(ofBody: a.bodySymbols), choice) {
+                    findings.append("\(what): alternative \(n + 1) outranks a sibling and can derive its own choice again without reading input, so the preference can remove every parse")
                 }
             }
         }
         var seenBrackets = Set<ObjectIdentifier>()
         func walkBrackets(_ node: GrammarNode?, owner: GrammarNode) {
             guard let node, seenBrackets.insert(ObjectIdentifier(node)).inserted else { return }
-            if node.kind.isBracket { check(chain: node.alt, owner: owner) }
+            if node.kind.isBracket { check(choice: node, owner: owner) }
             if node.kind != .END { walkBrackets(node.seq, owner: owner) }
             if !node.isRHS { walkBrackets(node.alt, owner: owner) }
         }
         for lhs in allProductions {
-            check(chain: lhs.alt, owner: lhs)
+            check(choice: lhs, owner: lhs)
             walkBrackets(lhs.alt, owner: lhs)
         }
         for finding in findings {
