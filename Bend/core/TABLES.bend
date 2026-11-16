@@ -1,7 +1,7 @@
 import Base
 import ./CORE.bend as Core
+import ./SETS.bend as Sets
 import ./GLL.bend as Gll
-import ./PREFER.bend as Prefer
 
 # THE LL(1) TABLES ON THE CORE (not trusted, then checked). Nullable, FIRST and FOLLOW are
 # grown as sets of facts and handed to the check only as they are: the check makes sure
@@ -84,7 +84,7 @@ def firstsOf(+x: Nat, facts: +List<FirstFact>) -> +List<Nat>:
     case Nil{}:
       []
     case Con{FirstFact{+y, +t}, rest}:
-      Prefer.addIf(Nat.is_eq(y, x), t, firstsOf(x, rest))
+      Sets.addIf(Nat.is_eq(y, x), t, firstsOf(x, rest))
 
 def followsOf(+x: Nat, facts: +List<FollowFact>) -> +List<Maybe<&2, Nat>>:
   match facts:
@@ -101,7 +101,7 @@ def firstOfItems(items: +List<Core.Sym>, +firsts: +List<FirstFact>, +nulls: +Lis
     case Con{Core.Terminal{+k}, rest}:
       [k]
     case Con{Core.Nonterminal{+y, +need}, +rest}:
-      Prefer.joinNats(firstsOf(y, firsts), natsIf(Prefer.itemNull(Core.Nonterminal{y, need}, nulls), firstOfItems(rest, firsts, nulls)))
+      Sets.joinNats(firstsOf(y, firsts), natsIf(Sets.itemNull(Core.Nonterminal{y, need}, nulls), firstOfItems(rest, firsts, nulls)))
 
 def followHas(+x: Nat, +n: Maybe<&2, Nat>, +follows: +List<FollowFact>) -> Bool:
   maybeIn(n, followsOf(x, follows))
@@ -120,7 +120,7 @@ def itemOk(s: Core.Sym, +rest: +List<Core.Sym>, +x: Nat, +firsts: +List<FirstFac
     case Core.Terminal{k}:
       True{}
     case Core.Nonterminal{+y, need}:
-      Bool.and(allFollow(firstOfItems(rest, firsts, nulls), y, follows), Bool.or(Bool.not(Prefer.allNull(rest, nulls)), allMaybeIn(followsOf(x, follows), followsOf(y, follows))))
+      Bool.and(allFollow(firstOfItems(rest, firsts, nulls), y, follows), Bool.or(Bool.not(Sets.allNull(rest, nulls)), allMaybeIn(followsOf(x, follows), followsOf(y, follows))))
 
 def suffixOk(items: +List<Core.Sym>, +x: Nat, +firsts: +List<FirstFact>, +follows: +List<FollowFact>, +nulls: +List<Nat>) -> Bool:
   match items:
@@ -134,7 +134,7 @@ def firstsClosed(prods: +List<Core.Production>, +firsts: +List<FirstFact>, +null
     case Nil{}:
       True{}
     case Con{Core.Production{+lhs, +rhs}, rest}:
-      Bool.and(Prefer.allNatIn(firstOfItems(rhs, firsts, nulls), firstsOf(lhs, firsts)), firstsClosed(rest, firsts, nulls))
+      Bool.and(Sets.allNatIn(firstOfItems(rhs, firsts, nulls), firstsOf(lhs, firsts)), firstsClosed(rest, firsts, nulls))
 
 def followsClosed(prods: +List<Core.Production>, +firsts: +List<FirstFact>, +follows: +List<FollowFact>, +nulls: +List<Nat>) -> Bool:
   match prods:
@@ -147,7 +147,7 @@ def followsClosed(prods: +List<Core.Production>, +firsts: +List<FirstFact>, +fol
 
 # What production (x, rhs) can begin with: its FIRST, and FOLLOW of x when it can read nothing.
 def predictOf(+x: Nat, +rhs: +List<Core.Sym>, +firsts: +List<FirstFact>, +follows: +List<FollowFact>, +nulls: +List<Nat>) -> +List<Maybe<&2, Nat>>:
-  joinMaybes(someAll(firstOfItems(rhs, firsts, nulls)), maybesIf(Prefer.allNull(rhs, nulls), followsOf(x, follows)))
+  joinMaybes(someAll(firstOfItems(rhs, firsts, nulls)), maybesIf(Sets.allNull(rhs, nulls), followsOf(x, follows)))
 
 def disjoint(xs: +List<Maybe<&2, Nat>>, +ys: +List<Maybe<&2, Nat>>) -> Bool:
   match xs:
@@ -175,7 +175,7 @@ def pairsOk(prods: +List<Core.Production>, +firsts: +List<FirstFact>, +follows: 
 # The tables are closed, the start symbol is followed by the end, and no two productions of
 # one nonterminal predict the same token.
 def checkWith(+grammar: +List<Core.Production>, +start: Nat, +nulls: +List<Nat>, +firsts: +List<FirstFact>, +follows: +List<FollowFact>) -> Bool:
-  Bool.and(Prefer.nullsClosed(grammar, nulls),
+  Bool.and(Sets.nullsClosed(grammar, nulls),
     Bool.and(firstsClosed(grammar, firsts, nulls),
       Bool.and(followsClosed(grammar, firsts, follows, nulls),
         Bool.and(followHas(start, None{}, follows),
@@ -185,7 +185,7 @@ def checkWith(+grammar: +List<Core.Production>, +start: Nat, +nulls: +List<Nat>,
 # ======== GROWING THE TABLES (not trusted) ========
 
 def firstIn(+x: Nat, +t: Nat, facts: +List<FirstFact>) -> Bool:
-  Prefer.natIn(t, firstsOf(x, facts))
+  Sets.natIn(t, firstsOf(x, facts))
 
 def firstPick(have: Bool, +x: Nat, +t: Nat, +acc: +List<FirstFact>) -> +List<FirstFact>:
   match have:
@@ -234,7 +234,7 @@ def itemFollows(s: Core.Sym, +rest: +List<Core.Sym>, +x: Nat, +firsts: +List<Fir
     case Core.Terminal{k}:
       acc
     case Core.Nonterminal{+y, need}:
-      addFollows(joinMaybes(someAll(firstOfItems(rest, firsts, nulls)), maybesIf(Prefer.allNull(rest, nulls), followsOf(x, acc))), y, acc)
+      addFollows(joinMaybes(someAll(firstOfItems(rest, firsts, nulls)), maybesIf(Sets.allNull(rest, nulls), followsOf(x, acc))), y, acc)
 
 def suffixFollows(items: +List<Core.Sym>, +x: Nat, +firsts: +List<FirstFact>, +nulls: +List<Nat>, +acc: +List<FollowFact>) -> +List<FollowFact>:
   match items:
@@ -265,4 +265,4 @@ def checkNulls(+fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +nulls
 
 # LL(1) BY THE TABLES: grow the tables with `fuel` rounds each, then check them.
 def ll1ByTables(+fuel: Nat, +grammar: +List<Core.Production>, +start: Nat) -> Bool:
-  checkNulls(fuel, grammar, start, Prefer.growNulls(fuel, grammar, []))
+  checkNulls(fuel, grammar, start, Sets.growNulls(fuel, grammar, []))

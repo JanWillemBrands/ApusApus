@@ -1,9 +1,9 @@
 import Base
 import ../LEMMAS.bend as Lemma
 import ./CORE.bend as Core
+import ./SETS.bend as Sets
 import ./GLL.bend as Gll
 import ./CHECK.bend as Check
-import ./PREFER.bend as Prefer
 import ./TABLES.bend as T
 import ./PREDICT.bend as Pr
 import ./PROOF_GLL.bend as G
@@ -91,7 +91,7 @@ law admits_walk:
   for +root: Core.Tree
   for +rr: {Core.reads([root], grammar, [Core.Nonterminal{start, Core.Anything{}}], input, 0n) == True{} : Bool}
   for +rl: {List.length(&2, Nat, Core.leaves([root])) == List.length(&2, Nat, input) : Nat}
-  for +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool}
+  for +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool}
   for +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool}
   for +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool}
   for +cs: {T.followHas(start, None{}, follows) == True{} : Bool}
@@ -146,7 +146,7 @@ def admits_walk(fs, items, grammar, start, input, firsts, follows, nulls, root, 
 
 def from_tree(+grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>,
   +s: Gll.GState, +set: +List<Core.Bsr>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool},
   +cs: {T.followHas(start, None{}, follows) == True{} : Bool},
@@ -167,7 +167,7 @@ def from_tree(+grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>,
 
 def state_pick(b: Bool, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>,
   +s: Gll.GState, +set: +List<Core.Bsr>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool},
   +cs: {T.followHas(start, None{}, follows) == True{} : Bool},
@@ -186,7 +186,7 @@ def state_pick(b: Bool, +grammar: +List<Core.Production>, +start: Nat, +input: +
       Empty.absurd(Core.EveryParseStep(grammar, start, input, set), G.none_not_some(set, e))
 
 def run_pick(r: Gll.GRun, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +set: +List<Core.Bsr>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool},
   +cs: {T.followHas(start, None{}, follows) == True{} : Bool},
@@ -205,7 +205,7 @@ def tables_pick(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +start: N
   match b:
     case True{}:
       +ok = Equal.sym(Bool, True{}, Pr.tablesClosed(grammar, start, nulls, firsts, follows), eb)
-      +a1 = {Prefer.nullsClosed(grammar, nulls) : Bool}
+      +a1 = {Sets.nullsClosed(grammar, nulls) : Bool}
       +a2 = {T.firstsClosed(grammar, firsts, nulls) : Bool}
       +a3 = {T.followsClosed(grammar, firsts, follows, nulls) : Bool}
       +a4 = {T.followHas(start, None{}, follows) : Bool}
@@ -236,7 +236,7 @@ law predict_every_parse_step:
 
 def predict_every_parse_step(fuel, grammar, start, input, set, got):
   +f = fuel
-  +nulls = Prefer.growNulls(f, grammar, [])
+  +nulls = Sets.growNulls(f, grammar, [])
   +firsts = T.growFirsts(f, grammar, nulls, [])
   +follows = T.growFollows(f, grammar, firsts, nulls, [T.FollowFact{start, None{}}])
   tables_pick(Pr.tablesClosed(grammar, start, nulls, firsts, follows), f, grammar, start, input, nulls, firsts, follows, set, {==}, got)

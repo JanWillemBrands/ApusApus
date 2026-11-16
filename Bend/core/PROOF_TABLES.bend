@@ -1,8 +1,9 @@
 import Base
 import ../LEMMAS.bend as Lemma
+import ./PROOF_BASICS.bend as B
 import ./CORE.bend as Core
+import ./SETS.bend as Sets
 import ./GLL.bend as Gll
-import ./PREFER.bend as Prefer
 import ./LL1.bend as LL
 import ./TABLES.bend as T
 import ./PROOF_GLL.bend as G
@@ -85,45 +86,45 @@ def maybe_join_right(a, b, n, h):
       Lemma.or_true_right_intro(T.maybeEq(n, x), T.maybeIn(n, T.joinMaybes(rest, b)), maybe_join_right(rest, b, n, h))
 
 def nat_join_pick(+x: Nat, +rest: +List<Nat>, +b: +List<Nat>, +t: Nat,
-  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Prefer.natIn(t, rest) == True{} : Bool}>,
-  later: {Prefer.natIn(t, rest) == True{} : Bool} -> {Prefer.natIn(t, Prefer.joinNats(rest, b)) == True{} : Bool}) -> {Prefer.natIn(t, x <> Prefer.joinNats(rest, b)) == True{} : Bool}:
+  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Sets.natIn(t, rest) == True{} : Bool}>,
+  later: {Sets.natIn(t, rest) == True{} : Bool} -> {Sets.natIn(t, Sets.joinNats(rest, b)) == True{} : Bool}) -> {Sets.natIn(t, x <> Sets.joinNats(rest, b)) == True{} : Bool}:
   match cases:
     case Inl{e}:
-      Lemma.or_true_left_intro(Nat.is_eq(t, x), Prefer.natIn(t, Prefer.joinNats(rest, b)), e)
+      Lemma.or_true_left_intro(Nat.is_eq(t, x), Sets.natIn(t, Sets.joinNats(rest, b)), e)
     case Inr{m}:
-      Lemma.or_true_right_intro(Nat.is_eq(t, x), Prefer.natIn(t, Prefer.joinNats(rest, b)), later(m))
+      Lemma.or_true_right_intro(Nat.is_eq(t, x), Sets.natIn(t, Sets.joinNats(rest, b)), later(m))
 
 law nat_in_join_left:
   for a: +List<Nat>
   for +b: +List<Nat>
   for +t: Nat
-  for +h: {Prefer.natIn(t, a) == True{} : Bool}
-  {Prefer.natIn(t, Prefer.joinNats(a, b)) == True{} : Bool}
+  for +h: {Sets.natIn(t, a) == True{} : Bool}
+  {Sets.natIn(t, Sets.joinNats(a, b)) == True{} : Bool}
 
 def nat_in_join_left(a, b, t, h):
   match a:
     case Nil{}:
-      Empty.absurd({Prefer.natIn(t, b) == True{} : Bool}, Lemma.false_is_not_true(h))
+      Empty.absurd({Sets.natIn(t, b) == True{} : Bool}, Lemma.false_is_not_true(h))
     case Con{+x, +rest}:
-      nat_join_pick(x, rest, b, t, Lemma.or_true_cases(Nat.is_eq(t, x), Prefer.natIn(t, rest), h), m => nat_in_join_left(rest, b, t, m))
+      nat_join_pick(x, rest, b, t, Lemma.or_true_cases(Nat.is_eq(t, x), Sets.natIn(t, rest), h), m => nat_in_join_left(rest, b, t, m))
 
 law nat_in_join_right:
   for a: +List<Nat>
   for +b: +List<Nat>
   for +t: Nat
-  for +h: {Prefer.natIn(t, b) == True{} : Bool}
-  {Prefer.natIn(t, Prefer.joinNats(a, b)) == True{} : Bool}
+  for +h: {Sets.natIn(t, b) == True{} : Bool}
+  {Sets.natIn(t, Sets.joinNats(a, b)) == True{} : Bool}
 
 def nat_in_join_right(a, b, t, h):
   match a:
     case Nil{}:
       h
     case Con{+x, +rest}:
-      Lemma.or_true_right_intro(Nat.is_eq(t, x), Prefer.natIn(t, Prefer.joinNats(rest, b)), nat_in_join_right(rest, b, t, h))
+      Lemma.or_true_right_intro(Nat.is_eq(t, x), Sets.natIn(t, Sets.joinNats(rest, b)), nat_in_join_right(rest, b, t, h))
 
 def some_pick(+x: Nat, +rest: +List<Nat>, +t: Nat,
-  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Prefer.natIn(t, rest) == True{} : Bool}>,
-  later: {Prefer.natIn(t, rest) == True{} : Bool} -> {T.maybeIn(Some{t}, T.someAll(rest)) == True{} : Bool}) -> {T.maybeIn(Some{t}, Some{x} <> T.someAll(rest)) == True{} : Bool}:
+  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Sets.natIn(t, rest) == True{} : Bool}>,
+  later: {Sets.natIn(t, rest) == True{} : Bool} -> {T.maybeIn(Some{t}, T.someAll(rest)) == True{} : Bool}) -> {T.maybeIn(Some{t}, Some{x} <> T.someAll(rest)) == True{} : Bool}:
   match cases:
     case Inl{e}:
       Lemma.or_true_left_intro(Nat.is_eq(t, x), T.maybeIn(Some{t}, T.someAll(rest)), e)
@@ -133,7 +134,7 @@ def some_pick(+x: Nat, +rest: +List<Nat>, +t: Nat,
 law some_in:
   for ts: +List<Nat>
   for +t: Nat
-  for +h: {Prefer.natIn(t, ts) == True{} : Bool}
+  for +h: {Sets.natIn(t, ts) == True{} : Bool}
   {T.maybeIn(Some{t}, T.someAll(ts)) == True{} : Bool}
 
 def some_in(ts, t, h):
@@ -141,14 +142,14 @@ def some_in(ts, t, h):
     case Nil{}:
       Empty.absurd({False{} == True{} : Bool}, Lemma.false_is_not_true(h))
     case Con{+x, +rest}:
-      some_pick(x, rest, t, Lemma.or_true_cases(Nat.is_eq(t, x), Prefer.natIn(t, rest), h), m => some_in(rest, t, m))
+      some_pick(x, rest, t, Lemma.or_true_cases(Nat.is_eq(t, x), Sets.natIn(t, rest), h), m => some_in(rest, t, m))
 
-def nat_all_pick(+x: Nat, +rest: +List<Nat>, +c: +List<Nat>, +t: Nat, +hx: {Prefer.natIn(x, c) == True{} : Bool},
-  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Prefer.natIn(t, rest) == True{} : Bool}>,
-  later: {Prefer.natIn(t, rest) == True{} : Bool} -> {Prefer.natIn(t, c) == True{} : Bool}) -> {Prefer.natIn(t, c) == True{} : Bool}:
+def nat_all_pick(+x: Nat, +rest: +List<Nat>, +c: +List<Nat>, +t: Nat, +hx: {Sets.natIn(x, c) == True{} : Bool},
+  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Sets.natIn(t, rest) == True{} : Bool}>,
+  later: {Sets.natIn(t, rest) == True{} : Bool} -> {Sets.natIn(t, c) == True{} : Bool}) -> {Sets.natIn(t, c) == True{} : Bool}:
   match cases:
     case Inl{e}:
-      %Equal.sym(Nat, t, x, Lemma.nat_eq_sound(t, x, e)) : {Prefer.natIn(_, c) == True{} : Bool}
+      %Equal.sym(Nat, t, x, Lemma.nat_eq_sound(t, x, e)) : {Sets.natIn(_, c) == True{} : Bool}
       hx
     case Inr{m}:
       later(m)
@@ -157,17 +158,17 @@ law nat_all_member:
   for xs: +List<Nat>
   for +c: +List<Nat>
   for +t: Nat
-  for +all: {Prefer.allNatIn(xs, c) == True{} : Bool}
-  for +m: {Prefer.natIn(t, xs) == True{} : Bool}
-  {Prefer.natIn(t, c) == True{} : Bool}
+  for +all: {Sets.allNatIn(xs, c) == True{} : Bool}
+  for +m: {Sets.natIn(t, xs) == True{} : Bool}
+  {Sets.natIn(t, c) == True{} : Bool}
 
 def nat_all_member(xs, c, t, all, m):
   match xs:
     case Nil{}:
-      Empty.absurd({Prefer.natIn(t, c) == True{} : Bool}, Lemma.false_is_not_true(m))
+      Empty.absurd({Sets.natIn(t, c) == True{} : Bool}, Lemma.false_is_not_true(m))
     case Con{+x, +rest}:
-      nat_all_pick(x, rest, c, t, Lemma.and_true_left(Prefer.natIn(x, c), Prefer.allNatIn(rest, c), all), Lemma.or_true_cases(Nat.is_eq(t, x), Prefer.natIn(t, rest), m),
-        m2 => nat_all_member(rest, c, t, Lemma.and_true_right_side(Prefer.natIn(x, c), Prefer.allNatIn(rest, c), all), m2))
+      nat_all_pick(x, rest, c, t, Lemma.and_true_left(Sets.natIn(x, c), Sets.allNatIn(rest, c), all), Lemma.or_true_cases(Nat.is_eq(t, x), Sets.natIn(t, rest), m),
+        m2 => nat_all_member(rest, c, t, Lemma.and_true_right_side(Sets.natIn(x, c), Sets.allNatIn(rest, c), all), m2))
 
 def maybe_all_pick(+x: Maybe<&2, Nat>, +rest: +List<Maybe<&2, Nat>>, +ys: +List<Maybe<&2, Nat>>, +n: Maybe<&2, Nat>, +hx: {T.maybeIn(x, ys) == True{} : Bool},
   cases: Either<{T.maybeEq(n, x) == True{} : Bool}, {T.maybeIn(n, rest) == True{} : Bool}>,
@@ -196,8 +197,8 @@ def maybe_all_member(xs, ys, n, all, m):
         m2 => maybe_all_member(rest, ys, n, Lemma.and_true_right_side(T.maybeIn(x, ys), T.allMaybeIn(rest, ys), all), m2))
 
 def follow_pick(+x: Nat, +rest: +List<Nat>, +y: Nat, +follows: +List<T.FollowFact>, +t: Nat, +hx: {T.followHas(y, Some{x}, follows) == True{} : Bool},
-  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Prefer.natIn(t, rest) == True{} : Bool}>,
-  later: {Prefer.natIn(t, rest) == True{} : Bool} -> {T.followHas(y, Some{t}, follows) == True{} : Bool}) -> {T.followHas(y, Some{t}, follows) == True{} : Bool}:
+  cases: Either<{Nat.is_eq(t, x) == True{} : Bool}, {Sets.natIn(t, rest) == True{} : Bool}>,
+  later: {Sets.natIn(t, rest) == True{} : Bool} -> {T.followHas(y, Some{t}, follows) == True{} : Bool}) -> {T.followHas(y, Some{t}, follows) == True{} : Bool}:
   match cases:
     case Inl{e}:
       %Equal.sym(Nat, t, x, Lemma.nat_eq_sound(t, x, e)) : {T.followHas(y, Some{_}, follows) == True{} : Bool}
@@ -211,7 +212,7 @@ law all_follow_member:
   for +follows: +List<T.FollowFact>
   for +t: Nat
   for +all: {T.allFollow(ts, y, follows) == True{} : Bool}
-  for +m: {Prefer.natIn(t, ts) == True{} : Bool}
+  for +m: {Sets.natIn(t, ts) == True{} : Bool}
   {T.followHas(y, Some{t}, follows) == True{} : Bool}
 
 def all_follow_member(ts, y, follows, t, all, m):
@@ -219,7 +220,7 @@ def all_follow_member(ts, y, follows, t, all, m):
     case Nil{}:
       Empty.absurd({T.followHas(y, Some{t}, follows) == True{} : Bool}, Lemma.false_is_not_true(m))
     case Con{+x, +rest}:
-      follow_pick(x, rest, y, follows, t, Lemma.and_true_left(T.followHas(y, Some{x}, follows), T.allFollow(rest, y, follows), all), Lemma.or_true_cases(Nat.is_eq(t, x), Prefer.natIn(t, rest), m),
+      follow_pick(x, rest, y, follows, t, Lemma.and_true_left(T.followHas(y, Some{x}, follows), T.allFollow(rest, y, follows), all), Lemma.or_true_cases(Nat.is_eq(t, x), Sets.natIn(t, rest), m),
         m2 => all_follow_member(rest, y, follows, t, Lemma.and_true_right_side(T.followHas(y, Some{x}, follows), T.allFollow(rest, y, follows), all), m2))
 
 def disjoint_pick(+x: Maybe<&2, Nat>, +rest: +List<Maybe<&2, Nat>>, +ys: +List<Maybe<&2, Nat>>, +n: Maybe<&2, Nat>,
@@ -230,7 +231,7 @@ def disjoint_pick(+x: Maybe<&2, Nat>, +rest: +List<Maybe<&2, Nat>>, +ys: +List<M
     case Inl{e}:
       +mx = {(%maybe_eq_sound(n, x, e) : {T.maybeIn(_, ys) == True{} : Bool}
         m2) : {T.maybeIn(x, ys) == True{} : Bool}}
-      Rule.not_both(T.maybeIn(x, ys), mx, hx)
+      B.not_both(T.maybeIn(x, ys), mx, hx)
     case Inr{m}:
       later(m)
 
@@ -256,8 +257,8 @@ law nats_if_true:
   for +xs: +List<Nat>
   for +t: Nat
   for +hb: {b == True{} : Bool}
-  for +h: {Prefer.natIn(t, xs) == True{} : Bool}
-  {Prefer.natIn(t, T.natsIf(b, xs)) == True{} : Bool}
+  for +h: {Sets.natIn(t, xs) == True{} : Bool}
+  {Sets.natIn(t, T.natsIf(b, xs)) == True{} : Bool}
 
 def nats_if_true(b, xs, t, hb, h):
   match b:
@@ -281,16 +282,6 @@ def maybes_if_true(b, xs, n, hb, h):
     case False{}:
       Empty.absurd({False{} == True{} : Bool}, Lemma.false_is_not_true(hb))
 
-law eq_is_eq:
-  for +a: Nat
-  for +b: Nat
-  for +e: {a == b : Nat}
-  {Nat.is_eq(a, b) == True{} : Bool}
-
-def eq_is_eq(a, b, e):
-  %e : {Nat.is_eq(a, _) == True{} : Bool}
-  Lemma.nat_eq_refl(a)
-
 law tok_end:
   for input: +List<Nat>
   {Core.tokAt(input, List.length(&2, Nat, input)) == None{} : Maybe<&2, Nat>}
@@ -302,24 +293,6 @@ def tok_end(input):
     case Con{+x, +rest}:
       tok_end(rest)
 
-law lhs_of:
-  for g: +List<Core.Production>
-  for p: Nat
-  for +y: Nat
-  for +hl: {Core.lhsIs(g, p, y) == True{} : Bool}
-  {Gll.lhsOf(g, p) == y : Nat}
-
-def lhs_of(g, p, y, hl):
-  match g p:
-    case Nil{} +p0:
-      Empty.absurd({0n == y : Nat}, Lemma.false_is_not_true(hl))
-    case Con{Core.Production{+lhs, +rhs}, +rest} 0n:
-      Lemma.nat_eq_sound(lhs, y, hl)
-    case Con{Core.Production{+lhs, +rhs}, +rest} 1n+(+n):
-      lhs_of(rest, n, y, hl)
-
-# ======== THE CLOSED TABLES, PRODUCTION BY PRODUCTION ========
-
 law first_closed_at:
   for g: +List<Core.Production>
   for p: Nat
@@ -328,18 +301,18 @@ law first_closed_at:
   for +nulls: +List<Nat>
   for +cf: {T.firstsClosed(g, firsts, nulls) == True{} : Bool}
   for +hl: {Core.lhsIs(g, p, y) == True{} : Bool}
-  {Prefer.allNatIn(T.firstOfItems(Core.rhsOf(g, p), firsts, nulls), T.firstsOf(y, firsts)) == True{} : Bool}
+  {Sets.allNatIn(T.firstOfItems(Core.rhsOf(g, p), firsts, nulls), T.firstsOf(y, firsts)) == True{} : Bool}
 
 def first_closed_at(g, p, y, firsts, nulls, cf, hl):
   match g p:
     case Nil{} +p0:
       Empty.absurd({True{} == True{} : Bool}, Lemma.false_is_not_true(hl))
     case Con{Core.Production{+lhs, +rhs}, +rest} 0n:
-      +here = {Prefer.allNatIn(T.firstOfItems(rhs, firsts, nulls), T.firstsOf(lhs, firsts)) : Bool}
-      %Lemma.nat_eq_sound(lhs, y, hl) : {Prefer.allNatIn(T.firstOfItems(rhs, firsts, nulls), T.firstsOf(_, firsts)) == True{} : Bool}
+      +here = {Sets.allNatIn(T.firstOfItems(rhs, firsts, nulls), T.firstsOf(lhs, firsts)) : Bool}
+      %Lemma.nat_eq_sound(lhs, y, hl) : {Sets.allNatIn(T.firstOfItems(rhs, firsts, nulls), T.firstsOf(_, firsts)) == True{} : Bool}
       Lemma.and_true_left(here, T.firstsClosed(rest, firsts, nulls), cf)
     case Con{Core.Production{+lhs, +rhs}, +rest} 1n+(+n):
-      +here = {Prefer.allNatIn(T.firstOfItems(rhs, firsts, nulls), T.firstsOf(lhs, firsts)) : Bool}
+      +here = {Sets.allNatIn(T.firstOfItems(rhs, firsts, nulls), T.firstsOf(lhs, firsts)) : Bool}
       first_closed_at(rest, n, y, firsts, nulls, Lemma.and_true_right_side(here, T.firstsClosed(rest, firsts, nulls), cf), hl)
 
 law follow_closed_at:
@@ -369,15 +342,15 @@ def follow_closed_at(g, p, y, firsts, follows, nulls, cfo, hl):
 
 def first_node(w: +List<Nat>, +p: Nat, +cs: +List<Core.Tree>, +ts: +List<Core.Tree>, +y: Nat, +need: Core.Need, +rest: +List<Core.Sym>,
   +grammar: +List<Core.Production>, +firsts: +List<T.FirstFact>, +nulls: +List<Nat>, +t: Nat, +r: +List<Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +hl: {Core.lhsIs(grammar, p, y) == True{} : Bool},
   +hd: {Bool.and(Bool.and(Core.lhsIs(grammar, p, y), Core.needOk(need, Core.width(Core.Node{p, cs}))), Core.fits(cs, grammar, Core.rhsOf(grammar, p))) == True{} : Bool},
   +ew: {Core.leaves(cs) == w : +List<Nat>},
   +e: {List.append(&2, Nat, Core.leaves(cs), Core.leaves(ts)) == t <> r : +List<Nat>},
-  inCs: @t2: Nat -> @r2: +List<Nat> -> {Core.leaves(cs) == t2 <> r2 : +List<Nat>} -> {Prefer.natIn(t2, T.firstOfItems(Core.rhsOf(grammar, p), firsts, nulls)) == True{} : Bool},
-  inTs: {Core.leaves(ts) == t <> r : +List<Nat>} -> {Prefer.natIn(t, T.firstOfItems(rest, firsts, nulls)) == True{} : Bool})
-  -> {Prefer.natIn(t, T.firstOfItems(Core.Nonterminal{y, need} <> rest, firsts, nulls)) == True{} : Bool}:
+  inCs: @t2: Nat -> @r2: +List<Nat> -> {Core.leaves(cs) == t2 <> r2 : +List<Nat>} -> {Sets.natIn(t2, T.firstOfItems(Core.rhsOf(grammar, p), firsts, nulls)) == True{} : Bool},
+  inTs: {Core.leaves(ts) == t <> r : +List<Nat>} -> {Sets.natIn(t, T.firstOfItems(rest, firsts, nulls)) == True{} : Bool})
+  -> {Sets.natIn(t, T.firstOfItems(Core.Nonterminal{y, need} <> rest, firsts, nulls)) == True{} : Bool}:
   match w:
     case Nil{}:
       +s = {Core.Nonterminal{y, need} : Core.Sym}
@@ -385,17 +358,17 @@ def first_node(w: +List<Nat>, +p: Nat, +cs: +List<Core.Tree>, +ts: +List<Core.Tr
         Equal.cong(+List<Nat>, +List<Nat>, v => List.append(&2, Nat, v, Core.leaves(ts)), [], Core.leaves(cs), Equal.sym(+List<Nat>, Core.leaves(cs), [], ew)), e)
       +zh = Equal.cong(+List<Nat>, +List<Nat>, v => List.append(&2, Nat, v, []), Core.leaves(cs), [], ew)
       +one = Lemma.and_true_intro(Bool.and(Bool.and(Core.lhsIs(grammar, p, y), Core.needOk(need, Core.width(Core.Node{p, cs}))), Core.fits(cs, grammar, Core.rhsOf(grammar, p))), True{}, hd, {==})
-      +sn = Lemma.and_true_left(Prefer.itemNull(s, nulls), True{}, Rule.zero_nulls([Core.Node{p, cs}], [s], grammar, nulls, cn, one, zh))
-      nat_in_join_right(T.firstsOf(y, firsts), T.natsIf(Prefer.itemNull(s, nulls), T.firstOfItems(rest, firsts, nulls)), t,
-        nats_if_true(Prefer.itemNull(s, nulls), T.firstOfItems(rest, firsts, nulls), t, sn, inTs(e2)))
+      +sn = Lemma.and_true_left(Sets.itemNull(s, nulls), True{}, Rule.zero_nulls([Core.Node{p, cs}], [s], grammar, nulls, cn, one, zh))
+      nat_in_join_right(T.firstsOf(y, firsts), T.natsIf(Sets.itemNull(s, nulls), T.firstOfItems(rest, firsts, nulls)), t,
+        nats_if_true(Sets.itemNull(s, nulls), T.firstOfItems(rest, firsts, nulls), t, sn, inTs(e2)))
     case Con{+t2, +r2}:
       +e2 = Equal.trans(+List<Nat>, t2 <> List.append(&2, Nat, r2, Core.leaves(ts)), List.append(&2, Nat, Core.leaves(cs), Core.leaves(ts)), t <> r,
         Equal.cong(+List<Nat>, +List<Nat>, v => List.append(&2, Nat, v, Core.leaves(ts)), t2 <> r2, Core.leaves(cs), Equal.sym(+List<Nat>, Core.leaves(cs), t2 <> r2, ew)), e)
       +same = L.cons_head(t2, t, List.append(&2, Nat, r2, Core.leaves(ts)), r, e2)
       +in2 = nat_all_member(T.firstOfItems(Core.rhsOf(grammar, p), firsts, nulls), T.firstsOf(y, firsts), t2, first_closed_at(grammar, p, y, firsts, nulls, cf, hl), inCs(t2, r2, ew))
-      +inT = {(%same : {Prefer.natIn(_, T.firstsOf(y, firsts)) == True{} : Bool}
-        in2) : {Prefer.natIn(t, T.firstsOf(y, firsts)) == True{} : Bool}}
-      nat_in_join_left(T.firstsOf(y, firsts), T.natsIf(Prefer.itemNull(Core.Nonterminal{y, need}, nulls), T.firstOfItems(rest, firsts, nulls)), t, inT)
+      +inT = {(%same : {Sets.natIn(_, T.firstsOf(y, firsts)) == True{} : Bool}
+        in2) : {Sets.natIn(t, T.firstsOf(y, firsts)) == True{} : Bool}}
+      nat_in_join_left(T.firstsOf(y, firsts), T.natsIf(Sets.itemNull(Core.Nonterminal{y, need}, nulls), T.firstOfItems(rest, firsts, nulls)), t, inT)
 
 law first_in:
   for fs: +List<Core.Tree>
@@ -403,30 +376,30 @@ law first_in:
   for +grammar: +List<Core.Production>
   for +firsts: +List<T.FirstFact>
   for +nulls: +List<Nat>
-  for +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool}
+  for +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool}
   for +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool}
   for +t: Nat
   for +r: +List<Nat>
   for +fit: {Core.fits(fs, grammar, items) == True{} : Bool}
   for +lv: {Core.leaves(fs) == t <> r : +List<Nat>}
-  {Prefer.natIn(t, T.firstOfItems(items, firsts, nulls)) == True{} : Bool}
+  {Sets.natIn(t, T.firstOfItems(items, firsts, nulls)) == True{} : Bool}
 
 def first_in(fs, items, grammar, firsts, nulls, cn, cf, t, r, fit, lv):
   match fs items:
     case Nil{} +its:
-      Empty.absurd({Prefer.natIn(t, T.firstOfItems(its, firsts, nulls)) == True{} : Bool}, L.cons_not_nil(t, r, Equal.sym(+List<Nat>, [], t <> r, lv)))
+      Empty.absurd({Sets.natIn(t, T.firstOfItems(its, firsts, nulls)) == True{} : Bool}, L.cons_not_nil(t, r, Equal.sym(+List<Nat>, [], t <> r, lv)))
     case Con{Core.Leaf{+a}, +ts} Con{Core.Terminal{+k}, +rest}:
       +ak = Lemma.nat_eq_sound(a, k, Lemma.and_true_left(Nat.is_eq(a, k), Core.fits(ts, grammar, rest), fit))
       +ta = Equal.sym(Nat, a, t, L.cons_head(a, t, Core.leaves(ts), r, lv))
-      Lemma.or_true_left_intro(Nat.is_eq(t, k), False{}, eq_is_eq(t, k, Equal.trans(Nat, t, a, k, ta, ak)))
+      Lemma.or_true_left_intro(Nat.is_eq(t, k), False{}, B.eq_is_eq(t, k, Equal.trans(Nat, t, a, k, ta, ak)))
     case Con{Core.Leaf{+a}, +ts} Nil{}:
       Empty.absurd({False{} == True{} : Bool}, Lemma.false_is_not_true(fit))
     case Con{Core.Leaf{+a}, +ts} Con{Core.Nonterminal{+y, +need}, +rest}:
-      Empty.absurd({Prefer.natIn(t, T.firstOfItems(Core.Nonterminal{y, need} <> rest, firsts, nulls)) == True{} : Bool}, Lemma.false_is_not_true(fit))
+      Empty.absurd({Sets.natIn(t, T.firstOfItems(Core.Nonterminal{y, need} <> rest, firsts, nulls)) == True{} : Bool}, Lemma.false_is_not_true(fit))
     case Con{Core.Node{+p, +cs}, +ts} Nil{}:
       Empty.absurd({False{} == True{} : Bool}, Lemma.false_is_not_true(fit))
     case Con{Core.Node{+p, +cs}, +ts} Con{Core.Terminal{+k}, +rest}:
-      Empty.absurd({Prefer.natIn(t, [k]) == True{} : Bool}, Lemma.false_is_not_true(fit))
+      Empty.absurd({Sets.natIn(t, [k]) == True{} : Bool}, Lemma.false_is_not_true(fit))
     case Con{Core.Node{+p, +cs}, +ts} Con{Core.Nonterminal{+y, +need}, +rest}:
       +lh = {Core.lhsIs(grammar, p, y) : Bool}
       +nd = {Core.needOk(need, Core.width(Core.Node{p, cs})) : Bool}
@@ -528,23 +501,6 @@ def own_index(cs, p, d0, i, k, x, m):
       +tail = Core.own(p, rest, 1n+d0, i, far)
       head_pick(hd, tail, x, p, {==}, Lemma.or_true_cases(Core.bsrEq(x, hd), Core.member(x, tail), m), m2 => own_index(rest, p, 1n+d0, i, far, x, m2))
 
-law succ_inj:
-  for +a: Nat
-  for +b: Nat
-  for +e: {1n+a == 1n+b : Nat}
-  {a == b : Nat}
-
-def succ_inj(a, b, e):
-  Equal.cong(Nat, Nat, v => Lemma.predOf(v), 1n+a, 1n+b, e)
-
-law succ_not_zero:
-  for +n: Nat
-  for +e: {1n+n == 0n : Nat}
-  Empty
-
-def succ_not_zero(n, e):
-  Lemma.false_is_not_true(Equal.cong(Nat, Bool, v => Nat.is_eq(v, 0n), 1n+n, 0n, e))
-
 law dot_len:
   for +d0: Nat
   for +len: Nat
@@ -553,7 +509,7 @@ law dot_len:
 
 def dot_len(d0, len, e):
   +e1 = Equal.trans(Nat, 1n+d0, Nat.add(d0, 1n+len), 1n+Nat.add(d0, len), e, Lemma.add_succ_right(d0, len))
-  +e2 = succ_inj(d0, Nat.add(d0, len), e1)
+  +e2 = B.succ_inj(d0, Nat.add(d0, len), e1)
   +e3 = Equal.trans(Nat, Nat.add(d0, 0n), d0, Nat.add(d0, len), Lemma.add_zero_right(d0), e2)
   Equal.sym(Nat, 0n, len, Lemma.add_cancel_left(d0, 0n, len, e3))
 
@@ -593,14 +549,14 @@ def leaf_zero(rest: +List<Core.Tree>, +a: Nat, +k: Nat, +lz: {List.length(&2, Co
     case Nil{}:
       Lemma.add_one_right(k)
     case Con{+t, +r}:
-      Empty.absurd({Nat.add(k, 1n) == G.endOf(Core.Leaf{a} <> t <> r, k) : Nat}, succ_not_zero(List.length(&2, Core.Tree, r), lz))
+      Empty.absurd({Nat.add(k, 1n) == G.endOf(Core.Leaf{a} <> t <> r, k) : Nat}, B.succ_not_zero(List.length(&2, Core.Tree, r), lz))
 
 def node_zero(rest: +List<Core.Tree>, +q: Nat, +ch: +List<Core.Tree>, +k: Nat, +lz: {List.length(&2, Core.Tree, rest) == 0n : Nat}) -> {Nat.add(k, Core.width(Core.Node{q, ch})) == G.endOf(Core.Node{q, ch} <> rest, k) : Nat}:
   match rest:
     case Nil{}:
       {==}
     case Con{+t, +r}:
-      Empty.absurd({Nat.add(k, Core.width(Core.Node{q, ch})) == G.endOf(Core.Node{q, ch} <> t <> r, k) : Nat}, succ_not_zero(List.length(&2, Core.Tree, r), lz))
+      Empty.absurd({Nat.add(k, Core.width(Core.Node{q, ch})) == G.endOf(Core.Node{q, ch} <> t <> r, k) : Nat}, B.succ_not_zero(List.length(&2, Core.Tree, r), lz))
 
 # The own step after the last item of a node ends where the node ends.
 law own_last:
@@ -644,19 +600,19 @@ def own_last(cs, p, d0, i, k, x, m, xd):
 # items after it, or, when they read nothing, what follows y.
 def child_cases(w: +List<Nat>, +ts: +List<Core.Tree>, +rest: +List<Core.Sym>, +z: Nat, +y: Nat, +far: Nat,
   +grammar: +List<Core.Production>, +input: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +ew: {Core.leaves(ts) == w : +List<Nat>},
   +rt: {Core.reads(ts, grammar, rest, input, far) == True{} : Bool},
   +ftt: {Core.fits(ts, grammar, rest) == True{} : Bool},
   +allF: {T.allFollow(T.firstOfItems(rest, firsts, nulls), z, follows) == True{} : Bool},
-  +orP: {Bool.or(Bool.not(Prefer.allNull(rest, nulls)), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows))) == True{} : Bool},
+  +orP: {Bool.or(Bool.not(Sets.allNull(rest, nulls)), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows))) == True{} : Bool},
   +pf: {T.followHas(y, Core.tokAt(input, G.endOf(ts, far)), follows) == True{} : Bool})
   -> {T.followHas(z, Core.tokAt(input, far), follows) == True{} : Bool}:
   match w:
     case Nil{}:
       +an = Rule.zero_nulls(ts, rest, grammar, nulls, cn, ftt, ew)
-      +sub = Rule.or_not_true(Prefer.allNull(rest, nulls), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows)), an, orP)
+      +sub = B.or_not_true(Sets.allNull(rest, nulls), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows)), an, orP)
       +endEq = Equal.trans(Nat, G.endOf(ts, far), Nat.add(far, List.length(&2, Nat, Core.leaves(ts))), far, G.end_eq(ts, far),
         Equal.trans(Nat, Nat.add(far, List.length(&2, Nat, Core.leaves(ts))), Nat.add(far, 0n), far,
           Equal.cong(+List<Nat>, Nat, v => Nat.add(far, List.length(&2, Nat, v)), Core.leaves(ts), [], ew), Lemma.add_zero_right(far)))
@@ -672,15 +628,15 @@ def child_cases(w: +List<Nat>, +ts: +List<Core.Tree>, +rest: +List<Core.Sym>, +z
 
 def child_follow(w: +List<Nat>, +ts: +List<Core.Tree>, +rest: +List<Core.Sym>, +z: Nat, +y: Nat, +far: Nat,
   +grammar: +List<Core.Production>, +input: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +ew: {Core.leaves(ts) == w : +List<Nat>},
   +rt: {Core.reads(ts, grammar, rest, input, far) == True{} : Bool},
-  +item: {Bool.and(T.allFollow(T.firstOfItems(rest, firsts, nulls), z, follows), Bool.or(Bool.not(Prefer.allNull(rest, nulls)), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows)))) == True{} : Bool},
+  +item: {Bool.and(T.allFollow(T.firstOfItems(rest, firsts, nulls), z, follows), Bool.or(Bool.not(Sets.allNull(rest, nulls)), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows)))) == True{} : Bool},
   +pf: {T.followHas(y, Core.tokAt(input, G.endOf(ts, far)), follows) == True{} : Bool})
   -> {T.followHas(z, Core.tokAt(input, far), follows) == True{} : Bool}:
   +allF = {T.allFollow(T.firstOfItems(rest, firsts, nulls), z, follows) : Bool}
-  +orP = {Bool.or(Bool.not(Prefer.allNull(rest, nulls)), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows))) : Bool}
+  +orP = {Bool.or(Bool.not(Sets.allNull(rest, nulls)), T.allMaybeIn(T.followsOf(y, follows), T.followsOf(z, follows))) : Bool}
   +ftt = D.reads_fits(ts, rest, grammar, input, far, rt)
   child_cases(w, ts, rest, z, y, far, grammar, input, firsts, follows, nulls, cn, cf, ew, rt, ftt, Lemma.and_true_left(allF, orP, item), Lemma.and_true_right_side(allF, orP, item), pf)
 
@@ -698,7 +654,7 @@ def own_follow(+cs: +List<Core.Tree>, +p: Nat, +z: Nat, +k: Nat, +x: Core.Bsr,
     Equal.cong(Nat, Nat, v => List.length(&2, Core.Sym, Core.rhsOf(grammar, v)), bIndex(x), p, ip))
   +xd = Equal.trans(Nat, bDot(x), List.length(&2, Core.Sym, Core.rhsOf(grammar, p)), List.length(&2, Core.Tree, cs), hn2, Equal.sym(Nat, List.length(&2, Core.Tree, cs), List.length(&2, Core.Sym, Core.rhsOf(grammar, p)), P.reads_length(cs, Core.rhsOf(grammar, p), grammar, input, k, rc)))
   +eE = Equal.trans(Nat, bEnd(x), G.endOf(cs, k), Nat.add(k, Core.width(Core.Node{p, cs})), own_last(cs, p, 0n, k, k, x, mo, xd), ec)
-  +eL = Equal.trans(Nat, Gll.lhsOf(grammar, bIndex(x)), Gll.lhsOf(grammar, p), z, Equal.cong(Nat, Nat, v => Gll.lhsOf(grammar, v), bIndex(x), p, ip), lhs_of(grammar, p, z, hl))
+  +eL = Equal.trans(Nat, Gll.lhsOf(grammar, bIndex(x)), Gll.lhsOf(grammar, p), z, Equal.cong(Nat, Nat, v => Gll.lhsOf(grammar, v), bIndex(x), p, ip), G.lhs_of(grammar, p, z, hl))
   %Equal.sym(Nat, Gll.lhsOf(grammar, bIndex(x)), z, eL) : {T.followHas(_, Core.tokAt(input, bEnd(x)), follows) == True{} : Bool}
   %Equal.sym(Nat, bEnd(x), Nat.add(k, Core.width(Core.Node{p, cs})), eE) : {T.followHas(z, Core.tokAt(input, _), follows) == True{} : Bool}
   childFol
@@ -745,7 +701,7 @@ law follow_walk:
   for +k: Nat
   for +y: Nat
   for +x: Core.Bsr
-  for +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool}
+  for +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool}
   for +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool}
   for +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool}
   for +hn: {bDot(x) == List.length(&2, Core.Sym, Core.rhsOf(grammar, bIndex(x))) : Nat}
@@ -797,7 +753,7 @@ def follow_walk(fs, items, grammar, input, firsts, follows, nulls, k, y, x, cn, 
 # ======== WHAT A PRODUCTION PREDICTS IS IN ITS PREDICT SET ========
 
 def first_branch(+grammar: +List<Core.Production>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +q: Nat, +next: Maybe<&2, Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   fi: LL.FirstIs(grammar, Core.rhsOf(grammar, q), next))
   -> {T.maybeIn(next, T.predictOf(Gll.lhsOf(grammar, q), Core.rhsOf(grammar, q), firsts, follows, nulls)) == True{} : Bool}:
@@ -812,11 +768,11 @@ def first_branch(+grammar: +List<Core.Production>, +firsts: +List<T.FirstFact>, 
       +rhs = Core.rhsOf(grammar, q)
       +inF = some_in(T.firstOfItems(rhs, firsts, nulls), t, first_in(f, rhs, grammar, firsts, nulls, cn, cf, t, r, fit, lv))
       %Equal.sym(Maybe<&2, Nat>, next, Some{t}, ne) : {T.maybeIn(_, T.predictOf(Gll.lhsOf(grammar, q), rhs, firsts, follows, nulls)) == True{} : Bool}
-      maybe_join_left(T.someAll(T.firstOfItems(rhs, firsts, nulls)), T.maybesIf(Prefer.allNull(rhs, nulls), T.followsOf(Gll.lhsOf(grammar, q), follows)), Some{t}, inF)
+      maybe_join_left(T.someAll(T.firstOfItems(rhs, firsts, nulls)), T.maybesIf(Sets.allNull(rhs, nulls), T.followsOf(Gll.lhsOf(grammar, q), follows)), Some{t}, inF)
 
 def follow_pt(+grammar: +List<Core.Production>, +start: Nat, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +q: Nat, +next: Maybe<&2, Nat>,
   +input: +List<Nat>, +tree: Core.Tree, +i: Nat, +k: Nat, +j: Nat,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool},
   +cs: {T.followHas(start, None{}, follows) == True{} : Bool},
@@ -839,7 +795,7 @@ def follow_pt(+grammar: +List<Core.Production>, +start: Nat, +firsts: +List<T.Fi
       fw
 
 def follow_tree(+grammar: +List<Core.Production>, +start: Nat, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +q: Nat, +next: Maybe<&2, Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool},
   +cs: {T.followHas(start, None{}, follows) == True{} : Bool},
@@ -850,7 +806,7 @@ def follow_tree(+grammar: +List<Core.Production>, +start: Nat, +firsts: +List<T.
       follow_pt(grammar, start, firsts, follows, nulls, q, next, input0, tree0, i0, k0, j0, cn, cf, cfo, cs, cr, mm0, tk0, pt)
 
 def null_branch(+grammar: +List<Core.Production>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +q: Nat, +next: Maybe<&2, Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +fh: {T.followHas(Gll.lhsOf(grammar, q), next, follows) == True{} : Bool},
   nul: LL.Nullable(grammar, Core.rhsOf(grammar, q)))
   -> {T.maybeIn(next, T.predictOf(Gll.lhsOf(grammar, q), Core.rhsOf(grammar, q), firsts, follows, nulls)) == True{} : Bool}:
@@ -858,11 +814,11 @@ def null_branch(+grammar: +List<Core.Production>, +firsts: +List<T.FirstFact>, +
     case (f0, (fit0, lv0)):
       +rhs = Core.rhsOf(grammar, q)
       +an = Rule.zero_nulls(f0, rhs, grammar, nulls, cn, fit0, lv0)
-      maybe_join_right(T.someAll(T.firstOfItems(rhs, firsts, nulls)), T.maybesIf(Prefer.allNull(rhs, nulls), T.followsOf(Gll.lhsOf(grammar, q), follows)), next,
-        maybes_if_true(Prefer.allNull(rhs, nulls), T.followsOf(Gll.lhsOf(grammar, q), follows), next, an, fh))
+      maybe_join_right(T.someAll(T.firstOfItems(rhs, firsts, nulls)), T.maybesIf(Sets.allNull(rhs, nulls), T.followsOf(Gll.lhsOf(grammar, q), follows)), next,
+        maybes_if_true(Sets.allNull(rhs, nulls), T.followsOf(Gll.lhsOf(grammar, q), follows), next, an, fh))
 
 def follow_branch(+grammar: +List<Core.Production>, +start: Nat, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +q: Nat, +next: Maybe<&2, Nat>,
-  +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool},
+  +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool},
   +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool},
   +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool},
   +cs: {T.followHas(start, None{}, follows) == True{} : Bool},
@@ -882,7 +838,7 @@ law predicts_in:
   for +nulls: +List<Nat>
   for +q: Nat
   for +next: Maybe<&2, Nat>
-  for +cn: {Prefer.nullsClosed(grammar, nulls) == True{} : Bool}
+  for +cn: {Sets.nullsClosed(grammar, nulls) == True{} : Bool}
   for +cf: {T.firstsClosed(grammar, firsts, nulls) == True{} : Bool}
   for +cfo: {T.followsClosed(grammar, firsts, follows, nulls) == True{} : Bool}
   for +cs: {T.followHas(start, None{}, follows) == True{} : Bool}
@@ -920,7 +876,7 @@ def later_at(prods, m, x, rhs, firsts, follows, nulls, al, hl):
       Empty.absurd({T.disjoint(T.predictOf(x, rhs, firsts, follows, nulls), Pred([], m0, firsts, follows, nulls)) == True{} : Bool}, Lemma.false_is_not_true(hl))
     case Con{Core.Production{+l2, +r2}, +rest} 0n:
       +d = {T.disjoint(T.predictOf(x, rhs, firsts, follows, nulls), T.predictOf(l2, r2, firsts, follows, nulls)) : Bool}
-      Rule.or_not_true(Nat.is_eq(l2, x), d, hl, Lemma.and_true_left(Bool.or(Bool.not(Nat.is_eq(l2, x)), d), T.againstLater(rest, x, rhs, firsts, follows, nulls), al))
+      B.or_not_true(Nat.is_eq(l2, x), d, hl, Lemma.and_true_left(Bool.or(Bool.not(Nat.is_eq(l2, x)), d), T.againstLater(rest, x, rhs, firsts, follows, nulls), al))
     case Con{Core.Production{+l2, +r2}, +rest} 1n+(+m2):
       +d = {T.disjoint(T.predictOf(x, rhs, firsts, follows, nulls), T.predictOf(l2, r2, firsts, follows, nulls)) : Bool}
       later_at(rest, m2, x, rhs, firsts, follows, nulls, Lemma.and_true_right_side(Bool.or(Bool.not(Nat.is_eq(l2, x)), d), T.againstLater(rest, x, rhs, firsts, follows, nulls), al), hl)
@@ -983,7 +939,7 @@ def sound_pair(+grammar: +List<Core.Production>, +start: Nat, +nulls: +List<Nat>
   +l2: {Core.lhsIs(grammar, q2, x) == True{} : Bool},
   p1: LL.Predicts(grammar, start, q1, next),
   p2: LL.Predicts(grammar, start, q2, next)) -> Empty:
-  +a1 = {Prefer.nullsClosed(grammar, nulls) : Bool}
+  +a1 = {Sets.nullsClosed(grammar, nulls) : Bool}
   +a2 = {T.firstsClosed(grammar, firsts, nulls) : Bool}
   +a3 = {T.followsClosed(grammar, firsts, follows, nulls) : Bool}
   +a4 = {T.followHas(start, None{}, follows) : Bool}
@@ -1018,7 +974,7 @@ law tables_ll1_sound:
 
 def tables_ll1_sound(fuel, grammar, start, ok):
   +f = fuel
-  +nulls = Prefer.growNulls(f, grammar, [])
+  +nulls = Sets.growNulls(f, grammar, [])
   +firsts = T.growFirsts(f, grammar, nulls, [])
   +follows = T.growFollows(f, grammar, firsts, nulls, [T.FollowFact{start, None{}}])
   sound_with(grammar, start, nulls, firsts, follows, ok)

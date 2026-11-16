@@ -1,8 +1,8 @@
 import Base
 import ./CORE.bend as Core
+import ./SETS.bend as Sets
 import ./GLL.bend as Gll
 import ./SUPPORT.bend as Sup
-import ./PREFER.bend as Prefer
 import ./TABLES.bend as T
 import ./PREDICT.bend as Pr
 
@@ -20,7 +20,7 @@ def g() -> +List<Core.Production>:
   [Core.Production{0n, [n(1n), t(2n)]}, Core.Production{1n, [t(1n)]}, Core.Production{1n, []}]
 
 def pred() -> Gll.Pred:
-  +nulls = Prefer.growNulls(10n, g(), [])
+  +nulls = Sets.growNulls(10n, g(), [])
   +firsts = T.growFirsts(10n, g(), nulls, [])
   Gll.Allowed{Pr.predictSets(g(), firsts, T.growFollows(10n, g(), firsts, nulls, [T.FollowFact{0n, None{}}]), nulls)}
 

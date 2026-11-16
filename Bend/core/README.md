@@ -20,8 +20,10 @@ files stay until their replacements check.
 | `PROOF_EXACT.bend` | Proof that the exact parser's set is exact: `gll_bsr_exact` |
 | `PROOF_SPELL.bend` | Proof that a tree which fits, uses only exact steps and is as long as the input spells it: `exact_trees_spell` |
 | `EXACT_EX.bend` | The exact parser on the examples against today's, and on a cyclic grammar |
+| `SETS.bend` | Sets of naturals and the nullable nonterminals (grown, checked closed), shared by the rule on preference cycles and the LL(1) tables |
+| `PROOF_BASICS.bend` | Small facts about Bool, Nat and lists shared by the core's proofs |
 | `GUARD.bend` | Phase 1 on the core: what lookahead, @left and @right mean, step by step (a tree is admissible when each of its steps keeps the rules it decides), the rules as written moved onto core productions, and phase 1's three-valued verdict on a step |
-| `PREFER.bend` | Phase 2 on the core: what @prefer and @avoid mean, step by step (a completed step is beaten when a higher-ranked production of its nonterminal has a rival over the same tokens whose steps keep their rules), the marks as written moved onto core productions, phase 2's verdict on a step, and the rule `noPreferenceCycle` (an outranking production lies on no cycle that reads no input) |
+| `PREFER.bend` | Phase 2 on the core: what @prefer and @avoid mean, step by step (a completed step is beaten when a higher-ranked production of its nonterminal has a rival over the same tokens whose steps keep their rules), the marks as written moved onto core productions, phase 2's verdict on a step, and the rule `noPreferenceCycle` (an outranking production lies on no cycle that reads no input; nullable sets from `SETS.bend`) |
 | `ORACLE.bend` | The oracle: the exact set, filtered by both verdicts at once; any Unknown means no answer. A chosen tree is one whose steps all keep their rules and complete no beaten node |
 | `PROOF_DECIDE.bend` | The questions phase 1 asks are answered soundly: Yes only with a checked witness, No only when the exact set has no such step |
 | `PROOF_GUARD.bend` | Phase 1's verdict is right: a step answered Yes keeps its rules, one answered No does not |

@@ -6,6 +6,7 @@ import ./GLL.bend as Gll
 import ./EBNF.bend as E
 import ./EXACT.bend as Exact
 import ./GUARD.bend as Guard
+import ./SETS.bend as Sets
 
 # PHASE 2 ON THE CORE: @prefer AND @avoid.
 #
@@ -214,79 +215,6 @@ def rankTri(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.G
 # nonterminals that can read nothing, and, for each outranking production, the
 # nonterminals it reaches.
 
-def natIn(+x: Nat, xs: +List<Nat>) -> Bool:
-  match xs:
-    case Nil{}:
-      False{}
-    case Con{+y, rest}:
-      Bool.or(Nat.is_eq(x, y), natIn(x, rest))
-
-def allNatIn(xs: +List<Nat>, +c: +List<Nat>) -> Bool:
-  match xs:
-    case Nil{}:
-      True{}
-    case Con{+x, rest}:
-      Bool.and(natIn(x, c), allNatIn(rest, c))
-
-def joinNats(a: +List<Nat>, +b: +List<Nat>) -> +List<Nat>:
-  match a:
-    case Nil{}:
-      b
-    case Con{+x, rest}:
-      x <> joinNats(rest, b)
-
-def addIf(b: Bool, +x: Nat, +c: +List<Nat>) -> +List<Nat>:
-  match b:
-    case True{}:
-      x <> c
-    case False{}:
-      c
-
-# Can the item read nothing? Never a terminal, nor an occurrence that needs something.
-def needNull(need: Core.Need, +x: Nat, +nulls: +List<Nat>) -> Bool:
-  match need:
-    case Core.Something{}:
-      False{}
-    case Core.Anything{}:
-      natIn(x, nulls)
-    case Core.Nothing{}:
-      natIn(x, nulls)
-
-def itemNull(s: Core.Sym, +nulls: +List<Nat>) -> Bool:
-  match s:
-    case Core.Terminal{k}:
-      False{}
-    case Core.Nonterminal{+x, +need}:
-      needNull(need, x, nulls)
-
-def allNull(items: +List<Core.Sym>, +nulls: +List<Nat>) -> Bool:
-  match items:
-    case Nil{}:
-      True{}
-    case Con{+s, rest}:
-      Bool.and(itemNull(s, nulls), allNull(rest, nulls))
-
-def nullsOnce(prods: +List<Core.Production>, +acc: +List<Nat>) -> +List<Nat>:
-  match prods:
-    case Nil{}:
-      acc
-    case Con{Core.Production{+lhs, +rhs}, rest}:
-      nullsOnce(rest, addIf(Bool.and(allNull(rhs, acc), Bool.not(natIn(lhs, acc))), lhs, acc))
-
-def growNulls(n: Nat, +grammar: +List<Core.Production>, +nulls: +List<Nat>) -> +List<Nat>:
-  match n:
-    case 0n:
-      nulls
-    case 1n+(+p):
-      growNulls(p, grammar, nullsOnce(grammar, nulls))
-
-def nullsClosed(prods: +List<Core.Production>, +nulls: +List<Nat>) -> Bool:
-  match prods:
-    case Nil{}:
-      True{}
-    case Con{Core.Production{+lhs, +rhs}, rest}:
-      Bool.and(Bool.or(Bool.not(allNull(rhs, nulls)), natIn(lhs, nulls)), nullsClosed(rest, nulls))
-
 def ntList(s: Core.Sym) -> +List<Nat>:
   match s:
     case Core.Terminal{k}:
@@ -308,14 +236,14 @@ def edgesFrom(items: +List<Core.Sym>, +pre: Bool, +nulls: +List<Nat>) -> +List<N
     case Nil{}:
       []
     case Con{+s, +rest}:
-      joinNats(edgeIf(Bool.and(pre, allNull(rest, nulls)), s), edgesFrom(rest, Bool.and(pre, itemNull(s, nulls)), nulls))
+      Sets.joinNats(edgeIf(Bool.and(pre, Sets.allNull(rest, nulls)), s), edgesFrom(rest, Bool.and(pre, Sets.itemNull(s, nulls)), nulls))
 
 def addAll(xs: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
   match xs:
     case Nil{}:
       acc
     case Con{+x, rest}:
-      addAll(rest, addIf(Bool.not(natIn(x, acc)), x, acc))
+      addAll(rest, Sets.addIf(Bool.not(Sets.natIn(x, acc)), x, acc))
 
 def addAllIf(b: Bool, +xs: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
   match b:
@@ -329,7 +257,7 @@ def reachOnce(prods: +List<Core.Production>, +nulls: +List<Nat>, +acc: +List<Nat
     case Nil{}:
       acc
     case Con{Core.Production{+lhs, +rhs}, rest}:
-      reachOnce(rest, nulls, addAllIf(natIn(lhs, acc), edgesFrom(rhs, True{}, nulls), acc))
+      reachOnce(rest, nulls, addAllIf(Sets.natIn(lhs, acc), edgesFrom(rhs, True{}, nulls), acc))
 
 def growReach(n: Nat, +grammar: +List<Core.Production>, +nulls: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
   match n:
@@ -343,12 +271,12 @@ def reachClosed(prods: +List<Core.Production>, +nulls: +List<Nat>, +r: +List<Nat
     case Nil{}:
       True{}
     case Con{Core.Production{+lhs, +rhs}, rest}:
-      Bool.and(Bool.or(Bool.not(natIn(lhs, r)), allNatIn(edgesFrom(rhs, True{}, nulls), r)), reachClosed(rest, nulls, r))
+      Bool.and(Bool.or(Bool.not(Sets.natIn(lhs, r)), Sets.allNatIn(edgesFrom(rhs, True{}, nulls), r)), reachClosed(rest, nulls, r))
 
 # Production m lies on no cycle that reads no input: r holds what m reaches, is closed, and
 # does not hold m's own nonterminal.
 def cycleFreeWith(+r: +List<Nat>, +grammar: +List<Core.Production>, +nulls: +List<Nat>, +m: Nat) -> Bool:
-  Bool.and(reachClosed(grammar, nulls, r), Bool.and(allNatIn(edgesFrom(Core.rhsOf(grammar, m), True{}, nulls), r), Bool.not(natIn(Gll.lhsOf(grammar, m), r))))
+  Bool.and(reachClosed(grammar, nulls, r), Bool.and(Sets.allNatIn(edgesFrom(Core.rhsOf(grammar, m), True{}, nulls), r), Bool.not(Sets.natIn(Gll.lhsOf(grammar, m), r))))
 
 def cycleFree(+grammar: +List<Core.Production>, +nulls: +List<Nat>, +m: Nat) -> Bool:
   cycleFreeWith(growReach(1n+List.length(&2, Core.Production, grammar), grammar, nulls, edgesFrom(Core.rhsOf(grammar, m), True{}, nulls)), grammar, nulls, m)
@@ -369,7 +297,7 @@ def prodsOk(prods: +List<Core.Production>, +grammar: +List<Core.Production>, +ma
       Bool.and(Bool.or(Bool.not(belowFrom(grammar, grammar, marks, m, 0n)), cycleFree(grammar, nulls, m)), prodsOk(rest, grammar, marks, nulls, 1n+m))
 
 def noCycleWith(+nulls: +List<Nat>, +grammar: +List<Core.Production>, +marks: +List<RankMark>) -> Bool:
-  Bool.and(nullsClosed(grammar, nulls), prodsOk(grammar, grammar, marks, nulls, 0n))
+  Bool.and(Sets.nullsClosed(grammar, nulls), prodsOk(grammar, grammar, marks, nulls, 0n))
 
 def noPreferenceCycle(+grammar: +List<Core.Production>, +marks: +List<RankMark>) -> Bool:
-  noCycleWith(growNulls(1n+List.length(&2, Core.Production, grammar), grammar, []), grammar, marks)
+  noCycleWith(Sets.growNulls(1n+List.length(&2, Core.Production, grammar), grammar, []), grammar, marks)

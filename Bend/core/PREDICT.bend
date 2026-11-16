@@ -1,8 +1,8 @@
 import Base
 import ./CORE.bend as Core
+import ./SETS.bend as Sets
 import ./GLL.bend as Gll
 import ./CHECK.bend as Check
-import ./PREFER.bend as Prefer
 import ./TABLES.bend as T
 
 # THE PREDICTING PARSER: the GLL engine with Scott's predict sets. A cluster of x at i
@@ -21,7 +21,7 @@ def predictSets(prods: +List<Core.Production>, +firsts: +List<T.FirstFact>, +fol
 
 # The tables are closed and the start symbol is followed by the end.
 def tablesClosed(+grammar: +List<Core.Production>, +start: Nat, +nulls: +List<Nat>, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>) -> Bool:
-  Bool.and(Prefer.nullsClosed(grammar, nulls),
+  Bool.and(Sets.nullsClosed(grammar, nulls),
     Bool.and(T.firstsClosed(grammar, firsts, nulls),
       Bool.and(T.followsClosed(grammar, firsts, follows, nulls),
         Bool.and(T.followHas(start, None{}, follows), T.suffixOk([Core.Nonterminal{start, Core.Anything{}}], start, firsts, follows, nulls)))))
@@ -39,6 +39,6 @@ def predictWith(+fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +inpu
 # THE PREDICTING PARSER: tables grown with `fuel` rounds each, the engine run with `fuel` steps.
 def predictedSteps(fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
   +f = fuel
-  +nulls = Prefer.growNulls(f, grammar, [])
+  +nulls = Sets.growNulls(f, grammar, [])
   +firsts = T.growFirsts(f, grammar, nulls, [])
   predictWith(f, grammar, start, input, nulls, firsts, T.growFollows(f, grammar, firsts, nulls, [T.FollowFact{start, None{}}]))

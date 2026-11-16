@@ -1,5 +1,6 @@
 import Base
 import ../LEMMAS.bend as Lemma
+import ./PROOF_BASICS.bend as B
 import ./CORE.bend as Core
 import ./LL1.bend as LL
 import ./PROOF_PRUNE.bend as P
@@ -48,32 +49,6 @@ law cons_not_nil:
 
 def cons_not_nil(t, r, e):
   Lemma.false_is_not_true(Equal.cong(+List<Nat>, Bool, v => List.is_empty(&2, Nat, v), t <> r, [], e))
-
-law append_nil_left:
-  for x: +List<Nat>
-  for +y: +List<Nat>
-  for e: {List.append(&2, Nat, x, y) == [] : +List<Nat>}
-  {x == [] : +List<Nat>}
-
-def append_nil_left(x, y, e):
-  match x:
-    case Nil{}:
-      {==}
-    case Con{+h, +t}:
-      Empty.absurd({h <> t == [] : +List<Nat>}, cons_not_nil(h, List.append(&2, Nat, t, y), e))
-
-law append_nil_right:
-  for x: +List<Nat>
-  for +y: +List<Nat>
-  for e: {List.append(&2, Nat, x, y) == [] : +List<Nat>}
-  {y == [] : +List<Nat>}
-
-def append_nil_right(x, y, e):
-  match x:
-    case Nil{}:
-      e
-    case Con{+h, +t}:
-      Empty.absurd({y == [] : +List<Nat>}, cons_not_nil(h, List.append(&2, Nat, t, y), e))
 
 law tok_is_some:
   for m: Maybe<&2, Nat>
@@ -133,7 +108,7 @@ def own_end_in(rest, t, q, dot, i, k, set, e, h):
     case +rs Core.Leaf{+a}:
       Empty.absurd({Core.member(Core.Bsr{q, Nat.add(dot, List.length(&2, Core.Tree, Core.Leaf{a} <> rs)), i, k, k}, set) == True{} : Bool}, cons_not_nil(a, Core.leaves(rs), e))
     case Nil{} Core.Node{+q2, +ch2}:
-      +lz = append_nil_left(Core.leaves(ch2), [], e)
+      +lz = B.append_nil_left(Core.leaves(ch2), [], e)
       +kz = width_zero(q2, ch2, k, lz)
       +far = {Nat.add(k, Core.width(Core.Node{q2, ch2})) : Nat}
       +m = Lemma.and_true_left(Core.member(Core.Bsr{q, 1n+dot, i, k, far}, set), True{}, h)
@@ -141,8 +116,8 @@ def own_end_in(rest, t, q, dot, i, k, set, e, h):
       %kz : {Core.member(Core.Bsr{q, 1n+dot, i, k, _}, set) == True{} : Bool}
       m
     case Con{+t2, +rest2} Core.Node{+q2, +ch2}:
-      +lz = append_nil_left(Core.leaves(ch2), Core.leaves(t2 <> rest2), e)
-      +e2 = append_nil_right(Core.leaves(ch2), Core.leaves(t2 <> rest2), e)
+      +lz = B.append_nil_left(Core.leaves(ch2), Core.leaves(t2 <> rest2), e)
+      +e2 = B.append_nil_right(Core.leaves(ch2), Core.leaves(t2 <> rest2), e)
       +kz = width_zero(q2, ch2, k, lz)
       +far = {Nat.add(k, Core.width(Core.Node{q2, ch2})) : Nat}
       +len = {List.length(&2, Core.Tree, t2 <> rest2) : Nat}

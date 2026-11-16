@@ -1,5 +1,6 @@
 import Base
 import ../LEMMAS.bend as Lemma
+import ./PROOF_BASICS.bend as B
 import ./CORE.bend as Core
 import ./EXACT.bend as Exact
 import ./WITNESS.bend as Witness
@@ -18,33 +19,6 @@ import ./PROOF_ORACLE.bend as PO
 # `beaten` looks for.
 
 # ======== SMALL FACTS ========
-
-law succ_not_zero:
-  for +n: Nat
-  for +e: {1n+n == 0n : Nat}
-  Empty
-
-def succ_not_zero(n, e):
-  Lemma.false_is_not_true(Equal.cong(Nat, Bool, v => Nat.is_eq(v, 0n), 1n+n, 0n, e))
-
-law succ_inj:
-  for +a: Nat
-  for +b: Nat
-  for +e: {1n+a == 1n+b : Nat}
-  {a == b : Nat}
-
-def succ_inj(a, b, e):
-  Equal.cong(Nat, Nat, v => Lemma.predOf(v), 1n+a, 1n+b, e)
-
-law eq_is_eq:
-  for +a: Nat
-  for +b: Nat
-  for +e: {a == b : Nat}
-  {Nat.is_eq(a, b) == True{} : Bool}
-
-def eq_is_eq(a, b, e):
-  %e : {Nat.is_eq(a, _) == True{} : Bool}
-  Lemma.nat_eq_refl(a)
 
 law rev_rev:
   for xs: +List<Nat>
@@ -318,7 +292,7 @@ def reading_in(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guar
     case (len0, ac):
       +len = len0
       Lemma.and_true_intro(Nat.is_eq(List.length(&2, Nat, ks), List.length(&2, Core.Sym, Core.rhsOf(grammar, q))), Core.allIn(Extent.stepsOf(q, i, ks), set),
-        eq_is_eq(List.length(&2, Nat, ks), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), len),
+        B.eq_is_eq(List.length(&2, Nat, ks), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), len),
         all_chosen_in(Extent.stepsOf(q, i, ks), fuel, grammar, gmarks, rmarks, start, input, set, got, ac))
 
 def in_reading(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +start: Nat, +input: +List<Nat>, +set: +List<Core.Bsr>, +q: Nat, +i: Nat, +ks: +List<Nat>,
@@ -473,9 +447,9 @@ def run_has(items, ks, set, q, p, i, states, rev, len, inS, inSet):
     case Nil{} Nil{}:
       inS
     case Nil{} Con{+k, +rest}:
-      Empty.absurd(PathIn(Extent.revOnto(k <> rest, rev), states), succ_not_zero(List.length(&2, Nat, rest), len))
+      Empty.absurd(PathIn(Extent.revOnto(k <> rest, rev), states), B.succ_not_zero(List.length(&2, Nat, rest), len))
     case Con{+it, +more} Nil{}:
-      Empty.absurd(PathIn(rev, Extent.run(it <> more, set, q, p, i, states)), succ_not_zero(List.length(&2, Core.Sym, more), Equal.sym(Nat, 0n, 1n+List.length(&2, Core.Sym, more), len)))
+      Empty.absurd(PathIn(rev, Extent.run(it <> more, set, q, p, i, states)), B.succ_not_zero(List.length(&2, Core.Sym, more), Equal.sym(Nat, 0n, 1n+List.length(&2, Core.Sym, more), len)))
     case Con{+it, +more} Con{+k, +rest}:
       +prev = Extent.prevOf(i, rev)
       +x = {Core.Bsr{q, 1n+p, i, prev, k} : Core.Bsr}
@@ -483,7 +457,7 @@ def run_has(items, ks, set, q, p, i, states, rev, len, inS, inSet):
       +mx = Lemma.and_true_left(Core.member(x, set), tail, inSet)
       next = expand_has(states, set, q, p, i, rev, k <> rev, inS, grow_has(set, q, p, i, rev, x, mx, fits_own(q, p, i, prev, k)))
       run_has(more, rest, set, q, 1n+p, i, Extent.expand(states, set, q, p, i), k <> rev,
-        succ_inj(List.length(&2, Nat, rest), List.length(&2, Core.Sym, more), len), next, Lemma.and_true_right_side(Core.member(x, set), tail, inSet))
+        B.succ_inj(List.length(&2, Nat, rest), List.length(&2, Core.Sym, more), len), next, Lemma.and_true_right_side(Core.member(x, set), tail, inSet))
 
 # ======== THE PAIR SEARCH ========
 
@@ -696,7 +670,7 @@ def found_both(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guar
   +cs = Extent.chains(set, grammar, q, i)
   p1 = run_has(Core.rhsOf(grammar, q), ks1, set, q, 0n, i, [[]], [], Lemma.nat_eq_sound(List.length(&2, Nat, ks1), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), Lemma.and_true_left(le1, al1, in1)), Inl{{==}}, Lemma.and_true_right_side(le1, al1, in1))
   p2 = run_has(Core.rhsOf(grammar, q), ks2, set, q, 0n, i, [[]], [], Lemma.nat_eq_sound(List.length(&2, Nat, ks2), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), Lemma.and_true_left(le2, al2, in2)), Inl{{==}}, Lemma.and_true_right_side(le2, al2, in2))
-  +en = eq_is_eq(Extent.endOf(ks1, i), Extent.endOf(ks2, i), ends)
+  +en = B.eq_is_eq(Extent.endOf(ks1, i), Extent.endOf(ks2, i), ends)
   +ok = {Lemma.and_true_intro(Extent.readingIn(grammar, set, q, i, ks1), Bool.and(Extent.readingIn(grammar, set, q, i, ks2), Bool.and(Nat.is_eq(Extent.endOf(ks1, i), Extent.endOf(ks2, i)), Bool.and(Core.member(Core.Bsr{q, d, i, k, j}, Extent.stepsOf(q, i, ks1)), Extent.beatsAt(ks1, ks2, emarks, grammar, q, d, 0n, i, i)))), in1,
     Lemma.and_true_intro(Extent.readingIn(grammar, set, q, i, ks2), Bool.and(Nat.is_eq(Extent.endOf(ks1, i), Extent.endOf(ks2, i)), Bool.and(Core.member(Core.Bsr{q, d, i, k, j}, Extent.stepsOf(q, i, ks1)), Extent.beatsAt(ks1, ks2, emarks, grammar, q, d, 0n, i, i))), in2,
       Lemma.and_true_intro(Nat.is_eq(Extent.endOf(ks1, i), Extent.endOf(ks2, i)), Bool.and(Core.member(Core.Bsr{q, d, i, k, j}, Extent.stepsOf(q, i, ks1)), Extent.beatsAt(ks1, ks2, emarks, grammar, q, d, 0n, i, i)), en,
