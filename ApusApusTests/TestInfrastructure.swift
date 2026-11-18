@@ -131,7 +131,7 @@ func parseMatches(grammar grammarString: String, message: String) throws -> Bool
         messageParser.parse(input: message)
 
         return messageParser.yield(of: messageParser.currentParseRoot).contains {
-            $0.i == message.startIndex && $0.j == message.endIndex
+            $0.i == 0 && $0.j == message.endPosition
         }
     }
 }
@@ -230,7 +230,7 @@ func parseLanguageMessage(_ fixture: LanguageFixture, message: String) throws ->
         parser.parse(input: input)
 
         return parser.yield(of: parser.currentParseRoot).contains {
-            $0.i == input.startIndex && $0.j == input.endIndex
+            $0.i == 0 && $0.j == input.endPosition
         }
     }
 }
@@ -255,7 +255,7 @@ func parseAndDisambiguate(grammar grammarString: String, message: String) throws
         messageParser.parse(input: message)
 
         let matches = messageParser.yield(of: messageParser.currentParseRoot).contains {
-            $0.i == message.startIndex && $0.j == message.endIndex
+            $0.i == 0 && $0.j == message.endPosition
         }
         let pruned = Oracle(parser: messageParser, input: message).disambiguate()
         return (matches, pruned)
@@ -274,7 +274,7 @@ func parsePostOracle(grammar grammarString: String, message: String) throws -> (
         let mp = MessageParser(grammar: grammar)
         mp.parse(input: message)
         func fullSpan() -> Bool {
-            mp.yield(of: mp.currentParseRoot).contains { $0.i == message.startIndex && $0.j == message.endIndex }
+            mp.yield(of: mp.currentParseRoot).contains { $0.i == 0 && $0.j == message.endPosition }
         }
         let raw = fullSpan()
         let pruned = Oracle(parser: mp, input: message).disambiguate()
@@ -297,7 +297,7 @@ func parseOracleAmbiguity(grammar grammarString: String, message: String) throws
         let mp = MessageParser(grammar: grammar)
         mp.parse(input: message)
         func fullSpan() -> Bool {
-            mp.yield(of: mp.currentParseRoot).contains { $0.i == message.startIndex && $0.j == message.endIndex }
+            mp.yield(of: mp.currentParseRoot).contains { $0.i == 0 && $0.j == message.endPosition }
         }
         let raw = fullSpan()
         let pruned = Oracle(parser: mp, input: message).disambiguate()

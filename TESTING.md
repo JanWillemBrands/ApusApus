@@ -209,6 +209,29 @@ To probe SwiftSyntax fast, add a temporary `@Test` in `SwiftSyntaxTests.ParserPr
 `print("PROBE …")`, run with `RunSomeTests`, grep `PROBE`, remove it.
 (`RunCodeSnippet` needs `-Onone`; the main target is `-O`.)
 
+### Timing the parser: the frozen benchmark (2026-11-18)
+
+The CLI parses the `Swift.apus` message `^^^#../grammars/sampleLargeFile.swift`: a frozen 544 KB
+copy of `GenerateSwiftSyntaxAST.swift`. `grammars/` belongs to no target, so it is not compiled.
+The `../grammars/` spelling resolves both for the CLI (relative to `ApusApus/`) and for the tests
+(relative to `grammars/`). Do not point the benchmark at a live source file: editing it changes
+the work, so descriptor counts can only be compared on the same input.
+
+`OS_ACTIVITY_DT_MODE=YES` sends the CLI's `Logger` output to stderr, including the timing line
+(`cpuTime, descriptorCount, crf.count, sizeOfSets, yieldCount`):
+```bash
+xcodebuild -scheme ApusApus -configuration Release -derivedDataPath /tmp/apusdd build -quiet
+OS_ACTIVITY_DT_MODE=YES /tmp/apusdd/Build/Products/Release/ApusApus 2>&1 | grep -A1 'cpuTime,'
+```
+A speed change must leave the counts unchanged; take the median of several runs (noise ≈ 1–2%).
+To profile: `xcrun xctrace record --template 'Time Profiler' --launch -- <binary>`, then
+`xcrun xctrace export --xpath '…/table[@schema="time-profile"]'`; app frames need `atos -o
+<binary> -l <load address>`.
+
+The lexer's hand-written matchers (`ApusRegexLibrary.matchers`) replace their regexes for speed;
+`HandMatcherTests` checks they agree. `tools/run_tests.sh` does not run it: after changing a
+matcher or its regex, run `-only-testing:ApusApusTests/HandMatcherTests`.
+
 ---
 
 ## 5. Parallel execution (2026-07-27)

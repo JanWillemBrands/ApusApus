@@ -271,16 +271,6 @@ def steps_pos(+ts: +List<Core.Tree>, +set: +List<Core.Bsr>, +a: Nat, +b: Nat,
   %Equal.sym(Nat, a, b, e) : {Core.allIn(Core.steps(ts, _), set) == True{} : Bool}
   h
 
-# The cursor's bookkeeping after one more item s, when the rest of the right side was s <> r.
-def inv_next(+grammar: +List<Core.Production>, +q: Nat, +d: Nat, +s: Core.Sym, +r: +List<Core.Sym>,
-  +ie: {G.dropFrom(d, Core.rhsOf(grammar, q)) == s <> r : +List<Core.Sym>},
-  +inv: {Nat.add(d, List.length(&2, Core.Sym, s <> r)) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat})
-  -> {Nat.add(1n+d, List.length(&2, Core.Sym, G.dropFrom(1n+d, Core.rhsOf(grammar, q)))) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}:
-  +dn = G.drop_next(Core.rhsOf(grammar, q), d, s, r, ie)
-  %Equal.sym(+List<Core.Sym>, G.dropFrom(1n+d, Core.rhsOf(grammar, q)), r, dn) : {Nat.add(1n+d, List.length(&2, Core.Sym, _)) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}
-  Equal.trans(Nat, 1n+Nat.add(d, List.length(&2, Core.Sym, r)), Nat.add(d, 1n+List.length(&2, Core.Sym, r)), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)),
-    Equal.sym(Nat, Nat.add(d, 1n+List.length(&2, Core.Sym, r)), 1n+Nat.add(d, List.length(&2, Core.Sym, r)), Lemma.add_succ_right(d, List.length(&2, Core.Sym, r))), inv)
-
 def rest_reads(+grammar: +List<Core.Production>, +input: +List<Nat>, +q: Nat, +d: Nat, +s: Core.Sym, +r: +List<Core.Sym>, +ts: +List<Core.Tree>, +far: Nat,
   +ie: {G.dropFrom(d, Core.rhsOf(grammar, q)) == s <> r : +List<Core.Sym>},
   +h: {Core.reads(ts, grammar, r, input, far) == True{} : Bool}) -> {Core.reads(ts, grammar, G.dropFrom(1n+d, Core.rhsOf(grammar, q)), input, far) == True{} : Bool}:
@@ -317,7 +307,7 @@ def step_next(+grammar: +List<Core.Production>, +input: +List<Nat>, +set: +List<
     Lemma.and_true_left(Core.member(hd, set), Core.allIn(tail, set), io),
     rest_reads(grammar, input, q, d, s, r, ts, far, ie, rt),
     Lemma.and_true_right_side(Core.member(hd, set), Core.allIn(tail, set), io),
-    isN, inv_next(grammar, q, d, s, r, ie, inv),
+    isN, G.inv_next(grammar, q, d, s, r, ie, inv),
     Lemma.or_true_cases(Core.bsrEq(y, hd), Core.member(y, tail), m), later)
 
 def nil_pick(+grammar: +List<Core.Production>, +input: +List<Nat>, +set: +List<Core.Bsr>, +q: Nat, +i: Nat, +j: Nat, +y: Core.Bsr,
@@ -775,10 +765,6 @@ def apart_no(+grammar: +List<Core.Production>, +q1: Nat, +q2: Nat, +firsts: +Lis
     case Inr{d}:
       PT.disjoint_no(PT.Pred(grammar, q2, firsts, follows, nulls), PT.Pred(grammar, q1, firsts, follows, nulls), tok, d, m2, m1)
 
-def lhs_zero(+grammar: +List<Core.Production>, +base: Nat, +x: Nat,
-  +h: {Core.lhsIs(grammar, Nat.add(base, 0n), x) == True{} : Bool}) -> {Core.lhsIs(grammar, base, x) == True{} : Bool}:
-  %Lemma.add_zero_right(base) : {Core.lhsIs(grammar, _, x) == True{} : Bool}
-  h
 
 def lhs_succ(+grammar: +List<Core.Production>, +base: Nat, +p: Nat, +x: Nat,
   +h: {Core.lhsIs(grammar, Nat.add(base, 1n+p), x) == True{} : Bool}) -> {Core.lhsIs(grammar, 1n+Nat.add(base, p), x) == True{} : Bool}:
@@ -838,68 +824,13 @@ def seed_pick(a: Bool, b: Bool, +grammar: +List<Core.Production>, +start: Nat, +
     case False{} False{}:
       later
 
-# The grammar from production n on.
-def dropProds(n: Nat, grammar: +List<Core.Production>) -> +List<Core.Production>:
-  match n grammar:
-    case 0n +g:
-      g
-    case 1n+m Nil{}:
-      []
-    case 1n+m Con{Core.Production{lhs, rhs}, rest}:
-      dropProds(m, rest)
 
-law drop_lhs:
-  for n: Nat
-  for grammar: +List<Core.Production>
-  for +p: Nat
-  for +x: Nat
-  {Core.lhsIs(dropProds(n, grammar), p, x) == Core.lhsIs(grammar, Nat.add(n, p), x) : Bool}
 
-def drop_lhs(n, grammar, p, x):
-  match n grammar:
-    case 0n +g:
-      {==}
-    case 1n+(+m) Nil{}:
-      {==}
-    case 1n+(+m) Con{Core.Production{+lhs, +rhs}, +rest}:
-      drop_lhs(m, rest, p, x)
 
-def isNilProds(ps: +List<Core.Production>) -> Bool:
-  match ps:
-    case Nil{}:
-      True{}
-    case Con{p, rest}:
-      False{}
 
-law drop_step:
-  for n: Nat
-  for grammar: +List<Core.Production>
-  for +lhs: Nat
-  for +rhs: +List<Core.Sym>
-  for +rest: +List<Core.Production>
-  for +e: {dropProds(n, grammar) == Core.Production{lhs, rhs} <> rest : +List<Core.Production>}
-  {dropProds(1n+n, grammar) == rest : +List<Core.Production>}
 
-def drop_step(n, grammar, lhs, rhs, rest, e):
-  match n grammar:
-    case 0n +g:
-      %Equal.sym(+List<Core.Production>, g, Core.Production{lhs, rhs} <> rest, e) : {dropProds(1n, _) == rest : +List<Core.Production>}
-      {==}
-    case 1n+(+m) Nil{}:
-      Empty.absurd({dropProds(2n+m, []) == rest : +List<Core.Production>},
-        Lemma.true_is_not_false(Equal.cong(+List<Core.Production>, Bool, v => isNilProds(v), [], Core.Production{lhs, rhs} <> rest, e)))
-    case 1n+(+m) Con{Core.Production{+l2, +r2}, +rest2}:
-      drop_step(m, rest2, lhs, rhs, rest, e)
 
-def head_lhs(+grammar: +List<Core.Production>, +base: Nat, +x: Nat, +lhs: Nat, +rhs: +List<Core.Sym>, +rest: +List<Core.Production>,
-  +hg: {dropProds(base, grammar) == Core.Production{lhs, rhs} <> rest : +List<Core.Production>},
-  +hb: {Nat.is_eq(lhs, x) == True{} : Bool}) -> {Core.lhsIs(grammar, base, x) == True{} : Bool}:
-  +e1 = Equal.sym(Bool, Core.lhsIs(dropProds(base, grammar), 0n, x), Core.lhsIs(grammar, Nat.add(base, 0n), x), drop_lhs(base, grammar, 0n, x))
-  +e2 = Equal.cong(+List<Core.Production>, Bool, v => Core.lhsIs(v, 0n, x), dropProds(base, grammar), Core.Production{lhs, rhs} <> rest, hg)
-  lhs_zero(grammar, base, x, Equal.trans(Bool, Core.lhsIs(grammar, Nat.add(base, 0n), x), Core.lhsIs(dropProds(base, grammar), 0n, x), True{}, e1, Equal.trans(Bool, Core.lhsIs(dropProds(base, grammar), 0n, x), Nat.is_eq(lhs, x), True{}, e2, hb)))
 
-# Every seed of a cluster on the tree lies on the tree: only the tree's production of x
-# at i gets past prediction.
 law seeds_on:
   for g: +List<Core.Production>
   for +base: Nat
@@ -914,7 +845,7 @@ law seeds_on:
   for +x: Nat
   for +i: Nat
   for +tok: Maybe<&2, Nat>
-  for +hg: {dropProds(base, grammar) == g : +List<Core.Production>}
+  for +hg: {G.dropProds(base, grammar) == g : +List<Core.Production>}
   for +lq0: {Core.lhsIs(grammar, q0, x) == True{} : Bool}
   for +m0: {T.maybeIn(tok, PT.Pred(grammar, q0, firsts, follows, nulls)) == True{} : Bool}
   for +hq0: {H.anyStep(Steps(tree), H.AskDesc{q0, 0n, i, i}, grammar) == True{} : Bool}
@@ -928,8 +859,8 @@ def seeds_on(g, base, grammar, start, tree, nulls, firsts, follows, ok, q0, x, i
       +pred = {Gll.Allowed{Pr.predictSets(grammar, firsts, follows, nulls)} : Gll.Pred}
       seed_pick(Gll.admits(pred, base, tok), Nat.is_eq(lhs, x), grammar, start, tree, nulls, firsts, follows, ok, base, q0, x, i, tok,
         Gll.productionsOf(rest, pred, tok, x, 1n+base, i), {==},
-        hb => head_lhs(grammar, base, x, lhs, rhs, rest, hg, hb), lq0, m0, hq0,
-        seeds_on(rest, 1n+base, grammar, start, tree, nulls, firsts, follows, ok, q0, x, i, tok, drop_step(base, grammar, lhs, rhs, rest, hg), lq0, m0, hq0))
+        hb => G.head_lhs(grammar, base, x, lhs, rhs, rest, hg, hb), lq0, m0, hq0,
+        seeds_on(rest, 1n+base, grammar, start, tree, nulls, firsts, follows, ok, q0, x, i, tok, G.drop_step(base, grammar, lhs, rhs, rest, hg), lq0, m0, hq0))
 
 def tok_moved(+grammar: +List<Core.Production>, +input: +List<Nat>, +q0: Nat, +firsts: +List<T.FirstFact>, +follows: +List<T.FollowFact>, +nulls: +List<Nat>, +i0: Nat, +i: Nat,
   +ei: {i0 == i : Nat}, +h: {T.maybeIn(Core.tokAt(input, i0), PT.Pred(grammar, q0, firsts, follows, nulls)) == True{} : Bool})

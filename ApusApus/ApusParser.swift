@@ -358,7 +358,7 @@ class ApusParser {
                 markRecognizerBodySuppressesLeadingTrivia(node)
                 // Register the name as a terminal so references in other productions resolve to
                 // `.T` (a single token) rather than expanding the body inline. The TokenPattern is
-                // a marker only — its match is computed by a GLL sub-parse (lexicalTokenRecognisers).
+                // a marker only — its match is computed by a GLL sub-parse (a `.recogniser` in `OnDemandLiteralLexer.terminals`).
                 if grammar.terminals[nonTerminalName] == nil {
                     var pat = TokenPattern(nonTerminalName, Regex { nonTerminalName }, false, false)
                     pat.isLexicalToken = true
@@ -594,17 +594,6 @@ class ApusParser {
                     if token.kind == "*" { factorNode = GrammarNode(kind: .KLN, name: "", alt: loopRound(miniSeq)) }
                     if token.kind == "+" { factorNode = GrammarNode(kind: .POS, name: "", alt: loopRound(miniSeq)) }
 
-//                    switch token.kind {
-//                    case "?":
-//                        factorNode = GrammarNode(kind: .OPT, name: "", alt: miniSeq)
-//                    case "*":
-//                        factorNode = GrammarNode(kind: .KLN, name: "", alt: miniSeq)
-//                    case "+":
-//                        factorNode = GrammarNode(kind: .POS, name: "", alt: miniSeq)
-//                    default:
-//                        break
-//                    }
-//                    factorNode.alt = miniSeq
                     cI += 1
                 default:
                     break
@@ -779,7 +768,9 @@ class ApusParser {
             Logger.parse.error("@builder terminal \(name, privacy: .public) references unknown RegexBuilder '\(key, privacy: .public)' in ApusRegexLibrary.patterns")
             throw ApusParserError.unexpectedToken(explanation: "unknown @builder key '\(key)' for terminal '\(name)'")
         }
-        grammar.terminals[name] = TokenPattern(name, regex, false, skip)
+        var pattern = TokenPattern(name, regex, false, skip)
+        if ApusRegexLibrary.matchers[key] != nil { pattern.matcherKey = key }
+        grammar.terminals[name] = pattern
         grammar.registerTerminal(name)
         return GrammarNode(kind: .T, name: name)
     }

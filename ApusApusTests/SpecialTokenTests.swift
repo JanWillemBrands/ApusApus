@@ -176,7 +176,7 @@ struct SpecialTokenTests {
                 messageParser.parse(input: message)
 
                 let matched = messageParser.yield(of: messageParser.currentParseRoot).contains {
-                    $0.i == message.startIndex && $0.j == message.endIndex
+                    $0.i == 0 && $0.j == message.endPosition
                 }
                 return (matched, messageParser.descriptorCount)
             }

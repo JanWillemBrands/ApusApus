@@ -7,11 +7,14 @@ import ./PREFER.bend as Prefer
 import ./PROOF_SPELL.bend as S
 import ./PROOF_DECIDE.bend as D
 import ./PROOF_GUARD.bend as PG
+import ./PROOF_GLL.bend as G
+import ./RIVAL.bend as R
+import ./PROOF_RIVAL.bend as PR
 
-# PHASE 2'S VERDICT ON A STEP IS RIGHT. Yes: no production that outranks the step's derives
-# its tokens (the exact parser says so, PROOF_DECIDE.bend), so there is no rival. No: the
-# certificate is a rival: its forest reads the tokens, and its steps at i are answered Yes
-# by phase 1.
+# PHASE 2'S VERDICT ON A STEP IS RIGHT. Yes: for no production that outranks the step's is
+# there a rival (a closed set of segments without its whole segment, PROOF_RIVAL.bend, or
+# an empty right side whose one step is answered No). No: the certificate is a rival: its
+# forest reads the tokens, and its steps at i are answered Yes by phase 1.
 
 # ======== SMALL FACTS ========
 
@@ -84,15 +87,40 @@ def cert_true(b, e):
     case False{}:
       Empty.absurd({False{} == True{} : Bool}, D.unknown_not_no(e))
 
-def rival_no(t: Guard.Tri, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat,
-  +e: {Prefer.rivalPick(t, fuel, grammar, gmarks, input, m, i, j) == Guard.No{} : Guard.Tri}) -> Prefer.Rival(grammar, gmarks, input, m, i, j):
+law closed_not_no:
+  for b: Bool
+  for +e: {Prefer.closedTri(b) == Guard.No{} : Guard.Tri}
+  Empty
+
+def closed_not_no(b, e):
+  match b:
+    case True{}:
+      D.yes_not_no(e)
+    case False{}:
+      D.unknown_not_no(e)
+
+def found_no(found: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +e: Nat, +segs: +List<R.Seg>,
+  +h: {Prefer.foundTri(found, fuel, grammar, gmarks, input, m, i, j, e, segs) == Guard.No{} : Guard.Tri}) -> Prefer.Rival(grammar, gmarks, input, m, i, j):
+  match found:
+    case True{}:
+      +ch = R.forestAt(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), e, segs)
+      with_rival(ch, fuel, grammar, gmarks, input, m, i, j, cert_true(Prefer.certWith(ch, fuel, grammar, gmarks, input, m, i, j), h))
+    case False{}:
+      Empty.absurd(Prefer.Rival(grammar, gmarks, input, m, i, j), closed_not_no(Bool.and(R.closedAll(segs, fuel, grammar, gmarks, input, segs), R.hasSeg(m, i, 0n, i, segs)), h))
+
+def root_no(t: Guard.Tri, +found: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +e: Nat, +segs: +List<R.Seg>,
+  +h: {Prefer.rootTri(t, found, fuel, grammar, gmarks, input, m, i, j, e, segs) == Guard.No{} : Guard.Tri}) -> Prefer.Rival(grammar, gmarks, input, m, i, j):
   match t:
-    case Guard.No{}:
-      Empty.absurd(Prefer.Rival(grammar, gmarks, input, m, i, j), D.yes_not_no(e))
     case Guard.Yes{}:
-      with_rival(Prefer.rivalFor(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j, cert_true(Prefer.certFor(fuel, grammar, gmarks, input, m, i, j), e))
+      found_no(found, fuel, grammar, gmarks, input, m, i, j, e, segs, h)
+    case Guard.No{}:
+      Empty.absurd(Prefer.Rival(grammar, gmarks, input, m, i, j), D.yes_not_no(h))
     case Guard.Unknown{}:
-      with_rival(Prefer.rivalFor(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j, cert_true(Prefer.certFor(fuel, grammar, gmarks, input, m, i, j), e))
+      Empty.absurd(Prefer.Rival(grammar, gmarks, input, m, i, j), D.unknown_not_no(h))
+
+# The rival's end: after the tokens of i .. j.
+def endAt(+input: +List<Nat>, +i: Nat, +j: Nat) -> Nat:
+  Nat.add(i, List.length(&2, Nat, Lemma.slice(input, i, Nat.sub(j, i))))
 
 def cand_no(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +input: +List<Nat>, +q: Nat, +m: Nat, +i: Nat, +j: Nat,
   +eb: {Prefer.outranking(grammar, rmarks, q, m) == b : Bool},
@@ -101,7 +129,10 @@ def cand_no(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +Lis
     case False{}:
       Empty.absurd(Prefer.Beaten(grammar, gmarks, rmarks, input, q, i, j), D.yes_not_no(e))
     case True{}:
-      rv = rival_no(Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j, e)
+      +ee = endAt(input, i, j)
+      +segs = R.segsFrom(fuel, grammar, gmarks, input, m, i)
+      rv = root_no(R.endTri(Core.rhsOf(grammar, m), fuel, grammar, gmarks, input, m, i, ee), R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), ee, segs),
+        fuel, grammar, gmarks, input, m, i, j, ee, segs, e)
       {(m, (eb, rv)) : Prefer.Beaten(grammar, gmarks, rmarks, input, q, i, j)}
 
 def from_cases(+rest: +List<Core.Production>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +input: +List<Nat>, +q: Nat, +m: Nat, +i: Nat, +j: Nat,
@@ -169,26 +200,116 @@ def cert_not_yes(b, e):
     case False{}:
       D.unknown_not_yes(e)
 
-def rival_yes(t: Guard.Tri, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat,
-  +et: {Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))) == t : Guard.Tri},
-  +e: {Prefer.rivalPick(t, fuel, grammar, gmarks, input, m, i, j) == Guard.Yes{} : Guard.Tri}) -> {Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))) == Guard.No{} : Guard.Tri}:
-  match t:
-    case Guard.No{}:
-      et
-    case Guard.Yes{}:
-      Empty.absurd({Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))) == Guard.No{} : Guard.Tri}, cert_not_yes(Prefer.certFor(fuel, grammar, gmarks, input, m, i, j), e))
-    case Guard.Unknown{}:
-      Empty.absurd({Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))) == Guard.No{} : Guard.Tri}, cert_not_yes(Prefer.certFor(fuel, grammar, gmarks, input, m, i, j), e))
+law closed_yes:
+  for b: Bool
+  for +e: {Prefer.closedTri(b) == Guard.Yes{} : Guard.Tri}
+  {b == True{} : Bool}
 
-def rival_none(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat,
-  +en: {Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))) == Guard.No{} : Guard.Tri},
-  r: Prefer.Rival(grammar, gmarks, input, m, i, j)) -> Empty:
+def closed_yes(b, e):
+  match b:
+    case True{}:
+      {==}
+    case False{}:
+      Empty.absurd({False{} == True{} : Bool}, D.unknown_not_yes(e))
+
+def spell_rival(+ch: +List<Core.Tree>, +w: +List<Nat>, +input: +List<Nat>, +i: Nat,
+  +lv: {Core.leaves(ch) == w : +List<Nat>}, +h: {S.spells(w, input, i) == True{} : Bool}) -> {S.spells(Core.leaves(ch), input, i) == True{} : Bool}:
+  %Equal.sym(+List<Nat>, Core.leaves(ch), w, lv) : {S.spells(_, input, i) == True{} : Bool}
+  h
+
+# A rival completes m's segment from i in a closed set that starts m at i.
+def rival_walk(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +segs: +List<R.Seg>,
+  +cl: {R.closedAll(segs, fuel, grammar, gmarks, input, segs) == True{} : Bool},
+  +hr: {R.hasSeg(m, i, 0n, i, segs) == True{} : Bool},
+  r: Prefer.Rival(grammar, gmarks, input, m, i, j)) -> {R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs) == True{} : Bool}:
   match r:
-    case (ch0, (fit0, (lv0, rest))):
+    case (ch0, (fit0, (lv0, ok))):
       +ch = ch0
       +fit = fit0
-      +lv = lv0
-      D.rhs_no(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i)), en, {(ch, (fit, lv)) : Core.Derives(grammar, Core.rhsOf(grammar, m), Lemma.slice(input, i, Nat.sub(j, i)))})
+      +w = Lemma.slice(input, i, Nat.sub(j, i))
+      +lv = {lv0 : {Core.leaves(ch) == w : +List<Nat>}}
+      +sOwn = Core.own(m, ch, 0n, i, i)
+      +sIn = List.append(&2, Core.Bsr, Core.steps(ch, i), Core.steps([], Nat.add(i, Core.width(Core.Node{m, ch}))))
+      +nn = PR.all_ok_nn(Core.steps([Core.Node{m, ch}], i), fuel, grammar, gmarks, input, ok)
+      +noR = PR.nn_left(sOwn, sIn, fuel, grammar, gmarks, input, nn)
+      +niR = PR.nn_left(Core.steps(ch, i), Core.steps([], Nat.add(i, Core.width(Core.Node{m, ch}))), fuel, grammar, gmarks, input, PR.nn_right(sOwn, sIn, fuel, grammar, gmarks, input, nn))
+      +rd = D.fits_reads(ch, Core.rhsOf(grammar, m), grammar, input, i, fit, spell_rival(ch, w, input, i, lv, PR.slice_spells(input, i, Nat.sub(j, i))))
+      +done = PR.walk(ch, Core.rhsOf(grammar, m), fuel, grammar, gmarks, input, segs, m, i, 0n, i, {==}, {==}, rd, hr, noR, niR, cl)
+      +endE = Equal.trans(Nat, G.endOf(ch, i), Nat.add(i, List.length(&2, Nat, Core.leaves(ch))), endAt(input, i, j), G.end_eq(ch, i),
+        Equal.cong(+List<Nat>, Nat, v => Nat.add(i, List.length(&2, Nat, v)), Core.leaves(ch), w, lv))
+      PR.seg_to(segs, m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), G.endOf(ch, i), endAt(input, i, j), endE, done)
+
+def found_yes(found: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +segs: +List<R.Seg>,
+  +ef: {R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs) == found : Bool},
+  +h: {Prefer.foundTri(found, fuel, grammar, gmarks, input, m, i, j, endAt(input, i, j), segs) == Guard.Yes{} : Guard.Tri},
+  r: Prefer.Rival(grammar, gmarks, input, m, i, j)) -> Empty:
+  match found:
+    case True{}:
+      cert_not_yes(Prefer.certWith(R.forestAt(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs), fuel, grammar, gmarks, input, m, i, j), h)
+    case False{}:
+      +cl0 = {R.closedAll(segs, fuel, grammar, gmarks, input, segs) : Bool}
+      +hr0 = {R.hasSeg(m, i, 0n, i, segs) : Bool}
+      +b = closed_yes(Bool.and(cl0, hr0), h)
+      +done = rival_walk(fuel, grammar, gmarks, input, m, i, j, segs, Lemma.and_true_left(cl0, hr0, b), Lemma.and_true_right_side(cl0, hr0, b), r)
+      Lemma.true_is_not_false(Equal.trans(Bool, True{}, R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs), False{},
+        Equal.sym(Bool, R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs), True{}, done), ef))
+
+def no_on(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +a: Nat, +b: Nat,
+  +e: {a == b : Nat}, +h: {Guard.stepTri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, a}) == Guard.No{} : Guard.Tri})
+  -> {Guard.stepTri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, b}) == Guard.No{} : Guard.Tri}:
+  %e : {Guard.stepTri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, _}) == Guard.No{} : Guard.Tri}
+  h
+
+def empty_kids(ch: +List<Core.Tree>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat,
+  +fit: {Core.fits(ch, grammar, []) == True{} : Bool},
+  +lv: {Core.leaves(ch) == Lemma.slice(input, i, Nat.sub(j, i)) : +List<Nat>},
+  +et: {Guard.stepTri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, endAt(input, i, j)}) == Guard.No{} : Guard.Tri},
+  ok: Guard.AllStepsOk(grammar, gmarks, input, Core.steps([Core.Node{m, ch}], i))) -> Empty:
+  match ch:
+    case Nil{}:
+      +ew = Equal.cong(+List<Nat>, Nat, v => Nat.add(i, List.length(&2, Nat, v)), [], Lemma.slice(input, i, Nat.sub(j, i)), lv)
+      +ei = Equal.trans(Nat, i, Nat.add(i, 0n), endAt(input, i, j), Equal.sym(Nat, Nat.add(i, 0n), i, Lemma.add_zero_right(i)), ew)
+      +sOwn = Core.own(m, [], 0n, i, i)
+      +sIn = List.append(&2, Core.Bsr, Core.steps([], i), Core.steps([], Nat.add(i, Core.width(Core.Node{m, []}))))
+      +nn = PR.nn_left(sOwn, sIn, fuel, grammar, gmarks, input, PR.all_ok_nn(Core.steps([Core.Node{m, []}], i), fuel, grammar, gmarks, input, ok))
+      +hn = Lemma.and_true_left(PR.notNo(R.tri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, i})), True{}, nn)
+      +eno = no_on(fuel, grammar, gmarks, input, m, i, endAt(input, i, j), i, Equal.sym(Nat, i, endAt(input, i, j), ei), et)
+      Lemma.false_is_not_true(Equal.trans(Bool, False{}, PR.notNo(R.tri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, i})), True{},
+        Equal.sym(Bool, PR.notNo(R.tri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, i})), False{}, Equal.cong(Guard.Tri, Bool, v => PR.notNo(v), R.tri(fuel, grammar, gmarks, input, Core.Bsr{m, 0n, i, i, i}), Guard.No{}, eno)), hn))
+    case Con{Core.Leaf{+a}, +ts}:
+      Lemma.false_is_not_true(fit)
+    case Con{Core.Node{+q2, +c2}, +ts}:
+      Lemma.false_is_not_true(fit)
+
+# m's right side is empty and its one step is answered No: the rival's own step breaks a rule.
+def empty_rival(items: +List<Core.Sym>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat,
+  +ip: {Core.rhsOf(grammar, m) == items : +List<Core.Sym>},
+  +et: {R.endTri(items, fuel, grammar, gmarks, input, m, i, endAt(input, i, j)) == Guard.No{} : Guard.Tri},
+  r: Prefer.Rival(grammar, gmarks, input, m, i, j)) -> Empty:
+  match items:
+    case Con{+s, +rest}:
+      D.yes_not_no(et)
+    case Nil{}:
+      match r:
+        case (ch0, (fit0, (lv0, ok))):
+          +ch = ch0
+          +w = Lemma.slice(input, i, Nat.sub(j, i))
+          +fit = {(%ip : {Core.fits(ch, grammar, _) == True{} : Bool}
+            fit0) : {Core.fits(ch, grammar, []) == True{} : Bool}}
+          empty_kids(ch, fuel, grammar, gmarks, input, m, i, j, fit, lv0, et, ok)
+
+def root_yes(t: Guard.Tri, +found: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +segs: +List<R.Seg>,
+  +et: {R.endTri(Core.rhsOf(grammar, m), fuel, grammar, gmarks, input, m, i, endAt(input, i, j)) == t : Guard.Tri},
+  +ef: {R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs) == found : Bool},
+  +h: {Prefer.rootTri(t, found, fuel, grammar, gmarks, input, m, i, j, endAt(input, i, j), segs) == Guard.Yes{} : Guard.Tri},
+  r: Prefer.Rival(grammar, gmarks, input, m, i, j)) -> Empty:
+  match t:
+    case Guard.Yes{}:
+      found_yes(found, fuel, grammar, gmarks, input, m, i, j, segs, ef, h, r)
+    case Guard.No{}:
+      empty_rival(Core.rhsOf(grammar, m), fuel, grammar, gmarks, input, m, i, j, {==}, et, r)
+    case Guard.Unknown{}:
+      D.unknown_not_yes(h)
 
 def cand_yes(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +input: +List<Nat>, +q: Nat, +m: Nat, +i: Nat, +j: Nat,
   +eb: {Prefer.outranking(grammar, rmarks, q, m) == b : Bool},
@@ -199,7 +320,9 @@ def cand_yes(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +Li
     case False{}:
       Lemma.true_is_not_false(Equal.trans(Bool, True{}, Prefer.outranking(grammar, rmarks, q, m), False{}, Equal.sym(Bool, Prefer.outranking(grammar, rmarks, q, m), True{}, hb), eb))
     case True{}:
-      rival_none(fuel, grammar, gmarks, input, m, i, j, rival_yes(Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j, {==}, e), r)
+      +segs = R.segsFrom(fuel, grammar, gmarks, input, m, i)
+      root_yes(R.endTri(Core.rhsOf(grammar, m), fuel, grammar, gmarks, input, m, i, endAt(input, i, j)), R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), endAt(input, i, j), segs),
+        fuel, grammar, gmarks, input, m, i, j, segs, {==}, {==}, e, r)
 
 law at_zero:
   for +fuel: Nat

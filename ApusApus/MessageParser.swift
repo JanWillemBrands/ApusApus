@@ -95,8 +95,8 @@ class MessageParser {
     // MARK: - GLL algorithm state (paper variables)
     var currentParseRoot: GrammarNode!
     var cL: GrammarNode!                    // current grammar slot
-    var cI: CharPosition = "".startIndex    // current input position
-    var cU: CharPosition = "".startIndex    // current cluster index
+    var cI: CharPosition = 0                // current input position
+    var cU: CharPosition = 0                // current cluster index
 
     // MARK: - LCNP lex API
     /// Per-terminal lex queries the parser issues at every `.T`/`.TI`/`.C` slot
@@ -132,35 +132,21 @@ class MessageParser {
     var usesRecognizerLexBoundaries = false
 
     // MARK: - Lex memoization
-    /// `(pos, terminalID) → [LexMatch]` cache. Lex queries are pure given the
-    /// input; the same (pos, terminalID) is asked many times during a parse
-    /// (one query per terminal in `firstBS` per `viable` invocation; plus
-    /// dual visits to the same position via descriptor re-entry). Without
-    /// memoization the per-terminal LCNP migration would re-run pattern
-    /// matching tens of thousands of times.
+    /// `(pos, terminalID) → [LexMatch]` for the answers that MATCH; non-matches are bits in
+    /// `lexNoMatch`. Lex queries are pure given the input; the same (pos, terminalID) is asked many
+    /// times during a parse (one query per terminal in `firstBS` per `viable` invocation; plus dual
+    /// visits to the same position via descriptor re-entry). `forEachLexAnswer` reports both.
     var lexCache: [LexCacheKey: [LexMatch]] = [:]
 
-    /// `(pos, terminalID)` → an EXCLUDED terminal's matches without literal munch, for the `---( )`
-    /// check in `tokenMatch`. Pure given the input, like `lexCache`, and kept apart from it because
-    /// the munch policy differs. Uncached, this re-lexed every excluded keyword for every candidate
-    /// match of every excluding slot (`identifier ---( lexerClassifiedKeyword )`), each time
-    /// skipping the leading trivia again, which made parsing ~4.5× slower (2026-10-21).
-    var exclusionLexCache: [LexCacheKey: [LexMatch]] = [:]
-
+    /// An EXCLUDED terminal's matches at `pos`, without literal munch, for the `---( )` check in
+    /// `tokenMatch`. Excluded LITERALS (the keyword case) never get here: `tokenMatch` compares
+    /// their bytes with the candidate's. What remains is rare enough to need no cache (removing it
+    /// cost nothing measurable, 2026-11-18). Leading trivia comes from `contentStart`, shared by all questions about
+    /// one position.
     final func exclusionLex(at pos: CharPosition, terminalID: Int, suppressesLeadingTrivia: Bool) -> [LexMatch] {
-        guard !suppressesLeadingTrivia else {
-            // Exact-start recognizer slots are rare; keep the cache key small.
-            return lexer.lex(at: pos, terminalID: terminalID,
-                             suppressesLeadingTrivia: true, appliesLiteralMunch: false)
-        }
-        let key = LexCacheKey(pos: pos, terminalID: terminalID)
-        if let cached = exclusionLexCache[key] { return cached }
-        // `contentStart`: skipping the leading trivia is the expensive part of a lex (the trivia
-        // recognizer runs), and every excluded keyword asks about the same position.
-        let result = lexer.lex(at: pos, terminalID: terminalID, suppressesLeadingTrivia: false,
-                               appliesLiteralMunch: false, contentStart: contentStart(at: pos))
-        exclusionLexCache[key] = result
-        return result
+        lexer.lex(at: pos, terminalID: terminalID, suppressesLeadingTrivia: suppressesLeadingTrivia,
+                  appliesLiteralMunch: false,
+                  contentStart: suppressesLeadingTrivia ? nil : contentStart(at: pos))
     }
 
     @inline(always)
@@ -180,11 +166,53 @@ class MessageParser {
                 appliesLiteralMunch: !usesRecognizerLexBoundaries
             )
         }
+        // A known non-match is one bit: no hashing, no allocation. Matches (≈ 2% of the answers)
+        // live in `lexCache`.
+        let bit = lexEntry(at: pos) * lexWidth + terminalID
+        if lexNoMatch[bit] { return [] }
         let key = LexCacheKey(pos: pos, terminalID: terminalID)
         if let cached = lexCache[key] { return cached }
         let result = lexer.lex(at: pos, terminalID: terminalID, contentStart: contentStart(at: pos))
-        lexCache[key] = result
+        if result.isEmpty { lexNoMatch[bit] = true } else { lexCache[key] = result }
         return result
+    }
+
+    /// Every lex answer recorded on the cached path, matches and non-matches alike, for reports
+    /// (`DecisionStatisticsTests`).
+    func forEachLexAnswer(_ body: (LexCacheKey, [LexMatch]) -> Void) {
+        for (key, matches) in lexCache { body(key, matches) }
+        for (pos, entry) in lexEntryOf.enumerated() where entry >= 0 {
+            for terminalID in 0..<lexWidth where lexNoMatch[Int(entry) * lexWidth + terminalID] {
+                body(LexCacheKey(pos: pos, terminalID: terminalID), [])
+            }
+        }
+    }
+
+    // MARK: - Lazy per-position "no match" bits
+    /// The lazy cache in front of `lexCache`: per position, the terminals known NOT to match there.
+    /// A position gets its entry the first time it is asked about, and a terminal its bit the first
+    /// time it is lexed there, so nothing is lexed ahead of need. Entries are numbered in the order
+    /// positions are first visited; the flat `BitArray` holds one entry of `lexWidth` bits (one per
+    /// symbol ID) each: bit `entry * lexWidth + terminalID`. Flat rather than a `BitSet` per entry,
+    /// which would allocate per position and retain on every access. `lexEntryOf` maps a position to
+    /// its entry (−1: not visited). Exact by construction: the bits record `lex` answers, and `lex` is
+    /// a pure function of (position, terminal) on this path, as `lexCache` already assumes.
+    /// Not allocated for recogniser sub-parsers (`usesRecognizerLexBoundaries`), which bypass it.
+    private var lexEntryOf: [Int32] = []
+    private var lexNoMatch = BitArray()
+    private var lexWidth = 0
+    /// An all-false entry, appended word by word when a position gets its entry.
+    private var lexEmptyEntry = BitArray()
+
+    /// The entry of `pos`, added on first use.
+    @inline(__always)
+    final func lexEntry(at pos: CharPosition) -> Int {
+        let entry = Int(lexEntryOf[pos])
+        if entry >= 0 { return entry }
+        let new = lexNoMatch.count / lexWidth
+        lexEntryOf[pos] = Int32(new)
+        lexNoMatch.append(contentsOf: lexEmptyEntry)
+        return new
     }
 
     /// Where the real token starts at `pos`, i.e. `skipTrivia(from: pos)` — remembered for the LAST
@@ -285,7 +313,7 @@ class MessageParser {
     func acceptingEnds(of root: GrammarNode, from origin: CharPosition) -> Set<CharPosition> {
         var ends = Set<CharPosition>()
         for y in yield(of: root) where y.i == origin {
-            if y.j == input.endIndex || !lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty { ends.insert(y.j) }
+            if y.j == input.endPosition || !lexer.lex(at: y.j, terminalID: grammar.eosID).isEmpty { ends.insert(y.j) }
         }
         return ends
     }
@@ -323,7 +351,7 @@ class MessageParser {
     func terminalImage(startingAt triviaStart: CharPosition) -> Substring? {
         guard let idxs = commitsByStart[triviaStart], !idxs.isEmpty else { return nil }
         let longestEnd = idxs.map { commits[$0].end }.max()!
-        return input[triviaStart..<longestEnd]
+        return input[positions: triviaStart..<longestEnd]
     }
 
     /// Exact CONTENT of the one commit identified by a BSR tile: the terminal's
@@ -341,7 +369,7 @@ class MessageParser {
         for i in idxs {
             let c = commits[i]
             if c.terminalID == terminalID && c.triviaEnd == triviaEnd {
-                return input[c.start..<c.end]
+                return input[positions: c.start..<c.end]
             }
         }
         return nil
@@ -377,10 +405,10 @@ class MessageParser {
 
     /// The source text of `[from, to)` without leading and trailing trivia.
     func contentText(from: CharPosition, to: CharPosition) -> Substring {
-        guard from < to else { return input[from..<from] }
+        guard from < to else { return input[positions: from..<from] }
         let start = commitsByStart[from].flatMap { $0.map { commits[$0].start }.min() } ?? from
         let end = latestContentCommit(endingAt: to)?.end ?? to
-        return start < end ? input[start..<end] : input[from..<from]
+        return start < end ? input[positions: start..<end] : input[positions: from..<from]
     }
 
     /// Shape of the trivia that ends at `position` (the gap after the token before it), or nil when
@@ -392,7 +420,7 @@ class MessageParser {
     /// Last content character of the token whose trivia ends at `position`.
     func lastContentCharacter(endingAt position: CharPosition) -> Character? {
         guard let c = latestContentCommit(endingAt: position), c.start < c.end else { return nil }
-        return input[input.index(before: c.end)]
+        return input[input.index(before: input.index(at: c.end))]
     }
 
     /// Content of the longest token starting at `triviaStart` — `terminalImage(startingAt:)`
@@ -401,7 +429,7 @@ class MessageParser {
     func tokenContent(startingAt triviaStart: CharPosition) -> Substring? {
         guard let idxs = commitsByStart[triviaStart], !idxs.isEmpty else { return nil }
         let c = idxs.map { commits[$0] }.max { $0.end < $1.end }!
-        return input[c.start..<c.end]
+        return input[positions: c.start..<c.end]
     }
 
     /// True when `range` holds trivia only (whitespace and comments), by the lexer's own definition.
@@ -413,7 +441,7 @@ class MessageParser {
     final func recordCommit(terminalID: Int, triviaStart: CharPosition, start: CharPosition, end: CharPosition, triviaEnd: CharPosition) {
         let idx = commits.count
         commits.append(TerminalCommit(terminalID: terminalID, triviaStart: triviaStart, start: start, end: end,
-                                      triviaEnd: triviaEnd, gap: GapFacts(classifying: input[end..<triviaEnd])))
+                                      triviaEnd: triviaEnd, gap: GapFacts(classifying: input[positions: end..<triviaEnd])))
         // Index by `triviaStart` — the position the parser cursor was at when
         // this commit started. This matches the BSR yield's `k` (= cI at lex
         // time), so AST/diagram consumers that get a position from the BSR
@@ -424,7 +452,7 @@ class MessageParser {
     }
 
     // MARK: - Error reporting, captures the furthest the parse has progressed before a mismatch occurred
-    var furthestMismatchIndex: CharPosition = "".startIndex
+    var furthestMismatchIndex: CharPosition = 0
     var furthestMismatchSlot: GrammarNode!
     var furthestMismatchExpected: Set<String> = []
 
@@ -449,7 +477,7 @@ class MessageParser {
     /// recogniser invocation — that's what keeps the per-call cost minimal.
     func parse(input: String, root: GrammarNode? = nil, start: CharPosition? = nil) {
         prepareInput(input: input, isSubParser: root != nil)
-        runGLL(root: root ?? grammar.root, start: start ?? input.startIndex)
+        runGLL(root: root ?? grammar.root, start: start ?? 0)
     }
 
     /// Per-input setup: builds the lex stack, constructs sub-parsers for structured `:`
@@ -462,36 +490,39 @@ class MessageParser {
         isSubParser: Bool = false,
         usesRecognizerLexBoundaries: Bool = false
     ) {
+        // Native UTF-8 storage, so `CharPosition` ↔ `String.Index` is O(1) (a bridged `NSString`
+        // may be UTF-16 underneath). Everything below, sub-parsers included, uses this copy.
+        var input = input
+        input.makeContiguousUTF8()
         self.isSubParser = isSubParser
         self.usesRecognizerLexBoundaries = usesRecognizerLexBoundaries
         self.input = input
-        // A `String.Index` from the previous input must never be reused against a new one.
+        // Positions from the previous input mean nothing in the new one.
         lastTriviaFrom = nil
         lastTriviaTo = nil
         // LCNP lex stack: `OnDemandLiteralLexer` only (Phase E Step 2d retired
         // `LegacyScannerLexAdapter`). All literals and regex terminals serve
         // from `input` directly. `transitions`-annotated terminals lose their
         // mode-gating — documented Python regression.
-        var literalSourceByID: [Int: String] = [:]
-        var regexByID: [Int: Regex<AnyRegexOutput>] = [:]
-        var triviaRegexes: [Regex<AnyRegexOutput>] = []
+        // How each terminal kind is matched, by symbol ID. Recognisers (below) take precedence.
+        var terminals = [TerminalMatcher?](repeating: nil, count: grammar.symbolToID.count)
+        var trivia: [TerminalMatcher] = []
         for (name, pat) in grammar.terminals {
             guard let id = grammar.symbolToID[name] else { continue }
             // Structured `-` lexical nonterminal — its match extent is computed by a GLL sub-parse
             // below, not by a regex/literal, so skip ONLY that registration.
-            if !pat.isLexicalToken, pat.scannerKey == nil {
-                if pat.isLiteral {
-                    literalSourceByID[id] = pat.source
-                } else if !pat.isSkip {
-                    // Regex terminal: answer from input directly.
-                    regexByID[id] = pat.regex
-                }
-                if pat.isSkip, !isSubParser || usesRecognizerLexBoundaries {
-                    // Trivia (whitespace, line comment, etc.) is available in recognizer
-                    // sub-parsers too. Direct terminal slots in structured `:` / `-` bodies
-                    // suppress the leading skip; normal `=` payloads keep it.
-                    triviaRegexes.append(pat.regex)
-                }
+            guard !pat.isLexicalToken, pat.scannerKey == nil else { continue }
+            let handWritten = pat.matcherKey.flatMap { ApusRegexLibrary.matchers[$0] }
+            if pat.isLiteral {
+                terminals[id] = .literal(Array(pat.source.utf8))
+            } else if !pat.isSkip {
+                terminals[id] = handWritten.map(TerminalMatcher.handWritten) ?? .regex(pat.regex)
+            }
+            if pat.isSkip, !isSubParser || usesRecognizerLexBoundaries {
+                // Trivia (whitespace, line comment, etc.) is available in recognizer
+                // sub-parsers too. Direct terminal slots in structured `:` / `-` bodies
+                // suppress the leading skip; normal `=` payloads keep it.
+                trivia.append(handWritten.map(TerminalMatcher.handWritten) ?? .regex(pat.regex))
             }
         }
         // Build trivia non-terminal recognisers for each structured `:` LHS in the
@@ -499,7 +530,6 @@ class MessageParser {
         // *same* input as the outer parser; the closure calls `sub.runGLL`
         // (cheap) rather than `sub.parse` (rebuilds everything). Skipped for
         // sub-parsers themselves — they'd recurse infinitely.
-        var triviaRecognisers: [(CharPosition) -> CharPosition?] = []
         if !isSubParser {
             for (_, nt) in grammar.nonTerminals where nt.isTrivia {
                 let sub = MessageParser(grammar: grammar)
@@ -509,7 +539,7 @@ class MessageParser {
                     let ends = sub.yield(of: nt).lazy.filter { $0.i == pos }.map(\.j)
                     return ends.max()
                 }
-                triviaRecognisers.append(recogniser)
+                trivia.append(.recogniser(recogniser))
             }
         }
         // Lexical-nonterminal recognisers for each structured `-` LHS. Same sub-parse machinery as
@@ -518,13 +548,12 @@ class MessageParser {
         // emit ONE token spanning the sub-parse's longest accept from `pos`. Skipped for
         // sub-parsers (would recurse). The sub-parser strips no trivia (isSubParser), so the
         // body is matched character-tight — right for whitespace-sensitive constructs like regex.
-        var lexicalTokenRecognisers: [Int: (CharPosition) -> CharPosition?] = [:]
         if !isSubParser {
             for (name, nt) in grammar.nonTerminals where nt.isLexicalToken {
                 guard let id = grammar.symbolToID[name] else { continue }
                 let sub = MessageParser(grammar: grammar)
                 sub.prepareInput(input: input, isSubParser: true, usesRecognizerLexBoundaries: true)
-                lexicalTokenRecognisers[id] = { pos in
+                terminals[id] = .recogniser { pos in
                     sub.runGLL(root: nt, start: pos)
                     return sub.yield(of: nt).lazy.filter { $0.i == pos }.map(\.j).max()
                 }
@@ -539,8 +568,8 @@ class MessageParser {
                   let make = ApusRegexLibrary.scannerFactories[key] else { continue }
             let scanner = scanners[key] ?? make()
             scanners[key] = scanner
-            lexicalTokenRecognisers[id] = { [input] pos in
-                scanner.match(terminal: name, in: input, at: pos)
+            terminals[id] = .recogniser { [input] pos in
+                scanner.match(terminal: name, in: input, at: input.index(at: pos)).map(input.position(of:))
             }
         }
         // `@preempt(X, N)` viability recognisers, keyed by the ID of the terminal carrying the
@@ -610,18 +639,23 @@ class MessageParser {
         }
         lexer = OnDemandLiteralLexer(
             input: input,
-            literalSourceByID: literalSourceByID,
-            regexByID: regexByID,
+            terminals: terminals,
+            trivia: trivia,
             preemptStartByID: preemptStartByID,
             literalMunchIDs: literalMunchIDs,
-            triviaRegexes: triviaRegexes,
-            triviaRecognisers: triviaRecognisers,
-            lexicalTokenRecognisers: lexicalTokenRecognisers,
             eosID: grammar.eosID,
             virtualTokensAt: virtualTokensAt
         )
         lexCache.removeAll(keepingCapacity: true)
-        exclusionLexCache.removeAll(keepingCapacity: true)
+        lexNoMatch.removeAll(keepingCapacity: true)
+        if usesRecognizerLexBoundaries {
+            lexWidth = 0
+            lexEntryOf = []
+        } else {
+            lexWidth = grammar.symbolToID.count
+            lexEmptyEntry = BitArray(repeating: false, count: lexWidth)
+            lexEntryOf = [Int32](repeating: -1, count: input.utf8.count + 1)
+        }
     }
 
     /// Per-call: reset GLL state, seed root cluster, run the GLL loop. Reads
@@ -842,8 +876,8 @@ class MessageParser {
             let matches = cachedLex(at: pos, terminalID: id)
             guard !matches.isEmpty else { continue }
             for m in matches {
-                let image = input[m.start..<m.end].replacingOccurrences(of: "\n", with: "⏎")
-                rows.append((name, "\(input.distance(from: m.start, to: m.end)) chars '\(image.prefix(48))'"))
+                let image = input[positions: m.start..<m.end].replacingOccurrences(of: "\n", with: "⏎")
+                rows.append((name, "\(input[positions: m.start..<m.end].count) chars '\(image.prefix(48))'"))
             }
         }
         if rows.isEmpty {
@@ -866,7 +900,7 @@ class MessageParser {
         if let ending = commitsByEnd[pos], !ending.isEmpty {
             for i in ending {
                 let c = commits[i]
-                print("lex-trace:   commit ENDING here: \(idToName[c.terminalID] ?? "id\(c.terminalID)") '\(input[c.start..<c.end].replacingOccurrences(of: "\n", with: "⏎").prefix(40))'")
+                print("lex-trace:   commit ENDING here: \(idToName[c.terminalID] ?? "id\(c.terminalID)") '\(input[positions: c.start..<c.end].replacingOccurrences(of: "\n", with: "⏎").prefix(40))'")
             }
         } else {
             print("lex-trace:   no commit ends here")
@@ -874,7 +908,7 @@ class MessageParser {
         if let starting = commitsByStart[pos], !starting.isEmpty {
             for i in starting {
                 let c = commits[i]
-                print("lex-trace:   commit STARTING here: \(idToName[c.terminalID] ?? "id\(c.terminalID)") '\(input[c.start..<c.end].replacingOccurrences(of: "\n", with: "⏎").prefix(40))'")
+                print("lex-trace:   commit STARTING here: \(idToName[c.terminalID] ?? "id\(c.terminalID)") '\(input[positions: c.start..<c.end].replacingOccurrences(of: "\n", with: "⏎").prefix(40))'")
             }
         } else {
             print("lex-trace:   no commit starts here")
@@ -882,7 +916,7 @@ class MessageParser {
         var covering: [String] = []
         for nt in grammar.allProductions {
             for y in yield(of: nt) where y.i <= pos && pos < y.j {
-                covering.append("\(Grammar.instanceName(nt, flavors: grammar.flavorNameToBit))[\(input.distance(from: input.startIndex, to: y.i))..\(input.distance(from: input.startIndex, to: y.j))]")
+                covering.append("\(Grammar.instanceName(nt, flavors: grammar.flavorNameToBit))[\(y.i)..\(y.j)]")
                 break
             }
         }
@@ -915,7 +949,7 @@ class MessageParser {
         let raw = cachedLex(at: pos, terminalID: id, suppressesLeadingTrivia: slot.suppressesLeadingTrivia)
         print("  lex: \(raw.count) match(es)")
         for m in raw {
-            print("    start=\(input.linePosition(of: m.start)) end=\(input.linePosition(of: m.end)) triviaEnd=\(input.linePosition(of: m.triviaEnd)) image='\(input[m.start..<m.end])'")
+            print("    start=\(input.linePosition(of: m.start)) end=\(input.linePosition(of: m.end)) triviaEnd=\(input.linePosition(of: m.triviaEnd)) image='\(input[positions: m.start..<m.end])'")
         }
         if raw.isEmpty {
             print("  -> lex returned nothing; input does not match this terminal here")
@@ -991,7 +1025,7 @@ class MessageParser {
         let idToName = Dictionary(uniqueKeysWithValues: grammar.symbolToID.map { ($0.value, $0.key) })
         print("Recent \(commits.count - start) of \(commits.count) terminal commits:")
         for c in commits[start...] {
-            let image = input[c.start..<c.end]
+            let image = input[positions: c.start..<c.end]
             let pos = input.linePosition(of: c.start)
             let name = idToName[c.terminalID] ?? "?"
             print("  \(pos)  id=\(c.terminalID) '\(name)'  image='\(image)'")
@@ -1034,17 +1068,17 @@ class MessageParser {
     /// path; everything that runs on a *successful* parse should use
     /// `terminalImage(startingAt:)` for exact boundaries.
     private func sourceSnippet(at pos: CharPosition) -> Substring {
-        guard pos < input.endIndex else { return "" }
+        guard pos < input.endPosition else { return "" }
         var end = pos
         var count = 0
-        while end < input.endIndex, count < 30 {
-            let ch = input[end]
+        while end < input.endPosition, count < 30 {
+            let ch = input[characterAt: end]
             if ch.isWhitespace || ch.isNewline { break }
-            end = input.index(after: end)
+            end = input.position(afterCharacterAt: end)
             count += 1
         }
-        if end == pos, end < input.endIndex { end = input.index(after: end) }
-        return input[pos..<end]
+        if end == pos, end < input.endPosition { end = input.position(afterCharacterAt: end) }
+        return input[positions: pos..<end]
     }
 
     /// Evaluate a boundary node at a parser cursor position. Structured token
@@ -1056,7 +1090,7 @@ class MessageParser {
         }
         switch predicate {
         case .tokenLookahead(let positive, _):
-            if position >= input.endIndex {
+            if position >= input.endPosition {
                 let matches = boundary.boundaryPredicateBS.contains(grammar.symbolToID["○"]!)
                 return positive ? matches : !matches
             }
@@ -1070,7 +1104,7 @@ class MessageParser {
     }
 
     private func tokenLookaheadMatches(_ kinds: BitSet, at position: CharPosition) -> Bool {
-        if position >= input.endIndex { return false }
+        if position >= input.endPosition { return false }
         for terminalID in kinds where terminalID != grammar.epsilonID {
             if !cachedLex(at: position, terminalID: terminalID).isEmpty {
                 return true
@@ -1098,14 +1132,14 @@ class MessageParser {
     /// as a statement terminator accept end-of-file in lieu of a final
     /// newline.
     func boundaryMatches(_ boundary: String, at position: CharPosition) -> Bool {
-        if boundary == "<n>", position == input.endIndex { return true }
+        if boundary == "<n>", position == input.endPosition { return true }
         guard let idxs = commitsByEnd[position], !idxs.isEmpty else {
             // No prior commit has advanced the cursor to this position yet
             // (e.g. at the very start of input or the first token of a fresh
             // clause). Use the *departing* trivia — the gap the lexer would
             // skip FROM this position to reach the next token's content start.
             let contentStart = lexer.skipTrivia(from: position)
-            return GapFacts(classifying: input[position..<contentStart]).satisfies(boundary)
+            return GapFacts(classifying: input[positions: position..<contentStart]).satisfies(boundary)
         }
         // EXISTENTIAL over the commits ending here, not universal. Under multi-lex the commits
         // sharing a `triviaEnd` are ALTERNATIVE lexicalisations — disjuncts, not conjuncts — and this
@@ -1124,11 +1158,16 @@ class MessageParser {
         case .T, .TI, .C:
             return slot.nameID == terminalID && slot.suppressesLeadingTrivia
         case .ALT:
-            for symbol in slot.bodySymbols {
+            // Walk the alternative's `seq` chain in place (what `bodySymbols` collects into an
+            // array). This runs for every candidate terminal in `viable`, and the array was 5.6% of
+            // a parse (profile 2026-11-17).
+            var s = slot.seq
+            while let symbol = s, symbol.kind != .END {
                 if symbol.firstBS.contains(terminalID) {
                     return suppressesLeadingTriviaForPrediction(slot: symbol, terminalID: terminalID)
                 }
                 if !symbol.isNullable { break }
+                s = symbol.seq
             }
             return false
         case .DO, .OPT, .KLN, .POS:
@@ -1243,6 +1282,13 @@ class MessageParser {
         if !cL.excludeBS.isEmpty {
             matches = matches.filter { m in
                 for eID in cL.excludeBS where eID != cL.nameID && eID != grammar.epsilonID {
+                    // An excluded LITERAL (the keyword case) lexes here with the same start and end
+                    // exactly when the candidate's bytes are that literal, the comparison `lex`
+                    // makes. Asking the text avoids a lex question per keyword.
+                    if case .literal(let literal)? = lexer.terminals[eID] {
+                        if m.end - m.start == literal.count, lexer.bytesMatch(literal, at: m.start) { return false }
+                        continue
+                    }
                     let excluded = exclusionLex(at: cI, terminalID: eID,
                                                 suppressesLeadingTrivia: cL.suppressesLeadingTrivia)
                     for em in excluded where em.start == m.start && em.end == m.end {

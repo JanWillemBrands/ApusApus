@@ -169,9 +169,10 @@ class Oracle {
     private var traceRulePrunes: Bool { Oracle.traceRulePrunesEnabled }
 
     private func describe(_ span: BinarySpan) -> String {
-        let i = input.distance(from: input.startIndex, to: span.i)
-        let j = input.distance(from: input.startIndex, to: span.j)
-        let text = input[span.i..<span.j].replacingOccurrences(of: "\n", with: "⏎")
+        // Character offsets, as before positions became UTF-8 offsets: these appear in reports.
+        let i = input[positions: 0..<span.i].count
+        let j = input[positions: 0..<span.j].count
+        let text = input[positions: span.i..<span.j].replacingOccurrences(of: "\n", with: "⏎")
         return "[\(i)..\(j)]'\(text.prefix(40))'"
     }
 
@@ -194,7 +195,7 @@ class Oracle {
     /// (those still surface as `Advent failed to parse` in the accept suites).
     private func logRootStatus(_ phase: String) {
         guard traceRulePrunes else { return }
-        let alive = !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: input.startIndex).isEmpty
+        let alive = !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: 0).isEmpty
         print("oracle-trace: after \(phase): root reading \(alive ? "ALIVE" : "*** GONE ***")")
     }
 
@@ -357,7 +358,7 @@ class Oracle {
         // The readings the callers accept (`MessageParser.acceptingEnds`): of the root the parse ran
         // (a sub-grammar root in some tests), ending at the input's end or before trailing trivia.
         let root = parser.currentParseRoot ?? grammar.root
-        let origin = input.startIndex
+        let origin: CharPosition = 0
         let ends = parser.acceptingEnds(of: root, from: origin)
         guard !ends.isEmpty else {
             // No reading, so the result is empty: what the parse left is dead ends and probe calls
@@ -713,7 +714,7 @@ private final class YieldGraph {
 
     private func extent(of s: Int, longest: Bool) -> Int {
         let seq = body[altOf[s]], at = posOf[s]
-        func length(_ id: Int) -> Int { input.utf8.distance(from: ySpan[id].k, to: ySpan[id].j) }
+        func length(_ id: Int) -> Int { ySpan[id].j - ySpan[id].k }
         // The lengths the occurrence can have in the readings that reach each key from `at` on.
         var lengths: [Int: Set<Int>] = [:]
         func lengthsAt(_ k: Int) -> Set<Int> {

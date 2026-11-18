@@ -22,6 +22,8 @@ struct Descriptor: Hashable {
     let i: CharPosition         // input index
 }   // this is three 64-bit words (24 bytes)
 // TODO: pack the descriptor and simplify the hash: L.id << 48 | k << 24 | i.
+// (Tried 2026-11-18 with fixed 16/24/24 widths: no measurable gain. Descriptor bookkeeping was
+// ≈ 4% of a parse, and `Set` hashes the one word with SipHash all the same.)
 
 // MARK: - MessageParser Descriptor Operations
 

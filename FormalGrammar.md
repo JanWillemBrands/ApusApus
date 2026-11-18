@@ -350,13 +350,47 @@ tokens. `PREFER.bend`'s refusal C6 and its cycle certificate (`closedFor`) becom
 | B | checks of untrusted parts | a failure is a bug | the same |
 | C1 | several marks in one sequence | `EXTENT.bend` refuses | decided exactly (core phase 3) |
 | C2, C4, C5 | loop limitations of the oracles | refused | gone: a round is a node (section 5) |
-| C3 | the extent oracle's stitched-reading check | refuses | to measure; algorithmic |
+| C3 | the extent oracle's stitched-reading check | refuses | gone: the core's phase 3 decides exactly on an exact chosen set |
 | C6 | a preference cycle | `PREFER.bend` refuses | not well-formed (rule 2); the core oracle answers |
-| C7 | certificate searches (`Witness.solve`) | unknown verdicts | fixpoint search; finite trees help |
+| C7 | certificate searches (`Witness.solve`) | unknown verdicts | witness searches: a fixpoint, complete with enough fuel (to prove, step 8); phase 2's rival: decided by a checked closure (below) |
 | D | outside the spec (lexical ambiguity, layout gates, an extent on a terminal) | not exported | the same |
 
-The inventory was compiled from the oracles' comments; step 6 checks it is complete (every
+The inventory was compiled from the oracles' comments; step 7 checks it is complete (every
 site that returns nothing, classified).
+
+**The inventory on the core** (step 7, 2026-11-16). Every site in `Bend/core/` that returns
+`None`, `Unknown` or `OutOfFuel`:
+
+| File | Site | Kind |
+|---|---|---|
+| `GLL` | `run` out of fuel | A |
+| `CHECK` | `checkPick`: the final state is not closed, or lacks the root cluster | B |
+| `PRUNE` | `needLoop` out of fuel | A |
+| `PRUNE` | `prunePick`: the needed segments are not closed | B |
+| `WITNESS` | `fixpoint` out of fuel; then `rootFor` finds no root forest | A |
+| `EXACT` | `exactPick`: a witness tree fails its check (B) or a step is left uncovered (A) | A, B |
+| `GUARD` | `rhsIn`: the sub-parse over w gave no answer | A, B |
+| `GUARD` | `yesIf`: the witness forest for "q derives w" fails `reads` | A, B |
+| `PREFER` | `certTri`: the rival forest fails its certificate | A, B, C7 |
+| `ORACLE` | `oraclePick`: some step's verdict is Unknown (from the three above) | as those |
+| `EXTENT` | `coverFrom`: the chosen set is not covered by checked witness trees | A, B |
+| `PREDICT` | `predictPick`: the grown tables are not closed | A, B |
+| `PREDICT` | `ll1Pick`: the tables do not pass the LL(1) check | not a refusal: the LL(1) parser is for LL(1) grammars only |
+| `SUPPORT`, `PREDICT` | `supportedPick`, `ll1Run`: the state is not reached within the fuel | A |
+| `EBNF` | `stepOf`: a step of a hidden production | not a refusal: it has no Swift step |
+
+Lookups that return `None` for "no mark here" (`extentOf`, `ntOf`, `productionAt`) are not
+refusals. So, apart from fuel (A) and failed checks of untrusted parts (B), one algorithmic
+refusal remains:
+
+- **Phase 2's rival (C7), fixed 2026-11-16.** The certificate for "m beats q over w" took the
+  first forest the witness search found for m over w, admissible or not, so `X = @prefer Y |
+  a`, `Y = a >!> Z | a`, `Z = a` on `a` got no answer, and neither did `Y = a >!> Z` alone.
+  Now the rival is searched among segments of the input grown Earley-style from m at i, only
+  through steps phase 1 answers Yes (`RIVAL.bend`, not trusted). A whole segment of m gives the
+  forest for the certificate (No); otherwise, when the segments are checked closed, no rival
+  exists (Yes, `PROOF_RIVAL.bend`: one walk over the rival). Phase 2 no longer runs sub-parses.
+  Both examples now get answers (`ORACLE_EX.bend`).
 
 ## 10. Plan
 
@@ -465,10 +499,64 @@ site that returns nothing, classified).
      `PROOF_SUPPORT.bend` 436 lines (today `PROOF_NODEAD.bend` 1,620 and `PROOF_NODEAD2.bend`
      about 4,030). A negative check: a resumed descriptor at the wrong dot fails. No generator
      was needed. Step 6 is done.
-7. **The inventory, complete**, and the algorithmic refusals (C3, C7).
+7. **The inventory, complete**, and the algorithmic refusals (C3, C7). Done 2026-11-16
+   (section 9): C3 is gone on the core; C7 left phase 2's rival search, fixed in step 8.
 8. **The twin answers.** On a well-formed grammar, with enough fuel, each oracle hands out a
    set (TODO.md, "Bend twin: answers"). This closes the escape hatch of section 1; its argument
    is GLL's own (a finite set of keys that only grows, section 6).
+   - Phase 2's rival search, done 2026-11-16 (section 9, C7): a checked Earley-style closure
+     instead of the first forest of a sub-parse. `RIVAL.bend` 203 and `PROOF_RIVAL.bend` 501
+     lines. A negative check: a closedness check that skips terminal items fails the proof.
+   - The worklist engine ends closed, done 2026-11-16 (`RUN.bend` 145, `PROOF_RUN.bend` 2,627
+     lines): an invariant of seven Bool parts holds at every iteration (checked on example runs
+     first, `RUN_EX.bend`); operations that only add descriptors and steps keep it as one
+     relation, `call` and `leave` by their own lemmas. So whenever the engine finishes, with or
+     without a predictor, its state is closed and has the root cluster (`engine_closed`), and
+     the checked parser answers (`checked_answers`). A negative check: an engine that does not
+     resume a new return edge at the pops of a known cluster fails the proof.
+   - The worklist engine finishes, done 2026-11-17 (`RUN.bend` 241, `PROOF_RUN.bend` 3,106,
+     `PROOF_COUNT.bend` 423 lines): the invariant gained three parts (every descriptor, return
+     edge and pop lies within the grammar and the input), and every operation keeps the
+     measure "unseen descriptors within bounds, plus the to-do list" from rising; taking a
+     descriptor off the list lowers it. So with one unit of fuel more than there are
+     descriptors within bounds, the engine finishes (`gll_finishes`) and the checked parser
+     answers (`checked_always_answers`), with or without a predictor. A negative check: one
+     unit of fuel less fails the proof.
+   - Pruning answers, done 2026-11-17 (`PROOF_NEEDS.bend` 914, `PROOF_ANSWER.bend` 36 lines;
+     `RUN.bend` 266, `PROOF_RUN.bend` 3,249, `PROOF_COUNT.bend` 483). The engine's invariant
+     gained an eleventh part: every step lies within the grammar and the input. So a segment
+     of the needs loop can be counted as a descriptor, and the same fuel serves both loops.
+     The loop's invariant has five Bool parts. The needs still to be added are carried along
+     in the invariant itself (a segment is done when its needs lie in those plus the seen
+     ones), so one induction over `addSegs` keeps it. With fuel 1 + the size of the
+     descriptor universe, the needs are closed (`needs_closed`), and pruning hands out its
+     steps, on any steps within bounds (`pruned_answers`) and on the engine's own
+     (`pruned_parser_answers`). A negative check: a loop that does not queue new segments
+     fails the proof.
+   - The witness search, in part, 2026-11-17 (`PROOF_WITNESS.bend` 1,535, `PROOF_WSOUND.bend`
+     1,341 lines). Design agreed with the user: keep the fixpoint (ORACLE and EXTENT use it on
+     filtered sets) and prove its completeness by a walk over a parse tree, so it serves them
+     too. Proven: closed facts and a parse tree of kept steps containing the target give a
+     root forest (`root_found`); the fixpoint ends closed with fuel 1 + twice the size of the
+     descriptor universe (`witness_closed`); every forest it hands out is a parse tree of the
+     input containing the target (`witness_good`); so the exact parser answers once every kept
+     step lies on such a tree (`exact_from_answers`). Left: that law ("every pruned step lies
+     on a parse tree of pruned steps"), from two order facts: the engine's steps rest on
+     earlier steps, and every needed segment is reached from the root. Then the tables and the
+     rival closure.
+   - Reminder (after step 8, agreed 2026-11-16): answer phase 1's questions ("does q derive w",
+     "does x derive a prefix") with the same checked closure, every step allowed, instead of
+     GLL sub-parses; `walk` would take a judge (phase 1, or none). That removes sub-parses from
+     both oracles and should replace most of `PROOF_DECIDE.bend` (1,448 lines).
+   - Reminder (after step 8, agreed 2026-11-16): partially LL(1) grammars, for later rewriting
+     steps towards LL(1). `ll1_at` and the prediction laws are already local or need no LL(1);
+     `tables_ll1_sound`, `ll1_unambiguous` and `ll1_no_dead_wood` are all-or-nothing. Add (1) a
+     local table law: no conflict among x's productions in the tables gives `LL1At x`
+     (`pairs_at` is per pair already); (2) a local determinism law: at a nonterminal that
+     passes it, prediction seeds at most one production per cluster. Open design question for
+     when rewrites are planned: each rewrite needs a law tying the new grammar's trees to the
+     old one's (a cover), else LL(1) facts about the rewritten grammar say nothing about the
+     original.
 
 Each step ends with the proof gate (`bend PROOF.bend --verdict`), the examples, `BendCheck` and
 a 200-seed `BendDifferential` run. Steps 1–6 replace files rather than edit them; today's files
@@ -653,382 +741,4 @@ their meaning: they mark an occurrence in a sequence, not a choice. Restricting 
 syntax would only simplify Swift's parser and Oracle (no bracket-level marks), at the cost of
 naming a nonterminal for every marked bracket (`@longest { word }`).
 
-# 14. next steps
-Grammar transformations towards LL(1) while preserving semantics.
-Reading assignments (from Grok)
-
-
-Rewriting CFGs to LL1 grammars and non-rewritable constructs
-is it possible to rewrite every CFG grammar in LL(1) form, and if not which grammar constructs are not rewriteable?  Be very precise
-
-Thought for 30s
-No. Not every CFG can be rewritten as an equivalent LL(1) grammar (one generating exactly the same language).
-
-Precise reasons
-LL(1) languages form a proper subset of the deterministic context-free languages (DCFLs), which in turn are a proper subset of the context-free languages. Consequently:
-
-There exist CFLs that are not LL(k) for any finite k.
-There exist DCFLs (hence LR(1) languages) that are not LL(k) for any k.
-LL(1) grammars are always unambiguous, so any inherently ambiguous CFL has no LL(1) grammar.
-Canonical non-LL constructs / languages
-The classic example (due to Rosenkrantz & Stearns and widely repeated in the literature) is
-
-L
-=
-{
-a
-i
-b
-j
-∣
-i
-≥
-j
-≥
-0
-}
-.
-L={a 
-i
- b 
-j
- ∣i≥j≥0}.
-This language is deterministic (it has a simple SLR(1)/LR(1) grammar) but is not LL(k) for any k. A top-down parser must, on seeing an 
-a
-a, decide whether that 
-a
-a will later be matched by a 
-b
-b or is an “extra” unmatched 
-a
-a. With only a fixed amount of lookahead consisting of further 
-a
-as, the decision cannot always be made correctly.
-
-The classic “dangling-else” / optional-else construct is essentially isomorphic to the same language (the number of if-then must be 
-≥
-≥ the number of elses) and likewise admits no LL(k) grammar, although it has an unambiguous LR(1) grammar.
-
-Another simple unambiguous but non-LL(k) language is generated by
-
-S → A | B
-A → a A b | ε
-B → a B bb | ε
-What can be rewritten, and what cannot
-The two standard local transformations
-
-elimination of left recursion (direct and indirect), and
-left factoring (elimination of common prefixes)
-are necessary for a grammar to be LL(1), but they are not sufficient. After performing them one may still have FIRST/FOLLOW conflicts that are intrinsic to the language rather than to the particular grammar. There is no general algorithm that converts an arbitrary CFG into an equivalent LL(1) grammar, because it is undecidable whether a given CFG generates an LL(k) language for some k.
-
-In short:
-
-Left recursion and common prefixes are “rewriteable” (they can be removed while preserving the language).
-Inherent ambiguity, the 
-a
-i
-b
-j
-a 
-i
- b 
-j
-  (
-i
-≥
-j
-i≥j) pattern, and the dangling-else pattern are not rewriteable into LL(1) form.
-Even when the language is LL(1), a given grammar for it may require non-trivial restructuring beyond the two classical transformations, and the original derivation structure is not always preservable.
-
-
-
-
-
-53 sources
-Thank you but that is not what I wanted to know, let me rephrase.  Given a CFG we can apply transforms to make the grammar 'almost' LL(1) -- I am specifying LL(1), not LL(k) -- but for a few remaining constructs that are never going to be tranformable.  You've mentioned the aibj pattern as an example.  What is the exhuative list of grammar constructions that cannot be transformed.
-
-Thought for 24s
-There is no exhaustive finite list of local syntactic “constructions” that are forever non-transformable into LL(1).
-
-After the two standard, language-preserving rewrites
-
-elimination of left recursion (immediate and indirect), and
-left factoring
-a grammar is still not LL(1) precisely when it still contains at least one residual FIRST/FOLLOW conflict:
-
-two alternatives 
-A
-→
-α
-∣
-β
-A→α∣β with 
-FIRST
-⁡
-(
-α
-)
-∩
-FIRST
-⁡
-(
-β
-)
-≠
-∅
-FIRST(α)∩FIRST(β)=∅, or
-a nullable alternative whose FIRST set intersects 
-FOLLOW
-⁡
-(
-A
-)
-FOLLOW(A).
-These residual conflicts cannot be removed by any further local rewriting exactly when the language generated by the grammar is not an LL(1) language. Because it is undecidable whether an arbitrary CFG generates an LL(1) language (Rosenkrantz & Stearns, 1970), there cannot exist a complete, effective catalogue of “bad constructs.”
-
-The known infinite families that survive the standard transformations are:
-
-Inherently ambiguous languages
-Any grammar for them remains ambiguous; LL(1) grammars are always unambiguous.
-Languages of the form 
-{
-a
-i
-b
-j
-∣
-i
-≥
-j
-}
-{a 
-i
- b 
-j
- ∣i≥j} and its close relatives
-(including the classic dangling-else / optional-else construct).
-These are deterministic (LR(1)) yet not LL(
-k
-k) for any 
-k
-k. After left-recursion elimination and left factoring one still obtains a nullable non-terminal whose FIRST and FOLLOW sets intersect, and no further local rewrite eliminates the conflict.
-Languages that require distinguishing two alternatives after an unbounded common prefix of identical symbols
-Classic example:
-
-S → A | B
-A → a A b | ε
-B → a B bb | ε
-The grammar is unambiguous, left-recursion-free and left-factored, yet the two alternatives for 
-S
-S have identical FIRST sets; the conflict is intrinsic.
-
-In short, once left recursion and common prefixes have been eliminated, the only remaining non-transformable phenomena are residual FIRST/FOLLOW conflicts that witness that the language itself is not LL(1). There is no deeper, finite list of local patterns.
-
-
-
-
-
-46 sources
-what is the main argument from Rosenkrantz for concluding that it's undecidable?
-
-Thought for 27s
-The main result is Theorem 11 of Rosenkrantz & Stearns (1970): it is undecidable whether there exists some 
-k
-k such that a given CFG is LL(
-k
-k).
-
-The proof is by reduction from the halting problem. They construct, from an arbitrary Turing machine 
-M
-M, two special LL(3) grammars 
-G
-1
-G 
-1
-​
-  and 
-G
-2
-G 
-2
-​
-  whose languages encode sequences of instantaneous descriptions of 
-M
-M. They then form a third grammar 
-G
-3
-G 
-3
-​
-  that essentially takes the union of the productions of 
-G
-1
-G 
-1
-​
-  and 
-G
-2
-G 
-2
-​
- . By the way the constructions are arranged,
-
-G
-3
- is LL
-(
-k
-)
- for some 
-k
-⟺
-M
- halts
-.
-G 
-3
-​
-  is LL(k) for some k⟺M halts.
-Because the halting problem is undecidable, it is undecidable whether an arbitrary CFG is LL(
-k
-k) for some 
-k
-k.
-
-(A related result, their Theorem 13, shows that it is already undecidable whether a given CFG generates an LL(
-k
-k) language even when 
-k
-k is fixed.)
-
-Thus the undecidability rests on a direct reduction from the classic undecidable problem of Turing-machine halting, via a careful encoding of computations into the conflict structure of an LL grammar.
-
-
-
-
-
-56 sources
-OK.  So it's undecidable, but my question was an engineering question, not a logic question.  Given a grammar and after transformations to "make it more LL(1)", what set of non-LL(1) grammar constructs are we left with.  As you mentioned, elimination of left-recursion and left-factoring are two methods that 'move' a grammar into the direction of LL(1).  Two questions:  besides these two, which other ones are there?  And: which patterns are not transformable, and here I am looking for more of a taxonomy than general statement about first/follow overlap
-
-Thought for 29s
-Engineering answer (practical taxonomy)
-
-Other useful transformations (beyond left-recursion elimination & left factoring)
-These are the additional rewrites that practitioners actually apply when trying to push a grammar toward LL(1):
-
-Substitution / nonterminal expansion (inlining)
-Replace a leftmost nonterminal by its productions. This exposes hidden common prefixes or FIRST/FOLLOW conflicts that left factoring alone cannot see.
-(Especially useful after left-recursion elimination.)
-Unit-production elimination + removal of useless/unreachable symbols
-Cleaning step that often makes subsequent factoring and substitution more effective.
-Layering for precedence and associativity
-Split a single expression nonterminal into a hierarchy (Expr → Term → Factor …). This both removes ambiguity and creates the classic right-recursive form that left-recursion elimination turns into LL(1).
-Relocation of ε-productions into “tail” nonterminals
-After left-recursion elimination you already have tails; further manual refactoring keeps nullable alternatives only on the tails so that FIRST/FOLLOW conflicts become local and sometimes disappear.
-Disambiguation by restructuring
-Classic example: the dangling-else is rewritten with “closed statement” / “open statement” nonterminals. This removes ambiguity but frequently leaves a residual FIRST/FOLLOW conflict; it is therefore only a partial win for pure LL(1).
-These five, together with the two classical ones, constitute essentially the complete practical toolkit. None of them is a general algorithm that always succeeds.
-
-Taxonomy of residual non-transformable patterns
-(after the transformations above have been applied)
-
-The remaining obstacles fall into three concrete, recurring families:
-
-Family	Characteristic pattern	Why it survives	Typical example
-Nullable self-conflict	A nullable nonterminal 
-A
-A whose FIRST set intersects its own FOLLOW set, and the conflict cannot be moved away by further substitution or factoring	The decision “consume the next token now or stop” depends on information that has not yet been seen	Dangling-else after left factoring; the language 
-{
-a
-i
-b
-j
-∣
-i
-≥
-j
-}
-{a 
-i
- b 
-j
- ∣i≥j}
-Unbounded identical-prefix discrimination	Two (or more) alternatives that share arbitrarily long identical prefixes of the same terminal symbols before they diverge	Finite left factoring only peels off a fixed-length prefix; the distinguishing information can be arbitrarily far to the right	S → A | B
-A → aAb | ε
-B → aBbb | ε
-Intrinsic ambiguity that rewriting cannot remove	Multiple leftmost derivations for the same string that cannot be eliminated by any of the language-preserving local rewrites above	LL(1) grammars are always unambiguous; if the language is inherently ambiguous, or the grammar encodes an associativity/precedence ambiguity that layering does not capture, the conflict remains	Classic inherently ambiguous languages; certain operator grammars that have not been fully layered
-Practical observation
-After left-recursion elimination, left factoring, substitution, and the other rewrites listed above, virtually every remaining conflict you will meet in real grammars belongs to one of the three families in the table. The first two families are the ones that appear most often in programming-language work; the third is rarer once precedence layering has been done carefully.
-
-There is no deeper finite catalogue of local syntactic shapes—these three cover the residual cases that the standard engineering transformations cannot eliminate.
-
-
-
-
-
-33 sources
-This statement is way to fuzzy for me "virtually every remaining conflict you will meet in real grammars belongs to one of the three families"
-
-I would like to study the academic state-of-the-art of grammar hacking in this area
-
-Thought for 13s
-Academic state of the art on “grammar hacking” toward LL(1)
-
-The literature that treats this rigorously is the theory of grammatical covers, developed mainly by Anton Nijholt (late 1970s–early 1980s) and building on Gray & Harrison (1972). A cover is a stronger relation than mere language equivalence: the parse trees (or leftmost/rightmost derivations) of the transformed grammar are related to those of the original by a simple homomorphism. This is exactly the formal counterpart of “the transformation is useful for parsing.”
-
-Core classical results
-Result	Source	What it gives you
-Every cycle-free CFG is left-to-left-corner covered by a non-left-recursive grammar	Nijholt (1976/77)	Generalises ordinary left-recursion elimination while preserving parse structure
-Every LL-regular grammar can be transformed into an LL(1) grammar that covers it	Nijholt (1982), RAIRO Inform. Théor.	The strongest pure-LL transformation known; any LL(k) grammar is LL-regular, so this applies to all of them
-Predictive LR(k) grammars (a proper superclass of LC(k)) transform into LL(k) grammars that left-to-right cover them	Soisalon-Soininen & Ukkonen (1979)	Gives a systematic route from a useful subclass of bottom-up grammars into top-down form
-Normal-form covers for LL(k), strict deterministic and LR(k) grammars	Nijholt, Context-Free Grammars: Covers, Normal Forms, and Parsing (LNCS 93, 1980)	The standard monograph; Chapters 8–10 and 12 are the definitive treatment
-These results show that left-recursion elimination and left factoring are special cases of more general, structure-preserving transformations studied in the cover literature. The transformations are algorithmic for the classes above, but the classes themselves are proper subsets of the deterministic context-free languages.
-
-What remains non-transformable (precise characterisation)
-After all cover-preserving transformations have been applied, a residual conflict exists precisely when the language is not LL(1). The known infinite families that survive every such transformation are still exactly the ones already identified:
-
-languages requiring unbounded lookahead of the form 
-{
-a
-i
-b
-j
-∣
-i
-≥
-j
-}
-{a 
-i
- b 
-j
- ∣i≥j} (and the dangling-else construct isomorphic to it),
-languages whose alternatives share arbitrarily long identical prefixes before diverging (the classic 
-A
-→
-a
-A
-b
-∣
-ε
-A→aAb∣ε vs. 
-B
-→
-a
-B
-b
-b
-∣
-ε
-B→aBbb∣ε),
-inherently ambiguous languages.
-No finer syntactic taxonomy of residual “local patterns” exists beyond these families, because the property “is the language LL(1)?” is already undecidable (Rosenkrantz & Stearns, Theorem 13).
-
-Modern (2020s) work
-Bilyk (Onward! 2025): semantics-preserving transformation of CFGs into LL(1) form using a typed-tree representation so that the original semantic actions are retained.
-GramTrans (2025): hierarchical conflict-elimination algorithm that produces an LL(1) representation together with translators between the original and the new grammar, with an explicit trade-off between syntactic simplicity and token length.
-These are engineering-oriented refinements of the classical cover idea; they do not enlarge the class of languages that can be made LL(1).
-
-Bottom line for study
-Start with Nijholt’s 1980 monograph (especially the chapters on deterministically parsable grammars and the survey of parsing strategies). Then read the 1982 LL-regular → LL(1) paper and the 1979 predictive-LR paper. That is the academic core of “grammar hacking” toward LL(1). Everything practical that is known reduces to special cases or applications of those results.
+# 

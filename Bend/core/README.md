@@ -13,6 +13,14 @@ files stay until their replacements check.
 | `CHECK.bend` | The closedness check on the engine's final state (for the descriptors a predictor admits), and the checked parser `checkedSteps` |
 | `PROOF_GLL.bend` | Proof that the checked parser misses no step of any parse tree: `gll_every_parse_step` |
 | `GLL_EX.bend` | The engine on the examples' translations, against today's checked and exact parsers |
+| `RUN.bend` | The engine's invariant (every seen descriptor done or still to do, clusters seeded, return edges met with every pop, everything belonging to a known cluster, to-do descriptors seen, every descriptor, return edge, pop and step within the grammar and the input), the relation an adding operation keeps, and the measure (unseen descriptors within bounds, plus the to-do list) |
+| `RUN_EX.bend` | The invariant evaluated at every iteration of example runs (left recursion, an optional, a cyclic nullable grammar) |
+| `PROOF_RUN.bend` | Every operation and every iteration of the worklist engine keeps the invariant, so a finished run is closed: `engine_closed`, and the checked parser answers whenever the engine finishes (`checked_answers`); no iteration raises the measure, so the engine finishes with enough fuel (`gll_finishes`) and the checked parser always answers (`checked_always_answers`); a finished run's steps lie within bounds (`final_steps_bounded`) |
+| `PROOF_COUNT.bend` | Counting for the measure: every descriptor within bounds lies in the universe, and seeing a new one lowers the count of unseen ones; small facts about step lists |
+| `PROOF_NEEDS.bend` | Pruning's needs loop on steps within bounds: with the same fuel it finishes with closed needs (`needs_closed`), so pruning hands out its steps (`pruned_answers`) |
+| `PROOF_WITNESS.bend` | The witness search finds what is there: on facts closed under the rules of the kept steps, a parse tree of kept steps that contains the target gives the root search a forest (`root_found`, by a walk over the tree); with fuel 1 + twice the size of the descriptor universe the fixpoint ends closed (`witness_closed`) |
+| `PROOF_WSOUND.bend` | The witness search is sound: every fact's forest reads its segment, and a flagged one contains the target, so the root search hands out only parse trees of the input that contain the target (`witness_good`); with a witness for every kept step the exact parser answers (`exact_from_answers`) |
+| `PROOF_ANSWER.bend` | The twin answers, stage by stage, with fuel 1 + the size of the descriptor universe: the pruned parser (`pruned_parser_answers`) |
 | `PRUNE.bend` | Pruning to the steps a parse tree of the whole input needs, with its closedness check |
 | `PROOF_PRUNE.bend` | Proof that pruning keeps every step of every parse tree: `prune_every_parse_step` |
 | `WITNESS.bend` | The covering witness search (not trusted): one fact per segment and flag, a least fixpoint |
@@ -27,9 +35,11 @@ files stay until their replacements check.
 | `ORACLE.bend` | The oracle: the exact set, filtered by both verdicts at once; any Unknown means no answer. A chosen tree is one whose steps all keep their rules and complete no beaten node |
 | `PROOF_DECIDE.bend` | The questions phase 1 asks are answered soundly: Yes only with a checked witness, No only when the exact set has no such step |
 | `PROOF_GUARD.bend` | Phase 1's verdict is right: a step answered Yes keeps its rules, one answered No does not |
+| `RIVAL.bend` | Phase 2's rival search: segments of the input grown Earley-style through steps phase 1 answers Yes, each with a forest (not trusted), and the check that they are closed |
+| `PROOF_RIVAL.bend` | A rival completes its segment in a closed set (`walk`), so a closed set without it leaves no rival |
 | `PROOF_PREFER.bend` | Phase 2's verdict is right: a step answered Yes is not beaten, one answered No is (its certificate is a rival) |
 | `PROOF_ORACLE.bend` | Proof that the oracle's set is exactly the steps of the chosen parse trees: `oracle_exact` |
-| `ORACLE_EX.bend` | The oracle on @left, @right, @prefer and @avoid; the rule on cyclic and acyclic grammars, and the cycle `A = @prefer A \| a`, where nothing is chosen |
+| `ORACLE_EX.bend` | The oracle on @left, @right, @prefer and @avoid; the rule on cyclic and acyclic grammars, and the cycle `A = @prefer A \| a`, where nothing is chosen; phase 2 with rivals that are admissible only through a later production, or never |
 | `PROOF_RULE.bend` | On a grammar without a preference cycle no rival comes back to its own choice: `no_self_rival` |
 | `EXTENT.bend` | Phase 3 on the core: what @longest and @shortest mean, step by step (a step is out when it stands on a reading of its production that another reading to the same end beats on the marked items; readings may be stitched from steps of chosen trees), the marks as written moved onto core items, the chosen set handed out only with witness trees inside it, and the selecting oracle (exact, no Unknown) |
 | `PROOF_EXTENT.bend` | Proof that the chosen set is exact (every step lies on a chosen tree) and that the selecting oracle's set is exactly the steps of the selected trees: `extent_exact` |

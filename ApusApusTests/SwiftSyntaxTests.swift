@@ -491,13 +491,13 @@ private func runAdventOnce(
             }
             if let root {
                 parser.prepareInput(input: input, isSubParser: false)
-                parser.runGLL(root: root, start: input.startIndex)
+                parser.runGLL(root: root, start: 0)
             } else {
                 parser.parse(input: input)
             }
 
             // Also a reading followed only by trivia (comment-only and trailing-comment sources).
-            let matched = !parser.acceptingEnds(of: parser.currentParseRoot, from: input.startIndex).isEmpty
+            let matched = !parser.acceptingEnds(of: parser.currentParseRoot, from: 0).isEmpty
 
             var oraclePruned = 0
             var parseResult: AdventParseResult? = nil
@@ -658,7 +658,7 @@ func adventAcceptsFile(_ text: String) -> Bool {
     let grammar = loadFreshSwiftGrammar()
     let parser = MessageParser(grammar: grammar)
     parser.parse(input: text)
-    return !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: text.startIndex).isEmpty
+    return !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: 0).isEmpty
 }
 
 @Suite("SwiftSyntax - Advent source files", .enabled(if: SourceFileCorpus.enabled, "opt-in and slow: set APUS_SOURCE_FILE_SUITES=1 (scheme Test > Arguments > Environment Variables)"))
@@ -1605,7 +1605,7 @@ struct KeyPathTailTests {
         let grammar = loadFreshSwiftGrammar()
         let parser = MessageParser(grammar: grammar)
         parser.parse(input: source)
-        let matched = !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: source.startIndex).isEmpty
+        let matched = !parser.acceptingEnds(of: parser.currentParseRoot ?? grammar.root, from: 0).isEmpty
         #expect(!matched, "Advent raw recognizer matched SwiftSyntax recovery input: \(source)")
     }
 

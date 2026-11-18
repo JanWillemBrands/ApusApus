@@ -110,7 +110,7 @@ class DerivationBuilder {
         diagnostics = []
         coverage = []
         seenCoverage = []
-        let origin = input.startIndex
+        let origin: CharPosition = 0
         // The parse's accepting ends (`MessageParser.acceptingEnds`), also before trailing trivia.
         // The longest one, so the choice does not depend on set order.
         let rootNode = parser.currentParseRoot ?? grammar.root
@@ -254,12 +254,12 @@ class DerivationBuilder {
             // at `from`: for a munch-split `>` out of `>>` the longest guess returned `>>`, an image
             // extending past the leaf's own span (caught by `Trivia round-trip`).
             let image = sym.nameID.flatMap { parser.terminalContent(terminalID: $0, triviaStart: from, triviaEnd: to) }
-                ?? input[from..<to]
+                ?? input[positions: from..<to]
             return ParseTreeNode(sym.name, from: from, to: to, image: image)
 
         case .B:
             // Boundary: zero-length predicate; no source content.
-            return ParseTreeNode(sym.name, from: from, to: to, image: input[from..<from])
+            return ParseTreeNode(sym.name, from: from, to: to, image: input[positions: from..<from])
 
         case .N:
             guard let lhs = sym.alt else { return nil }

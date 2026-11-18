@@ -47,12 +47,15 @@ struct TokenPattern {
     var preemptConstruct: String? = nil
     /// Structured `-` lexical-nonterminal marker. This terminal has no regex/literal source; its match
     /// is computed by a GLL sub-parse of the same-named nonterminal (see `GrammarNode.isLexicalToken`
-    /// and `MessageParser` lexicalTokenRecognisers). Skipped when building regexByID/literalSourceByID.
+    /// and the `.recogniser` entries of `OnDemandLiteralLexer.terminals`). It gets no regex/literal entry.
     var isLexicalToken: Bool = false
     /// Parse-scoped `@builder` terminal: matched by a per-parse `ApusTokenScanner` made from
     /// `ApusRegexLibrary.scannerFactories[scannerKey]`, not by `regex` (which never matches).
     /// Terminals with the same key share one scanner instance per parse.
     var scannerKey: String? = nil
+    /// `@builder` terminal with a hand-written matcher, `ApusRegexLibrary.matchers[matcherKey]`,
+    /// which the lexer runs instead of `regex` (same answers; `regex` stays the specification).
+    var matcherKey: String? = nil
 
     // Accept any RegexComponent (e.g. Swift literal `/foo/` typed as Regex<Substring>) and wrap
     // to Regex<AnyRegexOutput> so the storage can also hold regexes that include capturing

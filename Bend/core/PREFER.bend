@@ -4,8 +4,8 @@ import ../SPEC.bend as Spec
 import ./CORE.bend as Core
 import ./GLL.bend as Gll
 import ./EBNF.bend as E
-import ./EXACT.bend as Exact
 import ./GUARD.bend as Guard
+import ./RIVAL.bend as R
 import ./SETS.bend as Sets
 
 # PHASE 2 ON THE CORE: @prefer AND @avoid.
@@ -139,20 +139,10 @@ def rankMarksOf(ms: +List<Spec.Mark>, +origins: +List<E.Origin>) -> +List<RankMa
 # ======== THE VERDICT ON A STEP ========
 #
 # A completed step of q over i .. j is asked about each production m that outranks q. Yes
-# (not beaten by m) when the exact parser says m's right side does not derive the tokens;
-# No (beaten) with a certificate: children for m over the tokens, checked with `reads`,
-# whose steps at i are each answered Yes by phase 1. Unknown otherwise.
-
-# Children for m over w (not trusted; checked below).
-def rivalIn(found: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +m: Nat) -> +List<Core.Tree>:
-  match found:
-    case Some{+set}:
-      Guard.forestFor(fuel, grammar, w, set, m)
-    case None{}:
-      []
-
-def rivalFor(+fuel: Nat, +grammar: +List<Core.Production>, +m: Nat, +w: +List<Nat>) -> +List<Core.Tree>:
-  rivalIn(Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, m), w), fuel, grammar, w, m)
+# (not beaten by m) when no forest for m over the tokens has steps that keep their rules
+# (RIVAL.bend, checked closed); No (beaten) with a certificate: children for m over the
+# tokens, checked with `reads`, whose steps at i are each answered Yes by phase 1. Unknown
+# otherwise.
 
 def allYes(xs: +List<Core.Bsr>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>) -> Bool:
   match xs:
@@ -164,9 +154,6 @@ def allYes(xs: +List<Core.Bsr>, +fuel: Nat, +grammar: +List<Core.Production>, +g
 def certWith(+ch: +List<Core.Tree>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Bool:
   Bool.and(Guard.forestOk(grammar, m, Lemma.slice(input, i, Nat.sub(j, i)), ch), allYes(Core.steps([Core.Node{m, ch}], i), fuel, grammar, gmarks, input))
 
-def certFor(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Bool:
-  certWith(rivalFor(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j)
-
 def certTri(b: Bool) -> Guard.Tri:
   match b:
     case True{}:
@@ -174,21 +161,43 @@ def certTri(b: Bool) -> Guard.Tri:
     case False{}:
       Guard.Unknown{}
 
-def rivalPick(t: Guard.Tri, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
+def closedTri(b: Bool) -> Guard.Tri:
+  match b:
+    case True{}:
+      Guard.Yes{}
+    case False{}:
+      Guard.Unknown{}
+
+def foundTri(found: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +e: Nat, +segs: +List<R.Seg>) -> Guard.Tri:
+  match found:
+    case True{}:
+      certTri(certWith(R.forestAt(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), e, segs), fuel, grammar, gmarks, input, m, i, j))
+    case False{}:
+      closedTri(Bool.and(R.closedAll(segs, fuel, grammar, gmarks, input, segs), R.hasSeg(m, i, 0n, i, segs)))
+
+def rootTri(t: Guard.Tri, +found: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat, +e: Nat, +segs: +List<R.Seg>) -> Guard.Tri:
   match t:
+    case Guard.Yes{}:
+      foundTri(found, fuel, grammar, gmarks, input, m, i, j, e, segs)
     case Guard.No{}:
       Guard.Yes{}
-    case Guard.Yes{}:
-      certTri(certFor(fuel, grammar, gmarks, input, m, i, j))
     case Guard.Unknown{}:
-      certTri(certFor(fuel, grammar, gmarks, input, m, i, j))
+      Guard.Unknown{}
+
+# Is there a rival of m over i .. j? It ends at e, after the tokens there. Yes when m's one
+# step of an empty right side is answered No, or the closed segments from m at i do not
+# complete m; No with a certificate from the segments' forest.
+def rivalTri(+fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
+  +e = Nat.add(i, List.length(&2, Nat, Lemma.slice(input, i, Nat.sub(j, i))))
+  +segs = R.segsFrom(fuel, grammar, gmarks, input, m, i)
+  rootTri(R.endTri(Core.rhsOf(grammar, m), fuel, grammar, gmarks, input, m, i, e), R.hasSeg(m, i, List.length(&2, Core.Sym, Core.rhsOf(grammar, m)), e, segs), fuel, grammar, gmarks, input, m, i, j, e, segs)
 
 def candTri(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +input: +List<Nat>, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
   match b:
     case False{}:
       Guard.Yes{}
     case True{}:
-      rivalPick(Guard.rhsTri(fuel, grammar, m, Lemma.slice(input, i, Nat.sub(j, i))), fuel, grammar, gmarks, input, m, i, j)
+      rivalTri(fuel, grammar, gmarks, input, m, i, j)
 
 def candsFrom(prods: +List<Core.Production>, +fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<RankMark>, +input: +List<Nat>, +q: Nat, +m: Nat, +i: Nat, +j: Nat) -> Guard.Tri:
   match prods:

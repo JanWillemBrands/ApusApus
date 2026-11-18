@@ -178,3 +178,46 @@ law suffix_breaks_cycle:
 
 def suffix_breaks_cycle():
   {==}
+
+# ======== PHASE 2'S RIVAL SEARCH ========
+
+def ntA(+x: Nat) -> Core.Sym:
+  Core.Nonterminal{x, Core.Anything{}}
+
+# Production 2, Y = a >!> Z: never admissible on a, since Z = a derives it.
+def notZ() -> +List<Guard.GuardMark>:
+  [Guard.GuardMark{2n, Guard.NotAhead{[2n]}}]
+
+# X = @prefer Y | a, Y = a >!> Z | a, Z = a, on a: the rival Y -> a (production 3) is
+# admissible, though the forest through production 2 comes first. X -> Y is chosen.
+def rivalLater() -> +List<Core.Production>:
+  [Core.Production{0n, [ntA(1n)]}, Core.Production{0n, [a()]}, Core.Production{1n, [a()]}, Core.Production{1n, [a()]}, Core.Production{2n, [a()]}]
+
+law rival_later_beats:
+  {kept(Oracle.oracleSteps(30n, rivalLater(), notZ(), preferFirst(), 0n, [1n]), Core.Node{0n, [Core.Node{3n, [Core.Leaf{1n}]}]}) == True{} : Bool}
+
+def rival_later_beats():
+  {==}
+
+law rival_later_drops:
+  {kept(Oracle.oracleSteps(30n, rivalLater(), notZ(), preferFirst(), 0n, [1n]), Core.Node{1n, [Core.Leaf{1n}]}) == False{} : Bool}
+
+def rival_later_drops():
+  {==}
+
+# X = @prefer Y | a, Y = a >!> Z, Z = a, on a: no admissible rival, so X -> a is chosen.
+def rivalNever() -> +List<Core.Production>:
+  [Core.Production{0n, [ntA(1n)]}, Core.Production{0n, [a()]}, Core.Production{1n, [a()]}, Core.Production{2n, [a()]}]
+
+law rival_never_keeps:
+  {kept(Oracle.oracleSteps(30n, rivalNever(), notZ(), preferFirst(), 0n, [1n]), Core.Node{1n, [Core.Leaf{1n}]}) == True{} : Bool}
+
+def rival_never_keeps():
+  {==}
+
+# Both grammars are well-formed.
+law rival_grammars_well_formed:
+  {Bool.and(Prefer.noPreferenceCycle(rivalLater(), preferFirst()), Prefer.noPreferenceCycle(rivalNever(), preferFirst())) == True{} : Bool}
+
+def rival_grammars_well_formed():
+  {==}

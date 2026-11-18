@@ -86,11 +86,11 @@ func computeVirtualLayoutTokens(
         if hasContent, bracketDepth == 0 {
             if col > indentStack.last! {
                 indentStack.append(col)
-                result[firstVisible, default: []].append(indentKindID)
+                result[input.position(of: firstVisible), default: []].append(indentKindID)
             } else {
                 while indentStack.count > 1, col < indentStack.last! {
                     indentStack.removeLast()
-                    result[firstVisible, default: []].append(dedentKindID)
+                    result[input.position(of: firstVisible), default: []].append(dedentKindID)
                 }
             }
         }
@@ -125,7 +125,7 @@ func computeVirtualLayoutTokens(
     // (5) Trailing dedents at end-of-input — pop the indent stack.
     while indentStack.count > 1 {
         indentStack.removeLast()
-        result[input.endIndex, default: []].append(dedentKindID)
+        result[input.endPosition, default: []].append(dedentKindID)
     }
 
     return result
@@ -135,7 +135,8 @@ func computeVirtualLayoutTokens(
 /// (`"…"`, `'…'`) and triple-quoted (`"""…"""`, `'''…'''`) variants, with
 /// backslash escapes inside both. Returns the position just past the
 /// terminating delimiter (or `input.endIndex` if the string is unterminated).
-private func skipPythonStringLiteral(_ input: String, from cursor: CharPosition, delim: Character) -> CharPosition {
+/// Walks `Character`s by `String.Index`; only the result table holds `CharPosition`s.
+private func skipPythonStringLiteral(_ input: String, from cursor: String.Index, delim: Character) -> String.Index {
     // Detect triple-quoted by peeking two chars ahead.
     let secondIndex = input.index(after: cursor)
     let isTriple: Bool

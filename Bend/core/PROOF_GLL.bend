@@ -424,6 +424,16 @@ def drop_next(items, d, y, rest, e):
     case Con{+x, +xs} 1n+(+m):
       drop_next(xs, m, y, rest, e)
 
+# The bookkeeping of a walk through a right side after one more item s, when the rest of the right side was s <> r.
+def inv_next(+grammar: +List<Core.Production>, +q: Nat, +d: Nat, +s: Core.Sym, +r: +List<Core.Sym>,
+  +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == s <> r : +List<Core.Sym>},
+  +inv: {Nat.add(d, List.length(&2, Core.Sym, s <> r)) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat})
+  -> {Nat.add(1n+d, List.length(&2, Core.Sym, dropFrom(1n+d, Core.rhsOf(grammar, q)))) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}:
+  +dn = drop_next(Core.rhsOf(grammar, q), d, s, r, ie)
+  %Equal.sym(+List<Core.Sym>, dropFrom(1n+d, Core.rhsOf(grammar, q)), r, dn) : {Nat.add(1n+d, List.length(&2, Core.Sym, _)) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}
+  Equal.trans(Nat, 1n+Nat.add(d, List.length(&2, Core.Sym, r)), Nat.add(d, 1n+List.length(&2, Core.Sym, r)), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)),
+    Equal.sym(Nat, Nat.add(d, 1n+List.length(&2, Core.Sym, r)), 1n+Nat.add(d, List.length(&2, Core.Sym, r)), Lemma.add_succ_right(d, List.length(&2, Core.Sym, r))), inv)
+
 law nth_none:
   for items: +List<Core.Sym>
   for d: Nat
@@ -1016,3 +1026,73 @@ law gll_every_parse_step:
 
 def gll_every_parse_step(fuel, grammar, start, input, set, got):
   checked_run(Gll.parse(fuel, grammar, start, input), grammar, start, input, set, got)
+
+# ======== THE GRAMMAR FROM PRODUCTION n ON ========
+
+def lhs_zero(+grammar: +List<Core.Production>, +base: Nat, +x: Nat,
+  +h: {Core.lhsIs(grammar, Nat.add(base, 0n), x) == True{} : Bool}) -> {Core.lhsIs(grammar, base, x) == True{} : Bool}:
+  %Lemma.add_zero_right(base) : {Core.lhsIs(grammar, _, x) == True{} : Bool}
+  h
+
+# The grammar from production n on.
+def dropProds(n: Nat, grammar: +List<Core.Production>) -> +List<Core.Production>:
+  match n grammar:
+    case 0n +g:
+      g
+    case 1n+m Nil{}:
+      []
+    case 1n+m Con{Core.Production{lhs, rhs}, rest}:
+      dropProds(m, rest)
+
+law drop_lhs:
+  for n: Nat
+  for grammar: +List<Core.Production>
+  for +p: Nat
+  for +x: Nat
+  {Core.lhsIs(dropProds(n, grammar), p, x) == Core.lhsIs(grammar, Nat.add(n, p), x) : Bool}
+
+def drop_lhs(n, grammar, p, x):
+  match n grammar:
+    case 0n +g:
+      {==}
+    case 1n+(+m) Nil{}:
+      {==}
+    case 1n+(+m) Con{Core.Production{+lhs, +rhs}, +rest}:
+      drop_lhs(m, rest, p, x)
+
+def isNilProds(ps: +List<Core.Production>) -> Bool:
+  match ps:
+    case Nil{}:
+      True{}
+    case Con{p, rest}:
+      False{}
+
+law drop_step:
+  for n: Nat
+  for grammar: +List<Core.Production>
+  for +lhs: Nat
+  for +rhs: +List<Core.Sym>
+  for +rest: +List<Core.Production>
+  for +e: {dropProds(n, grammar) == Core.Production{lhs, rhs} <> rest : +List<Core.Production>}
+  {dropProds(1n+n, grammar) == rest : +List<Core.Production>}
+
+def drop_step(n, grammar, lhs, rhs, rest, e):
+  match n grammar:
+    case 0n +g:
+      %Equal.sym(+List<Core.Production>, g, Core.Production{lhs, rhs} <> rest, e) : {dropProds(1n, _) == rest : +List<Core.Production>}
+      {==}
+    case 1n+(+m) Nil{}:
+      Empty.absurd({dropProds(2n+m, []) == rest : +List<Core.Production>},
+        Lemma.true_is_not_false(Equal.cong(+List<Core.Production>, Bool, v => isNilProds(v), [], Core.Production{lhs, rhs} <> rest, e)))
+    case 1n+(+m) Con{Core.Production{+l2, +r2}, +rest2}:
+      drop_step(m, rest2, lhs, rhs, rest, e)
+
+def head_lhs(+grammar: +List<Core.Production>, +base: Nat, +x: Nat, +lhs: Nat, +rhs: +List<Core.Sym>, +rest: +List<Core.Production>,
+  +hg: {dropProds(base, grammar) == Core.Production{lhs, rhs} <> rest : +List<Core.Production>},
+  +hb: {Nat.is_eq(lhs, x) == True{} : Bool}) -> {Core.lhsIs(grammar, base, x) == True{} : Bool}:
+  +e1 = Equal.sym(Bool, Core.lhsIs(dropProds(base, grammar), 0n, x), Core.lhsIs(grammar, Nat.add(base, 0n), x), drop_lhs(base, grammar, 0n, x))
+  +e2 = Equal.cong(+List<Core.Production>, Bool, v => Core.lhsIs(v, 0n, x), dropProds(base, grammar), Core.Production{lhs, rhs} <> rest, hg)
+  lhs_zero(grammar, base, x, Equal.trans(Bool, Core.lhsIs(grammar, Nat.add(base, 0n), x), Core.lhsIs(dropProds(base, grammar), 0n, x), True{}, e1, Equal.trans(Bool, Core.lhsIs(dropProds(base, grammar), 0n, x), Nat.is_eq(lhs, x), True{}, e2, hb)))
+
+# Every seed of a cluster on the tree lies on the tree: only the tree's production of x
+# at i gets past prediction.

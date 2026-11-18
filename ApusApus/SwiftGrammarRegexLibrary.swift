@@ -1078,3 +1078,232 @@ final class SwiftStringLiteralTokens: ApusTokenScanner {
         }
     }
 }
+
+// MARK: - Hand-written matchers
+
+// Swift `Regex` turns a character class into a bitmap only when all its members are ASCII. Our
+// classes mix ASCII and Unicode ranges, so a scalar is tested against each range in turn (≈ 65 ns a
+// range: `identifierHead` has 48), and a scalar that is NOT in the class pays for all of them. Most
+// lex questions are exactly that: `identifier` asked at `+`. Measured (2026-11-18, `swiftc -O`):
+// `identifier` costs 3.5 µs to fail at `+` and 6.2 µs to match `barBaz123`; these matchers take
+// 3 ns and 18 ns.
+//
+// The regexes above stay the specification, and `HandMatcherTests` checks that each matcher gives
+// the same end as its regex at every scalar position of a corpus. ASCII bytes are decided here by
+// hand. A non-ASCII scalar is decided by a one-scalar regex over the SAME library class, so the
+// Unicode ranges are written only once and the slow path runs only on non-ASCII text.
+
+/// What a hand-written matcher reads: the input's UTF-8 bytes, and the `String` itself for the
+/// non-ASCII slow path. Positions are UTF-8 offsets (`CharPosition`).
+struct MatcherInput {
+    let text: String
+    let bytes: [UInt8]
+
+    init(_ text: String) {
+        self.text = text
+        bytes = Array(text.utf8)
+    }
+}
+
+extension ApusRegexLibrary {
+    /// Builder key → hand-written matcher. Same answer as `patterns[key]`: the end of the longest
+    /// match starting at the position, or nil. Every one of these matches at least one scalar.
+    static let matchers: [String: (MatcherInput, CharPosition) -> CharPosition?] = [
+        "whitespace":                whitespaceEnd,
+        "identifier":                identifierEnd,
+        "poundName":                 poundNameEnd,
+        "propertyWrapperProjection": propertyWrapperProjectionEnd,
+        "postfixOperatorToken":      postfixOperatorTokenEnd,
+        "nonArrowOperatorToken":     nonArrowOperatorTokenEnd,
+        "functionNameOperator":      functionNameOperatorEnd,
+        "dotOperator":               dotOperatorEnd,
+    ]
+
+    // ── Scalar classes ──────────────────────────────────────────────────────────
+
+    private enum ScalarClass {
+        case identifierHead, identifierCharacter, operatorHead, operatorCharacter, dotOperatorCharacter
+    }
+
+    private static let identifierHeadScalar = Regex { identifierHead }.matchingSemantics(.unicodeScalar)
+    private static let identifierCharacterScalar = Regex { identifierCharacter }.matchingSemantics(.unicodeScalar)
+    private static let operatorHeadScalar = Regex { operatorHead }.matchingSemantics(.unicodeScalar)
+    private static let operatorCharacterScalar = Regex { operatorCharacter }.matchingSemantics(.unicodeScalar)
+
+    /// The ASCII members of each class, read off the definitions at the top of this file.
+    @inline(__always)
+    private static func isASCIIMember(_ b: UInt8, _ c: ScalarClass) -> Bool {
+        let letter = (b >= 0x41 && b <= 0x5A) || (b >= 0x61 && b <= 0x7A)
+        switch c {
+        case .identifierHead:       return letter || b == 0x5F                                   // A-Z a-z _
+        case .identifierCharacter:  return letter || (b >= 0x30 && b <= 0x39) || b == 0x5F || b == 0x24  // + 0-9 $
+        case .operatorHead, .operatorCharacter: return isASCIIOperatorCharacter(b)
+        case .dotOperatorCharacter: return isASCIIOperatorCharacter(b) || b == 0x2E               // + .
+        }
+    }
+
+    /// `/ = - + ! * % < > & | ^ ~ ?`: the ASCII members of `operatorHead` and `operatorCharacter`.
+    @inline(__always)
+    private static func isASCIIOperatorCharacter(_ b: UInt8) -> Bool {
+        switch b {
+        case 0x2F, 0x3D, 0x2D, 0x2B, 0x21, 0x2A, 0x25, 0x3C, 0x3E, 0x26, 0x7C, 0x5E, 0x7E, 0x3F: return true
+        default: return false
+        }
+    }
+
+    /// The position after the scalar at `i` when that scalar is in class `c`, else nil.
+    @inline(__always)
+    private static func after(_ m: MatcherInput, _ i: CharPosition, _ c: ScalarClass) -> CharPosition? {
+        guard i < m.bytes.count else { return nil }
+        let b = m.bytes[i]
+        if b < 0x80 { return isASCIIMember(b, c) ? i + 1 : nil }
+        let rx: Regex<Substring>
+        switch c {
+        case .identifierHead:      rx = identifierHeadScalar
+        case .identifierCharacter: rx = identifierCharacterScalar
+        case .operatorHead:        rx = operatorHeadScalar
+        case .operatorCharacter, .dotOperatorCharacter: rx = operatorCharacterScalar  // `.` is ASCII
+        }
+        return m.text[from: i].prefixMatch(of: rx).map { m.text.position(of: $0.range.upperBound) }
+    }
+
+    /// The ASCII byte at `i`, or nil at the end or at a non-ASCII scalar.
+    @inline(__always)
+    private static func ascii(_ m: MatcherInput, _ i: CharPosition) -> UInt8? {
+        guard i < m.bytes.count, m.bytes[i] < 0x80 else { return nil }
+        return m.bytes[i]
+    }
+
+    // ── Trivia ──────────────────────────────────────────────────────────────────
+
+    /// `whitespace`: one or more of `\0 \t \n \v \f \r`, space, U+00A0, U+FEFF, per scalar.
+    /// All of them are single scalars, so the two non-ASCII ones are compared as their UTF-8
+    /// bytes (`C2 A0`, `EF BB BF`): no slow path.
+    static func whitespaceEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        let b = m.bytes
+        var i = start
+        while i < b.count {
+            switch b[i] {
+            case 0x00, 0x09...0x0D, 0x20:
+                i += 1
+            case 0xC2 where i + 1 < b.count && b[i + 1] == 0xA0:
+                i += 2
+            case 0xEF where i + 2 < b.count && b[i + 1] == 0xBB && b[i + 2] == 0xBF:
+                i += 3
+            default:
+                return i > start ? i : nil
+            }
+        }
+        return i > start ? i : nil
+    }
+
+    // ── Identifiers ─────────────────────────────────────────────────────────────
+
+    /// `identifier`: `identifierHead` then `identifierCharacter`*.
+    static func identifierEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard var i = after(m, start, .identifierHead) else { return nil }
+        while let n = after(m, i, .identifierCharacter) { i = n }
+        return i
+    }
+
+    /// `poundName`: `#` then an identifier.
+    static func poundNameEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard ascii(m, start) == 0x23 else { return nil }   // #
+        return identifierEnd(m, start + 1)
+    }
+
+    /// `propertyWrapperProjection`: `$` digit* (identifierCharacter − digit) identifierCharacter*.
+    /// Digits are identifier characters, so this is `$` followed by the longest run of identifier
+    /// characters, provided the run holds a non-digit.
+    static func propertyWrapperProjectionEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard ascii(m, start) == 0x24 else { return nil }   // $
+        var i = start + 1
+        var sawNonDigit = false
+        while let n = after(m, i, .identifierCharacter) {
+            if let b = ascii(m, i), b >= 0x30, b <= 0x39 {} else { sawNonDigit = true }
+            i = n
+        }
+        return sawNonDigit ? i : nil
+    }
+
+    // ── Operators ───────────────────────────────────────────────────────────────
+
+    /// Does a comment opener `//` or `/*` start at `i`?
+    @inline(__always)
+    private static func commentOpener(_ m: MatcherInput, _ i: CharPosition) -> Bool {
+        guard ascii(m, i) == 0x2F else { return false }
+        let b = ascii(m, i + 1)
+        return b == 0x2F || b == 0x2A
+    }
+
+    /// Does an end of block comment start at `i`, as `withoutBlockCommentEnd` sees it: `*/` not
+    /// followed by `*` or `/` (the end of input included)?
+    @inline(__always)
+    private static func blockCommentEnd(_ m: MatcherInput, _ i: CharPosition) -> Bool {
+        guard ascii(m, i) == 0x2A, ascii(m, i + 1) == 0x2F else { return false }
+        let b = ascii(m, i + 2)
+        return b != 0x2A && b != 0x2F
+    }
+
+    /// The longest run of `c` scalars from `start` that are not a comment opener (the
+    /// `…BeforeComment` classes), with its length. Nil when `withoutBlockCommentEnd` rejects: a
+    /// block comment end at any point of the run, its end included (`ZeroOrMore` backtracks).
+    private static func operatorRun(_ m: MatcherInput, _ start: CharPosition, _ c: ScalarClass) -> (end: CharPosition, count: Int)? {
+        var i = start
+        var count = 0
+        while true {
+            if blockCommentEnd(m, i) { return nil }
+            guard !commentOpener(m, i), let n = after(m, i, c) else { break }
+            i = n
+            count += 1
+        }
+        return (i, count)
+    }
+
+    /// `operatorBody`: `(headStandalone)(char)* | special(char)+`, both under the block comment
+    /// rule. Every operator head is an operator character, so either branch ends where the run of
+    /// operator characters from `start` ends; `special(char)+` needs two of them.
+    private static func operatorBodyEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard let run = operatorRun(m, start, .operatorCharacter), run.count > 0 else { return nil }
+        switch ascii(m, start) {
+        case 0x3D, 0x21, 0x3F, 0x26:                   // operatorSpecial `= ! ? &`
+            return run.count >= 2 ? run.end : nil
+        default:                                       // operatorHeadStandalone, not `//` or `/*`
+            guard !commentOpener(m, start), after(m, start, .operatorHead) != nil else { return nil }
+            return run.end
+        }
+    }
+
+    /// `notExactlyArrow` fails: `->` not followed by an operator character.
+    @inline(__always)
+    private static func isExactlyArrow(_ m: MatcherInput, _ start: CharPosition) -> Bool {
+        guard ascii(m, start) == 0x2D, ascii(m, start + 1) == 0x3E else { return false }
+        return after(m, start + 2, .operatorCharacter) == nil
+    }
+
+    /// `postfixOperatorToken`: not starting with `!` or `?`, not exactly `->`, an operator body.
+    static func postfixOperatorTokenEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        let b = ascii(m, start)
+        guard b != 0x21, b != 0x3F, !isExactlyArrow(m, start) else { return nil }
+        return operatorBodyEnd(m, start)
+    }
+
+    /// `nonArrowOperatorToken`: not exactly `->`, then an operator body or a dot operator.
+    static func nonArrowOperatorTokenEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard !isExactlyArrow(m, start) else { return nil }
+        return operatorBodyEnd(m, start) ?? dotOperatorEnd(m, start)
+    }
+
+    /// `functionNameOperator`: not exactly `->`, an operator body.
+    static func functionNameOperatorEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard !isExactlyArrow(m, start) else { return nil }
+        return operatorBodyEnd(m, start)
+    }
+
+    /// `dotOperator`: `.` then one or more dot-operator characters, under the block comment rule.
+    static func dotOperatorEnd(_ m: MatcherInput, _ start: CharPosition) -> CharPosition? {
+        guard ascii(m, start) == 0x2E,
+              let run = operatorRun(m, start, .dotOperatorCharacter), run.count >= 2 else { return nil }
+        return run.end
+    }
+}

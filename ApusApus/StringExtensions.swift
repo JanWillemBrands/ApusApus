@@ -53,6 +53,10 @@ extension String {
 }
 
 extension String {
+    func linePosition(of position: CharPosition) -> String {
+        linePosition(of: index(at: position))
+    }
+
     func linePosition(of index: String.Index) -> String {
         var line = 0
         var lineStart = self.startIndex

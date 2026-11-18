@@ -11,7 +11,7 @@ import BitCollections
 // MARK: - LCNP source-position model
 //
 // See `Ambiguity.md` §3. Positions everywhere (BSR/CRF/
-// Descriptor/Oracle) are `String.Index` into the parser's input. Lex queries
+// Descriptor/Oracle) are `CharPosition`s, UTF-8 offsets into the parser's input. Lex queries
 // are answered on-demand by `OnDemandLiteralLexer`.
 
 /// One terminal match returned by the lexer.
@@ -55,69 +55,92 @@ struct LexCacheKey: Hashable {
 // which is where the decision belongs; naming a dead lexer method after it only muddled which
 // layer owned the responsibility.
 
-/// On-demand per-terminal lexer covering literal terminals (Phase B Step 2) and regex
-/// terminals (Phase C Step 1) directly against `input`. Trivia skipping uses
-/// the grammar's `isSkip` patterns plus structured `:` non-terminal recognisers.
+/// How one terminal kind is matched. `OnDemandLiteralLexer.terminals` holds one per symbol ID
+/// (nil for symbols without a lex source: nonterminals, ε, virtual layout tokens).
+enum TerminalMatcher {
+    /// A literal, compared as UTF-8 bytes, like swiftc's lexer (no `Character` or
+    /// canonical-equivalence semantics). A complete UTF-8 literal always ends on a scalar boundary.
+    case literal([UInt8])
+    /// A hand-written matcher (`ApusRegexLibrary.matchers`), run instead of its regex.
+    case handWritten((MatcherInput, CharPosition) -> CharPosition?)
+    /// A regex, run by Swift `Regex`.
+    case regex(Regex<AnyRegexOutput>)
+    /// A recogniser returning the longest end at a position: the GLL sub-parse of a structured
+    /// `-` / `:` nonterminal, or a parse-scoped `@builder` scanner.
+    case recogniser((CharPosition) -> CharPosition?)
+}
+
+/// The lexer: answers "does terminal t match at position p, and where does it end?" on demand,
+/// directly against the input, plus the trivia skip between tokens.
 ///
-/// Phase E Step 2d (Jun 14, 2026): `LegacyScannerLexAdapter` retired — this
-/// lexer is the only path now. Terminals not present in `literalSourceByID`
-/// nor `regexByID` simply return no match. `transitions`-annotated terminals
-/// (Python's `bracketNewline`) lose their mode-gating; that's a documented
-/// regression captured in the design doc.
-///
-/// Virtual tokens (Phase G, Jun 14, 2026): zero-length matches at source-
-/// derived positions. Used for layout-sensitive synthetic tokens like
-/// `INDENT` / `DEDENT` (Python, Haskell offside) and EOS. The
-/// `virtualTokensAt` table is computed once at parse setup by walking the
-/// input lexically; the lex consults it after trivia-skipping the cursor.
-/// EOS still has a fallback special-case for grammars that don't populate
-/// the table.
+/// Virtual tokens: zero-length matches at source-derived positions, for layout-sensitive synthetic
+/// tokens like `INDENT` / `DEDENT` (Python). `virtualTokensAt` is computed once per input; `lex`
+/// consults it after the trivia skip. `transitions`-annotated terminals (Python's
+/// `bracketNewline`) have no mode-gating here, a known regression.
 ///
 /// In normal parses, `triviaEnd` coincides with the next visible-token start in well-formed inputs.
 /// Recognizer sub-parses return at `end` so the surrounding structured token keeps ownership of
 /// following trivia.
-struct OnDemandLiteralLexer {
+///
+/// A `final class`, not a struct: the parser stores it as `var lexer: OnDemandLiteralLexer!`, and a
+/// struct there was copied out of the optional on every `lexer.lex(…)`, one retain and one release
+/// per reference-counted field per lex question (measured: a struct costs 11%).
+final class OnDemandLiteralLexer {
     let input: String
-    /// `terminalID → literal source text` for every literal terminal in the grammar.
-    let literalSourceByID: [Int: String]
-    /// `terminalID → compiled regex` for every regex terminal (non-literal,
-    /// non-skip). Answered from `input` directly via `prefixMatch`.
-    let regexByID: [Int: Regex<AnyRegexOutput>]
+    /// `input.endPosition`, the position one past the last byte.
+    let inputEnd: CharPosition
+    /// The input's UTF-8 bytes (with `input`, for the matchers' non-ASCII slow path). Positions
+    /// index `matcherInput.bytes` directly.
+    let matcherInput: MatcherInput
+    /// How each terminal kind is matched, by symbol ID.
+    let terminals: [TerminalMatcher?]
+    /// Trivia, tried in this order at every point of the skip: the grammar's skip terminals, then
+    /// its structured `:` trivia nonterminals (sub-parses, for nested constructs a regex cannot
+    /// express).
+    let trivia: [TerminalMatcher]
     /// `@preempt(X, …)` per terminal: besides the maximal match, also offer the
     /// prefix ending before each internal position where terminal `X` (the value)
     /// begins a non-empty match. Ports swift-syntax's operator regex-scan
     /// (`^^/regex/` → `^^` + `/regex/`, keyed on `regexOpenSlash`).
     let preemptStartByID: [Int: Int]
-    /// Terminal IDs of `@literalMunch` regex terminals (identifier, operator, …).
+    /// Terminal IDs of `@literalMunch` terminals (identifier, operator, …).
     /// Maximal-munch (default, longest-across): a literal match is suppressed when
     /// any literal-munch terminal has a strictly longer match at the same start
     /// (`for` inside `foreach`, `_` inside `_foo`, `&` inside `&&`). The check is
-    /// a runtime prefix-match of the declared regex — the ground truth, not a
+    /// a runtime match of the declared terminal — the ground truth, not a
     /// derived extension set. See `Multiple Lexicalisation` §4.1.
     let literalMunchIDs: [Int]
-    /// Compiled `isSkip` patterns from the grammar, used to skip whitespace /
-    /// comments / etc. between the parser's cursor and the next meaningful
-    /// character.
-    let triviaRegexes: [Regex<AnyRegexOutput>]
-    /// Recognisers for structured `:` non-terminal trivia (Phase E Step 2). Each closure
-    /// runs a recursive `MessageParser` sub-parse rooted at the trivia non-
-    /// terminal and returns the longest accepting end position at `pos`, or
-    /// `nil` if no match. Tried after `triviaRegexes` in `skipTrivia`.
-    let triviaRecognisers: [(CharPosition) -> CharPosition?]
-    /// Structured `-` lexical-nonterminal recognisers, keyed by terminal kind ID. Each runs a GLL
-    /// sub-parse rooted at the lexical nonterminal and returns its longest accept end at `pos`.
-    /// A terminal in this map is matched by its recogniser (one token) instead of a regex/literal.
-    let lexicalTokenRecognisers: [Int: (CharPosition) -> CharPosition?]
     /// Terminal ID of the synthetic EOS sentinel (`"○"`). Matched directly at
-    /// `input.endIndex` (after trivia skip), since EOS isn't in
+    /// `inputEnd` (after trivia skip), since EOS isn't in
     /// `grammar.terminals` and wouldn't otherwise have a lex source.
     let eosID: Int
-    /// Source-derived zero-length tokens keyed by character position. Used by
+    /// Source-derived zero-length tokens keyed by position. Used by
     /// layout-sensitive grammars (Python's INDENT/DEDENT, etc.). Populated
     /// once at parse setup, gated on `grammar.usesInjectedLayoutTokens`.
     /// Multiple synthetic terminals at the same position appear once each in
     /// the value array (e.g. two DEDENTs at the same column).
     let virtualTokensAt: [CharPosition: [Int]]
+
+    init(
+        input: String,
+        terminals: [TerminalMatcher?],
+        trivia: [TerminalMatcher],
+        preemptStartByID: [Int: Int],
+        literalMunchIDs: [Int],
+        eosID: Int,
+        virtualTokensAt: [CharPosition: [Int]]
+    ) {
+        self.input = input
+        self.inputEnd = input.endPosition
+        self.matcherInput = MatcherInput(input)
+        self.terminals = terminals
+        self.trivia = trivia
+        self.preemptStartByID = preemptStartByID
+        self.literalMunchIDs = literalMunchIDs
+        self.eosID = eosID
+        self.virtualTokensAt = virtualTokensAt
+    }
+
     /// `contentStart`: the caller already ran `skipTrivia(from: pos)` and is handing us the answer,
     /// so we must not redo it. Trivia is a pure function of `(input, pos)`, and the parser asks
     /// every terminal in a FIRST set about the SAME position — so without this the trivia before
@@ -145,98 +168,98 @@ struct OnDemandLiteralLexer {
         }
         if terminalID == eosID {
             // EOS matches at end of input (after any trailing trivia).
-            guard scanStart == input.endIndex else { return [] }
+            guard scanStart == inputEnd else { return [] }
             return [LexMatch(terminalID: terminalID, start: scanStart, end: scanStart, triviaEnd: scanStart)]
         }
-        // Structured `-` lexical nonterminal: match extent via the GLL sub-parse recogniser. One token
-        // spanning the sub-parse's longest accept from `scanStart`; no match → no token.
-        if let recognise = lexicalTokenRecognisers[terminalID] {
-            guard scanStart < input.endIndex, let end = recognise(scanStart), end > scanStart else { return [] }
-            let cursorEnd = consumesTrailingTrivia ? skipTrivia(from: end) : end
-            return [LexMatch(terminalID: terminalID, start: scanStart, end: end, triviaEnd: cursorEnd)]
-        }
-        if let literal = literalSourceByID[terminalID] {
-            guard scanStart < input.endIndex else { return [] }
-            let remaining = input[scanStart...]
-            guard remaining.hasPrefix(literal) else { return [] }
-            let literalEnd = input.index(scanStart, offsetBy: literal.count)
-            if appliesLiteralMunch {
-                // Maximal munch (longest-across): suppress this literal if any declared
-                // `@literalMunch` terminal has a strictly longer match at the same
-                // start — `for` inside `foreach`, `_` inside `_foo`. Runtime prefix-
-                // match of the declared regex is the faithful test (no extension-set
-                // extraction, no probes). TODO #0.
-                for classID in literalMunchIDs where classID != terminalID {
-                    guard let rx = regexByID[classID] else { continue }
-                    if let rm = remaining.prefixMatch(of: rx), rm.range.upperBound > literalEnd {
-                        return []
-                    }
-                }
+        guard scanStart < inputEnd, let matcher = terminals[terminalID],
+              let end = matchEnd(matcher, at: scanStart) else { return [] }
+        if case .literal = matcher, appliesLiteralMunch {
+            // Maximal munch (longest-across): suppress this literal if any declared
+            // `@literalMunch` terminal has a strictly longer match at the same
+            // start — `for` inside `foreach`, `_` inside `_foo`. TODO #0.
+            for classID in literalMunchIDs where classID != terminalID {
+                if let munch = terminals[classID], let longer = matchEnd(munch, at: scanStart), longer > end { return [] }
             }
-            let cursorEnd = consumesTrailingTrivia ? skipTrivia(from: literalEnd) : literalEnd
-            return [LexMatch(terminalID: terminalID, start: scanStart, end: literalEnd, triviaEnd: cursorEnd)]
         }
-        if let regex = regexByID[terminalID] {
-            guard scanStart < input.endIndex else { return [] }
-            // m.range.upperBound is type-agnostic — works for any Regex<Output>, including AnyRegexOutput
-            // which is needed for regexes containing capturing groups (e.g. backreference forms like `(#+)…\1`).
-            guard let m = input[scanStart...].prefixMatch(of: regex),
-                  m.range.upperBound > scanStart else { return [] }
-            let maxEnd = m.range.upperBound
-            let cursorEnd = consumesTrailingTrivia ? skipTrivia(from: maxEnd) : maxEnd
-            var results = [LexMatch(terminalID: terminalID, start: scanStart, end: maxEnd, triviaEnd: cursorEnd)]
-            // @preempt(X, …): besides the maximal match, offer the prefix ending
-            // before each internal position where terminal `X` begins — ports
-            // swift-syntax lexOperatorIdentifier's regex-scan (Cursor.swift:2275),
-            // letting `^^/regex/` split into `^^` + `/regex/` (X = regexOpenSlash).
-            // A leading match position is not a split point. No trivia sits before
-            // the split, so end == triviaEnd. Whether the split survives is
-            // decided by `@preempt` construct viability in `MessageParser.tokenMatch`.
-            if let splitID = preemptStartByID[terminalID] {
-                var i = input.index(after: scanStart)
-                while i < maxEnd {
-                    if splitTerminalMatches(splitID, at: i) {
-                        results.append(LexMatch(terminalID: terminalID, start: scanStart, end: i, triviaEnd: i))
-                    }
-                    i = input.index(after: i)
+        let cursorEnd = consumesTrailingTrivia ? skipTrivia(from: end) : end
+        var results = [LexMatch(terminalID: terminalID, start: scanStart, end: end, triviaEnd: cursorEnd)]
+        // @preempt(X, …): besides the maximal match, offer the prefix ending
+        // before each internal position where terminal `X` begins — ports
+        // swift-syntax lexOperatorIdentifier's regex-scan (Cursor.swift:2275),
+        // letting `^^/regex/` split into `^^` + `/regex/` (X = regexOpenSlash).
+        // A leading match position is not a split point. No trivia sits before
+        // the split, so end == triviaEnd. Whether the split survives is
+        // decided by `@preempt` construct viability in `MessageParser.tokenMatch`.
+        if let splitID = preemptStartByID[terminalID], let split = terminals[splitID] {
+            var i = scalarEnd(at: scanStart)
+            while i < end {
+                if matchEnd(split, at: i) != nil {
+                    results.append(LexMatch(terminalID: terminalID, start: scanStart, end: i, triviaEnd: i))
                 }
+                i = scalarEnd(at: i)
             }
-            return results
         }
-        return []
+        return results
     }
 
-    /// Does the `@preempt` start terminal `terminalID` begin a non-empty match
-    /// exactly at `pos` — no trivia skip (split points sit mid-token)? Used by the
-    /// `@preempt` split loop to offer an operator prefix ending where terminal `X`
-    /// can start. `X` is a single-char delimiter in practice (`regexOpenSlash`,
-    /// `openAngle`), so this is cheap.
-    private func splitTerminalMatches(_ terminalID: Int, at pos: CharPosition) -> Bool {
-        if let literal = literalSourceByID[terminalID] {
-            return input[pos...].hasPrefix(literal)
+    /// Where a match of `matcher` starting exactly at `pos` ends (the longest one), or nil. Only a
+    /// literal may match empty; every other kind must consume input.
+    @inline(__always)
+    private func matchEnd(_ matcher: TerminalMatcher, at pos: CharPosition) -> CharPosition? {
+        switch matcher {
+        case .literal(let literal):
+            return bytesMatch(literal, at: pos) ? pos + literal.count : nil
+        case .handWritten(let match):
+            return match(matcherInput, pos)
+        case .regex(let regex):
+            return regexEnd(regex, at: pos)
+        case .recogniser(let recognise):
+            guard let end = recognise(pos), end > pos else { return nil }
+            return end
         }
-        if let regex = regexByID[terminalID],
-           let m = input[pos...].prefixMatch(of: regex), m.range.upperBound > pos {
-            return true
-        }
-        return false
     }
 
-    /// Advance past any sequence of trivia matches starting at `pos`. Tries
-    /// regex trivia first (fast path), then structured `:` non-terminal recognisers
-    /// (heavier, for nested constructs that regex can't express). Stops as
-    /// soon as nothing advances the cursor.
+    /// The `Regex` path, kept out of line: a regex `Match` needs a large stack frame, which an
+    /// inlined copy imposed on every lex question, the hand-written ones included (measured:
+    /// `___chkstk_darwin` 2.8%). `m.range.upperBound` is type-agnostic, so this works for any
+    /// `Regex<AnyRegexOutput>`, including regexes with capturing groups (`(#+)…\1`).
+    @inline(never)
+    private func regexEnd(_ regex: Regex<AnyRegexOutput>, at pos: CharPosition) -> CharPosition? {
+        guard let m = input[from: pos].prefixMatch(of: regex) else { return nil }
+        let end = input.position(of: m.range.upperBound)
+        return end > pos ? end : nil
+    }
+
+    /// Do the input's bytes at `pos` start with `literal`?
+    @inline(__always)
+    func bytesMatch(_ literal: [UInt8], at pos: CharPosition) -> Bool {
+        let bytes = matcherInput.bytes
+        guard pos + literal.count <= bytes.count else { return false }
+        for k in 0..<literal.count where bytes[pos + k] != literal[k] { return false }
+        return true
+    }
+
+    /// The end of the scalar that starts at `pos`: past its UTF-8 continuation bytes.
+    @inline(__always)
+    private func scalarEnd(at pos: CharPosition) -> CharPosition {
+        let bytes = matcherInput.bytes
+        var i = pos + 1
+        while i < bytes.count, bytes[i] & 0xC0 == 0x80 { i += 1 }
+        return i
+    }
+
+    /// Advance past any sequence of trivia matches starting at `pos`, trying `trivia` in order.
+    /// Stops as soon as nothing advances the cursor.
+    ///
+    /// What this costs now (≈ 6% of a Swift parse, 2026-11-18): not `whitespace`, which has a
+    /// hand-written matcher, but the `comment` regex and the `multilineComment` sub-parse, both tried
+    /// at every position where no whitespace starts. A hand-written matcher for `comment` (as a
+    /// library `@builder`) and a `/*` check before the sub-parse would remove most of it.
     func skipTrivia(from pos: CharPosition) -> CharPosition {
         var cursor = pos
-        outer: while cursor < input.endIndex {
-            for re in triviaRegexes {
-                if let m = input[cursor...].prefixMatch(of: re), m.range.upperBound > cursor {
-                    cursor = m.range.upperBound
-                    continue outer
-                }
-            }
-            for recognise in triviaRecognisers {
-                if let end = recognise(cursor), end > cursor {
+        outer: while cursor < inputEnd {
+            for matcher in trivia {
+                if let end = matchEnd(matcher, at: cursor), end > cursor {
                     cursor = end
                     continue outer
                 }
@@ -247,23 +270,70 @@ struct OnDemandLiteralLexer {
     }
 }
 
-/// Character index into the parser's input string.
-/// `String.Index` for the initial implementation — a later perf pass may swap
-/// to an interned integer if descriptor pressure justifies the complexity.
-typealias CharPosition = String.Index
+/// A position in the parser's input: a UTF-8 offset (0 … `input.utf8.count`). Positions are always
+/// on a scalar boundary, since every one comes from a lex step over whole scalars.
+///
+/// An `Int`, not a `String.Index`, so positions are array indices (`lexEntryOf`, and later the
+/// position-keyed tables), fit into packed keys (`Descriptor`), and match the Bend twin's natural
+/// numbers. A native `String` is stored as UTF-8 (`prepareInput` makes sure with
+/// `makeContiguousUTF8()`), so converting to and from `String.Index` (the helpers below) is O(1).
+/// `String.Index` appears only where a `String` API needs one: regexes and slicing text.
+typealias CharPosition = Int
+
+extension String {
+    /// The index at UTF-8 offset `position`. O(1) on a native string.
+    @inline(__always)
+    func index(at position: CharPosition) -> String.Index {
+        utf8.index(utf8.startIndex, offsetBy: position)
+    }
+
+    /// The UTF-8 offset of `index`. O(1) on a native string.
+    @inline(__always)
+    func position(of index: String.Index) -> CharPosition {
+        utf8.distance(from: utf8.startIndex, to: index)
+    }
+
+    /// The position one past the end: `utf8.count`.
+    @inline(__always)
+    var endPosition: CharPosition { utf8.count }
+
+    /// The text from `range.lowerBound` up to `range.upperBound`.
+    @inline(__always)
+    subscript(positions range: Range<CharPosition>) -> Substring {
+        self[index(at: range.lowerBound)..<index(at: range.upperBound)]
+    }
+
+    /// The text from `position` to the end.
+    @inline(__always)
+    subscript(from position: CharPosition) -> Substring {
+        self[index(at: position)...]
+    }
+
+    /// The `Character` starting at `position`.
+    @inline(__always)
+    subscript(characterAt position: CharPosition) -> Character {
+        self[index(at: position)]
+    }
+
+    /// The position after the `Character` that starts at `position`.
+    @inline(__always)
+    func position(afterCharacterAt position: CharPosition) -> CharPosition {
+        self.position(of: index(after: index(at: position)))
+    }
+}
 
 extension CharPosition {
     /// Locate the token index whose image starts at this position. Returns
-    /// `tokens.count` if `self` is at or past `input.endIndex`. Used only for
+    /// `tokens.count` if `self` is at or past the end of `input`. Used only for
     /// diagnostics (`recordMismatch`, AST/diagram builders) — the parse loop
     /// never falls off a token boundary.
     func tokenIndex(in tokens: [Token], input: String) -> Int {
-        if self >= input.endIndex { return tokens.count }
-        // Binary search by image.startIndex.
+        if self >= input.endPosition { return tokens.count }
+        // Binary search by the image's start position.
         var lo = 0, hi = tokens.count
         while lo < hi {
             let mid = (lo + hi) >> 1
-            if tokens[mid].image.startIndex < self { lo = mid + 1 } else { hi = mid }
+            if input.position(of: tokens[mid].image.startIndex) < self { lo = mid + 1 } else { hi = mid }
         }
         return lo
     }

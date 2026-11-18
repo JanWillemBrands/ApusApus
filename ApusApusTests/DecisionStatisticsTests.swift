@@ -109,8 +109,8 @@ struct DecisionStatisticsTests {
 
         """
         if parser.successfullParses == 0 {
-            let line = input[..<parser.furthestMismatchIndex].filter { $0 == "\n" }.count + 1
-            let rest = input[parser.furthestMismatchIndex...].prefix(60)
+            let line = input[positions: 0..<parser.furthestMismatchIndex].filter { $0 == "\n" }.count + 1
+            let rest = input[from: parser.furthestMismatchIndex].prefix(60)
             text += "  FAILED at line \(line), expected \(parser.furthestMismatchExpected.sorted()): \(rest.debugDescription)\n"
         }
         for (origin, n) in byOrigin.sorted(by: { $0.value > $1.value }) { text += "  \(n)  \(origin)\n" }
@@ -134,7 +134,7 @@ func lexMultiplicity(_ parser: MessageParser) -> String {
     for (symbol, id) in parser.grammar.symbolToID { name[id] = symbol }
     var asked = [CharPosition: Int]()
     var matched = [CharPosition: [LexMatch]]()
-    for (key, matches) in parser.lexCache {
+    parser.forEachLexAnswer { key, matches in
         asked[key.pos, default: 0] += 1
         if !matches.isEmpty { matched[key.pos, default: []].append(contentsOf: matches) }
     }
@@ -169,26 +169,32 @@ func lexMultiplicity(_ parser: MessageParser) -> String {
 
     // Questions by terminal kind: what a precomputed tΣᵢ would have to lex, and what it costs now.
     let lexer = parser.lexer!
-    func kind(_ id: Int) -> String {
-        if lexer.lexicalTokenRecognisers[id] != nil { return "recogniser" }
-        if lexer.literalSourceByID[id] != nil { return "literal" }
-        if lexer.regexByID[id] != nil { return "regex" }
-        return "other"
+    func kind(_ matcher: TerminalMatcher?) -> String {
+        switch matcher {
+        case .literal?:     return "literal"
+        case .handWritten?: return "hand-written"
+        case .regex?:       return "regex"
+        case .recogniser?:  return "recogniser"
+        case nil:           return "other"
+        }
     }
+    func kind(_ id: Int) -> String { kind(lexer.terminals[id]) }
     var byKind = [String: (asked: Int, matched: Int)]()
     var regexAsked = [Int: Int]()
-    for (key, matches) in parser.lexCache {
+    parser.forEachLexAnswer { key, matches in
         let k = kind(key.terminalID)
         var e = byKind[k] ?? (0, 0)
         e.asked += 1
         if !matches.isEmpty { e.matched += 1 }
         byKind[k] = e
-        if k == "regex" { regexAsked[key.terminalID, default: 0] += 1 }
+        if k == "regex" || k == "hand-written" { regexAsked[key.terminalID, default: 0] += 1 }
     }
-    s += "  grammar terminals: \(lexer.literalSourceByID.count) literal, \(lexer.regexByID.count) regex, "
-    s += "\(lexer.lexicalTokenRecognisers.count) recogniser, \(lexer.literalMunchIDs.count) literal-munch, "
-    s += "\(lexer.triviaRegexes.count) trivia regex, \(lexer.triviaRecognisers.count) trivia recogniser, "
-    s += "virtual-token positions \(lexer.virtualTokensAt.count)\n"
+    func census(_ matchers: [TerminalMatcher?]) -> String {
+        Dictionary(grouping: matchers.compactMap { $0 }, by: { kind($0) })
+            .map { "\($0.value.count) \($0.key)" }.sorted().joined(separator: ", ")
+    }
+    s += "  grammar terminals: \(census(lexer.terminals)); \(lexer.literalMunchIDs.count) literal-munch; "
+    s += "trivia: \(census(lexer.trivia)); virtual-token positions \(lexer.virtualTokensAt.count)\n"
     for (k, e) in byKind.sorted(by: { $0.value.asked > $1.value.asked }) {
         s += "  \(k): \(e.asked) questions (\(String(format: "%.1f", Double(e.asked) / Double(max(positions, 1)))) per position), matched \(e.matched) (\(pct(e.matched, e.asked)))\n"
     }

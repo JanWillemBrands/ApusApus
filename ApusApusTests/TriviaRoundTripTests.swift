@@ -43,15 +43,15 @@ struct TriviaRoundTripTests {
                 let previous = leaves[index - 1]
                 #expect(previous.to == leaf.from, """
                     gap or overlap between leaves '\(previous.name)' and '\(leaf.name)' at \
-                    \(input.distance(from: input.startIndex, to: leaf.from)) in \(snippet.diagnosticID)
+                    \(input[positions: 0..<leaf.from].count) in \(snippet.diagnosticID)
                     """)
             }
             if let image = leaf.image {
-                #expect(image.startIndex >= leaf.from && image.endIndex <= leaf.to,
+                #expect(input.position(of: image.startIndex) >= leaf.from && input.position(of: image.endIndex) <= leaf.to,
                         "image of '\(leaf.name)' lies outside its span in \(snippet.diagnosticID)")
             }
-            rebuilt += input[leaf.from..<leaf.to]
+            rebuilt += input[positions: leaf.from..<leaf.to]
         }
-        #expect(rebuilt == String(input[root.from..<root.to]), "round trip differs: \(snippet.diagnosticID)")
+        #expect(rebuilt == String(input[positions: root.from..<root.to]), "round trip differs: \(snippet.diagnosticID)")
     }
 }

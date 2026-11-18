@@ -70,17 +70,18 @@ struct SwiftSyntaxGenerator {
         //
         // `codeBlockItems?` is nullable, so the root also yields many EMPTY spans; take the WIDEST
         // yield and then require that whatever falls outside it is trivia only.
-        let n = input.endIndex
+        let n = input.endPosition
+        // Widest in `Character`s, as before positions became UTF-8 offsets.
         guard let span = parser.yield(of: grammar.root).max(by: {
-            input.distance(from: $0.i, to: $0.j) < input.distance(from: $1.i, to: $1.j)
+            input[positions: $0.i..<$0.j].count < input[positions: $1.i..<$1.j].count
         }) else {
-            record(.lookupFailed, "no root yield at all", from: input.startIndex, to: n)
+            record(.lookupFailed, "no root yield at all", from: 0, to: n)
             return nil
         }
         let origin = span.i
         let end = span.j
-        guard parser.isTriviaOnly(input.startIndex..<origin), parser.isTriviaOnly(end..<n) else {
-            record(.lookupFailed, "root yield leaves non-trivia uncovered", from: input.startIndex, to: n)
+        guard parser.isTriviaOnly(0..<origin), parser.isTriviaOnly(end..<n) else {
+            record(.lookupFailed, "root yield leaves non-trivia uncovered", from: 0, to: n)
             return nil
         }
         let items = convertNonterminal(grammar.root, from: origin, to: end)
@@ -111,7 +112,7 @@ struct SwiftSyntaxGenerator {
             kind: kind,
             function: function,
             reason: reason,
-            text: String(input[from..<to])
+            text: String(input[positions: from..<to])
         ))
     }
 
@@ -6842,7 +6843,7 @@ struct SwiftSyntaxGenerator {
         var hasTrailingComma = false
         if let listNT = find("captureListItems", in: spans) {
             collectCaptureItems(listNT.nt, from: listNT.from, to: listNT.to, into: &items)
-            hasTrailingComma = input[listNT.to..<to].contains(",")
+            hasTrailingComma = input[positions: listNT.to..<to].contains(",")
         }
         if items.count > 1 {
             for i in 0..<items.count - 1 {
@@ -7778,8 +7779,8 @@ struct SwiftSyntaxGenerator {
             leftBound = !"([{,;:".contains(previous)
         }
         var rightBound = false
-        if to < input.endIndex, let after = parser.gapFacts(endingAt: to), !after.contains(.nonEmpty) {
-            let next = input[to]
+        if to < input.endPosition, let after = parser.gapFacts(endingAt: to), !after.contains(.nonEmpty) {
+            let next = input[characterAt: to]
             rightBound = !")]},;:".contains(next)
             if next == "." { rightBound = !leftBound }
         }
@@ -8678,9 +8679,10 @@ struct SwiftSyntaxGenerator {
     /// raw literal whose content is `""` (testFalseMultilineDelimiters).
     private func stringLiteralLayout(from: CharPosition, to: CharPosition) -> SwiftStringLiteralLayout? {
         let u = input.unicodeScalars
-        var p = from
-        while p < to, u[p] != "#", u[p] != "\"" { p = u.index(after: p) }
-        guard p < to else { return nil }
+        var p = input.index(at: from)
+        let end = input.index(at: to)
+        while p < end, u[p] != "#", u[p] != "\"" { p = u.index(after: p) }
+        guard p < end else { return nil }
         return SwiftStringLiteralScanner.layout(in: input, at: p)
     }
 
@@ -9425,9 +9427,9 @@ struct SwiftSyntaxGenerator {
         for (index, elNT) in spans.enumerated() {
             var element = compositionElement(elNT)
             if index + 1 < spans.count,
-               let ampersand = input[elNT.to..<spans[index + 1].from].firstIndex(of: "&") {
-                let end = input.index(after: ampersand)
-                element.ampersand = classifiedOperatorToken("&", from: ampersand, to: end)
+               let ampersand = input[positions: elNT.to..<spans[index + 1].from].firstIndex(of: "&") {
+                let from = input.position(of: ampersand)
+                element.ampersand = classifiedOperatorToken("&", from: from, to: from + 1)
             }
             elements.append(element)
         }

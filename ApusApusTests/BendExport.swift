@@ -90,7 +90,7 @@ struct BendExport {
         messageParser.parse(input: input)
         if oracle { Oracle(parser: messageParser, input: input).disambiguate() }
         let rootKept = messageParser.yield(of: messageParser.currentParseRoot).contains {
-            $0.i == input.startIndex && $0.j == input.endIndex
+            $0.i == 0 && $0.j == input.endPosition
         }
 
         var translation = Translation(grammar: grammar)
@@ -131,13 +131,13 @@ struct BendExport {
     /// and the token index of each position on it.
     static func tokenChain(_ parser: MessageParser, input: String) throws -> (kinds: [Int], positions: [CharPosition: Int]) {
         var kinds: [Int] = []
-        var positions: [CharPosition: Int] = [input.startIndex: 0]
-        var pos = input.startIndex
-        while pos < input.endIndex {
+        var positions: [CharPosition: Int] = [0: 0]
+        var pos: CharPosition = 0
+        while pos < input.endPosition {
             let here = (parser.commitsByStart[pos] ?? []).map { parser.commits[$0] }.filter { $0.triviaEnd > pos }
-            let distinct = Set(here.map { "\($0.terminalID)@\(input.distance(from: input.startIndex, to: $0.triviaEnd))" })
+            let distinct = Set(here.map { "\($0.terminalID)@\(input[positions: 0..<$0.triviaEnd].count)" })
             guard distinct.count == 1, let commit = here.first else {
-                throw ExportError.unsupported("\(distinct.count) tokens at character \(input.distance(from: input.startIndex, to: pos))")
+                throw ExportError.unsupported("\(distinct.count) tokens at character \(input[positions: 0..<pos].count)")
             }
             kinds.append(commit.terminalID)
             pos = commit.triviaEnd

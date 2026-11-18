@@ -198,7 +198,7 @@ struct PerformanceTests {
             let elapsed = DispatchTime.now().uptimeNanoseconds - start
 
             let accepted = parser.yield(of: parser.currentParseRoot).contains {
-                $0.i == input.startIndex && $0.j == input.endIndex
+                $0.i == 0 && $0.j == input.endPosition
             }
             let seconds = String(format: "%.6f", Double(elapsed) / 1_000_000_000)
             print("\(input.count),\(seconds),\(accepted)")

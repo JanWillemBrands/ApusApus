@@ -131,11 +131,11 @@ struct OracleDisambiguationTests {
                 let mp = MessageParser(grammar: grammar)
                 mp.parse(input: input)
                 let e = try #require(grammar.nonTerminals["E"])
-                let two = input.firstIndex(of: "2")!
-                func spansTwoPlusThree() -> Bool { mp.yield(of: e).contains { $0.i == two && $0.j == input.endIndex } }
+                let two = input.position(of: input.firstIndex(of: "2")!)
+                func spansTwoPlusThree() -> Bool { mp.yield(of: e).contains { $0.i == two && $0.j == input.endPosition } }
                 let raw = spansTwoPlusThree()
                 Oracle(parser: mp, input: input).disambiguate()
-                return (raw, spansTwoPlusThree(), !mp.acceptingEnds(of: grammar.root, from: input.startIndex).isEmpty)
+                return (raw, spansTwoPlusThree(), !mp.acceptingEnds(of: grammar.root, from: 0).isEmpty)
             }
             #expect(raw, "GLL reads `2 + 3` as an E")
             #expect(!post, "no remaining tree reads `2 + 3` as the last child of `E \"+\" E`")
@@ -190,7 +190,7 @@ struct OracleDisambiguationTests {
                 let input = "# only a comment"
                 let mp = MessageParser(grammar: grammar)
                 mp.parse(input: input)
-                let ends = mp.acceptingEnds(of: grammar.root, from: input.startIndex).count
+                let ends = mp.acceptingEnds(of: grammar.root, from: 0).count
                 Oracle(parser: mp, input: input).disambiguate()
                 let builder = DerivationBuilder(parser: mp, input: input)
                 let tree = builder.buildAST()
