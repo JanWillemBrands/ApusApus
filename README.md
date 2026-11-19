@@ -1,3 +1,7 @@
+# ApusApus
+
 ApusApus is a grammar specification [language](documentation/apus.md) & an interpreter-style parser for context-free grammars.  It is written in Swift (a.k.a. *Apus Apus*).
+
 The parser implementation is formally verified by a twin written in Bend 2, see [proofs](Bend/README.md).  The plan is to migrate from Swift to Bend x when that becomes feasible.
+
 As a (large) test I have converted the full Swift 6.4 language spec (TSPL) into a Swift.apus [grammar](grammars/Swift.apus), and used it to generate AST's byte-equivalent to swift-syntax 6.4.  This has been tested on the test suite included in swift-syntax, top-100 most popular Swift repositories on GitHub, as well as on millions [...] of synthesized fuzzer samples.  For easy reading there's a [version](grammars/Swift.md) of the grammar that interleaves TSPL with the new grammar specification.
