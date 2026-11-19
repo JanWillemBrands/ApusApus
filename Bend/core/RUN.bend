@@ -237,6 +237,129 @@ def addsB(+grammar: +List<Core.Production>, +input: +List<Nat>, +s: Gll.GState, 
   Bool.and(grows(s, t), Bool.and(subDescs(todoOf(s), todoOf(t)), Bool.and(newQueued(Check.seenOf(t), Check.seenOf(s), todoOf(t)), Bool.and(newKeyed(Check.seenOf(t), Check.seenOf(s), grammar, Check.clustersOf(s)), Bool.and(newQueued(todoOf(t), todoOf(s), Check.seenOf(t)),
     Bool.and(newBounded(Check.seenOf(t), Check.seenOf(s), grammar, input), Bool.and(newStepsBounded(Check.stepsOf(t), Check.stepsOf(s), grammar, input), Nat.is_le(meas(grammar, input, t), meas(grammar, input, s)))))))))
 
+# ======== WHAT THE STEPS REST ON ========
+# Every step rests on steps added before it (later in the list): the prefix before its item
+# is completed by an earlier step (or is empty), and its item is a token there or a
+# production of the nonterminal completed by an earlier step. Descriptors, return edges and
+# pops rest on the steps in the same way. This order is what makes the steps real.
+
+def doneBy(+q: Nat, +ks: Nat, +d: Nat, +e: Nat, s: Core.Bsr) -> Bool:
+  match s:
+    case Core.Bsr{+q0, +d0, +i0, +k0, +j0}:
+      Bool.and(Nat.is_eq(q0, q), Bool.and(Nat.is_eq(i0, ks), Bool.and(Nat.is_eq(d0, d), Nat.is_eq(j0, e))))
+
+# Some step of the list completes the first d items of production q from ks to e.
+def segDone(+q: Nat, +ks: Nat, +d: Nat, +e: Nat, ys: +List<Core.Bsr>) -> Bool:
+  match ys:
+    case Nil{}:
+      False{}
+    case Con{+s, rest}:
+      Bool.or(doneBy(q, ks, d, e, s), segDone(q, ks, d, e, rest))
+
+# Some production of x (from index base on) is completed from k to j.
+def prodDone(g: +List<Core.Production>, +base: Nat, +x: Nat, +k: Nat, +j: Nat, +ys: +List<Core.Bsr>) -> Bool:
+  match g:
+    case Nil{}:
+      False{}
+    case Con{Core.Production{+lhs, +rhs}, rest}:
+      Bool.or(Bool.and(Nat.is_eq(lhs, x), segDone(base, k, List.length(&2, Core.Sym, rhs), j, ys)), prodDone(rest, 1n+base, x, k, j, ys))
+
+def prefixDone(+q: Nat, +ks: Nat, d: Nat, +k: Nat, +ys: +List<Core.Bsr>) -> Bool:
+  match d:
+    case 0n:
+      Nat.is_eq(ks, k)
+    case 1n+(+m):
+      segDone(q, ks, 1n+m, k, ys)
+
+def itemDone(item: Maybe<&2, Core.Sym>, +grammar: +List<Core.Production>, +input: +List<Nat>, +k: Nat, +j: Nat, +ys: +List<Core.Bsr>) -> Bool:
+  match item:
+    case Some{Core.Terminal{+t}}:
+      Bool.and(Core.tokIs(Core.tokAt(input, k), t), Nat.is_eq(j, 1n+k))
+    case Some{Core.Nonterminal{+x, +need}}:
+      Bool.and(Gll.needHolds(need, k, j), prodDone(grammar, 0n, x, k, j, ys))
+    case None{}:
+      False{}
+
+def groundedIn(e: Core.Bsr, +grammar: +List<Core.Production>, +input: +List<Nat>, +older: +List<Core.Bsr>) -> Bool:
+  match e:
+    case Core.Bsr{+q, 0n, +i, +k, +j}:
+      Bool.and(List.is_empty(&2, Core.Sym, Core.rhsOf(grammar, q)), Bool.and(Nat.is_eq(i, k), Nat.is_eq(k, j)))
+    case Core.Bsr{+q, 1n+(+d), +i, +k, +j}:
+      Bool.and(prefixDone(q, i, d, k, older), itemDone(Gll.nthSym(Core.rhsOf(grammar, q), d), grammar, input, k, j, older))
+
+def stepsGrounded(ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>) -> Bool:
+  match ys:
+    case Nil{}:
+      True{}
+    case Con{+e, +older}:
+      Bool.and(groundedIn(e, grammar, input, older), stepsGrounded(older, grammar, input))
+
+def descGround(d: Gll.Desc, +ys: +List<Core.Bsr>) -> Bool:
+  match d:
+    case Gll.Desc{+q, +dd, +k, +i}:
+      prefixDone(q, k, dd, i, ys)
+
+def descsGrounded(ds: +List<Gll.Desc>, +ys: +List<Core.Bsr>) -> Bool:
+  match ds:
+    case Nil{}:
+      True{}
+    case Con{+d, rest}:
+      Bool.and(descGround(d, ys), descsGrounded(rest, ys))
+
+def itemIsNT(item: Maybe<&2, Core.Sym>, +x: Nat) -> Bool:
+  match item:
+    case Some{Core.Nonterminal{+x2, +need}}:
+      Nat.is_eq(x2, x)
+    case _:
+      False{}
+
+# A return edge of x's cluster at kc: its prefix is done, and its item is x.
+def edgeGround(e: Gll.Edge, +x: Nat, +kc: Nat, +grammar: +List<Core.Production>, +ys: +List<Core.Bsr>) -> Bool:
+  match e:
+    case Gll.Edge{+q, +d, +k}:
+      Bool.and(prefixDone(q, k, d, kc, ys), itemIsNT(Gll.nthSym(Core.rhsOf(grammar, q), d), x))
+
+def retGround(r: Gll.Ret, +grammar: +List<Core.Production>, +ys: +List<Core.Bsr>) -> Bool:
+  match r:
+    case Gll.Ret{Gll.CKey{+x, +kc}, +e}:
+      edgeGround(e, x, kc, grammar, ys)
+
+def retsGrounded(rs: +List<Gll.Ret>, +grammar: +List<Core.Production>, +ys: +List<Core.Bsr>) -> Bool:
+  match rs:
+    case Nil{}:
+      True{}
+    case Con{+r, rest}:
+      Bool.and(retGround(r, grammar, ys), retsGrounded(rest, grammar, ys))
+
+# A pop of x's cluster at kc, ended at j: some production of x is done from kc to j.
+def popGround(p: Gll.Pop, +grammar: +List<Core.Production>, +ys: +List<Core.Bsr>) -> Bool:
+  match p:
+    case Gll.Pop{Gll.CKey{+x, +kc}, +j}:
+      prodDone(grammar, 0n, x, kc, j, ys)
+
+def popsGrounded(ps: +List<Gll.Pop>, +grammar: +List<Core.Production>, +ys: +List<Core.Bsr>) -> Bool:
+  match ps:
+    case Nil{}:
+      True{}
+    case Con{+r, rest}:
+      Bool.and(popGround(r, grammar, ys), popsGrounded(rest, grammar, ys))
+
+# Everything in the state rests on its steps.
+def groundOk(+grammar: +List<Core.Production>, +input: +List<Nat>, s: Gll.GState) -> Bool:
+  match s:
+    case Gll.GState{+seen, +todo, +cs, +rs, +ps, +ys}:
+      Bool.and(stepsGrounded(ys, grammar, input), Bool.and(descsGrounded(seen, ys), Bool.and(retsGrounded(rs, grammar, ys), popsGrounded(ps, grammar, ys))))
+
+def groundAlong(fuel: Nat, +pred: Gll.Pred, +grammar: +List<Core.Production>, +input: +List<Nat>, s: Gll.GState) -> Bool:
+  match fuel s:
+    case 0n +st:
+      groundOk(grammar, input, st)
+    case 1n+f Gll.GState{+seen, Nil{}, +cs, +rs, +ps, +ys}:
+      groundOk(grammar, input, Gll.GState{seen, [], cs, rs, ps, ys})
+    case 1n+f Gll.GState{+seen, Con{+d, +rest}, +cs, +rs, +ps, +ys}:
+      Bool.and(groundOk(grammar, input, Gll.GState{seen, d <> rest, cs, rs, ps, ys}),
+        groundAlong(f, pred, grammar, input, Gll.step(d, pred, grammar, input, Gll.GState{seen, rest, cs, rs, ps, ys})))
+
 # `extra`: descriptors taken off the to-do list whose work is still being done.
 def invWith(+extra: +List<Gll.Desc>, +pred: Gll.Pred, +grammar: +List<Core.Production>, +input: +List<Nat>, +s: Gll.GState) -> Bool:
   Bool.and(queuedOk(Check.seenOf(s), List.append(&2, Gll.Desc, extra, todoOf(s)), grammar, input, s),

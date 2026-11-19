@@ -378,6 +378,9 @@ class Oracle {
         let graph = YieldGraph(grammar: grammar, parser: parser, input: input)
         let before = graph.liveCount
         var disambiguated = 0
+        // Support from below is a pure function of the excluded yields, so it need not be redone
+        // until something is excluded again.
+        var supportIsCurrent = false
         for p in OraclePass.allCases {
             let selected = rules.filter { $0.rule.pass == p }
             var changedNodes = Set<Int>()
@@ -402,11 +405,12 @@ class Oracle {
             guard !changedNodes.isEmpty else { continue }
             graph.exclude(missingFrom: changedNodes)
             graph.support()
+            supportIsCurrent = true
             graph.write(reachableOnly: false)
             logRootStatus("\(p) support")
         }
         // Phase 3 on genuine readings, then the result: exactly the yields on complete readings.
-        graph.support()
+        if !supportIsCurrent { graph.support() }
         graph.reach(from: root, origin: origin, ends: ends)
         // Marks of one sequence left to right: each rank among the readings the earlier ranks kept.
         var rank = 0
@@ -478,7 +482,12 @@ private final class YieldGraph {
     // Keys.
     private var keyIndex: [Key: Int] = [:]
     private var members: [[Int]] = []
-    private var users: [[Int]] = []                // 2·yield (+1 for content) of the yields needing it
+    // The yields needing each key, as `2·yield` (+1 when the key is their content), flat (CSR):
+    // key k's uses are `userList[userStart[k] ..< userStart[k + 1]]`. One contiguous list rather
+    // than an array per key: there are about as many keys as yields (10 M on a large file), and a
+    // heap array each made both building the graph and `support()` chase a pointer per key.
+    private var userStart: [Int32] = []
+    private var userList: [Int32] = []
     private var liveMembers: [Int] = []
     private var keysOfNode: [[Int]]
 
@@ -545,6 +554,9 @@ private final class YieldGraph {
             }
         }
         // Their requirements.
+        var useKey: [Int32] = [], useValue: [Int32] = []
+        useKey.reserveCapacity(2 * yNode.count)
+        useValue.reserveCapacity(2 * yNode.count)
         for id in yNode.indices {
             let num = yNode[id], y = ySpan[id], node = nodeOf[num]!
             var prefix = YieldGraph.free
@@ -599,9 +611,21 @@ private final class YieldGraph {
             yPrefix.append(prefix)
             yContent.append(content)
             yFree.append(isFree)
-            if prefix >= 0 { users[prefix].append(2 * id) }
-            for k in content { users[k].append(2 * id + 1) }
+            if prefix >= 0 { useKey.append(Int32(prefix)); useValue.append(Int32(2 * id)) }
+            for k in content { useKey.append(Int32(k)); useValue.append(Int32(2 * id + 1)) }
         }
+        // Counting sort of the uses by key (stable: each key keeps its uses in creation order).
+        var start = [Int32](repeating: 0, count: members.count + 1)
+        for k in useKey { start[Int(k) + 1] += 1 }
+        for k in members.indices { start[k + 1] += start[k] }
+        var next = start
+        var list = [Int32](repeating: 0, count: useKey.count)
+        for (k, use) in zip(useKey, useValue) {
+            list[Int(next[Int(k)])] = use
+            next[Int(k)] += 1
+        }
+        userStart = start
+        userList = list
         excluded = Array(repeating: false, count: yNode.count)
         alive = Array(repeating: true, count: yNode.count)
         reached = Array(repeating: true, count: yNode.count)
@@ -615,7 +639,6 @@ private final class YieldGraph {
         let id = members.count
         keyIndex[k] = id
         members.append([])
-        users.append([])
         keysOfNode[node].append(id)
         return id
     }
@@ -632,34 +655,55 @@ private final class YieldGraph {
 
     /// Support from below: the least fixpoint, by counters. A yield stands when its prefix key and
     /// one of its content keys stand; a key stands when one of its yields does.
+    ///
+    /// Linear in yields and uses, but on a large ambiguous file that is ~10 M of each, so the cost is
+    /// memory traffic: the uses are one flat list (`userStart`/`userList`), each yield's state is one
+    /// byte, and the loops run on local copies written back once (no per-access exclusivity or
+    /// uniqueness checks on the class's arrays). Measured 2026-11-18 on a 455 KB test file: 4.9 s →
+    /// ≈ 3 s per call; together with skipping the repeated call in `disambiguate`, 53.6 s → 37 s for
+    /// the whole probe.
     func support() {
-        alive = Array(repeating: false, count: yNode.count)
-        liveMembers = Array(repeating: 0, count: members.count)
-        var waiting = [UInt8](repeating: 0, count: yNode.count)
-        var contentMet = [Bool](repeating: false, count: yNode.count)
+        let excluded = excluded, yPrefix = yPrefix, yFree = yFree, yContent = yContent
+        let yKey = yKey, userStart = userStart, userList = userList
+        var alive = [Bool](repeating: false, count: yNode.count)
+        var liveMembers = [Int](repeating: 0, count: members.count)
+        defer {
+            self.alive = alive
+            self.liveMembers = liveMembers
+            reached = alive
+        }
+        // One byte of state per yield, so a use touches one array instead of four: the low two bits
+        // count the requirements still waiting (prefix, content); `contentNeedsNothing` and
+        // `contentMet` say whether a content key still counts. A yield that is excluded, can never
+        // stand, is ready, or stands has a zero count, so "nothing to do" is one test.
+        let contentNeedsNothing: UInt8 = 0x10, contentMet: UInt8 = 0x20
+        var state = [UInt8](repeating: 0, count: yNode.count)
         var ready: [Int] = []
         for id in yNode.indices where !excluded[id] {
             if yPrefix[id] == YieldGraph.never || (!yFree[id] && yContent[id].isEmpty) { continue }
-            waiting[id] = (yPrefix[id] >= 0 ? 1 : 0) + (yFree[id] ? 0 : 1)
-            if waiting[id] == 0 { ready.append(id) }
+            let waiting: UInt8 = (yPrefix[id] >= 0 ? 1 : 0) + (yFree[id] ? 0 : 1)
+            state[id] = waiting | (yFree[id] ? contentNeedsNothing : 0)
+            if waiting == 0 { ready.append(id) }
         }
         while let id = ready.popLast() {
             alive[id] = true
             let k = yKey[id]
             liveMembers[k] += 1
             guard liveMembers[k] == 1 else { continue }
-            for use in users[k] {
+            for u in Int(userStart[k])..<Int(userStart[k + 1]) {
+                let use = Int(userList[u])
                 let user = use >> 1
-                if excluded[user] || alive[user] || waiting[user] == 0 { continue }
+                var st = state[user]
+                if st & 0x3 == 0 { continue }
                 if use & 1 == 1 {
-                    if yFree[user] || contentMet[user] { continue }
-                    contentMet[user] = true
+                    if st & (contentNeedsNothing | contentMet) != 0 { continue }
+                    st |= contentMet
                 }
-                waiting[user] -= 1
-                if waiting[user] == 0 { ready.append(user) }
+                st -= 1
+                state[user] = st
+                if st & 0x3 == 0 { ready.append(user) }
             }
         }
-        reached = alive
     }
 
     /// Reachability from the root's accepted readings, through the keys the standing yields need.

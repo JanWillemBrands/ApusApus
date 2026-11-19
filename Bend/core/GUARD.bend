@@ -4,8 +4,7 @@ import ../SPEC.bend as Spec
 import ./CORE.bend as Core
 import ./GLL.bend as Gll
 import ./EBNF.bend as E
-import ./EXACT.bend as Exact
-import ./WITNESS.bend as Witness
+import ./CLOSURE.bend as C
 
 # PHASE 1 ON THE CORE: lookahead, @left and @right.
 #
@@ -226,31 +225,6 @@ def notTri(a: Tri) -> Tri:
     case Unknown{}:
       Unknown{}
 
-# Is there a completed step of production q over the whole of w (0 .. n) in the set?
-def endsHere(e: Core.Bsr, +q: Nat, +len: Nat, +n: Nat) -> Bool:
-  match e:
-    case Core.Bsr{q2, d, i, k, j}:
-      Bool.and(Nat.is_eq(q2, q), Bool.and(Nat.is_eq(d, len), Bool.and(Nat.is_eq(i, 0n), Nat.is_eq(j, n))))
-
-def hasEnd(set: +List<Core.Bsr>, +q: Nat, +len: Nat, +n: Nat) -> Bool:
-  match set:
-    case Nil{}:
-      False{}
-    case Con{+e, rest}:
-      Bool.or(endsHere(e, q, len, n), hasEnd(rest, q, len, n))
-
-# A witness forest for production q over w (not trusted; checked below).
-def firstForest(os: +List<Witness.Opt>) -> +List<Core.Tree>:
-  match os:
-    case Con{Witness.Opt{f, +fo}, rest}:
-      fo
-    case Nil{}:
-      []
-
-def forestFor(+fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +set: +List<Core.Bsr>, +q: Nat) -> +List<Core.Tree>:
-  +dummy = {Core.Bsr{0n, 0n, 0n, 0n, 0n} : Core.Bsr}
-  firstForest(Witness.optsAt(grammar, dummy, q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), Witness.fixpoint(fuel, set, grammar, w, dummy, [])))
-
 def forestOk(+grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>, +f: +List<Core.Tree>) -> Bool:
   Bool.and(Core.reads(f, grammar, Core.rhsOf(grammar, q), w, 0n), Nat.is_eq(List.length(&2, Nat, Core.leaves(f)), List.length(&2, Nat, w)))
 
@@ -261,20 +235,26 @@ def yesIf(ok: Bool) -> Tri:
     case False{}:
       Unknown{}
 
-def endPick(ends: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +set: +List<Core.Bsr>, +q: Nat) -> Tri:
-  match ends:
+def noIf(ok: Bool) -> Tri:
+  match ok:
     case True{}:
-      yesIf(forestOk(grammar, q, w, forestFor(fuel, grammar, w, set, q)))
-    case False{}:
       No{}
-
-# Does production q derive w, judged from the exact set of q's nonterminal over w?
-def rhsIn(found: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +q: Nat) -> Tri:
-  match found:
-    case Some{+set}:
-      endPick(hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)), fuel, grammar, w, set, q)
-    case None{}:
+    case False{}:
       Unknown{}
+
+# Yes with the forest of a segment that completes q over w, checked with `reads`; No when
+# the closed segments from q at 0 do not complete q (CLOSURE.bend); Unknown otherwise.
+def foundPick(found: Bool, +grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>, +segs: +List<C.Seg>) -> Tri:
+  match found:
+    case True{}:
+      yesIf(forestOk(grammar, q, w, C.forestAt(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs)))
+    case False{}:
+      noIf(Bool.and(C.closedAll(segs, grammar, w, segs), C.hasSeg(q, 0n, 0n, 0n, segs)))
+
+# Does production q derive w, judged by the closure from q at 0 on w?
+def closureTri(+fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>) -> Tri:
+  +segs = C.segsFrom(fuel, grammar, w, q, 0n)
+  foundPick(C.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs), grammar, q, w, segs)
 
 # Past the end of the grammar a production has the empty right side: it derives just [].
 def emptyTri(w: +List<Nat>) -> Tri:
@@ -287,7 +267,7 @@ def emptyTri(w: +List<Nat>) -> Tri:
 def rhsPick(real: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>) -> Tri:
   match real:
     case True{}:
-      rhsIn(Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, q), w), fuel, grammar, w, q)
+      closureTri(fuel, grammar, q, w)
     case False{}:
       emptyTri(w)
 

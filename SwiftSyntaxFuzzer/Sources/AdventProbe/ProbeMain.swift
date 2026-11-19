@@ -177,8 +177,8 @@ struct AdventProbe {
         parser.parse(input: source)
         let parseSeconds = Date().timeIntervalSince(start)
 
-        let origin = source.startIndex
-        let extent = source.endIndex
+        let origin: CharPosition = 0
+        let extent = source.endPosition
         let matched = parser.yield(of: parser.currentParseRoot).contains { y in
             guard y.i == origin else { return false }
             if y.j == extent { return true }
@@ -220,7 +220,7 @@ struct AdventProbe {
         // The context is the source around it with newlines escaped, so a cluster key is one line.
         var failureSite: (offset: Int, line: Int, context: String, expected: [String])? = nil
         if !adventAccepted {
-            let index = parser.furthestMismatchIndex
+            let index = source.index(at: parser.furthestMismatchIndex)
             let offset = source.distance(from: source.startIndex, to: index)
             let line = source[source.startIndex..<index].reduce(1) { $1.isNewline ? $0 + 1 : $0 }
             let from = source.index(index, offsetBy: -30, limitedBy: source.startIndex) ?? source.startIndex

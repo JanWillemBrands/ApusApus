@@ -1451,7 +1451,6 @@ keyPathSpacedDot =
     | >-> ( keyPathNumericDot ) "."
     | >+> ( keyPathNumericDot ) ifConfigSameLine "."
     .
-
 // A spaced mark run is a legal FIRST component: after the root, swift's loop runs with
 // `mayBeAfterTypeName` still true and branch 2 takes the run. The root can only absorb a TIGHT
 // mark (`>s<`), so without this `\Foo ??` — clean in swift, two optional components — was
@@ -1471,7 +1470,6 @@ keyPathPivotFirst =
     | keyPathMarkRunOperator
     | <s> "!" >+> ( ".", ")", "]", "}", ",", ";", ":", EOF )
     .
-
 // A mark run is consumed HOWEVER IT IS SPACED. swift's key-path loop tests the operator TOKEN
 // (`getNumOptionalKeyPathPostfixComponents`, Expressions.swift) and splits its text into one
 // component per `?`/`!`, so `\Foo.bar ?? fallback` consumes `??` as TWO components and leaves
@@ -1484,14 +1482,12 @@ keyPathPivot =
     | >s< optionalMark
     | >s< forceMark
     .
-
 // Consume ONE mark and leave the rest of the run to the tail: swift emits one
 // `KeyPathComponent` PER mark (`consumeOptionalKeyPathPostfix` loops `numComponents` times), so a
 // rule that swallows two marks yields one node where the reference has two — `\Foo.bar ??` then
 // differs by a missing `KeyPathComponent`. The `>+>` only asserts a following mark; it does not
 // consume it.
 keyPathMarkRunOperator = <s> keyPathMarkRunOptional | <s> keyPathMarkRunForce .
-
 keyPathBareTail = keyPathBareComponent { keyPathBareComponent } .      // flag false: no dotted `.?`/`.!`/`.[`
 // Same spaced-run rule in phase 2: `mayBeAfterTypeName` gates only the DOTTED forms, never a
 // `?`/`!`, so `\.foo?.bar ?? fallback` consumes `??` here exactly as phase 1 would.
@@ -1503,7 +1499,6 @@ keyPathBareComponent =
     | <s> "!" >+> ( ".", ")", "]", "}", ",", ";", ":", EOF )
     | >n< "[" labeledExpressionList? "]"
     .
-
 
 /// Grammar of a selector expression
 /// selector-expression → #selector ( expression )
@@ -1572,65 +1567,55 @@ postfixExpression =
 /// labeled-trailing-closures → labeled-trailing-closure labeled-trailing-closures?
 /// labeled-trailing-closure → identifier : closure-expression
 
-@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
-functionCallExpression = argumentCall .
-// The call with an argument clause and no trailing closure, named so that the parenless
-// trailing-closure alternate below can rule it out as its callee (`@right( … argumentCall )`).
-@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
-argumentCall = postfixExpression >n< functionCallArgumentClause .
-// >n<: a call `(` may not start a new line (swift-syntax `allowAtStartOfLine:false`) — `g()⏎(x)` is two statements, not `g()(x)`
-// A trailing closure belongs to the same call as a preceding argument clause:
-// `f() {}` is one call on `f`, not a trailing-closure call on `f()`.
+// A call. swift-syntax decides trailing closures in `parsePostfixExpressionSuffix`, by three rules:
 //
-// NO layout gate on the closure brace: a trailing closure may start on the NEXT line.
-// `atValidTrailingClosure` (Expressions.swift) imposes a line constraint only in `.stmtCondition`
-// flavor —
-//     // If this is a normal expression (not an expr-basic) then trailing closures
-//     // are allowed, so this is obviously one.
-//     guard case .stmtCondition = flavor else { return true }
-//     …
-//     guard !self.peek().isAtStartOfLine else { return false }
-// — and condition position is already covered by `@rejectsFlavor(stmtCondition)` on
-// `trailingClosure`, which is why `if f(a: 1) { }` still reads the brace as the if-body.
+//   1. A closure after an argument clause belongs to that call: `f() {}` is ONE call on `f`, not a
+//      parenless call on `f()`. (The `(…)` suffix parses its own trailing closures,
+//      `parsePostfixExpressionCallSuffixIfPresent`; `a[0] {}` is the same for `subscriptExpression`.)
+//      Here: the first alternate takes its closures itself, and its `@prefer` removes the parenless
+//      reading of the same span, the one with callee `f()`.
 //
-// `@right` on the parenless alternate is the real rule: ONE trailing closure per parenless call. The
-// reference says it procedurally, in the `parsePostfixExpressionSuffix` loop —
-//     // We only allow a single trailing closure on a call.  This could be
-//     // generalized in the future, but needs further design.
-//     if self.at(.leftBrace) { break }
-// — i.e. after a PARENLESS trailing closure, a following `{` ends the postfix chain. A production
-// attribute says exactly "this alternate may not be its own LEFTMOST child":
-//     var y = x.map { [$0] } ⏎ { … }(&y[0])   → TWO statements   (chain forbidden)
-//     let v = x.map {}.filter {}.sorted {}    → all three attach (children are member accesses)
-// A parenthesized call with a trailing closure is the exception: `f(1) {} ⏎ {}` is one chained
-// call. `parenthesizedTrailingClosureCall` below names that base explicitly so its second closure
-// never passes through the guarded parenless alternate. A `>n<` layout gate used to stand in for
-// this distinction and cost two tree differences — `x.map ⏎ { $0 }` did not attach and
-// `f(1) {} ⏎ {}` did not chain.
-// The second alternate carries TWO child-position filters on the same (leftmost) child:
-//   @right                     — the alternate may not be its own leftmost child  (the chain rule above)
-//   @right( literalExpression, typePrimaryExpression ) — nor may a BARE literal or TypeExpr primary
-//     be. It is extent-based, which gives the bare-vs-rooted split for free: the callee of `1 {}`
-//     spans exactly the `literalExpression` `1`, while the callee of `1! {}`, `[1][0] {}` or
-//     `1.description {}` spans MORE than any literal, so those stay callable (matches swift-syntax).
-//     The TypeExpr half is the same structural rule for `@P M {}` / `(inout Int) -> Void {}`:
-//     those are expression-position types, not valid trailing-closure callees. This replaced a
-//     `nonLiteralPostfix`/`nonLiteralPrimary` clone of `postfixExpression`/`primaryExpression` (21
-//     alternates) that had drifted from its originals.
-// A parenthesized call with a trailing closure may itself be called by a second trailing closure.
-// Naming that base keeps the permission structural: the parenless alternate below remains
-// right-associatively guarded, so `x.map {}\n{}` still forms two statements.
+//   2. A closure after any other postfix expression makes a parenless call, unless that expression
+//      is a plain literal (`isLiteralWithoutTrailingClosureSupport`: integer, float, string, regex,
+//      bool, nil). `1 {}` is two statements; `[1] {}`, `[k: v] {}` and `Self {}` are calls.
+//      Here: `@right( literal, … )` on the second alternate. It is extent-based, which gives the
+//      bare-vs-rooted split for free: the callee of `1 {}` spans exactly the literal `1`, while the
+//      callee of `1! {}`, `[1][0] {}` or `1.description {}` spans more, so those stay callable.
+//      `typePrimaryExpression` in the same list is an artefact of this grammar, not a swift-syntax
+//      rule: a function type is one primary here (`(inout Int) -> Void {}`), where swift-syntax reads
+//      an arrow sequence and attaches the closure to `Void`; likewise `@P M {}`. `Self` is a
+//      `typePrimaryExpression` too, but to swift-syntax a declaration reference, so the last
+//      alternate calls it. (The filter replaced a `nonLiteralPostfix`/`nonLiteralPrimary` clone of
+//      `postfixExpression`/`primaryExpression`, 21 alternates that had drifted from the originals.)
+//
+//   3. After a parenless closure, a `{` ends the postfix chain:
+//          // We only allow a single trailing closure on a call.  This could be
+//          // generalized in the future, but needs further design.
+//          if self.at(.leftBrace) { break }
+//      `x.map {} {}` and `var y = x.map { [$0] } ⏎ { … }(&y[0])` are two statements, while
+//      `x.map {}.filter {}.sorted {}` attaches all three (their callees are member accesses).
+//      Here: the bare `@right` on the second alternate, which may not be its own leftmost child.
+//      After a call WITH an argument clause one more closure may follow: `f(1) {} {}` and
+//      `f(1) {} ⏎ {}` chain. The third alternate names that callee, `parenthesizedTrailingClosureCall`,
+//      because the bare `@right` reads the raw forest (Bend/SPEC.bend `EdgeOk`), where `f(1) {}` still
+//      has the parenless reading that rule 1's `@prefer` removes; through it the guard would forbid
+//      the chain.
+//
+// Layout: `>n<` keeps an argument clause on the callee's line (swift-syntax `allowAtStartOfLine:
+// false`): `g() ⏎ (x)` is two statements. The closure brace has NO layout gate: a trailing closure
+// may start on the next line. swift-syntax's `atValidTrailingClosure` restricts lines only in the
+// `.stmtCondition` flavor, which `@rejectsFlavor(stmtCondition)` on `trailingClosure` covers
+// (`if f(a: 1) { }` reads the brace as the if-body).
+@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
+functionCallExpression =
+    | @prefer postfixExpression >n< functionCallArgumentClause [ ifConfigSameLine trailingClosures ]  // rule 1
+    | @right @right( literal, typePrimaryExpression ) postfixExpression ifConfigSameLine trailingClosures  // rules 2, 3
+    | parenthesizedTrailingClosureCall ifConfigSameLine trailingClosures  // rule 3: `f(1) {} {}`
+    | selfType ifConfigSameLine trailingClosures  // rule 2: `Self {}`
+    .
 parenthesizedTrailingClosureCall = postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures .
-functionCallExpression = @prefer parenthesizedTrailingClosureCall ifConfigSameLine trailingClosures .
-functionCallExpression = @prefer postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures    // f(args){closure} — preferred over base=`f()` (same span)
-                       | @right @right( literalExpression, typePrimaryExpression, argumentCall ) postfixExpression ifConfigSameLine trailingClosures .
-functionCallExpression = collectionLiteralCallee ifConfigSameLine trailingClosures .
-// `Self` is a type-primary syntactically, but unlike other bare type expressions it is also a
-// declaration reference and may be called with trailing closures (`Self { ... }`).
-functionCallExpression = selfType ifConfigSameLine trailingClosures .
 
-@flavors(stmtCondition)
-collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
+
 @flavors(bindingIntroducer)
 functionCallArgumentClause = "(" ")" | "(" labeledExpressionList ","? ")" .
 // swift-syntax Expressions.swift `parseArgumentListElements`: one element list for tuples, calls,
@@ -1638,6 +1623,7 @@ functionCallArgumentClause = "(" ")" | "(" labeledExpressionList ","? ")" .
 // `isArgumentLabel` admits keywords as labels: `(let: 1)`, `(_: 1)`.
 @flavors(bindingIntroducer)
 labeledExpressionList = labeledExpression { "," labeledExpression } .
+
 @flavors(bindingIntroducer)
 labeledExpression = [ argumentLabel ":" ] ( expression | operatorReference ) .
 // `atBinaryOperatorArgument`: an element that is only an operator refers to it, module-qualified
@@ -1710,13 +1696,14 @@ initializerExpression = "init" .
 // nested `#if`, then resumes the postfix suffix loop.
 // The generic-argument island is structural — see `postfixExpression`.
 @flavors(stmtCondition, poundIfDirective)
-explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral, octalLiteral, decimalLiteral, hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
-explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< "." >s< | <s> "." ) moduleSelector? memberName
-                           [ genericArgumentClause | >n< "(" argumentNames ")" ] .
-explicitMemberExpression = postfixExpression ifConfigSameLine postfixConditionalCompilationBlock .
+explicitMemberExpression =
+    | postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral, octalLiteral, decimalLiteral, hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits
+    | postfixExpression ifConfigSameLine ( >s< "." >s< | <s> "." ) moduleSelector? memberName [ genericArgumentClause | >n< "(" argumentNames ")" ]
+    | postfixExpression ifConfigSameLine postfixConditionalCompilationBlock
+    .
 
 argumentNames = argumentName argumentNames? .
-argumentName = argumentLabel ":" .   // swift-syntax `parseArgLabelList`: `isArgumentLabel`
+argumentName = argumentLabel ":" .
 
 /// Grammar of a postfix self expression
 /// postfix-self-expression → postfix-expression . self
@@ -1804,7 +1791,6 @@ committingStatementDeclaration = >-> ( "open" ) declaration .
 statement = >!>(committingStatementDeclaration, attributes, initializerIntroducer, macroIntroducer, operatorDeclarationStart, invalidOperatorDeclarationStart, actorDeclarationStart)
             ( @requiresFlavor(fileScope) >->( "{" ) | @rejectsFlavor(fileScope) ε ) expression .
 statement = >!>(typeMemberIntroducer, localSetterAccessModifier) declaration .
-
 statement = loopStatement .
 // `if`/`switch` arrive via `statement = expression` (first `expression` alternative covers
 // `conditionalExpression`); branchStatement holds only `guard` (the sole keyword-led true statement).
@@ -1973,7 +1959,6 @@ labeledStatement = statementLabel loopStatement .
 // labeled `if`/`switch` are LabeledStmt wrapping the if/switch EXPRESSION (swift-syntax).
 labeledStatement = statementLabel conditionalExpression .
 labeledStatement = statementLabel doStatement .
-
 statementLabel = labelName ":" .
 // swift-syntax `parseOptionalStatementLabel` (Statements.swift): an `.identifier` token followed by
 // `:`. `_borrowing` is excluded because swift-syntax's statement dispatch rejects `_borrowing: …`
@@ -1987,11 +1972,13 @@ labelName = identifier ---( "_", "_borrowing", lexerClassifiedKeyword ) | escape
 /// control-transfer-statement → return-statement
 /// control-transfer-statement → throw-statement
 
-controlTransferStatement = breakStatement
-                         | continueStatement
-                         | fallthroughStatement
-                         | returnStatement
-                         | throwStatement .
+controlTransferStatement =
+    | breakStatement
+    | continueStatement
+    | fallthroughStatement
+    | returnStatement
+    | throwStatement
+    .
 
 /// Grammar of a break statement
 /// break-statement → break label-name?
@@ -2057,9 +2044,7 @@ deferStatement = "defer" codeBlock .
 doStatement = "do" codeBlock catchClauses? | "do" throwsClause codeBlock catchClauses .
 catchClauses = catchClause catchClauses? .
 catchClause = "catch" catchPatternList? codeBlock .
-
 catchPatternList = >-> ( "{" ) catchPattern { "," catchPattern } .
-
 catchPattern = matchPattern whereClause? .
 // swift-syntax Statements.swift `parseGuardedCatchPattern`: `catch {` or `catch where ...` produces
 // an implicit `let error` pattern, so the explicit pattern is optional when a where-clause is
@@ -2687,7 +2672,7 @@ actorName = identifierToken .
 /// protocol-member-declaration → protocol-subscript-declaration
 /// protocol-member-declaration → protocol-associated-type-declaration
 /// protocol-member-declaration → typealias-declaration
-///
+
 /// Grammar of a protocol property declaration
 /// protocol-property-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block
 
@@ -2708,7 +2693,6 @@ protocolDeclaration = attributes? declarationModifiers? "protocol" protocolName 
 protocolName = identifierToken .
 primaryAssociatedTypeClause = openAngle primaryAssociatedTypeList ","? closeAngle .
 primaryAssociatedTypeList = identifierOrSelf { "," identifierOrSelf } .
-
 
 // swift-syntax parses protocol bodies with the SAME member parser as class/struct (members are
 // FunctionDeclSyntax, InitializerDeclSyntax, VariableDeclSyntax, …, not protocol-specific nodes).
@@ -3158,14 +3142,12 @@ specializeArgument  = "target" ":" attributeDeclName ","?
                     | "kind" ":" identifierToken ","?
                     | "spi" ":" effectsToken ","?
                     | "spiModule" ":" effectsToken ","? .
-
 // CAUTION: naming an attribute here also removes its BARE form from the general rule. Any
 // attribute that is legal without arguments needs its own bare alternate as well — `@objc` has
 // one for exactly this reason.
 attribute = "@"
             >-> ( "abi", "attached", "available", "convention", "freestanding", "isolated", "backDeployed", "derivative", "differentiable", "lifetime", "_lifetime", "objc", "specialized", "transpose", "_originallyDefinedIn", "_documentation", "_dynamicReplacement", "_implements", "_spi", "_unavailableFromAsync", "_expose", "_swift_native_objc_runtime_base", "_backDeploy", "_effects", "_specialize" )
             >s< ( >!>( declarationModifier ) attributeName ) attributeArgumentExprClause? .
-
 // Module-qualified attribute name = a custom attribute → its args are an EXPRESSION argument list,
 // not the bespoke argument grammar a builtin of the same name would get.
 // `@main::available(macOS 10.15, *)` rejects (availability spec is not an expression arg list);
@@ -3315,6 +3297,7 @@ matchIdentifierPattern =
     | escapedIdentifier
     | propertyWrapperProjection
     .
+
 // swift-syntax `parseMatchingPattern` parses everything except `is`/`let`/`var` as an
 // expression: `case _:`→ExpressionPattern(DiscardAssignmentExpr), `case .foo:`/`Foo.bar`→
 // ExpressionPattern(MemberAccessExpr), `case (x,y):`→ExpressionPattern(TupleExpr). The Wildcard/Identifier/EnumCase pattern nodes are Sema's, not the
@@ -3406,6 +3389,7 @@ enumCaseQualifier = memberType | typeIdentifier .
 // Restricting the latter two forms avoids overlap with optional-chaining expressions.
 @flavors(bindingIntroducer)
 optionalPattern = ( identifierPattern | tupleMatchPattern | enumCasePayloadPattern ) >s< optionalMark .
+
 @flavors(bindingIntroducer)
 enumCasePayloadPattern =
     | enumCaseName >n< tupleMatchPattern
@@ -3436,7 +3420,7 @@ expressionPattern = expression .
 /// generic-parameter → type-name
 /// generic-parameter → type-name : type-identifier
 /// generic-parameter → type-name : protocol-composition-type
-/// generic-parameter → let type-name : type \
+/// generic-parameter → let type-name : type
 /// generic-where-clause → where requirement-list
 /// requirement-list → requirement | requirement , requirement-list
 /// requirement → conformance-requirement | same-type-requirement
@@ -3447,7 +3431,6 @@ expressionPattern = expression .
 
 // declaration-position generic params are unambiguous — no follow-restriction (unlike expression-position genericArgumentClause)
 genericParameterClause  = openAngle genericParameterList genericWhereClause? ","? closeAngle .
-
 genericParameterList = genericParameter { "," genericParameter } .
 
 // SwiftSyntax `parseGenericParameters` greedily consumes `each` or `let` as the specifier, then
@@ -3488,8 +3471,7 @@ requirement = conformanceRequirement | sameTypeRequirement | layoutRequirement .
 // `~` belongs to `type` (`suppressedType` / a composition element); a separate `"~"?` here made `T:
 // ~Copyable & P` ambiguous.
 conformanceRequirement = type ":" conformanceRequirementRHS .
-conformanceRequirementRHS = >-> ( "_Trivial", "_TrivialAtMost", "_TrivialStride", "_UnknownLayout", "_RefCountedObject", "_NativeRefCountedObject", "_Class", "_NativeClass", "_BridgeObject" )
-                          type .
+conformanceRequirementRHS = >-> ( "_Trivial", "_TrivialAtMost", "_TrivialStride", "_UnknownLayout", "_RefCountedObject", "_NativeRefCountedObject", "_Class", "_NativeClass", "_BridgeObject" ) type .
 sameTypeRequirement = type "==" ( type | signedIntegerLiteral ) .
 layoutRequirement = type ":" layoutSpecifier layoutRequirementArguments? .
 layoutSpecifier =
@@ -3530,9 +3512,11 @@ layoutRequirementArguments = "(" integerLiteral ( "," integerLiteral )? ")" .
 // error. In an EXPRESSION a tight `<>` is not a clause at all: the lexer makes it one postfix
 // operator (`A<>.self` is PostfixOperatorExpr), so the empty form needs a gap. In a TYPE `A<>` is a
 // clause.
-genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle >n< >+> ( "(" ) .
-genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle
-                        >+> ( ")", "[", "]", "{", "}", ",", ";", ":", ".", keyPathDot, "?", "!", "&", EOF ) .
+genericArgumentClause =
+    | openAngle ( genericArgumentList ","? | <s> ) closeAngle >n< >+> ( "(" )
+    | openAngle ( genericArgumentList ","? | <s> ) closeAngle
+                        >+> ( ")", "[", "]", "{", "}", ",", ";", ":", ".", keyPathDot, "?", "!", "&", EOF )
+    .
 typeGenericArgumentClause = openAngle [ genericArgumentList ","? ] closeAngle .
 genericArgumentList = genericArgument { "," genericArgument } .
 // swift-syntax 604 `parseGenericArgumentType` accepts value generic arguments:

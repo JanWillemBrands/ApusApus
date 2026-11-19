@@ -2,11 +2,11 @@ import Base
 import ../LEMMAS.bend as Lemma
 import ./CORE.bend as Core
 import ./GLL.bend as Gll
-import ./EXACT.bend as Exact
+import ./CLOSURE.bend as CL
 import ./GUARD.bend as Guard
 import ./PROOF_GLL.bend as G
 import ./PROOF_PRUNE.bend as P
-import ./PROOF_EXACT.bend as X
+import ./PROOF_CLOSURE.bend as PCL
 import ./PROOF_SPELL.bend as S
 
 # THE GUARD ORACLE'S ANSWERS ARE RIGHT. "Does production q derive w?" Yes comes with a
@@ -261,7 +261,7 @@ law unknown_not_no:
 def unknown_not_no(e):
   Lemma.false_is_not_true(Equal.cong(Guard.Tri, Bool, v => isNo(v), Guard.Unknown{}, Guard.No{}, e))
 
-# ======== A NODE'S LAST STEP ========
+# ======== A STEP EQUALS ITSELF ========
 
 law bsr_eq_refl:
   for b: Core.Bsr
@@ -274,202 +274,6 @@ def bsr_eq_refl(b):
         Lemma.and_true_intro(Nat.is_eq(d, d), Bool.and(Nat.is_eq(i, i), Bool.and(Nat.is_eq(k, k), Nat.is_eq(j, j))), Lemma.nat_eq_refl(d),
           Lemma.and_true_intro(Nat.is_eq(i, i), Bool.and(Nat.is_eq(k, k), Nat.is_eq(j, j)), Lemma.nat_eq_refl(i),
             Lemma.and_true_intro(Nat.is_eq(k, k), Nat.is_eq(j, j), Lemma.nat_eq_refl(k), Lemma.nat_eq_refl(j)))))
-
-law ends_self:
-  for +q: Nat
-  for +d: Nat
-  for +k: Nat
-  for +j: Nat
-  {Guard.endsHere(Core.Bsr{q, d, 0n, k, j}, q, d, j) == True{} : Bool}
-
-def ends_self(q, d, k, j):
-  Lemma.and_true_intro(Nat.is_eq(q, q), Bool.and(Nat.is_eq(d, d), Bool.and(True{}, Nat.is_eq(j, j))), Lemma.nat_eq_refl(q),
-    Lemma.and_true_intro(Nat.is_eq(d, d), Bool.and(True{}, Nat.is_eq(j, j)), Lemma.nat_eq_refl(d),
-      Lemma.and_true_intro(True{}, Nat.is_eq(j, j), {==}, Lemma.nat_eq_refl(j))))
-
-law last_end:
-  for +q: Nat
-  for +dot: Nat
-  for +k: Nat
-  for +j: Nat
-  for +rest: +List<Core.Bsr>
-  {Guard.hasEnd(Core.Bsr{q, 1n+dot, 0n, k, j} <> rest, q, Nat.add(dot, 1n), j) == True{} : Bool}
-
-def last_end(q, dot, k, j, rest):
-  %Equal.sym(Nat, Nat.add(dot, 1n), 1n+dot, Lemma.add_one_right(dot)) : {Guard.hasEnd(Core.Bsr{q, 1n+dot, 0n, k, j} <> rest, q, _, j) == True{} : Bool}
-  Lemma.or_true_left_intro(Guard.endsHere(Core.Bsr{q, 1n+dot, 0n, k, j}, q, 1n+dot, j), Guard.hasEnd(rest, q, 1n+dot, j), ends_self(q, 1n+dot, k, j))
-
-law later_end:
-  for +q: Nat
-  for +dot: Nat
-  for +k: Nat
-  for +j: Nat
-  for +rest: +List<Core.Bsr>
-  for +l: Nat
-  for +e: Nat
-  for +h: {Guard.hasEnd(rest, q, 1n+Nat.add(dot, l), e) == True{} : Bool}
-  {Guard.hasEnd(Core.Bsr{q, 1n+dot, 0n, k, j} <> rest, q, Nat.add(dot, 1n+l), e) == True{} : Bool}
-
-def later_end(q, dot, k, j, rest, l, e, h):
-  %Equal.sym(Nat, Nat.add(dot, 1n+l), 1n+Nat.add(dot, l), Lemma.add_succ_right(dot, l)) : {Guard.hasEnd(Core.Bsr{q, 1n+dot, 0n, k, j} <> rest, q, _, e) == True{} : Bool}
-  Lemma.or_true_right_intro(Guard.endsHere(Core.Bsr{q, 1n+dot, 0n, k, j}, q, 1n+Nat.add(dot, l), e), Guard.hasEnd(rest, q, 1n+Nat.add(dot, l), e), h)
-
-law leaf_end_at:
-  for +q: Nat
-  for +dot: Nat
-  for +k: Nat
-  for +a: Nat
-  for +ts: +List<Core.Tree>
-  for +l: Nat
-  for +e: Nat
-  for +h: {Guard.hasEnd(Core.Bsr{q, 1n+dot, 0n, k, 1n+k} <> Core.own(q, ts, 1n+dot, 0n, 1n+k), q, l, e) == True{} : Bool}
-  {Guard.hasEnd(Core.own(q, Core.Leaf{a} <> ts, dot, 0n, k), q, l, e) == True{} : Bool}
-
-def leaf_end_at(q, dot, k, a, ts, l, e, h):
-  %Equal.sym(Nat, Nat.add(k, 1n), 1n+k, Lemma.add_one_right(k)) : {Guard.hasEnd(Core.Bsr{q, 1n+dot, 0n, k, _} <> Core.own(q, ts, 1n+dot, 0n, _), q, l, e) == True{} : Bool}
-  h
-
-# Among a node's own steps is the completed one: after its last child, at the node's end.
-law own_end_has:
-  for rest: +List<Core.Tree>
-  for t: Core.Tree
-  for +q: Nat
-  for +dot: Nat
-  for +k: Nat
-  {Guard.hasEnd(Core.own(q, t <> rest, dot, 0n, k), q, Nat.add(dot, 1n+List.length(&2, Core.Tree, rest)), G.endOf(t <> rest, k)) == True{} : Bool}
-
-def own_end_has(rest, t, q, dot, k):
-  match rest t:
-    case Nil{} Core.Leaf{+a}:
-      leaf_end_at(q, dot, k, a, [], Nat.add(dot, 1n), 1n+k, last_end(q, dot, k, 1n+k, []))
-    case Nil{} Core.Node{+q2, +ch}:
-      last_end(q, dot, k, Nat.add(k, Core.width(Core.Node{q2, ch})), [])
-    case Con{+t2, +r2} Core.Leaf{+a}:
-      +l = {1n+List.length(&2, Core.Tree, r2) : Nat}
-      leaf_end_at(q, dot, k, a, t2 <> r2, Nat.add(dot, 1n+l), G.endOf(t2 <> r2, 1n+k),
-        later_end(q, dot, k, 1n+k, Core.own(q, t2 <> r2, 1n+dot, 0n, 1n+k), l, G.endOf(t2 <> r2, 1n+k), own_end_has(r2, t2, q, 1n+dot, 1n+k)))
-    case Con{+t2, +r2} Core.Node{+q2, +ch}:
-      +l = {1n+List.length(&2, Core.Tree, r2) : Nat}
-      +far = {Nat.add(k, Core.width(Core.Node{q2, ch})) : Nat}
-      later_end(q, dot, k, far, Core.own(q, t2 <> r2, 1n+dot, 0n, far), l, G.endOf(t2 <> r2, far), own_end_has(r2, t2, q, 1n+dot, far))
-
-law own_has_end:
-  for f: +List<Core.Tree>
-  for +q: Nat
-  {Guard.hasEnd(Core.own(q, f, 0n, 0n, 0n), q, List.length(&2, Core.Tree, f), G.endOf(f, 0n)) == True{} : Bool}
-
-def own_has_end(f, q):
-  match f:
-    case Nil{}:
-      Lemma.or_true_left_intro(Guard.endsHere(Core.Bsr{q, 0n, 0n, 0n, 0n}, q, 0n, 0n), False{}, ends_self(q, 0n, 0n, 0n))
-    case Con{+t, +rest}:
-      own_end_has(rest, t, q, 0n, 0n)
-
-# ---- From a list that has it, to a set that has it ----
-
-def Picked(+xs: +List<Core.Bsr>, +q: Nat, +len: Nat, +n: Nat) -> Type:
-  &y: Core.Bsr -> {Core.member(y, xs) == True{} : Bool} & {Guard.endsHere(y, q, len, n) == True{} : Bool}
-
-def pick_lift(+x: Core.Bsr, +rest: +List<Core.Bsr>, +q: Nat, +len: Nat, +n: Nat, p: Picked(rest, q, len, n)) -> Picked(x <> rest, q, len, n):
-  match p:
-    case (y0, (m, e)):
-      +y = y0
-      +my = Lemma.or_true_right_intro(Core.bsrEq(y, x), Core.member(y, rest), m)
-      {(y, (my, e)) : Picked(x <> rest, q, len, n)}
-
-def pick_cases(+x: Core.Bsr, +rest: +List<Core.Bsr>, +q: Nat, +len: Nat, +n: Nat,
-  cases: Either<{Guard.endsHere(x, q, len, n) == True{} : Bool}, {Guard.hasEnd(rest, q, len, n) == True{} : Bool}>,
-  later: {Guard.hasEnd(rest, q, len, n) == True{} : Bool} -> Picked(rest, q, len, n)) -> Picked(x <> rest, q, len, n):
-  match cases:
-    case Inl{+e}:
-      +m = Lemma.or_true_left_intro(Core.bsrEq(x, x), Core.member(x, rest), bsr_eq_refl(x))
-      {(x, (m, e)) : Picked(x <> rest, q, len, n)}
-    case Inr{h}:
-      pick_lift(x, rest, q, len, n, later(h))
-
-law pick_end:
-  for xs: +List<Core.Bsr>
-  for +q: Nat
-  for +len: Nat
-  for +n: Nat
-  for +h: {Guard.hasEnd(xs, q, len, n) == True{} : Bool}
-  Picked(xs, q, len, n)
-
-def pick_end(xs, q, len, n, h):
-  match xs:
-    case Nil{}:
-      Empty.absurd(Picked([], q, len, n), Lemma.false_is_not_true(h))
-    case Con{+x, +rest}:
-      pick_cases(x, rest, q, len, n, Lemma.or_true_cases(Guard.endsHere(x, q, len, n), Guard.hasEnd(rest, q, len, n), h), later => pick_end(rest, q, len, n, later))
-
-def member_app_pick(+x: Core.Bsr, +rest: +List<Core.Bsr>, +ys: +List<Core.Bsr>, +y: Core.Bsr,
-  cases: Either<{Core.bsrEq(y, x) == True{} : Bool}, {Core.member(y, rest) == True{} : Bool}>,
-  later: {Core.member(y, rest) == True{} : Bool} -> {Core.member(y, List.append(&2, Core.Bsr, rest, ys)) == True{} : Bool})
-  -> {Core.member(y, x <> List.append(&2, Core.Bsr, rest, ys)) == True{} : Bool}:
-  match cases:
-    case Inl{e}:
-      Lemma.or_true_left_intro(Core.bsrEq(y, x), Core.member(y, List.append(&2, Core.Bsr, rest, ys)), e)
-    case Inr{m}:
-      Lemma.or_true_right_intro(Core.bsrEq(y, x), Core.member(y, List.append(&2, Core.Bsr, rest, ys)), later(m))
-
-
-law member_app_left:
-  for xs: +List<Core.Bsr>
-  for +ys: +List<Core.Bsr>
-  for +y: Core.Bsr
-  for +m: {Core.member(y, xs) == True{} : Bool}
-  {Core.member(y, List.append(&2, Core.Bsr, xs, ys)) == True{} : Bool}
-
-def member_app_left(xs, ys, y, m):
-  match xs:
-    case Nil{}:
-      Empty.absurd({Core.member(y, ys) == True{} : Bool}, Lemma.false_is_not_true(m))
-    case Con{+x, +rest}:
-      member_app_pick(x, rest, ys, y, Lemma.or_true_cases(Core.bsrEq(y, x), Core.member(y, rest), m), later => member_app_left(rest, ys, y, later))
-
-law ends_cast:
-  for +y: Core.Bsr
-  for +z: Core.Bsr
-  for +q: Nat
-  for +len: Nat
-  for +n: Nat
-  for +same: {y == z : Core.Bsr}
-  for +e: {Guard.endsHere(y, q, len, n) == True{} : Bool}
-  {Guard.endsHere(z, q, len, n) == True{} : Bool}
-
-def ends_cast(y, z, q, len, n, same, e):
-  %same : {Guard.endsHere(_, q, len, n) == True{} : Bool}
-  e
-
-def ends_pick(+y: Core.Bsr, +z: Core.Bsr, +rest: +List<Core.Bsr>, +q: Nat, +len: Nat, +n: Nat,
-  +e: {Guard.endsHere(y, q, len, n) == True{} : Bool},
-  cases: Either<{Core.bsrEq(y, z) == True{} : Bool}, {Core.member(y, rest) == True{} : Bool}>,
-  later: {Core.member(y, rest) == True{} : Bool} -> {Guard.hasEnd(rest, q, len, n) == True{} : Bool})
-  -> {Guard.hasEnd(z <> rest, q, len, n) == True{} : Bool}:
-  match cases:
-    case Inl{same}:
-      +ez = ends_cast(y, z, q, len, n, G.bsr_eq_sound(y, z, same), e)
-      Lemma.or_true_left_intro(Guard.endsHere(z, q, len, n), Guard.hasEnd(rest, q, len, n), ez)
-    case Inr{m}:
-      Lemma.or_true_right_intro(Guard.endsHere(z, q, len, n), Guard.hasEnd(rest, q, len, n), later(m))
-
-
-law member_ends:
-  for set: +List<Core.Bsr>
-  for +y: Core.Bsr
-  for +q: Nat
-  for +len: Nat
-  for +n: Nat
-  for +m: {Core.member(y, set) == True{} : Bool}
-  for +e: {Guard.endsHere(y, q, len, n) == True{} : Bool}
-  {Guard.hasEnd(set, q, len, n) == True{} : Bool}
-
-def member_ends(set, y, q, len, n, m, e):
-  match set:
-    case Nil{}:
-      Empty.absurd({Guard.hasEnd([], q, len, n) == True{} : Bool}, Lemma.false_is_not_true(m))
-    case Con{+z, +rest}:
-      ends_pick(y, z, rest, q, len, n, e, Lemma.or_true_cases(Core.bsrEq(y, z), Core.member(y, rest), m), later => member_ends(rest, y, q, len, n, later, e))
 
 
 # ======== DOES PRODUCTION q DERIVE w? ========
@@ -498,25 +302,41 @@ def yes_if_not_no(c, e):
     case False{}:
       unknown_not_no(e)
 
-def ends_yes(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +set: +List<Core.Bsr>, +q: Nat,
-  +e: {Guard.endPick(b, fuel, grammar, w, set, q) == Guard.Yes{} : Guard.Tri}) -> Core.Derives(grammar, Core.rhsOf(grammar, q), w):
+law no_if_true:
+  for c: Bool
+  for +e: {Guard.noIf(c) == Guard.No{} : Guard.Tri}
+  {c == True{} : Bool}
+
+def no_if_true(c, e):
+  match c:
+    case True{}:
+      {==}
+    case False{}:
+      Empty.absurd({False{} == True{} : Bool}, unknown_not_no(e))
+
+law no_if_not_yes:
+  for c: Bool
+  for +e: {Guard.noIf(c) == Guard.Yes{} : Guard.Tri}
+  Empty
+
+def no_if_not_yes(c, e):
+  match c:
+    case True{}:
+      no_not_yes(e)
+    case False{}:
+      unknown_not_yes(e)
+
+def found_yes(b: Bool, +grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>, +segs: +List<CL.Seg>,
+  +e: {Guard.foundPick(b, grammar, q, w, segs) == Guard.Yes{} : Guard.Tri}) -> Core.Derives(grammar, Core.rhsOf(grammar, q), w):
   match b:
     case True{}:
-      +f = Guard.forestFor(fuel, grammar, w, set, q)
+      +f = CL.forestAt(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs)
       +ok = yes_if_true(Guard.forestOk(grammar, q, w, f), e)
       +r = Lemma.and_true_left(Core.reads(f, grammar, Core.rhsOf(grammar, q), w, 0n), Nat.is_eq(List.length(&2, Nat, Core.leaves(f)), List.length(&2, Nat, w)), ok)
       +l = Lemma.nat_eq_sound(List.length(&2, Nat, Core.leaves(f)), List.length(&2, Nat, w), Lemma.and_true_right_side(Core.reads(f, grammar, Core.rhsOf(grammar, q), w, 0n), Nat.is_eq(List.length(&2, Nat, Core.leaves(f)), List.length(&2, Nat, w)), ok))
       derives_of(f, Core.rhsOf(grammar, q), grammar, w, r, l)
     case False{}:
-      Empty.absurd(Core.Derives(grammar, Core.rhsOf(grammar, q), w), no_not_yes(e))
-
-def found_yes(m: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +w: +List<Nat>, +q: Nat,
-  +e: {Guard.rhsIn(m, fuel, grammar, w, q) == Guard.Yes{} : Guard.Tri}) -> Core.Derives(grammar, Core.rhsOf(grammar, q), w):
-  match m:
-    case Some{+set}:
-      ends_yes(Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)), fuel, grammar, w, set, q, e)
-    case None{}:
-      Empty.absurd(Core.Derives(grammar, Core.rhsOf(grammar, q), w), unknown_not_yes(e))
+      Empty.absurd(Core.Derives(grammar, Core.rhsOf(grammar, q), w), no_if_not_yes(Bool.and(CL.closedAll(segs, grammar, w, segs), CL.hasSeg(q, 0n, 0n, 0n, segs)), e))
 
 # Past the grammar's end a production's right side is empty.
 law past_end:
@@ -558,7 +378,7 @@ def real_yes(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +w:
   +e: {Guard.rhsPick(b, fuel, grammar, q, w) == Guard.Yes{} : Guard.Tri}) -> Core.Derives(grammar, Core.rhsOf(grammar, q), w):
   match b:
     case True{}:
-      found_yes(Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, q), w), fuel, grammar, w, q, e)
+      found_yes(CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), CL.segsFrom(fuel, grammar, w, q, 0n)), grammar, q, w, CL.segsFrom(fuel, grammar, w, q, 0n), e)
     case False{}:
       empty_yes(w, grammar, q, past_end(grammar, q, Equal.sym(Bool, False{}, Core.lhsIs(grammar, q, Gll.lhsOf(grammar, q)), eb)), e)
 
@@ -574,108 +394,36 @@ law rhs_yes:
 def rhs_yes(fuel, grammar, q, w, e):
   real_yes(Core.lhsIs(grammar, q, Gll.lhsOf(grammar, q)), fuel, grammar, q, w, {==}, e)
 
-law own_lhs:
-  for +grammar: +List<Core.Production>
-  for +q: Nat
-  for +x: Nat
-  for +lhs: {Core.lhsIs(grammar, q, x) == True{} : Bool}
-  {Core.lhsIs(grammar, q, Gll.lhsOf(grammar, q)) == True{} : Bool}
-
-def own_lhs(grammar, q, x, lhs):
-  %Equal.sym(Nat, Gll.lhsOf(grammar, q), x, G.lhs_of(grammar, q, x, lhs)) : {Core.lhsIs(grammar, q, _) == True{} : Bool}
-  lhs
-
-law end_at:
-  for +q: Nat
-  for +f: +List<Core.Tree>
-  for +grammar: +List<Core.Production>
-  for +w: +List<Nat>
-  for +set: +List<Core.Bsr>
-  for +ef: {List.length(&2, Core.Tree, f) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}
-  for +lv: {Core.leaves(f) == w : +List<Nat>}
-  for +h: {Guard.hasEnd(set, q, List.length(&2, Core.Tree, f), G.endOf(f, 0n)) == True{} : Bool}
-  {Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)) == True{} : Bool}
-
-def end_at(q, f, grammar, w, set, ef, lv, h):
+def end_at_w(+grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>, +segs: +List<CL.Seg>, +f: +List<Core.Tree>, +lv: {Core.leaves(f) == w : +List<Nat>},
+  +h: {CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), G.endOf(f, 0n), segs) == True{} : Bool}) -> {CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs) == True{} : Bool}:
   +en = Equal.trans(Nat, G.endOf(f, 0n), List.length(&2, Nat, Core.leaves(f)), List.length(&2, Nat, w), G.end_eq(f, 0n), Equal.cong(+List<Nat>, Nat, v => List.length(&2, Nat, v), Core.leaves(f), w, lv))
-  %ef : {Guard.hasEnd(set, q, _, List.length(&2, Nat, w)) == True{} : Bool}
-  %en : {Guard.hasEnd(set, q, List.length(&2, Core.Tree, f), _) == True{} : Bool}
+  %en : {CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), _, segs) == True{} : Bool}
   h
 
-def end_picked(+grammar: +List<Core.Production>, +q: Nat, +lx: Nat, +w: +List<Nat>, +set: +List<Core.Bsr>, +f: +List<Core.Tree>,
-  +rr: {Core.reads([Core.Node{q, f}], grammar, [Core.Nonterminal{lx, Core.Anything{}}], w, 0n) == True{} : Bool},
-  +rl: {List.length(&2, Nat, Core.leaves([Core.Node{q, f}])) == List.length(&2, Nat, w) : Nat},
-  +ef: {List.length(&2, Core.Tree, f) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat},
-  +lv: {Core.leaves(f) == w : +List<Nat>},
-  every: Core.EveryParseStep(grammar, lx, w, set),
-  p: Picked(Core.own(q, f, 0n, 0n, 0n), q, List.length(&2, Core.Tree, f), G.endOf(f, 0n)))
-  -> {Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)) == True{} : Bool}:
-  match p:
-    case (y0, (my, ey)):
-      +y = y0
-      +inTree = member_app_left(Core.own(q, f, 0n, 0n, 0n), List.append(&2, Core.Bsr, Core.steps(f, 0n), []), y, my)
-      +inSet = every(Core.Node{q, f}, y, (rr, rl), inTree)
-      end_at(q, f, grammar, w, set, ef, lv, member_ends(set, y, q, List.length(&2, Core.Tree, f), G.endOf(f, 0n), inSet, ey))
-
-
-def end_found(+fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +lx: Nat, +w: +List<Nat>, +set: +List<Core.Bsr>, +f: +List<Core.Tree>,
-  +em: {Exact.exactSteps(fuel, grammar, lx, w) == Some{set} : Maybe<&2, +List<Core.Bsr>>},
-  +rr: {Core.reads([Core.Node{q, f}], grammar, [Core.Nonterminal{lx, Core.Anything{}}], w, 0n) == True{} : Bool},
-  +rl: {List.length(&2, Nat, Core.leaves([Core.Node{q, f}])) == List.length(&2, Nat, w) : Nat},
-  +ef: {List.length(&2, Core.Tree, f) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat},
-  +lv: {Core.leaves(f) == w : +List<Nat>},
-  ex: Core.IsExact(grammar, lx, w, set)) -> {Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)) == True{} : Bool}:
-  match ex:
-    case (every, only):
-      +len = List.length(&2, Core.Tree, f)
-      +n = G.endOf(f, 0n)
-      end_picked(grammar, q, lx, w, set, f, rr, rl, ef, lv, every, pick_end(Core.own(q, f, 0n, 0n, 0n), q, len, n, own_has_end(f, q)))
-
-
-# The completed step of a node of q over w is in the exact set of q's nonterminal over w.
-def end_in_set(+fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +x: Nat, +w: +List<Nat>, +set: +List<Core.Bsr>,
-  +lhs: {Core.lhsIs(grammar, q, x) == True{} : Bool},
-  +em: {Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, q), w) == Some{set} : Maybe<&2, +List<Core.Bsr>>},
-  d: Core.Derives(grammar, Core.rhsOf(grammar, q), w)) -> {Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)) == True{} : Bool}:
+# A closed set with q's start: a forest of q's right side over w completes q in a segment.
+def closed_has(+grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>, +segs: +List<CL.Seg>,
+  +c: {Bool.and(CL.closedAll(segs, grammar, w, segs), CL.hasSeg(q, 0n, 0n, 0n, segs)) == True{} : Bool},
+  d: Core.Derives(grammar, Core.rhsOf(grammar, q), w)) -> {CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs) == True{} : Bool}:
   match d:
     case (f0, (fit0, lv0)):
       +f = f0
-      +fit = fit0
       +lv = lv0
-      +rf = fits_reads(f, Core.rhsOf(grammar, q), grammar, w, 0n, fit, spells_own(f, w, lv))
-      +t = {Core.Node{q, f} : Core.Tree}
-      +lx = Gll.lhsOf(grammar, q)
-      +head = {Bool.and(Core.lhsIs(grammar, q, lx), True{}) : Bool}
-      +rr = Lemma.and_true_intro(Bool.and(head, Core.reads(f, grammar, Core.rhsOf(grammar, q), w, 0n)), True{},
-        Lemma.and_true_intro(head, Core.reads(f, grammar, Core.rhsOf(grammar, q), w, 0n), Lemma.and_true_intro(Core.lhsIs(grammar, q, lx), True{}, own_lhs(grammar, q, x, lhs), {==}), rf), {==})
-      +rl = Equal.trans(Nat, List.length(&2, Nat, List.append(&2, Nat, Core.leaves(f), [])), List.length(&2, Nat, Core.leaves(f)), List.length(&2, Nat, w),
-        Equal.cong(+List<Nat>, Nat, v => List.length(&2, Nat, v), List.append(&2, Nat, Core.leaves(f), []), Core.leaves(f), Lemma.append_nil_right(Core.leaves(f))),
-        Equal.cong(+List<Nat>, Nat, v => List.length(&2, Nat, v), Core.leaves(f), w, lv))
-      +ef = P.reads_length(f, Core.rhsOf(grammar, q), grammar, w, 0n, rf)
-      end_found(fuel, grammar, q, lx, w, set, f, em, rr, rl, ef, lv, X.gll_bsr_exact(fuel, grammar, lx, w, set, em))
+      +rf = fits_reads(f, Core.rhsOf(grammar, q), grammar, w, 0n, fit0, spells_own(f, w, lv))
+      end_at_w(grammar, q, w, segs, f, lv,
+        PCL.walk(f, Core.rhsOf(grammar, q), grammar, w, segs, q, 0n, 0n, 0n, {==}, {==}, rf,
+          Lemma.and_true_right_side(CL.closedAll(segs, grammar, w, segs), CL.hasSeg(q, 0n, 0n, 0n, segs), c),
+          Lemma.and_true_left(CL.closedAll(segs, grammar, w, segs), CL.hasSeg(q, 0n, 0n, 0n, segs), c)))
 
-def ends_no(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +x: Nat, +w: +List<Nat>, +set: +List<Core.Bsr>,
-  +lhs: {Core.lhsIs(grammar, q, x) == True{} : Bool},
-  +em: {Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, q), w) == Some{set} : Maybe<&2, +List<Core.Bsr>>},
-  +eb: {b == Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)) : Bool},
-  +e: {Guard.endPick(b, fuel, grammar, w, set, q) == Guard.No{} : Guard.Tri},
+def found_no(b: Bool, +grammar: +List<Core.Production>, +q: Nat, +w: +List<Nat>, +segs: +List<CL.Seg>,
+  +eb: {CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs) == b : Bool},
+  +e: {Guard.foundPick(b, grammar, q, w, segs) == Guard.No{} : Guard.Tri},
   d: Core.Derives(grammar, Core.rhsOf(grammar, q), w)) -> Empty:
   match b:
     case True{}:
-      yes_if_not_no(Guard.forestOk(grammar, q, w, Guard.forestFor(fuel, grammar, w, set, q)), e)
+      yes_if_not_no(Guard.forestOk(grammar, q, w, CL.forestAt(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs)), e)
     case False{}:
-      Lemma.false_is_not_true(Equal.trans(Bool, False{}, Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)), True{}, eb, end_in_set(fuel, grammar, q, x, w, set, lhs, em, d)))
-
-def found_no(m: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +x: Nat, +w: +List<Nat>,
-  +lhs: {Core.lhsIs(grammar, q, x) == True{} : Bool},
-  +em: {Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, q), w) == m : Maybe<&2, +List<Core.Bsr>>},
-  +e: {Guard.rhsIn(m, fuel, grammar, w, q) == Guard.No{} : Guard.Tri},
-  d: Core.Derives(grammar, Core.rhsOf(grammar, q), w)) -> Empty:
-  match m:
-    case Some{+set}:
-      ends_no(Guard.hasEnd(set, q, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w)), fuel, grammar, q, x, w, set, lhs, em, {==}, e, d)
-    case None{}:
-      unknown_not_no(e)
+      Lemma.false_is_not_true(Equal.trans(Bool, False{}, CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs), True{}, Equal.sym(Bool, CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), segs), False{}, eb),
+        closed_has(grammar, q, w, segs, no_if_true(Bool.and(CL.closedAll(segs, grammar, w, segs), CL.hasSeg(q, 0n, 0n, 0n, segs)), e), d)))
 
 def empty_no(f: +List<Core.Tree>, w: +List<Nat>, +grammar: +List<Core.Production>,
   +e: {Guard.emptyTri(w) == Guard.No{} : Guard.Tri},
@@ -718,8 +466,7 @@ def real_no(b: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +q: Nat, +w: 
   d: Core.Derives(grammar, Core.rhsOf(grammar, q), w)) -> Empty:
   match b:
     case True{}:
-      +lhs = Equal.sym(Bool, True{}, Core.lhsIs(grammar, q, Gll.lhsOf(grammar, q)), eb)
-      found_no(Exact.exactSteps(fuel, grammar, Gll.lhsOf(grammar, q), w), fuel, grammar, q, Gll.lhsOf(grammar, q), w, lhs, {==}, e, d)
+      found_no(CL.hasSeg(q, 0n, List.length(&2, Core.Sym, Core.rhsOf(grammar, q)), List.length(&2, Nat, w), CL.segsFrom(fuel, grammar, w, q, 0n)), grammar, q, w, CL.segsFrom(fuel, grammar, w, q, 0n), {==}, e, d)
     case False{}:
       past_no(grammar, q, w, past_end(grammar, q, Equal.sym(Bool, False{}, Core.lhsIs(grammar, q, Gll.lhsOf(grammar, q)), eb)), e, d)
 

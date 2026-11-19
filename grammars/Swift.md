@@ -1147,7 +1147,6 @@ keyPathSpacedDot =
     | >-> ( keyPathNumericDot ) "."
     | >+> ( keyPathNumericDot ) ifConfigSameLine "."
     .
-
 keyPathPivotFirst =
     | keyPathDot >s< optionalMark
     | keyPathDot >s< forceMark
@@ -1156,15 +1155,12 @@ keyPathPivotFirst =
     | keyPathMarkRunOperator
     | <s> "!" >+> ( ".", ")", "]", "}", ",", ";", ":", EOF )
     .
-
 keyPathPivot =
     | keyPathPivotFirst
     | >s< optionalMark
     | >s< forceMark
     .
-
 keyPathMarkRunOperator = <s> keyPathMarkRunOptional | <s> keyPathMarkRunForce .
-
 keyPathBareTail = keyPathBareComponent { keyPathBareComponent } .
 keyPathBareComponent =
     | keyPathProperty
@@ -1228,22 +1224,21 @@ _labeled-trailing-closure → identifier **:** closure-expression_
 
 ```apus
 @flavors(stmtCondition, bindingIntroducer, poundIfDirective)
-functionCallExpression = argumentCall .
-@flavors(stmtCondition, bindingIntroducer, poundIfDirective)
-argumentCall = postfixExpression >n< functionCallArgumentClause .
+functionCallExpression =
+    | @prefer postfixExpression >n< functionCallArgumentClause [ ifConfigSameLine trailingClosures ]
+    | @right @right( literal, typePrimaryExpression ) postfixExpression ifConfigSameLine trailingClosures
+    | parenthesizedTrailingClosureCall ifConfigSameLine trailingClosures
+    | selfType ifConfigSameLine trailingClosures
+    .
 parenthesizedTrailingClosureCall = postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures .
-functionCallExpression = @prefer parenthesizedTrailingClosureCall ifConfigSameLine trailingClosures .
-functionCallExpression = @prefer postfixExpression >n< functionCallArgumentClause ifConfigSameLine trailingClosures
-                       | @right @right( literalExpression, typePrimaryExpression, argumentCall ) postfixExpression ifConfigSameLine trailingClosures .
-functionCallExpression = collectionLiteralCallee ifConfigSameLine trailingClosures .
-functionCallExpression = selfType ifConfigSameLine trailingClosures .
+```
 
-@flavors(stmtCondition)
-collectionLiteralCallee = arrayLiteral | dictionaryLiteral .
+```apus
 @flavors(bindingIntroducer)
 functionCallArgumentClause = "(" ")" | "(" labeledExpressionList ","? ")" .
 @flavors(bindingIntroducer)
 labeledExpressionList = labeledExpression { "," labeledExpression } .
+
 @flavors(bindingIntroducer)
 labeledExpression = [ argumentLabel ":" ] ( expression | operatorReference ) .
 operatorReference = moduleSelector? ( operator | "&" | "!" ) .
@@ -1281,10 +1276,11 @@ _argument-name → identifier **:**_
 
 ```apus
 @flavors(stmtCondition, poundIfDirective)
-explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral, octalLiteral, decimalLiteral, hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits .
-explicitMemberExpression = postfixExpression ifConfigSameLine ( >s< "." >s< | <s> "." ) moduleSelector? memberName
-                           [ genericArgumentClause | >n< "(" argumentNames ")" ] .
-explicitMemberExpression = postfixExpression ifConfigSameLine postfixConditionalCompilationBlock .
+explicitMemberExpression =
+    | postfixExpression ifConfigSameLine ( >s< <-< ( binaryLiteral, octalLiteral, decimalLiteral, hexadecimalLiteral ) "." >s< | <s> "." ) decimalDigits
+    | postfixExpression ifConfigSameLine ( >s< "." >s< | <s> "." ) moduleSelector? memberName [ genericArgumentClause | >n< "(" argumentNames ")" ]
+    | postfixExpression ifConfigSameLine postfixConditionalCompilationBlock
+    .
 
 argumentNames = argumentName argumentNames? .
 argumentName = argumentLabel ":" .
@@ -1352,7 +1348,6 @@ committingStatementDeclaration = >-> ( "open" ) declaration .
 statement = >!>(committingStatementDeclaration, attributes, initializerIntroducer, macroIntroducer, operatorDeclarationStart, invalidOperatorDeclarationStart, actorDeclarationStart)
             ( @requiresFlavor(fileScope) >->( "{" ) | @rejectsFlavor(fileScope) ε ) expression .
 statement = >!>(typeMemberIntroducer, localSetterAccessModifier) declaration .
-
 statement = loopStatement .
 statement = branchStatement .
 statement = labeledStatement .
@@ -1498,7 +1493,6 @@ _label-name → identifier_
 labeledStatement = statementLabel loopStatement .
 labeledStatement = statementLabel conditionalExpression .
 labeledStatement = statementLabel doStatement .
-
 statementLabel = labelName ":" .
 labelName = identifier ---( "_", "_borrowing", lexerClassifiedKeyword ) | escapedIdentifier .
 ```
@@ -1512,11 +1506,13 @@ _control-transfer-statement → return-statement_
 _control-transfer-statement → throw-statement_
 
 ```apus
-controlTransferStatement = breakStatement
-                         | continueStatement
-                         | fallthroughStatement
-                         | returnStatement
-                         | throwStatement .
+controlTransferStatement =
+    | breakStatement
+    | continueStatement
+    | fallthroughStatement
+    | returnStatement
+    | throwStatement
+    .
 ```
 
 
@@ -1580,9 +1576,7 @@ _catch-pattern → pattern where-clause?_
 doStatement = "do" codeBlock catchClauses? | "do" throwsClause codeBlock catchClauses .
 catchClauses = catchClause catchClauses? .
 catchClause = "catch" catchPatternList? codeBlock .
-
 catchPatternList = >-> ( "{" ) catchPattern { "," catchPattern } .
-
 catchPattern = matchPattern whereClause? .
 catchPattern = whereClause .
 ```
@@ -2063,7 +2057,6 @@ _protocol-member-declaration → protocol-subscript-declaration_
 _protocol-member-declaration → protocol-associated-type-declaration_  
 _protocol-member-declaration → typealias-declaration_
 
-
 ### Grammar of a protocol property declaration
 _protocol-property-declaration → variable-declaration-head variable-name type-annotation getter-setter-keyword-block_
 
@@ -2407,11 +2400,9 @@ specializeArgument  = "target" ":" attributeDeclName ","?
                     | "kind" ":" identifierToken ","?
                     | "spi" ":" effectsToken ","?
                     | "spiModule" ":" effectsToken ","? .
-
 attribute = "@"
             >-> ( "abi", "attached", "available", "convention", "freestanding", "isolated", "backDeployed", "derivative", "differentiable", "lifetime", "_lifetime", "objc", "specialized", "transpose", "_originallyDefinedIn", "_documentation", "_dynamicReplacement", "_implements", "_spi", "_unavailableFromAsync", "_expose", "_swift_native_objc_runtime_base", "_backDeploy", "_effects", "_specialize" )
             >s< ( >!>( declarationModifier ) attributeName ) attributeArgumentExprClause? .
-
 attribute = "@"
             >-> ( "abi", "attached", "available", "convention", "freestanding", "isolated", "backDeployed", "derivative", "differentiable", "lifetime", "_lifetime", "objc", "specialized", "transpose", "_originallyDefinedIn", "_documentation", "_dynamicReplacement", "_implements", "_backDeploy", "_effects", "_specialize" )
             >s< moduleSelector attributeName attributeArgumentExprClause? .
@@ -2510,6 +2501,7 @@ matchIdentifierPattern =
     | escapedIdentifier
     | propertyWrapperProjection
     .
+
 @flavors(bindingIntroducer)
 matchPattern =
     | wildcardPattern
@@ -2592,6 +2584,7 @@ _optional-pattern → identifier-pattern **?**_
 ```apus
 @flavors(bindingIntroducer)
 optionalPattern = ( identifierPattern | tupleMatchPattern | enumCasePayloadPattern ) >s< optionalMark .
+
 @flavors(bindingIntroducer)
 enumCasePayloadPattern =
     | enumCaseName >n< tupleMatchPattern
@@ -2628,7 +2621,7 @@ _generic-parameter-list → generic-parameter | generic-parameter **,** generic-
 _generic-parameter → type-name_  
 _generic-parameter → type-name **:** type-identifier_  
 _generic-parameter → type-name **:** protocol-composition-type_  
-_generic-parameter → **let** type-name **:** type **\\**_  
+_generic-parameter → **let** type-name **:** type_  
 _generic-where-clause → **where** requirement-list_  
 _requirement-list → requirement | requirement **,** requirement-list_  
 _requirement → conformance-requirement | same-type-requirement_  
@@ -2639,7 +2632,6 @@ _same-type-requirement → type-identifier **==** signed-integer-literal_
 
 ```apus
 genericParameterClause  = openAngle genericParameterList genericWhereClause? ","? closeAngle .
-
 genericParameterList = genericParameter { "," genericParameter } .
 
 genericParameter =
@@ -2665,8 +2657,7 @@ requirementList = requirement { "," requirement } .
 requirement = conformanceRequirement | sameTypeRequirement | layoutRequirement .
 
 conformanceRequirement = type ":" conformanceRequirementRHS .
-conformanceRequirementRHS = >-> ( "_Trivial", "_TrivialAtMost", "_TrivialStride", "_UnknownLayout", "_RefCountedObject", "_NativeRefCountedObject", "_Class", "_NativeClass", "_BridgeObject" )
-                          type .
+conformanceRequirementRHS = >-> ( "_Trivial", "_TrivialAtMost", "_TrivialStride", "_UnknownLayout", "_RefCountedObject", "_NativeRefCountedObject", "_Class", "_NativeClass", "_BridgeObject" ) type .
 sameTypeRequirement = type "==" ( type | signedIntegerLiteral ) .
 layoutRequirement = type ":" layoutSpecifier layoutRequirementArguments? .
 layoutSpecifier =
@@ -2684,9 +2675,11 @@ _generic-argument-list → generic-argument | generic-argument **,** generic-arg
 _generic-argument → type | signed-integer-literal_
 
 ```apus
-genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle >n< >+> ( "(" ) .
-genericArgumentClause = openAngle ( genericArgumentList ","? | <s> ) closeAngle
-                        >+> ( ")", "[", "]", "{", "}", ",", ";", ":", ".", keyPathDot, "?", "!", "&", EOF ) .
+genericArgumentClause =
+    | openAngle ( genericArgumentList ","? | <s> ) closeAngle >n< >+> ( "(" )
+    | openAngle ( genericArgumentList ","? | <s> ) closeAngle
+                        >+> ( ")", "[", "]", "{", "}", ",", ";", ":", ".", keyPathDot, "?", "!", "&", EOF )
+    .
 typeGenericArgumentClause = openAngle [ genericArgumentList ","? ] closeAngle .
 genericArgumentList = genericArgument { "," genericArgument } .
 genericArgument =

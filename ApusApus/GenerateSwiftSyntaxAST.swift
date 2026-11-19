@@ -7888,19 +7888,14 @@ struct SwiftSyntaxGenerator {
     }
 
     private mutating func convertFunctionCallExpression(_ nt: GrammarNode, from: CharPosition, to: CharPosition) -> ExprSyntax {
-        // functionCallExpression = postfixExpression >n< functionCallArgumentClause .
-        // functionCallExpression = @prefer postfixExpression functionCallArgumentClause trailingClosures
-        //                        | @right @right(literalExpression) postfixExpression trailingClosures
-        //                        | collectionLiteralCallee trailingClosures
-        //                        | selfType trailingClosures
-        //                        | anyType trailingClosures .
-        guard var (_, spans) = tileAlternate(nt, from: from, to: to) else {
+        // functionCallExpression =
+        //     | postfixExpression functionCallArgumentClause [ trailingClosures ]   // rule 1
+        //     | postfixExpression trailingClosures                                   // rules 2, 3 (parenless)
+        //     | parenthesizedTrailingClosureCall trailingClosures                    // rule 3: `f(1) {} {}`
+        //     | selfType trailingClosures .                                          // rule 2: `Self {}`
+        // (rules 1–3: the comment at `functionCallExpression` in Swift.apus).
+        guard let (_, spans) = tileAlternate(nt, from: from, to: to) else {
             return missingExpr(.lookupFailed, "no alternate tiles the span", from: from, to: to)
-        }
-        // functionCallExpression = argumentCall . — the plain call has its own nonterminal.
-        if let callNT = find("argumentCall", in: spans),
-           let (_, callSpans) = tileAlternate(callNT.nt, from: callNT.from, to: callNT.to) {
-            spans = callSpans
         }
         let callee: ExprSyntax
         if let baseNT = find("parenthesizedTrailingClosureCall", in: spans) {
@@ -7915,15 +7910,6 @@ struct SwiftSyntaxGenerator {
             callee = ExprSyntax(TypeExprSyntax(
                 type: TypeSyntax(IdentifierTypeSyntax(name: .keyword(.Any)))
             ))
-        } else if let collNT = find("collectionLiteralCallee", in: spans),
-                  let (_, collSpans) = tileAlternate(collNT.nt, from: collNT.from, to: collNT.to) {
-            if let arrNT = find("arrayLiteral", in: collSpans) {
-                callee = convertArrayLiteral(arrNT.nt, from: arrNT.from, to: arrNT.to)
-            } else if let dictNT = find("dictionaryLiteral", in: collSpans) {
-                callee = convertDictionaryLiteral(dictNT.nt, from: dictNT.from, to: dictNT.to)
-            } else {
-                return missingExpr(.lookupFailed, "collection literal callee without literal", from: collNT.from, to: collNT.to)
-            }
         } else {
             return missingExpr(.lookupFailed, "no callee child", from: from, to: to)
         }

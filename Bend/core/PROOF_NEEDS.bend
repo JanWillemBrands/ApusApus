@@ -470,6 +470,138 @@ def roots_bounded(+grammar: +List<Core.Production>, +start: Nat, +input: +List<N
 
 # ======== THE INVARIANT ========
 
+# ---- Every needed segment is reached from the root, in the loop's order ----
+
+def anyNeed(+x: Prune.Seg, older: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>) -> Bool:
+  match older:
+    case Nil{}:
+      False{}
+    case Con{+y, rest}:
+      Bool.or(Prune.segIn(x, Prune.segNeeds(ys, grammar, y)), anyNeed(x, rest, ys, grammar))
+
+# x is a root segment, or a need of an older segment.
+def justBy(+x: Prune.Seg, +older: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +roots: +List<Prune.Seg>) -> Bool:
+  Bool.or(Prune.segIn(x, roots), anyNeed(x, older, ys, grammar))
+
+def seenJust(seen: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +roots: +List<Prune.Seg>) -> Bool:
+  match seen:
+    case Nil{}:
+      True{}
+    case Con{+x, +older}:
+      Bool.and(justBy(x, older, ys, grammar, roots), seenJust(older, ys, grammar, roots))
+
+def remJust(rem: +List<Prune.Seg>, +seen: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +roots: +List<Prune.Seg>) -> Bool:
+  match rem:
+    case Nil{}:
+      True{}
+    case Con{+x, rest}:
+      Bool.and(justBy(x, seen, ys, grammar, roots), remJust(rest, seen, ys, grammar, roots))
+
+def just_pick(+x: Prune.Seg, +older: +List<Prune.Seg>, +y: Prune.Seg, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +roots: +List<Prune.Seg>,
+  c: Either<{Prune.segIn(x, roots) == True{} : Bool}, {anyNeed(x, older, ys, grammar) == True{} : Bool}>) -> {justBy(x, y <> older, ys, grammar, roots) == True{} : Bool}:
+  match c:
+    case Inl{r}:
+      Lemma.or_true_left_intro(Prune.segIn(x, roots), anyNeed(x, y <> older, ys, grammar), r)
+    case Inr{a}:
+      Lemma.or_true_right_intro(Prune.segIn(x, roots), anyNeed(x, y <> older, ys, grammar),
+        Lemma.or_true_right_intro(Prune.segIn(x, Prune.segNeeds(ys, grammar, y)), anyNeed(x, older, ys, grammar), a))
+
+def just_mono(+x: Prune.Seg, +older: +List<Prune.Seg>, +y: Prune.Seg, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +roots: +List<Prune.Seg>,
+  +h: {justBy(x, older, ys, grammar, roots) == True{} : Bool}) -> {justBy(x, y <> older, ys, grammar, roots) == True{} : Bool}:
+  just_pick(x, older, y, ys, grammar, roots, Lemma.or_true_cases(Prune.segIn(x, roots), anyNeed(x, older, ys, grammar), h))
+
+law rem_mono:
+  for rem: +List<Prune.Seg>
+  for +seen: +List<Prune.Seg>
+  for +y: Prune.Seg
+  for +ys: +List<Core.Bsr>
+  for +grammar: +List<Core.Production>
+  for +roots: +List<Prune.Seg>
+  for +h: {remJust(rem, seen, ys, grammar, roots) == True{} : Bool}
+  {remJust(rem, y <> seen, ys, grammar, roots) == True{} : Bool}
+
+def rem_mono(rem, seen, y, ys, grammar, roots, h):
+  match rem:
+    case Nil{}:
+      {==}
+    case Con{+x, +rest}:
+      +j = {justBy(x, seen, ys, grammar, roots) : Bool}
+      Lemma.and_true_intro(justBy(x, y <> seen, ys, grammar, roots), remJust(rest, y <> seen, ys, grammar, roots),
+        just_mono(x, seen, y, ys, grammar, roots, Lemma.and_true_left(j, remJust(rest, seen, ys, grammar, roots), h)),
+        rem_mono(rest, seen, y, ys, grammar, roots, Lemma.and_true_right_side(j, remJust(rest, seen, ys, grammar, roots), h)))
+
+def need_move(+x: Prune.Seg, +seg: Prune.Seg, +y: Prune.Seg, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +eq: {seg == y : Prune.Seg},
+  +h: {Prune.segIn(x, Prune.segNeeds(ys, grammar, seg)) == True{} : Bool}) -> {Prune.segIn(x, Prune.segNeeds(ys, grammar, y)) == True{} : Bool}:
+  %eq : {Prune.segIn(x, Prune.segNeeds(ys, grammar, _)) == True{} : Bool}
+  h
+
+def reach_pick(+x: Prune.Seg, +seg: Prune.Seg, +y: Prune.Seg, +rest: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>,
+  +hx: {Prune.segIn(x, Prune.segNeeds(ys, grammar, seg)) == True{} : Bool},
+  cases: Either<{Prune.segEq(seg, y) == True{} : Bool}, {Prune.segIn(seg, rest) == True{} : Bool}>,
+  later: {Prune.segIn(seg, rest) == True{} : Bool} -> {anyNeed(x, rest, ys, grammar) == True{} : Bool}) -> {anyNeed(x, y <> rest, ys, grammar) == True{} : Bool}:
+  match cases:
+    case Inl{e}:
+      +eq = seg_eq_sound(seg, y, e)
+      Lemma.or_true_left_intro(Prune.segIn(x, Prune.segNeeds(ys, grammar, y)), anyNeed(x, rest, ys, grammar), need_move(x, seg, y, ys, grammar, eq, hx))
+    case Inr{m}:
+      Lemma.or_true_right_intro(Prune.segIn(x, Prune.segNeeds(ys, grammar, y)), anyNeed(x, rest, ys, grammar), later(m))
+
+law any_need:
+  for seen: +List<Prune.Seg>
+  for +seg: Prune.Seg
+  for +x: Prune.Seg
+  for +ys: +List<Core.Bsr>
+  for +grammar: +List<Core.Production>
+  for +hs: {Prune.segIn(seg, seen) == True{} : Bool}
+  for +hx: {Prune.segIn(x, Prune.segNeeds(ys, grammar, seg)) == True{} : Bool}
+  {anyNeed(x, seen, ys, grammar) == True{} : Bool}
+
+def any_need(seen, seg, x, ys, grammar, hs, hx):
+  match seen:
+    case Nil{}:
+      Empty.absurd({False{} == True{} : Bool}, Lemma.false_is_not_true(hs))
+    case Con{+y, +rest}:
+      reach_pick(x, seg, y, rest, ys, grammar, hx, Lemma.or_true_cases(Prune.segEq(seg, y), Prune.segIn(seg, rest), hs), m => any_need(rest, seg, x, ys, grammar, m, hx))
+
+# The needs of a seen segment are reached.
+law needs_just:
+  for xs: +List<Prune.Seg>
+  for +seg: Prune.Seg
+  for +seen: +List<Prune.Seg>
+  for +ys: +List<Core.Bsr>
+  for +grammar: +List<Core.Production>
+  for +roots: +List<Prune.Seg>
+  for +sub: {Prune.allSegsIn(xs, Prune.segNeeds(ys, grammar, seg)) == True{} : Bool}
+  for +hs: {Prune.segIn(seg, seen) == True{} : Bool}
+  {remJust(xs, seen, ys, grammar, roots) == True{} : Bool}
+
+def needs_just(xs, seg, seen, ys, grammar, roots, sub, hs):
+  match xs:
+    case Nil{}:
+      {==}
+    case Con{+x, +rest}:
+      +N = Prune.segNeeds(ys, grammar, seg)
+      Lemma.and_true_intro(justBy(x, seen, ys, grammar, roots), remJust(rest, seen, ys, grammar, roots),
+        Lemma.or_true_right_intro(Prune.segIn(x, roots), anyNeed(x, seen, ys, grammar), any_need(seen, seg, x, ys, grammar, hs, Lemma.and_true_left(Prune.segIn(x, N), Prune.allSegsIn(rest, N), sub))),
+        needs_just(rest, seg, seen, ys, grammar, roots, Lemma.and_true_right_side(Prune.segIn(x, N), Prune.allSegsIn(rest, N), sub), hs))
+
+law roots_just:
+  for xs: +List<Prune.Seg>
+  for +roots: +List<Prune.Seg>
+  for +ys: +List<Core.Bsr>
+  for +grammar: +List<Core.Production>
+  for +sub: {Prune.allSegsIn(xs, roots) == True{} : Bool}
+  {remJust(xs, [], ys, grammar, roots) == True{} : Bool}
+
+def roots_just(xs, roots, ys, grammar, sub):
+  match xs:
+    case Nil{}:
+      {==}
+    case Con{+x, +rest}:
+      Lemma.and_true_intro(justBy(x, [], ys, grammar, roots), remJust(rest, [], ys, grammar, roots),
+        Lemma.or_true_left_intro(Prune.segIn(x, roots), False{}, Lemma.and_true_left(Prune.segIn(x, roots), Prune.allSegsIn(rest, roots), sub)),
+        roots_just(rest, roots, ys, grammar, Lemma.and_true_right_side(Prune.segIn(x, roots), Prune.allSegsIn(rest, roots), sub)))
+
 # Every segment of xs is still to do, or what it needs lies in tgt.
 def queuedJ(xs: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +tgt: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>) -> Bool:
   match xs:
@@ -479,29 +611,35 @@ def queuedJ(xs: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +tgt: +List<Prune.Seg
       Bool.and(Bool.or(Prune.segIn(x, todo), Prune.allSegsIn(Prune.segNeeds(ys, grammar, x), tgt)), queuedJ(rest, todo, tgt, ys, grammar))
 
 def needJ(+rem: +List<Prune.Seg>, +seen: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat) -> Bool:
-  Bool.and(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)))))
+  Bool.and(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))))))
 
 def JParts(+rem: +List<Prune.Seg>, +seen: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat) -> Type:
   {queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar) == True{} : Bool} &
   {Prune.allSegsIn(todo, seen) == True{} : Bool} &
   {segsBounded(seen, grammar, input) == True{} : Bool} &
   {Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)) == True{} : Bool} &
-  {segsBounded(rem, grammar, input) == True{} : Bool}
+  {segsBounded(rem, grammar, input) == True{} : Bool} &
+  {seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))) == True{} : Bool} &
+  {remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))) == True{} : Bool}
 
 def j_split(+rem: +List<Prune.Seg>, +seen: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat,
   +h: {needJ(rem, seen, todo, ys, grammar, input, start) == True{} : Bool}) -> JParts(rem, seen, todo, ys, grammar, input, start):
-  +r1 = Lemma.and_true_right_side(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)))), h)
-  +r2 = Lemma.and_true_right_side(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input))), r1)
-  +r3 = Lemma.and_true_right_side(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)), r2)
-  (Lemma.and_true_left(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)))), h), (Lemma.and_true_left(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input))), r1), (Lemma.and_true_left(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)), r2), (Lemma.and_true_left(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input), r3), Lemma.and_true_right_side(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input), r3)))))
+  +r1 = Lemma.and_true_right_side(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))))), h)
+  +r2 = Lemma.and_true_right_side(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))))))), r1)
+  +r3 = Lemma.and_true_right_side(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))), r2)
+  +r4 = Lemma.and_true_right_side(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))))), r3)
+  +r5 = Lemma.and_true_right_side(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))), r4)
+  (Lemma.and_true_left(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))))), h), (Lemma.and_true_left(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))))))), r1), (Lemma.and_true_left(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))), r2), (Lemma.and_true_left(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))))), r3), (Lemma.and_true_left(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))), r4), (Lemma.and_true_left(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), r5), Lemma.and_true_right_side(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), r5)))))))
 
 def j_join(+rem: +List<Prune.Seg>, +seen: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat,
   +j1: {queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar) == True{} : Bool},
   +j2: {Prune.allSegsIn(todo, seen) == True{} : Bool},
   +j3: {segsBounded(seen, grammar, input) == True{} : Bool},
   +j4: {Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)) == True{} : Bool},
-  +j5: {segsBounded(rem, grammar, input) == True{} : Bool}) -> {needJ(rem, seen, todo, ys, grammar, input, start) == True{} : Bool}:
-  Lemma.and_true_intro(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)))), j1, Lemma.and_true_intro(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input))), j2, Lemma.and_true_intro(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input)), j3, Lemma.and_true_intro(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), segsBounded(rem, grammar, input), j4, j5))))
+  +j5: {segsBounded(rem, grammar, input) == True{} : Bool},
+  +j6: {seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))) == True{} : Bool},
+  +j7: {remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))) == True{} : Bool}) -> {needJ(rem, seen, todo, ys, grammar, input, start) == True{} : Bool}:
+  Lemma.and_true_intro(queuedJ(seen, todo, List.append(&2, Prune.Seg, rem, seen), ys, grammar), Bool.and(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))))), j1, Lemma.and_true_intro(Prune.allSegsIn(todo, seen), Bool.and(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))))))), j2, Lemma.and_true_intro(segsBounded(seen, grammar, input), Bool.and(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))))), j3, Lemma.and_true_intro(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, rem, seen)), Bool.and(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))))), j4, Lemma.and_true_intro(segsBounded(rem, grammar, input), Bool.and(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))), j5, Lemma.and_true_intro(seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rem, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), j6, j7))))))
 
 # ======== ADDING THE NEEDS OF ONE SEGMENT ========
 
@@ -551,7 +689,9 @@ def fold_case(known: Bool, +r: Prune.Seg, +rest: +List<Prune.Seg>, +seen: +List<
   +h2: {Prune.allSegsIn(todo, seen) == True{} : Bool},
   +h3: {segsBounded(seen, grammar, input) == True{} : Bool},
   +h4: {Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, r <> rest, seen)) == True{} : Bool},
-  +hb: {segsBounded(r <> rest, grammar, input) == True{} : Bool})
+  +hb: {segsBounded(r <> rest, grammar, input) == True{} : Bool},
+  +h6: {seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))) == True{} : Bool},
+  +h7: {remJust(r <> rest, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))) == True{} : Bool})
   -> {needJ(rest, Prune.addIf(known, r, seen), Prune.addIf(known, r, todo), ys, grammar, input, start) == True{} : Bool} &
      {Nat.is_le(nMeas(grammar, input, Prune.NeedState{Prune.addIf(known, r, seen), Prune.addIf(known, r, todo)}), nMeas(grammar, input, Prune.NeedState{seen, todo})) == True{} : Bool}:
   match known:
@@ -561,7 +701,7 @@ def fold_case(known: Bool, +r: Prune.Seg, +rest: +List<Prune.Seg>, +seen: +List<
       +sub = rem_sub(r, rest, seen, seen, ek, seg_refl(seen))
       (j_join(rest, seen, todo, ys, grammar, input, start,
          queued_shift(seen, todo, todo, List.append(&2, Prune.Seg, r <> rest, seen), List.append(&2, Prune.Seg, rest, seen), ys, grammar, seg_refl(todo), sub, h1), h2, h3,
-         segs_trans(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, r <> rest, seen), List.append(&2, Prune.Seg, rest, seen), h4, sub), h5),
+         segs_trans(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, r <> rest, seen), List.append(&2, Prune.Seg, rest, seen), h4, sub), h5, h6, Lemma.and_true_right_side(justBy(r, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rest, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), h7)),
        Lemma.le_refl(nMeas(grammar, input, Prune.NeedState{seen, todo})))
     case False{}:
       +hbr = Lemma.and_true_left(segBound(r, grammar, input), segsBounded(rest, grammar, input), hb)
@@ -574,7 +714,9 @@ def fold_case(known: Bool, +r: Prune.Seg, +rest: +List<Prune.Seg>, +seen: +List<
       (j_join(rest, seen1, r <> todo, ys, grammar, input, start, q1,
          Lemma.and_true_intro(Prune.segIn(r, seen1), Prune.allSegsIn(todo, seen1), seg_in_head(r, seen), seg_weaken(todo, r, seen, h2)),
          Lemma.and_true_intro(segBound(r, grammar, input), segsBounded(seen, grammar, input), hbr, h3),
-         segs_trans(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, r <> rest, seen), List.append(&2, Prune.Seg, rest, seen1), h4, sub), h5),
+         segs_trans(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), List.append(&2, Prune.Seg, r <> rest, seen), List.append(&2, Prune.Seg, rest, seen1), h4, sub), h5,
+         Lemma.and_true_intro(justBy(r, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), Lemma.and_true_left(justBy(r, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rest, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), h7), h6),
+         rem_mono(rest, seen, r, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), Lemma.and_true_right_side(justBy(r, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), remJust(rest, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))), h7))),
        meas_add(grammar, input, r, seen, todo, ek, hbr))
 
 def fold_pick(known: Bool, +r: Prune.Seg, +rest: +List<Prune.Seg>, +seen: +List<Prune.Seg>, +todo: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat,
@@ -583,8 +725,8 @@ def fold_pick(known: Bool, +r: Prune.Seg, +rest: +List<Prune.Seg>, +seen: +List<
   -> {needJ(rest, Prune.addIf(known, r, seen), Prune.addIf(known, r, todo), ys, grammar, input, start) == True{} : Bool} &
      {Nat.is_le(nMeas(grammar, input, Prune.NeedState{Prune.addIf(known, r, seen), Prune.addIf(known, r, todo)}), nMeas(grammar, input, Prune.NeedState{seen, todo})) == True{} : Bool}:
   match p:
-    case (+h1, (+h2, (+h3, (+h4, h5)))):
-      fold_case(known, r, rest, seen, todo, ys, grammar, input, start, ek, h1, h2, h3, h4, h5)
+    case (+h1, (+h2, (+h3, (+h4, (+h5, (+h6, h7)))))):
+      fold_case(known, r, rest, seen, todo, ys, grammar, input, start, ek, h1, h2, h3, h4, h5, h6, h7)
 
 def fold_join(+t: Prune.NeedState, +s1: Prune.NeedState, +s0: Prune.NeedState, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat,
   q: {needJ([], nSeen(t), nTodo(t), ys, grammar, input, start) == True{} : Bool} & {Nat.is_le(nMeas(grammar, input, t), nMeas(grammar, input, s1)) == True{} : Bool},
@@ -780,15 +922,16 @@ def steps_ok(zs, ys, grammar, seen, sub, h1):
 def closedPick(m: Maybe<&2, +List<Prune.Seg>>, +grammar: +List<Core.Production>, +start: Nat, +n: Nat, +ys: +List<Core.Bsr>) -> Bool:
   match m:
     case Some{+ns}:
-      Prune.needsClosed(grammar, start, n, ys, ns)
+      Bool.and(Prune.needsClosed(grammar, start, n, ys, ns), seenJust(ns, ys, grammar, Prune.rootSegs(grammar, start, n)))
     case None{}:
       False{}
 
 def end_closed(+seen: +List<Prune.Seg>, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat, p: JParts([], seen, [], ys, grammar, input, start))
-  -> {Prune.needsClosed(grammar, start, List.length(&2, Nat, input), ys, seen) == True{} : Bool}:
+  -> {Bool.and(Prune.needsClosed(grammar, start, List.length(&2, Nat, input), ys, seen), seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)))) == True{} : Bool}:
   match p:
-    case (+h1, (+h2, (+h3, (+h4, h5)))):
-      Lemma.and_true_intro(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), seen), Prune.allStepsOk(ys, grammar, seen), h4, steps_ok(ys, ys, grammar, seen, C.step_refl(ys), h1))
+    case (+h1, (+h2, (+h3, (+h4, (+h5, (+h6, h7)))))):
+      Lemma.and_true_intro(Prune.needsClosed(grammar, start, List.length(&2, Nat, input), ys, seen), seenJust(seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input))),
+        Lemma.and_true_intro(Prune.allSegsIn(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), seen), Prune.allStepsOk(ys, grammar, seen), h4, steps_ok(ys, ys, grammar, seen, C.step_refl(ys), h1)), h6)
 
 def loop_more(+f: Nat, +t: Prune.NeedState, +s0: Prune.NeedState, +ys: +List<Core.Bsr>, +grammar: +List<Core.Production>, +input: +List<Nat>, +start: Nat,
   +hy: {Run.stepsBounded(ys, grammar, input) == True{} : Bool},
@@ -813,11 +956,12 @@ def loop_next(+f: Nat, +seg: Prune.Seg, +rest: +List<Prune.Seg>, +seen: +List<Pr
   later: {needJ([], nSeen(Prune.addSegs(Prune.segNeeds(ys, grammar, seg), seen, rest)), nTodo(Prune.addSegs(Prune.segNeeds(ys, grammar, seg), seen, rest)), ys, grammar, input, start) == True{} : Bool} -> {Nat.is_le(1n+nMeas(grammar, input, Prune.addSegs(Prune.segNeeds(ys, grammar, seg), seen, rest)), f) == True{} : Bool} -> {closedPick(Prune.needLoop(f, ys, grammar, Prune.addSegs(Prune.segNeeds(ys, grammar, seg), seen, rest)), grammar, start, List.length(&2, Nat, input), ys) == True{} : Bool})
   -> {closedPick(Prune.needLoop(f, ys, grammar, Prune.addSegs(Prune.segNeeds(ys, grammar, seg), seen, rest)), grammar, start, List.length(&2, Nat, input), ys) == True{} : Bool}:
   match p:
-    case (+h1, (+h2, (+h3, (+h4, h5)))):
+    case (+h1, (+h2, (+h3, (+h4, (+h5, (+h6, h7)))))):
       +N = Prune.segNeeds(ys, grammar, seg)
       +J = j_join(N, seen, rest, ys, grammar, input, start, requeue(seen, seg, rest, seen, ys, grammar, h1),
         Lemma.and_true_right_side(Prune.segIn(seg, seen), Prune.allSegsIn(rest, seen), h2), h3,
-        segs_app_right(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), N, seen, h4), needs_bounded(ys, grammar, input, seg, hy))
+        segs_app_right(Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), N, seen, h4), needs_bounded(ys, grammar, input, seg, hy), h6,
+        needs_just(N, seg, seen, ys, grammar, Prune.rootSegs(grammar, start, List.length(&2, Nat, input)), seg_refl(N), Lemma.and_true_left(Prune.segIn(seg, seen), Prune.allSegsIn(rest, seen), h2)))
       loop_more(f, Prune.addSegs(N, seen, rest), Prune.NeedState{seen, rest}, ys, grammar, input, start, hy,
         fold_inv(N, seen, rest, ys, grammar, input, start, J), pop_meas(grammar, input, seen, rest, f, hf), later)
 
@@ -873,7 +1017,7 @@ law needs_closed:
 def needs_closed(fuel, grammar, start, input, ys, hy, hf):
   +R = Prune.rootSegs(grammar, start, List.length(&2, Nat, input))
   start_more(fuel, ys, grammar, input, start, hy,
-    fold_inv(R, [], [], ys, grammar, input, start, j_join(R, [], [], ys, grammar, input, start, {==}, {==}, {==}, segs_app_left(R, R, [], seg_refl(R)), roots_bounded(grammar, start, input))), hf)
+    fold_inv(R, [], [], ys, grammar, input, start, j_join(R, [], [], ys, grammar, input, start, {==}, {==}, {==}, segs_app_left(R, R, [], seg_refl(R)), roots_bounded(grammar, start, input), {==}, roots_just(R, R, ys, grammar, seg_refl(R)))), hf)
 
 def isSteps(m: Maybe<&2, +List<Core.Bsr>>) -> Bool:
   match m:
@@ -893,7 +1037,7 @@ def prune_from(m: Maybe<&2, +List<Prune.Seg>>, +grammar: +List<Core.Production>,
   -> {isSteps(Prune.pruneChecked(m, grammar, start, n, ys)) == True{} : Bool}:
   match m:
     case Some{+ns}:
-      prune_pick(Prune.needsClosed(grammar, start, n, ys, ns), ys, ns, h)
+      prune_pick(Prune.needsClosed(grammar, start, n, ys, ns), ys, ns, Lemma.and_true_left(Prune.needsClosed(grammar, start, n, ys, ns), seenJust(ns, ys, grammar, Prune.rootSegs(grammar, start, n)), h))
     case None{}:
       Empty.absurd({isSteps(None{}) == True{} : Bool}, Lemma.false_is_not_true(h))
 

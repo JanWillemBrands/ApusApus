@@ -369,8 +369,7 @@ site that returns nothing, classified).
 | `PRUNE` | `prunePick`: the needed segments are not closed | B |
 | `WITNESS` | `fixpoint` out of fuel; then `rootFor` finds no root forest | A |
 | `EXACT` | `exactPick`: a witness tree fails its check (B) or a step is left uncovered (A) | A, B |
-| `GUARD` | `rhsIn`: the sub-parse over w gave no answer | A, B |
-| `GUARD` | `yesIf`: the witness forest for "q derives w" fails `reads` | A, B |
+| `GUARD` | `foundPick`: the closure on w is not closed, or its forest for "q derives w" fails `reads` (decided with enough fuel, `phase1_decides`) | A, B |
 | `PREFER` | `certTri`: the rival forest fails its certificate | A, B, C7 |
 | `ORACLE` | `oraclePick`: some step's verdict is Unknown (from the three above) | as those |
 | `EXTENT` | `coverFrom`: the chosen set is not covered by checked witness trees | A, B |
@@ -540,14 +539,65 @@ refusal remains:
      root forest (`root_found`); the fixpoint ends closed with fuel 1 + twice the size of the
      descriptor universe (`witness_closed`); every forest it hands out is a parse tree of the
      input containing the target (`witness_good`); so the exact parser answers once every kept
-     step lies on such a tree (`exact_from_answers`). Left: that law ("every pruned step lies
-     on a parse tree of pruned steps"), from two order facts: the engine's steps rest on
-     earlier steps, and every needed segment is reached from the root. Then the tables and the
-     rival closure.
-   - Reminder (after step 8, agreed 2026-11-16): answer phase 1's questions ("does q derive w",
-     "does x derive a prefix") with the same checked closure, every step allowed, instead of
-     GLL sub-parses; `walk` would take a judge (phase 1, or none). That removes sub-parses from
-     both oracles and should replace most of `PROOF_DECIDE.bend` (1,448 lines).
+     step lies on such a tree (`exact_from_answers`).
+   - The exact parser answers, done 2026-11-18 (`PROOF_GROUND.bend` 896, `PROOF_FOUND.bend`
+     876, `PROOF_ANSWER.bend` 255 lines; `RUN.bend` 389, `PROOF_NEEDS.bend` 1,058). Two order
+     facts. (1) Every step, descriptor, return edge and pop rests on steps added before it
+     (`groundOk`, RUN.bend; checked on the example runs first): each engine operation keeps
+     it, proven directly on the state records without touching PROOF_RUN; resume and token
+     match add a descriptor before its step, so a lemma swaps the two additions. (2) Every
+     needed segment is a root segment or a need of an older one (`seenJust`, the needs
+     loop's invariant gained two parts). Instead of building trees inside proofs, the proof
+     works on witness facts: kept segments that a step completes get a fact by induction in
+     the steps' order (`bottom`), and a flagged fact goes up the needs' order to a root
+     (`up`, `found_root`). So with fuel 1 + twice the size of the descriptor universe the
+     exact parser always answers (`exact_parser_answers`). A negative check: a witness search
+     that never marks the target fails the proof.
+   - The predicting parser answers, done 2026-11-19 (`PROOF_GROW.bend` 1,987, `PROOF_ANSWER.bend`
+     275 lines; no definition changed). Each table round either adds a fact from a finite
+     universe or changes nothing, and then the table is closed. Facts are counted as
+     descriptors, reusing PROOF_COUNT: nullable left sides; FIRST pairs (left side, terminal);
+     FOLLOW pairs (start or a nonterminal on a right side, the end or a terminal). FIRST and
+     FOLLOW carry an invariant: every fact's token is a terminal of the grammar. The FOLLOW
+     seed stays, and the start symbol's FOLLOW rule holds on any table. So with fuel
+     1 + the table size, `tablesClosed` holds on every grammar (`tables_closed`). With fuel
+     1 + the size of the descriptor universe + the table size, the engine with the predict
+     sets finishes, and `predictedSteps` always answers (`predicted_parser_answers`). The
+     LL(1) parser's table part is the same; it still refuses on a grammar that is not LL(1)
+     (not a refusal, see the table above) and on support. A negative check: one unit of fuel
+     less fails the proof.
+   - The rival closure answers, done 2026-11-19 (`PROOF_RIVAL_GROW.bend` 1,082 lines; no
+     definition changed). The hypothesis that phase 1 answers no step Unknown is a Bool,
+     `decided`, over every step within bounds (Bend's function hypotheses can be used only
+     once). Each round either adds a segment with a new key, counted as a descriptor, or
+     changes nothing; a round that adds nothing leaves a closed set, since every step the
+     check asks about is decided, and a Yes leads to a grown segment. So with fuel 1 + the
+     size of the descriptor universe, the segments grown from m at i are closed and have m's
+     start (`rival_closed`). A negative check: a grower that never reads a terminal fails the
+     proof.
+   - The rival's certificate is sound, done 2026-11-19 (`PROOF_RIVAL_SOUND.bend` 903 lines; no
+     definition changed). Every grown segment's forest reads its prefix of items from its
+     start to its end, and each of its steps in its node is answered Yes (`grow_ok`). So the
+     forest of a segment that completes m passes `certWith`; the reading is moved from the
+     input at i to the slice at 0 by spelling. With `rival_closed`, phase 2's rival verdict is
+     Yes or No whenever phase 1 decides (`rival_decided`). A negative check: a completion that
+     drops the child's forest fails the proof.
+   - Phase 1 decides, done 2026-11-19 (reminder (a) below; `CLOSURE.bend` 172,
+     `PROOF_CLOSURE.bend` 1,575, `PROOF_VERDICT.bend` 392 lines; `PROOF_DECIDE.bend` 1,448 to
+     1,195, `GUARD.bend` 398 to 378). "Does q derive w" is now answered by a judge-free copy of
+     the rival closure on w (`GUARD.closureTri`), not by the exact parser and the witness
+     search. A first-order judge shared with RIVAL was not possible: Bend wants every
+     definition before its use, so the closure, its judge and phase 1's verdict cannot call
+     each other (design changed with the user the same day). Its walk, growth and soundness
+     proofs are RIVAL's with the judge removed; the segments are counted against the outer
+     input, so one fuel bound covers every question cut from it. `rhs_yes` and `rhs_no` keep
+     their statements, so PROOF_GUARD is unchanged. With fuel 1 + the size of the input's
+     descriptor universe, phase 1 decides every step (`phase1_decides`), and phase 2 decides
+     every step within bounds (`phase2_decides`). A negative check: a closedness check that
+     skips terminal items fails the proof. Left for step 8: the joined oracles hand out their
+     sets (ORACLE, EXTENT), from these verdicts and the exact parser answering.
+   - Reminder (a), done 2026-11-19 (see above): phase 1's questions are answered by the
+     checked closure, every step allowed, instead of GLL sub-parses.
    - Reminder (after step 8, agreed 2026-11-16): partially LL(1) grammars, for later rewriting
      steps towards LL(1). `ll1_at` and the prediction laws are already local or need no LL(1);
      `tables_ll1_sound`, `ll1_unambiguous` and `ll1_no_dead_wood` are all-or-nothing. Add (1) a

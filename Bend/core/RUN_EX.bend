@@ -38,3 +38,12 @@ law inv_cyc:
 
 def inv_cyc():
   {==}
+
+# Every step, descriptor, return edge and pop rests on earlier steps, at every iteration.
+law ground_holds:
+  {Bool.and(Run.groundAlong(200n, Gll.NoPred{}, expr(), [1n, 2n, 1n, 2n, 1n], Run.initial(Gll.NoPred{}, expr(), 0n, [1n, 2n, 1n, 2n, 1n])),
+    Bool.and(Run.groundAlong(100n, Gll.NoPred{}, opt(), [1n, 2n], Run.initial(Gll.NoPred{}, opt(), 0n, [1n, 2n])),
+      Bool.and(Run.groundAlong(100n, Gll.NoPred{}, cyc(), [], Run.initial(Gll.NoPred{}, cyc(), 0n, [])), Run.groundAlong(100n, Gll.NoPred{}, cyc(), [1n], Run.initial(Gll.NoPred{}, cyc(), 0n, [1n]))))) == True{} : Bool}
+
+def ground_holds():
+  {==}
