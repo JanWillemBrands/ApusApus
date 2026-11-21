@@ -11,104 +11,103 @@ import Foundation
 //
 //     t ∈ FIRST(β)   or   β can read nothing and t ∈ FOLLOW(X)
 //
-// The parser asks this before every step that may fail: choosing an alternate, calling,
-// skipping a bracket, going on after a return. Leaving out a step that fails the test removes
-// only dead wood: the derivations stay the same.
+// The parser asks this — viable(), as in ApusApus — before every step that may fail: choosing an
+// alternate, entering, skipping a bracket, going on after a return. FOLLOW is global, so a step
+// may pass that dies later, but no step that would succeed is stopped: leaving out a step that
+// fails the test removes only dead wood. A caller that needs something asks FIRST alone.
 //
-// The tables are the smallest sets closed under these rules ('$' is the end of the input):
+// As in ApusApus, FIRST is kept per slot: node.first is FIRST of the rest of the alternate from
+// that node on, with ε in it when the rest can read nothing. It is built right to left:
 //
-//     X ::= α,  α can read nothing        ⟹  X is nullable
-//     X ::= α                             ⟹  FIRST(α) ⊆ FIRST(X)
-//     S is the start symbol               ⟹  $ ∈ FOLLOW(S)
-//     X ::= α Y β                         ⟹  FIRST(β) ⊆ FOLLOW(Y)
-//     X ::= α Y β,  β can read nothing    ⟹  FOLLOW(X) ⊆ FOLLOW(Y)
+//     at END                       { ε }
+//     at a terminal t              { t }
+//     at ε                         FIRST after it
+//     at a nonterminal or bracket  FIRST of its definition without ε, plus FIRST after it when
+//                                  the definition can read nothing ([ ] and { } always can)
 //
-// A bracket is a Y whose definition is its body; [ ] and { } can always read nothing, and in
-// a loop a round can follow a round: FIRST(body) ⊆ FOLLOW(body). The rules are applied until
-// nothing changes. (The same rules in Bend: Bend/core/TABLES.bend.)
+// A definition's FIRST is the union of its alternates' first slots, and FOLLOW of a definition Y
+// collects, at every occurrence of Y:
+//
+//     FIRST after Y without ε, plus FOLLOW of the owner when the rest after Y can read nothing,
+//     plus, for { } and < >, FIRST of Y's body (a round can follow a round)
+//
+// with $ ∈ FOLLOW(S). These are the smallest sets closed under the rules, found by applying
+// them until nothing changes. (The same rules in Bend: Bend/core/TABLES.bend.)
 
+/// What the parser finds at the end of the input.
 nonisolated let endOfInput: Character = "$"
 
-nonisolated struct Prediction {
-    private(set) var nullable: Set<GrammarNode> = []
-    private(set) var first: [GrammarNode: Set<Character>] = [:]
-    private(set) var follow: [GrammarNode: Set<Character>] = [:]
+/// The mark in a FIRST set for "can read nothing".
+nonisolated let epsilon: Character = "ε"
 
-    init(definitions: [GrammarNode], start: GrammarNode) {
-        follow[start] = [endOfInput]
+nonisolated extension Parser {
+
+    func computeFirstAndFollow(start: GrammarNode) {
+        start.follow = [endOfInput]
         var changed = true
-        func add(_ characters: Set<Character>, to table: inout [GrammarNode: Set<Character>], at X: GrammarNode) {
-            if !characters.isSubset(of: table[X, default: []]) {
-                table[X, default: []].formUnion(characters)
-                changed = true
-            }
-        }
         while changed {
             changed = false
-            for X in definitions {
+            for X in allDefinitions {
                 var alternate = X.alt
                 while let a = alternate {
-                    let whole = firstOf(a.seq)
-                    add(whole.characters, to: &first, at: X)
-                    if whole.nullable && nullable.insert(X).inserted { changed = true }
-
-                    var node = a.seq
-                    while let Y = node, Y.kind != .END {
-                        if let body = Y.alt, Y.kind == .N || Y.kind.isBracket {
-                            let after = firstOf(Y.seq)
-                            add(after.characters, to: &follow, at: body)
-                            if after.nullable { add(follow[X, default: []], to: &follow, at: body) }
-                            if Y.kind.isLoop { add(first[body, default: []], to: &follow, at: body) }
-                        }
-                        node = Y.seq
+                    if updateFirst(from: a.seq!) { changed = true }
+                    if !a.seq!.first.isSubset(of: X.first) {
+                        X.first.formUnion(a.seq!.first)
+                        changed = true
                     }
+                    if updateFollow(in: a, of: X) { changed = true }
                     alternate = a.alt
                 }
             }
         }
     }
 
-    /// Can the parse go on at `slot` with `next`? (The test above.)
-    func predicts(_ slot: GrammarNode, _ next: Character) -> Bool {
-        let rest = firstOf(slot)
-        return rest.characters.contains(next) || rest.nullable && follow[owner(of: slot), default: []].contains(next)
+    /// May the parse go on at `slot` with the character at `j`? A caller that needs something
+    /// passes `mayBeEmpty: false`: then only FIRST counts.
+    func viable(_ slot: GrammarNode, at j: Int, mayBeEmpty: Bool = true) -> Bool {
+        let next = character(at: j)
+        if slot.first.contains(next) { return true }
+        return mayBeEmpty && slot.first.contains(epsilon) && slot.owner!.follow.contains(next)
     }
 
-    /// Can the rest of the alternate from `slot` begin with `next`? For callers that need something.
-    func begins(_ slot: GrammarNode, with next: Character) -> Bool {
-        firstOf(slot).characters.contains(next)
-    }
-
-    /// Can a bracket's body begin with `next`?
-    func begins(body: GrammarNode, with next: Character) -> Bool {
-        first[body, default: []].contains(next)
-    }
-
-    /// FIRST of the rest of an alternate, from `slot` to its END, and whether it can read nothing.
-    private func firstOf(_ slot: GrammarNode?) -> (characters: Set<Character>, nullable: Bool) {
-        var characters: Set<Character> = []
-        var node = slot
-        while let symbol = node, symbol.kind != .END {
-            switch symbol.kind {
-            case .T:
-                return (characters.union([symbol.name]), false)
-            case .N, .DO, .OPT, .KLN, .POS:
-                guard let body = symbol.alt else { return (characters, false) }
-                characters.formUnion(first[body, default: []])
-                let skippable = symbol.kind == .OPT || symbol.kind == .KLN
-                if !skippable && !nullable.contains(body) { return (characters, false) }
-            case .EPS, .ALT, .END:
-                break
-            }
-            node = symbol.seq
+    // FIRST of every slot from `node` to the END of its alternate, right to left. True if one grew.
+    private func updateFirst(from node: GrammarNode) -> Bool {
+        if node.kind == .END {
+            node.first = [epsilon]
+            return false
         }
-        return (characters, true)
+        let grewAfter = updateFirst(from: node.seq!)
+        let after = node.seq!.first
+        var first: Set<Character>
+        switch node.kind {
+        case .T:
+            first = [node.name]
+        case .N, .DO, .OPT, .KLN, .POS:
+            let body = node.alt?.first ?? []
+            first = body.subtracting([epsilon])
+            if body.contains(epsilon) || node.kind == .OPT || node.kind == .KLN { first.formUnion(after) }
+        default:
+            first = after
+        }
+        let grew = first != node.first
+        node.first = first
+        return grew || grewAfter
     }
 
-    /// The definition an alternate belongs to: its END links back to it.
-    private func owner(of slot: GrammarNode) -> GrammarNode {
-        var node = slot
-        while node.kind != .END { node = node.seq! }
-        return node.seq!
+    // FOLLOW of every nonterminal and bracket in alternate `a` of X. True if one grew.
+    private func updateFollow(in a: GrammarNode, of X: GrammarNode) -> Bool {
+        var grew = false
+        var node = a.seq!
+        while node.kind != .END {
+            if let Y = node.alt, node.kind == .N || node.kind.isBracket {
+                let after = node.seq!.first
+                var follow = Y.follow.union(after.subtracting([epsilon]))
+                if after.contains(epsilon) { follow.formUnion(X.follow) }
+                if node.kind.isLoop { follow.formUnion(Y.first.subtracting([epsilon])) }
+                if follow != Y.follow { Y.follow = follow; grew = true }
+            }
+            node = node.seq!
+        }
+        return grew
     }
 }

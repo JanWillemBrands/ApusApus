@@ -100,6 +100,12 @@ nonisolated final class GrammarNode {
 
     let number: Int // unique number to identify the node
 
+    // Filled by computeFirstAndFollow() (Prediction.swift), as in ApusApus:
+    var first: Set<Character> = []      // a slot: FIRST of the rest of its alternate, ε if that can read nothing
+                                        // a definition: FIRST of the definition
+    var follow: Set<Character> = []     // a definition: FOLLOW
+    var owner: GrammarNode?             // a slot: the definition its alternate belongs to
+
     init(_ kind: GrammarNodeKind, _ name: Character, number: Int) {
         self.kind = kind
         self.name = name
@@ -145,6 +151,13 @@ nonisolated final class ParseCluster {
     var seeded = Need.nonEmpty      // the weakest need its alternates were seeded for
 }
 
+// A call made in fast mode (HybridGLL.md): a return edge not yet written into a cluster,
+// and where the call started.
+nonisolated struct Frame {
+    let edge: ParsePosition
+    let start: Int
+}
+
 // MARK: - Parser
 
 nonisolated final class Parser {
@@ -179,8 +192,11 @@ nonisolated final class Parser {
     // Paper: CRF - Call Return Forest
     var crf: [ParsePosition: ParseCluster] = [:]
 
-    // FIRST and FOLLOW, built by parseInput()
-    private(set) var prediction: Prediction!
+    // Fast mode: the calls of the current path that have no cluster, innermost last.
+    var frames: [Frame] = []
+
+    // The highest position at which a cluster was made: beyond it, none can be found.
+    var watermark = -1
 
     init(syntax: String, input: String) {
         self.syntax = Array(syntax)
@@ -254,11 +270,13 @@ nonisolated final class Parser {
             var tmp = startOfSequence
             repeat {
                 let symbol = try factor()
+                symbol.owner = owner
                 tmp.seq = symbol
                 tmp = symbol
             } while c.isLetter || GrammarNodeKind.brackets[c] != nil
 
             let end = makeNode(.END, "]")
+            end.owner = owner
             tmp.seq = end
             end.seq = owner
             end.alt = startOfSequence
@@ -315,15 +333,23 @@ nonisolated final class Parser {
     // Paper: ntAdd(X, j) — add descriptors for the alternates the next character predicts.
     // A caller that needs something only gets the alternates that can begin with it.
     func addDescriptorsForAlternates(X: GrammarNode, j: Int, need: Need) {
-        let next = character(at: j)
+        for slot in fittingAlternates(of: X, at: j, need: need) {
+            addDescriptor(L: slot, k: j, i: j)
+        }
+    }
+
+    // The first slots of the alternates of X that can go on at j, for a caller with `need`.
+    func fittingAlternates(of X: GrammarNode, at j: Int, need: Need) -> [GrammarNode] {
+        var slots: [GrammarNode] = []
         var alt = X.alt
         while let node = alt {
             let slot = node.seq!
-            if need == .nonEmpty ? prediction.begins(slot, with: next) : prediction.predicts(slot, next) {
-                addDescriptor(L: slot, k: j, i: j)
+            if viable(slot, at: j, mayBeEmpty: need == .mayBeEmpty) {
+                slots.append(slot)
             }
             alt = node.alt
         }
+        return slots
     }
 
     func getDescriptor() -> Bool {
@@ -360,6 +386,7 @@ nonisolated final class Parser {
     //
     // `occurrence` (a nonterminal or a bracket) is called at `j` from a cluster that started at `u`.
     func enter(_ occurrence: GrammarNode, from u: Int, at j: Int, need: Need) {
+        materialize()
         let returnEdge = ParsePosition(slot: occurrence, index: u, need: need)
         let definition = occurrence.alt!
         let clusterKey = ParsePosition(slot: definition, index: j)
@@ -378,6 +405,7 @@ nonisolated final class Parser {
             let cluster = ParseCluster()
             cluster.seeded = need
             crf[clusterKey] = cluster
+            watermark = max(watermark, j)
             cluster.returns.insert(returnEdge)
             addDescriptorsForAlternates(X: definition, j: j, need: need)
         }
@@ -398,19 +426,88 @@ nonisolated final class Parser {
 
     // One return: the call on `edge`, made at `start`, has read up to `end`.
     func resume(_ edge: ParsePosition, start: Int, end: Int) {
-        let occurrence = edge.slot
-        if edge.need == .nonEmpty && end == start { return }    // this caller needs something
-
-        // Go on after the occurrence, and for a loop also round again — a tail call with the same
-        // edge, so a loop needs no cluster of its own. A round that read nothing gets no successor.
-        let next = character(at: end)
-        let goOn = prediction.predicts(occurrence.seq!, next)
-        let roundAgain = occurrence.kind.isLoop && end > start && prediction.begins(body: occurrence.alt!, with: next)
+        let (goOn, roundAgain) = ways(after: edge, start: start, end: end)
         guard goOn || roundAgain else { return }
 
+        let occurrence = edge.slot
         addYield(L: occurrence, i: edge.index, k: start, j: end)
         if goOn { addDescriptor(L: occurrence.seq!, k: edge.index, i: end) }
         if roundAgain { enter(occurrence, from: edge.index, at: end, need: .nonEmpty) }
+    }
+
+    // After the call on `edge` read [start, end): may the caller go on after it, and may a loop go
+    // round again? The next round is a tail call with the same edge, so a loop needs no cluster of
+    // its own; a round that read nothing gets no successor.
+    func ways(after edge: ParsePosition, start: Int, end: Int) -> (goOn: Bool, roundAgain: Bool) {
+        if edge.need == .nonEmpty && end == start { return (false, false) }    // this caller needs something
+        let occurrence = edge.slot
+        return (viable(occurrence.seq!, at: end),
+                occurrence.kind.isLoop && end > start && occurrence.alt!.first.contains(character(at: end)))
+    }
+
+    // MARK: Fast mode (HybridGLL.md)
+
+    // enterFast: a call as in plain recursive descent — push a frame and run the one alternate in
+    // place, no cluster and no descriptor. Only when there is no cluster for the call (beyond the
+    // watermark none can exist, so the lookup is needed only at or below it) and exactly one
+    // alternate fits. Frames belong to the current path alone: it runs until it ends or splits
+    // before any other descriptor, and at a split its open frames become clusters. A call it
+    // completes here leaves no cluster, so another path wanting the same call parses it again —
+    // same yields, a bounded repeat (HybridGLL.md).
+    func enterFast(_ occurrence: GrammarNode, from u: Int, at j: Int, need: Need) -> Bool {
+        let definition = occurrence.alt!
+        if j <= watermark && crf[ParsePosition(slot: definition, index: j)] != nil { return false }
+        // The same call already open at j is left recursion: that needs GLL. (Frames are pushed at
+        // growing positions, so only the top ones can have started at j.)
+        for frame in frames.reversed() {
+            if frame.start < j { break }
+            if frame.edge.slot.alt == definition { return false }
+        }
+        let fitting = fittingAlternates(of: definition, at: j, need: need)
+        guard fitting.count == 1 else { return false }
+
+        frames.append(Frame(edge: ParsePosition(slot: occurrence, index: u, need: need), start: j))
+        cU = j
+        cL = fitting[0]
+        return true
+    }
+
+    // leaveFast: the only caller is the top frame, so return to it directly. True when the path
+    // goes on in fast mode; false when it ends here or splits into descriptors.
+    func leaveFast() -> Bool {
+        let edge = frames.removeLast().edge
+        let occurrence = edge.slot
+        switch ways(after: edge, start: cU, end: cI) {
+        case (false, false):
+            return false
+        case (true, false):
+            addYield(L: occurrence, i: edge.index, k: cU, j: cI)
+            cU = edge.index
+            cL = occurrence.seq!
+            return true
+        case (false, true):
+            addYield(L: occurrence, i: edge.index, k: cU, j: cI)
+            if enterFast(occurrence, from: edge.index, at: cI, need: .nonEmpty) { return true }
+            enter(occurrence, from: edge.index, at: cI, need: .nonEmpty)
+            return false
+        case (true, true):
+            materialize()
+            resume(edge, start: cU, end: cI)
+            return false
+        }
+    }
+
+    // A split: the general machinery takes over, so the open calls on the frame stack become what
+    // GLL would have made — a cluster with one return edge each.
+    func materialize() {
+        for frame in frames {
+            let cluster = ParseCluster()
+            cluster.returns = [frame.edge]
+            cluster.seeded = frame.edge.need
+            crf[ParsePosition(slot: frame.edge.slot.alt!, index: frame.start)] = cluster
+            watermark = max(watermark, frame.start)
+        }
+        frames.removeAll()
     }
 
     // MARK: Parse the input
@@ -420,15 +517,17 @@ nonisolated final class Parser {
         guard let grammarRoot = nonTerminalDefinitions["S"] else {
             throw GrammarError.missingStartSymbol
         }
-        prediction = Prediction(definitions: allDefinitions, start: grammarRoot)
+        computeFirstAndFollow(start: grammarRoot)
 
         crf[ParsePosition(slot: grammarRoot, index: 0)] = ParseCluster()
+        watermark = 0
         addDescriptorsForAlternates(X: grammarRoot, j: 0, need: .mayBeEmpty)
 
         // make the yield storage large enough
         yields = Array(repeating: [], count: nodeCount)
 
         nextDescriptor: while getDescriptor() {
+            frames.removeAll()      // left over from a path that ended in fast mode
             while true {
                 switch cL.kind {
                 case .T:
@@ -442,17 +541,17 @@ nonisolated final class Parser {
                     }
                 case .N, .DO, .POS:
                     // A nonterminal, a group, or the first round of < >: may read nothing.
-                    if prediction.predicts(cL, character(at: cI)) {
-                        enter(cL, from: cU, at: cI, need: .mayBeEmpty)
-                    }
+                    guard viable(cL, at: cI) else { continue nextDescriptor }
+                    if enterFast(cL, from: cU, at: cI, need: .mayBeEmpty) { continue }
+                    enter(cL, from: cU, at: cI, need: .mayBeEmpty)
                     continue nextDescriptor
                 case .OPT, .KLN:
                     // Pick, or first round, which must read something; or skip, which reads nothing.
-                    let next = character(at: cI)
-                    if prediction.begins(body: cL.alt!, with: next) {
-                        enter(cL, from: cU, at: cI, need: .nonEmpty)
-                    }
-                    guard prediction.predicts(cL.seq!, next) else { continue nextDescriptor }
+                    let pick = cL.alt!.first.contains(character(at: cI))
+                    let skip = viable(cL.seq!, at: cI)
+                    if pick && !skip && enterFast(cL, from: cU, at: cI, need: .nonEmpty) { continue }
+                    if pick { enter(cL, from: cU, at: cI, need: .nonEmpty) }
+                    guard skip else { continue nextDescriptor }
                     addYield(L: cL, i: cU, k: cI, j: cI)
                     cL = cL.seq!
                 case .EPS:
@@ -463,6 +562,10 @@ nonisolated final class Parser {
                 case .END:
                     let nt = cL.seq! // the seq link of an END node points back to its definition
                     addYield(L: nt, i: cU, k: cU, j: cI)
+                    if !frames.isEmpty {
+                        if leaveFast() { continue }
+                        continue nextDescriptor
+                    }
                     leave(X: nt)
                     continue nextDescriptor
                 }
