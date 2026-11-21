@@ -2,10 +2,10 @@
 # Grammar: S = { A } "a". A = "b" "b" | ε.
 # Input:   bba
 # Nonterminals: 0 = A, 1 = S
-# Swift yields kept: 12; completion yields left out: 4
+# Swift yields kept: 9; completion yields left out: 3
 
 import Base
-import ../SPEC.bend as Spec
+import ../SYNTAX.bend as Spec
 import ../COMPARE.bend as Compare
 
 def grammar() -> +List<Spec.Production>:
@@ -19,19 +19,25 @@ def start() -> Nat:
 def input() -> +List<Nat>:
   [3n, 3n, 2n]
 
+def marks() -> +List<Spec.Mark>:
+  []
+
+def guards() -> +List<Spec.GuardMark>:
+  []
+
+def extents() -> +List<Spec.ExtentMark>:
+  []
+
 def swiftSteps() -> +List<Spec.Bsr>:
   [Spec.Bsr{Spec.Slot{2n, [1n]}, 0n, 0n, 2n},
    Spec.Bsr{Spec.Slot{2n, [0n, 0n, 1n]}, 0n, 0n, 0n},
    Spec.Bsr{Spec.Slot{2n, [0n, 0n, 1n]}, 0n, 0n, 2n},
-   Spec.Bsr{Spec.Slot{2n, [0n, 0n, 1n]}, 0n, 2n, 2n},
    Spec.Bsr{Spec.Slot{2n, [0n, 0n, 0n, 0n, 1n]}, 0n, 0n, 0n},
    Spec.Bsr{Spec.Slot{2n, [0n, 0n, 0n, 0n, 1n]}, 0n, 0n, 2n},
-   Spec.Bsr{Spec.Slot{2n, [0n, 0n, 0n, 0n, 1n]}, 2n, 2n, 2n},
    Spec.Bsr{Spec.Slot{2n, [2n]}, 0n, 2n, 3n},
    Spec.Bsr{Spec.Slot{0n, [1n]}, 0n, 0n, 1n},
    Spec.Bsr{Spec.Slot{0n, [2n]}, 0n, 1n, 2n},
-   Spec.Bsr{Spec.Slot{1n, [1n]}, 0n, 0n, 0n},
-   Spec.Bsr{Spec.Slot{1n, [1n]}, 2n, 2n, 2n}]
+   Spec.Bsr{Spec.Slot{1n, [1n]}, 0n, 0n, 0n}]
 
 def main() -> Compare.Report:
   Compare.report(grammar(), start(), input(), swiftSteps())

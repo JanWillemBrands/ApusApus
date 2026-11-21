@@ -27,6 +27,9 @@ import Foundation
 // Start symbol 'S'. Empty production 'ε'.
 // Terminals/nonterminals are single lowercase/uppercase letters.
 // Space and newline are skipped.
+// Brackets: ( ) group, [ ] optional, { } zero or more, < > one or more. E.g. S = { a | b c } [ d ] .
+// A pick of [ ] and a round of { } or < > must read something (skipping is how they read
+// nothing), except the one round of a < > over nothing.
 
 //T = a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z | ε .
 //N = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z .
@@ -61,7 +64,33 @@ nonisolated enum GrammarError: Error, CustomStringConvertible {
 // 'GrammarNode' builds a binary tree with its 'seq' and 'alt' links.
 // terminal, nonTerminal and epsilon nodes are stored as T, N, EPS.
 // The ALT and END nodes signal the start and end of a sequence.
-nonisolated enum GrammarNodeKind { case T, EPS, N, ALT, END }
+// A bracket DO ( ), OPT [ ], KLN { }, POS < > is a nonterminal defined in place: its 'alt'
+// leads to its body, an unnamed definition "(" whose alternates are the bracket's.
+nonisolated enum GrammarNodeKind {
+    case T, EPS, N, ALT, END, DO, OPT, KLN, POS
+
+    static let brackets: [Character: GrammarNodeKind] = ["(": .DO, "[": .OPT, "{": .KLN, "<": .POS]
+
+    var isBracket: Bool { closer != nil }
+    var isLoop: Bool { self == .KLN || self == .POS }
+
+    var closer: Character? {
+        switch self {
+        case .DO:  ")"
+        case .OPT: "]"
+        case .KLN: "}"
+        case .POS: ">"
+        default:   nil
+        }
+    }
+}
+
+/// What a caller needs from what it calls. Kept on the return edge, so callers with
+/// different needs still share one cluster.
+nonisolated enum Need: Hashable {
+    case mayBeEmpty
+    case nonEmpty
+}
 
 nonisolated final class GrammarNode {
     let kind: GrammarNodeKind
@@ -83,7 +112,6 @@ nonisolated struct Descriptor: Hashable {
     let L: GrammarNode          // grammar slot
     let k: Int                  // cluster index: where the containing nonterminal was entered
     let i: Int                  // input index: how far this attempt has got
-    // TODO: simplify has as hash.into(L.number << 48 | k << 24 | i)
 }
 
 // The (ambiguous) parse tree is stored as a set of binary spans a.k.a. Binary Subtree Representation, not in an SPPF.
@@ -105,13 +133,16 @@ nonisolated struct BinarySpan: Hashable {
 nonisolated struct ParsePosition: Hashable {
     let slot: GrammarNode
     let index: Int
+    var need: Need = .mayBeEmpty    // return edges only
 }
 
 // Paper: clusterNode (X, k). The (X, k) label is the crf dictionary key, so it is not
-// repeated here — what a cluster adds over its identity is these two sets.
+// repeated here — what a cluster adds over its identity is these sets.
 nonisolated final class ParseCluster {
     var returns: Set<ParsePosition> = []
     var pops: Set<Int> = []         // Paper: P — contingent returns
+    // TODO: use Afroozeh to change into Array<Int> ?
+    var seeded = Need.nonEmpty      // the weakest need its alternates were seeded for
 }
 
 // MARK: - Parser
@@ -123,6 +154,13 @@ nonisolated final class Parser {
 
     // stores LHS nonTerminal definition grammar trees by name.
     var nonTerminalDefinitions: [Character: GrammarNode] = [:]
+
+    // the bodies of the brackets, unnamed definitions
+    var bracketDefinitions: [GrammarNode] = []
+
+    var allDefinitions: [GrammarNode] {
+        nonTerminalDefinitions.values.sorted { $0.number < $1.number } + bracketDefinitions
+    }
 
     /// Numbers handed out to GrammarNodes so far, and so also the size 'yields' needs.
     private(set) var nodeCount = 0
@@ -141,9 +179,17 @@ nonisolated final class Parser {
     // Paper: CRF - Call Return Forest
     var crf: [ParsePosition: ParseCluster] = [:]
 
+    // FIRST and FOLLOW, built by parseInput()
+    private(set) var prediction: Prediction!
+
     init(syntax: String, input: String) {
         self.syntax = Array(syntax)
         self.input = Array(input)
+    }
+
+    /// The character at `j`; '$' past the end of the input.
+    func character(at j: Int) -> Character {
+        j < input.count ? input[j] : endOfInput
     }
 
     /// The only way a GrammarNode should be made: it is the numbering that keeps 'yields'
@@ -176,57 +222,73 @@ nonisolated final class Parser {
             }
         }
 
-        var nonTerminal: GrammarNode!                   // the current LHS production being parsed
         var nonTerminalReferences: [GrammarNode] = []   // RHS nonTerminal (forward/backward) references
 
         func production() throws {
             let name = c
             try next() { $0.isUppercase }
-            nonTerminal = makeNode(.N, name)
+            let definition = makeNode(.N, name)
             // store the LHS nonTerminal definition
-            nonTerminalDefinitions[nonTerminal.name] = nonTerminal
+            nonTerminalDefinitions[name] = definition
             try next() { $0 == "=" }
-            nonTerminal.alt = try alternates()
+            definition.alt = try alternates(of: definition)
             try next() { $0 == "." }
         }
 
-        func alternates() throws -> GrammarNode {
-            let startOfAlternates = try sequence()
+        // 'owner' is the definition the alternates belong to: a production's LHS, or the body
+        // of a bracket. Every END links back to it.
+        func alternates(of owner: GrammarNode) throws -> GrammarNode {
+            let startOfAlternates = try sequence(of: owner)
             var tmp = startOfAlternates
             while c == "|" {
                 try next()
-                let nextAlternate = try sequence()
+                let nextAlternate = try sequence(of: owner)
                 tmp.alt = nextAlternate
                 tmp = nextAlternate
             }
             return startOfAlternates
         }
 
-        func sequence() throws -> GrammarNode {
+        func sequence(of owner: GrammarNode) throws -> GrammarNode {
             let startOfSequence = makeNode(.ALT, "[")
             var tmp = startOfSequence
             repeat {
-                let terminal: GrammarNode
-                if c == "ε" {
-                    terminal = makeNode(.EPS, c)
-                } else if c.isUppercase {
-                    terminal = makeNode(.N, c)
-                    nonTerminalReferences.append(terminal)
-                } else if c.isLowercase {
-                    terminal = makeNode(.T, c)
-                } else {
-                    throw GrammarError.unexpectedFactor(c, at: i - 1)
-                }
-                tmp.seq = terminal
-                tmp = terminal
-                try next()
-            } while c.isLetter
+                let symbol = try factor()
+                tmp.seq = symbol
+                tmp = symbol
+            } while c.isLetter || GrammarNodeKind.brackets[c] != nil
 
             let end = makeNode(.END, "]")
             tmp.seq = end
-            end.seq = nonTerminal
+            end.seq = owner
             end.alt = startOfSequence
             return startOfSequence
+        }
+
+        func factor() throws -> GrammarNode {
+            if let kind = GrammarNodeKind.brackets[c] {
+                let occurrence = makeNode(kind, c)
+                try next()
+                let body = makeNode(.N, "(")
+                bracketDefinitions.append(body)
+                body.alt = try alternates(of: body)
+                try next() { $0 == kind.closer }
+                occurrence.alt = body
+                return occurrence
+            }
+            let symbol: GrammarNode
+            if c == "ε" {
+                symbol = makeNode(.EPS, c)
+            } else if c.isUppercase {
+                symbol = makeNode(.N, c)
+                nonTerminalReferences.append(symbol)
+            } else if c.isLowercase {
+                symbol = makeNode(.T, c)
+            } else {
+                throw GrammarError.unexpectedFactor(c, at: i - 1)
+            }
+            try next()
+            return symbol
         }
 
         try next()
@@ -250,11 +312,16 @@ nonisolated final class Parser {
         }
     }
 
-    // Paper: ntAdd(X, j) — add descriptors for all alternates of a nonterminal.
-    func addDescriptorsForAlternates(X: GrammarNode, j: Int) {
+    // Paper: ntAdd(X, j) — add descriptors for the alternates the next character predicts.
+    // A caller that needs something only gets the alternates that can begin with it.
+    func addDescriptorsForAlternates(X: GrammarNode, j: Int, need: Need) {
+        let next = character(at: j)
         var alt = X.alt
         while let node = alt {
-            addDescriptor(L: node.seq!, k: j, i: j)
+            let slot = node.seq!
+            if need == .nonEmpty ? prediction.begins(slot, with: next) : prediction.predicts(slot, next) {
+                addDescriptor(L: slot, k: j, i: j)
+            }
             alt = node.alt
         }
     }
@@ -277,42 +344,46 @@ nonisolated final class Parser {
         yields[L.number].insert(bs)
     }
 
-    // MARK: Call and return
+    // MARK: enter and leave
 
     // Paper: call(L, i, j) — enter a nonterminal (BSR paper §5.3.1, where "L is Y ::= αX·β":
     // the slot with the dot AFTER the called nonterminal). The paper labels both the CRF node
     // and the BSR element with that slot.
     //
-    // The return edge here stores the nonterminal node itself — the dot BEFORE — because one
-    // stored node then serves both uses on the way back out (see rtn):
+    // The return edge here stores the occurrence itself — a nonterminal reference or a
+    // bracket, the dot BEFORE — because one stored node then serves both uses on the way back
+    // out (see resume):
     //   edge.slot        is the yield key      (paper: bsrAdd(L, ...))
     //   edge.slot.seq!   is the paper's L      (paper: dscAdd(L, ...))
     // Storing the paper's L instead would require a backward link to recover the nonterminal
     // for the yield. node ↔ node.seq is a bijection, so this is a relabeling, not a difference.
-    func enter() {
-        // Create the return edge: (L=cL, i=cU), cL is the RHS nonterminal node
-        let returnEdge = ParsePosition(slot: cL, index: cU)
+    //
+    // `occurrence` (a nonterminal or a bracket) is called at `j` from a cluster that started at `u`.
+    func enter(_ occurrence: GrammarNode, from u: Int, at j: Int, need: Need) {
+        let returnEdge = ParsePosition(slot: occurrence, index: u, need: need)
+        let definition = occurrence.alt!
+        let clusterKey = ParsePosition(slot: definition, index: j)
 
-        // Create the cluster key: (X=cL.alt!, k=cI), cL.alt! is the LHS nonterminal node
-        let clusterKey = ParsePosition(slot: cL.alt!, index: cI)
-
-        // Find or create the parseCluster in the crf
-        if let existingCluster = crf[clusterKey] {
-            if existingCluster.returns.insert(returnEdge).inserted {
-                for pop in existingCluster.pops {
-                    addDescriptor(L: cL.seq!, k: cU, i: pop)
-                    addYield(L: cL, i: cU, k: cI, j: pop)
-                }
+        if let cluster = crf[clusterKey] {
+            guard cluster.returns.insert(returnEdge).inserted else { return }
+            for pop in cluster.pops {
+                resume(returnEdge, start: j, end: pop)
+            }
+            // The first caller that accepts nothing also gets the alternates that only read nothing.
+            if need == .mayBeEmpty && cluster.seeded == .nonEmpty {
+                cluster.seeded = .mayBeEmpty
+                addDescriptorsForAlternates(X: definition, j: j, need: .mayBeEmpty)
             }
         } else {
-            let newCluster = ParseCluster()
-            crf[clusterKey] = newCluster
-            newCluster.returns.insert(returnEdge)
-            addDescriptorsForAlternates(X: cL.alt!, j: cI)
+            let cluster = ParseCluster()
+            cluster.seeded = need
+            crf[clusterKey] = cluster
+            cluster.returns.insert(returnEdge)
+            addDescriptorsForAlternates(X: definition, j: j, need: need)
         }
     }
 
-    // Paper: rtn(X, k, j) — leave a nonterminal.
+    // Paper: rtn(X, k, j) — leave a definition.
     // Only X is passed; the paper's k and j are read from the registers cU and cI.
     func leave(X: GrammarNode) {
         let clusterKey = ParsePosition(slot: X, index: cU)
@@ -320,10 +391,26 @@ nonisolated final class Parser {
 
         if cluster.pops.insert(cI).inserted {
             for returnEdge in cluster.returns {
-                addDescriptor(L: returnEdge.slot.seq!, k: returnEdge.index, i: cI)
-                addYield(L: returnEdge.slot, i: returnEdge.index, k: cU, j: cI)
+                resume(returnEdge, start: cU, end: cI)
             }
         }
+    }
+
+    // One return: the call on `edge`, made at `start`, has read up to `end`.
+    func resume(_ edge: ParsePosition, start: Int, end: Int) {
+        let occurrence = edge.slot
+        if edge.need == .nonEmpty && end == start { return }    // this caller needs something
+
+        // Go on after the occurrence, and for a loop also round again — a tail call with the same
+        // edge, so a loop needs no cluster of its own. A round that read nothing gets no successor.
+        let next = character(at: end)
+        let goOn = prediction.predicts(occurrence.seq!, next)
+        let roundAgain = occurrence.kind.isLoop && end > start && prediction.begins(body: occurrence.alt!, with: next)
+        guard goOn || roundAgain else { return }
+
+        addYield(L: occurrence, i: edge.index, k: start, j: end)
+        if goOn { addDescriptor(L: occurrence.seq!, k: edge.index, i: end) }
+        if roundAgain { enter(occurrence, from: edge.index, at: end, need: .nonEmpty) }
     }
 
     // MARK: Parse the input
@@ -333,8 +420,10 @@ nonisolated final class Parser {
         guard let grammarRoot = nonTerminalDefinitions["S"] else {
             throw GrammarError.missingStartSymbol
         }
+        prediction = Prediction(definitions: allDefinitions, start: grammarRoot)
+
         crf[ParsePosition(slot: grammarRoot, index: 0)] = ParseCluster()
-        addDescriptorsForAlternates(X: grammarRoot, j: 0)
+        addDescriptorsForAlternates(X: grammarRoot, j: 0, need: .mayBeEmpty)
 
         // make the yield storage large enough
         yields = Array(repeating: [], count: nodeCount)
@@ -351,16 +440,28 @@ nonisolated final class Parser {
                     } else {
                         continue nextDescriptor
                     }
-                case .N:
-                    enter()
+                case .N, .DO, .POS:
+                    // A nonterminal, a group, or the first round of < >: may read nothing.
+                    if prediction.predicts(cL, character(at: cI)) {
+                        enter(cL, from: cU, at: cI, need: .mayBeEmpty)
+                    }
                     continue nextDescriptor
+                case .OPT, .KLN:
+                    // Pick, or first round, which must read something; or skip, which reads nothing.
+                    let next = character(at: cI)
+                    if prediction.begins(body: cL.alt!, with: next) {
+                        enter(cL, from: cU, at: cI, need: .nonEmpty)
+                    }
+                    guard prediction.predicts(cL.seq!, next) else { continue nextDescriptor }
+                    addYield(L: cL, i: cU, k: cI, j: cI)
+                    cL = cL.seq!
                 case .EPS:
                     addYield(L: cL, i: cU, k: cI, j: cI)
                     cL = cL.seq!
                 case .ALT:
                     fatalError(#function + ": ALT should not happen here")
                 case .END:
-                    let nt = cL.seq! // the seq link of an END node points back to the nonTerminal node
+                    let nt = cL.seq! // the seq link of an END node points back to its definition
                     addYield(L: nt, i: cU, k: cU, j: cI)
                     leave(X: nt)
                     continue nextDescriptor

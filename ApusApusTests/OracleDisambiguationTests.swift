@@ -35,9 +35,9 @@ import Foundation
 struct OracleDisambiguationTests {
 
 
-    // MARK: - Order of the annotations (Bend/SPEC.bend)
+    // MARK: - Order of the annotations (the Bend twin)
 
-    /// The order of annotations in `Bend/SPEC.bend`: hard rules first (lookahead, `@left`,
+    /// The order of annotations in the Bend twin (`Bend/ORACLE.bend`, `Bend/EXTENT.bend`): hard rules first (lookahead, `@left`,
     /// `@right`), then `@prefer`/`@avoid` among the admissible trees, then `@longest`/`@shortest`.
     /// A preferred alternative with no admissible tree is no rival: it can't take the plain
     /// alternative's place. Swift runs `@prefer` before `@left`/`@right`, so it removes the plain
@@ -69,7 +69,7 @@ struct OracleDisambiguationTests {
 
         /// The `f(1) {}⏎{}` pattern of Swift.apus. `P K` is a parenless closure call; its callee
         /// may not be an argument call (`@right(AC)`) nor itself (`@right`). Bare `@right` asks
-        /// plain "derives" (Bend/SPEC.bend `EdgeOk`): `P K` derives `f ( ) { }` with the callee
+        /// plain "derives" (Bend/GUARD.bend): `P K` derives `f ( ) { }` with the callee
         /// `f ( )`, its own `@right(AC)` notwithstanding, so the chain `f ( ) { } { }` is forbidden.
         /// swift-syntax chains it (TODO.md, "Grammar rework for the Oracle").
         static let closureCall = #"S = F . F = AC | P "(" ")" K | @right @right(AC) P K . AC = P "(" ")" . P = "f" | F . K = "{" "}" ."#
@@ -88,7 +88,7 @@ struct OracleDisambiguationTests {
             #expect(!r.postMatch, "the parenless call `f { }` may not be the callee of another parenless call")
         }
 
-        /// Nonterminal `@longest` is local, as for brackets (Bend/SPEC.bend `ExtentBest`): a reading
+        /// Nonterminal `@longest` is local, as for brackets (Bend/EXTENT.bend): a reading
         /// of a marked nonterminal loses only to a longer reading of the SAME enclosing sequence. The
         /// argless macro `# e` followed by a call `( )` and the macro with its argument clause
         /// `# e ( )` sit in different enclosing sequences, so `@longest` keeps both (until 2026-11-10
@@ -105,7 +105,7 @@ struct OracleDisambiguationTests {
             #expect(preferred.isUnambiguous, "\(preferred.diagnostics)")
         }
 
-        /// Several marks in one sequence are served left to right (Bend/SPEC.bend, phase 3): the
+        /// Several marks in one sequence are served left to right (Bend/EXTENT.bend, `beatsAt`): the
         /// first marked item takes the best length that still lets the sequence be read, the next
         /// takes the best of what is left. Applied all at once, the first `A` wanted `(a a)( )` and
         /// the second `( )(a a)`, and no reading survived.
@@ -119,7 +119,7 @@ struct OracleDisambiguationTests {
         }
 
         /// Bare `@left` asks whether the alternate could derive the last child's TEXT, not whether
-        /// the last child IS such a node (Bend/SPEC.bend, Guard, note 2). On `1 + 2 + 3` the last
+        /// the last child IS such a node (Bend/GUARD.bend: the rules read the language, not the shape). On `1 + 2 + 3` the last
         /// child `2 + 3` of `E "+" E` is out also where it was read via `E "+" F`; that tree was the
         /// last to read `2 + 3` as an `E`, so afterwards no `E` spans it.
         @Test("bare @left goes by the text, not the node")
@@ -496,7 +496,7 @@ struct OracleDisambiguationTests {
             #expect(!r.isUnambiguous, "A/B/C remain mutually ambiguous — same as three @prefer")
         }
 
-        // Ranks: @prefer above unmarked above @avoid (Bend/SPEC.bend, `outranks`). Two avoided
+        // Ranks: @prefer above unmarked above @avoid (Bend/PREFER.bend, `outranks`). Two avoided
         // siblings have the same rank, so both stay. Each once lost to the other, and which one
         // survived depended on the order the rules ran.
         @Test("two @avoid siblings have the same rank — both stay")
@@ -707,7 +707,7 @@ struct OracleDisambiguationTests {
                       #"S = A . A = A | @avoid "a" ."#,
                       #"S = A . A = @prefer B | "a" . B = A ."#,
                       // The rival reaches T, a nonterminal ABOVE the choice over the same tokens
-                      // (Bend/SPEC.bend `xs`); that too is an input-free cycle through it.
+                      // (Bend/PREFER.bend, `noPreferenceCycle`); that too is an input-free cycle through it.
                       #"S = T . T = A . A = @prefer T | "a" ."#,
                       // A virtual layout token matches zero characters, so it reads nothing.
                       #"S = A . A = @prefer >>| A | "a" ."#,

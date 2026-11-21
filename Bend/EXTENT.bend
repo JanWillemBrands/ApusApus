@@ -1,451 +1,435 @@
 import Base
-import ./SPEC.bend as Spec
-import ./GLL.bend as Gll
-import ./PRUNE.bend as Prune
-import ./PREFER.bend as Prefer
-import ./GUARD.bend as Guard
-import ./UNBEATEN.bend as Unb
+import ./SYNTAX.bend as Spec
+import ./CORE.bend as Core
+import ./EBNF.bend as E
+import ./EXACT.bend as Exact
 import ./WITNESS.bend as Witness
-import ./LEMMAS.bend as Lemma
+import ./GUARD.bend as Guard
+import ./PREFER.bend as Prefer
+import ./ORACLE.bend as Oracle
 
-# THE EXTENT ORACLE (not trusted): phase 3 of SPEC.bend, @longest and @shortest, on top
-# of phases 1 and 2. It takes the preference oracle's set, the steps of the unbeaten
-# trees, and keeps the steps that lie on a best reading of their sequence, where only a
-# reading that phases 1 and 2 keep counts (`extent_exact` in LAWS.bend).
+# PHASE 3 ON THE CORE: @longest AND @shortest.
 #
-# A step can't decide this alone. Whether a sequence's reading is best depends on where
-# the whole sequence ends, and only its last step has that end. So the oracle looks at
-# every end e at which the set completes the sequence from the step's start i:
-#   - the best length M of the marked item over (i, e) is the longest (shortest) one of
-#     the readings the set has: chains of the sequence's own steps from i to e;
-#   - the step is kept when, for some such e, such a chain through the step reads the
-#     marked item with length M.
-# That set can hold steps that stand on nothing (a rule that fails at a node leaves the
-# step above it), and a chain through one is no reading. So the set is first pruned from
-# below, as UNBEATEN.bend prunes its sub-parses.
-#
-# The readings are looked for in the set itself, not by parsing again: a reading that
-# phases 1 and 2 keep where the sequence stands is one of an unbeaten tree (it takes the
-# sequence's place in it), so its steps are in the set. A best length is only used with
-# a certificate: a forest for the sequence, built from the set (WITNESS.bend), that fits
-# the items, spells the tokens, reads the marked item with that length, and whose steps
-# all are in the set. Without one the oracle hands out nothing.
-#
-# Kept steps could still be stitched into a reading that is not best: its steps each lie
-# on some best reading, but over different ends. So the oracle checks its own answer: a
-# kept step of the marked item that lies on any reading over (i, e) has the best length
-# over (i, e). If one doesn't, it hands out nothing. (The check may refuse a grammar
-# where no stitched reading is made of kept steps; refusing is always safe.)
-#
-# The oracle refuses a sequence with more than one marked item, and a mark on an item of a
-# loop's own alternative (a round has one item, so its length is fixed anyway).
+# A mark asks for the longest or shortest reading of an item: of one item of a production
+# (a bracket's mark sits on the item of its nonterminal), or of every item that is a given
+# nonterminal. A reading of production q from i is where its items end, k_1 .. k_n; its
+# steps are q's own steps along those ends, and each must lie on some tree that phases 1
+# and 2 keep (the reading may be stitched from steps of different such trees). A step of q
+# is out when it stands on a reading that ends at some e, and another reading that ends at
+# e reads q's marked items better: the same on every marked item before the step's item,
+# and better (longer, shorter) on the step's item. A tree is selected when phases 1 and 2
+# keep it and none of its steps is out.
 
-# ---- Items of a sequence ----
+# ======== THE MEANING ========
 
-# Does the set have the step of item q of the sequence at (index, prefix) from i, over
-# the tokens from a to b?
+# @longest or @shortest.
+type Extent is Data:
+  Longest{}
+  Shortest{}
 
-def triIf(ok: Bool) -> Guard.Tri:
-  match ok:
+# ItemExtent: the item before dot `dot` of production `index`. NtExtent: every item that is
+# nonterminal x.
+type ExtentMark is Data:
+  ItemExtent{index: Nat, dot: Nat, ext: Extent}
+  NtExtent{x: Nat, ext: Extent}
+
+def extentIf(hit: Bool, +e: Extent) -> Maybe<&2, Extent>:
+  match hit:
     case True{}:
-      Guard.Yes{}
-    case False{}:
-      Guard.No{}
-def seg(+set: +List<Spec.Bsr>, +index: Nat, +prefix: +List<Nat>, +i: Nat, +q: Nat, +a: Nat, +b: Nat) -> Guard.Tri:
-  triIf(Spec.bsrMember(Spec.at(index, prefix, 1n+q, i, a, b), set))
-
-# ---- The marked item of a sequence ----
-
-type Marked is Data:
-  NoMark{}
-  OneMark{d: Nat, ext: Spec.Extent}
-  ManyMarks{}
-
-def addMark(acc: Marked, found: Maybe<&2, Spec.Extent>, +dot: Nat) -> Marked:
-  match acc found:
-    case NoMark{} Some{+e}:
-      OneMark{dot, e}
-    case NoMark{} None{}:
-      NoMark{}
-    case OneMark{+d, +e} None{}:
-      OneMark{d, e}
-    case OneMark{d, e} Some{e2}:
-      ManyMarks{}
-    case ManyMarks{} _:
-      ManyMarks{}
-
-# The marked item of the items from the dot on, in the sequence at (index, prefix).
-def markedFrom(items: +List<Spec.Item>, +marks: +List<Spec.ExtentMark>, +index: Nat, +prefix: +List<Nat>, +dot: Nat, acc: Marked) -> Marked:
-  match items:
-    case Nil{}:
-      acc
-    case Con{+it, rest}:
-      markedFrom(rest, marks, index, prefix, 1n+dot, addMark(acc, Spec.itemExtent(marks, it, index, List.append(&2, Nat, prefix, [dot])), dot))
-
-def stepOk(hasStep: Bool, +q: Nat, +from: Nat, +b: Nat, +p: Nat, +k: Nat, +j: Nat) -> Bool:
-  match hasStep:
-    case True{}:
-      Bool.or(Bool.not(Nat.is_eq(q, p)), Bool.and(Nat.is_eq(from, k), Nat.is_eq(b, j)))
-    case False{}:
-      True{}
-
-# ---- Readings of a sequence, found in the set ----
-
-# Is the constraint kept by item q read from `from` to b? The marked item d must read len
-# tokens; when hasStep, item p must read from k to j.
-def okAt(+q: Nat, +from: Nat, +b: Nat, +d: Nat, +len: Nat, hasStep: Bool, +p: Nat, +k: Nat, +j: Nat) -> Bool:
-  Bool.and(Bool.or(Bool.not(Nat.is_eq(q, d)), Nat.is_eq(Nat.sub(b, from), len)), stepOk(hasStep, q, from, b, p, k, j))
-
-# Is there a reading of the items (item q first) over the tokens from `from` to e that
-# keeps the constraint? The next item ends at from + m for some m below count. gas
-# bounds the search; when it runs out the answer is Unknown.
-def search(gas: Nat, +items: +List<Spec.Item>, count: Nat, +set: +List<Spec.Bsr>, +index: Nat, +prefix: +List<Nat>, +i: Nat, +q: Nat, +from: Nat, +e: Nat, +d: Nat, +len: Nat, +hasStep: Bool, +p: Nat, +k: Nat, +j: Nat) -> Guard.Tri:
-  match gas items count:
-    case 0n _ _:
-      Guard.Unknown{}
-    case 1n+(+g) Nil{} _:
-      triIf(Nat.is_eq(from, e))
-    case 1n+(+g) Con{+it, +rest} 0n:
-      Guard.No{}
-    case 1n+(+g) Con{+it, +rest} 1n+(+m):
-      +b = Nat.add(from, m)
-      +here = Guard.andTri(triIf(okAt(q, from, b, d, len, hasStep, p, k, j)), Guard.andTri(seg(set, index, prefix, i, q, from, b), search(g, rest, 1n+Nat.sub(e, b), set, index, prefix, i, 1n+q, b, e, d, len, hasStep, p, k, j)))
-      Guard.orTri(here, search(g, it <> rest, m, set, index, prefix, i, q, from, e, d, len, hasStep, p, k, j))
-
-# Enough gas for every boundary of every item.
-def gasFor(+its: +List<Spec.Item>, +i: Nat, +e: Nat) -> Nat:
-  Nat.mul(1n+List.length(&2, Spec.Item, its), 2n+Nat.sub(e, i))
-
-# The sequence a step belongs to, and where to look: the set's own steps of the sequence
-# at (index, prefix), whose reversed path is rpath, with items its.
-type Seq is Data:
-  Seq{fuel: Nat, grammar: +List<Spec.Production>, input: +List<Nat>, set: +List<Spec.Bsr>, index: Nat, rpath: +List<Nat>, prefix: +List<Nat>, its: +List<Spec.Item>}
-
-def seqSet(w: Seq) -> +List<Spec.Bsr>:
-  match w:
-    case Seq{fuel, grammar, input, +set, index, rpath, prefix, its}:
-      set
-
-def seqIndex(w: Seq) -> Nat:
-  match w:
-    case Seq{fuel, grammar, input, set, +index, rpath, prefix, its}:
-      index
-
-def seqPrefix(w: Seq) -> +List<Nat>:
-  match w:
-    case Seq{fuel, grammar, input, set, index, rpath, +prefix, its}:
-      prefix
-
-def seqIts(w: Seq) -> +List<Spec.Item>:
-  match w:
-    case Seq{fuel, grammar, input, set, index, rpath, prefix, +its}:
-      its
-
-# Is there a reading over (i, e) whose marked item d reads len tokens (and, when hasStep,
-# whose item p reads from k to j)?
-def readsWith(+w: Seq, +d: Nat, +len: Nat, +hasStep: Bool, +p: Nat, +k: Nat, +j: Nat, +i: Nat, +e: Nat) -> Guard.Tri:
-  match w:
-    case Seq{fuel, grammar, input, +set, +index, rpath, +prefix, +its}:
-      search(gasFor(its, i, e), its, 1n+Nat.sub(e, i), set, index, prefix, i, 0n, i, e, d, len, hasStep, p, k, j)
-
-def lengthOk(+w: Seq, +d: Nat, +i: Nat, +len: Nat, +e: Nat) -> Guard.Tri:
-  readsWith(w, d, len, False{}, 0n, 0n, 0n, i, e)
-
-# ---- Certificates ----
-
-# Does the forest read the items from `from` on with the constraint of `search`?
-def consOk(f: +List<Spec.Tree>, +q: Nat, +from: Nat, +d: Nat, +len: Nat, +hasStep: Bool, +p: Nat, +k: Nat, +j: Nat) -> Bool:
-  match f:
-    case Nil{}:
-      True{}
-    case Con{+t, +ts}:
-      +b = Nat.add(from, List.length(&2, Nat, Spec.leaves([t])))
-      Bool.and(okAt(q, from, b, d, len, hasStep, p, k, j), consOk(ts, 1n+q, b, d, len, hasStep, p, k, j))
-
-# A reading over (i, e) whose marked item reads len tokens, all of whose steps are in
-# the set.
-def certOk(+grammar: +List<Spec.Production>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +index: Nat, +prefix: +List<Nat>, +its: +List<Spec.Item>, +d: Nat, +i: Nat, +len: Nat, +e: Nat, +f: +List<Spec.Tree>) -> Bool:
-  Bool.and(Bool.and(Spec.fits(f, grammar, its), Gll.natsEq(Spec.leaves(f), Prefer.tokensFrom(input, i, e))), Bool.and(consOk(f, 0n, i, d, len, False{}, 0n, 0n, 0n), Spec.allIn(Spec.walk(f, False{}, index, prefix, 0n, i, i), set)))
-
-def anyCert(fs: +List<+List<Spec.Tree>>, +grammar: +List<Spec.Production>, +input: +List<Nat>, +set: +List<Spec.Bsr>, +index: Nat, +prefix: +List<Nat>, +its: +List<Spec.Item>, +d: Nat, +i: Nat, +len: Nat, +e: Nat) -> Bool:
-  match fs:
-    case Nil{}:
-      False{}
-    case Con{+f, rest}:
-      Bool.or(certOk(grammar, input, set, index, prefix, its, d, i, len, e, f), anyCert(rest, grammar, input, set, index, prefix, its, d, i, len, e))
-
-# Some forest the set has for the sequence over (i, e) is such a reading.
-def certified(+w: Seq, +d: Nat, +i: Nat, +len: Nat, +e: Nat) -> Bool:
-  match w:
-    case Seq{+fuel, +grammar, +input, +set, +index, +rpath, +prefix, +its}:
-      +fs = Prefer.seqForests(Witness.solve(fuel, grammar, input, set, [], Witness.TSeq{Prune.Seg{index, rpath, i, List.length(&2, Spec.Item, its), e}}))
-      anyCert(fs, grammar, input, set, index, prefix, its, d, i, len, e)
-
-# ---- The best length over (i, e) ----
-
-type Best is Data:
-  Found{len: Nat}
-  NoneFound{}
-  Unsure{}
-
-def foundIf(ok: Bool, +len: Nat) -> Best:
-  match ok:
-    case True{}:
-      Found{len}
-    case False{}:
-      Unsure{}
-
-# A length a reading has is found when a certificate shows it.
-def bestOn(t: Guard.Tri, +w: Seq, +d: Nat, +i: Nat, +len: Nat, +e: Nat, next: Best) -> Best:
-  match t:
-    case Guard.Yes{}:
-      foundIf(certified(w, d, i, len, e), len)
-    case Guard.No{}:
-      next
-    case Guard.Unknown{}:
-      Unsure{}
-
-# The first length of the list that a reading has: lengths are tried best first.
-def firstLength(lens: +List<Nat>, +w: Seq, +d: Nat, +i: Nat, +e: Nat) -> Best:
-  match lens:
-    case Nil{}:
-      NoneFound{}
-    case Con{+len, rest}:
-      bestOn(lengthOk(w, d, i, len, e), w, d, i, len, e, firstLength(rest, w, d, i, e))
-
-def downFrom(n: Nat) -> +List<Nat>:
-  match n:
-    case 0n:
-      [0n]
-    case 1n+(+m):
-      (1n+m) <> downFrom(m)
-
-def upTo(n: Nat, +from: Nat) -> +List<Nat>:
-  match n:
-    case 0n:
-      [from]
-    case 1n+m:
-      from <> upTo(m, 1n+from)
-
-def lengthsFor(e: Spec.Extent, +n: Nat) -> +List<Nat>:
-  match e:
-    case Spec.Longest{}:
-      downFrom(n)
-    case Spec.Shortest{}:
-      upTo(n, 0n)
-
-def bestLength(+ext: Spec.Extent, +w: Seq, +d: Nat, +i: Nat, +e: Nat) -> Best:
-  firstLength(lengthsFor(ext, Nat.sub(e, i)), w, d, i, e)
-
-# ---- Does a step lie on a best reading over (i, e)? ----
-
-def onBest(b: Best, +w: Seq, +p: Nat, +d: Nat, +i: Nat, +k: Nat, +j: Nat, +e: Nat) -> Guard.Tri:
-  match b:
-    case Found{+len}:
-      readsWith(w, d, len, True{}, p, k, j, i, e)
-    case NoneFound{}:
-      Guard.No{}
-    case Unsure{}:
-      Guard.Unknown{}
-
-def endIf(ok: Bool, +j: Nat) -> Maybe<&2, Nat>:
-  match ok:
-    case True{}:
-      Some{j}
+      Some{e}
     case False{}:
       None{}
 
-# ---- Where the sequence ends ----
-
-# Is e a step that ends the sequence at (index, endPath) from i? Then its j is an end.
-def endsHere(+index: Nat, +endPath: +List<Nat>, +i: Nat, e: Spec.Bsr) -> Maybe<&2, Nat>:
-  match e:
-    case Spec.Bsr{Spec.Slot{p, path}, i2, k, +j}:
-      endIf(Bool.and(Nat.is_eq(p, index), Bool.and(Spec.pathEq(path, endPath), Nat.is_eq(i2, i))), j)
-
-def consEnd(found: Maybe<&2, Nat>, +rest: +List<Nat>) -> +List<Nat>:
+def orExtent(found: Maybe<&2, Extent>, +later: Maybe<&2, Extent>) -> Maybe<&2, Extent>:
   match found:
-    case Some{+j}:
-      j <> rest
+    case Some{+e}:
+      Some{e}
+    case None{}:
+      later
+
+# The mark's extent, if it marks the item before dot d of production q.
+def extentHit(m: ExtentMark, +grammar: +List<Core.Production>, +q: Nat, +d: Nat) -> Maybe<&2, Extent>:
+  match m:
+    case ItemExtent{p, e, +ext}:
+      extentIf(Bool.and(Nat.is_eq(p, q), Nat.is_eq(e, d)), ext)
+    case NtExtent{x, +ext}:
+      extentIf(Prefer.isNt(Prefer.before(Core.rhsOf(grammar, q), d), x), ext)
+
+# What is asked of the item before dot d of production q: the first mark for it.
+def extentOf(marks: +List<ExtentMark>, +grammar: +List<Core.Production>, +q: Nat, +d: Nat) -> Maybe<&2, Extent>:
+  match marks:
+    case Nil{}:
+      None{}
+    case Con{+m, rest}:
+      orExtent(extentHit(m, grammar, q, d), extentOf(rest, grammar, q, d))
+
+# Is length a better than length b: longer for @longest, shorter for @shortest?
+def better(e: Extent, +a: Nat, +b: Nat) -> Bool:
+  match e:
+    case Longest{}:
+      Nat.is_lt(b, a)
+    case Shortest{}:
+      Nat.is_lt(a, b)
+
+# Better, if the item is marked; never better if it is not.
+def betterOpt(m: Maybe<&2, Extent>, +a: Nat, +b: Nat) -> Bool:
+  match m:
+    case Some{+e}:
+      better(e, a, b)
+    case None{}:
+      False{}
+
+# The same length, if the item is marked; unmarked items need not agree.
+def sameOpt(m: Maybe<&2, Extent>, +a: Nat, +b: Nat) -> Bool:
+  match m:
+    case Some{e}:
+      Nat.is_eq(a, b)
+    case None{}:
+      True{}
+
+# One item of the comparison in beatsAt: better here, or the same here and better later.
+def compareAt(here: Bool, +m: Maybe<&2, Extent>, +w1: Nat, +w2: Nat, later: Bool) -> Bool:
+  match here:
+    case True{}:
+      betterOpt(m, w2, w1)
+    case False{}:
+      Bool.and(sameOpt(m, w1, w2), later)
+
+# The reading ks2 beats ks1 at the item before dot d: the same on each marked item before
+# it, better on it. prev1, prev2: where the item after dot p starts. (The lists come first
+# because Bend checks that a recursion shrinks its first argument.)
+def beatsAt(ks1: +List<Nat>, ks2: +List<Nat>, +marks: +List<ExtentMark>, +grammar: +List<Core.Production>, +q: Nat, +d: Nat, +p: Nat, +prev1: Nat, +prev2: Nat) -> Bool:
+  match ks1:
+    case Nil{}:
+      False{}
+    case Con{+a, r1}:
+      match ks2:
+        case Nil{}:
+          False{}
+        case Con{+b, r2}:
+          compareAt(Nat.is_eq(1n+p, d), extentOf(marks, grammar, q, 1n+p), Nat.sub(a, prev1), Nat.sub(b, prev2), beatsAt(r1, r2, marks, grammar, q, d, 1n+p, a, b))
+
+# q's own steps along the ends ks, from dot p, the item after dot p starting at prev.
+def ownOf(ks: +List<Nat>, +q: Nat, +i: Nat, +p: Nat, +prev: Nat) -> +List<Core.Bsr>:
+  match ks:
+    case Nil{}:
+      []
+    case Con{+k, rest}:
+      Core.Bsr{q, 1n+p, i, prev, k} <> ownOf(rest, q, i, 1n+p, k)
+
+# The steps of a reading of q from i; an empty right side has its one step.
+def stepsOf(+q: Nat, +i: Nat, ks: +List<Nat>) -> +List<Core.Bsr>:
+  match ks:
+    case Nil{}:
+      [Core.Bsr{q, 0n, i, i, i}]
+    case Con{+k, +rest}:
+      ownOf(k <> rest, q, i, 0n, i)
+
+# Where a reading ends: its last item's end (prev for an empty right side).
+def endOf(ks: +List<Nat>, +prev: Nat) -> Nat:
+  match ks:
+    case Nil{}:
+      prev
+    case Con{+k, rest}:
+      endOf(rest, k)
+
+# A step of some tree that phases 1 and 2 keep.
+def ChosenStep(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +start: Nat, +input: +List<Nat>, +x: Core.Bsr) -> Type:
+  &tree: Core.Tree -> Core.ParseTree(grammar, start, input, tree) & Oracle.Chosen(grammar, gmarks, rmarks, start, input, tree) & {Core.member(x, Core.steps([tree], 0n)) == True{} : Bool}
+
+# Every step in the list lies on some tree that phases 1 and 2 keep.
+def AllChosen(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +start: Nat, +input: +List<Nat>, xs: +List<Core.Bsr>) -> Type:
+  match xs:
+    case Nil{}:
+      Unit
+    case Con{+x, rest}:
+      ChosenStep(grammar, gmarks, rmarks, start, input, x) & AllChosen(grammar, gmarks, rmarks, start, input, rest)
+
+# A reading of q from i: one end per item, and all its steps lie on trees phases 1 and 2 keep.
+def Reading(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +start: Nat, +input: +List<Nat>, +q: Nat, +i: Nat, +ks: +List<Nat>) -> Type:
+  {List.length(&2, Nat, ks) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat} & AllChosen(grammar, gmarks, rmarks, start, input, stepsOf(q, i, ks))
+
+# A step is out: it stands on a reading ks1 of its production, and another reading ks2
+# to the same end beats ks1 at the step's item.
+def Out(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +emarks: +List<ExtentMark>, +start: Nat, +input: +List<Nat>, x: Core.Bsr) -> Type:
+  match x:
+    case Core.Bsr{+q, +d, +i, +k, +j}:
+      &ks1: +List<Nat> -> &ks2: +List<Nat> -> Reading(grammar, gmarks, rmarks, start, input, q, i, ks1) & Reading(grammar, gmarks, rmarks, start, input, q, i, ks2) &
+        {endOf(ks1, i) == endOf(ks2, i) : Nat} & {Core.member(Core.Bsr{q, d, i, k, j}, stepsOf(q, i, ks1)) == True{} : Bool} & {beatsAt(ks1, ks2, emarks, grammar, q, d, 0n, i, i) == True{} : Bool}
+
+# No step in the list is out.
+def AllBest(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +emarks: +List<ExtentMark>, +start: Nat, +input: +List<Nat>, xs: +List<Core.Bsr>) -> Type:
+  match xs:
+    case Nil{}:
+      Unit
+    case Con{+x, rest}:
+      (Out(grammar, gmarks, rmarks, emarks, start, input, x) -> Empty) & AllBest(grammar, gmarks, rmarks, emarks, start, input, rest)
+
+# A selected tree: phases 1 and 2 keep it, and none of its steps is out.
+def Selected(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +emarks: +List<ExtentMark>, +start: Nat, +input: +List<Nat>, +tree: Core.Tree) -> Type:
+  Oracle.Chosen(grammar, gmarks, rmarks, start, input, tree) & AllBest(grammar, gmarks, rmarks, emarks, start, input, Core.steps([tree], 0n))
+
+# A set that embeds exactly the selected trees: a parse tree of the input uses only steps of
+# the set when, and only when, it is selected. (The set may hold other steps too.)
+def EmbedsSelected(+grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +emarks: +List<ExtentMark>, +start: Nat, +input: +List<Nat>, +set: +List<Core.Bsr>) -> Type:
+  @tree: Core.Tree -> Core.ParseTree(grammar, start, input, tree) ->
+    ({Core.allIn(Core.steps([tree], 0n), set) == True{} : Bool} -> Selected(grammar, gmarks, rmarks, emarks, start, input, tree)) &
+    (Selected(grammar, gmarks, rmarks, emarks, start, input, tree) -> {Core.allIn(Core.steps([tree], 0n), set) == True{} : Bool})
+
+# ======== THE MARKS AS WRITTEN, ON THE CORE ========
+
+def extentFrom(e: Spec.Extent) -> Extent:
+  match e:
+    case Spec.Longest{}:
+      Longest{}
+    case Spec.Shortest{}:
+      Shortest{}
+
+# xs reversed, then acc.
+def revOnto(xs: +List<Nat>, +acc: +List<Nat>) -> +List<Nat>:
+  match xs:
+    case Nil{}:
+      acc
+    case Con{+x, rest}:
+      revOnto(rest, x <> acc)
+
+def headOr(xs: +List<Nat>, +d: Nat) -> Nat:
+  match xs:
+    case Nil{}:
+      d
+    case Con{+x, rest}:
+      x
+
+def tailOf(xs: +List<Nat>) -> +List<Nat>:
+  match xs:
+    case Nil{}:
+      []
+    case Con{x, +rest}:
+      rest
+
+def itemAt(m: Maybe<&2, Nat>, +dot: Nat, +e: Spec.Extent, +rest: +List<ExtentMark>) -> +List<ExtentMark>:
+  match m:
+    case Some{+q}:
+      ItemExtent{q, dot, extentFrom(e)} <> rest
     case None{}:
       rest
 
-def endsOf(set: +List<Spec.Bsr>, +index: Nat, +endPath: +List<Nat>, +i: Nat) -> +List<Nat>:
-  match set:
+# A mark on nonterminal x stays on x; a mark on the bracket at (index, prefix ++ [m]) moves
+# to item m of the production whose origin is the sequence at (index, prefix).
+def extentMarksOf(ms: +List<Spec.ExtentMark>, +origins: +List<E.Origin>) -> +List<ExtentMark>:
+  match ms:
     case Nil{}:
       []
-    case Con{+e, rest}:
-      consEnd(endsHere(index, endPath, i, e), endsOf(rest, index, endPath, i))
+    case Con{Spec.NtExtent{+x, +e}, rest}:
+      NtExtent{x, extentFrom(e)} <> extentMarksOf(rest, origins)
+    case Con{Spec.BrackExtent{+index, +path, +e}, rest}:
+      +rev = revOnto(path, [])
+      itemAt(Guard.productionAt(origins, index, revOnto(tailOf(rev), []), 0n), 1n+headOr(rev, 0n), e, extentMarksOf(rest, origins))
 
-# The ends of the sequence from i.
-def endsFrom(+w: Seq, +i: Nat) -> +List<Nat>:
-  endsOf(seqSet(w), seqIndex(w), List.append(&2, Nat, seqPrefix(w), [List.length(&2, Spec.Item, seqIts(w))]), i)
+# ======== THE CHOSEN SET, EXACTLY ========
+#
+# The oracle's set without its dead wood, handed out only with checked witnesses: every step
+# lies on a parse tree all of whose steps are in the set, so (by oracle_exact) on a chosen tree.
 
-# Some end e of the list at which the step lies on a best reading.
-def onSomeBest(es: +List<Nat>, +ext: Spec.Extent, +w: Seq, +p: Nat, +d: Nat, +i: Nat, +k: Nat, +j: Nat) -> Guard.Tri:
-  match es:
-    case Nil{}:
-      Guard.No{}
-    case Con{+e, rest}:
-      Guard.orTri(onBest(bestLength(ext, w, d, i, e), w, p, d, i, k, j, e), onSomeBest(rest, ext, w, p, d, i, k, j))
+def treeIn(+grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +set: +List<Core.Bsr>, +t: Core.Tree) -> Bool:
+  Bool.and(Exact.treeOk(grammar, start, input, t), Core.allIn(Core.steps([t], 0n), set))
 
-def loopItem(item: Maybe<&2, Spec.Item>) -> Bool:
-  match item:
-    case Some{Spec.Brack{+kind, alts}}:
-      Gll.isLoop(kind)
-    case Some{Spec.Sym{s}}:
-      False{}
-    case Some{Spec.Eps{}}:
-      False{}
-    case None{}:
-      False{}
-
-# ---- The verdict on a step ----
-
-# The sequence a step belongs to: its items, its prefix path, and whether it is a loop's
-# own alternative.
-def seqLoopy(rpath: +List<Nat>, +grammar: +List<Spec.Production>, +index: Nat) -> Bool:
-  match rpath:
-    case Con{a, Con{+m, +outer}}:
-      loopItem(Gll.nthItem(Gll.seqAt(grammar, index, outer), m))
-    case Con{a, Nil{}}:
-      False{}
-    case Nil{}:
-      False{}
-
-# An empty step (dot 0) has no item; it can't belong to a marked sequence's reading.
-def stepIn(dot: Nat, t: Guard.Tri) -> Guard.Tri:
-  match dot:
-    case 0n:
-      Guard.Yes{}
-    case 1n+p:
-      t
-
-# Yes: keep the step; No: remove it; Unknown: can't tell (or refused).
-def verdictFor(m: Marked, loopy: Bool, +w: Seq, +dot: Nat, +i: Nat, +k: Nat, +j: Nat) -> Guard.Tri:
-  match m loopy:
-    case NoMark{} _:
-      Guard.Yes{}
-    case ManyMarks{} _:
-      Guard.Unknown{}
-    case OneMark{d, e} True{}:
-      Guard.Unknown{}
-    case OneMark{+d, +e} False{}:
-      stepIn(dot, onSomeBest(endsFrom(w, i), e, w, Nat.sub(dot, 1n), d, i, k, j))
-
-def seqOf(+set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +input: +List<Nat>, +index: Nat, +rpath: +List<Nat>) -> Seq:
-  Seq{fuel, grammar, input, set, index, rpath, Gll.reverseOnto(rpath, []), Gll.seqAt(grammar, index, rpath)}
-
-def verdictAt(rev: +List<Nat>, +set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>, +index: Nat, +i: Nat, +k: Nat, +j: Nat) -> Guard.Tri:
-  match rev:
-    case Nil{}:
-      Guard.Yes{}
-    case Con{+dot, +rpath}:
-      +its = Gll.seqAt(grammar, index, rpath)
-      +prefix = Gll.reverseOnto(rpath, [])
-      verdictFor(markedFrom(its, marks, index, prefix, 0n, NoMark{}), seqLoopy(rpath, grammar, index), seqOf(set, fuel, grammar, input, index, rpath), dot, i, k, j)
-
-def stepVerdict(+set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>, e: Spec.Bsr) -> Guard.Tri:
-  match e:
-    case Spec.Bsr{Spec.Slot{+index, path}, +i, +k, +j}:
-      verdictAt(Gll.reverseOnto(path, []), set, fuel, grammar, marks, input, index, i, k, j)
-
-# ---- The self-check: a kept marked step is best wherever it can stand ----
-
-# Kept steps could be stitched into a reading that is not best: each lies on some best
-# reading, but over different ends. So for every kept step of the marked item, and every
-# end e the sequence reaches from the step's start, the oracle checks: if the step lies
-# on any reading over (i, e), its length is the best length over (i, e). Then every
-# reading made of kept steps is best.
-
-def isNo(t: Guard.Tri) -> Bool:
-  match t:
-    case Guard.Yes{}:
-      False{}
-    case Guard.No{}:
-      True{}
-    case Guard.Unknown{}:
-      False{}
-
-def foundIs(b: Best, +len: Nat) -> Bool:
-  match b:
-    case Found{+x}:
-      Nat.is_eq(x, len)
-    case NoneFound{}:
-      False{}
-    case Unsure{}:
-      False{}
-
-# At end e: not on a reading over (i, e), or of the best length there.
-def endOk(+ext: Spec.Extent, +w: Seq, +d: Nat, +i: Nat, +k: Nat, +j: Nat, +e: Nat) -> Bool:
-  +len = Nat.sub(j, k)
-  Bool.or(isNo(readsWith(w, d, len, True{}, d, k, j, i, e)), foundIs(bestLength(ext, w, d, i, e), len))
-
-def endsOk(es: +List<Nat>, +ext: Spec.Extent, +w: Seq, +d: Nat, +i: Nat, +k: Nat, +j: Nat) -> Bool:
-  match es:
+def allTreesIn(ws: +List<Core.Tree>, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +set: +List<Core.Bsr>) -> Bool:
+  match ws:
     case Nil{}:
       True{}
-    case Con{+e, rest}:
-      Bool.and(endOk(ext, w, d, i, k, j, e), endsOk(rest, ext, w, d, i, k, j))
+    case Con{+t, rest}:
+      Bool.and(treeIn(grammar, start, input, set, t), allTreesIn(rest, grammar, start, input, set))
 
-# The check for one step: only kept steps of the marked item are checked.
-def checkFor(m: Marked, +kept: Bool, +w: Seq, +dot: Nat, +i: Nat, +k: Nat, +j: Nat) -> Bool:
-  match m:
-    case OneMark{+d, +e}:
-      Bool.or(Bool.or(Bool.not(kept), Bool.not(Nat.is_eq(dot, 1n+d))), endsOk(endsFrom(w, i), e, w, d, i, k, j))
-    case NoMark{}:
-      True{}
-    case ManyMarks{}:
-      True{}
-
-def checkAt(rev: +List<Nat>, +kept: Bool, +set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>, +index: Nat, +i: Nat, +k: Nat, +j: Nat) -> Bool:
-  match rev:
-    case Nil{}:
-      True{}
-    case Con{+dot, +rpath}:
-      +its = Gll.seqAt(grammar, index, rpath)
-      +prefix = Gll.reverseOnto(rpath, [])
-      checkFor(markedFrom(its, marks, index, prefix, 0n, NoMark{}), kept, seqOf(set, fuel, grammar, input, index, rpath), dot, i, k, j)
-
-def checkStep(+set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>, e: Spec.Bsr) -> Bool:
-  match e:
-    case Spec.Bsr{Spec.Slot{+index, +path}, +i, +k, +j}:
-      checkAt(Gll.reverseOnto(path, []), Guard.isYes(stepVerdict(set, fuel, grammar, marks, input, Spec.Bsr{Spec.Slot{index, path}, i, k, j})), set, fuel, grammar, marks, input, index, i, k, j)
-
-def allChecked(es: +List<Spec.Bsr>, +set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>) -> Bool:
-  match es:
-    case Nil{}:
-      True{}
-    case Con{+e, rest}:
-      Bool.and(checkStep(set, fuel, grammar, marks, input, e), allChecked(rest, set, fuel, grammar, marks, input))
-
-# ---- The oracle ----
-
-def extentKept(es: +List<Spec.Bsr>, +set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>) -> +List<Spec.Bsr>:
-  match es:
-    case Nil{}:
-      []
-    case Con{+e, rest}:
-      Prune.keepPick(Guard.isYes(stepVerdict(set, fuel, grammar, marks, input, e)), e, extentKept(rest, set, fuel, grammar, marks, input))
-
-def allKnown(es: +List<Spec.Bsr>, +set: +List<Spec.Bsr>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>) -> Bool:
-  match es:
-    case Nil{}:
-      True{}
-    case Con{+e, rest}:
-      Bool.and(Guard.isKnown(stepVerdict(set, fuel, grammar, marks, input, e)), allKnown(rest, set, fuel, grammar, marks, input))
-
-def extentFrom(found: Maybe<&2, +List<Spec.Bsr>>, +fuel: Nat, +grammar: +List<Spec.Production>, +marks: +List<Spec.ExtentMark>, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+def coverFrom(found: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
   match found:
     case Some{+set}:
-      +ks = extentKept(set, set, fuel, grammar, marks, input)
-      Prefer.preferPick(Bool.and(allKnown(set, set, fuel, grammar, marks, input), allChecked(set, set, fuel, grammar, marks, input)), ks)
+      +ws = Witness.witnesses(fuel, grammar, start, input, set)
+      Exact.exactPick(Bool.and(allTreesIn(ws, grammar, start, input, set), Exact.allCovered(set, ws)), set)
     case None{}:
       None{}
 
-# The preference oracle's set, pruned from below (UNBEATEN.bend: a step stays when the set
-# has what it stands on; every tree of the set keeps its steps), without the steps that
-# lie on no best reading; or nothing when a check fails.
-def extentSteps(+fuel: Nat, +grammar: +List<Spec.Production>, +guards: +List<Spec.GuardMark>, +pmarks: +List<Spec.Mark>, +marks: +List<Spec.ExtentMark>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Spec.Bsr>>:
+# The oracle's set may hold dead wood: steps on no parse tree all of whose steps are in the
+# set (a rule rejects a later step of the same node). One pass over the set keeps the trees
+# found so far: a step on one of them is live without a search; for another step the
+# witness search inside the set runs once, and the step stays when it finds a tree (which
+# joins the others), is dropped when its facts are closed (so no such tree exists,
+# `root_found`), and otherwise there is no answer (fuel).
+def hasRoot(m: Maybe<&2, +List<Core.Tree>>) -> Bool:
+  match m:
+    case Some{ts}:
+      True{}
+    case None{}:
+      False{}
+
+# What the pass hands out: whether every dropped step had closed facts, the live steps, and
+# the trees found.
+type Live is Data:
+  Live{ok: Bool, kept: +List<Core.Bsr>, trees: +List<Core.Tree>}
+
+# The witness facts for x, unless x is covered already.
+def searchIf(covered: Bool, +fuel: Nat, +grammar: +List<Core.Production>, +input: +List<Nat>, +set: +List<Core.Bsr>, +x: Core.Bsr) -> +List<Witness.Fact>:
+  match covered:
+    case True{}:
+      []
+    case False{}:
+      Witness.fixpoint(fuel, set, grammar, input, x, [])
+
+def rootIf(covered: Bool, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +x: Core.Bsr, +facts: +List<Witness.Fact>) -> Maybe<&2, +List<Core.Tree>>:
+  match covered:
+    case True{}:
+      None{}
+    case False{}:
+      Witness.rootFor(grammar, grammar, x, 0n, start, List.length(&2, Nat, input), facts)
+
+def liveCons(keep: Bool, closed: Bool, +x: Core.Bsr, +out: Live) -> Live:
+  match keep:
+    case True{}:
+      match out:
+        case Live{+ok, +kept, +trees}:
+          Live{ok, x <> kept, trees}
+    case False{}:
+      match out:
+        case Live{+ok, +kept, +trees}:
+          Live{Bool.and(closed, ok), kept, trees}
+
+def liveRun(xs: +List<Core.Bsr>, +ws: +List<Core.Tree>, +fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +set: +List<Core.Bsr>) -> Live:
+  match xs:
+    case Nil{}:
+      Live{True{}, [], ws}
+    case Con{+x, +rest}:
+      +cov = Witness.coveredBy(x, ws)
+      +facts = searchIf(cov, fuel, grammar, input, set, x)
+      +r = rootIf(cov, grammar, start, input, x, facts)
+      liveCons(Bool.or(cov, hasRoot(r)), Witness.closedW(set, grammar, input, x, facts), x, liveRun(rest, Witness.addWitness(r, ws), fuel, grammar, start, input, set))
+
+def okPick(ok: Bool, +kept: +List<Core.Bsr>) -> Maybe<&2, +List<Core.Bsr>>:
+  match ok:
+    case True{}:
+      Some{kept}
+    case False{}:
+      None{}
+
+def livePick(out: Live) -> Maybe<&2, +List<Core.Bsr>>:
+  match out:
+    case Live{+ok, +kept, trees}:
+      okPick(ok, kept)
+
+def liveFrom(found: Maybe<&2, +List<Core.Bsr>>, +fuel: Nat, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
+  match found:
+    case Some{+set}:
+      livePick(liveRun(set, [], fuel, grammar, start, input, set))
+    case None{}:
+      None{}
+
+def chosenSteps(fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
   +f = fuel
-  extentFrom(Unb.prunedFrom(Unb.unbeatenSteps(f, grammar, guards, pmarks, start, input), grammar, input), f, grammar, marks, input)
+  coverFrom(liveFrom(Oracle.oracleSteps(f, grammar, gmarks, rmarks, start, input), f, grammar, start, input), f, grammar, start, input)
+
+# ======== THE READINGS IN THE SET ========
+#
+# All readings of q from i whose steps are in the set, found item by item; each is kept
+# with its ends reversed.
+
+def prevOf(+i: Nat, rev: +List<Nat>) -> Nat:
+  match rev:
+    case Nil{}:
+      i
+    case Con{+k, rest}:
+      k
+
+def fitsStep(+q: Nat, +p: Nat, +i: Nat, +prev: Nat, x: Core.Bsr) -> Bool:
+  match x:
+    case Core.Bsr{q2, d2, i2, k2, j2}:
+      Bool.and(Nat.is_eq(q2, q), Bool.and(Nat.is_eq(d2, 1n+p), Bool.and(Nat.is_eq(i2, i), Nat.is_eq(k2, prev))))
+
+def stepEnd(x: Core.Bsr) -> Nat:
+  match x:
+    case Core.Bsr{q, d, i, k, +j}:
+      j
+
+def addPath(b: Bool, +path: +List<Nat>, +rest: +List<+List<Nat>>) -> +List<+List<Nat>>:
+  match b:
+    case True{}:
+      path <> rest
+    case False{}:
+      rest
+
+def joinPaths(a: +List<+List<Nat>>, +b: +List<+List<Nat>>) -> +List<+List<Nat>>:
+  match a:
+    case Nil{}:
+      b
+    case Con{+x, rest}:
+      x <> joinPaths(rest, b)
+
+def growOne(xs: +List<Core.Bsr>, +q: Nat, +p: Nat, +i: Nat, +rev: +List<Nat>) -> +List<+List<Nat>>:
+  match xs:
+    case Nil{}:
+      []
+    case Con{+x, rest}:
+      addPath(fitsStep(q, p, i, prevOf(i, rev), x), stepEnd(x) <> rev, growOne(rest, q, p, i, rev))
+
+def expand(states: +List<+List<Nat>>, +set: +List<Core.Bsr>, +q: Nat, +p: Nat, +i: Nat) -> +List<+List<Nat>>:
+  match states:
+    case Nil{}:
+      []
+    case Con{+rev, rest}:
+      joinPaths(growOne(set, q, p, i, rev), expand(rest, set, q, p, i))
+
+def run(items: +List<Core.Sym>, +set: +List<Core.Bsr>, +q: Nat, +p: Nat, +i: Nat, +states: +List<+List<Nat>>) -> +List<+List<Nat>>:
+  match items:
+    case Nil{}:
+      states
+    case Con{it, rest}:
+      run(rest, set, q, 1n+p, i, expand(states, set, q, p, i))
+
+def chains(+set: +List<Core.Bsr>, +grammar: +List<Core.Production>, +q: Nat, +i: Nat) -> +List<+List<Nat>>:
+  run(Core.rhsOf(grammar, q), set, q, 0n, i, [[]])
+
+# ======== THE VERDICT ON A STEP ========
+
+def readingIn(+grammar: +List<Core.Production>, +set: +List<Core.Bsr>, +q: Nat, +i: Nat, +ks: +List<Nat>) -> Bool:
+  Bool.and(Nat.is_eq(List.length(&2, Nat, ks), List.length(&2, Core.Sym, Core.rhsOf(grammar, q))), Core.allIn(stepsOf(q, i, ks), set))
+
+def pairOk(+grammar: +List<Core.Production>, +emarks: +List<ExtentMark>, +set: +List<Core.Bsr>, +q: Nat, +d: Nat, +i: Nat, +k: Nat, +j: Nat, +ks1: +List<Nat>, +ks2: +List<Nat>) -> Bool:
+  Bool.and(readingIn(grammar, set, q, i, ks1), Bool.and(readingIn(grammar, set, q, i, ks2),
+    Bool.and(Nat.is_eq(endOf(ks1, i), endOf(ks2, i)), Bool.and(Core.member(Core.Bsr{q, d, i, k, j}, stepsOf(q, i, ks1)), beatsAt(ks1, ks2, emarks, grammar, q, d, 0n, i, i)))))
+
+def anyWith(cs: +List<+List<Nat>>, +grammar: +List<Core.Production>, +emarks: +List<ExtentMark>, +set: +List<Core.Bsr>, +q: Nat, +d: Nat, +i: Nat, +k: Nat, +j: Nat, +ks1: +List<Nat>) -> Bool:
+  match cs:
+    case Nil{}:
+      False{}
+    case Con{+r2, rest}:
+      Bool.or(pairOk(grammar, emarks, set, q, d, i, k, j, ks1, revOnto(r2, [])), anyWith(rest, grammar, emarks, set, q, d, i, k, j, ks1))
+
+def anyPair(cs: +List<+List<Nat>>, +all: +List<+List<Nat>>, +grammar: +List<Core.Production>, +emarks: +List<ExtentMark>, +set: +List<Core.Bsr>, +q: Nat, +d: Nat, +i: Nat, +k: Nat, +j: Nat) -> Bool:
+  match cs:
+    case Nil{}:
+      False{}
+    case Con{+r1, rest}:
+      Bool.or(anyWith(all, grammar, emarks, set, q, d, i, k, j, revOnto(r1, [])), anyPair(rest, all, grammar, emarks, set, q, d, i, k, j))
+
+# Is the step out? Decided exactly: the readings in the chosen set are the readings.
+def beaten(+grammar: +List<Core.Production>, +emarks: +List<ExtentMark>, +set: +List<Core.Bsr>, x: Core.Bsr) -> Bool:
+  match x:
+    case Core.Bsr{+q, +d, +i, +k, +j}:
+      +cs = chains(set, grammar, q, i)
+      anyPair(cs, cs, grammar, emarks, set, q, d, i, k, j)
+
+def keepBest(xs: +List<Core.Bsr>, +grammar: +List<Core.Production>, +emarks: +List<ExtentMark>, +set: +List<Core.Bsr>) -> +List<Core.Bsr>:
+  match xs:
+    case Nil{}:
+      []
+    case Con{+x, rest}:
+      Oracle.keepIf(Bool.not(beaten(grammar, emarks, set, x)), x, keepBest(rest, grammar, emarks, set))
+
+def selectFrom(found: Maybe<&2, +List<Core.Bsr>>, +grammar: +List<Core.Production>, +emarks: +List<ExtentMark>) -> Maybe<&2, +List<Core.Bsr>>:
+  match found:
+    case Some{+set}:
+      Some{keepBest(set, grammar, emarks, set)}
+    case None{}:
+      None{}
+
+# THE SELECTING ORACLE: the chosen set without the steps that are out.
+def selectedSteps(fuel: Nat, +grammar: +List<Core.Production>, +gmarks: +List<Guard.GuardMark>, +rmarks: +List<Prefer.RankMark>, +emarks: +List<ExtentMark>, +start: Nat, +input: +List<Nat>) -> Maybe<&2, +List<Core.Bsr>>:
+  selectFrom(chosenSteps(fuel, grammar, gmarks, rmarks, start, input), grammar, emarks)

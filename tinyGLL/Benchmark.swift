@@ -66,8 +66,9 @@ nonisolated enum Benchmark {
     ///
     /// The compiled column comes from generating a standalone parser for the same grammar,
     /// building it with swiftc -O and running the whole sweep in one process (see
-    /// `compiledTimings`). Both sides therefore do identical work on identical inputs, which
-    /// makes the ratio a measurement of codegen alone. If the toolchain is unavailable the
+    /// `compiledTimings`). Both sides parse identical inputs, but only the interpreter predicts
+    /// (Prediction.swift), so the ratio measures codegen and prediction together; on this grammar
+    /// every alternate begins with b and prediction prunes little. If the toolchain is unavailable the
     /// compiled column is simply omitted.
     ///
     /// Only the descriptor loop is timed on either side. Grammar reading, code generation,

@@ -6,7 +6,7 @@
 //
 
 // Post-parse disambiguator operating entirely on BSR yield sets, in the three phases of
-// Bend/SPEC.bend: admissible (lookahead, @left, @right), unbeaten (@prefer, @avoid), selected
+// the Bend twin: admissible (lookahead, @left, @right), unbeaten (@prefer, @avoid), selected
 // (@longest, @shortest). The rules are yield filters; dead wood is handled by one graph of the
 // yields (`YieldGraph`): support from below and reachability from the root, both linear.
 
@@ -21,7 +21,7 @@ protocol DisambiguationRule {
     var pass: OraclePass { get }
 }
 
-/// The Oracle's rule passes, in run order: the phases of Bend/SPEC.bend. Phase 1 (admissible)
+/// The Oracle's rule passes, in run order: the phases of the Bend twin (Bend/ORACLE.bend, Bend/EXTENT.bend). Phase 1 (admissible)
 /// is `filter`, phase 2 (unbeaten) is `sameSpan`; phase 3 (`@longest`,
 /// `@shortest`) is not a rule pass but `YieldGraph.extent`, on genuine readings only. Each pass
 /// is followed by support from below (`YieldGraph.support`), so the next pass sees genuine
@@ -79,7 +79,7 @@ private struct SpanKey: Hashable {
 struct LookaheadPredicateRule: DisambiguationRule {
     var pass: OraclePass { .filter }
     let negated: Bool
-    /// Start positions where the target derives a prefix of the rest (Bend/SPEC.bend: plain derives,
+    /// Start positions where the target derives a prefix of the rest (Bend/GUARD.bend: plain derives,
     /// the target's own predicates do not count), SNAPSHOT from the RAW forest at Oracle registration
     /// (before dead-wood); the parser probed the target at every start of the alternate
     /// (`MessageParser.probe`). This is swift-syntax's `canParseAsXxx`: a SPECULATIVE "could N parse
@@ -113,7 +113,7 @@ struct LookaheadPredicateRule: DisambiguationRule {
 /// `(0,0,6)` is exactly `(1 + 2) + 3`, which is what each direction has to remove.
 ///
 /// With operands (`@right(literalExpression …)`) the forbidden extents are the named
-/// nonterminals' extents, read from the RAW forest at Oracle init (Bend/SPEC.bend `EdgeOk`: "no
+/// nonterminals' extents, read from the RAW forest at Oracle init (Bend/GUARD.bend, bare and listed @left/@right: "no
 /// listed nonterminal derives the edge child's tokens"), so the rule does not depend on what other
 /// passes remove. Bare `@left`/`@right` forbids the alternate's own raw completions the same way
 /// (`EdgeOk`: plain derives, its own filters do not count).
@@ -342,7 +342,7 @@ class Oracle {
         }
 
         // @avoid (alt-prefix): an avoided alternate loses to its siblings that are not avoided.
-        // Two avoided siblings have the same rank and both stay (Bend/SPEC.bend, `outranks`):
+        // Two avoided siblings have the same rank and both stay (Bend/PREFER.bend, `outranks`):
         // letting each lose to the other made the survivor depend on rule order.
         for a in alts where a.isAvoided {
             let siblingsLast = alts.filter { !$0.isAvoided }.compactMap { $0.bodySymbols.last }
@@ -371,7 +371,7 @@ class Oracle {
             return removed
         }
 
-        // The phases of Bend/SPEC.bend over one graph of the yields (`YieldGraph`), built once.
+        // The phases of the Bend twin over one graph of the yields (`YieldGraph`), built once.
         // Dead wood may stay between phases (each Bend phase's law is "embeds exactly"); what a
         // phase reads is made genuine first: support from below before every rule pass, and
         // reachability from the root before extent, which ranks whole readings (Bend `prunedFrom`).
@@ -586,7 +586,7 @@ private final class YieldGraph {
                     if prefix < 0 { prefix = YieldGraph.never }
                 }
             }
-            // No removable empty rounds (Bend/SPEC.bend `roundsOk`): a round that reads nothing is
+            // No removable empty rounds (Bend/EBNF.bend, the needs on rounds): a round that reads nothing is
             // in a parse tree only as the first, and then only, round of a `< >`. The parser still
             // predicts later empty `< >` rounds (`addDescriptorsForAlternates`); without this rule
             // such a round's key supported itself, an SPPF cycle of repeated nothing.
@@ -739,7 +739,7 @@ private final class YieldGraph {
     /// sequence; a reading of the item that is best in no reading of its sequence is removed.
     /// Returns how many yields it removed, and whether any sequence has a mark of a higher rank.
     ///
-    /// Several marks in one sequence are served left to right (Bend/SPEC.bend, phase 3): the caller
+    /// Several marks in one sequence are served left to right (Bend/EXTENT.bend, `beatsAt`): the caller
     /// runs rank 0, removes what no longer stands, then rank 1 among the readings that are left, and
     /// so on. Applying them all at once could keep a different reading for each mark, and no reading
     /// for the sequence (`S = A A . @longest A = { a } .` on `a a`).

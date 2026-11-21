@@ -9,10 +9,11 @@ import Testing
 /// - "Bend check" (`APUS_BEND=<path to bend>`, or `APUS_BEND=1` for `~/.bend/bin/bend`) runs Bend on
 ///   every accepted message of the `TestCase` tables, and fails a case when Swift misses a step of a
 ///   parse tree. Dead wood and grammars the export refuses are reported, not failed; after the
-///   Oracle, dead wood fails too. A case Bend gives no answer for (fuel shortage, a failed check,
-///   a refusal, the time limit) fails: it was not compared. A third test runs grammars with `@prefer`/`@avoid`
-///   through the Oracle and compares them with `Bend/PREFER.bend`, the proven twin of those rules;
-///   a fourth does the same for `>?>`/`>!>`/`@left`/`@right` and `Bend/GUARD.bend`,
+///   Oracle, dead wood fails too. Bend is proven to answer (`Bend/README.md`, "What the laws
+///   promise"), so only the time limit leaves a case without an answer; such a case fails: it was
+///   not compared. A third test runs grammars with `@prefer`/`@avoid`
+///   through the Oracle and compares them with `Bend/ORACLE.bend`, the proven twin of those rules;
+///   a fourth does the same for `>?>`/`>!>`/`@left`/`@right` (phase 1 of the same oracle),
 ///   and a fifth for `@longest`/`@shortest` and `Bend/EXTENT.bend`.
 /// Set the variable in the test plan, or as `TEST_RUNNER_<name>` via xcodebuild.
 ///
@@ -38,7 +39,7 @@ struct BendExport {
         let input: String
     }
 
-    /// The examples of `Bend/EXAMPLES.bend`, plus a few from `CoreGrammarTests`.
+    /// Small examples of brackets and recursion, checked in as `Bend/swift/*.bend`.
     static let cases: [Case] = [
         Case(name: "loop", grammar: #"X = "a" { "b" } "c"."#, input: "abbbc"),
         Case(name: "loop_empty", grammar: #"X = "a" { "b" } "c"."#, input: "ac"),
@@ -74,8 +75,8 @@ struct BendExport {
 
     // MARK: - One case
 
-    /// The Bend file of one grammar and input; `imports` is the directory of `SPEC.bend` and
-    /// `COMPARE.bend`, relative to the file or absolute, ending in "/".
+    /// The Bend file of one grammar and input; `imports` is the directory holding
+    /// `SYNTAX.bend` and `COMPARE.bend`, relative to the file or absolute, ending in "/".
     /// With `oracle`, the yields are
     /// taken after `Oracle.disambiguate()` instead of straight from the parser. With `prefer`, they
     /// are too, and the file compares them with the steps of the unbeaten trees (`preferReport`);
@@ -94,7 +95,6 @@ struct BendExport {
         }
 
         var translation = Translation(grammar: grammar)
-        translation.comparesExtents = extents
         try translation.run()
         let tokens = try tokenChain(messageParser, input: input)
         let steps = try translation.steps(messageParser.yields, positions: tokens.positions)
@@ -107,7 +107,7 @@ struct BendExport {
         out += oracle ? "# Yields after Oracle.disambiguate()\n" : ""
         out += "# Nonterminals: " + translation.nonterminalNames.enumerated().map { "\($0.offset) = \($0.element)" }.joined(separator: ", ") + "\n"
         out += "# Swift yields kept: \(steps.count); completion yields left out: \(translation.droppedCompletionYields)\n\n"
-        out += "import Base\nimport \(imports)SPEC.bend as Spec\nimport \(imports)COMPARE.bend as Compare\n\n"
+        out += "import Base\nimport \(imports)SYNTAX.bend as Spec\nimport \(imports)COMPARE.bend as Compare\n\n"
         out += "def grammar() -> +List<Spec.Production>:\n  [" + translation.productions.joined(separator: ",\n   ") + "]\n\n"
         out += "def start() -> Nat:\n  \(startID)n\n\n"
         out += "def input() -> +List<Nat>:\n  [" + tokens.kinds.map { "\($0)n" }.joined(separator: ", ") + "]\n\n"
@@ -170,8 +170,6 @@ struct BendExport {
         /// The `@longest`/`@shortest` marks, as `Spec.ExtentMark`s.
         var extents: [String] = []
 
-        /// Whether the export is compared with `EXTENT.bend`, which handles one mark per sequence.
-        var comparesExtents = false
         init(grammar: Grammar) { self.grammar = grammar }
 
         mutating func run() throws {
@@ -244,13 +242,6 @@ struct BendExport {
         mutating func sequence(_ alt: GrammarNode, index: Int, prefix: [Int]) throws -> String {
             let nodes = items(alt)
             if nodes.isEmpty { throw ExportError.unsupported("an alternate with no item") }
-            // The spec serves several marks in one sequence left to right, and Swift Apus does too;
-            // Bend's extent oracle only handles one, and would answer nothing.
-            let marked = nodes.filter { node in
-                let mark = node.kind == .N ? node.alt?.disambiguation : (node.kind.isBracket ? node.disambiguation : nil)
-                return mark == .longest || mark == .shortest
-            }
-            if comparesExtents, marked.count > 1 { throw ExportError.unsupported("several @longest/@shortest items in one sequence (EXTENT.bend handles one)") }
             var parts: [String] = []
             for (m, node) in nodes.enumerated() {
                 let slot = Slot(index: index, path: prefix + [m + 1])
@@ -323,7 +314,7 @@ enum BendReport: Equatable {
     case agree(count: Int)
     /// `missing`: parse-tree steps Swift lacks; `extra`: Swift steps in no parse tree (dead wood).
     case differ(exact: Int, swift: Int, missing: [String], extra: [String])
-    /// The exact parser ran out of fuel, or one of its checks failed.
+    /// Bend gave no answer within the time limit (it is proven to answer with enough time).
     case noAnswer
 }
 
@@ -353,7 +344,7 @@ enum BendRunner {
 
     private final class TimeoutFlag: @unchecked Sendable { var value = false }
 
-    /// `Bend/`, with SPEC.bend and COMPARE.bend, as an import prefix.
+    /// `Bend/`, with SYNTAX.bend and COMPARE.bend, as an import prefix.
     static let bendDirectory = testProjectDirectory().appendingPathComponent("Bend").path + "/"
 
     /// Exports one grammar and input, runs Bend on it, and reads the report; also returns the file.
@@ -375,8 +366,8 @@ enum BendRunner {
         process.standardOutput = pipe
         process.standardError = pipe
         try process.run()
-        // Fuel bounds the depth of Bend's recursion, not its total work, so a run can still take
-        // very long. Past the limit the case counts as "no answer", which fails the test.
+        // Bend always answers, but a large case can take long. Past the limit the case counts
+        // as "no answer", which fails the test.
         let stopped = TimeoutFlag()
         let stopper = DispatchWorkItem { if process.isRunning { stopped.value = true; process.terminate() } }
         DispatchQueue.global().asyncAfter(deadline: .now() + timeLimit, execute: stopper)
@@ -480,7 +471,7 @@ struct BendCheck {
     }
 
     /// Grammars with `@prefer` and `@avoid`, from `OracleDisambiguationTests`, after the Oracle,
-    /// against the steps of the selected trees (`Bend/PREFER.bend`, `prefer_avoid_exact`). A step
+    /// against the steps of the selected trees (`Bend/ORACLE.bend`, `oracle_exact`). A step
     /// Swift lacks belongs to a selected tree, so Swift removed a reading the annotations keep; a
     /// step Swift has in addition belongs to no selected tree. Both fail. Bend refuses grammars whose preferences go round a cycle, as Swift does.
     static let preferCases: [TestCase] = [
@@ -513,7 +504,7 @@ struct BendCheck {
         try compare(tc, oracle: true, prefer: true)
     }
 
-    /// `@prefer` on top of hard rules (`Bend/UNBEATEN.bend`, `prefer_avoid_exact`): a preferred
+    /// `@prefer` on top of hard rules (`Bend/ORACLE.bend`, `oracle_exact`): a preferred
     /// alternative that has no admissible tree is no rival. Swift runs `@left`/`@right` before
     /// `@prefer`, as the spec does.
     @Test func joinAgainstBend() throws {
@@ -522,13 +513,13 @@ struct BendCheck {
     }
 
     /// Grammars with `>?>`/`>!>`/`@left`/`@right`, after the Oracle, against the
-    /// steps of the admissible trees (`Bend/GUARD.bend`, `guards_exact`). Both read a predicate as
+    /// steps of the admissible trees (`Bend/GUARD.bend`, phase 1 of `oracle_exact`). Both read a predicate as
     /// the language: some prefix of the rest derives N (Swift: the parser's probe of N).
     static let guardCases: [TestCase] = [
         TestCase(grammar: #"number - /[0-9]+/ . E = @left E "+" E | number ."#, pass: ["1 + 2", "1 + 2 + 3", "1 + 2 + 3 + 4"], label: "left: bare"),
         TestCase(grammar: #"number - /[0-9]+/ . E = @right E "+" E | number ."#, pass: ["1 + 2 + 3", "1 + 2 + 3 + 4"], label: "right: bare"),
         // The text, not the node: the last child `2 + 3` read via `E "+" F` is out too, because
-        // `E "+" E` can derive its tokens (Bend/SPEC.bend, Guard, note 2).
+        // `E "+" E` can derive its tokens (Bend/GUARD.bend: the rules read the language, not the shape).
         TestCase(grammar: #"n - /[0-9]+/ . E = @left E "+" E | E "+" F | n . F = n ."#, pass: ["1 + 2 + 3"], label: "left: by the text, not the node"),
         // BendDifferential seeds 110 and 119: the parse never called the listed `A`, nor started the
         // bare alternate where the last child starts; the parser probes them (documentation/Oracle.md § 4).
@@ -562,8 +553,8 @@ struct BendCheck {
 
     /// Grammars with `@longest`/`@shortest`, after the Oracle, against the steps of the
     /// best-extent trees (`Bend/EXTENT.bend`, `extent_exact`). Bend compares extents locally,
-    /// within the sequence the mark sits in, and refuses two marks in one sequence and a mark
-    /// on a loop's alternative.
+    /// within the sequence the mark sits in; several marks in one sequence are served left to
+    /// right, as in Swift Apus.
     static let extentCases: [TestCase] = [
         TestCase(grammar: #"word - /[a-z]+/ . @longest S = < word > ."#, pass: ["hello world foo"], label: "longest: start symbol"),
         TestCase(grammar: #"word - /[a-z]+/ . S = @longest < word > ."#, pass: ["hello world foo"], label: "longest: positive closure"),
@@ -612,11 +603,11 @@ struct BendCheck {
             case .agree(let count):
                 lines.append("BEND agree     \(tc.label) '\(message)': \(count) steps")
             case .noAnswer:
-                // The laws cover only answers Bend gives (Bend/README.md, "What the laws
-                // promise"): a case without one was not compared, so it fails.
+                // Bend is proven to answer (Bend/README.md, "What the laws promise"), so this is
+                // the time limit: the case was not compared, so it fails.
                 lines.append("BEND no answer \(tc.label) '\(message)'")
                 Attachment.record(checked.file, named: "\(tc.label) '\(message)'.bend")
-                Issue.record("\(tc.label) '\(message)': Bend gave no answer (out of fuel, a failed check, a refusal or the time limit), so the case was not compared, with grammar: \(tc.grammar)")
+                Issue.record("\(tc.label) '\(message)': Bend gave no answer within the time limit, so the case was not compared, with grammar: \(tc.grammar)")
             case .differ(let exact, let swift, let missing, let extra):
                 lines.append("BEND differ    \(tc.label) '\(message)': exact \(exact), swift \(swift), "
                              + "missing \(missing.count) \(missing), dead wood \(extra.count) \(extra)")

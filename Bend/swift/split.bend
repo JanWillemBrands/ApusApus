@@ -5,7 +5,7 @@
 # Swift yields kept: 17; completion yields left out: 4
 
 import Base
-import ../SPEC.bend as Spec
+import ../SYNTAX.bend as Spec
 import ../COMPARE.bend as Compare
 
 def grammar() -> +List<Spec.Production>:
@@ -16,6 +16,15 @@ def start() -> Nat:
 
 def input() -> +List<Nat>:
   [2n, 2n, 2n]
+
+def marks() -> +List<Spec.Mark>:
+  []
+
+def guards() -> +List<Spec.GuardMark>:
+  []
+
+def extents() -> +List<Spec.ExtentMark>:
+  []
 
 def swiftSteps() -> +List<Spec.Bsr>:
   [Spec.Bsr{Spec.Slot{0n, [1n]}, 0n, 0n, 0n},

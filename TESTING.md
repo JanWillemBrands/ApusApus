@@ -550,19 +550,20 @@ compiled `Regex`, the `nonTerminals` table, the `GrammarNode` graph — 100 time
 
 ## 8d. Comparing Swift with the Bend twin — `APUS_BEND=1`
 
-`Bend/` holds a proven model of the parser and the Oracle (see `Bend/README.md`). The
-`BendCheck` suite in `ApusApusTests/BendExport.swift` exports each case (grammar, token
-chain, Swift's BSR yields) as a Bend file, runs `bend` on it, and compares Swift's yields with
-the set the proven Bend oracle hands out:
+`Bend/` holds a proven model of the parser and the Oracle on a BNF core (see
+`Bend/README.md`). The `BendCheck` suite in `ApusApusTests/BendExport.swift` exports each
+case (grammar, token chain, Swift's BSR yields) as a Bend file, runs `bend` on it, and
+`Bend/COMPARE.bend` compares Swift's yields with the set the proven core hands out,
+mapped back to Swift's slots:
 
 | Test | Compares Swift's yields with |
 |---|---|
 | `againstExactSet` | the exact set (raw parser, no Oracle) |
 | `oraclePhase1IsExact` | the exact set, after Oracle phase 1 |
 | `guardsAgainstBend` | the steps of the admissible trees (lookahead, `@left`/`@right`) |
-| `preferencesAgainstBend` | the steps of the unbeaten trees (`@prefer`/`@avoid`) |
+| `preferencesAgainstBend` | the steps of the chosen trees (`@prefer`/`@avoid`, among the admissible ones) |
 | `extentsAgainstBend` | the steps of the selected trees (`@longest`/`@shortest`) |
-| `joinAgainstBend` | the joined phase order (a known issue until Swift reorders its passes) |
+| `joinAgainstBend` | the joined phase order (an inadmissible preferred rival beats nothing) |
 
 The suite is **opt-in and silently skipped otherwise**: without the variable every test reports
 "skipped" and xcodebuild still prints `TEST SUCCEEDED`. Pass it to the test runner with the
@@ -576,16 +577,15 @@ TEST_RUNNER_APUS_BEND=1 xcodebuild test -project ApusApus.xcodeproj -scheme Apus
 
 `APUS_BEND=1` means `~/.bend/bin/bend`; any other value is the path to `bend`. Check the log for
 `Test case 'BendCheck/…' passed` lines; zero of them means the filter or the variable was wrong.
-A full run takes about 3 minutes. One Bend run may take `APUS_BEND_TIMEOUT` seconds (300 by
-default). A case Bend gives no answer for (fuel shortage, a failed check, a refusal, or the time
-limit) fails: the laws cover only the answers Bend gives (`Bend/README.md`, "What the laws
-promise"), so such a case was not compared.
+A full run takes about 4 minutes. One Bend run may take `APUS_BEND_TIMEOUT` seconds (300 by
+default). Bend is proven to answer with the fuel the comparison ends with, so "no answer"
+means the time limit; such a case was not compared, and fails.
 
 Reading a failure: "missing" (Swift lacks a step of a tree the Bend oracle keeps) is a real
 Swift bug; so is "dead wood" (Swift keeps steps that lie on no kept tree) after the Oracle.
 Failure details are in the result bundle (`xcrun xcresulttool get test-results tests --path <bundle>`), not on stdout.
-After changing anything under `Bend/`, first run `bend Bend/PROOF.bend --verdict` and
-`bend Bend/EXAMPLES.bend`; the comparison only means something against a proven twin.
+After changing anything under `Bend/`, first run `bend Bend/PROOF.bend --verdict`
+and `bend Bend/EXAMPLES.bend`; the comparison only means something against a proven twin.
 
 To inspect one case by hand, `APUS_EXPORT_BEND=<directory>` runs the `Bend export` suite, which
 writes the generated `.bend` files there (`bend <file>` prints the comparison report).

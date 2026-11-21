@@ -14,11 +14,12 @@ import Foundation
 // 'goto L' written as 'cL = <id>' and 'goto L0' as 'continue nextDescriptor', Swift having
 // no goto.
 //
-// Lookahead is left out, exactly as in the interpreter: addDescriptorsForAlternates adds a
-// descriptor for every alternate and the terminal match is inline, so no FIRST/FOLLOW sets
-// and no testSelect() are needed. In CNP lookahead only suppresses descriptors — it is not
-// load bearing for correctness or termination, which come from 'unique'. Both parsers
-// therefore build the *same* BSR, which is what makes them diffable against each other.
+// Lookahead is left out: addDescriptorsForAlternates adds a descriptor for every alternate and
+// the terminal match is inline, so no FIRST/FOLLOW sets and no testSelect() are needed. In CNP
+// lookahead only suppresses descriptors — it is not load bearing for correctness or
+// termination, which come from 'unique'. The interpreter does predict (Prediction.swift), so
+// the two find the same derivations, but the generated parser does more work and its BSR has
+// the dead wood the interpreter's prediction avoids.
 //
 // Slot ids are GrammarNode.number, so the two BSRs are keyed identically too, right down to
 // the engine's deliberate relabelling: a yield is keyed by the dot-BEFORE node, and a
@@ -26,8 +27,11 @@ import Foundation
 
 nonisolated enum GenerateError: Error, CustomStringConvertible {
     case missingStartSymbol
+    case brackets
 
-    var description: String { "cannot generate: missing start symbol 'S'" }
+    var description: String {
+        self == .brackets ? "cannot generate: brackets are not supported" : "cannot generate: missing start symbol 'S'"
+    }
 }
 
 /// Writes a standalone parser for `parser`'s grammar to 'GeneratedParser.swift' and returns
@@ -38,6 +42,9 @@ nonisolated enum GenerateError: Error, CustomStringConvertible {
 nonisolated func generate(from parser: Parser, to directory: URL? = nil) throws -> URL {
     guard let start = parser.nonTerminalDefinitions["S"] else {
         throw GenerateError.missingStartSymbol
+    }
+    guard parser.bracketDefinitions.isEmpty else {
+        throw GenerateError.brackets
     }
 
     // Deterministic order: node numbers follow the grammar text, dictionaries do not.
@@ -264,6 +271,8 @@ nonisolated func generate(from parser: Parser, to directory: URL? = nil) throws 
                     line("continue nextDescriptor", indent: 4)
                 case .ALT:
                     break   // ALT is never a descriptor target: ntAdd enters at alt.seq
+                case .DO, .OPT, .KLN, .POS:
+                    break   // refused above
                 }
                 if n.kind == .END { break }
                 node = n.seq

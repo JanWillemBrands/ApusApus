@@ -2,10 +2,10 @@
 # Grammar: S = [ A ] "b". A = "a" | ε.
 # Input:   b
 # Nonterminals: 0 = A, 1 = S
-# Swift yields kept: 4; completion yields left out: 2
+# Swift yields kept: 2; completion yields left out: 1
 
 import Base
-import ../SPEC.bend as Spec
+import ../SYNTAX.bend as Spec
 import ../COMPARE.bend as Compare
 
 def grammar() -> +List<Spec.Production>:
@@ -19,11 +19,18 @@ def start() -> Nat:
 def input() -> +List<Nat>:
   [2n]
 
+def marks() -> +List<Spec.Mark>:
+  []
+
+def guards() -> +List<Spec.GuardMark>:
+  []
+
+def extents() -> +List<Spec.ExtentMark>:
+  []
+
 def swiftSteps() -> +List<Spec.Bsr>:
   [Spec.Bsr{Spec.Slot{2n, [1n]}, 0n, 0n, 0n},
-   Spec.Bsr{Spec.Slot{2n, [0n, 0n, 1n]}, 0n, 0n, 0n},
-   Spec.Bsr{Spec.Slot{2n, [2n]}, 0n, 0n, 1n},
-   Spec.Bsr{Spec.Slot{1n, [1n]}, 0n, 0n, 0n}]
+   Spec.Bsr{Spec.Slot{2n, [2n]}, 0n, 0n, 1n}]
 
 def main() -> Compare.Report:
   Compare.report(grammar(), start(), input(), swiftSteps())

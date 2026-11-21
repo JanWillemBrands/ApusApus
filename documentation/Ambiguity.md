@@ -198,7 +198,7 @@ does not build trees.
 
 ### 5.2 Sequence
 
-The Oracle (`Oracle.disambiguate`) runs the phases of `Bend/SPEC.bend`, in its order:
+The Oracle (`Oracle.disambiguate`) runs the phases of the Bend twin (`Bend/ORACLE.bend`, `Bend/EXTENT.bend`), in its order:
 
 | Phase | Annotations | What a rule needs to know |
 |---|---|---|
@@ -302,7 +302,7 @@ eats first. So with `S = A A . @longest A = { a } .`, the input `a a` reads as `
 
 This order always leaves a reading: each step chooses among the readings that the steps before
 it kept, so `@longest` and `@shortest` never remove every reading of a sequence
-(`Bend/SPEC.bend`, phase 3).
+(`Bend/EXTENT.bend`).
 
 #### Nesting: `@left` and `@right`
 

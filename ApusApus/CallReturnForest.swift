@@ -49,7 +49,7 @@ extension MessageParser {
         default: isBracket = false
         }
         checkInvariant(isBracket, "Called \(#function) on a GrammarNode \(X) which is not a bracket")
-        // The bracket rule (Bend/SPEC.bend `roundsOk`, GLL.bend `predictFor`): a round of
+        // The bracket rule (Bend/EBNF.bend, the needs on rounds `G!` and `G⁰`): a round of
         // `[ ]` or `{ }`, and a later round of `< >`, must read something, so FOLLOW cannot
         // predict it; only FIRST can. Such an empty round is in no parse tree: predicting it
         // only made work for the Oracle's sweep. The round group of a `< >` stays as it was: it

@@ -213,13 +213,13 @@ extension Grammar {
     /// (`@prefer` over an unmarked or avoided sibling, or unmarked over an `@avoid`) and lies
     /// on a cycle that reads no input. In `A = @prefer A | "a"` every tree of `A` ends in the
     /// `"a"` alternative, and there `A → A` covers the same tokens and outranks it, so no
-    /// tree is left (Bend/SPEC.bend, preferences). A cycle through an alternative that
+    /// tree is left (Bend/PREFER.bend). A cycle through an alternative that
     /// outranks nothing is harmless: `A = @prefer "a" | A`.
     ///
     /// An alternative reaches a nonterminal or a bracket over its own span when that item can
     /// be the whole of the alternative: every other item can read nothing. A bracket is a choice
     /// of its own (on the BNF core it is a nonterminal), so a bracket's alternative is checked
-    /// against the bracket itself. This is the rule `noPreferenceCycle` of Bend/core/PREFER.bend,
+    /// against the bracket itself. This is the rule `noPreferenceCycle` of Bend/PREFER.bend,
     /// exactly.
     ///
     /// Grammar loading refuses a grammar with findings (`ApusParserError.preferenceCycle`).

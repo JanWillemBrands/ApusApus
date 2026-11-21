@@ -1,3124 +1,1098 @@
 import Base
-import ./SPEC.bend as Spec
-import ./LAWS.bend as Laws
+import ./LEMMAS.bend as Lemma
+import ./CORE.bend as Core
 import ./GLL.bend as Gll
 import ./CHECK.bend as Check
-import ./LEMMAS.bend as Lemma
-import ./FIRST.bend as First
-import ./PROOF_ADMIT.bend as Adm
-import ./PROOF_PRED.bend as Pr
 
 # A CLOSED STATE HAS EVERY STEP OF EVERY PARSE TREE.
 #
-# The proof walks a parse tree the way `Spec.walk` lists its steps. At each item the
-# closedness condition for the descriptor there says what the state must hold: a
-# terminal's successor, a call's cluster and return edge, a sequence end's pop. The
-# cluster's seeds start the subtree; the subtree's pop and the return edge give back
-# the caller's next descriptor and step. Loops run round by round in their own cluster.
+# Walk a parse tree. At each node, the descriptor that starts its production is seen; each
+# child then leads, by one closedness condition, to the next descriptor and to the child's
+# step: a leaf by the token rule, a node through its cluster, the seeds of its production,
+# the node's own walk (which ends in a pop), and the return edge resumed at that pop. At the
+# end of a production its descriptor gives the pop. Nothing else of the check is used.
 
 # ======== EQUAL BY ==, SO EQUAL ========
 
-law nats_eq_sound:
-  for xs: +List<Nat>
-  for ys: +List<Nat>
-  for e: {Gll.natsEq(xs, ys) == True{} : Bool}
-  {xs == ys : +List<Nat>}
+law desc_eq_sound:
+  for a: Gll.Desc
+  for b: Gll.Desc
+  for +e: {Gll.descEq(a, b) == True{} : Bool}
+  {a == b : Gll.Desc}
 
-def nats_eq_sound(xs, ys, e):
-  match xs ys:
-    case Nil{} Nil{}:
-      {==}
-    case Nil{} Con{y, yr}:
-      Empty.absurd({[] == y <> yr : +List<Nat>}, Lemma.false_is_not_true(e))
-    case Con{x, xr} Nil{}:
-      Empty.absurd({x <> xr == [] : +List<Nat>}, Lemma.false_is_not_true(e))
-    case Con{+x, +xr} Con{+y, +yr}:
-      +both = e
-      ex = Lemma.nat_eq_sound(x, y, Lemma.and_true_left(Nat.is_eq(x, y), Gll.natsEq(xr, yr), both))
-      er = nats_eq_sound(xr, yr, Lemma.and_true_right_side(Nat.is_eq(x, y), Gll.natsEq(xr, yr), both))
-      %ex : {x <> xr == _ <> yr : +List<Nat>}
-      %er : {x <> xr == x <> _ : +List<Nat>}
-      {==}
-
-law target_eq_sound:
-  for a: Gll.Target
-  for b: Gll.Target
-  for e: {Gll.targetEq(a, b) == True{} : Bool}
-  {a == b : Gll.Target}
-
-def target_eq_sound(a, b, e):
+def desc_eq_sound(a, b, e):
   match a b:
-    case Gll.TNt{+x} Gll.TNt{+y}:
-      Equal.cong(Nat, Gll.Target, v => Gll.TNt{v}, x, y, Lemma.nat_eq_sound(x, y, e))
-    case Gll.TBr{+p, +xs} Gll.TBr{+q, +ys}:
-      +both = e
-      ep = Lemma.nat_eq_sound(p, q, Lemma.and_true_left(Nat.is_eq(p, q), Gll.natsEq(xs, ys), both))
-      er = nats_eq_sound(xs, ys, Lemma.and_true_right_side(Nat.is_eq(p, q), Gll.natsEq(xs, ys), both))
-      %ep : {Gll.TBr{p, xs} == Gll.TBr{_, ys} : Gll.Target}
-      %er : {Gll.TBr{p, xs} == Gll.TBr{p, _} : Gll.Target}
+    case Gll.Desc{+q1, +d1, +k1, +i1} Gll.Desc{+q2, +d2, +k2, +i2}:
+      +r1 = {Bool.and(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2))) : Bool}
+      +r2 = {Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2)) : Bool}
+      +e1 = Lemma.and_true_right_side(Nat.is_eq(q1, q2), r1, e)
+      +e2 = Lemma.and_true_right_side(Nat.is_eq(d1, d2), r2, e1)
+      +eq = Lemma.nat_eq_sound(q1, q2, Lemma.and_true_left(Nat.is_eq(q1, q2), r1, e))
+      +ed = Lemma.nat_eq_sound(d1, d2, Lemma.and_true_left(Nat.is_eq(d1, d2), r2, e1))
+      +ek = Lemma.nat_eq_sound(k1, k2, Lemma.and_true_left(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2), e2))
+      +ei = Lemma.nat_eq_sound(i1, i2, Lemma.and_true_right_side(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2), e2))
+      %eq : {Gll.Desc{q1, d1, k1, i1} == Gll.Desc{_, d2, k2, i2} : Gll.Desc}
+      %ed : {Gll.Desc{q1, d1, k1, i1} == Gll.Desc{q1, _, k2, i2} : Gll.Desc}
+      %ek : {Gll.Desc{q1, d1, k1, i1} == Gll.Desc{q1, d1, _, i2} : Gll.Desc}
+      %ei : {Gll.Desc{q1, d1, k1, i1} == Gll.Desc{q1, d1, k1, _} : Gll.Desc}
       {==}
-    case Gll.TNt{x} Gll.TBr{q, ys}:
-      Empty.absurd({Gll.TNt{x} == Gll.TBr{q, ys} : Gll.Target}, Lemma.false_is_not_true(e))
-    case Gll.TBr{p, xs} Gll.TNt{y}:
-      Empty.absurd({Gll.TBr{p, xs} == Gll.TNt{y} : Gll.Target}, Lemma.false_is_not_true(e))
 
 law key_eq_sound:
   for a: Gll.CKey
   for b: Gll.CKey
-  for e: {Gll.keyEq(a, b) == True{} : Bool}
+  for +e: {Gll.keyEq(a, b) == True{} : Bool}
   {a == b : Gll.CKey}
 
 def key_eq_sound(a, b, e):
   match a b:
-    case Gll.CKey{+t1, +k1} Gll.CKey{+t2, +k2}:
-      +both = e
-      et = target_eq_sound(t1, t2, Lemma.and_true_left(Gll.targetEq(t1, t2), Nat.is_eq(k1, k2), both))
-      ek = Lemma.nat_eq_sound(k1, k2, Lemma.and_true_right_side(Gll.targetEq(t1, t2), Nat.is_eq(k1, k2), both))
-      %et : {Gll.CKey{t1, k1} == Gll.CKey{_, k2} : Gll.CKey}
-      %ek : {Gll.CKey{t1, k1} == Gll.CKey{t1, _} : Gll.CKey}
+    case Gll.CKey{+x1, +i1} Gll.CKey{+x2, +i2}:
+      +ex = Lemma.nat_eq_sound(x1, x2, Lemma.and_true_left(Nat.is_eq(x1, x2), Nat.is_eq(i1, i2), e))
+      +ei = Lemma.nat_eq_sound(i1, i2, Lemma.and_true_right_side(Nat.is_eq(x1, x2), Nat.is_eq(i1, i2), e))
+      %ex : {Gll.CKey{x1, i1} == Gll.CKey{_, i2} : Gll.CKey}
+      %ei : {Gll.CKey{x1, i1} == Gll.CKey{x1, _} : Gll.CKey}
       {==}
 
 law edge_eq_sound:
   for a: Gll.Edge
   for b: Gll.Edge
-  for e: {Gll.edgeEq(a, b) == True{} : Bool}
+  for +e: {Check.edgeEq(a, b) == True{} : Bool}
   {a == b : Gll.Edge}
 
 def edge_eq_sound(a, b, e):
   match a b:
-    case Gll.Edge{+p1, +r1, +d1, +k1} Gll.Edge{+p2, +r2, +d2, +k2}:
-      +s0 = e
-      +s1 = Lemma.and_true_right_side(Nat.is_eq(p1, p2), Bool.and(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2))), s0)
-      +s2 = Lemma.and_true_right_side(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2)), s1)
-      ep = Lemma.nat_eq_sound(p1, p2, Lemma.and_true_left(Nat.is_eq(p1, p2), Bool.and(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2))), s0))
-      er = nats_eq_sound(r1, r2, Lemma.and_true_left(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2)), s1))
-      ed = Lemma.nat_eq_sound(d1, d2, Lemma.and_true_left(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2), s2))
-      ek = Lemma.nat_eq_sound(k1, k2, Lemma.and_true_right_side(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2), s2))
-      %ep : {Gll.Edge{p1, r1, d1, k1} == Gll.Edge{_, r2, d2, k2} : Gll.Edge}
-      %er : {Gll.Edge{p1, r1, d1, k1} == Gll.Edge{p1, _, d2, k2} : Gll.Edge}
-      %ed : {Gll.Edge{p1, r1, d1, k1} == Gll.Edge{p1, r1, _, k2} : Gll.Edge}
-      %ek : {Gll.Edge{p1, r1, d1, k1} == Gll.Edge{p1, r1, d1, _} : Gll.Edge}
+    case Gll.Edge{+q1, +d1, +k1} Gll.Edge{+q2, +d2, +k2}:
+      +r1 = {Bool.and(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2)) : Bool}
+      +e1 = Lemma.and_true_right_side(Nat.is_eq(q1, q2), r1, e)
+      +eq = Lemma.nat_eq_sound(q1, q2, Lemma.and_true_left(Nat.is_eq(q1, q2), r1, e))
+      +ed = Lemma.nat_eq_sound(d1, d2, Lemma.and_true_left(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2), e1))
+      +ek = Lemma.nat_eq_sound(k1, k2, Lemma.and_true_right_side(Nat.is_eq(d1, d2), Nat.is_eq(k1, k2), e1))
+      %eq : {Gll.Edge{q1, d1, k1} == Gll.Edge{_, d2, k2} : Gll.Edge}
+      %ed : {Gll.Edge{q1, d1, k1} == Gll.Edge{q1, _, k2} : Gll.Edge}
+      %ek : {Gll.Edge{q1, d1, k1} == Gll.Edge{q1, d1, _} : Gll.Edge}
       {==}
 
-law desc_eq_sound:
-  for a: Gll.Desc
-  for b: Gll.Desc
-  for e: {Gll.descEq(a, b) == True{} : Bool}
-  {a == b : Gll.Desc}
+# ======== FROM THE CHECK TO SINGLE FACTS ========
 
-def desc_eq_sound(a, b, e):
-  match a b:
-    case Gll.Desc{+p1, +r1, +d1, +k1, +i1} Gll.Desc{+p2, +r2, +d2, +k2, +i2}:
-      +s0 = e
-      +s1 = Lemma.and_true_right_side(Nat.is_eq(p1, p2), Bool.and(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2)))), s0)
-      +s2 = Lemma.and_true_right_side(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2))), s1)
-      +s3 = Lemma.and_true_right_side(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2)), s2)
-      ep = Lemma.nat_eq_sound(p1, p2, Lemma.and_true_left(Nat.is_eq(p1, p2), Bool.and(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2)))), s0))
-      er = nats_eq_sound(r1, r2, Lemma.and_true_left(Gll.natsEq(r1, r2), Bool.and(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2))), s1))
-      ed = Lemma.nat_eq_sound(d1, d2, Lemma.and_true_left(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2)), s2))
-      ek = Lemma.nat_eq_sound(k1, k2, Lemma.and_true_left(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2), s3))
-      ei = Lemma.nat_eq_sound(i1, i2, Lemma.and_true_right_side(Nat.is_eq(k1, k2), Nat.is_eq(i1, i2), s3))
-      %ep : {Gll.Desc{p1, r1, d1, k1, i1} == Gll.Desc{_, r2, d2, k2, i2} : Gll.Desc}
-      %er : {Gll.Desc{p1, r1, d1, k1, i1} == Gll.Desc{p1, _, d2, k2, i2} : Gll.Desc}
-      %ed : {Gll.Desc{p1, r1, d1, k1, i1} == Gll.Desc{p1, r1, _, k2, i2} : Gll.Desc}
-      %ek : {Gll.Desc{p1, r1, d1, k1, i1} == Gll.Desc{p1, r1, d1, _, i2} : Gll.Desc}
-      %ei : {Gll.Desc{p1, r1, d1, k1, i1} == Gll.Desc{p1, r1, d1, k1, _} : Gll.Desc}
-      {==}
-
-# ======== FROM THE CHECKS TO SINGLE FACTS ========
-
-# ---- Every seen descriptor is ok ----
-
-law desc_pick:
-  for +pr: Gll.Pred
-  for +d: Gll.Desc
-  for +y: Gll.Desc
-  for -rest: +List<Gll.Desc>
-  for +grammar: +List<Spec.Production>
+law closed_descs:
+  for +pred: Gll.Pred
+  for +grammar: +List<Core.Production>
   for +input: +List<Nat>
   for +s: Gll.GState
-  for cases: Either<{Gll.descEq(d, y) == True{} : Bool}, {Gll.descIn(d, rest) == True{} : Bool}>
-  for +yOk: {Check.descOk(y, pr, grammar, input, s) == True{} : Bool}
-  for searchRest: {Gll.descIn(d, rest) == True{} : Bool} -> {Check.descOk(d, pr, grammar, input, s) == True{} : Bool}
-  {Check.descOk(d, pr, grammar, input, s) == True{} : Bool}
+  for +hc: {Check.closedWith(pred, grammar, input, s) == True{} : Bool}
+  {Check.allDescs(Check.seenOf(s), grammar, input, s) == True{} : Bool}
 
-def desc_pick(pr, d, y, rest, grammar, input, s, cases, yOk, searchRest):
+def closed_descs(pred, grammar, input, s, hc):
+  Lemma.and_true_left(Check.allDescs(Check.seenOf(s), grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), pred, grammar, input, s), Check.allReturns(Check.returnsOf(s), grammar, Check.popsOf(s), s)), hc)
+
+law closed_clusters:
+  for +pred: Gll.Pred
+  for +grammar: +List<Core.Production>
+  for +input: +List<Nat>
+  for +s: Gll.GState
+  for +hc: {Check.closedWith(pred, grammar, input, s) == True{} : Bool}
+  {Check.allClusters(Check.clustersOf(s), pred, grammar, input, s) == True{} : Bool}
+
+def closed_clusters(pred, grammar, input, s, hc):
+  +rest = Lemma.and_true_right_side(Check.allDescs(Check.seenOf(s), grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), pred, grammar, input, s), Check.allReturns(Check.returnsOf(s), grammar, Check.popsOf(s), s)), hc)
+  Lemma.and_true_left(Check.allClusters(Check.clustersOf(s), pred, grammar, input, s), Check.allReturns(Check.returnsOf(s), grammar, Check.popsOf(s), s), rest)
+
+law closed_returns:
+  for +pred: Gll.Pred
+  for +grammar: +List<Core.Production>
+  for +input: +List<Nat>
+  for +s: Gll.GState
+  for +hc: {Check.closedWith(pred, grammar, input, s) == True{} : Bool}
+  {Check.allReturns(Check.returnsOf(s), grammar, Check.popsOf(s), s) == True{} : Bool}
+
+def closed_returns(pred, grammar, input, s, hc):
+  +rest = Lemma.and_true_right_side(Check.allDescs(Check.seenOf(s), grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), pred, grammar, input, s), Check.allReturns(Check.returnsOf(s), grammar, Check.popsOf(s), s)), hc)
+  Lemma.and_true_right_side(Check.allClusters(Check.clustersOf(s), pred, grammar, input, s), Check.allReturns(Check.returnsOf(s), grammar, Check.popsOf(s), s), rest)
+
+# ---- A seen descriptor is ok ----
+
+def desc_ok_pick(+d: Gll.Desc, +y: Gll.Desc, +rest: +List<Gll.Desc>, +grammar: +List<Core.Production>, +input: +List<Nat>, +s: Gll.GState,
+  cases: Either<{Gll.descEq(d, y) == True{} : Bool}, {Gll.descIn(d, rest) == True{} : Bool}>,
+  +here: {Check.descOk(y, grammar, input, s) == True{} : Bool},
+  later: {Gll.descIn(d, rest) == True{} : Bool} -> {Check.descOk(d, grammar, input, s) == True{} : Bool})
+  -> {Check.descOk(d, grammar, input, s) == True{} : Bool}:
   match cases:
-    case Inl{same}:
-      Equal.trans(Bool, Check.descOk(d, pr, grammar, input, s), Check.descOk(y, pr, grammar, input, s), True{},
-        Equal.cong(Gll.Desc, Bool, v => Check.descOk(v, pr, grammar, input, s), d, y, desc_eq_sound(d, y, same)), yOk)
-    case Inr{later}:
-      searchRest(later)
+    case Inl{e}:
+      %Equal.sym(Gll.Desc, d, y, desc_eq_sound(d, y, e)) : {Check.descOk(_, grammar, input, s) == True{} : Bool}
+      here
+    case Inr{m}:
+      later(m)
 
 law desc_ok:
-  for +pr: Gll.Pred
-  for xs: +List<Gll.Desc>
+  for ds: +List<Gll.Desc>
   for +d: Gll.Desc
-  for +grammar: +List<Spec.Production>
+  for +grammar: +List<Core.Production>
   for +input: +List<Nat>
   for +s: Gll.GState
-  for all: {Check.allDescs(xs, pr, grammar, input, s) == True{} : Bool}
-  for m: {Gll.descIn(d, xs) == True{} : Bool}
-  {Check.descOk(d, pr, grammar, input, s) == True{} : Bool}
+  for +all: {Check.allDescs(ds, grammar, input, s) == True{} : Bool}
+  for +m: {Gll.descIn(d, ds) == True{} : Bool}
+  {Check.descOk(d, grammar, input, s) == True{} : Bool}
 
-def desc_ok(pr, xs, d, grammar, input, s, all, m):
-  match xs:
+def desc_ok(ds, d, grammar, input, s, all, m):
+  match ds:
     case Nil{}:
-      Empty.absurd({Check.descOk(d, pr, grammar, input, s) == True{} : Bool}, Lemma.false_is_not_true(m))
+      Empty.absurd({Check.descOk(d, grammar, input, s) == True{} : Bool}, Lemma.false_is_not_true(m))
     case Con{+y, +rest}:
-      +both = all
-      desc_pick(pr, d, y, rest, grammar, input, s,
-        Lemma.or_true_cases(Gll.descEq(d, y), Gll.descIn(d, rest), m),
-        Lemma.and_true_left(Check.descOk(y, pr, grammar, input, s), Check.allDescs(rest, pr, grammar, input, s), both),
-        later => desc_ok(pr, rest, d, grammar, input, s, Lemma.and_true_right_side(Check.descOk(y, pr, grammar, input, s), Check.allDescs(rest, pr, grammar, input, s), both), later))
+      desc_ok_pick(d, y, rest, grammar, input, s, Lemma.or_true_cases(Gll.descEq(d, y), Gll.descIn(d, rest), m),
+        Lemma.and_true_left(Check.descOk(y, grammar, input, s), Check.allDescs(rest, grammar, input, s), all),
+        later => desc_ok(rest, d, grammar, input, s, Lemma.and_true_right_side(Check.descOk(y, grammar, input, s), Check.allDescs(rest, grammar, input, s), all), later))
 
-# ---- Every cluster has its seeds ----
+# ---- A cluster has its seeds ----
 
-law cluster_pick:
-  for +pr: Gll.Pred
-  for +input: +List<Nat>
-  for +key: Gll.CKey
-  for +y: Gll.CKey
-  for -rest: +List<Gll.CKey>
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for cases: Either<{Gll.keyEq(key, y) == True{} : Bool}, {Gll.keyIn(key, rest) == True{} : Bool}>
-  for +yOk: {Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, y), s) == True{} : Bool}
-  for searchRest: {Gll.keyIn(key, rest) == True{} : Bool} -> {Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, key), s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, key), s) == True{} : Bool}
-
-def cluster_pick(pr, input, key, y, rest, grammar, s, cases, yOk, searchRest):
+def seeds_pick(+x: Nat, +i: Nat, +x2: Nat, +i2: Nat, +rest: +List<Gll.CKey>, +pred: Gll.Pred, +grammar: +List<Core.Production>, +input: +List<Nat>, +s: Gll.GState,
+  cases: Either<{Gll.keyEq(Gll.CKey{x, i}, Gll.CKey{x2, i2}) == True{} : Bool}, {Gll.keyIn(Gll.CKey{x, i}, rest) == True{} : Bool}>,
+  +here: {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i2), x2, 0n, i2), s) == True{} : Bool},
+  later: {Gll.keyIn(Gll.CKey{x, i}, rest) == True{} : Bool} -> {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i), x, 0n, i), s) == True{} : Bool})
+  -> {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i), x, 0n, i), s) == True{} : Bool}:
   match cases:
-    case Inl{same}:
-      Equal.trans(Bool, Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, key), s), Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, y), s), True{},
-        Equal.cong(Gll.CKey, Bool, v => Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, v), s), key, y, key_eq_sound(key, y, same)), yOk)
-    case Inr{later}:
-      searchRest(later)
+    case Inl{+e}:
+      +ex = Lemma.nat_eq_sound(x, x2, Lemma.and_true_left(Nat.is_eq(x, x2), Nat.is_eq(i, i2), e))
+      +ei = Lemma.nat_eq_sound(i, i2, Lemma.and_true_right_side(Nat.is_eq(x, x2), Nat.is_eq(i, i2), e))
+      %Equal.sym(Nat, x, x2, ex) : {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i), _, 0n, i), s) == True{} : Bool}
+      %Equal.sym(Nat, i, i2, ei) : {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, _), x2, 0n, _), s) == True{} : Bool}
+      here
+    case Inr{m}:
+      later(m)
 
 law cluster_seeds:
-  for +pr: Gll.Pred
-  for +input: +List<Nat>
   for cs: +List<Gll.CKey>
-  for +key: Gll.CKey
-  for +grammar: +List<Spec.Production>
+  for +x: Nat
+  for +i: Nat
+  for +pred: Gll.Pred
+  for +grammar: +List<Core.Production>
+  for +input: +List<Nat>
   for +s: Gll.GState
-  for all: {Check.allClusters(cs, pr, grammar, input, s) == True{} : Bool}
-  for m: {Gll.keyIn(key, cs) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, key), s) == True{} : Bool}
+  for +all: {Check.allClusters(cs, pred, grammar, input, s) == True{} : Bool}
+  for +m: {Gll.keyIn(Gll.CKey{x, i}, cs) == True{} : Bool}
+  {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i), x, 0n, i), s) == True{} : Bool}
 
-def cluster_seeds(pr, input, cs, key, grammar, s, all, m):
+def cluster_seeds(cs, x, i, pred, grammar, input, s, all, m):
   match cs:
     case Nil{}:
-      Empty.absurd({Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, key), s) == True{} : Bool}, Lemma.false_is_not_true(m))
-    case Con{+y, +rest}:
-      +both = all
-      cluster_pick(pr, input, key, y, rest, grammar, s,
-        Lemma.or_true_cases(Gll.keyEq(key, y), Gll.keyIn(key, rest), m),
-        Lemma.and_true_left(Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, y), s), Check.allClusters(rest, pr, grammar, input, s), both),
-        later => cluster_seeds(pr, input, rest, key, grammar, s, Lemma.and_true_right_side(Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, y), s), Check.allClusters(rest, pr, grammar, input, s), both), later))
+      Empty.absurd({Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i), x, 0n, i), s) == True{} : Bool}, Lemma.false_is_not_true(m))
+    case Con{Gll.CKey{+x2, +i2}, +rest}:
+      +mine = {Check.allSeen(Gll.productionsOf(grammar, pred, Core.tokAt(input, i2), x2, 0n, i2), s) : Bool}
+      seeds_pick(x, i, x2, i2, rest, pred, grammar, input, s, Lemma.or_true_cases(Gll.keyEq(Gll.CKey{x, i}, Gll.CKey{x2, i2}), Gll.keyIn(Gll.CKey{x, i}, rest), m),
+        Lemma.and_true_left(mine, Check.allClusters(rest, pred, grammar, input, s), all),
+        later => cluster_seeds(rest, x, i, pred, grammar, input, s, Lemma.and_true_right_side(mine, Check.allClusters(rest, pred, grammar, input, s), all), later))
 
-# ---- Every pop of a loop starts it again ----
+# ---- A return edge at a pop of its cluster resumes ----
 
-law pop_pick:
-  for +pr: Gll.Pred
-  for +input: +List<Nat>
-  for +key: Gll.CKey
-  for +j: Nat
-  for +k2: Gll.CKey
-  for +j2: Nat
-  for -rest: +List<Gll.Pop>
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for cases: Either<{Bool.and(Gll.keyEq(key, k2), Nat.is_eq(j, j2)) == True{} : Bool}, {Gll.popIn(key, j, rest) == True{} : Bool}>
-  for +yOk: {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, k2, j2), s) == True{} : Bool}
-  for searchRest: {Gll.popIn(key, j, rest) == True{} : Bool} -> {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, key, j), s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, key, j), s) == True{} : Bool}
-
-def pop_pick(pr, input, key, j, k2, j2, rest, grammar, s, cases, yOk, searchRest):
+def ret_pick(+key: Gll.CKey, +edge: Gll.Edge, +k2: Gll.CKey, +e2: Gll.Edge, +rest: +List<Gll.Ret>, +grammar: +List<Core.Production>, +pops: +List<Gll.Pop>, +s: Gll.GState,
+  cases: Either<{Bool.and(Gll.keyEq(key, k2), Check.edgeEq(edge, e2)) == True{} : Bool}, {Check.retIn(key, edge, rest) == True{} : Bool}>,
+  +here: {Check.edgePops(pops, grammar, k2, e2, s) == True{} : Bool},
+  later: {Check.retIn(key, edge, rest) == True{} : Bool} -> {Check.edgePops(pops, grammar, key, edge, s) == True{} : Bool})
+  -> {Check.edgePops(pops, grammar, key, edge, s) == True{} : Bool}:
   match cases:
-    case Inl{same}:
-      +both = same
-      ek = key_eq_sound(key, k2, Lemma.and_true_left(Gll.keyEq(key, k2), Nat.is_eq(j, j2), both))
-      ej = Lemma.nat_eq_sound(j, j2, Lemma.and_true_right_side(Gll.keyEq(key, k2), Nat.is_eq(j, j2), both))
-      %Equal.sym(Gll.CKey, key, k2, ek) : {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, _, j), s) == True{} : Bool}
-      %Equal.sym(Nat, j, j2, ej) : {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, k2, _), s) == True{} : Bool}
-      yOk
-    case Inr{later}:
-      searchRest(later)
+    case Inl{+e}:
+      +ek = key_eq_sound(key, k2, Lemma.and_true_left(Gll.keyEq(key, k2), Check.edgeEq(edge, e2), e))
+      +ee = edge_eq_sound(edge, e2, Lemma.and_true_right_side(Gll.keyEq(key, k2), Check.edgeEq(edge, e2), e))
+      %Equal.sym(Gll.CKey, key, k2, ek) : {Check.edgePops(pops, grammar, _, edge, s) == True{} : Bool}
+      %Equal.sym(Gll.Edge, edge, e2, ee) : {Check.edgePops(pops, grammar, k2, _, s) == True{} : Bool}
+      here
+    case Inr{m}:
+      later(m)
 
-law pop_again:
-  for +pr: Gll.Pred
-  for +input: +List<Nat>
-  for ps: +List<Gll.Pop>
+law ret_ok:
+  for rs: +List<Gll.Ret>
   for +key: Gll.CKey
-  for +j: Nat
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for all: {Check.allPops(ps, pr, grammar, input, s) == True{} : Bool}
-  for m: {Gll.popIn(key, j, ps) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, key, j), s) == True{} : Bool}
-
-def pop_again(pr, input, ps, key, j, grammar, s, all, m):
-  match ps:
-    case Nil{}:
-      Empty.absurd({Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, key, j), s) == True{} : Bool}, Lemma.false_is_not_true(m))
-    case Con{Gll.Pop{+k2, +j2}, +rest}:
-      +both = all
-      pop_pick(pr, input, key, j, k2, j2, rest, grammar, s,
-        Lemma.or_true_cases(Bool.and(Gll.keyEq(key, k2), Nat.is_eq(j, j2)), Gll.popIn(key, j, rest), m),
-        Lemma.and_true_left(Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, k2, j2), s), Check.allPops(rest, pr, grammar, input, s), both),
-        later => pop_again(pr, input, rest, key, j, grammar, s, Lemma.and_true_right_side(Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, k2, j2), s), Check.allPops(rest, pr, grammar, input, s), both), later))
-
-# ---- Every return edge resumes at every pop ----
-
-law resume_hit:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for hit: Bool
   for +edge: Gll.Edge
+  for +grammar: +List<Core.Production>
+  for +pops: +List<Gll.Pop>
+  for +s: Gll.GState
+  for +all: {Check.allReturns(rs, grammar, pops, s) == True{} : Bool}
+  for +m: {Check.retIn(key, edge, rs) == True{} : Bool}
+  {Check.edgePops(pops, grammar, key, edge, s) == True{} : Bool}
+
+def ret_ok(rs, key, edge, grammar, pops, s, all, m):
+  match rs:
+    case Nil{}:
+      Empty.absurd({Check.edgePops(pops, grammar, key, edge, s) == True{} : Bool}, Lemma.false_is_not_true(m))
+    case Con{Gll.Ret{+k2, +e2}, +rest}:
+      +mine = {Check.edgePops(pops, grammar, k2, e2, s) : Bool}
+      ret_pick(key, edge, k2, e2, rest, grammar, pops, s, Lemma.or_true_cases(Bool.and(Gll.keyEq(key, k2), Check.edgeEq(edge, e2)), Check.retIn(key, edge, rest), m),
+        Lemma.and_true_left(mine, Check.allReturns(rest, grammar, pops, s), all),
+        later => ret_ok(rest, key, edge, grammar, pops, s, Lemma.and_true_right_side(mine, Check.allReturns(rest, grammar, pops, s), all), later))
+
+law hit_true:
+  for b: Bool
+  for +edge: Gll.Edge
+  for +grammar: +List<Core.Production>
   for +kc: Nat
   for +j: Nat
   for +s: Gll.GState
-  for isHit: {hit == True{} : Bool}
-  for r: {Check.resumeIfOk(hit, pr, grammar, input, edge, kc, j, s) == True{} : Bool}
-  {Check.resumeOk(pr, grammar, input, edge, kc, j, s) == True{} : Bool}
+  for +eb: {b == True{} : Bool}
+  for +h: {Check.hitOk(b, edge, grammar, kc, j, s) == True{} : Bool}
+  {Check.edgeOk(edge, grammar, kc, j, s) == True{} : Bool}
 
-def resume_hit(pr, grammar, input, hit, edge, kc, j, s, isHit, r):
-  match hit:
+def hit_true(b, edge, grammar, kc, j, s, eb, h):
+  match b:
     case True{}:
-      r
+      h
     case False{}:
-      Empty.absurd({Check.resumeOk(pr, grammar, input, edge, kc, j, s) == True{} : Bool}, Lemma.false_is_not_true(isHit))
+      Empty.absurd({Check.edgeOk(edge, grammar, kc, j, s) == True{} : Bool}, Lemma.false_is_not_true(eb))
 
-law edge_pop_pick:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +key: Gll.CKey
-  for +edge: Gll.Edge
-  for +j: Nat
-  for +k2: Gll.CKey
-  for +j2: Nat
-  for -rest: +List<Gll.Pop>
-  for +s: Gll.GState
-  for cases: Either<{Bool.and(Gll.keyEq(key, k2), Nat.is_eq(j, j2)) == True{} : Bool}, {Gll.popIn(key, j, rest) == True{} : Bool}>
-  for +here: {Check.resumeIfOk(Gll.keyEq(key, k2), pr, grammar, input, edge, Check.keyStart(key), j2, s) == True{} : Bool}
-  for searchRest: {Gll.popIn(key, j, rest) == True{} : Bool} -> {Check.resumeOk(pr, grammar, input, edge, Check.keyStart(key), j, s) == True{} : Bool}
-  {Check.resumeOk(pr, grammar, input, edge, Check.keyStart(key), j, s) == True{} : Bool}
-
-def edge_pop_pick(pr, grammar, input, key, edge, j, k2, j2, rest, s, cases, here, searchRest):
+def pop_pick(+x: Nat, +kc: Nat, +edge: Gll.Edge, +j: Nat, +k2: Gll.CKey, +j2: Nat, +rest: +List<Gll.Pop>, +grammar: +List<Core.Production>, +s: Gll.GState,
+  cases: Either<{Bool.and(Gll.keyEq(Gll.CKey{x, kc}, k2), Nat.is_eq(j, j2)) == True{} : Bool}, {Gll.popIn(Gll.CKey{x, kc}, j, rest) == True{} : Bool}>,
+  +here: {Check.hitOk(Gll.keyEq(Gll.CKey{x, kc}, k2), edge, grammar, kc, j2, s) == True{} : Bool},
+  later: {Gll.popIn(Gll.CKey{x, kc}, j, rest) == True{} : Bool} -> {Check.edgeOk(edge, grammar, kc, j, s) == True{} : Bool})
+  -> {Check.edgeOk(edge, grammar, kc, j, s) == True{} : Bool}:
   match cases:
-    case Inl{same}:
-      +both = same
-      ej = Lemma.nat_eq_sound(j, j2, Lemma.and_true_right_side(Gll.keyEq(key, k2), Nat.is_eq(j, j2), both))
-      %Equal.sym(Nat, j, j2, ej) : {Check.resumeOk(pr, grammar, input, edge, Check.keyStart(key), _, s) == True{} : Bool}
-      resume_hit(pr, grammar, input, Gll.keyEq(key, k2), edge, Check.keyStart(key), j2, s, Lemma.and_true_left(Gll.keyEq(key, k2), Nat.is_eq(j, j2), both), here)
-    case Inr{later}:
-      searchRest(later)
+    case Inl{+e}:
+      +hk = Lemma.and_true_left(Gll.keyEq(Gll.CKey{x, kc}, k2), Nat.is_eq(j, j2), e)
+      +ej = Lemma.nat_eq_sound(j, j2, Lemma.and_true_right_side(Gll.keyEq(Gll.CKey{x, kc}, k2), Nat.is_eq(j, j2), e))
+      %Equal.sym(Nat, j, j2, ej) : {Check.edgeOk(edge, grammar, kc, _, s) == True{} : Bool}
+      hit_true(Gll.keyEq(Gll.CKey{x, kc}, k2), edge, grammar, kc, j2, s, hk, here)
+    case Inr{m}:
+      later(m)
 
-law edge_pop:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
+law pop_ok:
   for ps: +List<Gll.Pop>
-  for +key: Gll.CKey
+  for +x: Nat
+  for +kc: Nat
   for +edge: Gll.Edge
   for +j: Nat
+  for +grammar: +List<Core.Production>
   for +s: Gll.GState
-  for all: {Check.edgePops(ps, pr, grammar, input, key, edge, s) == True{} : Bool}
-  for m: {Gll.popIn(key, j, ps) == True{} : Bool}
-  {Check.resumeOk(pr, grammar, input, edge, Check.keyStart(key), j, s) == True{} : Bool}
+  for +all: {Check.edgePops(ps, grammar, Gll.CKey{x, kc}, edge, s) == True{} : Bool}
+  for +m: {Gll.popIn(Gll.CKey{x, kc}, j, ps) == True{} : Bool}
+  {Check.edgeOk(edge, grammar, kc, j, s) == True{} : Bool}
 
-def edge_pop(pr, grammar, input, ps, key, edge, j, s, all, m):
+def pop_ok(ps, x, kc, edge, j, grammar, s, all, m):
   match ps:
     case Nil{}:
-      Empty.absurd({Check.resumeOk(pr, grammar, input, edge, Check.keyStart(key), j, s) == True{} : Bool}, Lemma.false_is_not_true(m))
+      Empty.absurd({Check.edgeOk(edge, grammar, kc, j, s) == True{} : Bool}, Lemma.false_is_not_true(m))
     case Con{Gll.Pop{+k2, +j2}, +rest}:
-      +both = all
-      +hit = Check.resumeIfOk(Gll.keyEq(key, k2), pr, grammar, input, edge, Check.keyStart(key), j2, s)
-      edge_pop_pick(pr, grammar, input, key, edge, j, k2, j2, rest, s,
-        Lemma.or_true_cases(Bool.and(Gll.keyEq(key, k2), Nat.is_eq(j, j2)), Gll.popIn(key, j, rest), m),
-        Lemma.and_true_left(hit, Check.edgePops(rest, pr, grammar, input, key, edge, s), both),
-        later => edge_pop(pr, grammar, input, rest, key, edge, j, s, Lemma.and_true_right_side(hit, Check.edgePops(rest, pr, grammar, input, key, edge, s), both), later))
+      +mine = {Check.hitOk(Gll.keyEq(Gll.CKey{x, kc}, k2), edge, grammar, kc, j2, s) : Bool}
+      pop_pick(x, kc, edge, j, k2, j2, rest, grammar, s, Lemma.or_true_cases(Bool.and(Gll.keyEq(Gll.CKey{x, kc}, k2), Nat.is_eq(j, j2)), Gll.popIn(Gll.CKey{x, kc}, j, rest), m),
+        Lemma.and_true_left(mine, Check.edgePops(rest, grammar, Gll.CKey{x, kc}, edge, s), all),
+        later => pop_ok(rest, x, kc, edge, j, grammar, s, Lemma.and_true_right_side(mine, Check.edgePops(rest, grammar, Gll.CKey{x, kc}, edge, s), all), later))
 
-law return_pick:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +key: Gll.CKey
-  for +edge: Gll.Edge
-  for +k2: Gll.CKey
-  for +e2: Gll.Edge
-  for -rest: +List<Gll.Ret>
-  for +ps: +List<Gll.Pop>
-  for +s: Gll.GState
-  for cases: Either<{Bool.and(Gll.keyEq(key, k2), Gll.edgeEq(edge, e2)) == True{} : Bool}, {Gll.retIn(key, edge, rest) == True{} : Bool}>
-  for +here: {Check.edgePops(ps, pr, grammar, input, k2, e2, s) == True{} : Bool}
-  for searchRest: {Gll.retIn(key, edge, rest) == True{} : Bool} -> {Check.edgePops(ps, pr, grammar, input, key, edge, s) == True{} : Bool}
-  {Check.edgePops(ps, pr, grammar, input, key, edge, s) == True{} : Bool}
+# ---- The seeds of a cluster ----
 
-def return_pick(pr, grammar, input, key, edge, k2, e2, rest, ps, s, cases, here, searchRest):
-  match cases:
-    case Inl{same}:
-      +both = same
-      ek = key_eq_sound(key, k2, Lemma.and_true_left(Gll.keyEq(key, k2), Gll.edgeEq(edge, e2), both))
-      ee = edge_eq_sound(edge, e2, Lemma.and_true_right_side(Gll.keyEq(key, k2), Gll.edgeEq(edge, e2), both))
-      %Equal.sym(Gll.CKey, key, k2, ek) : {Check.edgePops(ps, pr, grammar, input, _, edge, s) == True{} : Bool}
-      %Equal.sym(Gll.Edge, edge, e2, ee) : {Check.edgePops(ps, pr, grammar, input, k2, _, s) == True{} : Bool}
-      here
-    case Inr{later}:
-      searchRest(later)
-
-law return_edge:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for rs: +List<Gll.Ret>
-  for +ps: +List<Gll.Pop>
-  for +key: Gll.CKey
-  for +edge: Gll.Edge
-  for +s: Gll.GState
-  for all: {Check.allReturns(rs, pr, grammar, input, ps, s) == True{} : Bool}
-  for m: {Gll.retIn(key, edge, rs) == True{} : Bool}
-  {Check.edgePops(ps, pr, grammar, input, key, edge, s) == True{} : Bool}
-
-def return_edge(pr, grammar, input, rs, ps, key, edge, s, all, m):
-  match rs:
-    case Nil{}:
-      Empty.absurd({Check.edgePops(ps, pr, grammar, input, key, edge, s) == True{} : Bool}, Lemma.false_is_not_true(m))
-    case Con{Gll.Ret{+k2, +e2}, +rest}:
-      +both = all
-      return_pick(pr, grammar, input, key, edge, k2, e2, rest, ps, s,
-        Lemma.or_true_cases(Bool.and(Gll.keyEq(key, k2), Gll.edgeEq(edge, e2)), Gll.retIn(key, edge, rest), m),
-        Lemma.and_true_left(Check.edgePops(ps, pr, grammar, input, k2, e2, s), Check.allReturns(rest, pr, grammar, input, ps, s), both),
-        later => return_edge(pr, grammar, input, rest, ps, key, edge, s, Lemma.and_true_right_side(Check.edgePops(ps, pr, grammar, input, k2, e2, s), Check.allReturns(rest, pr, grammar, input, ps, s), both), later))
-
-# ---- Seeds that are seen ----
-
-law keep_head:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for keep: Bool
-  for +isKept: {keep == True{} : Bool}
+law keep_rest:
+  for b: Bool
   for +d: Gll.Desc
   for +ds: +List<Gll.Desc>
   for +s: Gll.GState
-  for all: {Check.allWanted(pr, grammar, input, Gll.keepDesc(keep, d, ds), s) == True{} : Bool}
-  {Check.wanted(pr, grammar, input, d, s) == True{} : Bool}
+  for +h: {Check.allSeen(Gll.keepDesc(b, d, ds), s) == True{} : Bool}
+  {Check.allSeen(ds, s) == True{} : Bool}
 
-def keep_head(pr, grammar, input, keep, isKept, d, ds, s, all):
-  match keep:
+def keep_rest(b, d, ds, s, h):
+  match b:
     case True{}:
-      Lemma.and_true_left(Check.wanted(pr, grammar, input, d, s), Check.allWanted(pr, grammar, input, ds, s), all)
+      Lemma.and_true_right_side(Check.seenIn(d, s), Check.allSeen(ds, s), h)
     case False{}:
-      Empty.absurd({Check.wanted(pr, grammar, input, d, s) == True{} : Bool}, Lemma.false_is_not_true(isKept))
+      h
 
-law keep_tail:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for keep: Bool
+law keep_here:
+  for b: Bool
   for +d: Gll.Desc
   for +ds: +List<Gll.Desc>
   for +s: Gll.GState
-  for all: {Check.allWanted(pr, grammar, input, Gll.keepDesc(keep, d, ds), s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, ds, s) == True{} : Bool}
+  for +eb: {b == True{} : Bool}
+  for +h: {Check.allSeen(Gll.keepDesc(b, d, ds), s) == True{} : Bool}
+  {Check.seenIn(d, s) == True{} : Bool}
 
-def keep_tail(pr, grammar, input, keep, d, ds, s, all):
-  match keep:
+def keep_here(b, d, ds, s, eb, h):
+  match b:
     case True{}:
-      Lemma.and_true_right_side(Check.wanted(pr, grammar, input, d, s), Check.allWanted(pr, grammar, input, ds, s), all)
+      Lemma.and_true_left(Check.seenIn(d, s), Check.allSeen(ds, s), h)
     case False{}:
-      all
+      Empty.absurd({Check.seenIn(d, s) == True{} : Bool}, Lemma.false_is_not_true(eb))
 
-# A cluster of x at i has seen the start of every production of x.
-law productions_seen:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for prods: +List<Spec.Production>
-  for +x: Nat
-  for +o: Nat
-  for +i: Nat
+law seed_seen:
+  for g: +List<Core.Production>
   for q: Nat
-  for +s: Gll.GState
-  for lhsOk: {Spec.lhsIs(prods, q, x) == True{} : Bool}
-  for all: {Check.allWanted(pr, grammar, input, Gll.productionsOf(prods, x, o, i), s) == True{} : Bool}
-  {Check.wanted(pr, grammar, input, Gll.Desc{Nat.add(o, q), [], 0n, i, i}, s) == True{} : Bool}
-
-def productions_seen(pr, grammar, input, prods, x, o, i, q, s, lhsOk, all):
-  match prods q:
-    case Nil{} 0n:
-      Empty.absurd({Check.wanted(pr, grammar, input, Gll.Desc{Nat.add(o, 0n), [], 0n, i, i}, s) == True{} : Bool}, Lemma.false_is_not_true(lhsOk))
-    case Nil{} 1n+r:
-      Empty.absurd({Check.wanted(pr, grammar, input, Gll.Desc{Nat.add(o, 1n+r), [], 0n, i, i}, s) == True{} : Bool}, Lemma.false_is_not_true(lhsOk))
-    case Con{Spec.Production{+lhs, +rhs}, +rest} 0n:
-      %Equal.sym(Nat, Nat.add(o, 0n), o, Lemma.add_zero_right(o)) : {Check.wanted(pr, grammar, input, Gll.Desc{_, [], 0n, i, i}, s) == True{} : Bool}
-      keep_head(pr, grammar, input, Nat.is_eq(lhs, x), lhsOk, Gll.Desc{o, [], 0n, i, i}, Gll.productionsOf(rest, x, 1n+o, i), s, all)
-    case Con{Spec.Production{+lhs, +rhs}, +rest} 1n+(+r):
-      %Equal.sym(Nat, Nat.add(o, 1n+r), 1n+Nat.add(o, r), Lemma.add_succ_right(o, r)) : {Check.wanted(pr, grammar, input, Gll.Desc{_, [], 0n, i, i}, s) == True{} : Bool}
-      productions_seen(pr, grammar, input, rest, x, 1n+o, i, r, s, lhsOk, keep_tail(pr, grammar, input, Nat.is_eq(lhs, x), Gll.Desc{o, [], 0n, i, i}, Gll.productionsOf(rest, x, 1n+o, i), s, all))
-
-law alt_pick:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for same: Bool
-  for +m: Nat
-  for +a: Nat
-  for +sameEq: {Nat.is_eq(m, a) == same : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +k: Nat
+  for +x: Nat
+  for +base: Nat
   for +i: Nat
   for +s: Gll.GState
-  for lt: {Nat.is_lt(a, 1n+m) == True{} : Bool}
-  for all: {Check.allWanted(pr, grammar, input, Gll.alternatives(1n+m, index, rpath, k, i), s) == True{} : Bool}
-  for later: {Nat.is_lt(a, m) == True{} : Bool} -> {Check.allWanted(pr, grammar, input, Gll.alternatives(m, index, rpath, k, i), s) == True{} : Bool} -> {Check.wanted(pr, grammar, input, Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}
-  {Check.wanted(pr, grammar, input, Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}
+  for +pred: Gll.Pred
+  for +tok: Maybe<&2, Nat>
+  for +h: {Core.lhsIs(g, q, x) == True{} : Bool}
+  for +ha: {Gll.admits(pred, Nat.add(base, q), tok) == True{} : Bool}
+  for +all: {Check.allSeen(Gll.productionsOf(g, pred, tok, x, base, i), s) == True{} : Bool}
+  {Check.seenIn(Gll.Desc{Nat.add(base, q), 0n, i, i}, s) == True{} : Bool}
 
-def alt_pick(pr, grammar, input, same, m, a, sameEq, index, rpath, k, i, s, lt, all, later):
-  match same:
-    case True{}:
-      %Lemma.nat_eq_sound(m, a, sameEq) : {Check.wanted(pr, grammar, input, Gll.Desc{index, _ <> rpath, 0n, k, i}, s) == True{} : Bool}
-      Lemma.and_true_left(Check.wanted(pr, grammar, input, Gll.Desc{index, m <> rpath, 0n, k, i}, s), Check.allWanted(pr, grammar, input, Gll.alternatives(m, index, rpath, k, i), s), all)
-    case False{}:
-      later(Lemma.lt_succ_ne(a, m, lt, sameEq), Lemma.and_true_right_side(Check.wanted(pr, grammar, input, Gll.Desc{index, m <> rpath, 0n, k, i}, s), Check.allWanted(pr, grammar, input, Gll.alternatives(m, index, rpath, k, i), s), all))
+def seed_seen(g, q, x, base, i, s, pred, tok, h, ha, all):
+  match g q:
+    case Nil{} +q0:
+      Empty.absurd({Check.seenIn(Gll.Desc{Nat.add(base, q0), 0n, i, i}, s) == True{} : Bool}, Lemma.false_is_not_true(h))
+    case Con{Core.Production{+lhs, +rhs}, +rest} 0n:
+      +ha0 = {(%Lemma.add_zero_right(base) : {Gll.admits(pred, _, tok) == True{} : Bool}
+        ha) : {Gll.admits(pred, base, tok) == True{} : Bool}}
+      %Equal.sym(Nat, Nat.add(base, 0n), base, Lemma.add_zero_right(base)) : {Check.seenIn(Gll.Desc{_, 0n, i, i}, s) == True{} : Bool}
+      keep_here(Bool.and(Gll.admits(pred, base, tok), Nat.is_eq(lhs, x)), Gll.Desc{base, 0n, i, i}, Gll.productionsOf(rest, pred, tok, x, 1n+base, i), s,
+        Lemma.and_true_intro(Gll.admits(pred, base, tok), Nat.is_eq(lhs, x), ha0, h), all)
+    case Con{Core.Production{+lhs, +rhs}, +rest} 1n+(+n):
+      +ha1 = {(%Lemma.add_succ_right(base, n) : {Gll.admits(pred, _, tok) == True{} : Bool}
+        ha) : {Gll.admits(pred, 1n+Nat.add(base, n), tok) == True{} : Bool}}
+      %Equal.sym(Nat, Nat.add(base, 1n+n), 1n+Nat.add(base, n), Lemma.add_succ_right(base, n)) : {Check.seenIn(Gll.Desc{_, 0n, i, i}, s) == True{} : Bool}
+      seed_seen(rest, n, x, 1n+base, i, s, pred, tok, h, ha1, keep_rest(Bool.and(Gll.admits(pred, base, tok), Nat.is_eq(lhs, x)), Gll.Desc{base, 0n, i, i}, Gll.productionsOf(rest, pred, tok, x, 1n+base, i), s, all))
 
-# A bracket's cluster has seen the start of each of its alternatives.
-law alternatives_seen:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for n: Nat
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +k: Nat
-  for +i: Nat
-  for +a: Nat
-  for +s: Gll.GState
-  for lt: {Nat.is_lt(a, n) == True{} : Bool}
-  for all: {Check.allWanted(pr, grammar, input, Gll.alternatives(n, index, rpath, k, i), s) == True{} : Bool}
-  {Check.wanted(pr, grammar, input, Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}
+law lhs_of:
+  for g: +List<Core.Production>
+  for q: Nat
+  for +x: Nat
+  for +h: {Core.lhsIs(g, q, x) == True{} : Bool}
+  {Gll.lhsOf(g, q) == x : Nat}
 
-def alternatives_seen(pr, grammar, input, n, index, rpath, k, i, a, s, lt, all):
-  match n:
-    case 0n:
-      Empty.absurd({Check.wanted(pr, grammar, input, Gll.Desc{index, a <> rpath, 0n, k, i}, s) == True{} : Bool}, Lemma.lt_zero_false(a, lt))
-    case 1n+(+m):
-      alt_pick(pr, grammar, input, Nat.is_eq(m, a), m, a, {==}, index, rpath, k, i, s, lt, all,
-        ltM => allM => alternatives_seen(pr, grammar, input, m, index, rpath, k, i, a, s, ltM, allM))
+def lhs_of(g, q, x, h):
+  match g q:
+    case Nil{} +q0:
+      Empty.absurd({Gll.lhsOf([], q0) == x : Nat}, Lemma.false_is_not_true(h))
+    case Con{Core.Production{+lhs, +rhs}, +rest} 0n:
+      Lemma.nat_eq_sound(lhs, x, h)
+    case Con{+p, +rest} 1n+(+n):
+      lhs_of(rest, n, x, h)
 
-# ---- Positions in the input ----
+# ======== POSITIONS IN THE GRAMMAR ========
 
-def Spells(+forest: +List<Spec.Tree>, +input: +List<Nat>, +pos: Nat) -> Data:
-  {Spec.leaves(forest) == Lemma.slice(input, pos, List.length(&2, Nat, Spec.leaves(forest))) : +List<Nat>}
+# The items of a sequence from the dot on.
+def dropFrom(n: Nat, items: +List<Core.Sym>) -> +List<Core.Sym>:
+  match n items:
+    case 0n _:
+      items
+    case 1n+m Nil{}:
+      []
+    case 1n+m Con{x, rest}:
+      dropFrom(m, rest)
 
-law split_slice:
-  for +input: +List<Nat>
-  for +pos: Nat
-  for +w1: +List<Nat>
-  for +w2: +List<Nat>
-  for sp: {List.append(&2, Nat, w1, w2) == Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : +List<Nat>}
-  {Lemma.slice(input, pos, Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2))) == List.append(&2, Nat, w1, w2) : +List<Nat>}
-
-def split_slice(input, pos, w1, w2, sp):
-  Equal.trans(+List<Nat>, Lemma.slice(input, pos, Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2))), Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))), List.append(&2, Nat, w1, w2),
-    Equal.cong(Nat, +List<Nat>, v => Lemma.slice(input, pos, v), Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2)), List.length(&2, Nat, List.append(&2, Nat, w1, w2)), Equal.sym(Nat, List.length(&2, Nat, List.append(&2, Nat, w1, w2)), Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2)), Lemma.length_append(w1, w2))),
-    Equal.sym(+List<Nat>, List.append(&2, Nat, w1, w2), Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))), sp))
-
-law spells_first:
-  for +input: +List<Nat>
-  for +pos: Nat
-  for +w1: +List<Nat>
-  for +w2: +List<Nat>
-  for sp: {List.append(&2, Nat, w1, w2) == Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : +List<Nat>}
-  {w1 == Lemma.slice(input, pos, List.length(&2, Nat, w1)) : +List<Nat>}
-
-def spells_first(input, pos, w1, w2, sp):
-  Equal.sym(+List<Nat>, Lemma.slice(input, pos, List.length(&2, Nat, w1)), w1, Lemma.slice_left(input, pos, w1, w2, split_slice(input, pos, w1, w2, sp)))
-
-law spells_second:
-  for +input: +List<Nat>
-  for +pos: Nat
-  for +w1: +List<Nat>
-  for +w2: +List<Nat>
-  for sp: {List.append(&2, Nat, w1, w2) == Lemma.slice(input, pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : +List<Nat>}
-  {w2 == Lemma.slice(input, Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)) : +List<Nat>}
-
-def spells_second(input, pos, w1, w2, sp):
-  Equal.sym(+List<Nat>, Lemma.slice(input, Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)), w2, Lemma.slice_right(input, pos, w1, w2, split_slice(input, pos, w1, w2, sp)))
-
-# The token under a leaf.
-law leaf_token:
-  for +input: +List<Nat>
-  for +pos: Nat
-  for +kind: Nat
-  for +rest: +List<Nat>
-  for sp: {kind <> rest == Lemma.slice(input, pos, List.length(&2, Nat, kind <> rest)) : +List<Nat>}
-  {List.get(&2, Nat, input, pos) == Some{kind} : Maybe<&2, Nat>}
-
-def leaf_token(input, pos, kind, rest, sp):
-  Lemma.slice_get(input, pos, kind, Equal.sym(+List<Nat>, [kind], Lemma.slice(input, pos, 1n), spells_first(input, pos, [kind], rest, sp)))
-
-law leaf_rest:
-  for +input: +List<Nat>
-  for +pos: Nat
-  for +kind: Nat
-  for +rest: +List<Nat>
-  for sp: {kind <> rest == Lemma.slice(input, pos, List.length(&2, Nat, kind <> rest)) : +List<Nat>}
-  {rest == Lemma.slice(input, 1n+pos, List.length(&2, Nat, rest)) : +List<Nat>}
-
-def leaf_rest(input, pos, kind, rest, sp):
-  %Lemma.add_one_right(pos) : {rest == Lemma.slice(input, _, List.length(&2, Nat, rest)) : +List<Nat>}
-  spells_second(input, pos, [kind], rest, sp)
-
-# Where a forest ends, split after its first part.
-law end_split:
-  for +pos: Nat
-  for +w1: +List<Nat>
-  for +w2: +List<Nat>
-  {Nat.add(Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)) == Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))) : Nat}
-
-def end_split(pos, w1, w2):
-  Equal.trans(Nat, Nat.add(Nat.add(pos, List.length(&2, Nat, w1)), List.length(&2, Nat, w2)), Nat.add(pos, Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2))), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, w1, w2))),
-    Lemma.add_assoc(pos, List.length(&2, Nat, w1), List.length(&2, Nat, w2)),
-    Equal.cong(Nat, Nat, v => Nat.add(pos, v), Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2)), List.length(&2, Nat, List.append(&2, Nat, w1, w2)), Equal.sym(Nat, List.length(&2, Nat, List.append(&2, Nat, w1, w2)), Nat.add(List.length(&2, Nat, w1), List.length(&2, Nat, w2)), Lemma.length_append(w1, w2))))
-
-law end_alone:
-  for +pos: Nat
-  for +w: +List<Nat>
-  {Nat.add(pos, List.length(&2, Nat, w)) == Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, w, []))) : Nat}
-
-def end_alone(pos, w):
-  Equal.cong(+List<Nat>, Nat, v => Nat.add(pos, List.length(&2, Nat, v)), w, List.append(&2, Nat, w, []), Equal.sym(+List<Nat>, List.append(&2, Nat, w, []), w, Lemma.append_nil_right(w)))
-
-# ---- Positions in the grammar ----
-
-def dropItems(n: Nat, items: +List<Spec.Item>) -> +List<Spec.Item>:
-  Gll.dropFrom(n, items)
-
-def headOr(items: +List<Spec.Item>, d: Spec.Item) -> Spec.Item:
-  match items:
+def symHead(xs: +List<Core.Sym>, +d: Core.Sym) -> Core.Sym:
+  match xs:
     case Nil{}:
       d
     case Con{x, rest}:
       x
 
-def tailOf(items: +List<Spec.Item>) -> +List<Spec.Item>:
-  match items:
+def symTail(xs: +List<Core.Sym>) -> +List<Core.Sym>:
+  match xs:
     case Nil{}:
       []
     case Con{x, rest}:
       rest
 
-def itemsEmpty(items: +List<Spec.Item>) -> Bool:
-  match items:
-    case Nil{}:
-      True{}
-    case Con{x, rest}:
-      False{}
+law syms_cons_not_nil:
+  for +y: Core.Sym
+  for +r: +List<Core.Sym>
+  for +e: {[] == y <> r : +List<Core.Sym>}
+  Empty
+
+def syms_cons_not_nil(y, r, e):
+  Lemma.true_is_not_false(Equal.cong(+List<Core.Sym>, Bool, v => List.is_empty(&2, Core.Sym, v), [], y <> r, e))
+
+law nth_drop:
+  for items: +List<Core.Sym>
+  for d: Nat
+  for +y: Core.Sym
+  for +rest: +List<Core.Sym>
+  for +e: {dropFrom(d, items) == y <> rest : +List<Core.Sym>}
+  {Gll.nthSym(items, d) == Some{y} : Maybe<&2, Core.Sym>}
+
+def nth_drop(items, d, y, rest, e):
+  match items d:
+    case Nil{} 0n:
+      Empty.absurd({Gll.nthSym([], 0n) == Some{y} : Maybe<&2, Core.Sym>}, syms_cons_not_nil(y, rest, e))
+    case Nil{} 1n+(+m):
+      Empty.absurd({Gll.nthSym([], 1n+m) == Some{y} : Maybe<&2, Core.Sym>}, syms_cons_not_nil(y, rest, e))
+    case Con{+x, +xs} 0n:
+      Equal.cong(Core.Sym, Maybe<&2, Core.Sym>, v => Some{v}, x, y, Equal.cong(+List<Core.Sym>, Core.Sym, v => symHead(v, x), x <> xs, y <> rest, e))
+    case Con{+x, +xs} 1n+(+m):
+      nth_drop(xs, m, y, rest, e)
 
 law drop_next:
-  for n: Nat
-  for seq: +List<Spec.Item>
-  for +it: Spec.Item
-  for +rest: +List<Spec.Item>
-  for e: {dropItems(n, seq) == it <> rest : +List<Spec.Item>}
-  {Gll.nthItem(seq, n) == Some{it} : Maybe<&2, Spec.Item>}
+  for items: +List<Core.Sym>
+  for d: Nat
+  for +y: Core.Sym
+  for +rest: +List<Core.Sym>
+  for +e: {dropFrom(d, items) == y <> rest : +List<Core.Sym>}
+  {dropFrom(1n+d, items) == rest : +List<Core.Sym>}
 
-def drop_next(n, seq, it, rest, e):
-  match n seq:
-    case 0n Nil{}:
-      Empty.absurd({Gll.nthItem([], 0n) == Some{it} : Maybe<&2, Spec.Item>}, Lemma.true_is_not_false(Equal.cong(+List<Spec.Item>, Bool, v => itemsEmpty(v), [], it <> rest, e)))
-    case 0n Con{+x, +xs}:
-      Equal.cong(Spec.Item, Maybe<&2, Spec.Item>, v => Some{v}, x, it, Equal.cong(+List<Spec.Item>, Spec.Item, v => headOr(v, x), x <> xs, it <> rest, e))
-    case 1n+m Nil{}:
-      Empty.absurd({Gll.nthItem([], 1n+m) == Some{it} : Maybe<&2, Spec.Item>}, Lemma.true_is_not_false(Equal.cong(+List<Spec.Item>, Bool, v => itemsEmpty(v), [], it <> rest, e)))
-    case 1n+m Con{x, xs}:
-      drop_next(m, xs, it, rest, e)
-
-law drop_succ:
-  for n: Nat
-  for seq: +List<Spec.Item>
-  for +it: Spec.Item
-  for +rest: +List<Spec.Item>
-  for e: {dropItems(n, seq) == it <> rest : +List<Spec.Item>}
-  {dropItems(1n+n, seq) == rest : +List<Spec.Item>}
-
-def drop_succ(n, seq, it, rest, e):
-  match n seq:
-    case 0n Nil{}:
-      Empty.absurd({dropItems(1n, []) == rest : +List<Spec.Item>}, Lemma.true_is_not_false(Equal.cong(+List<Spec.Item>, Bool, v => itemsEmpty(v), [], it <> rest, e)))
-    case 0n Con{+x, +xs}:
-      Equal.cong(+List<Spec.Item>, +List<Spec.Item>, v => tailOf(v), x <> xs, it <> rest, e)
-    case 1n+m Nil{}:
-      Empty.absurd({dropItems(1n+1n+m, []) == rest : +List<Spec.Item>}, Lemma.true_is_not_false(Equal.cong(+List<Spec.Item>, Bool, v => itemsEmpty(v), [], it <> rest, e)))
-    case 1n+m Con{x, xs}:
-      drop_succ(m, xs, it, rest, e)
-
-law drop_end:
-  for n: Nat
-  for seq: +List<Spec.Item>
-  for e: {dropItems(n, seq) == [] : +List<Spec.Item>}
-  {Gll.nthItem(seq, n) == None{} : Maybe<&2, Spec.Item>}
-
-def drop_end(n, seq, e):
-  match n seq:
-    case 0n Nil{}:
-      {==}
-    case 0n Con{x, xs}:
-      Empty.absurd({Gll.nthItem(x <> xs, 0n) == None{} : Maybe<&2, Spec.Item>}, Lemma.false_is_not_true(Equal.cong(+List<Spec.Item>, Bool, v => itemsEmpty(v), x <> xs, [], e)))
-    case 1n+m Nil{}:
-      {==}
-    case 1n+m Con{x, xs}:
-      drop_end(m, xs, e)
-
-law lhs_of_is:
-  for +grammar: +List<Spec.Production>
-  for p: Nat
-  for +a: Nat
-  for e: {Spec.lhsIs(grammar, p, a) == True{} : Bool}
-  {Gll.lhsOf(grammar, p) == a : Nat}
-
-def lhs_of_is(grammar, p, a, e):
-  match grammar p:
+def drop_next(items, d, y, rest, e):
+  match items d:
     case Nil{} 0n:
-      Empty.absurd({0n == a : Nat}, Lemma.false_is_not_true(e))
-    case Nil{} 1n+q:
-      Empty.absurd({0n == a : Nat}, Lemma.false_is_not_true(e))
-    case Con{Spec.Production{+lhs, rhs}, rest} 0n:
-      Lemma.nat_eq_sound(lhs, a, e)
-    case Con{prod, +rest} 1n+q:
-      lhs_of_is(rest, q, a, e)
+      Empty.absurd({dropFrom(1n, []) == rest : +List<Core.Sym>}, syms_cons_not_nil(y, rest, e))
+    case Nil{} 1n+(+m):
+      Empty.absurd({dropFrom(2n+m, []) == rest : +List<Core.Sym>}, syms_cons_not_nil(y, rest, e))
+    case Con{+x, +xs} 0n:
+      Equal.cong(+List<Core.Sym>, +List<Core.Sym>, v => symTail(v), x <> xs, y <> rest, e)
+    case Con{+x, +xs} 1n+(+m):
+      drop_next(xs, m, y, rest, e)
 
-# ---- Slot paths: the specification's order and the engine's reversed one ----
+# The bookkeeping of a walk through a right side after one more item s, when the rest of the right side was s <> r.
+def inv_next(+grammar: +List<Core.Production>, +q: Nat, +d: Nat, +s: Core.Sym, +r: +List<Core.Sym>,
+  +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == s <> r : +List<Core.Sym>},
+  +inv: {Nat.add(d, List.length(&2, Core.Sym, s <> r)) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat})
+  -> {Nat.add(1n+d, List.length(&2, Core.Sym, dropFrom(1n+d, Core.rhsOf(grammar, q)))) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}:
+  +dn = drop_next(Core.rhsOf(grammar, q), d, s, r, ie)
+  %Equal.sym(+List<Core.Sym>, dropFrom(1n+d, Core.rhsOf(grammar, q)), r, dn) : {Nat.add(1n+d, List.length(&2, Core.Sym, _)) == List.length(&2, Core.Sym, Core.rhsOf(grammar, q)) : Nat}
+  Equal.trans(Nat, 1n+Nat.add(d, List.length(&2, Core.Sym, r)), Nat.add(d, 1n+List.length(&2, Core.Sym, r)), List.length(&2, Core.Sym, Core.rhsOf(grammar, q)),
+    Equal.sym(Nat, Nat.add(d, 1n+List.length(&2, Core.Sym, r)), 1n+Nat.add(d, List.length(&2, Core.Sym, r)), Lemma.add_succ_right(d, List.length(&2, Core.Sym, r))), inv)
 
-law nat_append_assoc:
-  for xs: +List<Nat>
-  for +ys: +List<Nat>
-  for +zs: +List<Nat>
-  {List.append(&2, Nat, List.append(&2, Nat, xs, ys), zs) == List.append(&2, Nat, xs, List.append(&2, Nat, ys, zs)) : +List<Nat>}
+law nth_none:
+  for items: +List<Core.Sym>
+  for d: Nat
+  for +e: {dropFrom(d, items) == [] : +List<Core.Sym>}
+  {Gll.nthSym(items, d) == None{} : Maybe<&2, Core.Sym>}
 
-def nat_append_assoc(xs, ys, zs):
-  match xs:
-    case Nil{}:
+def nth_none(items, d, e):
+  match items d:
+    case Nil{} +m:
       {==}
-    case Con{+x, +rest}:
-      Equal.cong(+List<Nat>, +List<Nat>, v => x <> v, List.append(&2, Nat, List.append(&2, Nat, rest, ys), zs), List.append(&2, Nat, rest, List.append(&2, Nat, ys, zs)), nat_append_assoc(rest, ys, zs))
+    case Con{+x, +xs} 0n:
+      Empty.absurd({Gll.nthSym(x <> xs, 0n) == None{} : Maybe<&2, Core.Sym>}, syms_cons_not_nil(x, xs, Equal.sym(+List<Core.Sym>, x <> xs, [], e)))
+    case Con{+x, +xs} 1n+(+m):
+      nth_none(xs, m, e)
 
-law rev_onto:
-  for xs: +List<Nat>
-  for +acc: +List<Nat>
-  {Gll.reverseOnto(xs, acc) == List.append(&2, Nat, Gll.reverseOnto(xs, []), acc) : +List<Nat>}
+# ======== POSITIONS IN THE INPUT ========
 
-def rev_onto(xs, acc):
-  match xs:
+# Where a forest that starts at k ends, counted as `steps` and `reads` count.
+def endOf(forest: +List<Core.Tree>, +k: Nat) -> Nat:
+  match forest:
     case Nil{}:
-      {==}
-    case Con{+x, +rest}:
-      Equal.trans(+List<Nat>, Gll.reverseOnto(rest, x <> acc), List.append(&2, Nat, Gll.reverseOnto(rest, []), x <> acc), List.append(&2, Nat, Gll.reverseOnto(rest, [x]), acc),
-        rev_onto(rest, x <> acc),
-        Equal.sym(+List<Nat>, List.append(&2, Nat, Gll.reverseOnto(rest, [x]), acc), List.append(&2, Nat, Gll.reverseOnto(rest, []), x <> acc),
-          Equal.trans(+List<Nat>, List.append(&2, Nat, Gll.reverseOnto(rest, [x]), acc), List.append(&2, Nat, List.append(&2, Nat, Gll.reverseOnto(rest, []), [x]), acc), List.append(&2, Nat, Gll.reverseOnto(rest, []), x <> acc),
-            Equal.cong(+List<Nat>, +List<Nat>, v => List.append(&2, Nat, v, acc), Gll.reverseOnto(rest, [x]), List.append(&2, Nat, Gll.reverseOnto(rest, []), [x]), rev_onto(rest, [x])),
-            nat_append_assoc(Gll.reverseOnto(rest, []), [x], acc))))
+      k
+    case Con{Core.Leaf{kind}, ts}:
+      endOf(ts, 1n+k)
+    case Con{Core.Node{+q, +ch}, ts}:
+      endOf(ts, Nat.add(k, Core.width(Core.Node{q, ch})))
 
-# A prefix in reading order, extended, is the reversed path read onto the extension.
-law prefix_ext:
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +extra: +List<Nat>
-  for pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  {List.append(&2, Nat, prefix, extra) == Gll.reverseOnto(rpath, extra) : +List<Nat>}
-
-def prefix_ext(rpath, prefix, extra, pEq):
-  Equal.trans(+List<Nat>, List.append(&2, Nat, prefix, extra), List.append(&2, Nat, Gll.reverseOnto(rpath, []), extra), Gll.reverseOnto(rpath, extra),
-    Equal.cong(+List<Nat>, +List<Nat>, v => List.append(&2, Nat, v, extra), prefix, Gll.reverseOnto(rpath, []), pEq),
-    Equal.sym(+List<Nat>, Gll.reverseOnto(rpath, extra), List.append(&2, Nat, Gll.reverseOnto(rpath, []), extra), rev_onto(rpath, extra)))
-
-# The step the specification lists is the step the engine records.
-law step_in:
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +d: Nat
-  for +i: Nat
+law end_eq:
+  for f: +List<Core.Tree>
   for +k: Nat
-  for +j: Nat
-  for +s: Gll.GState
-  for pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for m: {Check.stepIn(Gll.stepAt(index, rpath, d, i, k, j), s) == True{} : Bool}
-  {Spec.bsrMember(Spec.at(index, prefix, d, i, k, j), Check.stepsOf(s)) == True{} : Bool}
+  {endOf(f, k) == Nat.add(k, List.length(&2, Nat, Core.leaves(f))) : Nat}
 
-def step_in(index, rpath, prefix, d, i, k, j, s, pEq, m):
-  %Equal.sym(+List<Nat>, List.append(&2, Nat, prefix, [d]), Gll.reverseOnto(rpath, [d]), prefix_ext(rpath, prefix, [d], pEq)) : {Spec.bsrMember(Spec.Bsr{Spec.Slot{index, _}, i, k, j}, Check.stepsOf(s)) == True{} : Bool}
-  m
+def end_eq(f, k):
+  match f:
+    case Nil{}:
+      Equal.sym(Nat, Nat.add(k, 0n), k, Lemma.add_zero_right(k))
+    case Con{Core.Leaf{+a}, +ts}:
+      +n = {List.length(&2, Nat, Core.leaves(ts)) : Nat}
+      Equal.trans(Nat, endOf(ts, 1n+k), 1n+Nat.add(k, n), Nat.add(k, 1n+n), end_eq(ts, 1n+k), Equal.sym(Nat, Nat.add(k, 1n+n), 1n+Nat.add(k, n), Lemma.add_succ_right(k, n)))
+    case Con{Core.Node{+q, +ch}, +ts}:
+      +w = {Core.width(Core.Node{q, ch}) : Nat}
+      +lc = {List.length(&2, Nat, Core.leaves(ch)) : Nat}
+      +lt = {List.length(&2, Nat, Core.leaves(ts)) : Nat}
+      +wl = Equal.cong(+List<Nat>, Nat, v => List.length(&2, Nat, v), List.append(&2, Nat, Core.leaves(ch), []), Core.leaves(ch), Lemma.append_nil_right(Core.leaves(ch)))
+      Equal.trans(Nat, endOf(ts, Nat.add(k, w)), Nat.add(Nat.add(k, w), lt), Nat.add(k, List.length(&2, Nat, List.append(&2, Nat, Core.leaves(ch), Core.leaves(ts)))), end_eq(ts, Nat.add(k, w)),
+        Equal.trans(Nat, Nat.add(Nat.add(k, w), lt), Nat.add(k, Nat.add(w, lt)), Nat.add(k, List.length(&2, Nat, List.append(&2, Nat, Core.leaves(ch), Core.leaves(ts)))), Lemma.add_assoc(k, w, lt),
+          Equal.trans(Nat, Nat.add(k, Nat.add(w, lt)), Nat.add(k, Nat.add(lc, lt)), Nat.add(k, List.length(&2, Nat, List.append(&2, Nat, Core.leaves(ch), Core.leaves(ts)))),
+            Equal.cong(Nat, Nat, v => Nat.add(k, Nat.add(v, lt)), w, lc, wl),
+            Equal.cong(Nat, Nat, v => Nat.add(k, v), Nat.add(lc, lt), List.length(&2, Nat, List.append(&2, Nat, Core.leaves(ch), Core.leaves(ts))), Equal.sym(Nat, List.length(&2, Nat, List.append(&2, Nat, Core.leaves(ch), Core.leaves(ts))), Nat.add(lc, lt), Lemma.length_append(Core.leaves(ch), Core.leaves(ts)))))))
+
+# A node's children end where the node does.
+law end_node:
+  for +q: Nat
+  for +ch: +List<Core.Tree>
+  for +k: Nat
+  {endOf(ch, k) == Nat.add(k, Core.width(Core.Node{q, ch})) : Nat}
+
+def end_node(q, ch, k):
+  Equal.trans(Nat, endOf(ch, k), Nat.add(k, List.length(&2, Nat, Core.leaves(ch))), Nat.add(k, Core.width(Core.Node{q, ch})), end_eq(ch, k),
+    Equal.cong(+List<Nat>, Nat, v => Nat.add(k, List.length(&2, Nat, v)), Core.leaves(ch), List.append(&2, Nat, Core.leaves(ch), []), Equal.sym(+List<Nat>, List.append(&2, Nat, Core.leaves(ch), []), Core.leaves(ch), Lemma.append_nil_right(Core.leaves(ch)))))
+
+# ======== NEEDS ========
+
+law need_holds:
+  for need: Core.Need
+  for w: Nat
+  for +k: Nat
+  for +h: {Core.needOk(need, w) == True{} : Bool}
+  {Gll.needHolds(need, k, Nat.add(k, w)) == True{} : Bool}
+
+def need_holds(need, w, k, h):
+  match need w:
+    case Core.Anything{} +w0:
+      {==}
+    case Core.Something{} 0n:
+      Empty.absurd({Gll.needHolds(Core.Something{}, k, Nat.add(k, 0n)) == True{} : Bool}, Lemma.false_is_not_true(h))
+    case Core.Something{} 1n+(+n):
+      +far = {Nat.add(k, 1n+n) : Nat}
+      %Equal.sym(Bool, Nat.is_eq(k, far), False{}, Equal.trans(Bool, Nat.is_eq(k, far), Nat.is_eq(far, k), False{}, Lemma.nat_eq_symm(k, far), Lemma.add_succ_ne(k, n))) : {Bool.not(_) == True{} : Bool}
+      {==}
+    case Core.Nothing{} 0n:
+      %Equal.sym(Nat, Nat.add(k, 0n), k, Lemma.add_zero_right(k)) : {Nat.is_eq(k, _) == True{} : Bool}
+      Lemma.nat_eq_refl(k)
+    case Core.Nothing{} 1n+(+n):
+      Empty.absurd({Gll.needHolds(Core.Nothing{}, k, Nat.add(k, 1n+n)) == True{} : Bool}, Lemma.false_is_not_true(h))
+
+law need_at:
+  for +grammar: +List<Core.Production>
+  for +q: Nat
+  for +d: Nat
+  for +x: Nat
+  for +need: Core.Need
+  for +rest: +List<Core.Sym>
+  for +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == Core.Nonterminal{x, need} <> rest : +List<Core.Sym>}
+  {Gll.needAt(grammar, q, d) == need : Core.Need}
+
+def need_at(grammar, q, d, x, need, rest, ie):
+  %Equal.sym(Maybe<&2, Core.Sym>, Gll.nthSym(Core.rhsOf(grammar, q), d), Some{Core.Nonterminal{x, need}}, nth_drop(Core.rhsOf(grammar, q), d, Core.Nonterminal{x, need}, rest, ie)) : {Gll.needOf(_) == need : Core.Need}
+  {==}
 
 # ======== THE WALK ========
 
-def allStepsIn(+xs: +List<Spec.Bsr>, +s: Gll.GState) -> Bool:
-  Spec.allIn(xs, Check.stepsOf(s))
+# What a closed state holds for a forest read from k, the rest of production q from dot d,
+# in a node that started at ks: the node's own steps for these children, all steps below
+# them, and the pop of the node's cluster where the forest ends.
+def Walked(+grammar: +List<Core.Production>, +s: Gll.GState, +q: Nat, +ks: Nat, +f: +List<Core.Tree>, +d: Nat, +k: Nat) -> Type:
+  {Core.allIn(Core.own(q, f, d, ks, k), Check.stepsOf(s)) == True{} : Bool} &
+  {Core.allIn(Core.steps(f, k), Check.stepsOf(s)) == True{} : Bool} &
+  {Gll.popIn(Gll.CKey{Gll.lhsOf(grammar, q), ks}, endOf(f, k), Check.popsOf(s)) == True{} : Bool}
 
 law all_in_app:
-  for xs: +List<Spec.Bsr>
-  for +ys: +List<Spec.Bsr>
-  for +set: +List<Spec.Bsr>
-  for hx: {Spec.allIn(xs, set) == True{} : Bool}
-  for +hy: {Spec.allIn(ys, set) == True{} : Bool}
-  {Spec.allIn(List.append(&2, Spec.Bsr, xs, ys), set) == True{} : Bool}
+  for xs: +List<Core.Bsr>
+  for +ys: +List<Core.Bsr>
+  for +set: +List<Core.Bsr>
+  for +hx: {Core.allIn(xs, set) == True{} : Bool}
+  for +hy: {Core.allIn(ys, set) == True{} : Bool}
+  {Core.allIn(List.append(&2, Core.Bsr, xs, ys), set) == True{} : Bool}
 
 def all_in_app(xs, ys, set, hx, hy):
   match xs:
     case Nil{}:
       hy
     case Con{+x, +rest}:
-      +both = hx
-      Lemma.and_true_intro(Spec.bsrMember(x, set), Spec.allIn(List.append(&2, Spec.Bsr, rest, ys), set),
-        Lemma.and_true_left(Spec.bsrMember(x, set), Spec.allIn(rest, set), both),
-        all_in_app(rest, ys, set, Lemma.and_true_right_side(Spec.bsrMember(x, set), Spec.allIn(rest, set), both), hy))
+      Lemma.and_true_intro(Core.member(x, set), Core.allIn(List.append(&2, Core.Bsr, rest, ys), set),
+        Lemma.and_true_left(Core.member(x, set), Core.allIn(rest, set), hx),
+        all_in_app(rest, ys, set, Lemma.and_true_right_side(Core.member(x, set), Core.allIn(rest, set), hx), hy))
 
-# The bracket item of a loop path: the item m of the sequence outside it.
-def loopItem(+grammar: +List<Spec.Production>, +index: Nat, rpath: +List<Nat>) -> Maybe<&2, Spec.Item>:
-  Pr.loopAt(grammar, index, rpath)
-
-# How the rounds of a loop read: all of them, except a first round of < > (one that starts
-# where the loop starts), which may be empty when it is the only one.
-def roundsReady(kind: Spec.Bracket, +ctx: Nat, +pos: Nat, +rounds: +List<Spec.Tree>) -> Bool:
-  match kind:
-    case Spec.Closure{}:
-      Spec.allConsume(rounds)
-    case Spec.Positive{}:
-      Bool.or(Spec.allConsume(rounds), Bool.and(Nat.is_eq(ctx, pos), Spec.roundsOk(Spec.Positive{}, rounds)))
-    case Spec.Group{}:
-      True{}
-    case Spec.Optional{}:
-      True{}
-
-
-law either_after:
-  for -A: Type
-  for -B: Type
-  for -C: Type
-  for c: Either<A, B>
-  for left: A -> C
-  for right: B -> C
-  C
-
-def either_after(A, B, C, c, left, right):
-  match c:
-    case Inl{x}:
-      left(x)
-    case Inr{y}:
-      right(y)
-
-law consumes_child:
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for e: {Spec.consumes(Spec.Pick{a, ch}) == True{} : Bool}
-  {Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch))) == True{} : Bool}
-
-def consumes_child(a, ch, e):
-  Equal.trans(Bool, Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch))), Bool.not(List.is_empty(&2, Nat, List.append(&2, Nat, Spec.leaves(ch), []))), True{},
-    Equal.cong(+List<Nat>, Bool, v => Bool.not(List.is_empty(&2, Nat, v)), Spec.leaves(ch), List.append(&2, Nat, Spec.leaves(ch), []), Equal.sym(+List<Nat>, List.append(&2, Nat, Spec.leaves(ch), []), Spec.leaves(ch), Lemma.append_nil_right(Spec.leaves(ch)))), e)
-
-law optional_reads:
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for e: {Spec.roundsOk(Spec.Optional{}, [Spec.Pick{a, ch}]) == True{} : Bool}
-  {Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch))) == True{} : Bool}
-
-def optional_reads(a, ch, e):
-  +p = {Spec.Pick{a, ch} : Spec.Tree}
-  consumes_child(a, ch, Lemma.and_true_left(Spec.consumes(p), True{}, Lemma.or_false_right(Bool.and(Spec.consumes(p), True{}), e)))
-
-law closure_reads:
-  for rs: +List<Spec.Tree>
-  for e: {Spec.roundsOk(Spec.Closure{}, rs) == True{} : Bool}
-  {Spec.allConsume(rs) == True{} : Bool}
-
-def closure_reads(rs, e):
-  match rs:
-    case Nil{}:
-      {==}
-    case Con{+r, +rr}:
-      Lemma.or_false_right(Spec.allConsume(r <> rr), e)
-
-law positive_later:
-  for +r: Spec.Tree
-  for rr: +List<Spec.Tree>
-  for e: {Spec.roundsOk(Spec.Positive{}, r <> rr) == True{} : Bool}
-  {Spec.allConsume(rr) == True{} : Bool}
-
-def positive_later(r, rr, e):
-  match rr:
-    case Nil{}:
-      {==}
-    case Con{+r2, +rr2}:
-      Lemma.and_true_right_side(Spec.consumes(r), Spec.allConsume(r2 <> rr2), Lemma.or_false_right(Spec.allConsume(r <> (r2 <> rr2)), e))
-
-# Entering a loop: its rounds read as they must.
-law ready_entry:
-  for kind: Spec.Bracket
-  for +pos: Nat
-  for +rs: +List<Spec.Tree>
-  for +loopOk: {Gll.isLoop(kind) == True{} : Bool}
-  for +okR: {Spec.roundsOk(kind, rs) == True{} : Bool}
-  {roundsReady(kind, pos, pos, rs) == True{} : Bool}
-
-def ready_entry(kind, pos, rs, loopOk, okR):
-  match kind:
-    case Spec.Closure{}:
-      closure_reads(rs, okR)
-    case Spec.Positive{}:
-      Lemma.or_true_right_intro(Spec.allConsume(rs), Bool.and(Nat.is_eq(pos, pos), Spec.roundsOk(Spec.Positive{}, rs)), Lemma.and_true_intro(Nat.is_eq(pos, pos), Spec.roundsOk(Spec.Positive{}, rs), Lemma.nat_eq_refl(pos), okR))
-    case Spec.Group{}:
-      {==}
-    case Spec.Optional{}:
-      {==}
-
-law positive_round:
-  for b: Bool
-  for +ctx: Nat
-  for +pos: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +rest: +List<Spec.Tree>
-  for +bEq: {Nat.is_eq(ctx, pos) == b : Bool}
-  for +rinv: {roundsReady(Spec.Positive{}, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}
-  {Bool.or(Bool.not(Bool.not(b)), Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))) == True{} : Bool}
-
-def positive_round(b, ctx, pos, a, ch, rest, bEq, rinv):
-  match b:
-    case True{}:
-      {==}
-    case False{}:
-      +all = Spec.allConsume(Spec.Pick{a, ch} <> rest)
-      +rinvF = Equal.trans(Bool, Bool.or(all, False{}), Bool.or(all, Bool.and(Nat.is_eq(ctx, pos), Spec.roundsOk(Spec.Positive{}, Spec.Pick{a, ch} <> rest))), True{},
-        Equal.cong(Bool, Bool, v => Bool.or(all, Bool.and(v, Spec.roundsOk(Spec.Positive{}, Spec.Pick{a, ch} <> rest))), False{}, Nat.is_eq(ctx, pos), Equal.sym(Bool, Nat.is_eq(ctx, pos), False{}, bEq)), rinv)
-      consumes_child(a, ch, Lemma.and_true_left(Spec.consumes(Spec.Pick{a, ch}), Spec.allConsume(rest), Lemma.or_false_right(all, rinvF)))
-
-# A round of a loop that must read something does.
-law round_reads:
-  for kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +ctx: Nat
-  for +pos: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +rest: +List<Spec.Tree>
-  for +loopOk: {Gll.isLoop(kind) == True{} : Bool}
-  for +rinv: {roundsReady(kind, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}
-  {Bool.or(Bool.not(Gll.roundReads(Some{Spec.Brack{kind, alts}}, ctx, pos)), Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))) == True{} : Bool}
-
-def round_reads(kind, alts, ctx, pos, a, ch, rest, loopOk, rinv):
-  match kind:
-    case Spec.Closure{}:
-      consumes_child(a, ch, Lemma.and_true_left(Spec.consumes(Spec.Pick{a, ch}), Spec.allConsume(rest), rinv))
-    case Spec.Positive{}:
-      positive_round(Nat.is_eq(ctx, pos), ctx, pos, a, ch, rest, {==}, rinv)
-    case Spec.Group{}:
-      Empty.absurd({Bool.or(Bool.not(False{}), Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))) == True{} : Bool}, Lemma.false_is_not_true(loopOk))
-    case Spec.Optional{}:
-      Empty.absurd({Bool.or(Bool.not(True{}), Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))) == True{} : Bool}, Lemma.false_is_not_true(loopOk))
-
-law positive_next:
-  for +ctx: Nat
-  for +pos: Nat
-  for +e: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +rest: +List<Spec.Tree>
-  for +rinv: {roundsReady(Spec.Positive{}, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}
-  {Spec.allConsume(rest) == True{} : Bool}
-
-def positive_next(ctx, pos, e, a, ch, rest, rinv):
-  +all = Spec.allConsume(Spec.Pick{a, ch} <> rest)
-  +first = Bool.and(Nat.is_eq(ctx, pos), Spec.roundsOk(Spec.Positive{}, Spec.Pick{a, ch} <> rest))
-  either_after({all == True{} : Bool}, {first == True{} : Bool}, {Spec.allConsume(rest) == True{} : Bool}, Lemma.or_true_cases(all, first, rinv),
-    ea => Lemma.and_true_right_side(Spec.consumes(Spec.Pick{a, ch}), Spec.allConsume(rest), ea),
-    ef => positive_later(Spec.Pick{a, ch}, rest, Lemma.and_true_right_side(Nat.is_eq(ctx, pos), Spec.roundsOk(Spec.Positive{}, Spec.Pick{a, ch} <> rest), ef)))
-
-# After a round: the rest of the rounds read as they must.
-law round_next:
-  for kind: Spec.Bracket
-  for +ctx: Nat
-  for +pos: Nat
-  for +e: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +rest: +List<Spec.Tree>
-  for +loopOk: {Gll.isLoop(kind) == True{} : Bool}
-  for +rinv: {roundsReady(kind, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}
-  {roundsReady(kind, ctx, e, rest) == True{} : Bool}
-
-def round_next(kind, ctx, pos, e, a, ch, rest, loopOk, rinv):
-  match kind:
-    case Spec.Closure{}:
-      Lemma.and_true_right_side(Spec.consumes(Spec.Pick{a, ch}), Spec.allConsume(rest), rinv)
-    case Spec.Positive{}:
-      Lemma.or_true_left_intro(Spec.allConsume(rest), Bool.and(Nat.is_eq(ctx, e), Spec.roundsOk(Spec.Positive{}, rest)), positive_next(ctx, pos, e, a, ch, rest, rinv))
-    case Spec.Group{}:
-      {==}
-    case Spec.Optional{}:
-      {==}
-
-# What the walk needs: in a sequence, the descriptor at the dot is seen and the forest
-# fits the items from the dot on; in the rounds of a loop, every alternative of the loop
-# that prediction admits has started at the position, and the forest is rounds of the
-# loop's body. Both: the forest ends at fin, what comes there may come after the sequence
-# (or after the loop), and the FOLLOW check holds for the sequence (or the one around the
-# loop), with nesting fuel ff. Without prediction the last two are True.
-def Ready(rounds: Bool, +pr: Gll.Pred, +grammar: +List<Spec.Production>, +input: +List<Nat>, +s: Gll.GState, +forest: +List<Spec.Tree>, +index: Nat, +rpath: +List<Nat>, +dot: Nat, +ctx: Nat, +pos: Nat, +ff: Nat, +fin: Nat, +items: +List<Spec.Item>, +kind: Spec.Bracket, +alts: +List<+List<Spec.Item>>) -> Type:
-  match rounds:
-    case False{}:
-      {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool} & {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == items : +List<Spec.Item>} & {Spec.fits(forest, grammar, items) == True{} : Bool} & {Nat.add(pos, List.length(&2, Nat, Spec.leaves(forest))) == fin : Nat} & {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool} & {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-    case True{}:
-      {Check.allWanted(pr, grammar, input, Gll.alternatives(List.length(&2, +List<Spec.Item>, alts), index, rpath, ctx, pos), s) == True{} : Bool} & {loopItem(grammar, index, rpath) == Some{Spec.Brack{kind, alts}} : Maybe<&2, Spec.Item>} & {Gll.isLoop(kind) == True{} : Bool} & {Spec.fits(forest, grammar, Spec.times(List.length(&2, Spec.Tree, forest), Spec.Brack{Spec.Group{}, alts})) == True{} : Bool} & {Nat.add(pos, List.length(&2, Nat, Spec.leaves(forest))) == fin : Nat} & {Pr.afterOk(pr, grammar, input, index, rpath, fin) == True{} : Bool} & {Pr.foLoop(pr, ff, grammar, index, rpath) == True{} : Bool} & {roundsReady(kind, ctx, pos, forest) == True{} : Bool}
-
-# What the walk shows: its steps are in the state, and the cluster of the sequence (or
-# of the loop) has ended where the forest ends.
-def Walked(rounds: Bool, +grammar: +List<Spec.Production>, +s: Gll.GState, +forest: +List<Spec.Tree>, +index: Nat, +rpath: +List<Nat>, +prefix: +List<Nat>, +dot: Nat, +ctx: Nat, +pos: Nat) -> Type:
-  match rounds:
-    case False{}:
-      {allStepsIn(Spec.walk(forest, False{}, index, prefix, dot, ctx, pos), s) == True{} : Bool} & {Check.popIn(Check.endKey(grammar, index, rpath, ctx), Nat.add(pos, List.length(&2, Nat, Spec.leaves(forest))), s) == True{} : Bool}
-    case True{}:
-      {allStepsIn(Spec.walk(forest, True{}, index, prefix, dot, ctx, pos), s) == True{} : Bool} & {Bool.or(List.is_empty(&2, Spec.Tree, forest), Check.popIn(Gll.CKey{Gll.TBr{index, rpath}, ctx}, Nat.add(pos, List.length(&2, Nat, Spec.leaves(forest))), s)) == True{} : Bool}
-
-def WalkIH(+pr: Gll.Pred, +grammar: +List<Spec.Production>, +input: +List<Nat>, +s: Gll.GState, +forest: +List<Spec.Tree>) -> Type:
-  @rounds: Bool -> @index: Nat -> @rpath: +List<Nat> -> @prefix: +List<Nat> -> @dot: Nat -> @ctx: Nat -> @pos: Nat -> @ff: Nat -> @fin: Nat -> @items: +List<Spec.Item> -> @kind: Spec.Bracket -> @alts: +List<+List<Spec.Item>> ->
-    {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>} -> Spells(forest, input, pos) -> Ready(rounds, pr, grammar, input, s, forest, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts) -> Walked(rounds, grammar, s, forest, index, rpath, prefix, dot, ctx, pos)
-
-# ---- Prediction admits what a parse tree needs ----
-
-law or_not_true:
-  for b: Bool
-  for -x: Bool
-  for bEq: {b == True{} : Bool}
-  for w: {Bool.or(Bool.not(b), x) == True{} : Bool}
-  {x == True{} : Bool}
-
-def or_not_true(b, x, bEq, w):
-  match b:
-    case True{}:
-      w
-    case False{}:
-      Empty.absurd({x == True{} : Bool}, Lemma.false_is_not_true(bEq))
-
-# A wanted descriptor that prediction admits is seen.
-law wanted_hit:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +d: Gll.Desc
-  for +s: Gll.GState
-  for adm: {Gll.admits(pr, grammar, input, d) == True{} : Bool}
-  for w: {Check.wanted(pr, grammar, input, d, s) == True{} : Bool}
-  {Check.descSeen(d, s) == True{} : Bool}
-
-def wanted_hit(pr, grammar, input, d, s, adm, w):
-  or_not_true(Gll.admits(pr, grammar, input, d), Check.descSeen(d, s), adm, w)
-
-# A wanted pair whose descriptor prediction admits: the descriptor and its step.
-law pair_hit:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +d: Gll.Desc
-  for +y: Spec.Bsr
-  for +s: Gll.GState
-  for adm: {Gll.admits(pr, grammar, input, d) == True{} : Bool}
-  for w: {Check.wantedPair(pr, grammar, input, d, y, s) == True{} : Bool}
-  {Bool.and(Check.descSeen(d, s), Check.stepIn(y, s)) == True{} : Bool}
-
-def pair_hit(pr, grammar, input, d, y, s, adm, w):
-  or_not_true(Gll.admits(pr, grammar, input, d), Bool.and(Check.descSeen(d, s), Check.stepIn(y, s)), adm, w)
-
-# ---- The closedness conditions, one at a time ----
-
-law seen_ok:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
+# The descriptor's item, as the check reads it.
+law desc_item:
+  for +grammar: +List<Core.Production>
   for +input: +List<Nat>
   for +s: Gll.GState
-  for closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +d: Gll.Desc
-  for seen: {Check.descSeen(d, s) == True{} : Bool}
-  {Check.descOk(d, pr, grammar, input, s) == True{} : Bool}
+  for +q: Nat
+  for +d: Nat
+  for +ks: Nat
+  for +k: Nat
+  for +y: Core.Sym
+  for +rest: +List<Core.Sym>
+  for +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == y <> rest : +List<Core.Sym>}
+  for +h: {Check.descOk(Gll.Desc{q, d, ks, k}, grammar, input, s) == True{} : Bool}
+  {Check.itemOk(Some{y}, grammar, input, q, d, ks, k, s) == True{} : Bool}
 
-def seen_ok(pr, grammar, input, s, closedOk, d, seen):
-  desc_ok(pr, Check.seenOf(s), d, grammar, input, s,
-    Lemma.and_true_left(Check.allDescs(Check.seenOf(s), pr, grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), pr, grammar, input, s), Bool.and(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s))), closedOk),
-    seen)
+def desc_item(grammar, input, s, q, d, ks, k, y, rest, ie, h):
+  %nth_drop(Core.rhsOf(grammar, q), d, y, rest, ie) : {Check.itemOk(_, grammar, input, q, d, ks, k, s) == True{} : Bool}
+  h
 
-law closed_rest:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
+law desc_end:
+  for +grammar: +List<Core.Production>
   for +input: +List<Nat>
   for +s: Gll.GState
-  for closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  {Bool.and(Check.allClusters(Check.clustersOf(s), pr, grammar, input, s), Bool.and(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s))) == True{} : Bool}
+  for +q: Nat
+  for +d: Nat
+  for +ks: Nat
+  for +k: Nat
+  for +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == [] : +List<Core.Sym>}
+  for +h: {Check.descOk(Gll.Desc{q, d, ks, k}, grammar, input, s) == True{} : Bool}
+  {Check.itemOk(None{}, grammar, input, q, d, ks, k, s) == True{} : Bool}
 
-def closed_rest(pr, grammar, input, s, closedOk):
-  Lemma.and_true_right_side(Check.allDescs(Check.seenOf(s), pr, grammar, input, s), Bool.and(Check.allClusters(Check.clustersOf(s), pr, grammar, input, s), Bool.and(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s))), closedOk)
+def desc_end(grammar, input, s, q, d, ks, k, ie, h):
+  %nth_none(Core.rhsOf(grammar, q), d, ie) : {Check.itemOk(_, grammar, input, q, d, ks, k, s) == True{} : Bool}
+  h
 
-law cluster_ok:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +key: Gll.CKey
-  for inC: {Check.clusterIn(key, s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, key), s) == True{} : Bool}
-
-def cluster_ok(pr, grammar, input, s, closedOk, key, inC):
-  cluster_seeds(pr, input, Check.clustersOf(s), key, grammar, s,
-    Lemma.and_true_left(Check.allClusters(Check.clustersOf(s), pr, grammar, input, s), Bool.and(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s)), closed_rest(pr, grammar, input, s, closedOk)),
-    inC)
-
-law closed_last:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  {Bool.and(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s)) == True{} : Bool}
-
-def closed_last(pr, grammar, input, s, closedOk):
-  Lemma.and_true_right_side(Check.allClusters(Check.clustersOf(s), pr, grammar, input, s), Bool.and(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s)), closed_rest(pr, grammar, input, s, closedOk))
-
-law resume_ok:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +key: Gll.CKey
-  for +edge: Gll.Edge
-  for +j: Nat
-  for inR: {Check.returnIn(key, edge, s) == True{} : Bool}
-  for inP: {Check.popIn(key, j, s) == True{} : Bool}
-  {Check.resumeOk(pr, grammar, input, edge, Check.keyStart(key), j, s) == True{} : Bool}
-
-def resume_ok(pr, grammar, input, s, closedOk, key, edge, j, inR, inP):
-  edge_pop(pr, grammar, input, Check.popsOf(s), key, edge, j, s,
-    return_edge(pr, grammar, input, Check.returnsOf(s), Check.popsOf(s), key, edge, s,
-      Lemma.and_true_left(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s), closed_last(pr, grammar, input, s, closedOk)),
-      inR),
-    inP)
-
-law again_ok:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +key: Gll.CKey
-  for +j: Nat
-  for inP: {Check.popIn(key, j, s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Check.againOfKey(grammar, key, j), s) == True{} : Bool}
-
-def again_ok(pr, grammar, input, s, closedOk, key, j, inP):
-  pop_again(pr, input, Check.popsOf(s), key, j, grammar, s,
-    Lemma.and_true_right_side(Check.allReturns(Check.returnsOf(s), pr, grammar, input, Check.popsOf(s), s), Check.allPops(Check.popsOf(s), pr, grammar, input, s), closed_last(pr, grammar, input, s, closedOk)),
-    inP)
-
-law item_ok_at:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +item: Maybe<&2, Spec.Item>
-  for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == item : Maybe<&2, Spec.Item>}
-  for ok: {Check.descOk(Gll.Desc{index, rpath, dot, ctx, pos}, pr, grammar, input, s) == True{} : Bool}
-  {Check.itemOk(item, pr, grammar, input, index, rpath, dot, ctx, pos, s) == True{} : Bool}
-
-def item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, item, itemEq, ok):
-  Equal.trans(Bool, Check.itemOk(item, pr, grammar, input, index, rpath, dot, ctx, pos, s), Check.itemOk(Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), pr, grammar, input, index, rpath, dot, ctx, pos, s), True{},
-    Equal.cong(Maybe<&2, Spec.Item>, Bool, v => Check.itemOk(v, pr, grammar, input, index, rpath, dot, ctx, pos, s), item, Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), Equal.sym(Maybe<&2, Spec.Item>, Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), item, itemEq)),
-    ok)
-
-# ---- The end of a sequence ----
-
-law nil_seq:
-  for +pr: Gll.Pred
+law empty_own:
   for dot: Nat
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
+  for +q: Nat
+  for +ks: Nat
+  for +k: Nat
   for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +ctx: Nat
-  for +pos: Nat
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemNone: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == None{} : Maybe<&2, Spec.Item>}
-  Walked(False{}, grammar, s, [], index, rpath, prefix, dot, ctx, pos)
+  for +h: {Check.emptyOk(dot, q, ks, k, s) == True{} : Bool}
+  {Core.allIn(Core.emptyAt(dot, q, ks, k), Check.stepsOf(s)) == True{} : Bool}
 
-def nil_seq(pr, dot, grammar, input, s, closedOk, start, po, index, rpath, prefix, ctx, pos, pEq, seen, itemNone):
+def empty_own(dot, q, ks, k, s, h):
   match dot:
     case 0n:
-      +key = Check.endKey(grammar, index, rpath, ctx)
-      +ok = item_ok_at(pr, grammar, input, s, index, rpath, 0n, ctx, pos, None{}, itemNone, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, 0n, ctx, pos}, seen))
-      +eps = Gll.stepAt(index, rpath, 0n, ctx, pos, pos)
-      stepP = Lemma.and_true_left(Check.stepIn(eps, s), Check.popIn(key, pos, s), ok)
-      popP = Lemma.and_true_right_side(Check.stepIn(eps, s), Check.popIn(key, pos, s), ok)
-      (Lemma.and_true_intro(Spec.bsrMember(Spec.at(index, prefix, 0n, ctx, pos, pos), Check.stepsOf(s)), True{}, step_in(index, rpath, prefix, 0n, ctx, pos, pos, s, pEq, stepP), {==}),
-        Equal.trans(Bool, Check.popIn(key, Nat.add(pos, 0n), s), Check.popIn(key, pos, s), True{}, Equal.cong(Nat, Bool, v => Check.popIn(key, v, s), Nat.add(pos, 0n), pos, Lemma.add_zero_right(pos)), popP))
-    case 1n+(+d):
-      +key = Check.endKey(grammar, index, rpath, ctx)
-      +ok = item_ok_at(pr, grammar, input, s, index, rpath, 1n+d, ctx, pos, None{}, itemNone, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, 1n+d, ctx, pos}, seen))
-      popP = Lemma.and_true_right_side(True{}, Check.popIn(key, pos, s), ok)
-      ({==}, Equal.trans(Bool, Check.popIn(key, Nat.add(pos, 0n), s), Check.popIn(key, pos, s), True{}, Equal.cong(Nat, Bool, v => Check.popIn(key, v, s), Nat.add(pos, 0n), pos, Lemma.add_zero_right(pos)), popP))
+      Lemma.and_true_intro(Core.member(Core.Bsr{q, 0n, ks, k, k}, Check.stepsOf(s)), True{}, h, {==})
+    case 1n+(+n):
+      {==}
 
-# ---- A terminal ----
-
-law token_hit:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for ok: Bool
-  for +okEq: {ok == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +k: Nat
-  for +i: Nat
-  for +s: Gll.GState
-  for r: {Check.tokenOk(ok, pr, grammar, input, index, rpath, dot, k, i, s) == True{} : Bool}
-  {Check.wantedPair(pr, grammar, input, Gll.Desc{index, rpath, 1n+dot, k, 1n+i}, Gll.stepAt(index, rpath, 1n+dot, k, i, 1n+i), s) == True{} : Bool}
-
-def token_hit(pr, grammar, input, ok, okEq, index, rpath, dot, k, i, s, r):
-  match ok:
-    case True{}:
-      r
-    case False{}:
-      Empty.absurd({Check.wantedPair(pr, grammar, input, Gll.Desc{index, rpath, 1n+dot, k, 1n+i}, Gll.stepAt(index, rpath, 1n+dot, k, i, 1n+i), s) == True{} : Bool}, Lemma.false_is_not_true(okEq))
-
-law leaf_finish:
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +kind: Nat
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for stepP: {Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, 1n+pos), s) == True{} : Bool}
-  for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, 1n+pos)
-  Walked(False{}, grammar, s, Spec.Leaf{kind} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def leaf_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, kind, ts, pEq, stepP, ih):
-  match ih:
-    case (stepsTs, popTs):
-      +n = List.length(&2, Nat, Spec.leaves(ts))
-      +key = Check.endKey(grammar, index, rpath, ctx)
-      (Lemma.and_true_intro(Spec.bsrMember(Spec.at(index, prefix, 1n+dot, ctx, pos, 1n+pos), Check.stepsOf(s)), allStepsIn(Spec.walk(ts, False{}, index, prefix, 1n+dot, ctx, 1n+pos), s), step_in(index, rpath, prefix, 1n+dot, ctx, pos, 1n+pos, s, pEq, stepP), stepsTs),
-        Equal.trans(Bool, Check.popIn(key, Nat.add(pos, 1n+n), s), Check.popIn(key, 1n+Nat.add(pos, n), s), True{}, Equal.cong(Nat, Bool, v => Check.popIn(key, v, s), Nat.add(pos, 1n+n), 1n+Nat.add(pos, n), Lemma.add_succ_right(pos, n)), popTs))
-
-law leaf_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Nat
-  for +ts: +List<Spec.Tree>
-  for +t: Nat
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Leaf{kind} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Leaf{kind} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Sym{Spec.Terminal{t}}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fit: {Spec.fits(Spec.Leaf{kind} <> ts, grammar, Spec.Sym{Spec.Terminal{t}} <> rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Leaf{kind} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def leaf_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, ts, t, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihTs):
-  isKT = Lemma.and_true_left(Nat.is_eq(kind, t), Spec.fits(ts, grammar, rest), fit)
-  +fitTs = Lemma.and_true_right_side(Nat.is_eq(kind, t), Spec.fits(ts, grammar, rest), fit)
-  ok = item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Sym{Spec.Terminal{t}}}, itemEq, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
-  +get = List.get(&2, Nat, input, pos)
-  tokEq = Equal.trans(Bool, Gll.tokenIs(get, t), Gll.tokenIs(Some{kind}, t), True{}, Equal.cong(Maybe<&2, Nat>, Bool, v => Gll.tokenIs(v, t), get, Some{kind}, leaf_token(input, pos, kind, Spec.leaves(ts), sp)), isKT)
-  +next = {Gll.Desc{index, rpath, 1n+dot, ctx, 1n+pos} : Gll.Desc}
-  +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, 1n+pos)
-  +spTs = leaf_rest(input, pos, kind, Spec.leaves(ts), sp)
-  +finTs = Equal.trans(Nat, Nat.add(1n+pos, List.length(&2, Nat, Spec.leaves(ts))), Nat.add(pos, 1n+List.length(&2, Nat, Spec.leaves(ts))), fin, Equal.sym(Nat, Nat.add(pos, 1n+List.length(&2, Nat, Spec.leaves(ts))), 1n+Nat.add(pos, List.length(&2, Nat, Spec.leaves(ts))), Lemma.add_succ_right(pos, List.length(&2, Nat, Spec.leaves(ts)))), finEq)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +adm = Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, 1n+pos, fin, po, fitDrop, spTs, finTs, ctxF, {==})
-  +hit = pair_hit(pr, grammar, input, next, step, s, adm, token_hit(pr, grammar, input, Gll.tokenIs(get, t), tokEq, index, rpath, dot, ctx, pos, s, ok))
-  leaf_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, kind, ts, pEq, Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), hit),
-    ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, 1n+pos, ff, fin, rest, Spec.Group{}, [], pEq, spTs, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), hit), (restEq, (fitTs, (finTs, (ctxF, foF)))))))
-
-# ---- A skipped [ ] or { } ----
-
-law skip_finish:
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for stepP: {Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos), s) == True{} : Bool}
-  for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, pos)
-  Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def skip_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, stepP, ih):
-  match ih:
-    case (stepsTs, popTs):
-      (Lemma.and_true_intro(Spec.bsrMember(Spec.at(index, prefix, 1n+dot, ctx, pos, pos), Check.stepsOf(s)), allStepsIn(Spec.walk(ts, False{}, index, prefix, 1n+dot, ctx, pos), s), step_in(index, rpath, prefix, 1n+dot, ctx, pos, pos, s, pEq, stepP), stepsTs), popTs)
-
-law skip_hit:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for skip: Bool
-  for +skipEq: {skip == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +k: Nat
-  for +i: Nat
-  for +s: Gll.GState
-  for r: {Check.skipOk(skip, pr, grammar, input, index, rpath, dot, k, i, s) == True{} : Bool}
-  {Check.wantedPair(pr, grammar, input, Gll.Desc{index, rpath, 1n+dot, k, i}, Gll.stepAt(index, rpath, 1n+dot, k, i, i), s) == True{} : Bool}
-
-def skip_hit(pr, grammar, input, skip, skipEq, index, rpath, dot, k, i, s, r):
-  match skip:
-    case True{}:
-      r
-    case False{}:
-      Empty.absurd({Check.wantedPair(pr, grammar, input, Gll.Desc{index, rpath, 1n+dot, k, i}, Gll.stepAt(index, rpath, 1n+dot, k, i, i), s) == True{} : Bool}, Lemma.false_is_not_true(skipEq))
-
-# The skip part of a bracket's check, for a bracket that may be skipped.
-law skip_parts:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +bkind: Spec.Bracket
-  for +balts: +List<+List<Spec.Item>>
-  for +skippable: {Gll.isSkippable(bkind) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
-  {Check.wantedPair(pr, grammar, input, Gll.Desc{index, rpath, 1n+dot, ctx, pos}, Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos), s) == True{} : Bool}
-
-def skip_parts(pr, grammar, input, s, closedOk, start, po, index, rpath, dot, ctx, pos, bkind, balts, skippable, seen, itemEq):
-  +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, pos} : Gll.CKey}
-  +edge = {Gll.Edge{index, rpath, dot, ctx} : Gll.Edge}
-  +ok = item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Brack{bkind, balts}}, itemEq, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
-  +skip = Check.skipOk(Gll.isSkippable(bkind), pr, grammar, input, index, rpath, dot, ctx, pos, s)
-  +r1 = Lemma.and_true_right_side(Check.clusterIn(key, s), Bool.and(Check.returnIn(key, edge, s), skip), ok)
-  skip_hit(pr, grammar, input, Gll.isSkippable(bkind), skippable, index, rpath, dot, ctx, pos, s, Lemma.and_true_right_side(Check.returnIn(key, edge, s), skip, r1))
-
-law skip_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +ts: +List<Spec.Tree>
-  for +balts: +List<+List<Spec.Item>>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Skip{} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Skip{} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{Spec.Optional{}, balts}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def skip_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, ts, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fitTs, ihTs):
-  +parts = skip_parts(pr, grammar, input, s, closedOk, start, po, index, rpath, dot, ctx, pos, Spec.Optional{}, balts, {==}, seen, itemEq)
-  +next = {Gll.Desc{index, rpath, 1n+dot, ctx, pos} : Gll.Desc}
-  +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +adm = Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, pos, fin, po, fitDrop, sp, finEq, ctxF, {==})
-  +hit = pair_hit(pr, grammar, input, next, step, s, adm, parts)
-  skip_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), hit),
-    ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, pos, ff, fin, rest, Spec.Group{}, [], pEq, sp, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), hit), (restEq, (fitTs, (finEq, (ctxF, foF)))))))
-
-# ---- An ε item: like a skip ----
-
-law eps_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +ts: +List<Spec.Tree>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Skip{} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Skip{} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Eps{}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def eps_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, ts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fitTs, ihTs):
-  +parts = item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Eps{}}, itemEq, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
-  +next = {Gll.Desc{index, rpath, 1n+dot, ctx, pos} : Gll.Desc}
-  +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +adm = Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, pos, fin, po, fitDrop, sp, finEq, ctxF, {==})
-  +hit = pair_hit(pr, grammar, input, next, step, s, adm, parts)
-  skip_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), hit),
-    ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, pos, ff, fin, rest, Spec.Group{}, [], pEq, sp, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), hit), (restEq, (fitTs, (finEq, (ctxF, foF)))))))
-
-# A closure with no rounds: the skip, with its end written as pos + 0.
-law empty_loop_finish:
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for stepP: {Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, Nat.add(pos, 0n)), s) == True{} : Bool}
-  for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, Nat.add(pos, 0n))
-  Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def empty_loop_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, stepP, ih):
-  match ih:
-    case (stepsTs, popTs):
-      +key = Check.endKey(grammar, index, rpath, ctx)
-      +n = List.length(&2, Nat, Spec.leaves(ts))
-      (Lemma.and_true_intro(Spec.bsrMember(Spec.at(index, prefix, 1n+dot, ctx, pos, Nat.add(pos, 0n)), Check.stepsOf(s)), allStepsIn(Spec.walk(ts, False{}, index, prefix, 1n+dot, ctx, Nat.add(pos, 0n)), s), step_in(index, rpath, prefix, 1n+dot, ctx, pos, Nat.add(pos, 0n), s, pEq, stepP), stepsTs),
-        Equal.trans(Bool, Check.popIn(key, Nat.add(pos, n), s), Check.popIn(key, Nat.add(Nat.add(pos, 0n), n), s), True{},
-          Equal.cong(Nat, Bool, v => Check.popIn(key, Nat.add(v, n), s), pos, Nat.add(pos, 0n), Equal.sym(Nat, Nat.add(pos, 0n), pos, Lemma.add_zero_right(pos))), popTs))
-
-law empty_loop_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +ts: +List<Spec.Tree>
-  for +balts: +List<+List<Spec.Item>>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Loop{[]} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Loop{[]} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{Spec.Closure{}, balts}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def empty_loop_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, ts, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fitTs, ihTs):
-  +parts = skip_parts(pr, grammar, input, s, closedOk, start, po, index, rpath, dot, ctx, pos, Spec.Closure{}, balts, {==}, seen, itemEq)
-  +p0 = Nat.add(pos, 0n)
-  +z = Equal.sym(Nat, p0, pos, Lemma.add_zero_right(pos))
-  +next = {Gll.Desc{index, rpath, 1n+dot, ctx, pos} : Gll.Desc}
-  +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, pos)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +adm = Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, pos, fin, po, fitDrop, sp, finEq, ctxF, {==})
-  +hit = pair_hit(pr, grammar, input, next, step, s, adm, parts)
-  +fin0 = Equal.trans(Nat, Nat.add(p0, List.length(&2, Nat, Spec.leaves(ts))), Nat.add(pos, List.length(&2, Nat, Spec.leaves(ts))), fin, Equal.cong(Nat, Nat, v => Nat.add(v, List.length(&2, Nat, Spec.leaves(ts))), p0, pos, Lemma.add_zero_right(pos)), finEq)
-  next0 = Equal.trans(Bool, Check.descSeen(Gll.Desc{index, rpath, 1n+dot, ctx, p0}, s), Check.descSeen(next, s), True{},
-    Equal.cong(Nat, Bool, v => Check.descSeen(Gll.Desc{index, rpath, 1n+dot, ctx, v}, s), p0, pos, Lemma.add_zero_right(pos)), Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), hit))
-  step0 = Equal.trans(Bool, Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, p0), s), Check.stepIn(step, s), True{},
-    Equal.cong(Nat, Bool, v => Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, v), s), p0, pos, Lemma.add_zero_right(pos)), Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), hit))
-  sp0 = Equal.trans(+List<Nat>, Spec.leaves(ts), Lemma.slice(input, pos, List.length(&2, Nat, Spec.leaves(ts))), Lemma.slice(input, p0, List.length(&2, Nat, Spec.leaves(ts))), sp,
-    Equal.cong(Nat, +List<Nat>, v => Lemma.slice(input, v, List.length(&2, Nat, Spec.leaves(ts))), pos, p0, z))
-  empty_loop_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, ts, pEq, step0,
-    ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, p0, ff, fin, rest, Spec.Group{}, [], pEq, sp0, (next0, (restEq, (fitTs, (fin0, (ctxF, foF)))))))
-
-# ---- A call: a nonterminal, a ( ) or [ ] taken, or the rounds of a loop ----
-
-# After the callee ended at `end`, the caller's step is in and the rest goes on from there.
-law call_finish:
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +end: Nat
-  for +inner: +List<Spec.Bsr>
-  for +ts: +List<Spec.Tree>
-  for +total: Nat
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for stepP: {Check.stepIn(Gll.stepAt(index, rpath, 1n+dot, ctx, pos, end), s) == True{} : Bool}
-  for innerOk: {allStepsIn(inner, s) == True{} : Bool}
-  for endEq: {Nat.add(end, List.length(&2, Nat, Spec.leaves(ts))) == total : Nat}
-  for ih: Walked(False{}, grammar, s, ts, index, rpath, prefix, 1n+dot, ctx, end)
-  {allStepsIn(Spec.at(index, prefix, 1n+dot, ctx, pos, end) <> List.append(&2, Spec.Bsr, inner, Spec.walk(ts, False{}, index, prefix, 1n+dot, ctx, end)), s) == True{} : Bool} & {Check.popIn(Check.endKey(grammar, index, rpath, ctx), total, s) == True{} : Bool}
-
-def call_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, end, inner, ts, total, pEq, stepP, innerOk, endEq, ih):
-  match ih:
-    case (stepsTs, popTs):
-      +key = Check.endKey(grammar, index, rpath, ctx)
-      +later = Spec.walk(ts, False{}, index, prefix, 1n+dot, ctx, end)
-      (Lemma.and_true_intro(Spec.bsrMember(Spec.at(index, prefix, 1n+dot, ctx, pos, end), Check.stepsOf(s)), allStepsIn(List.append(&2, Spec.Bsr, inner, later), s), step_in(index, rpath, prefix, 1n+dot, ctx, pos, end, s, pEq, stepP),
-          all_in_app(inner, later, Check.stepsOf(s), innerOk, stepsTs)),
-        Equal.trans(Bool, Check.popIn(key, total, s), Check.popIn(key, Nat.add(end, List.length(&2, Nat, Spec.leaves(ts))), s), True{},
-          Equal.cong(Nat, Bool, v => Check.popIn(key, v, s), total, Nat.add(end, List.length(&2, Nat, Spec.leaves(ts))), Equal.sym(Nat, Nat.add(end, List.length(&2, Nat, Spec.leaves(ts))), total, endEq)), popTs))
-
-# The caller resumes after its callee: the next descriptor, and the call's step.
-law resumed:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +target: Gll.Target
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +end: Nat
-  for inR: {Check.returnIn(Gll.CKey{target, pos}, Gll.Edge{index, rpath, dot, ctx}, s) == True{} : Bool}
-  for inP: {Check.popIn(Gll.CKey{target, pos}, end, s) == True{} : Bool}
-  {Check.wantedPair(pr, grammar, input, Gll.Desc{index, rpath, 1n+dot, ctx, end}, Gll.stepAt(index, rpath, 1n+dot, ctx, pos, end), s) == True{} : Bool}
-
-def resumed(pr, grammar, input, s, closedOk, start, po, target, index, rpath, dot, ctx, pos, end, inR, inP):
-  resume_ok(pr, grammar, input, s, closedOk, Gll.CKey{target, pos}, Gll.Edge{index, rpath, dot, ctx}, end, inR, inP)
-
-# The seeds of a bracket's cluster, once the item at the dot is known.
-law alt_seeds:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +pos: Nat
-  for +bkind: Spec.Bracket
-  for +balts: +List<+List<Spec.Item>>
-  for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
-  for seeds: {Check.allWanted(pr, grammar, input, Check.seedsOf(grammar, Gll.CKey{Gll.TBr{index, dot <> rpath}, pos}), s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Gll.alternatives(List.length(&2, +List<Spec.Item>, balts), index, dot <> rpath, pos, pos), s) == True{} : Bool}
-
-def alt_seeds(pr, grammar, input, s, index, rpath, dot, pos, bkind, balts, itemEq, seeds):
-  +item = Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot)
-  Equal.trans(Bool, Check.allWanted(pr, grammar, input, Gll.alternatives(List.length(&2, +List<Spec.Item>, balts), index, dot <> rpath, pos, pos), s), Check.allWanted(pr, grammar, input, Gll.alternatives(Check.altCount(item), index, dot <> rpath, pos, pos), s), True{},
-    Equal.cong(Maybe<&2, Spec.Item>, Bool, v => Check.allWanted(pr, grammar, input, Gll.alternatives(Check.altCount(v), index, dot <> rpath, pos, pos), s), Some{Spec.Brack{bkind, balts}}, item, Equal.sym(Maybe<&2, Spec.Item>, item, Some{Spec.Brack{bkind, balts}}, itemEq)),
-    seeds)
-
-# The sequence of alternative a of the bracket at the dot.
-law alt_seq:
-  for +grammar: +List<Spec.Production>
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +dot: Nat
-  for +a: Nat
-  for +bkind: Spec.Bracket
-  for +balts: +List<+List<Spec.Item>>
-  for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
-  {dropItems(0n, Gll.seqAt(grammar, index, a <> dot <> rpath)) == Spec.altOf(balts, a) : +List<Spec.Item>}
-
-def alt_seq(grammar, index, rpath, dot, a, bkind, balts, itemEq):
-  Equal.cong(Maybe<&2, Spec.Item>, +List<Spec.Item>, v => Gll.bracketAlt(v, a), Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), Some{Spec.Brack{bkind, balts}}, itemEq)
-
-# ---- A nonterminal ----
-
-law node_after:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
+law token_parts:
+  for b: Bool
   for +q: Nat
-  for +ch: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +x: Nat
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Node{q, ch} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Node{q, ch} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +lhsOk: {Spec.lhsIs(grammar, q, x) == True{} : Bool}
-  for +inR: {Check.returnIn(Gll.CKey{Gll.TNt{x}, pos}, Gll.Edge{index, rpath, dot, ctx}, s) == True{} : Bool}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  for inner: Walked(False{}, grammar, s, ch, q, [], [], 0n, pos, pos)
-  Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def node_after(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, q, ch, ts, x, rest, pEq, sp, finEq, ctxF, foF, lhsOk, inR, restEq, fitTs, ihTs, inner):
-  match inner:
-    case (stepsCh, popCh):
-      +lch = Spec.leaves(ch)
-      +lts = Spec.leaves(ts)
-      +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-      popX = Equal.trans(Bool, Check.popIn(Gll.CKey{Gll.TNt{x}, pos}, e1, s), Check.popIn(Gll.CKey{Gll.TNt{Gll.lhsOf(grammar, q)}, pos}, e1, s), True{},
-        Equal.cong(Nat, Bool, v => Check.popIn(Gll.CKey{Gll.TNt{v}, pos}, e1, s), x, Gll.lhsOf(grammar, q), Equal.sym(Nat, Gll.lhsOf(grammar, q), x, lhs_of_is(grammar, q, x, lhsOk))), popCh)
-      +finTs = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lts)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lts))), fin, end_split(pos, lch, lts), finEq)
-      +spTs = spells_second(input, pos, lch, lts, sp)
-      +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-      +res0 = resumed(pr, grammar, input, s, closedOk, start, po, Gll.TNt{x}, index, rpath, dot, ctx, pos, e1, inR, popX)
-      +next = {Gll.Desc{index, rpath, 1n+dot, ctx, e1} : Gll.Desc}
-      +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, e1)
-      +res = pair_hit(pr, grammar, input, next, step, s, Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, e1, fin, po, fitDrop, spTs, finTs, ctxF, {==}), res0)
-      call_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, e1, Spec.walk(ch, False{}, q, [], 0n, pos, pos), ts, Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lts))), pEq,
-        Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), res), stepsCh, end_split(pos, lch, lts),
-        ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, e1, ff, fin, rest, Spec.Group{}, [], pEq, spTs, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), res), (restEq, (fitTs, (finTs, (ctxF, foF)))))))
-
-law node_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +q: Nat
-  for +ch: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +x: Nat
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Node{q, ch} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Node{q, ch} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Sym{Spec.Nonterminal{x}}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fit: {Spec.fits(Spec.Node{q, ch} <> ts, grammar, Spec.Sym{Spec.Nonterminal{x}} <> rest) == True{} : Bool}
-  for ihCh: WalkIH(pr, grammar, input, s, ch)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def node_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, q, ch, ts, x, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihCh, ihTs):
-  +h = Bool.and(Spec.lhsIs(grammar, q, x), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)))
-  +hOk = Lemma.and_true_left(h, Spec.fits(ts, grammar, rest), fit)
-  +lhsOk = Lemma.and_true_left(Spec.lhsIs(grammar, q, x), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)), hOk)
-  +fitCh = Lemma.and_true_right_side(Spec.lhsIs(grammar, q, x), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)), hOk)
-  +fitTs = Lemma.and_true_right_side(h, Spec.fits(ts, grammar, rest), fit)
-  +key = {Gll.CKey{Gll.TNt{x}, pos} : Gll.CKey}
-  +edge = {Gll.Edge{index, rpath, dot, ctx} : Gll.Edge}
-  +ok = item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Sym{Spec.Nonterminal{x}}}, itemEq, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
-  seeds = cluster_ok(pr, grammar, input, s, closedOk, key, Lemma.and_true_left(Check.clusterIn(key, s), Check.returnIn(key, edge, s), ok))
-  seeded = productions_seen(pr, grammar, input, grammar, x, 0n, pos, q, s, lhsOk, seeds)
-  +lch = Spec.leaves(ch)
-  +lts = Spec.leaves(ts)
-  +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-  +finTs = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lts)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lts))), fin, end_split(pos, lch, lts), finEq)
-  +spTs = spells_second(input, pos, lch, lts, sp)
-  +spCh = spells_first(input, pos, lch, lts, sp)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +ctxCh = Pr.ctx_node(pr, grammar, start, input, index, rpath, dot, ff, x, q, ts, e1, fin, po, foF, itemEq, lhsOk, fitDrop, spTs, finTs, ctxF)
-  +foCh = Pr.fo_node(pr, grammar, start, q, x, po, lhsOk)
-  +seen0 = wanted_hit(pr, grammar, input, Gll.Desc{q, [], 0n, pos, pos}, s, Pr.admit_any(pr, grammar, start, input, q, [], 0n, pos, ch, pos, e1, po, fitCh, spCh, {==}, ctxCh, {==}), seeded)
-  node_after(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, q, ch, ts, x, rest, pEq, sp, finEq, ctxF, foF, lhsOk, Lemma.and_true_right_side(Check.clusterIn(key, s), Check.returnIn(key, edge, s), ok), restEq, fitTs, ihTs,
-    ihCh(False{}, q, [], [], 0n, pos, pos, Gll.nestFuel(), e1, Spec.rhsOf(grammar, q), Spec.Group{}, [], {==}, spCh, (seen0, ({==}, (fitCh, ({==}, (ctxCh, foCh)))))))
-
-# ---- A ( ) or [ ] that matched ----
-
-law pick_after:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Pick{a, ch} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Pick{a, ch} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +inR: {Check.returnIn(Gll.CKey{Gll.TBr{index, dot <> rpath}, pos}, Gll.Edge{index, rpath, dot, ctx}, s) == True{} : Bool}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  for inner: Walked(False{}, grammar, s, ch, index, a <> dot <> rpath, List.append(&2, Nat, prefix, [dot, a]), 0n, pos, pos)
-  Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def pick_after(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, a, ch, ts, rest, pEq, sp, finEq, ctxF, foF, inR, restEq, fitTs, ihTs, inner):
-  match inner:
-    case (stepsCh, popCh):
-      +lch = Spec.leaves(ch)
-      +lts = Spec.leaves(ts)
-      +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-      +finTs = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lts)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lts))), fin, end_split(pos, lch, lts), finEq)
-      +spTs = spells_second(input, pos, lch, lts, sp)
-      +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-      +res0 = resumed(pr, grammar, input, s, closedOk, start, po, Gll.TBr{index, dot <> rpath}, index, rpath, dot, ctx, pos, e1, inR, popCh)
-      +next = {Gll.Desc{index, rpath, 1n+dot, ctx, e1} : Gll.Desc}
-      +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, e1)
-      +res = pair_hit(pr, grammar, input, next, step, s, Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, e1, fin, po, fitDrop, spTs, finTs, ctxF, {==}), res0)
-      call_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, e1, Spec.walk(ch, False{}, index, List.append(&2, Nat, prefix, [dot, a]), 0n, pos, pos), ts, Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lts))), pEq,
-        Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), res), stepsCh, end_split(pos, lch, lts),
-        ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, e1, ff, fin, rest, Spec.Group{}, [], pEq, spTs, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), res), (restEq, (fitTs, (finTs, (ctxF, foF)))))))
-
-law pick_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +bkind: Spec.Bracket
-  for +balts: +List<+List<Spec.Item>>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Pick{a, ch} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Pick{a, ch} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +isA: {Spec.isAlt(balts, a) == True{} : Bool}
-  for +fitCh: {Spec.fits(ch, grammar, Spec.altOf(balts, a)) == True{} : Bool}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for +pickReads: {Bool.or(Bool.not(Gll.roundReads(Some{Spec.Brack{bkind, balts}}, pos, pos)), Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))) == True{} : Bool}
-  for ihCh: WalkIH(pr, grammar, input, s, ch)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def pick_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, a, ch, ts, bkind, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, isA, fitCh, fitTs, pickReads, ihCh, ihTs):
-  +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, pos} : Gll.CKey}
-  +edge = {Gll.Edge{index, rpath, dot, ctx} : Gll.Edge}
-  +skip = Check.skipOk(Gll.isSkippable(bkind), pr, grammar, input, index, rpath, dot, ctx, pos, s)
-  +ok = item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Brack{bkind, balts}}, itemEq, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
-  +r1 = Lemma.and_true_right_side(Check.clusterIn(key, s), Bool.and(Check.returnIn(key, edge, s), skip), ok)
-  seeds = alt_seeds(pr, grammar, input, s, index, rpath, dot, pos, bkind, balts, itemEq, cluster_ok(pr, grammar, input, s, closedOk, key, Lemma.and_true_left(Check.clusterIn(key, s), Bool.and(Check.returnIn(key, edge, s), skip), ok)))
-  seeded = alternatives_seen(pr, grammar, input, List.length(&2, +List<Spec.Item>, balts), index, dot <> rpath, pos, pos, a, s, isA, seeds)
-  +lch = Spec.leaves(ch)
-  +lts = Spec.leaves(ts)
-  +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-  +finTs = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lts)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lts))), fin, end_split(pos, lch, lts), finEq)
-  +spTs = spells_second(input, pos, lch, lts, sp)
-  +spCh = spells_first(input, pos, lch, lts, sp)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +path = {a <> (dot <> rpath) : +List<Nat>}
-  +altEq = alt_seq(grammar, index, rpath, dot, a, bkind, balts, itemEq)
-  +fitCh0 = Equal.trans(Bool, Spec.fits(ch, grammar, dropItems(0n, Gll.seqAt(grammar, index, path))), Spec.fits(ch, grammar, Spec.altOf(balts, a)), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ch, grammar, v), dropItems(0n, Gll.seqAt(grammar, index, path)), Spec.altOf(balts, a), altEq), fitCh)
-  +ctxCh = Pr.ctx_pick(pr, grammar, start, input, index, rpath, dot, a, ts, e1, fin, po, fitDrop, spTs, finTs, ctxF)
-  +foCh = Pr.fo_pick(pr, ff, grammar, index, rpath, dot, bkind, balts, a, foF, itemEq, isA)
-  +notEmpty = Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))
-  +readsP = Equal.trans(Bool, Bool.or(Bool.not(Gll.roundReads(Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), pos, pos)), notEmpty), Bool.or(Bool.not(Gll.roundReads(Some{Spec.Brack{bkind, balts}}, pos, pos)), notEmpty), True{},
-    Equal.cong(Maybe<&2, Spec.Item>, Bool, v => Bool.or(Bool.not(Gll.roundReads(v, pos, pos)), notEmpty), Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot), Some{Spec.Brack{bkind, balts}}, itemEq), pickReads)
-  +seen0 = wanted_hit(pr, grammar, input, Gll.Desc{index, path, 0n, pos, pos}, s, Pr.admit_any(pr, grammar, start, input, index, path, 0n, pos, ch, pos, e1, po, fitCh0, spCh, {==}, ctxCh, readsP), seeded)
-  pick_after(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, a, ch, ts, rest, pEq, sp, finEq, ctxF, foF, Lemma.and_true_left(Check.returnIn(key, edge, s), skip, r1), restEq, fitTs, ihTs,
-    ihCh(False{}, index, path, List.append(&2, Nat, prefix, [dot, a]), 0n, pos, pos, Adm.pred2(ff), e1, Spec.altOf(balts, a), Spec.Group{}, [], prefix_ext(rpath, prefix, [dot, a], pEq), spCh, (seen0, (altEq, (fitCh, ({==}, (ctxCh, foCh)))))))
-
-# ---- A loop with rounds ----
-
-law loop_after:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +r: Spec.Tree
-  for +rr: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Loop{r <> rr} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Loop{r <> rr} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +inR: {Check.returnIn(Gll.CKey{Gll.TBr{index, dot <> rpath}, pos}, Gll.Edge{index, rpath, dot, ctx}, s) == True{} : Bool}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  for inner: Walked(True{}, grammar, s, r <> rr, index, dot <> rpath, List.append(&2, Nat, prefix, [dot]), 0n, pos, pos)
-  Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def loop_after(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, r, rr, ts, rest, pEq, sp, finEq, ctxF, foF, inR, restEq, fitTs, ihTs, inner):
-  match inner:
-    case (stepsRs, popRs):
-      +lrs = Spec.leaves(r <> rr)
-      +lts = Spec.leaves(ts)
-      +e1 = Nat.add(pos, List.length(&2, Nat, lrs))
-      +finTs = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lts)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lrs, lts))), fin, end_split(pos, lrs, lts), finEq)
-      +spTs = spells_second(input, pos, lrs, lts, sp)
-      +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-      +res0 = resumed(pr, grammar, input, s, closedOk, start, po, Gll.TBr{index, dot <> rpath}, index, rpath, dot, ctx, pos, e1, inR, popRs)
-      +next = {Gll.Desc{index, rpath, 1n+dot, ctx, e1} : Gll.Desc}
-      +step = Gll.stepAt(index, rpath, 1n+dot, ctx, pos, e1)
-      +res = pair_hit(pr, grammar, input, next, step, s, Pr.admit_any(pr, grammar, start, input, index, rpath, 1n+dot, ctx, ts, e1, fin, po, fitDrop, spTs, finTs, ctxF, {==}), res0)
-      call_finish(grammar, s, index, rpath, prefix, dot, ctx, pos, e1, Spec.walk(r <> rr, True{}, index, List.append(&2, Nat, prefix, [dot]), 0n, pos, pos), ts, Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lrs, lts))), pEq,
-        Lemma.and_true_right_side(Check.descSeen(next, s), Check.stepIn(step, s), res), stepsRs, end_split(pos, lrs, lts),
-        ihTs(False{}, index, rpath, prefix, 1n+dot, ctx, e1, ff, fin, rest, Spec.Group{}, [], pEq, spTs, (Lemma.and_true_left(Check.descSeen(next, s), Check.stepIn(step, s), res), (restEq, (fitTs, (finTs, (ctxF, foF)))))))
-
-law loop_case:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +r: Spec.Tree
-  for +rr: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +bkind: Spec.Bracket
-  for +balts: +List<+List<Spec.Item>>
-  for +rest: +List<Spec.Item>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Loop{r <> rr} <> ts, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Loop{r <> rr} <> ts))) == fin : Nat}
-  for +ctxF: {Pr.ctxOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foF: {Pr.foOk(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +seen: {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, rpath), dot) == Some{Spec.Brack{bkind, balts}} : Maybe<&2, Spec.Item>}
-  for +restEq: {dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)) == rest : +List<Spec.Item>}
-  for +loopOk: {Gll.isLoop(bkind) == True{} : Bool}
-  for +okR: {Spec.roundsOk(bkind, r <> rr) == True{} : Bool}
-  for +fitRs: {Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})) == True{} : Bool}
-  for +fitTs: {Spec.fits(ts, grammar, rest) == True{} : Bool}
-  for ihRs: WalkIH(pr, grammar, input, s, r <> rr)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def loop_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, r, rr, ts, bkind, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, loopOk, okR, fitRs, fitTs, ihRs, ihTs):
-  +key = {Gll.CKey{Gll.TBr{index, dot <> rpath}, pos} : Gll.CKey}
-  +edge = {Gll.Edge{index, rpath, dot, ctx} : Gll.Edge}
-  +skip = Check.skipOk(Gll.isSkippable(bkind), pr, grammar, input, index, rpath, dot, ctx, pos, s)
-  +ok = item_ok_at(pr, grammar, input, s, index, rpath, dot, ctx, pos, Some{Spec.Brack{bkind, balts}}, itemEq, seen_ok(pr, grammar, input, s, closedOk, Gll.Desc{index, rpath, dot, ctx, pos}, seen))
-  +r1 = Lemma.and_true_right_side(Check.clusterIn(key, s), Bool.and(Check.returnIn(key, edge, s), skip), ok)
-  seeds = alt_seeds(pr, grammar, input, s, index, rpath, dot, pos, bkind, balts, itemEq, cluster_ok(pr, grammar, input, s, closedOk, key, Lemma.and_true_left(Check.clusterIn(key, s), Bool.and(Check.returnIn(key, edge, s), skip), ok)))
-  +lrs = Spec.leaves(r <> rr)
-  +lts = Spec.leaves(ts)
-  +e1 = Nat.add(pos, List.length(&2, Nat, lrs))
-  +finTs = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lts)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lrs, lts))), fin, end_split(pos, lrs, lts), finEq)
-  +spTs = spells_second(input, pos, lrs, lts, sp)
-  +fitDrop = Equal.trans(Bool, Spec.fits(ts, grammar, dropItems(1n+dot, Gll.seqAt(grammar, index, rpath))), Spec.fits(ts, grammar, rest), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ts, grammar, v), dropItems(1n+dot, Gll.seqAt(grammar, index, rpath)), rest, restEq), fitTs)
-  +afterRs = Pr.after_loop(pr, grammar, start, input, index, rpath, dot, ts, e1, fin, po, fitDrop, spTs, finTs, ctxF)
-  loop_after(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, r, rr, ts, rest, pEq, sp, finEq, ctxF, foF, Lemma.and_true_left(Check.returnIn(key, edge, s), skip, r1), restEq, fitTs, ihTs,
-    ihRs(True{}, index, dot <> rpath, List.append(&2, Nat, prefix, [dot]), 0n, pos, pos, ff, e1, [], bkind, balts, prefix_ext(rpath, prefix, [dot], pEq), spells_first(input, pos, lrs, lts, sp), (seeds, (itemEq, (loopOk, (fitRs, ({==}, (afterRs, (foF, ready_entry(bkind, pos, r <> rr, loopOk, okR))))))))))
-
-# ---- The rounds of a loop ----
-
-law again_hit:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for loop: Bool
-  for +loopEq: {loop == True{} : Bool}
-  for +n: Nat
-  for +index: Nat
-  for +rpath: +List<Nat>
+  for +d: Nat
+  for +ks: Nat
   for +k: Nat
-  for +i: Nat
   for +s: Gll.GState
-  for r: {Check.allWanted(pr, grammar, input, Gll.againPick(loop, n, index, rpath, k, i), s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Gll.alternatives(n, index, rpath, k, i), s) == True{} : Bool}
+  for +eb: {b == True{} : Bool}
+  for +h: {Check.tokenOk(b, q, d, ks, k, s) == True{} : Bool}
+  {Bool.and(Check.seenIn(Gll.Desc{q, 1n+d, ks, 1n+k}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, k, 1n+k}, s)) == True{} : Bool}
 
-def again_hit(pr, grammar, input, loop, loopEq, n, index, rpath, k, i, s, r):
-  match loop:
+def token_parts(b, q, d, ks, k, s, eb, h):
+  match b:
     case True{}:
-      r
+      h
     case False{}:
-      Empty.absurd({Check.allWanted(pr, grammar, input, Gll.alternatives(n, index, rpath, k, i), s) == True{} : Bool}, Lemma.false_is_not_true(loopEq))
+      Empty.absurd({Bool.and(Check.seenIn(Gll.Desc{q, 1n+d, ks, 1n+k}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, k, 1n+k}, s)) == True{} : Bool}, Lemma.false_is_not_true(eb))
 
-# After a round ends at j, the loop starts every alternative again from j.
-law round_again:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +m: Nat
-  for +outer: +List<Nat>
-  for +ctx: Nat
+law resume_parts:
+  for b: Bool
+  for +q: Nat
+  for +d: Nat
+  for +ks: Nat
+  for +kc: Nat
   for +j: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, outer), m) == Some{Spec.Brack{kind, alts}} : Maybe<&2, Spec.Item>}
-  for +loopOk: {Gll.isLoop(kind) == True{} : Bool}
-  for inP: {Check.popIn(Gll.CKey{Gll.TBr{index, m <> outer}, ctx}, j, s) == True{} : Bool}
-  {Check.allWanted(pr, grammar, input, Gll.alternatives(List.length(&2, +List<Spec.Item>, alts), index, m <> outer, ctx, j), s) == True{} : Bool}
-
-def round_again(pr, grammar, input, s, closedOk, start, po, index, m, outer, ctx, j, kind, alts, itemEq, loopOk, inP):
-  +item = Gll.nthItem(Gll.seqAt(grammar, index, outer), m)
-  again = again_ok(pr, grammar, input, s, closedOk, Gll.CKey{Gll.TBr{index, m <> outer}, ctx}, j, inP)
-  againK = Equal.trans(Bool, Check.allWanted(pr, grammar, input, Gll.againOf(Some{Spec.Brack{kind, alts}}, index, m <> outer, ctx, j), s), Check.allWanted(pr, grammar, input, Gll.againOf(item, index, m <> outer, ctx, j), s), True{},
-    Equal.cong(Maybe<&2, Spec.Item>, Bool, v => Check.allWanted(pr, grammar, input, Gll.againOf(v, index, m <> outer, ctx, j), s), Some{Spec.Brack{kind, alts}}, item, Equal.sym(Maybe<&2, Spec.Item>, item, Some{Spec.Brack{kind, alts}}, itemEq)),
-    again)
-  again_hit(pr, grammar, input, Gll.isLoop(kind), loopOk, List.length(&2, +List<Spec.Item>, alts), index, m <> outer, ctx, j, s, againK)
-
-law round_rest:
-  for +grammar: +List<Spec.Production>
   for +s: Gll.GState
-  for +index: Nat
-  for +m: Nat
-  for +outer: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
+  for +eb: {b == True{} : Bool}
+  for +h: {Check.resumeOk(b, q, d, ks, kc, j, s) == True{} : Bool}
+  {Bool.and(Check.seenIn(Gll.Desc{q, 1n+d, ks, j}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, kc, j}, s)) == True{} : Bool}
+
+def resume_parts(b, q, d, ks, kc, j, s, eb, h):
+  match b:
+    case True{}:
+      h
+    case False{}:
+      Empty.absurd({Bool.and(Check.seenIn(Gll.Desc{q, 1n+d, ks, j}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, kc, j}, s)) == True{} : Bool}, Lemma.false_is_not_true(eb))
+
+law token_here:
+  for +input: +List<Nat>
+  for +k: Nat
   for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +r2: Spec.Tree
-  for +rest2: +List<Spec.Tree>
-  for stepsCh: {allStepsIn(Spec.walk(ch, False{}, index, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos), s) == True{} : Bool}
-  for later: Walked(True{}, grammar, s, r2 <> rest2, index, m <> outer, prefix, 0n, ctx, Nat.add(pos, List.length(&2, Nat, Spec.leaves(ch))))
-  Walked(True{}, grammar, s, Spec.Pick{a, ch} <> r2 <> rest2, index, m <> outer, prefix, dot, ctx, pos)
+  for +t: Nat
+  for +ea: {a == t : Nat}
+  for +h: {Core.tokIs(Core.tokAt(input, k), a) == True{} : Bool}
+  {Core.tokIs(Core.tokAt(input, k), t) == True{} : Bool}
 
-def round_rest(grammar, s, index, m, outer, prefix, dot, ctx, pos, a, ch, r2, rest2, stepsCh, later):
-  match later:
-    case (stepsRest, popRest):
-      +lch = Spec.leaves(ch)
-      +lrest = Spec.leaves(r2 <> rest2)
-      +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-      +key = {Gll.CKey{Gll.TBr{index, m <> outer}, ctx} : Gll.CKey}
-      (all_in_app(Spec.walk(ch, False{}, index, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos), Spec.walk(r2 <> rest2, True{}, index, prefix, 0n, ctx, e1), Check.stepsOf(s), stepsCh, stepsRest),
-        Equal.trans(Bool, Check.popIn(key, Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lrest))), s), Check.popIn(key, Nat.add(e1, List.length(&2, Nat, lrest)), s), True{},
-          Equal.cong(Nat, Bool, v => Check.popIn(key, v, s), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lrest))), Nat.add(e1, List.length(&2, Nat, lrest)), Equal.sym(Nat, Nat.add(e1, List.length(&2, Nat, lrest)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lrest))), end_split(pos, lch, lrest))),
-          popRest))
+def token_here(input, k, a, t, ea, h):
+  %ea : {Core.tokIs(Core.tokAt(input, k), _) == True{} : Bool}
+  h
 
-law round_after:
-  for +pr: Gll.Pred
-  for rest: +List<Spec.Tree>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
+law leaf_own:
   for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +m: Nat
-  for +outer: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +pEq: {prefix == Gll.reverseOnto(m <> outer, []) : +List<Nat>}
-  for +sp: Spells(Spec.Pick{a, ch} <> rest, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Pick{a, ch} <> rest))) == fin : Nat}
-  for +after: {Pr.afterOk(pr, grammar, input, index, m <> outer, fin) == True{} : Bool}
-  for +foL: {Pr.foLoop(pr, ff, grammar, index, m <> outer) == True{} : Bool}
-  for +itemEq: {Gll.nthItem(Gll.seqAt(grammar, index, outer), m) == Some{Spec.Brack{kind, alts}} : Maybe<&2, Spec.Item>}
-  for +loopOk: {Gll.isLoop(kind) == True{} : Bool}
-  for +fitRest: {Spec.fits(rest, grammar, Spec.times(List.length(&2, Spec.Tree, rest), Spec.Brack{Spec.Group{}, alts})) == True{} : Bool}
-  for +rinv: {roundsReady(kind, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}
-  for ihRest: WalkIH(pr, grammar, input, s, rest)
-  for inner: Walked(False{}, grammar, s, ch, index, a <> m <> outer, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos)
-  Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, m <> outer, prefix, dot, ctx, pos)
-
-def round_after(pr, rest, grammar, input, s, closedOk, start, po, index, m, outer, prefix, dot, ctx, pos, ff, fin, a, ch, kind, alts, pEq, sp, finEq, after, foL, itemEq, loopOk, fitRest, rinv, ihRest, inner):
-  match rest:
-    case Nil{}:
-      match inner:
-        case (stepsCh, popCh):
-          +lch = Spec.leaves(ch)
-          +key = {Gll.CKey{Gll.TBr{index, m <> outer}, ctx} : Gll.CKey}
-          (all_in_app(Spec.walk(ch, False{}, index, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos), [], Check.stepsOf(s), stepsCh, {==}),
-            Equal.trans(Bool, Check.popIn(key, Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, []))), s), Check.popIn(key, Nat.add(pos, List.length(&2, Nat, lch)), s), True{},
-              Equal.cong(Nat, Bool, v => Check.popIn(key, v, s), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, []))), Nat.add(pos, List.length(&2, Nat, lch)), Equal.sym(Nat, Nat.add(pos, List.length(&2, Nat, lch)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, []))), end_alone(pos, lch))),
-              popCh))
-    case Con{+r2, +rest2}:
-      match inner:
-        case (stepsCh, popCh):
-          +lch = Spec.leaves(ch)
-          +lrest = Spec.leaves(r2 <> rest2)
-          +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-          +key = {Gll.CKey{Gll.TBr{index, m <> outer}, ctx} : Gll.CKey}
-          starts = round_again(pr, grammar, input, s, closedOk, start, po, index, m, outer, ctx, e1, kind, alts, itemEq, loopOk, popCh)
-          round_rest(grammar, s, index, m, outer, prefix, dot, ctx, pos, a, ch, r2, rest2, stepsCh,
-            ihRest(True{}, index, m <> outer, prefix, 0n, ctx, e1, ff, fin, [], kind, alts, pEq, spells_second(input, pos, lch, lrest, sp), (starts, (itemEq, (loopOk, (fitRest, (Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lrest)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lrest))), fin, end_split(pos, lch, lrest), finEq), (after, (foL, round_next(kind, ctx, pos, e1, a, ch, r2 <> rest2, loopOk, rinv))))))))))
-
-def isNone(x: Maybe<&2, Spec.Item>) -> Bool:
-  match x:
-    case None{}:
-      True{}
-    case Some{v}:
-      False{}
-
-law round_case:
-  for +pr: Gll.Pred
-  for rpath: +List<Nat>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +rest: +List<Spec.Tree>
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Pick{a, ch} <> rest, input, pos)
-  for +finEq: {Nat.add(pos, List.length(&2, Nat, Spec.leaves(Spec.Pick{a, ch} <> rest))) == fin : Nat}
-  for +after: {Pr.afterOk(pr, grammar, input, index, rpath, fin) == True{} : Bool}
-  for +foL: {Pr.foLoop(pr, ff, grammar, index, rpath) == True{} : Bool}
-  for +starts: {Check.allWanted(pr, grammar, input, Gll.alternatives(List.length(&2, +List<Spec.Item>, alts), index, rpath, ctx, pos), s) == True{} : Bool}
-  for +itemEq: {loopItem(grammar, index, rpath) == Some{Spec.Brack{kind, alts}} : Maybe<&2, Spec.Item>}
-  for +loopOk: {Gll.isLoop(kind) == True{} : Bool}
-  for +isA: {Spec.isAlt(alts, a) == True{} : Bool}
-  for +fitCh: {Spec.fits(ch, grammar, Spec.altOf(alts, a)) == True{} : Bool}
-  for +fitRest: {Spec.fits(rest, grammar, Spec.times(List.length(&2, Spec.Tree, rest), Spec.Brack{Spec.Group{}, alts})) == True{} : Bool}
-  for +rinv: {roundsReady(kind, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}
-  for ihCh: WalkIH(pr, grammar, input, s, ch)
-  for ihRest: WalkIH(pr, grammar, input, s, rest)
-  Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, rpath, prefix, dot, ctx, pos)
-
-def round_case(pr, rpath, grammar, input, s, closedOk, start, po, index, prefix, dot, ctx, pos, ff, fin, a, ch, rest, kind, alts, pEq, sp, finEq, after, foL, starts, itemEq, loopOk, isA, fitCh, fitRest, rinv, ihCh, ihRest):
-  match rpath:
-    case Nil{}:
-      Empty.absurd(Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, [], prefix, dot, ctx, pos), Lemma.true_is_not_false(Equal.cong(Maybe<&2, Spec.Item>, Bool, v => isNone(v), None{}, Some{Spec.Brack{kind, alts}}, itemEq)))
-    case Con{+m, +outer}:
-      seeded = alternatives_seen(pr, grammar, input, List.length(&2, +List<Spec.Item>, alts), index, m <> outer, ctx, pos, a, s, isA, starts)
-      +remCh = Equal.cong(Maybe<&2, Spec.Item>, +List<Spec.Item>, v => Gll.bracketAlt(v, a), Gll.nthItem(Gll.seqAt(grammar, index, outer), m), Some{Spec.Brack{kind, alts}}, itemEq)
-      +lch = Spec.leaves(ch)
-      +lrest = Spec.leaves(rest)
-      +e1 = Nat.add(pos, List.length(&2, Nat, lch))
-      +spCh = spells_first(input, pos, lch, lrest, sp)
-      +spRest = spells_second(input, pos, lch, lrest, sp)
-      +finRest = Equal.trans(Nat, Nat.add(e1, List.length(&2, Nat, lrest)), Nat.add(pos, List.length(&2, Nat, List.append(&2, Nat, lch, lrest))), fin, end_split(pos, lch, lrest), finEq)
-      +path = {a <> (m <> outer) : +List<Nat>}
-      +fitCh0 = Equal.trans(Bool, Spec.fits(ch, grammar, dropItems(0n, Gll.seqAt(grammar, index, path))), Spec.fits(ch, grammar, Spec.altOf(alts, a)), True{}, Equal.cong(+List<Spec.Item>, Bool, v => Spec.fits(ch, grammar, v), dropItems(0n, Gll.seqAt(grammar, index, path)), Spec.altOf(alts, a), remCh), fitCh)
-      +ctxCh = Pr.ctx_round(pr, grammar, start, input, index, m <> outer, a, kind, alts, rest, e1, fin, po, itemEq, loopOk, after, fitRest, spRest, finRest)
-      +foCh = Pr.fo_round(pr, ff, grammar, index, m <> outer, kind, alts, a, foL, itemEq, isA)
-      +notEmpty = Bool.not(List.is_empty(&2, Nat, Spec.leaves(ch)))
-      +readsR = Equal.trans(Bool, Bool.or(Bool.not(Gll.roundReads(Gll.nthItem(Gll.seqAt(grammar, index, outer), m), ctx, pos)), notEmpty), Bool.or(Bool.not(Gll.roundReads(Some{Spec.Brack{kind, alts}}, ctx, pos)), notEmpty), True{},
-        Equal.cong(Maybe<&2, Spec.Item>, Bool, v => Bool.or(Bool.not(Gll.roundReads(v, ctx, pos)), notEmpty), Gll.nthItem(Gll.seqAt(grammar, index, outer), m), Some{Spec.Brack{kind, alts}}, itemEq), round_reads(kind, alts, ctx, pos, a, ch, rest, loopOk, rinv))
-      +seen0 = wanted_hit(pr, grammar, input, Gll.Desc{index, path, 0n, ctx, pos}, s, Pr.admit_any(pr, grammar, start, input, index, path, 0n, ctx, ch, pos, e1, po, fitCh0, spCh, {==}, ctxCh, readsR), seeded)
-      round_after(pr, rest, grammar, input, s, closedOk, start, po, index, m, outer, prefix, dot, ctx, pos, ff, fin, a, ch, kind, alts, pEq, sp, finEq, after, foL, itemEq, loopOk, fitRest, rinv, ihRest,
-        ihCh(False{}, index, path, List.append(&2, Nat, prefix, [a]), 0n, ctx, pos, Adm.pred2(ff), e1, Spec.altOf(alts, a), Spec.Group{}, [], prefix_ext(m <> outer, prefix, [a], pEq), spCh, (seen0, (remCh, (fitCh, ({==}, (ctxCh, foCh)))))))
-
-law leaf_disp:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +k0: Nat
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Leaf{k0} <> ts, input, pos)
-  for ready: Ready(False{}, pr, grammar, input, s, Spec.Leaf{k0} <> ts, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def leaf_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, k0, ts, pEq, sp, ready, ihTs):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Sym{Spec.Terminal{+t}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Sym{Spec.Terminal{t}} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Leaf{k0} <> ts, grammar, Spec.Sym{Spec.Terminal{t}} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Sym{Spec.Terminal{t}}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Sym{Spec.Terminal{t}}, rest, rem)
-          leaf_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, k0, ts, t, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihTs)
-    case Con{Spec.Sym{Spec.Nonterminal{+x}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Group{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Optional{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Eps{}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Leaf{k0} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-
-law node_disp:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
   for +q: Nat
-  for +ch: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Node{q, ch} <> ts, input, pos)
-  for ready: Ready(False{}, pr, grammar, input, s, Spec.Node{q, ch} <> ts, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  for ihCh: WalkIH(pr, grammar, input, s, ch)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def node_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, q, ch, ts, pEq, sp, ready, ihCh, ihTs):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Sym{Spec.Terminal{+t}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Sym{Spec.Nonterminal{+x}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Sym{Spec.Nonterminal{x}} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Node{q, ch} <> ts, grammar, Spec.Sym{Spec.Nonterminal{x}} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Sym{Spec.Nonterminal{x}}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Sym{Spec.Nonterminal{x}}, rest, rem)
-          node_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, q, ch, ts, x, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihCh, ihTs)
-    case Con{Spec.Brack{Spec.Group{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Optional{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Eps{}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Node{q, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-
-law pick_disp:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
+  for +ks: Nat
   for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Pick{a, ch} <> ts, input, pos)
-  for ready: Ready(False{}, pr, grammar, input, s, Spec.Pick{a, ch} <> ts, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  for ihCh: WalkIH(pr, grammar, input, s, ch)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos)
+  for +ts: +List<Core.Tree>
+  for +d: Nat
+  for +k: Nat
+  for +step: {Check.stepIn(Core.Bsr{q, 1n+d, ks, k, 1n+k}, s) == True{} : Bool}
+  for +o: {Core.allIn(Core.own(q, ts, 1n+d, ks, 1n+k), Check.stepsOf(s)) == True{} : Bool}
+  {Core.allIn(Core.own(q, Core.Leaf{a} <> ts, d, ks, k), Check.stepsOf(s)) == True{} : Bool}
 
-def pick_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, a, ch, ts, pEq, sp, ready, ihCh, ihTs):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Sym{Spec.Terminal{+t}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Sym{Spec.Nonterminal{+x}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Group{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Brack{Spec.Group{}, balts} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Pick{a, ch} <> ts, grammar, Spec.Brack{Spec.Group{}, balts} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Group{}, balts}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Group{}, balts}, rest, rem)
-          +hOk = Lemma.and_true_left(Bool.and(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit)
-          pick_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, a, ch, ts, Spec.Group{}, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq,
-            Lemma.and_true_left(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk),
-            Lemma.and_true_right_side(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk),
-            Lemma.and_true_right_side(Bool.and(Spec.isAlt(balts, a), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit), {==}, ihCh, ihTs)
-    case Con{Spec.Brack{Spec.Optional{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Brack{Spec.Optional{}, balts} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Pick{a, ch} <> ts, grammar, Spec.Brack{Spec.Optional{}, balts} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Optional{}, balts}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Optional{}, balts}, rest, rem)
-          +okR = Spec.roundsOk(Spec.Optional{}, [Spec.Pick{a, ch}])
-          +hOk = Lemma.and_true_left(Bool.and(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit)
-          +altOk = Lemma.and_true_left(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk)
-          pick_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, a, ch, ts, Spec.Optional{}, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq,
-            Lemma.and_true_right_side(okR, Spec.isAlt(balts, a), altOk),
-            Lemma.and_true_right_side(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a)), hOk),
-            Lemma.and_true_right_side(Bool.and(Bool.and(okR, Spec.isAlt(balts, a)), Spec.fits(ch, grammar, Spec.altOf(balts, a))), Spec.fits(ts, grammar, rest), fit),
-            optional_reads(a, ch, Lemma.and_true_left(okR, Spec.isAlt(balts, a), altOk)), ihCh, ihTs)
-    case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Eps{}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Pick{a, ch} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
+def leaf_own(s, q, ks, a, ts, d, k, step, o):
+  %Equal.sym(Nat, Nat.add(k, 1n), 1n+k, Lemma.add_one_right(k)) : {Core.allIn(Core.Bsr{q, 1n+d, ks, k, _} <> Core.own(q, ts, 1n+d, ks, _), Check.stepsOf(s)) == True{} : Bool}
+  Lemma.and_true_intro(Core.member(Core.Bsr{q, 1n+d, ks, k, 1n+k}, Check.stepsOf(s)), Core.allIn(Core.own(q, ts, 1n+d, ks, 1n+k), Check.stepsOf(s)), step, o)
 
-law skip_disp:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
+# After a leaf: its step, then the rest's.
+def leaf_join(+grammar: +List<Core.Production>, +s: Gll.GState, +q: Nat, +ks: Nat, +a: Nat, +ts: +List<Core.Tree>, +d: Nat, +k: Nat,
+  +step: {Check.stepIn(Core.Bsr{q, 1n+d, ks, k, 1n+k}, s) == True{} : Bool},
+  rest: Walked(grammar, s, q, ks, ts, 1n+d, 1n+k)) -> Walked(grammar, s, q, ks, Core.Leaf{a} <> ts, d, k):
+  match rest:
+    case (o, (st, p)):
+      +own = leaf_own(s, q, ks, a, ts, d, k, step, o)
+      {(own, (st, p)) : Walked(grammar, s, q, ks, Core.Leaf{a} <> ts, d, k)}
+
+# After a node: its step, the steps below it, then the rest's.
+def node_join(+grammar: +List<Core.Production>, +s: Gll.GState, +q: Nat, +ks: Nat, +q2: Nat, +ch: +List<Core.Tree>, +ts: +List<Core.Tree>, +d: Nat, +k: Nat,
+  +step: {Check.stepIn(Core.Bsr{q, 1n+d, ks, k, Nat.add(k, Core.width(Core.Node{q2, ch}))}, s) == True{} : Bool},
+  +oc: {Core.allIn(Core.own(q2, ch, 0n, k, k), Check.stepsOf(s)) == True{} : Bool},
+  +sc: {Core.allIn(Core.steps(ch, k), Check.stepsOf(s)) == True{} : Bool},
+  rest: Walked(grammar, s, q, ks, ts, 1n+d, Nat.add(k, Core.width(Core.Node{q2, ch})))) -> Walked(grammar, s, q, ks, Core.Node{q2, ch} <> ts, d, k):
+  match rest:
+    case (o, (st, p)):
+      +far = {Nat.add(k, Core.width(Core.Node{q2, ch})) : Nat}
+      +own = Lemma.and_true_intro(Core.member(Core.Bsr{q, 1n+d, ks, k, far}, Check.stepsOf(s)), Core.allIn(Core.own(q, ts, 1n+d, ks, far), Check.stepsOf(s)), step, o)
+      +below = all_in_app(Core.own(q2, ch, 0n, k, k), List.append(&2, Core.Bsr, Core.steps(ch, k), Core.steps(ts, far)), Check.stepsOf(s), oc, all_in_app(Core.steps(ch, k), Core.steps(ts, far), Check.stepsOf(s), sc, st))
+      {(own, (below, p)) : Walked(grammar, s, q, ks, Core.Node{q2, ch} <> ts, d, k)}
+
+law pop_at:
+  for +grammar: +List<Core.Production>
+  for +s: Gll.GState
+  for +q2: Nat
+  for +x: Nat
+  for +ch: +List<Core.Tree>
+  for +k: Nat
+  for +lhs: {Core.lhsIs(grammar, q2, x) == True{} : Bool}
+  for +p: {Gll.popIn(Gll.CKey{Gll.lhsOf(grammar, q2), k}, endOf(ch, k), Check.popsOf(s)) == True{} : Bool}
+  {Gll.popIn(Gll.CKey{x, k}, Nat.add(k, Core.width(Core.Node{q2, ch})), Check.popsOf(s)) == True{} : Bool}
+
+def pop_at(grammar, s, q2, x, ch, k, lhs, p):
+  %lhs_of(grammar, q2, x, lhs) : {Gll.popIn(Gll.CKey{_, k}, Nat.add(k, Core.width(Core.Node{q2, ch})), Check.popsOf(s)) == True{} : Bool}
+  %end_node(q2, ch, k) : {Gll.popIn(Gll.CKey{Gll.lhsOf(grammar, q2), k}, _, Check.popsOf(s)) == True{} : Bool}
+  p
+
+law need_here:
+  for +grammar: +List<Core.Production>
+  for +q: Nat
+  for +d: Nat
+  for +x: Nat
+  for +need: Core.Need
+  for +rest: +List<Core.Sym>
+  for +k: Nat
+  for +w: Nat
+  for +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == Core.Nonterminal{x, need} <> rest : +List<Core.Sym>}
+  for +h: {Core.needOk(need, w) == True{} : Bool}
+  {Gll.needHolds(Gll.needAt(grammar, q, d), k, Nat.add(k, w)) == True{} : Bool}
+
+def need_here(grammar, q, d, x, need, rest, k, w, ie, h):
+  %Equal.sym(Core.Need, Gll.needAt(grammar, q, d), need, need_at(grammar, q, d, x, need, rest, ie)) : {Gll.needHolds(_, k, Nat.add(k, w)) == True{} : Bool}
+  need_holds(need, w, k, h)
+
+# A node's children are walked: resume its caller at their end, then walk the rest.
+def node_rest(+pred: Gll.Pred, +grammar: +List<Core.Production>, +input: +List<Nat>, +s: Gll.GState, +hc: {Check.closedWith(pred, grammar, input, s) == True{} : Bool},
+  +q: Nat, +ks: Nat, +q2: Nat, +ch: +List<Core.Tree>, +ts: +List<Core.Tree>, +d: Nat, +k: Nat, +x: Nat, +need: Core.Need, +rest: +List<Core.Sym>,
+  +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == Core.Nonterminal{x, need} <> rest : +List<Core.Sym>},
+  +lhs: {Core.lhsIs(grammar, q2, x) == True{} : Bool},
+  +nk: {Core.needOk(need, Core.width(Core.Node{q2, ch})) == True{} : Bool},
+  +rt: {Check.retIn(Gll.CKey{x, k}, Gll.Edge{q, d, ks}, Check.returnsOf(s)) == True{} : Bool},
+  below: Walked(grammar, s, q2, k, ch, 0n, k),
+  recTs: {Check.seenIn(Gll.Desc{q, 1n+d, ks, Nat.add(k, Core.width(Core.Node{q2, ch}))}, s) == True{} : Bool} -> Walked(grammar, s, q, ks, ts, 1n+d, Nat.add(k, Core.width(Core.Node{q2, ch}))))
+  -> Walked(grammar, s, q, ks, Core.Node{q2, ch} <> ts, d, k):
+  match below:
+    case (oc, (sc, pc)):
+      +far = {Nat.add(k, Core.width(Core.Node{q2, ch})) : Nat}
+      +edge = {Gll.Edge{q, d, ks} : Gll.Edge}
+      +ep = ret_ok(Check.returnsOf(s), Gll.CKey{x, k}, edge, grammar, Check.popsOf(s), s, closed_returns(pred, grammar, input, s, hc), rt)
+      +eo = pop_ok(Check.popsOf(s), x, k, edge, far, grammar, s, ep, pop_at(grammar, s, q2, x, ch, k, lhs, pc))
+      +nh = need_here(grammar, q, d, x, need, rest, k, Core.width(Core.Node{q2, ch}), ie, nk)
+      +both = resume_parts(Gll.needHolds(Gll.needAt(grammar, q, d), k, far), q, d, ks, k, far, s, nh, eo)
+      +seen = Lemma.and_true_left(Check.seenIn(Gll.Desc{q, 1n+d, ks, far}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, k, far}, s), both)
+      +step = Lemma.and_true_right_side(Check.seenIn(Gll.Desc{q, 1n+d, ks, far}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, k, far}, s), both)
+      node_join(grammar, s, q, ks, q2, ch, ts, d, k, step, oc, sc, recTs(seen))
+
+law walk:
+  for f: +List<Core.Tree>
+  for items: +List<Core.Sym>
+  for +pred: Gll.Pred
+  for +grammar: +List<Core.Production>
   for +input: +List<Nat>
   for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Skip{} <> ts, input, pos)
-  for ready: Ready(False{}, pr, grammar, input, s, Spec.Skip{} <> ts, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos)
+  for +hc: {Check.closedWith(pred, grammar, input, s) == True{} : Bool}
+  for +q: Nat
+  for +d: Nat
+  for +ks: Nat
+  for +k: Nat
+  for +ie: {dropFrom(d, Core.rhsOf(grammar, q)) == items : +List<Core.Sym>}
+  for +r: {Core.reads(f, grammar, items, input, k) == True{} : Bool}
+  for +sd: {Check.seenIn(Gll.Desc{q, d, ks, k}, s) == True{} : Bool}
+  for +ad: {Check.admitsAll(f, pred, input, k) == True{} : Bool}
+  Walked(grammar, s, q, ks, f, d, k)
 
-def skip_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, ts, pEq, sp, ready, ihTs):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Sym{Spec.Terminal{+t}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Sym{Spec.Nonterminal{+x}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Group{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Optional{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Brack{Spec.Optional{}, balts} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Skip{} <> ts, grammar, Spec.Brack{Spec.Optional{}, balts} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Optional{}, balts}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Optional{}, balts}, rest, rem)
-          skip_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, ts, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihTs)
-    case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Skip{} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Eps{}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Eps{} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Skip{} <> ts, grammar, Spec.Eps{} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Eps{}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Eps{}, rest, rem)
-          eps_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, ts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihTs)
-
-law loop0_disp:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Loop{[]} <> ts, input, pos)
-  for ready: Ready(False{}, pr, grammar, input, s, Spec.Loop{[]} <> ts, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def loop0_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, ts, pEq, sp, ready, ihTs):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Sym{Spec.Terminal{+t}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Sym{Spec.Nonterminal{+x}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Group{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Optional{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Brack{Spec.Closure{}, balts} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Loop{[]} <> ts, grammar, Spec.Brack{Spec.Closure{}, balts} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Closure{}, balts}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Closure{}, balts}, rest, rem)
-          empty_loop_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, ts, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, fit, ihTs)
-    case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Eps{}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{[]} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-
-law loop_disp:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +r: Spec.Tree
-  for +rr: +List<Spec.Tree>
-  for +ts: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Loop{r <> rr} <> ts, input, pos)
-  for ready: Ready(False{}, pr, grammar, input, s, Spec.Loop{r <> rr} <> ts, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  for ihRs: WalkIH(pr, grammar, input, s, r <> rr)
-  for ihTs: WalkIH(pr, grammar, input, s, ts)
-  Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos)
-
-def loop_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, r, rr, ts, pEq, sp, ready, ihRs, ihTs):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Sym{Spec.Terminal{+t}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Sym{Spec.Nonterminal{+x}}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Group{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Optional{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-    case Con{Spec.Brack{Spec.Closure{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Brack{Spec.Closure{}, balts} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Loop{r <> rr} <> ts, grammar, Spec.Brack{Spec.Closure{}, balts} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Closure{}, balts}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Closure{}, balts}, rest, rem)
-          +okR = Spec.roundsOk(Spec.Closure{}, r <> rr)
-          +both = Lemma.and_true_left(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit)
-          loop_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, r, rr, ts, Spec.Closure{}, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, {==},
-            Lemma.and_true_left(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), both),
-            Lemma.and_true_right_side(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), both),
-            Lemma.and_true_right_side(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit), ihRs, ihTs)
-    case Con{Spec.Brack{Spec.Positive{}, +balts}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          +seen = {seen0 : {Check.descSeen(Gll.Desc{index, rpath, dot, ctx, pos}, s) == True{} : Bool}}
-          +rem = {rem0 : {dropItems(dot, Gll.seqAt(grammar, index, rpath)) == Spec.Brack{Spec.Positive{}, balts} <> rest : +List<Spec.Item>}}
-          +fit = {fit0 : {Spec.fits(Spec.Loop{r <> rr} <> ts, grammar, Spec.Brack{Spec.Positive{}, balts} <> rest) == True{} : Bool}}
-          +itemEq = drop_next(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Positive{}, balts}, rest, rem)
-          +restEq = drop_succ(dot, Gll.seqAt(grammar, index, rpath), Spec.Brack{Spec.Positive{}, balts}, rest, rem)
-          +okR = Spec.roundsOk(Spec.Positive{}, r <> rr)
-          +both = Lemma.and_true_left(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit)
-          loop_case(pr, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, r, rr, ts, Spec.Positive{}, balts, rest, pEq, sp, finEq, ctxF, foF, seen, itemEq, restEq, {==},
-            Lemma.and_true_left(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), both),
-            Lemma.and_true_right_side(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts})), both),
-            Lemma.and_true_right_side(Bool.and(okR, Spec.fits(r <> rr, grammar, Spec.times(List.length(&2, Spec.Tree, r <> rr), Spec.Brack{Spec.Group{}, balts}))), Spec.fits(ts, grammar, rest), fit), ihRs, ihTs)
-    case Con{Spec.Eps{}, +rest}:
-      match ready:
-        case (seen0, (rem0, (fit0, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, Spec.Loop{r <> rr} <> ts, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit0))
-
-law round_disp:
-  for +pr: Gll.Pred
-  for +a: Nat
-  for +ch: +List<Spec.Tree>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +rest: +List<Spec.Tree>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(Spec.Pick{a, ch} <> rest, input, pos)
-  for ready: Ready(True{}, pr, grammar, input, s, Spec.Pick{a, ch} <> rest, index, rpath, dot, ctx, pos, ff, fin, [], kind, alts)
-  for ihCh: WalkIH(pr, grammar, input, s, ch)
-  for ihRest: WalkIH(pr, grammar, input, s, rest)
-  Walked(True{}, grammar, s, Spec.Pick{a, ch} <> rest, index, rpath, prefix, dot, ctx, pos)
-
-def round_disp(pr, a, ch, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, rest, pEq, sp, ready, ihCh, ihRest):
-  match ready:
-    case (starts0, (itemEq0, (loopOk0, (fit0, (finEq, (after, (foL, rinv0))))))):
-      +rinv = {rinv0 : {roundsReady(kind, ctx, pos, Spec.Pick{a, ch} <> rest) == True{} : Bool}}
-      +starts = {starts0 : {Check.allWanted(pr, grammar, input, Gll.alternatives(List.length(&2, +List<Spec.Item>, alts), index, rpath, ctx, pos), s) == True{} : Bool}}
-      +itemEq = {itemEq0 : {loopItem(grammar, index, rpath) == Some{Spec.Brack{kind, alts}} : Maybe<&2, Spec.Item>}}
-      +loopOk = {loopOk0 : {Gll.isLoop(kind) == True{} : Bool}}
-      +fit = {fit0 : {Spec.fits(Spec.Pick{a, ch} <> rest, grammar, Spec.times(List.length(&2, Spec.Tree, Spec.Pick{a, ch} <> rest), Spec.Brack{Spec.Group{}, alts})) == True{} : Bool}}
-      +h = Bool.and(Spec.isAlt(alts, a), Spec.fits(ch, grammar, Spec.altOf(alts, a)))
-      +R = Spec.fits(rest, grammar, Spec.times(List.length(&2, Spec.Tree, rest), Spec.Brack{Spec.Group{}, alts}))
-      +hOk = Lemma.and_true_left(h, R, fit)
-      round_case(pr, rpath, grammar, input, s, closedOk, start, po, index, prefix, dot, ctx, pos, ff, fin, a, ch, rest, kind, alts, pEq, sp, finEq, after, foL, starts, itemEq, loopOk,
-        Lemma.and_true_left(Spec.isAlt(alts, a), Spec.fits(ch, grammar, Spec.altOf(alts, a)), hOk),
-        Lemma.and_true_right_side(Spec.isAlt(alts, a), Spec.fits(ch, grammar, Spec.altOf(alts, a)), hOk),
-        Lemma.and_true_right_side(h, R, fit), rinv, ihCh, ihRest)
-
-law seq_nil:
-  for +pr: Gll.Pred
-  for items: +List<Spec.Item>
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for ready: Ready(False{}, pr, grammar, input, s, [], index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  Walked(False{}, grammar, s, [], index, rpath, prefix, dot, ctx, pos)
-
-def seq_nil(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, pEq, ready):
-  match items:
-    case Nil{}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          nil_seq(pr, dot, grammar, input, s, closedOk, start, po, index, rpath, prefix, ctx, pos, pEq, seen, drop_end(dot, Gll.seqAt(grammar, index, rpath), rem))
-    case Con{it, rest}:
-      match ready:
-        case (seen, (rem, (fit, (finEq, (ctxF, foF))))):
-          Empty.absurd(Walked(False{}, grammar, s, [], index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-
-# Every step of a forest walked from a seen descriptor (or from a loop's starts) is in a
-# closed state, and the sequence (or the loop) ends where the forest ends.
-law walk_closed:
-  for +pr: Gll.Pred
-  for forest: +List<Spec.Tree>
-  for rounds: Bool
-  for +grammar: +List<Spec.Production>
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +start: Nat
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +index: Nat
-  for +rpath: +List<Nat>
-  for +prefix: +List<Nat>
-  for +dot: Nat
-  for +ctx: Nat
-  for +pos: Nat
-  for +ff: Nat
-  for +fin: Nat
-  for +items: +List<Spec.Item>
-  for +kind: Spec.Bracket
-  for +alts: +List<+List<Spec.Item>>
-  for +pEq: {prefix == Gll.reverseOnto(rpath, []) : +List<Nat>}
-  for +sp: Spells(forest, input, pos)
-  for ready: Ready(rounds, pr, grammar, input, s, forest, index, rpath, dot, ctx, pos, ff, fin, items, kind, alts)
-  Walked(rounds, grammar, s, forest, index, rpath, prefix, dot, ctx, pos)
-
-def walk_closed(pr, forest, rounds, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, items, kind, alts, pEq, sp, ready):
-  match forest rounds:
-    case Nil{} False{}:
-      seq_nil(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, pEq, ready)
-    case Nil{} True{}:
-      ({==}, {==})
-    case Con{Spec.Leaf{+k0}, +ts} False{}:
-      leaf_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, k0, ts, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ts, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Node{+q, +ch}, +ts} False{}:
-      node_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, q, ch, ts, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ch, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)), (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ts, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Pick{+a, +ch}, +ts} False{}:
-      pick_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, a, ch, ts, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ch, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)), (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ts, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Skip{}, +ts} False{}:
-      skip_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, ts, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ts, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Loop{Nil{}}, +ts} False{}:
-      loop0_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, ts, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ts, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Loop{Con{+r, +rr}}, +ts} False{}:
-      loop_disp(pr, items, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, r, rr, ts, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, r <> rr, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)), (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ts, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Pick{+a, +ch}, +rest} True{}:
-      round_disp(pr, a, ch, grammar, input, s, closedOk, start, po, index, rpath, prefix, dot, ctx, pos, ff, fin, kind, alts, rest, pEq, sp, ready, (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, ch, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)), (ri => ix => rx => px => dx => cx => qx => fx => nx => its => kx => ax => pe => spx => rd => walk_closed(pr, rest, ri, grammar, input, s, closedOk, start, po, ix, rx, px, dx, cx, qx, fx, nx, its, kx, ax, pe, spx, rd)))
-    case Con{Spec.Leaf{k0}, rest} True{}:
-      match ready:
-        case (st, (ie, (lo, (fit, (fe, (af, (fl, ri))))))):
-          Empty.absurd(Walked(True{}, grammar, s, Spec.Leaf{k0} <> rest, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Node{q, ch}, rest} True{}:
-      match ready:
-        case (st, (ie, (lo, (fit, (fe, (af, (fl, ri))))))):
-          Empty.absurd(Walked(True{}, grammar, s, Spec.Node{q, ch} <> rest, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Skip{}, rest} True{}:
-      match ready:
-        case (st, (ie, (lo, (fit, (fe, (af, (fl, ri))))))):
-          Empty.absurd(Walked(True{}, grammar, s, Spec.Skip{} <> rest, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
-    case Con{Spec.Loop{rs}, rest} True{}:
-      match ready:
-        case (st, (ie, (lo, (fit, (fe, (af, (fl, ri))))))):
-          Empty.absurd(Walked(True{}, grammar, s, Spec.Loop{rs} <> rest, index, rpath, prefix, dot, ctx, pos), Lemma.false_is_not_true(fit))
+def walk(f, items, pred, grammar, input, s, hc, q, d, ks, k, ie, r, sd, ad):
+  match f items:
+    case Nil{} Nil{}:
+      +ok = desc_end(grammar, input, s, q, d, ks, k, ie, desc_ok(Check.seenOf(s), Gll.Desc{q, d, ks, k}, grammar, input, s, closed_descs(pred, grammar, input, s, hc), sd))
+      +em = {Check.emptyOk(d, q, ks, k, s) : Bool}
+      +pop = {Gll.popIn(Gll.CKey{Gll.lhsOf(grammar, q), ks}, k, Check.popsOf(s)) : Bool}
+      +own = empty_own(d, q, ks, k, s, Lemma.and_true_left(em, pop, ok))
+      +ended = Lemma.and_true_right_side(em, pop, ok)
+      {(own, ({==}, ended)) : Walked(grammar, s, q, ks, [], d, k)}
+    case Nil{} Con{+y, +ys}:
+      Empty.absurd(Walked(grammar, s, q, ks, [], d, k), Lemma.false_is_not_true(r))
+    case Con{Core.Leaf{+a}, +ts} Nil{}:
+      Empty.absurd(Walked(grammar, s, q, ks, Core.Leaf{a} <> ts, d, k), Lemma.false_is_not_true(r))
+    case Con{Core.Leaf{+a}, +ts} Con{Core.Nonterminal{+x, +need}, +rest}:
+      Empty.absurd(Walked(grammar, s, q, ks, Core.Leaf{a} <> ts, d, k), Lemma.false_is_not_true(r))
+    case Con{Core.Leaf{+a}, +ts} Con{Core.Terminal{+t}, +rest}:
+      +more = {Bool.and(Core.tokIs(Core.tokAt(input, k), a), Core.reads(ts, grammar, rest, input, 1n+k)) : Bool}
+      +ea = Lemma.nat_eq_sound(a, t, Lemma.and_true_left(Nat.is_eq(a, t), more, r))
+      +tk = token_here(input, k, a, t, ea, Lemma.and_true_left(Core.tokIs(Core.tokAt(input, k), a), Core.reads(ts, grammar, rest, input, 1n+k), Lemma.and_true_right_side(Nat.is_eq(a, t), more, r)))
+      +rt = Lemma.and_true_right_side(Core.tokIs(Core.tokAt(input, k), a), Core.reads(ts, grammar, rest, input, 1n+k), Lemma.and_true_right_side(Nat.is_eq(a, t), more, r))
+      +ok = desc_item(grammar, input, s, q, d, ks, k, Core.Terminal{t}, rest, ie, desc_ok(Check.seenOf(s), Gll.Desc{q, d, ks, k}, grammar, input, s, closed_descs(pred, grammar, input, s, hc), sd))
+      +both = token_parts(Core.tokIs(Core.tokAt(input, k), t), q, d, ks, k, s, tk, ok)
+      +seen = Lemma.and_true_left(Check.seenIn(Gll.Desc{q, 1n+d, ks, 1n+k}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, k, 1n+k}, s), both)
+      +step = Lemma.and_true_right_side(Check.seenIn(Gll.Desc{q, 1n+d, ks, 1n+k}, s), Check.stepIn(Core.Bsr{q, 1n+d, ks, k, 1n+k}, s), both)
+      leaf_join(grammar, s, q, ks, a, ts, d, k, step,
+        walk(ts, rest, pred, grammar, input, s, hc, q, 1n+d, ks, 1n+k, drop_next(Core.rhsOf(grammar, q), d, Core.Terminal{t}, rest, ie), rt, seen, ad))
+    case Con{Core.Node{+q2, +ch}, +ts} Nil{}:
+      Empty.absurd(Walked(grammar, s, q, ks, Core.Node{q2, ch} <> ts, d, k), Lemma.false_is_not_true(r))
+    case Con{Core.Node{+q2, +ch}, +ts} Con{Core.Terminal{+t}, +rest}:
+      Empty.absurd(Walked(grammar, s, q, ks, Core.Node{q2, ch} <> ts, d, k), Lemma.false_is_not_true(r))
+    case Con{Core.Node{+q2, +ch}, +ts} Con{Core.Nonterminal{+x, +need}, +rest}:
+      +far = {Nat.add(k, Core.width(Core.Node{q2, ch})) : Nat}
+      +head = {Bool.and(Core.lhsIs(grammar, q2, x), Core.needOk(need, Core.width(Core.Node{q2, ch}))) : Bool}
+      +own = {Bool.and(head, Core.reads(ch, grammar, Core.rhsOf(grammar, q2), input, k)) : Bool}
+      +left = Lemma.and_true_left(own, Core.reads(ts, grammar, rest, input, far), r)
+      +hd = Lemma.and_true_left(head, Core.reads(ch, grammar, Core.rhsOf(grammar, q2), input, k), left)
+      +lhs = Lemma.and_true_left(Core.lhsIs(grammar, q2, x), Core.needOk(need, Core.width(Core.Node{q2, ch})), hd)
+      +nk = Lemma.and_true_right_side(Core.lhsIs(grammar, q2, x), Core.needOk(need, Core.width(Core.Node{q2, ch})), hd)
+      +rc = Lemma.and_true_right_side(head, Core.reads(ch, grammar, Core.rhsOf(grammar, q2), input, k), left)
+      +rt = Lemma.and_true_right_side(own, Core.reads(ts, grammar, rest, input, far), r)
+      +ok = desc_item(grammar, input, s, q, d, ks, k, Core.Nonterminal{x, need}, rest, ie, desc_ok(Check.seenOf(s), Gll.Desc{q, d, ks, k}, grammar, input, s, closed_descs(pred, grammar, input, s, hc), sd))
+      +cl = Lemma.and_true_left(Gll.keyIn(Gll.CKey{x, k}, Check.clustersOf(s)), Check.retIn(Gll.CKey{x, k}, Gll.Edge{q, d, ks}, Check.returnsOf(s)), ok)
+      +re = Lemma.and_true_right_side(Gll.keyIn(Gll.CKey{x, k}, Check.clustersOf(s)), Check.retIn(Gll.CKey{x, k}, Gll.Edge{q, d, ks}, Check.returnsOf(s)), ok)
+      +tok = Core.tokAt(input, k)
+      +adh = {Gll.admits(pred, q2, tok) : Bool}
+      +adc = {Check.admitsAll(ch, pred, input, k) : Bool}
+      +adt = {Check.admitsAll(ts, pred, input, far) : Bool}
+      +seed = seed_seen(grammar, q2, x, 0n, k, s, pred, tok, lhs, Lemma.and_true_left(adh, Bool.and(adc, adt), ad), cluster_seeds(Check.clustersOf(s), x, k, pred, grammar, input, s, closed_clusters(pred, grammar, input, s, hc), cl))
+      +adr = Lemma.and_true_right_side(adh, Bool.and(adc, adt), ad)
+      node_rest(pred, grammar, input, s, hc, q, ks, q2, ch, ts, d, k, x, need, rest, ie, lhs, nk, re,
+        walk(ch, Core.rhsOf(grammar, q2), pred, grammar, input, s, hc, q2, 0n, k, k, {==}, rc, seed, Lemma.and_true_left(adc, adt, adr)),
+        seen => walk(ts, rest, pred, grammar, input, s, hc, q, 1n+d, ks, far, drop_next(Core.rhsOf(grammar, q), d, Core.Nonterminal{x, need}, rest, ie), rt, seen, Lemma.and_true_right_side(adc, adt, adr)))
 
 # ======== THE THEOREM ========
 
-# The leaves of the root's children are the input, read from position 0.
-law root_spells:
-  for +input: +List<Nat>
-  for +q: Nat
-  for +ch: +List<Spec.Tree>
-  for spelled: {Spec.leaves([Spec.Node{q, ch}]) == input : +List<Nat>}
-  Spells(ch, input, 0n)
+law bsr_eq_sound:
+  for a: Core.Bsr
+  for b: Core.Bsr
+  for +e: {Core.bsrEq(a, b) == True{} : Bool}
+  {a == b : Core.Bsr}
 
-def root_spells(input, q, ch, spelled):
-  +lch = Spec.leaves(ch)
-  +same = Equal.trans(+List<Nat>, lch, List.append(&2, Nat, lch, []), input, Equal.sym(+List<Nat>, List.append(&2, Nat, lch, []), lch, Lemma.append_nil_right(lch)), spelled)
-  Equal.trans(+List<Nat>, lch, input, Lemma.takeN(List.length(&2, Nat, lch), input), same,
-    Equal.trans(+List<Nat>, input, Lemma.takeN(List.length(&2, Nat, input), input), Lemma.takeN(List.length(&2, Nat, lch), input),
-      Equal.sym(+List<Nat>, Lemma.takeN(List.length(&2, Nat, input), input), input, Lemma.take_length(input)),
-      Equal.cong(+List<Nat>, +List<Nat>, v => Lemma.takeN(List.length(&2, Nat, v), input), input, lch, Equal.sym(+List<Nat>, lch, input, same))))
-
-law root_done:
-  for +grammar: +List<Spec.Production>
-  for +s: Gll.GState
-  for +q: Nat
-  for +ch: +List<Spec.Tree>
-  for w: Walked(False{}, grammar, s, ch, q, [], [], 0n, 0n, 0n)
-  {Spec.allIn(Spec.steps(Spec.Node{q, ch}, 0n), Check.stepsOf(s)) == True{} : Bool}
-
-def root_done(grammar, s, q, ch, w):
-  match w:
-    case (steps, pop):
-      steps
-
-# A closed state with the start symbol's cluster at 0 holds every step of every parse tree.
-law closed_complete:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +closedOk: {Check.closedWith(pr, grammar, input, s) == True{} : Bool}
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for +rootIn: {Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s) == True{} : Bool}
-  for tree: Spec.Tree
-  for fitting: {Spec.fits([tree], grammar, [Spec.Sym{Spec.Nonterminal{start}}]) == True{} : Bool}
-  for +spelled: {Spec.leaves([tree]) == input : +List<Nat>}
-  {Spec.allIn(Spec.steps(tree, 0n), Check.stepsOf(s)) == True{} : Bool}
-
-def closed_complete(pr, grammar, start, input, s, closedOk, po, rootIn, tree, fitting, spelled):
-  match tree:
-    case Spec.Leaf{k}:
-      Empty.absurd({Spec.allIn(Spec.steps(Spec.Leaf{k}, 0n), Check.stepsOf(s)) == True{} : Bool}, Lemma.false_is_not_true(fitting))
-    case Spec.Node{+q, +ch}:
-      +both = fitting
-      +h = Bool.and(Spec.lhsIs(grammar, q, start), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)))
-      +hOk = Lemma.and_true_left(h, True{}, both)
-      +lhsOk = Lemma.and_true_left(Spec.lhsIs(grammar, q, start), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)), hOk)
-      +fitCh = Lemma.and_true_right_side(Spec.lhsIs(grammar, q, start), Spec.fits(ch, grammar, Spec.rhsOf(grammar, q)), hOk)
-      seeds = cluster_ok(pr, grammar, input, s, closedOk, Gll.CKey{Gll.TNt{start}, 0n}, rootIn)
-      startSeen = productions_seen(pr, grammar, input, grammar, start, 0n, 0n, q, s, lhsOk, seeds)
-      +lch = Spec.leaves(ch)
-      +spCh = root_spells(input, q, ch, spelled)
-      +sameL = Equal.trans(+List<Nat>, lch, List.append(&2, Nat, lch, []), input, Equal.sym(+List<Nat>, List.append(&2, Nat, lch, []), lch, Lemma.append_nil_right(lch)), spelled)
-      +finCh = Equal.cong(+List<Nat>, Nat, v => List.length(&2, Nat, v), lch, input, sameL)
-      +ctxCh = Pr.root_ctx(pr, grammar, start, input, q, po, lhsOk)
-      +foCh = Pr.fo_node(pr, grammar, start, q, start, po, lhsOk)
-      +seen0 = wanted_hit(pr, grammar, input, Gll.Desc{q, [], 0n, 0n, 0n}, s, Pr.admit_any(pr, grammar, start, input, q, [], 0n, 0n, ch, 0n, List.length(&2, Nat, input), po, fitCh, spCh, finCh, ctxCh, {==}), startSeen)
-      root_done(grammar, s, q, ch,
-        walk_closed(pr, ch, False{}, grammar, input, s, closedOk, start, po, q, [], [], 0n, 0n, 0n, Gll.nestFuel(), List.length(&2, Nat, input), Spec.rhsOf(grammar, q), Spec.Group{}, [], {==}, spCh, (seen0, ({==}, (fitCh, (finCh, (ctxCh, foCh)))))))
-    case Spec.Pick{a, ch}:
-      Empty.absurd({Spec.allIn(Spec.steps(Spec.Pick{a, ch}, 0n), Check.stepsOf(s)) == True{} : Bool}, Lemma.false_is_not_true(fitting))
-    case Spec.Skip{}:
-      Empty.absurd({Spec.allIn(Spec.steps(Spec.Skip{}, 0n), Check.stepsOf(s)) == True{} : Bool}, Lemma.false_is_not_true(fitting))
-    case Spec.Loop{rs}:
-      Empty.absurd({Spec.allIn(Spec.steps(Spec.Loop{rs}, 0n), Check.stepsOf(s)) == True{} : Bool}, Lemma.false_is_not_true(fitting))
-# ======== THE CHECKED PARSER MISSES NOTHING ========
-
-law path_eq_sound:
-  for xs: +List<Nat>
-  for ys: +List<Nat>
-  for e: {Spec.pathEq(xs, ys) == True{} : Bool}
-  {xs == ys : +List<Nat>}
-
-def path_eq_sound(xs, ys, e):
-  match xs ys:
-    case Nil{} Nil{}:
-      {==}
-    case Nil{} Con{y, yr}:
-      Empty.absurd({[] == y <> yr : +List<Nat>}, Lemma.false_is_not_true(e))
-    case Con{x, xr} Nil{}:
-      Empty.absurd({x <> xr == [] : +List<Nat>}, Lemma.false_is_not_true(e))
-    case Con{+x, +xr} Con{+y, +yr}:
-      +both = e
-      ex = Lemma.nat_eq_sound(x, y, Lemma.and_true_left(Nat.is_eq(x, y), Spec.pathEq(xr, yr), both))
-      er = path_eq_sound(xr, yr, Lemma.and_true_right_side(Nat.is_eq(x, y), Spec.pathEq(xr, yr), both))
-      %ex : {x <> xr == _ <> yr : +List<Nat>}
-      %er : {x <> xr == x <> _ : +List<Nat>}
+def bsr_eq_sound(a, b, e):
+  match a b:
+    case Core.Bsr{+q1, +d1, +i1, +k1, +j1} Core.Bsr{+q2, +d2, +i2, +k2, +j2}:
+      +r1 = {Bool.and(Nat.is_eq(d1, d2), Bool.and(Nat.is_eq(i1, i2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(j1, j2)))) : Bool}
+      +r2 = {Bool.and(Nat.is_eq(i1, i2), Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(j1, j2))) : Bool}
+      +r3 = {Bool.and(Nat.is_eq(k1, k2), Nat.is_eq(j1, j2)) : Bool}
+      +e1 = Lemma.and_true_right_side(Nat.is_eq(q1, q2), r1, e)
+      +e2 = Lemma.and_true_right_side(Nat.is_eq(d1, d2), r2, e1)
+      +e3 = Lemma.and_true_right_side(Nat.is_eq(i1, i2), r3, e2)
+      +eq = Lemma.nat_eq_sound(q1, q2, Lemma.and_true_left(Nat.is_eq(q1, q2), r1, e))
+      +ed = Lemma.nat_eq_sound(d1, d2, Lemma.and_true_left(Nat.is_eq(d1, d2), r2, e1))
+      +ei = Lemma.nat_eq_sound(i1, i2, Lemma.and_true_left(Nat.is_eq(i1, i2), r3, e2))
+      +ek = Lemma.nat_eq_sound(k1, k2, Lemma.and_true_left(Nat.is_eq(k1, k2), Nat.is_eq(j1, j2), e3))
+      +ej = Lemma.nat_eq_sound(j1, j2, Lemma.and_true_right_side(Nat.is_eq(k1, k2), Nat.is_eq(j1, j2), e3))
+      %eq : {Core.Bsr{q1, d1, i1, k1, j1} == Core.Bsr{_, d2, i2, k2, j2} : Core.Bsr}
+      %ed : {Core.Bsr{q1, d1, i1, k1, j1} == Core.Bsr{q1, _, i2, k2, j2} : Core.Bsr}
+      %ei : {Core.Bsr{q1, d1, i1, k1, j1} == Core.Bsr{q1, d1, _, k2, j2} : Core.Bsr}
+      %ek : {Core.Bsr{q1, d1, i1, k1, j1} == Core.Bsr{q1, d1, i1, _, j2} : Core.Bsr}
+      %ej : {Core.Bsr{q1, d1, i1, k1, j1} == Core.Bsr{q1, d1, i1, k1, _} : Core.Bsr}
       {==}
 
-law ebnf_bsr_eq_sound:
-  for +p: Nat
-  for +path: +List<Nat>
-  for +i: Nat
-  for +k: Nat
-  for +j: Nat
-  for +p2: Nat
-  for +path2: +List<Nat>
-  for +i2: Nat
-  for +k2: Nat
-  for +j2: Nat
-  for same: {Bool.and(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))))) == True{} : Bool}
-  {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p2, path2}, i2, k2, j2} : Spec.Bsr}
-
-def ebnf_bsr_eq_sound(p, path, i, k, j, p2, path2, i2, k2, j2, same):
-  +s0 = same
-  +s1 = Lemma.and_true_right_side(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2)))), s0)
-  +s2 = Lemma.and_true_right_side(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))), s1)
-  +s3 = Lemma.and_true_right_side(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2)), s2)
-  ep = Lemma.nat_eq_sound(p, p2, Lemma.and_true_left(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2)))), s0))
-  epath = path_eq_sound(path, path2, Lemma.and_true_left(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))), s1))
-  ei = Lemma.nat_eq_sound(i, i2, Lemma.and_true_left(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2)), s2))
-  ek = Lemma.nat_eq_sound(k, k2, Lemma.and_true_left(Nat.is_eq(k, k2), Nat.is_eq(j, j2), s3))
-  ej = Lemma.nat_eq_sound(j, j2, Lemma.and_true_right_side(Nat.is_eq(k, k2), Nat.is_eq(j, j2), s3))
-  %ep : {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{_, path2}, i2, k2, j2} : Spec.Bsr}
-  %epath : {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p, _}, i2, k2, j2} : Spec.Bsr}
-  %ei : {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p, path}, _, k2, j2} : Spec.Bsr}
-  %ek : {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p, path}, i, _, j2} : Spec.Bsr}
-  %ej : {Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p, path}, i, k, _} : Spec.Bsr}
-  {==}
-
-law member_pick:
-  for +element: Spec.Bsr
-  for +x: Spec.Bsr
-  for -rest: +List<Spec.Bsr>
-  for +set: +List<Spec.Bsr>
-  for cases: Either<{element == x : Spec.Bsr}, {Spec.bsrMember(element, rest) == True{} : Bool}>
-  for +inX: {Spec.bsrMember(x, set) == True{} : Bool}
-  for searchRest: {Spec.bsrMember(element, rest) == True{} : Bool} -> {Spec.bsrMember(element, set) == True{} : Bool}
-  {Spec.bsrMember(element, set) == True{} : Bool}
-
-def member_pick(element, x, rest, set, cases, inX, searchRest):
+def member_pick(+x: Core.Bsr, +y: Core.Bsr, +rest: +List<Core.Bsr>, +set: +List<Core.Bsr>,
+  cases: Either<{Core.bsrEq(x, y) == True{} : Bool}, {Core.member(x, rest) == True{} : Bool}>,
+  +here: {Core.member(y, set) == True{} : Bool},
+  later: {Core.member(x, rest) == True{} : Bool} -> {Core.member(x, set) == True{} : Bool})
+  -> {Core.member(x, set) == True{} : Bool}:
   match cases:
-    case Inl{same}:
-      Equal.trans(Bool, Spec.bsrMember(element, set), Spec.bsrMember(x, set), True{}, Equal.cong(Spec.Bsr, Bool, v => Spec.bsrMember(v, set), element, x, same), inX)
-    case Inr{later}:
-      searchRest(later)
+    case Inl{e}:
+      %Equal.sym(Core.Bsr, x, y, bsr_eq_sound(x, y, e)) : {Core.member(_, set) == True{} : Bool}
+      here
+    case Inr{m}:
+      later(m)
 
-law ebnf_cases_pick:
-  for +p: Nat
-  for +path: +List<Nat>
-  for +i: Nat
-  for +k: Nat
-  for +j: Nat
-  for +p2: Nat
-  for +path2: +List<Nat>
-  for +i2: Nat
-  for +k2: Nat
-  for +j2: Nat
-  for -rest: +List<Spec.Bsr>
-  for cases: Either<{Bool.and(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))))) == True{} : Bool}, {Spec.bsrMember(Spec.Bsr{Spec.Slot{p, path}, i, k, j}, rest) == True{} : Bool}>
-  Either<{Spec.Bsr{Spec.Slot{p, path}, i, k, j} == Spec.Bsr{Spec.Slot{p2, path2}, i2, k2, j2} : Spec.Bsr}, {Spec.bsrMember(Spec.Bsr{Spec.Slot{p, path}, i, k, j}, rest) == True{} : Bool}>
+law all_in_member:
+  for xs: +List<Core.Bsr>
+  for +set: +List<Core.Bsr>
+  for +x: Core.Bsr
+  for +all: {Core.allIn(xs, set) == True{} : Bool}
+  for +m: {Core.member(x, xs) == True{} : Bool}
+  {Core.member(x, set) == True{} : Bool}
 
-def ebnf_cases_pick(p, path, i, k, j, p2, path2, i2, k2, j2, rest, cases):
-  match cases:
-    case Inl{same}:
-      Inl{ebnf_bsr_eq_sound(p, path, i, k, j, p2, path2, i2, k2, j2, same)}
-    case Inr{later}:
-      Inr{later}
-
-law ebnf_member_cases:
-  for element: Spec.Bsr
-  for x: Spec.Bsr
-  for -rest: +List<Spec.Bsr>
-  for m: {Spec.bsrMember(element, x <> rest) == True{} : Bool}
-  Either<{element == x : Spec.Bsr}, {Spec.bsrMember(element, rest) == True{} : Bool}>
-
-def ebnf_member_cases(element, x, rest, m):
-  match element x:
-    case Spec.Bsr{Spec.Slot{+p, +path}, +i, +k, +j} Spec.Bsr{Spec.Slot{+p2, +path2}, +i2, +k2, +j2}:
-      ebnf_cases_pick(p, path, i, k, j, p2, path2, i2, k2, j2, rest,
-        Lemma.or_true_cases(Bool.and(Nat.is_eq(p, p2), Bool.and(Spec.pathEq(path, path2), Bool.and(Nat.is_eq(i, i2), Bool.and(Nat.is_eq(k, k2), Nat.is_eq(j, j2))))), Spec.bsrMember(Spec.Bsr{Spec.Slot{p, path}, i, k, j}, rest), m))
-
-law ebnf_not_in_empty:
-  for element: Spec.Bsr
-  for m: {Spec.bsrMember(element, []) == True{} : Bool}
-  Empty
-
-def ebnf_not_in_empty(element, m):
-  match element:
-    case Spec.Bsr{Spec.Slot{p, path}, i, k, j}:
-      Lemma.false_is_not_true(m)
-
-# An element of xs is in every set that holds all of xs.
-law ebnf_all_in_member:
-  for xs: +List<Spec.Bsr>
-  for +set: +List<Spec.Bsr>
-  for +element: Spec.Bsr
-  for all: {Spec.allIn(xs, set) == True{} : Bool}
-  for m: {Spec.bsrMember(element, xs) == True{} : Bool}
-  {Spec.bsrMember(element, set) == True{} : Bool}
-
-def ebnf_all_in_member(xs, set, element, all, m):
+def all_in_member(xs, set, x, all, m):
   match xs:
     case Nil{}:
-      Empty.absurd({Spec.bsrMember(element, set) == True{} : Bool}, ebnf_not_in_empty(element, m))
-    case Con{+x, +rest}:
-      +both = all
-      member_pick(element, x, rest, set, ebnf_member_cases(element, x, rest, m),
-        Lemma.and_true_left(Spec.bsrMember(x, set), Spec.allIn(rest, set), both),
-        later => ebnf_all_in_member(rest, set, element, Lemma.and_true_right_side(Spec.bsrMember(x, set), Spec.allIn(rest, set), both), later))
+      Empty.absurd({Core.member(x, set) == True{} : Bool}, Lemma.false_is_not_true(m))
+    case Con{+y, +rest}:
+      member_pick(x, y, rest, set, Lemma.or_true_cases(Core.bsrEq(x, y), Core.member(x, rest), m),
+        Lemma.and_true_left(Core.member(y, set), Core.allIn(rest, set), all),
+        later => all_in_member(rest, set, x, Lemma.and_true_right_side(Core.member(y, set), Core.allIn(rest, set), all), later))
 
-def stepsOr(m: Maybe<&2, +List<Spec.Bsr>>) -> +List<Spec.Bsr>:
+def tree_join(+grammar: +List<Core.Production>, +s: Gll.GState, +q: Nat, +ch: +List<Core.Tree>, w: Walked(grammar, s, q, 0n, ch, 0n, 0n))
+  -> {Core.allIn(Core.steps([Core.Node{q, ch}], 0n), Check.stepsOf(s)) == True{} : Bool}:
+  match w:
+    case (o, (st, p)):
+      all_in_app(Core.own(q, ch, 0n, 0n, 0n), List.append(&2, Core.Bsr, Core.steps(ch, 0n), []), Check.stepsOf(s), o, all_in_app(Core.steps(ch, 0n), [], Check.stepsOf(s), st, {==}))
+
+law plain_admits:
+  for f: +List<Core.Tree>
+  for +input: +List<Nat>
+  for +k: Nat
+  {Check.admitsAll(f, Gll.NoPred{}, input, k) == True{} : Bool}
+
+def plain_admits(f, input, k):
+  match f:
+    case Nil{}:
+      {==}
+    case Con{Core.Leaf{+a}, +ts}:
+      plain_admits(ts, input, 1n+k)
+    case Con{Core.Node{+q, +ch}, +ts}:
+      +far = Nat.add(k, Core.width(Core.Node{q, ch}))
+      Lemma.and_true_intro(Check.admitsAll(ch, Gll.NoPred{}, input, k), Check.admitsAll(ts, Gll.NoPred{}, input, far), plain_admits(ch, input, k), plain_admits(ts, input, far))
+
+# Every step of a parse tree whose nodes the predictor admits is in a state closed for the
+# predictor that has the start symbol's cluster at 0.
+law tree_steps_with:
+  for tree: Core.Tree
+  for +pred: Gll.Pred
+  for +grammar: +List<Core.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +s: Gll.GState
+  for +hc: {Check.closedWith(pred, grammar, input, s) == True{} : Bool}
+  for +root: {Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s)) == True{} : Bool}
+  for +rr: {Core.reads([tree], grammar, [Core.Nonterminal{start, Core.Anything{}}], input, 0n) == True{} : Bool}
+  for +ad: {Check.admitsAll([tree], pred, input, 0n) == True{} : Bool}
+  {Core.allIn(Core.steps([tree], 0n), Check.stepsOf(s)) == True{} : Bool}
+
+def tree_steps_with(tree, pred, grammar, start, input, s, hc, root, rr, ad):
+  match tree:
+    case Core.Leaf{+a}:
+      Empty.absurd({Core.allIn(Core.steps([Core.Leaf{a}], 0n), Check.stepsOf(s)) == True{} : Bool}, Lemma.false_is_not_true(rr))
+    case Core.Node{+q, +ch}:
+      +w = {Core.width(Core.Node{q, ch}) : Nat}
+      +head = {Bool.and(Core.lhsIs(grammar, q, start), True{}) : Bool}
+      +own = {Bool.and(head, Core.reads(ch, grammar, Core.rhsOf(grammar, q), input, 0n)) : Bool}
+      +left = Lemma.and_true_left(own, Core.reads([], grammar, [], input, Nat.add(0n, w)), rr)
+      +lhs = Lemma.and_true_left(Core.lhsIs(grammar, q, start), True{}, Lemma.and_true_left(head, Core.reads(ch, grammar, Core.rhsOf(grammar, q), input, 0n), left))
+      +rc = Lemma.and_true_right_side(head, Core.reads(ch, grammar, Core.rhsOf(grammar, q), input, 0n), left)
+      +adh = {Gll.admits(pred, q, Core.tokAt(input, 0n)) : Bool}
+      +adc = {Check.admitsAll(ch, pred, input, 0n) : Bool}
+      +adr = Lemma.and_true_right_side(adh, Bool.and(adc, True{}), ad)
+      +seed = seed_seen(grammar, q, start, 0n, 0n, s, pred, Core.tokAt(input, 0n), lhs, Lemma.and_true_left(adh, Bool.and(adc, True{}), ad), cluster_seeds(Check.clustersOf(s), start, 0n, pred, grammar, input, s, closed_clusters(pred, grammar, input, s, hc), root))
+      tree_join(grammar, s, q, ch, walk(ch, Core.rhsOf(grammar, q), pred, grammar, input, s, hc, q, 0n, 0n, 0n, {==}, rc, seed, Lemma.and_true_left(adc, True{}, adr)))
+
+# Every step of a parse tree is in a closed state that has the start symbol's cluster at 0.
+law tree_steps:
+  for tree: Core.Tree
+  for +grammar: +List<Core.Production>
+  for +start: Nat
+  for +input: +List<Nat>
+  for +s: Gll.GState
+  for +hc: {Check.closed(grammar, input, s) == True{} : Bool}
+  for +root: {Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s)) == True{} : Bool}
+  for +rr: {Core.reads([tree], grammar, [Core.Nonterminal{start, Core.Anything{}}], input, 0n) == True{} : Bool}
+  {Core.allIn(Core.steps([tree], 0n), Check.stepsOf(s)) == True{} : Bool}
+
+def tree_steps(tree, grammar, start, input, s, hc, root, rr):
+  +t = tree
+  tree_steps_with(t, Gll.NoPred{}, grammar, start, input, s, hc, root, rr, plain_admits([t], input, 0n))
+
+# ======== THE CHECKED PARSER MISSES NOTHING ========
+
+def setOr(m: Maybe<&2, +List<Core.Bsr>>, +d: +List<Core.Bsr>) -> +List<Core.Bsr>:
   match m:
     case None{}:
-      []
-    case Some{xs}:
-      xs
+      d
+    case Some{+x}:
+      x
 
-def isNothing(m: Maybe<&2, +List<Spec.Bsr>>) -> Bool:
+def isNone(m: Maybe<&2, +List<Core.Bsr>>) -> Bool:
   match m:
     case None{}:
       True{}
-    case Some{xs}:
+    case Some{x}:
       False{}
 
-law check_pick:
-  for ok: Bool
-  for +s: Gll.GState
-  for +set: +List<Spec.Bsr>
-  for got: {Check.checkPick(ok, s) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  {ok == True{} : Bool} & {Check.stepsOf(s) == set : +List<Spec.Bsr>}
+law none_not_some:
+  for +set: +List<Core.Bsr>
+  for +e: {None{} == Some{set} : Maybe<&2, +List<Core.Bsr>>}
+  Empty
 
-def check_pick(ok, s, set, got):
-  match ok:
+def none_not_some(set, e):
+  Lemma.true_is_not_false(Equal.cong(Maybe<&2, +List<Core.Bsr>>, Bool, v => isNone(v), None{}, Some{set}, e))
+
+def EveryFrom(+grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +s: Gll.GState, +set: +List<Core.Bsr>) -> Type:
+  Core.EveryParseStep(grammar, start, input, set)
+
+def from_parse_tree(+grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +s: Gll.GState, +set: +List<Core.Bsr>,
+  +hc: {Check.closed(grammar, input, s) == True{} : Bool},
+  +root: {Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s)) == True{} : Bool},
+  +es: {Check.stepsOf(s) == set : +List<Core.Bsr>},
+  +tree: Core.Tree, +x: Core.Bsr, pt: Core.ParseTree(grammar, start, input, tree),
+  +m: {Core.member(x, Core.steps([tree], 0n)) == True{} : Bool}) -> {Core.member(x, set) == True{} : Bool}:
+  match pt:
+    case (rr, rl):
+      %es : {Core.member(x, _) == True{} : Bool}
+      all_in_member(Core.steps([tree], 0n), Check.stepsOf(s), x, tree_steps(tree, grammar, start, input, s, hc, root, rr), m)
+
+def checked_state(b: Bool, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +s: Gll.GState, +set: +List<Core.Bsr>,
+  +eb: {b == Bool.and(Check.closed(grammar, input, s), Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s))) : Bool},
+  +e: {Check.checkPick(b, s) == Some{set} : Maybe<&2, +List<Core.Bsr>>}) -> Core.EveryParseStep(grammar, start, input, set):
+  match b:
     case True{}:
-      ({==}, Equal.cong(Maybe<&2, +List<Spec.Bsr>>, +List<Spec.Bsr>, v => stepsOr(v), Some{Check.stepsOf(s)}, Some{set}, got))
+      +both = Equal.sym(Bool, True{}, Bool.and(Check.closed(grammar, input, s), Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s))), eb)
+      +hc = Lemma.and_true_left(Check.closed(grammar, input, s), Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s)), both)
+      +root = Lemma.and_true_right_side(Check.closed(grammar, input, s), Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s)), both)
+      +es = Equal.cong(Maybe<&2, +List<Core.Bsr>>, +List<Core.Bsr>, v => setOr(v, []), Some{Check.stepsOf(s)}, Some{set}, e)
+      tree => x => pt => m => from_parse_tree(grammar, start, input, s, set, hc, root, es, tree, x, pt, m)
     case False{}:
-      Empty.absurd({False{} == True{} : Bool} & {Check.stepsOf(s) == set : +List<Spec.Bsr>}, Lemma.true_is_not_false(Equal.cong(Maybe<&2, +List<Spec.Bsr>>, Bool, v => isNothing(v), None{}, Some{set}, got)))
+      Empty.absurd(Core.EveryParseStep(grammar, start, input, set), none_not_some(set, e))
 
-law state_done:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +set: +List<Spec.Bsr>
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for facts: {Bool.and(Check.closedWith(pr, grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)) == True{} : Bool} & {Check.stepsOf(s) == set : +List<Spec.Bsr>}
-  Spec.EveryParseStep(grammar, start, input, set)
-
-def state_done(pr, grammar, start, input, s, set, po, facts):
-  match facts:
-    case (ok0, same0):
-      +ok = {ok0 : {Bool.and(Check.closedWith(pr, grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)) == True{} : Bool}}
-      +same = {same0 : {Check.stepsOf(s) == set : +List<Spec.Bsr>}}
-      +closedOk = Lemma.and_true_left(Check.closedWith(pr, grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s), ok)
-      +rootIn = Lemma.and_true_right_side(Check.closedWith(pr, grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s), ok)
-      +tree => +element => fitting => spelled => inTree =>
-        inS = ebnf_all_in_member(Spec.steps(tree, 0n), Check.stepsOf(s), element, closed_complete(pr, grammar, start, input, s, closedOk, po, rootIn, tree, fitting, spelled), inTree)
-        Equal.trans(Bool, Spec.bsrMember(element, set), Spec.bsrMember(element, Check.stepsOf(s)), True{},
-          Equal.cong(+List<Spec.Bsr>, Bool, v => Spec.bsrMember(element, v), set, Check.stepsOf(s), Equal.sym(+List<Spec.Bsr>, Check.stepsOf(s), set, same)), inS)
-
-law state_complete:
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +input: +List<Nat>
-  for +s: Gll.GState
-  for +set: +List<Spec.Bsr>
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for got: {Check.checkPick(Bool.and(Check.closedWith(pr, grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)), s) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  Spec.EveryParseStep(grammar, start, input, set)
-
-def state_complete(pr, grammar, start, input, s, set, po, got):
-  state_done(pr, grammar, start, input, s, set, po, check_pick(Bool.and(Check.closedWith(pr, grammar, input, s), Check.clusterIn(Gll.CKey{Gll.TNt{start}, 0n}, s)), s, set, got))
-law run_complete:
-  for r: Gll.GRun
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +input: +List<Nat>
-  for +set: +List<Spec.Bsr>
-  for got: {Check.runChecked(r, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  Spec.EveryParseStep(grammar, start, input, set)
-
-def run_complete(r, grammar, start, input, set, got):
+def checked_run(r: Gll.GRun, +grammar: +List<Core.Production>, +start: Nat, +input: +List<Nat>, +set: +List<Core.Bsr>,
+  +e: {Check.runChecked(r, grammar, start, input) == Some{set} : Maybe<&2, +List<Core.Bsr>>}) -> Core.EveryParseStep(grammar, start, input, set):
   match r:
     case Gll.GDone{+s}:
-      state_complete(Gll.NoPred{}, grammar, start, input, s, set, {==}, got)
-    case Gll.OutOfFuel{s}:
-      Empty.absurd(Spec.EveryParseStep(grammar, start, input, set), Lemma.true_is_not_false(Equal.cong(Maybe<&2, +List<Spec.Bsr>>, Bool, v => isNothing(v), None{}, Some{set}, got)))
+      checked_state(Bool.and(Check.closed(grammar, input, s), Gll.keyIn(Gll.CKey{start, 0n}, Check.clustersOf(s))), grammar, start, input, s, set, {==}, e)
+    case Gll.OutOfFuel{+s}:
+      Empty.absurd(Core.EveryParseStep(grammar, start, input, set), none_not_some(set, e))
 
-# The law gll_every_parse_step.
-def Laws.gll_every_parse_step(fuel, grammar, start, input, set, got):
-  run_complete(Gll.parse(fuel, grammar, start, input), grammar, start, input, set, got)
-
-# ---- With prediction ----
-
-law run_complete_with:
-  for r: Gll.GRun
-  for +pr: Gll.Pred
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +input: +List<Nat>
-  for +set: +List<Spec.Bsr>
-  for +po: {Pr.predOk(pr, grammar, start) == True{} : Bool}
-  for got: {Check.runCheckedWith(r, pr, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  Spec.EveryParseStep(grammar, start, input, set)
-
-def run_complete_with(r, pr, grammar, start, input, set, po, got):
-  match r:
-    case Gll.GDone{+s}:
-      state_complete(pr, grammar, start, input, s, set, po, got)
-    case Gll.OutOfFuel{s}:
-      Empty.absurd(Spec.EveryParseStep(grammar, start, input, set), Lemma.true_is_not_false(Equal.cong(Maybe<&2, +List<Spec.Bsr>>, Bool, v => isNothing(v), None{}, Some{set}, got)))
-
-def tablesOr(m: Maybe<&2, Gll.Tables>) -> Gll.Tables:
-  match m:
-    case Some{t}:
-      t
-    case None{}:
-      Gll.Tables{[], [], []}
-
-def isNoTables(m: Maybe<&2, Gll.Tables>) -> Bool:
-  match m:
-    case Some{t}:
-      False{}
-    case None{}:
-      True{}
-
-# Tables handed out are closed.
-law closed_pick:
-  for ok: Bool
-  for +t0: Gll.Tables
-  for +t: Gll.Tables
-  for got: {First.closedPick(ok, t0) == Some{t} : Maybe<&2, Gll.Tables>}
-  {ok == True{} : Bool} & {t0 == t : Gll.Tables}
-
-def closed_pick(ok, t0, t, got):
-  match ok:
-    case True{}:
-      ({==}, Equal.cong(Maybe<&2, Gll.Tables>, Gll.Tables, v => tablesOr(v), Some{t0}, Some{t}, got))
-    case False{}:
-      Empty.absurd({False{} == True{} : Bool} & {t0 == t : Gll.Tables}, Lemma.true_is_not_false(Equal.cong(Maybe<&2, Gll.Tables>, Bool, v => isNoTables(v), None{}, Some{t}, got)))
-
-law predict_pick:
-  for tables: Maybe<&2, Gll.Tables>
+# THE CHECKED GLL PARSER MISSES NOTHING: whenever it hands out a set of steps, every step of
+# every parse tree of the input is in it.
+law gll_every_parse_step:
   for fuel: Nat
-  for +grammar: +List<Spec.Production>
+  for +grammar: +List<Core.Production>
   for +start: Nat
   for +input: +List<Nat>
-  for +set: +List<Spec.Bsr>
-  for tc: @t: Gll.Tables -> {tables == Some{t} : Maybe<&2, Gll.Tables>} -> {First.tablesClosed(grammar, start, t) == True{} : Bool}
-  for got: {Check.predictPick(tables, fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Spec.Bsr>>}
-  Spec.EveryParseStep(grammar, start, input, set)
+  for +set: +List<Core.Bsr>
+  for +got: {Check.checkedSteps(fuel, grammar, start, input) == Some{set} : Maybe<&2, +List<Core.Bsr>>}
+  Core.EveryParseStep(grammar, start, input, set)
 
-def predict_pick(tables, fuel, grammar, start, input, set, tc, got):
-  match tables:
-    case Some{+t}:
-      run_complete_with(Gll.parseWith(fuel, Gll.Predict{t}, grammar, start, input), Gll.Predict{t}, grammar, start, input, set, tc(t, {==}), got)
-    case None{}:
-      Empty.absurd(Spec.EveryParseStep(grammar, start, input, set), Lemma.true_is_not_false(Equal.cong(Maybe<&2, +List<Spec.Bsr>>, Bool, v => isNothing(v), None{}, Some{set}, got)))
+def gll_every_parse_step(fuel, grammar, start, input, set, got):
+  checked_run(Gll.parse(fuel, grammar, start, input), grammar, start, input, set, got)
 
-law closed_of:
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +t0: Gll.Tables
-  for +t: Gll.Tables
-  for both: {First.tablesClosed(grammar, start, t0) == True{} : Bool} & {t0 == t : Gll.Tables}
-  {First.tablesClosed(grammar, start, t) == True{} : Bool}
+# ======== THE GRAMMAR FROM PRODUCTION n ON ========
 
-def closed_of(grammar, start, t0, t, both):
-  match both:
-    case (ok, same):
-      Equal.trans(Bool, First.tablesClosed(grammar, start, t), First.tablesClosed(grammar, start, t0), True{}, Equal.cong(Gll.Tables, Bool, v => First.tablesClosed(grammar, start, v), t, t0, Equal.sym(Gll.Tables, t0, t, same)), ok)
+def lhs_zero(+grammar: +List<Core.Production>, +base: Nat, +x: Nat,
+  +h: {Core.lhsIs(grammar, Nat.add(base, 0n), x) == True{} : Bool}) -> {Core.lhsIs(grammar, base, x) == True{} : Bool}:
+  %Lemma.add_zero_right(base) : {Core.lhsIs(grammar, _, x) == True{} : Bool}
+  h
 
-# Tables from FIRST.bend are closed whenever they are handed out.
-law tables_closed:
-  for +rounds: Nat
-  for +grammar: +List<Spec.Production>
-  for +start: Nat
-  for +t: Gll.Tables
-  for got: {First.tablesOf(rounds, grammar, start) == Some{t} : Maybe<&2, Gll.Tables>}
-  {First.tablesClosed(grammar, start, t) == True{} : Bool}
+# The grammar from production n on.
+def dropProds(n: Nat, grammar: +List<Core.Production>) -> +List<Core.Production>:
+  match n grammar:
+    case 0n +g:
+      g
+    case 1n+m Nil{}:
+      []
+    case 1n+m Con{Core.Production{lhs, rhs}, rest}:
+      dropProds(m, rest)
 
-def tables_closed(rounds, grammar, start, t, got):
-  +t0 = First.iterate(rounds, grammar, start, First.emptyTables())
-  closed_of(grammar, start, t0, t, closed_pick(First.tablesClosed(grammar, start, t0), t0, t, got))
+law drop_lhs:
+  for n: Nat
+  for grammar: +List<Core.Production>
+  for +p: Nat
+  for +x: Nat
+  {Core.lhsIs(dropProds(n, grammar), p, x) == Core.lhsIs(grammar, Nat.add(n, p), x) : Bool}
 
-# The law predict_every_parse_step.
-def Laws.predict_every_parse_step(fuel, grammar, start, input, set, got):
-  +rounds = Nat.add(Nat.mul(First.ntCount(grammar), 4n), 4n)
-  predict_pick(First.tablesOf(rounds, grammar, start), fuel, grammar, start, input, set,
-    t => e => tables_closed(rounds, grammar, start, t, e), got)
+def drop_lhs(n, grammar, p, x):
+  match n grammar:
+    case 0n +g:
+      {==}
+    case 1n+(+m) Nil{}:
+      {==}
+    case 1n+(+m) Con{Core.Production{+lhs, +rhs}, +rest}:
+      drop_lhs(m, rest, p, x)
+
+def isNilProds(ps: +List<Core.Production>) -> Bool:
+  match ps:
+    case Nil{}:
+      True{}
+    case Con{p, rest}:
+      False{}
+
+law drop_step:
+  for n: Nat
+  for grammar: +List<Core.Production>
+  for +lhs: Nat
+  for +rhs: +List<Core.Sym>
+  for +rest: +List<Core.Production>
+  for +e: {dropProds(n, grammar) == Core.Production{lhs, rhs} <> rest : +List<Core.Production>}
+  {dropProds(1n+n, grammar) == rest : +List<Core.Production>}
+
+def drop_step(n, grammar, lhs, rhs, rest, e):
+  match n grammar:
+    case 0n +g:
+      %Equal.sym(+List<Core.Production>, g, Core.Production{lhs, rhs} <> rest, e) : {dropProds(1n, _) == rest : +List<Core.Production>}
+      {==}
+    case 1n+(+m) Nil{}:
+      Empty.absurd({dropProds(2n+m, []) == rest : +List<Core.Production>},
+        Lemma.true_is_not_false(Equal.cong(+List<Core.Production>, Bool, v => isNilProds(v), [], Core.Production{lhs, rhs} <> rest, e)))
+    case 1n+(+m) Con{Core.Production{+l2, +r2}, +rest2}:
+      drop_step(m, rest2, lhs, rhs, rest, e)
+
+def head_lhs(+grammar: +List<Core.Production>, +base: Nat, +x: Nat, +lhs: Nat, +rhs: +List<Core.Sym>, +rest: +List<Core.Production>,
+  +hg: {dropProds(base, grammar) == Core.Production{lhs, rhs} <> rest : +List<Core.Production>},
+  +hb: {Nat.is_eq(lhs, x) == True{} : Bool}) -> {Core.lhsIs(grammar, base, x) == True{} : Bool}:
+  +e1 = Equal.sym(Bool, Core.lhsIs(dropProds(base, grammar), 0n, x), Core.lhsIs(grammar, Nat.add(base, 0n), x), drop_lhs(base, grammar, 0n, x))
+  +e2 = Equal.cong(+List<Core.Production>, Bool, v => Core.lhsIs(v, 0n, x), dropProds(base, grammar), Core.Production{lhs, rhs} <> rest, hg)
+  lhs_zero(grammar, base, x, Equal.trans(Bool, Core.lhsIs(grammar, Nat.add(base, 0n), x), Core.lhsIs(dropProds(base, grammar), 0n, x), True{}, e1, Equal.trans(Bool, Core.lhsIs(dropProds(base, grammar), 0n, x), Nat.is_eq(lhs, x), True{}, e2, hb)))
+
+# Every seed of a cluster on the tree lies on the tree: only the tree's production of x
+# at i gets past prediction.

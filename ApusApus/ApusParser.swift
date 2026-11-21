@@ -164,8 +164,8 @@ class ApusParser {
         grammar.prepareParsePredicates()
         grammar.propagateExcludeSets()
         grammar.diagnosePredicateTargets()
-        // A preference on a cycle that reads no input can remove every parse in the Oracle,
-        // where the specification (Bend/SPEC.bend) keeps one. Refuse such a grammar.
+        // A preference on a cycle that reads no input can remove every parse in the Oracle; the
+        // specification rules such a grammar out (Bend/PREFER.bend, `noPreferenceCycle`). Refuse it.
         let preferenceCycles = grammar.diagnosePreferenceCycles()
         if !preferenceCycles.isEmpty { throw ApusParserError.preferenceCycle(findings: preferenceCycles) }
         try grammar.populateBitSets()

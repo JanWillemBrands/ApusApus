@@ -1,538 +1,300 @@
 # Apus in Bend
 
-A formally checked specification of EBNF parsing, with a GLL parser whose output
-is checked against it. Written in [Bend 2](<Bend Guide.md>).
-
-## What to read
-
-Only two files are trusted. Everything else is either checked by the machine or
-there for intuition.
-
-| File | What it is | Read? |
-|---|---|---|
-| `SPEC.bend` | What parsing means: grammars (EBNF right sides with `( ) [ ] { } < >`), parse trees, `fits`, `leaves`, the steps of a tree as BSR elements, exact BSR sets, and which trees `@prefer` and `@avoid` select; at the end, derived notions (nullable, FIRST, FOLLOW, predict, choice points, LL(1)) used only by the LL(1) laws | **yes** |
-| `LAWS.bend` | Every claim, nothing else | **yes** |
-| `EXAMPLES.bend` | The paper's examples, the engine on them, the check catching broken states | for intuition |
-| `GLL.bend` | The GLL engine, after tinyGLL and ApusApus, plain or with prediction (Scott's predict sets) | optional: not trusted |
-| `FIRST.bend` | The nullable, FIRST and FOLLOW tables prediction reads, and their closedness check | optional: not trusted |
-| `CHECK.bend` | The closedness check on the engine's final state, and `checkedSteps`; with prediction, `predictedSteps` | optional |
-| `PRUNE.bend` | The round rule on link steps, and pruning to the steps a parse tree needs, with its closedness check | optional |
-| `WITNESS.bend` | A search for parse trees built from the kept steps | optional: not trusted |
-| `EXACT.bend` | The exact parser `exactSteps`: pruned steps, handed out only when witness trees cover them all | optional |
-| `GUARD.bend` | The guard oracle `guardSteps` (phase 1): the exact set without the steps of nodes that break a lookahead, `@left` or `@right` rule, every answer checked | optional |
-| `EXTENT.bend` | The joined extent oracle `extentSteps` (phase 3 on top of phases 1 and 2): the preference oracle's set, pruned from below, without the steps on no best reading; best lengths come with certificates from the set, and a self-check rules out stitched readings | optional |
-| `UNBEATEN.bend` | The joined preference oracle `unbeatenSteps` (phase 2 on top of phase 1): the guard oracle's set without the steps of choices outranked by an admissible rival | optional |
-| `PREFER.bend` | The preference oracle `preferSteps`: the exact set without the steps of outranked choices, each removal with a checked certificate | optional |
-| `COMPARE.bend` | Sets Swift Apus's BSR yields next to the exact set, or after `@prefer`/`@avoid` next to the steps of the unbeaten trees: what is missing, what is dead wood | optional |
-| `swift/` | Cases exported from Swift Apus by `ApusApusTests/BendExport.swift`; generated | run |
-| `PROOF.bend` | The gate | run, don't read |
-| `PROOF_TREES.bend` | Proofs of the rewriting laws | no |
-| `PROOF_GLL.bend` | Proof that the checked parser misses nothing, plain and with prediction | no |
-| `PROOF_PRED.bend` | What the walk needs from prediction: admitted descriptors, and what may come after a sequence | no |
-| `PROOF_ADMIT.bend` | A parse tree's descriptor is admitted; the FOLLOW check carried into a slot and a bracket | no |
-| `PROOF_TABLES.bend` | Closed tables are sound: a forest that reads nothing makes its items nullable, its first token is in FIRST | no |
-| `PROOF_SETS.bend` | Facts about lookahead sets: union, subset | no |
-| `PROOF_SAVES.bend` | Proof that a supported state is within a closed plain one | no |
-| `PROOF_LL1.bend` | Proof that no conflict by the tables means LL(1) | no |
-| `PROOF_UNAMBIGUOUS.bend` | Proof that an LL(1) grammar is unambiguous (generated case code) | no |
-| `PSUPPORT.bend` | Support with prediction, and the checked LL(1) parser `llSteps` | optional: not trusted |
-| `PROOF_NODEAD.bend` | No dead wood for grammars without brackets (first stage, used by PROOF_NODEAD2) | no |
-| `PROOF_NODEAD2.bend` | Proof that the checked LL(1) parser has no dead wood: `ll1_no_dead_wood` | no |
-| `PROOF_LL1AT.bend` | Proof that LL(1) at one choice point decides the choice there: `ll1_at` | no |
-| `gen/` | Generators of the long proofs (PROOF_TABLES, PROOF_LL1, PROOF_UNAMBIGUOUS, PROOF_NODEAD, PROOF_NODEAD2, PROOF_LL1AT): change them there and rebuild; `python3 gen/build.py --check-all` (gen/README.md) | no |
-| `LL_EX.bend` | `llSteps` against the exact set on the examples | optional: not trusted |
-| `PREDICT_EX.bend` | Prediction on the examples: facts of the plain and predicting engines, and their sets | run |
-| `SUPPORT.bend` | Is a state supported: every fact derivable from the root by the engine's rules, within the state | optional: not trusted |
-| `LL1.bend` | LL(1) by the tables: the conflicts at every choice point, read from FIRST.bend's tables | optional: not trusted |
-| `COST.bend` | What a parse costs: descriptors (work), steps (memory), lexer questions (a lexer answering on demand) | a measure, not a claim |
-| `COST_EX.bend` | The cost of the plain and predicting parser on the examples and the `swift/` cases, with the counts left out | run |
-| `PROOF_ROUNDS.bend` | Proof that the round rule keeps every step of every parse tree | no |
-| `PROOF_PRUNE.bend` | Proof that pruning keeps every step of every parse tree | no |
-| `PROOF_EXACT.bend` | Proof that the exact parser's set is exact | no |
-| `PROOF_SPELL.bend` | Proof that trees built from the exact set spell the input | no |
-| `PROOF_GUARD.bend` | Proof that the guard oracle's set embeds exactly the admissible trees | no |
-| `PROOF_PREFER.bend` | Proof that the joined preference oracle's set embeds exactly the admissible unbeaten trees | no |
-| `PROOF_SUPPORT.bend` | Proof that a no from the admissible sub-parse leaves no admissible rival in place | no |
-| `PROOF_SUBPARSE.bend` | What a sub-parse and the exact set say about trees; shared by the oracle proofs | no |
-| `PROOF_EXTENT.bend` | Proof that the joined extent oracle's set embeds exactly the selected trees | no |
-| `PROOF_PLUG.bend` | Plugging: a forest swapped into a tree, where it fits, reads the same tokens and keeps phases 1 and 2, leaves the tree unbeaten, and its steps are the tree's | no |
-| `FITS.bend` | Facts about `fits`: of a list, of its head and tail, of a join | no |
-| `LEMMAS.bend` | Facts about Bool, Nat and lists | no |
-| `core/` | Work in progress: the specification on a BNF core, as planned in `FormalGrammar.md` (core/README.md); not in the gate yet | optional |
-| `bnf/` | The earlier BNF specification with a proven CYK parser, frozen | history |
+A specification of Apus grammars and their parse trees, with proven algorithms: the GLL
+parser, the exact set of parse-tree steps, the three phases of the Oracle (lookahead,
+`@left`/`@right`; `@prefer`/`@avoid`; `@longest`/`@shortest`), and the LL(1) and prediction
+laws. A grammar as written (`SYNTAX.bend`) means its translation to a small BNF core
+(`EBNF.bend`, `CORE.bend`); every definition and proof works on the core (see "The design"
+below). Swift Apus is tested against it (`TESTING.md` § 8d).
 
 ## How to check
 
 ```
-bend PROOF.bend             # ALL PROOFS CHECK when every law holds
+bend PROOF.bend             # ALL PROOFS CHECK when every law in LAWS.bend holds
 bend PROOF.bend --verdict   # the same, with the Lean-proven kernel
 bend EXAMPLES.bend          # the examples
-bend bnf/PROOF.bend         # the frozen BNF and CYK work
 bend swift/split.bend       # one Swift Apus case against the exact set
 ```
 
-## Checking Swift Apus
+`LAWS.bend` states the claims and nothing else; `PROOF.bend` proves each one (`def
+Laws.<name>`) and imports every proof file, so the gate checks them all. Checked on its own,
+`LAWS.bend` reports its claims as open.
 
-`ApusApusTests/BendExport.swift` translates a grammar, its tokens and Swift's BSR
-yields into a Bend file. Swift's extra completion yields `(lhs, i, i, j)` are left
-out, as in `SPEC.bend`. It refuses a case rather than guess: for example
-boundaries, lookaround, an alternate with no item at all, ambiguous lexing or a
-rejected input. Running such a file gives a report from `COMPARE.bend`:
+## What to read
 
-| Report | Meaning |
+To see what is specified and claimed, read `LAWS.bend` (the claims), then the meaning in
+`SYNTAX.bend`, `CORE.bend`, `EBNF.bend`, `GUARD.bend`, `PREFER.bend`, `ORACLE.bend`,
+`EXTENT.bend` and `LL1.bend` (in each, the part headed "THE MEANING" or the definitions with
+capital-letter type names). The proof files and the algorithms need not be read: the gate
+checks them.
+
+**Reading Bend.** `type T is Data:` lists the shapes of a value. `def f(x: A) -> B:` is a
+function; one returning `Bool` is a check. A definition returning `Type` is a statement, and
+these forms build them:
+
+| Written | Read |
 |---|---|
-| `Agree{n}` | Swift has exactly the n steps of the parse trees |
-| `Differ{e, s, missing, extra}` | `missing`: parse-tree steps Swift lacks; `extra`: Swift steps in no parse tree (dead wood) |
-| `NoAnswer{}` | the exact parser ran out of fuel or a check failed |
+| `{a == b : T}` | a equals b (`{c == True{} : Bool}`: the check c holds) |
+| `P & Q` | P and Q |
+| `P -> Q` | if P, then Q (`P -> Empty`: P is impossible) |
+| `@x: T -> P` | for every x of type T, P |
+| `&x: T -> P` | there is an x of type T with P |
+| `Unit` | nothing to show |
+| `Some{x}`, `None{}` | an answer x; no answer |
+| `[a, b]`, `x <> xs` | a list; x in front of the list xs |
+| `0n`, `1n+n` | the numbers 0 and n + 1 |
 
-The trust is in `gll_bsr_exact`: the set Swift is compared with is proven to be
-exactly the steps of the parse trees.
+A `+` before a name or type only tells Bend that the value may be used more than once.
 
-Two opt-in suites use it (set the variable in the test plan, or as
-`TEST_RUNNER_<name>` via xcodebuild):
-
-| Suite | Variable | What it does |
-|---|---|---|
-| Bend check | `APUS_BEND=1` (or the path to `bend`) | runs Bend on every accepted message of the `TestCase` tables in `CoreGrammarTests`, plus the cases below; fails when Swift misses a parse-tree step; a second test does the same after the Oracle, and a third compares grammars with `@prefer`/`@avoid`, and a fourth grammars with `>?>`/`>!>`/`@left`/`@right` (below); attaches a report per case, and the Bend file of every difference |
-| Bend export | `APUS_EXPORT_BEND=<path to Bend/swift>` | writes a few cases to `swift/`, to run by hand |
-
-Results (2026-10-27), 341 accepted messages:
-
-| | Messages |
+| File | What it is |
 |---|---|
-| agree exactly | 202 |
-| differ: dead wood only | 137 |
-| refused | 2 (one grammar with two lexings) |
-| missing steps | 0 |
-| no answer | 0 |
+| `LAWS.bend` | The claims: the exact set, the phases, the answer laws, LL(1) and prediction |
+| `PROOF.bend` | The gate: each claim's proof, and every proof file |
+| `SYNTAX.bend` | The grammar as written: productions, items, brackets, the marks, and Swift's steps (slots in the grammar as written) |
+| `CORE.bend` | L0: productions over terminals and nonterminals, trees of leaves and nodes, `reads`, steps, the exact set |
+| `EBNF.bend` | L1: what an EBNF grammar means, as its translation to the core (towards Swift, and towards LL(1)), and the map from core steps to Swift's slots |
+| `EBNF_EX.bend` | The translation on examples: core trees read the input, and their steps, mapped to Swift's slots, are the expected steps, written out |
+| `GLL.bend` | The GLL engine on the core (not trusted); return edges are added without a duplicate check (Afroozeh). It takes a predictor: none, or a set of allowed next tokens per production (Scott's predict sets) |
+| `CHECK.bend` | The closedness check on the engine's final state (for the descriptors a predictor admits), and the checked parser `checkedSteps` |
+| `PROOF_GLL.bend` | Proof that the checked parser misses no step of any parse tree: `gll_every_parse_step` |
+| `GLL_EX.bend` | The engine on the examples' translations, against the expected checked and exact sets, written out |
+| `RUN.bend` | The engine's invariant (every seen descriptor done or still to do, clusters seeded, return edges met with every pop, everything belonging to a known cluster, to-do descriptors seen, every descriptor, return edge, pop and step within the grammar and the input), the relation an adding operation keeps, the measure (unseen descriptors within bounds, plus the to-do list), and what the steps rest on (`groundOk`) |
+| `RUN_EX.bend` | The invariant evaluated at every iteration of example runs (left recursion, an optional, a cyclic nullable grammar) |
+| `PROOF_RUN.bend` | Every operation and every iteration of the worklist engine keeps the invariant, so a finished run is closed: `engine_closed`, and the checked parser answers whenever the engine finishes (`checked_answers`); no iteration raises the measure, so the engine finishes with enough fuel (`gll_finishes`) and the checked parser always answers (`checked_always_answers`); a finished run's steps lie within bounds (`final_steps_bounded`) |
+| `PROOF_COUNT.bend` | Counting for the measure: every descriptor within bounds lies in the universe, and seeing a new one lowers the count of unseen ones; small facts about step lists |
+| `PROOF_NEEDS.bend` | Pruning's needs loop on steps within bounds: with the same fuel it finishes with closed needs (`needs_closed`), so pruning hands out its steps (`pruned_answers`) |
+| `PROOF_WITNESS.bend` | The witness search finds what is there: on facts closed under the rules of the kept steps, a parse tree of kept steps that contains the target gives the root search a forest (`root_found`, by a walk over the tree); with fuel 1 + twice the size of the descriptor universe the fixpoint ends closed (`witness_closed`) |
+| `PROOF_WSOUND.bend` | The witness search is sound: every fact's forest reads its segment, and a flagged one contains the target, so the root search hands out only parse trees of the input that contain the target (`witness_good`); with a witness for every kept step the exact parser answers (`exact_from_answers`) |
+| `PROOF_GROUND.bend` | Every engine operation keeps every step, descriptor, return edge and pop resting on earlier steps (`groundOk`, RUN.bend): `ground_step`, `initial_ground` |
+| `PROOF_FOUND.bend` | On grounded steps and needs reached from the root in order, closed witness facts give every kept step a witness: `found_root` |
+| `PROOF_GROW.bend` | The grown tables close: each round adds a fact from a finite universe or changes nothing (`nulls_closed`, `firsts_closed`, `follows_fix`), so with fuel 1 + the table size `tablesClosed` holds on every grammar (`tables_closed`) |
+| `PROOF_ANSWER.bend` | The twin answers, stage by stage: the pruned parser with fuel 1 + the size of the descriptor universe (`pruned_parser_answers`), the engine's final state is grounded (`final_ground`), the exact parser with fuel 1 + twice that size (`exact_parser_answers`), and the predicting parser with fuel 1 + that size + the table size (`predicted_parser_answers`) |
+| `PRUNE.bend` | Pruning to the steps a parse tree of the whole input needs, with its closedness check |
+| `PROOF_PRUNE.bend` | Proof that pruning keeps every step of every parse tree: `prune_every_parse_step` |
+| `WITNESS.bend` | The covering witness search (not trusted): one fact per segment and flag, a least fixpoint, grown until the facts are closed (at most `fuel` rounds); a node of an empty right side is found only from its empty step, so trees use only the given steps |
+| `EXACT.bend` | The exact parser `exactSteps`: pruned steps, handed out only when checked witness trees cover them |
+| `PROOF_EXACT.bend` | Proof that the exact parser's set is exact: `gll_bsr_exact` |
+| `PROOF_SPELL.bend` | Proof that a tree which fits, uses only exact steps and is as long as the input spells it: `exact_trees_spell` |
+| `EXACT_EX.bend` | The exact parser on the examples against the expected sets, written out, and on a cyclic grammar |
+| `SETS.bend` | Sets of naturals and the nullable nonterminals (grown, checked closed), shared by the rule on preference cycles and the LL(1) tables |
+| `LEMMAS.bend` | Facts about Bool, Nat and lists |
+| `PROOF_BASICS.bend` | Small facts about Bool, Nat and lists shared by the core's proofs |
+| `GUARD.bend` | Phase 1 on the core: what lookahead, @left and @right mean, step by step (a tree is admissible when each of its steps keeps the rules it decides), the rules as written moved onto core productions, and phase 1's three-valued verdict on a step; "does q derive w" is judged by the closure of `CLOSURE.bend` |
+| `PREFER.bend` | Phase 2 on the core: what @prefer and @avoid mean, step by step (a completed step is beaten when a higher-ranked production of its nonterminal has a rival over the same tokens whose steps keep their rules), the marks as written moved onto core productions, phase 2's verdict on a step, and the rule `noPreferenceCycle` (an outranking production lies on no cycle that reads no input; nullable sets from `SETS.bend`) |
+| `ORACLE.bend` | The oracle: the exact set, filtered by both verdicts at once; any Unknown means no answer. A chosen tree is one whose steps all keep their rules and complete no beaten node |
+| `CLOSURE.bend` | "Does q derive w" without sub-parses: segments of w grown Earley-style with every step allowed, each with a forest (not trusted), until they are closed, and the check that they are |
+| `PROOF_CLOSURE.bend` | The closure decides derivation: a closed set without q's whole segment leaves no forest (`walk`), the growth ends closed (`closure_closed`), and a completing segment's forest reads w (`closure_found`) |
+| `PROOF_DECIDE.bend` | The questions phase 1 asks are answered soundly: Yes only with a checked forest, No only when the closed segments do not complete q |
+| `PROOF_GUARD.bend` | Phase 1's verdict is right: a step answered Yes keeps its rules, one answered No does not |
+| `RIVAL.bend` | Phase 2's rival search: segments of the input grown Earley-style through steps phase 1 answers Yes, each with a forest (not trusted), until they are closed, and the check that they are |
+| `PROOF_RIVAL.bend` | A rival completes its segment in a closed set (`walk`), so a closed set without it leaves no rival |
+| `PROOF_RIVAL_GROW.bend` | The rival closure answers: when phase 1 decides every step within bounds (`decided`), with fuel 1 + the size of the descriptor universe the segments grown from m at i are closed and have m's start (`rival_closed`); segment keys are counted as descriptors |
+| `PROOF_RIVAL_SOUND.bend` | The rival's certificate is sound: every grown segment's forest reads its prefix of items and has only steps phase 1 answers Yes (`grow_ok`), so a segment that completes m passes `certWith`; with `rival_closed`, phase 2's rival verdict is never Unknown when phase 1 decides (`rival_decided`) |
+| `PROOF_LIVE.bend` | Dropping dead wood keeps exactly the chosen trees: a step is dropped only when no tree found so far covers it and its closed witness search finds no tree inside the oracle's set (`live_embeds`) |
+| `PROOF_WINSIDE.bend` | The witness search stays inside its steps: every forest and every tree it or the cover loop hands out uses only the given steps (`witness_in`, `cover_in`) |
+| `PROOF_ORACLE_ANSWERS.bend` | The oracle answers: with fuel 1 + twice the size of the descriptor universe, the exact set lies within bounds and no verdict on it is Unknown (`oracle_answers`) |
+| `PROOF_EXTENT_ANSWERS.bend` | The chosen set and the selecting oracle answer with that fuel (`chosen_answers`, `extent_answers`) |
+| `PROOF_VERDICT.bend` | The verdicts are decided: with fuel 1 + the size of the descriptor universe, phase 1 answers every step Yes or No (`phase1_decides`), and phase 2 every step within bounds (`phase2_decides`) |
+| `PROOF_PREFER.bend` | Phase 2's verdict is right: a step answered Yes is not beaten, one answered No is (its certificate is a rival) |
+| `PROOF_ORACLE.bend` | Proof that the oracle's set is exactly the steps of the chosen parse trees: `oracle_exact` |
+| `ORACLE_EX.bend` | The oracle on @left, @right, @prefer and @avoid; the rule on cyclic and acyclic grammars, and the cycle `A = @prefer A \| a`, where nothing is chosen; phase 2 with rivals that are admissible only through a later production, or never |
+| `PROOF_RULE.bend` | On a grammar without a preference cycle no rival comes back to its own choice: `no_self_rival` |
+| `EXTENT.bend` | Phase 3 on the core: what @longest and @shortest mean, step by step (a step is out when it stands on a reading of its production that another reading to the same end beats on the marked items; readings may be stitched from steps of chosen trees), the marks as written moved onto core items, the chosen set (the oracle's set without dead wood: one pass keeps the trees it finds, searches only for steps none of them covers, and drops a step only when its search is closed, `liveFrom`) handed out only with witness trees inside it, and the selecting oracle (exact, no Unknown) |
+| `PROOF_EXTENT.bend` | Proof that the chosen set is exact (every step lies on a chosen tree) and that the selecting oracle's set is exactly the steps of the selected trees: `extent_exact` |
+| `EXTENT_EX.bend` | The selecting oracle on @longest and @shortest, on an item and on a nonterminal |
+| `LL1.bend` | LL(1) on the core: nullable, FIRST and FOLLOW read from trees, what a production predicts, LL(1) at a nonterminal and everywhere; LL(1) of a grammar as written is LL(1) of its translation towards LL(1) |
+| `PROOF_LL1.bend` | An LL(1) grammar is unambiguous (`ll1_unambiguous`), and LL(1) at one nonterminal decides it (`ll1_at`) |
+| `TABLES.bend` | The LL(1) tables (nullable, FIRST, FOLLOW) grown untrusted and checked closed, the predict sets, the check `ll1ByTables`, and the check at one nonterminal `ll1AtByTables` |
+| `TABLES_EX.bend` | The LL(1) check on examples, including clashes only FOLLOW shows |
+| `PROOF_TABLES.bend` | LL(1) by the tables is LL(1): `tables_ll1_sound` |
+| `PROOF_LL1_AT_TABLES.bend` | Partially LL(1) grammars: the check at x gives LL(1) at x (`tables_ll1_at`), and prediction then admits at most one production of x per next token (`seeds_one_at`) |
+| `PREDICT.bend` | The predicting parser `predictedSteps`: predict sets from the checked tables, the engine run with them, the final state checked closed for what prediction admits; the LL(1) parser `ll1Steps`: tables that pass the LL(1) check, and a final state also supported |
+| `PROOF_PREDICT.bend` | Prediction admits every node of every parse tree, so the predicting parser misses nothing: `predict_every_parse_step` |
+| `PREDICT_EX.bend` | The predicting parser on examples, including a production predicted only by FOLLOW; the LL(1) parser's set is exactly the tree's steps where the plain parser has dead wood, and a grammar that is not LL(1) gets no answer |
+| `SUPPORT.bend` | Support: the facts of an engine state, the engine's rules on facts (with its predictor), the facts reached from the root, and `supported` (every fact of the state is reached) |
+| `SUPPORT_EX.bend` | Support on examples: plain and predicting runs are supported, and the predicting run's facts lie inside the plain run |
+| `PROOF_HOLD.bend` | Goals for the facts reached: in a closed plain state, or on a parse tree (a Bool search over the tree's steps); lists of facts |
+| `PROOF_STATE.bend` | Every rule keeps the goal "in a closed plain state" |
+| `PROOF_TREE.bend` | Every rule of the predicting engine keeps the goal "on a parse tree of an LL(1) grammar": the node of a step, cursors, seeds by table conflicts, resumes by `compare` |
+| `PROOF_SUPPORT.bend` | Every fact of a supported state holds the goal (one induction): `predict_saves_work`, and `ll1_no_dead_wood` (the LL(1) parser's set is exact) |
+| `EXAMPLES.bend` | Every example file above, checked at once |
+| `COMPARE.bend` | Swift Apus against the core: a grammar as written, its marks, an input and Swift's steps (exported by `ApusApusTests/BendExport.swift`), next to the core's exact, chosen or selected set mapped to Swift's slots; the dead wood of the oracles' sets is dropped first. It tries small fuels first and doubles them, up to the fuel with which each set is proven to come, so it always answers |
 
-Of Swift's 1963 steps, 406 (21%) are dead wood. Since the bracket rule (below), this includes the empty rounds Swift records, such as the `[ τ ]` taken over nothing. The most is in ambiguous and
-nested loops: for example 12 of 21 steps for `even brackets` on `aaaa`. A simple
-case is `split` (`X = { "a" | "a" "a" }` on `aaa`). It has 4 dead-wood steps:
-the loop ending at 0, 1 and 2, and a round `"a" "a"` started at 2 that can't
-finish. Swift's one-token lookahead can't prune them, because the next token is
-always an `a`.
+Run each with `bend <file>`; each prints ALL PROOFS CHECK. The growth loops (`WITNESS.bend`,
+`CLOSURE.bend`, `RIVAL.bend`) stop as soon as their facts are closed: their fuel is only a
+bound, so the proven fuel (about twice the descriptor universe) costs no more than needed.
 
-### After the Oracle's phase 1
+## The design
 
-The Bend check also compares the yields after `Oracle.disambiguate()`. The test
-grammars carry no annotations, so only phase 1 acts: it removes yields on no
-complete derivation. Its contract, as its own comments state it:
+### Principles
 
-1. the root still spans the input: it never removes the last parse;
-2. it removes no parse step that consumes input;
-3. it leaves no dead wood, also not at loops. (Until 2026-11-09 it kept every loop
-   iteration end on purpose, for `@longest` to compare with, and the check allowed them;
-   the Oracle's graph rewrite dropped that, and since 2026-11-10 the check allows nothing.)
+- **Bend is the reference.** The meaning of every annotation is defined here. Swift's engine
+  implements it; the tests compare Swift with Bend, never the other way.
+- **Pure reasons only.** A rule needs a language-design reason that holds for any grammar. That
+  a particular grammar (such as `Swift.apus`) uses a form or not is no reason; such a grammar
+  serves only as a regression check.
+- **No desugaring in Swift.** Swift's engine keeps EBNF (it is faster, and its trees are what
+  users see). The export to Bend is one to one; the translation to the core happens inside the
+  spec, so its meaning is specified too.
+- **Rules, not implementation limits.** Where an oracle does not handle a well-formed form, the
+  oracle is incomplete; that is no reason to forbid the form.
+- **Keyed facts, never lists of trees.** A cyclic grammar has infinitely many trees
+  (`A = A | "a"` reads `a` as `A(a)`, `A(A(a))`, …). GLL records each descriptor, call and step
+  once, keyed by slot and positions, and every algorithm here that reasons about trees does the
+  same: one fact per key, found as a least fixpoint. The meaning keeps every finite tree; the
+  algorithms never list them.
+- **Trees, not language equivalence.** The Oracle chooses among trees and the tests compare tree
+  steps, so the translation must give each reading of the grammar as written exactly one tree,
+  not merely keep the language (`EBNF_EX.bend`, and Swift's steps in the tests).
 
-Results (2026-11-10), the same 341 messages, of which the exporter refuses 2:
+### The layers
 
-| | Raw yields | After phase 1 |
+| Layer | What it adds | Trees | Proved on it |
+|---|---|---|---|
+| L0, BNF core (`CORE.bend`) | productions `A = x1 … xn` over terminals and nonterminals; n = 0 is ε | leaf, node | the parsers, pruning, the oracles, LL(1), every law |
+| L1, EBNF (`SYNTAX.bend`, `EBNF.bend`) | `( )`, `[ ]`, `{ }`, `< >`, ε as an item | none of its own: the core trees of its translation | nothing: the translation is its meaning |
+| L2, annotations | guards, ranks, extent marks | — | their meaning is defined on L0 |
+| L3, well-formed | no preference cycle | — | a hypothesis of `no_self_rival` only |
+
+The parser, pruning, exactness and LL(1) laws hold for every grammar; making them conditional
+on well-formedness would only weaken them.
+
+Chomsky normal form is not the core: ε-removal and unit-rule removal merge distinct trees (a
+cyclic grammar has infinitely many trees and its normal form finitely many), and they destroy
+the alternatives and sequences the annotations are attached to. Its useful half, binary steps,
+the core has: a step `(X = α · β, i, k, j)` is the intermediate node for the prefix α.
+
+### The core
+
+    Need       = Anything | Something | Nothing
+    Sym        = Terminal{kind} | Nonterminal{id, need}
+    Production = Production{lhs, rhs: List<Sym>}
+    Tree       = Leaf{kind} | Node{production, children}
+    Bsr        = Bsr{production, dot, i, k, j}
+
+Every proof that walks a tree has two cases. A parse tree is defined with `reads` (the forest
+fits the items and matches the input from a position). An occurrence's `need` carries the rules
+for empty rounds (below); written nonterminals have `Anything`.
+
+### EBNF as a translation
+
+Each bracket occurrence gets a fresh *group* nonterminal G whose productions are its
+alternatives, as written. `[ ]`, `{ }` and `< >` add a fresh *shape* nonterminal H with fixed
+productions around G:
+
+    ( τ1 | … | τn )   →  G = τ1 | … | τn
+    [ … ]             →  H = ε | G!
+    { … }             →  H = ε | H G!                   (towards Swift)
+                         H = ε | G! H                   (towards LL(1))
+    < … >             →  H = G⁰ | K,  K = G! | K G!     (towards Swift)
+                         H = G⁰ | G! K,  K = ε | G! K   (towards LL(1))
+    ε (an item)       →  E = ε, one E for the grammar
+
+`G!` is an occurrence that must read something, `G⁰` one that must read nothing. A loop's body
+is a group, as Swift Apus builds it: `{ τ }` and `{ ( τ ) }` mean the same.
+
+**The translation is the meaning.** An EBNF grammar has no trees of its own: its parse trees
+are the core trees of its translation, so the rewriting laws of EBNF hold by construction.
+New nonterminals are named by where their bracket stands (production, path, role) and numbered
+in a second, flat pass; written nonterminals and productions keep their numbers. The walk
+through nested brackets uses nesting fuel, as Bend has no mutual recursion; a grammar nested
+deeper has no translation and is reported (`ok`), never translated silently wrong.
+
+Guards and ranks sit on G's productions, the alternatives as written. A shape nonterminal's
+productions are generated: never ranked, marked or guarded. So the ε production of `[ ]` and
+`{ }` is no rival of a pick: a skip makes no choice.
+
+**Nullable bodies.** When a bracket's body can read nothing, `[ τ ]` over nothing is only the
+skip (a pick must read something), and the rounds of a loop all read something, except the one
+round of `< τ >` over nothing. These are the needs of the generated occurrences (`G!`, `G⁰`),
+checked by `reads` like any other part of a tree.
+
+**Two translations of loops.** No L0 definition or proof depends on the direction of a loop;
+only the translation does, and each family of laws uses the direction it needs:
+
+| Laws | Need | Loops |
 |---|---|---|
-| agree exactly | 207 | 339 |
-| dead wood | 132 messages | 0 |
-| missing steps | 0 | 0 |
-| parse lost | 0 | 0 |
+| parser, exact set, the three phases | steps that are Swift's yields | left-recursive |
+| LL(1) (tables, unambiguous, no dead wood, `ll1_at`), prediction | the choice "another round or stop" made after each round | right-recursive |
 
-The check found three bugs in phase 1, each fixed, each with a regression test in
-`OracleDisambiguationTests`:
+Towards Swift, each round runs from the loop's start, as Swift records it: `H = H · G` over
+`(i, k, j)` is the round's link step from the loop's start i over a round from k to j. Towards
+LL(1), each round's start is where "another round or stop" is chosen; a left-recursive
+production is never LL(1). A grammar as written is LL(1) when its right-recursive translation
+is (Wirth's conditions, here a definition).
 
-- **A zero-width `< >` lost its parse** (`S = < "x" | "" >` on the empty input).
-  Phase 1 treated it like a `{ }`, as the skip, but a `< >` has no skip: over an
-  empty span it is one empty round. Fixed in `YieldNavigator.endPositions` and in
-  `visitBracket`. Test: "zero-width < … > keeps its one empty round".
-- **An `""` inside a longer body lost its parse** (`S = "a" ""` on `a`). The walk
-  tiled alternates without their EPS symbols, so their yields were never marked,
-  and the sweep deleted them. Fixed in `visitAlternates`. Test: "EPS inside a
-  longer body keeps its parse".
-- **A zero-width `[ ]` kept dead wood**. Over nothing a `[ ]` is the skip, so
-  `visitBracket` no longer walks its round.
+**The step map** (`EBNF.stepsToSwift`). Swift's yields use slots in the grammar as written
+(production, path); the core's steps use (production, dot) of the translation towards Swift.
+Each core production records where it came from: a sequence as written keeps its slots, a
+loop's shape production gives the round's link step, and the other shapes and E give no step
+of Swift's. So the map is a function from core steps to Swift's slots that drops the core's
+extra steps. It is the one place where the two layers meet in the tests.
 
-### After `@prefer` and `@avoid`
+### Cyclic grammars
 
-A third test runs 20 grammars with `@prefer`/`@avoid`, from `OracleDisambiguationTests`,
-through Swift's Oracle and compares the yields with the steps of the unbeaten trees
-(`COMPARE.bend`, `preferReport`: the witness trees of the preference oracle's set that
-use only its steps).
+A cyclic grammar (`A ⇒ … ⇒ A` over the same tokens) is legal and simply ambiguous: every finite
+tree counts. The set of steps that occur in some tree is finite however many trees there are,
+so the laws need no exception, and every algorithm that reasons about trees (the witness search,
+the oracles' closures and certificates) works on keyed facts with a least fixpoint.
 
-Results (2026-11-10), 28 messages: all agree exactly. No step of an unbeaten tree is
-missing, and no step of an outranked choice survives.
+### Annotations on the core
 
-### After lookahead, `@left` and `@right`
+| As written | On the core |
+|---|---|
+| guard on a production (`ProdGuard`) or a bracket alternative (`AltGuard`) | on a production (of G, for a bracket) |
+| rank on a production (`ProdMark`) or a bracket alternative (`AltMark`) | on a production (of G, for a bracket) |
+| extent on a nonterminal (`NtExtent`) or a bracket (`BrackExtent`) | on an occurrence: a production and a dot |
 
-A fourth test runs 19 grammars with `>?>`/`>!>`/`@left`/`@right` through
-Swift's Oracle and compares the yields with the steps of the admissible trees
-(`COMPARE.bend`, `guardReport`). The cases cover bare and listed `@left`/`@right`, both
-on productions and in groups, lookahead that removes every parse, ambiguous lookahead,
-lookahead on a nonterminal GLL never predicts at that position, on one the parse did not
-call at that position, and on one that derives by reading nothing. Swift answers the parse
-predicates `>?>`/`>!>` in the parser, by probing the target (`documentation/Oracle.md` § 4),
-so it means the language, as `Ahead`/`NotAhead` do.
+An extent mark compares readings of the sequence it stands in, so on the core it names one item
+of one production. A mark on a nonterminal is shorthand for every occurrence of it in the
+grammar as written; a mark on a bracket marks the one occurrence of its G or H. Generated
+occurrences are never marked: in `H = H G` the shape nonterminal occurs in its own production,
+and marking it there would add a rule inside the loop. Several marks in one sequence are served
+left to right (`EXTENT.bend`, `beatsAt`).
 
-Results (2026-11-10), all messages agree exactly. Where a rule removes every parse, Swift
-and Bend both leave nothing.
+### Well-formed grammars: no preference cycle
+
+An alternative that outranks a sibling (`@prefer` over a plain or `@avoid` sibling, a plain one
+over an `@avoid` sibling) lies on no cycle that reads no input: it cannot derive, over its own
+tokens, the choice it belongs to. A preferred rival that comes back to the choice it competes
+in only says "the same again"; counting it could beat every reading, so that no tree is left.
+The rule is a property of the grammar, checked once (`PREFER.bend`, `noPreferenceCycle`, by two
+checked closed sets); cyclic grammars as such stay legal. On a well-formed grammar no rival holds
+a node of its own nonterminal over all its tokens (`no_self_rival`). Swift Apus refuses such a
+grammar at load time (`GrammarDiagnostics.diagnosePreferenceCycles`, exact for brackets too).
+
+### What can go unanswered
+
+Every algorithm answers with the fuel of the answer laws. The untrusted parts (the engine, the
+pruning loop, the witness search, the closures) are checked before anything is handed out; a
+failed check would be a bug, and the answer laws show none happens. The LL(1) parser
+(`PREDICT.bend`, `ll1Steps`) is for LL(1) grammars only: on another grammar it answers nothing,
+by design. Outside the spec, and so not exported to Bend: lexical ambiguity, layout gates, an
+extent on a terminal, and an extent mark on one occurrence of a nonterminal.
 
 ## Design choices: where Swift Apus and the spec meet
 
-Bare `@left`/`@right` means plain "derives", as `SPEC.bend` `EdgeOk` says (2026-11-10;
-before, Swift Apus asked "derives admissibly, one level deep"). This makes Swift.apus forbid
+Bare `@left`/`@right` means plain "derives", as `GUARD.bend` says. This makes Swift.apus forbid
 the chain `f(1) {}⏎{}` that swift-syntax accepts (TODO.md, "Grammar rework for the Oracle").
 
-`@longest`/`@shortest` are local for brackets and nonterminals alike, as `SPEC.bend`
-`ExtentBest` says (2026-11-10; before, Swift Apus kept a marked nonterminal's best completion
-per start, whatever enclosed it). Swift Apus and the spec now mean the same thing everywhere;
-`documentation/Oracle.md` § 5 lists the remaining choices, which the spec makes too.
+`@longest`/`@shortest` are local for brackets and nonterminals alike, as `EXTENT.bend` says,
+and several marks in one sequence are served left to right. Swift
+Apus and the spec mean the same thing everywhere; `documentation/Oracle.md` § 5 lists the
+remaining choices, which the spec makes too. A mark on one occurrence of a nonterminal is
+not compared: Swift Apus reads only the mark on the nonterminal's own rule.
 
 ## What the laws promise
 
-Every law about an algorithm says what an answer means: "whenever `exactSteps` hands out
-a set, it holds exactly the steps of the parse trees", and likewise for the checked and
-predicting parsers and the guard, preference and extent oracles. No law says that the
-algorithm hands out an answer. An algorithm that always said "no answer" would keep every
-law. So the proofs are proofs of partial correctness: what you get is right, but you may
-get nothing.
+A law about an algorithm says what an answer means: "whenever `exactSteps` hands out a set,
+it holds exactly the steps of the parse trees", and likewise for the checked and predicting
+parsers and the oracles. On its own, such a law also holds for an algorithm that never
+answers. The answer laws close that gap: with fuel 1 + twice the size of the descriptor
+universe, the checked, pruned, exact and predicting parsers and the oracles always hand out
+their sets (`checked_always_answers`, `exact_parser_answers`, `predicted_parser_answers`,
+`oracle_answers`, `chosen_answers`, `extent_answers`). Fuel is only a bound: every loop stops
+when it is done.
 
-An algorithm hands out nothing when it runs out of fuel, when a check of an untrusted
-part fails (the GLL state is not closed, pruning's needs are not closed, the witness trees
-do not cover the kept steps, a certificate is missing), or when an oracle refuses a
-grammar it was not built for. Fuel bounds the depth of the recursion, not the total work,
-so a run always ends but may take very long.
+For the comparisons with Swift Apus (`COMPARE.bend`) this means a case always gets an answer;
+only the time limit of a test run can leave one uncompared, and `BendCheck` and
+`BendDifferential` fail such a case, so it cannot pass unnoticed.
 
-For the comparisons with Swift Apus this means: a case without an answer was not
-compared. `BendCheck` and `BendDifferential` therefore fail such a case, so it cannot pass
-unnoticed. Until 2026-11-10 the witness search listed every tree, which is exponential
-and on a cyclic grammar incomplete (`BendDifferential` seed 86: no answer after minutes);
-it now builds one tree per uncovered step from a least fixpoint. That an answer always
-comes, with enough fuel, is not proven (TODO.md, "Bend twin: answers").
-
-## What is proven
-
-- **Rewriting laws**: each bracket means its usual BNF rewriting, without helper
-  nonterminals. `{τ} η` derives what `η` or `(τ) {τ} η` derives, and so on.
-- **The checked GLL parser misses nothing** (`gll_every_parse_step`): whenever
-  `checkedSteps` hands out a set, every step of every parse tree of the input is
-  in it.
-- **The exact parser is exact** (`gll_bsr_exact`): whenever `exactSteps` hands out
-  a set, it holds exactly the steps of the parse trees of the input. Nothing is
-  missing, and there is no dead wood.
-- **Trees from the exact set spell the input** (`exact_trees_spell`): a tree that
-  fits, uses only steps of the exact set, and is as long as the input, spells the
-  input. An oracle choosing from the set cannot produce a non-parse.
-- **Lookahead, `@left` and `@right` keep exactly the admissible trees**
-  (`guards_exact`, phase 1): whenever `guardSteps` hands out a set, a parse tree of
-  the input uses only its steps exactly when every node, pick and round keeps the rules
-  of the alternative it chose (`SPEC.bend`, `Admissible`). The oracle refuses rules on
-  the alternatives of a loop.
-- **`@longest` and `@shortest` keep exactly the selected trees** (`extent_exact`,
-  phase 3 joined to phases 1 and 2): whenever `extentSteps` hands out a set, a parse tree
-  of the input uses only its steps exactly when it is admissible, unbeaten, and no node,
-  pick or round has a rival reading of the same children's tokens, kept by phases 1 and 2
-  where it stands, whose marked item is longer (`@longest`) or shorter (`@shortest`)
-  (`SPEC.bend`, `ExtentBest`, `Selected`). A longer reading that breaks a hard rule or is
-  outranked beats nothing. The comparison is local, within the one sequence the
-  mark sits in. The oracle refuses two marks in one sequence and a mark on the
-  alternative of a loop. Its self-check (a kept step of a marked item, at each end of
-  its sequence, either lies on no reading or has the best length there) rules out
-  readings stitched together from different trees.
-- **`@prefer` and `@avoid` choose exactly the unbeaten trees, among the admissible
-  ones** (`prefer_avoid_exact`, phase 2 joined to phase 1): whenever `unbeatenSteps`
-  hands out a set, a parse tree of the input uses only its steps exactly when it is
-  admissible and no node of it is outranked by an admissible rival (`SPEC.bend`,
-  `UnbeatenTree`). A preferred alternative that breaks a hard rule beats nothing. The
-  set may keep steps inside a removed choice; they make no tree.
-- **An answer leaves a reading** (`prefer_avoid_safe`): whenever `unbeatenSteps` hands
-  out a set and the input has an admissible tree, some admissible tree is unbeaten. The proof
-  builds it: it repairs any parse tree from the top, keeping each node the oracle kept
-  and putting a removed node's certified rival in its place.
-  Not proven: the same without the oracle's answer, that preferences never remove every
-  parse tree. Its classical proof ("it is impossible that no tree is unbeaten") uses a
-  hypothesis twice, which Bend's affine logic does not allow (`¬¬(P ∨ ¬P)` is not
-  provable in Bend); it would need a verified recogniser instead.
-
-- **Prediction misses nothing** (`predict_every_parse_step`): whenever the checked
-  parser with prediction (`predictedSteps`) hands out a set, every step of every parse
-  tree of the input is in it. A descriptor is started only where the token at its
-  position can begin what follows it: FIRST of the rest of its sequence, and when that
-  can be empty, what may follow the sequence (another round of a loop, the rest after a
-  bracket, or FOLLOW of the production's nonterminal). The tables are computed in
-  FIRST.bend and handed out only when closed. The proof is the one for plain GLL, with
-  three more facts carried along the walk: where the current sequence ends, that the
-  token there may follow it, and the FOLLOW check for it. Without prediction all three
-  hold trivially, so `gll_every_parse_step` is the special case. On the examples the
-  predicting parser starts 10–36% fewer descriptors; on an LL(1) expression grammar its
-  steps are exactly the exact set.
-
-- **Prediction saves work** (`predict_saves_work`): whenever the plain parser's final
-  state is closed and the parser's final state in any mode is supported (every fact of
-  it derivable from the root by the engine's rules, SUPPORT.bend), every fact of the
-  second is in the first. So the predicting parser has no descriptor and no step the
-  plain one lacks: by the cost below, it never does more work and never uses more memory.
-  The proof grows the facts reached round by round and shows each round stays inside the
-  closed state, because closed means the rules add nothing new. Lexer questions are not
-  covered: prediction can ask more of them.
-
-- **LL(1) by the tables is LL(1)** (`tables_ll1_sound`): when LL1.bend's check finds no
-  conflict in closed tables, the grammar is LL(1) in SPEC.bend's exact sense: at no choice
-  point can two different choices begin with the same next token. The proof walks a parse
-  tree to show that wherever a sequence ends, the next token is in the tables' context for
-  it; so the exact FIRST, FOLLOW and PREDICT sets lie inside the tables' sets. It then shows
-  the check visits every choice point (every nonterminal, every bracket at any depth, and
-  after a round of `< >`), or reports running out of nesting fuel. The converse fails on
-  purpose: the tables may report a conflict that no sentence has.
-
-- **An LL(1) grammar is unambiguous** (`ll1_unambiguous`): under SPEC.bend's `LL1`, any
-  two parse trees of the same input are the same tree. `LL1` is a function, and Bend lets a
-  proof call a function only once, so the proof first shows, without LL(1), that two parse
-  trees of one input are equal or give a clash (`trees_same`): a choice point where the
-  trees choose differently and both choices predict the token there (by FIRST when the
-  chosen part reads something, else by nullable and FOLLOW, taken from the tree's own
-  steps). The law then rules out the clash with one call of `LL1`.
-
-- **No dead wood for LL(1)** (`ll1_no_dead_wood`): when
-  the input is a sentence and the tables pass LL1.bend's check, the checked LL(1) parser
-  (`llSteps` in PSUPPORT.bend: the predicting engine's state must be closed, and supported
-  by the engine's rules with prediction) hands out exactly the steps of the parse tree. The
-  proof fixes the tree and shows every fact grown from the root lies on it: only the tree's
-  production gets past prediction at a cluster (another would be a conflict of the table
-  check), and a pop matches every caller, since two nodes of one nonterminal at one position
-  are the same (`compare` of PROOF_UNAMBIGUOUS, on one tree). PROOF_NODEAD.bend does this
-  for grammars without brackets (its first stage, `ll1_no_dead_wood_bnf`, kept as a lemma);
-  PROOF_NODEAD2.bend adds brackets: a round's descriptors are on the tree when the round is,
-  and at a bracket only the tree's choice gets past prediction (entering, skipping, another
-  round, leaving), else the table check would have found a conflict at its `BracketAt` or
-  `AfterRoundAt`. Two callers of one bracket at one position have the same forest from
-  there on, so a round's pop resumes only the tree's caller.
-
-- **LL(1) at one choice point decides it** (`ll1_at`): where the grammar is LL(1) at one
-  choice point (`LL1At` at that point only), two parse trees, of any inputs, that make a
-  choice there at the same position with the same token next make the same choice. The
-  choices a tree makes are listed by `choicesMade` at SPEC's end (a node, a Pick or Skip of
-  `( )` `[ ]`, each round of a loop and stopping it; examples in EXAMPLES.bend). The proof
-  (PROOF_LL1AT.bend) walks one tree and shows every choice it makes predicts the token where
-  it is made, with the pieces of PROOF_UNAMBIGUOUS; then two different choices would break
-  `LL1At`. So a parser may predict by one token at such a point even when the grammar is not
-  LL(1) elsewhere.
-
-## What a parse costs
-
-`COST.bend` measures a run of the engine by three counts of distinct facts of its final
-state, each one unit, none depending on the order the engine worked in. They follow Scott
-and Johnstone's reporting: in the LCNP paper only the descriptor set |U| and the BSR set
-|ϒ| ("an implementation independent measure of the work done by a GLL-style parser is the
-number of descriptors created ... memory usage is dominated by the size of the output
-derivation representation").
-
-| Count | Measures | Bound | Ideal |
-|---|---|---|---|
-| `descriptors` | the work: one execution of the engine's outer loop each | | about the input length times the grammar size, for an LL(1) grammar |
-| `steps` | the memory: the output BSR set | at least the exact set (the rest is dead wood) | the exact set |
-| `lexerQuestions` | the lexer's work, for a lexer that answers on demand and remembers its answers: the distinct pairs (position, terminal) it is asked | at least one per position visited | one per position (a lexer that answers per position) |
-
-A descriptor before a terminal asks about that terminal; with prediction, every candidate
-descriptor also asks about each terminal of its predict set. The same count is the lex
-cache's size in Swift Apus (about 65 questions per position on `Oracle.swift`).
-
-Left out, after checking on the 32 runs of `COST_EX.bend` (16 cases, plain and
-predicting) that they follow the descriptors: clusters (correlation 0.93), return edges
-(0.93; 0.998 with clusters), pops (0.96), and candidates, Scott's "descriptor finds"
-(0.98; at most 3 more than the descriptors without prediction). Steps also follow the
-descriptors (0.97), since each is made with one, but stay as the memory and dead-wood
-measure; lexer questions do not (0.81) and can grow with prediction (22 → 25 on the
-expression grammar, while descriptors fall 70 → 45).
-
-`COST_EX.bend` imports every case in `swift/`; after a re-export with other cases, update
-its list.
-
-## How the exact parser is built
-
-None of the algorithms is trusted. Each one's output is checked, and the proofs are
-about the checks:
-
-1. `GLL.bend` parses; `CHECK.bend` checks that its final state is closed. A closed
-   state misses no step of any parse tree.
-2. The round rule (`PRUNE.bend`) removes the link steps of rounds that read nothing,
-   unless the rule below allows them. A loop is written `{ ( τ ) }`, so a round's
-   link step records the loop's start, the round's start and its end, and the rule
-   needs nothing else. A parse tree's rounds all pass it.
-3. `PRUNE.bend` keeps the steps a parse tree of the whole input needs, and checks
-   that its needs are closed. Closed needs keep every step of every parse tree. A
-   `[ ]` that reads nothing needs none of its alternatives: it is the skip.
-   A round that starts after its loop's start needs the round before it to have
-   ended there; the first round needs nothing, because a parse tree has no empty
-   round before another one.
-4. `WITNESS.bend` builds parse trees from the kept steps; `EXACT.bend` checks each
-   one with `SPEC.bend`'s own `fits`, `leaves` and `steps`, and that together they
-   cover every kept step. So every kept step is a step of a parse tree.
-
-If a check fails, or an algorithm runs out of fuel, the parser hands out nothing.
-
-## How the guard oracle works
-
-`GUARD.bend` starts from the exact set and decides each rule from one step of the
-node, because of how a sequence's steps are recorded: the last step has the node's
-start i and its last child's span k..j, and the first step has the first child's span.
-Lookahead depends only on the choice and i, `@left` on the choice and k..j, `@right`
-on the choice and the first span. Two trees that share a step share these values, so
-removing the step takes out the nodes that break a rule, and only those; no pruning
-is needed. Every answer is checked: "N derives w" with a forest that `SPEC.bend`'s
-`fits` and `leaves` accept, "N does not derive w" when the checked parser finds no
-tree. A lookahead tries every prefix length of the rest of the input. Anything the
-oracle can't decide makes it hand out nothing.
-
-In the proof, a rule's Holds can be used only once (affine logic), while a node's own
-steps are visited one by one. Each rule is decided by exactly one own step, so the
-rules are split up front: the `@right` part goes to the first step, the rest to the
-last.
-
-## How the extent oracle works
-
-`EXTENT.bend` runs on the preference oracle's set (phase 2), pruned from below as
-UNBEATEN.bend prunes its sub-parses (a rule that fails at a node leaves the step above
-it, and a chain through such a step is no reading). A sequence's readings are looked for
-in the set itself: chains of its own steps from the start i to an end e. That is enough
-because of plugging (PROOF_PLUG.bend): a rival reading that phases 1 and 2 keep where the
-children stand takes their place in an unbeaten tree, so its steps are in the set. A best
-length is used only with a certificate, a forest built from the set (WITNESS.bend) that
-fits the items, spells the tokens, reads the marked item with that length, and whose
-steps are all in the set; such a forest keeps phases 1 and 2 where it stands
-(PROOF_GUARD's and PROOF_PREFER's walks), so it is a genuine rival. Without one the
-oracle hands out nothing.
-
-## How the preference oracle works
-
-`UNBEATEN.bend` runs on the guard oracle's set (phase 1), with PREFER.bend's machinery
-and one change in step 1 below: the sub-parse's steps are moved back to where they
-stand in the input (shifted by the choice's start, the extra production's slots read
-as the rival's own), judged there by the guard oracle with the whole input to look
-ahead in, and pruned from below to the steps that what is kept supports (a loop that
-is not trusted, and a closure check that is). A rival is found only when the end of
-its sequence survives, so only admissible rivals count. Certificates are drawn from
-the guard oracle's set, so a certified rival is admissible (PROOF_GUARD's walks).
-What follows describes PREFER.bend, the unjoined original.
-
-`PREFER.bend` starts from the exact set. A step that completes a choice (the end of a
-production's right side, or of a bracket's alternative) reads the tokens from its i
-to its j. For each sibling of higher rank:
-
-1. **Keep** needs proof that the sibling cannot read those tokens. The checked GLL
-   parser runs on just those tokens, with the sibling's items as one extra
-   production. If its set has no end of that production over all of them,
-   `gll_every_parse_step` says no tree exists, so no rival exists.
-2. **Remove** needs a certificate from some sibling of higher rank, checked with
-   `SPEC.bend`'s own definitions: a forest for the sibling over the same tokens, made
-   of kept steps only, and a set C of nonterminals with no node in the forest over
-   those tokens. (Kept steps only: then the forest can take the removed node's place in
-   a tree of kept steps, which is how `prefer_avoid_safe` builds an unbeaten tree. Any
-   sibling may give the certificate: the first one found may be outranked itself.) C holds every nonterminal that can be above
-   the choice over the same tokens: it is grown from the choice's nonterminal along
-   steps that start a sequence with a member of C, and checked to be closed. That is
-   SPEC's rival, which may not go round a cycle back to a node above it.
-
-Without a certificate, or when the parser runs out of fuel, the oracle hands out
-nothing. That is the case for a grammar whose preferences go round a cycle (Swift
-Apus refuses those too), and for a loop not written `{ ( τ ) }`, whose rounds the
-steps cannot tell apart.
-
-## Design choices in SPEC.bend
-
-Some definitions in the spec are choices, not consequences. They were validated on
-examples, not proven right; nothing could prove them right. The reasoning:
-
-**The step convention** (which BSR elements a tree records), copied from Swift Apus:
-every child of a sequence records its slot, the first one too; every bracket is a
-context of its own, like an anonymous nonterminal; the rounds of a loop are counted
-from the loop's start, so each round records where the earlier rounds ended. A loop
-is written `{ ( τ ) }`: its one alternative is a group, so each round is one item,
-whose step records the loop's start, the round's start and its end, and the group's
-own sequence starts where the round starts. Swift Apus builds every loop this way
-(`ApusParser.loopRound`).
-
-| Alternative | Better at | Why not chosen |
-|---|---|---|
-| Scott's binarisation: skip the first child's element | fewer elements, same information | Swift records it; one uniform rule kept the proofs simple |
-| Scott's EBNF slots: `( )` and `[ ]` inside the surrounding sequence | fewer contexts | a bracket's choice then has no element of its own for an oracle to prefer |
-| Rounds counted from the loop's start, without the group | one element less per round | a round's own start is then in no element, so nothing that compares rounds can work: `@prefer` among a loop's alternatives compared loop prefixes instead of rounds. Chosen at first, replaced by the group (Scott and Johnstone's "local root node" for a closure, one per round) |
-| Swift's completion elements `(lhs, i, i, j)` too | direct span lookup | redundant with the last child's element; dropped when comparing |
-
-Because every child records an element, every leaf's token is written in the set.
-That is what makes `exact_trees_spell` true (the exact parser also checks that each
-terminal's step matches the input token at its position): a fitting tree built only from steps of
-the exact set, as long as the input, spells the input. An oracle choosing a tree from
-the set cannot produce nonsense. (The length condition matters: for `S ::= S S | a`
-on `aa`, the tree `S -> a` uses only steps of the exact set, but spells `a`.)
-
-What a finite set cannot do is tell infinitely many trees apart: trees that differ
-only in repeated cycles like `A ::= A | a` have the same steps. Telling trees apart
-is therefore a job for the oracle.
-
-**ε is an item**: `Eps{}`, matched by a `Skip`. It
-records a step like any other item, the slot after it with (sequence start, k, k),
-which is the yield Swift Apus records for an EPS node.
-
-**No removable empty rounds**. Every bracket repeats its body:
-`( τ )` exactly once, `[ τ ]` at most once, `{ τ }` any number of times, `< τ >` at
-least once. The rule (`roundsOk`):
-
-> A bracket has at least its minimum number of rounds, and an empty round only when
-> it has exactly its minimum.
-
-| Bracket over nothing | Its tree |
-|---|---|
-| `[ τ ]` | a `Skip`, never a `Pick` whose τ derives ε |
-| `{ τ }` | no rounds |
-| `< τ >` | exactly one empty round, the τ of `< τ > = ( τ ) { τ }` |
-| `( τ )` | its one round; a choice between empty alternatives stays |
-
-A bracket that reads something has no empty round.
-
-Trees that differ only in how often nothing was repeated are one reading. Trees
-that differ in which alternative or production was chosen are different readings,
-even when nothing is read: `( ε | A )` with `A ::= ε`, or `A A` with a nullable `A`
-on one token. Those are for the oracle to resolve. The language is unchanged; only
-which trees count, and so which steps are in the exact set.
-
-**Grammar cycles** (`A ::= A | a`): allowed, with infinitely many trees. The
-alternative is cycle-free trees only (no node with the nonterminal and span of one
-of its ancestors), as in Scott and Johnstone's work on cycle breaking.
-
-**Empty rounds and LL(1).** Scott and Johnstone's EBNF parsers keep every empty round: a
-closure with a nullable body has infinitely many derivations, folded into SPPF loops, and an
-optional with a nullable body is a genuine ambiguity (in their Java study they rewrote such
-rules). Here those readings are no trees, so the LL(1) notions at the end of SPEC.bend follow
-the bracket rule: the rounds of `[ ]` and `{ }`, and the later rounds of `< >`, always read
-something, so their alternates are told apart by FIRST alone. Only an alternate of a
-nonterminal, the round of `( )`, the first round of `< >`, and leaving a bracket may read
-nothing, and so also predict through FOLLOW. A `< >` has two choice points: entering (a round
-must be taken, and it may be empty) and after a round (another round, which reads
-something, or leave). With this, `[A] b` with `A ::= a | ε` is LL(1): `b` skips, `a` takes.
-The predicting engine follows the same rule (`Gll.predictFor`): it starts a round of `[ ]`
-or `{ }`, or a round of `< >` that does not start where the loop starts, only when the next
-token is in FIRST of the round, so it never enters a removable empty round. Before, it used
-FOLLOW there too, and `{ a | ε } b` on input `b` left the empty round's step as dead wood.
-
-**Swift Apus** keeps the present-but-empty readings of `[ τ ]` in its raw yields, and
-phase 1 of the Oracle removes them. It also reports no ambiguity for `( "" | A )`
-with `A = ""`, which is a genuine one. Its prediction (`viable`) and its LL(1) diagnostic
-(`verifyLL1`) use the textbook rule (FIRST, and FOLLOW where nullable) for every bracket, so
-they enter the empty reading of a nullable `[ ]` or `{ }` alternate; the bracket rule would
-let both engines skip it.
-
-## Still to do
-
-- Done: LL(1) laws, on the derived notions at the end of SPEC.bend (`Nullable`, `First`,
-  `FollowAt` read from parse trees, `Predicts`, `ChoicePoint`, `choiceOf`, strong `LL1At`
-  and `LL1`): `ll1_unambiguous` (an LL(1) grammar has at most one parse tree per input),
-  then a computable check "LL(1) by the tables" in FIRST.bend with the law that it implies
-  `LL1` (`tables_ll1_sound`), then `ll1_no_dead_wood` (with that check, the predicting
-  parser's set is exactly the steps of the parse tree), and last `ll1_at` (two trees reaching
-  an LL(1) choice point at the same position choose the same there).
-
-- Once the whole Oracle is proven: review the edifice and simplify it.
-
-- Preferences never remove every parse tree, without the premise that the oracle
-  answered: needs a verified recogniser for "do these items derive these tokens
-  without going round a cycle?" (see `prefer_avoid_safe`).
-
-- A law that enough fuel always gives an answer (today a failure is safe: no answer).
-- Larger grammars in the Bend check: the language fixtures, and the `fail` messages.
-- Done 2026-11-09: Swift Apus no longer keeps loop iteration ends for `@longest`.

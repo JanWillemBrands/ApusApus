@@ -168,8 +168,48 @@ nonisolated final class DerivationBuilder {
             // the production that actually produced it.
             guard let definition = symbol.alt else { return [] }
             return trees(for: definition, from: from, to: to, limit: limit).map { [$0] }
+        case .DO, .OPT, .KLN, .POS:
+            // A bracket's children are its rounds: trees of its body, one per round.
+            guard let body = symbol.alt else { return [] }
+            return rounds(of: symbol, body: body, from: from, to: to, first: true, limit: limit).map { rounds in
+                let bracket = node(symbol, from: from, to: to)
+                bracket.children = rounds
+                return [bracket]
+            }
         case .ALT, .END:
             return [[]]
+        }
+    }
+
+    /// The ways `occurrence` reads [from, to) as a list of rounds, by the bracket rules: a group
+    /// is one round; [ ] is none (the skip) or one that reads something; { } and < > are rounds
+    /// that each read something, except that < > over nothing is one empty round.
+    private func rounds(of occurrence: GrammarNode, body: GrammarNode, from: Int, to: Int,
+                        first: Bool, limit: Int) -> [[DerivationNode]] {
+        func one() -> [[DerivationNode]] { trees(for: body, from: from, to: to, limit: limit).map { [$0] } }
+
+        switch occurrence.kind {
+        case .DO:
+            return one()
+        case .OPT:
+            return from == to ? [[]] : one()
+        default:
+            if from == to {
+                // Stop here — or, for a < > that has read nothing at all, its one empty round.
+                return occurrence.kind == .POS && first ? one() : [[]]
+            }
+            var results = [[DerivationNode]]()
+            for mid in endPositions(body, from: from).sorted() where from < mid && mid <= to {
+                guard results.count < limit else { break }
+                for head in trees(for: body, from: from, to: mid, limit: limit - results.count) {
+                    for tail in rounds(of: occurrence, body: body, from: mid, to: to, first: false,
+                                       limit: limit - results.count) {
+                        guard results.count < limit else { break }
+                        results.append([head] + tail)
+                    }
+                }
+            }
+            return results
         }
     }
 
@@ -181,6 +221,7 @@ nonisolated final class DerivationBuilder {
     ///   - terminals and ε are keyed by the pivot `k` (addYield(..., k: cI, ...) in parseInput)
     ///   - an RHS nonterminal reference is also keyed by `k` (addYield(..., k: cU, ...) in rtn)
     ///   - a LHS definition's own span is keyed by `i`, since its pivot equals its left extent
+    ///   - a bracket is keyed by `k`, one yield per pick or round (resume in Engine.swift)
     private func endPositions(_ symbol: GrammarNode, from: Int) -> Set<Int> {
         let yields = parser.yields
         guard yields.indices.contains(symbol.number) else { return [] }
@@ -207,6 +248,22 @@ nonisolated final class DerivationBuilder {
         case .N:
             result = Set(yields[symbol.number].lazy.filter { $0.i == from }.map(\.j))
 
+        case .DO, .OPT:
+            // One yield per pick (or skip), keyed by where the bracket starts.
+            result = Set(yields[symbol.number].lazy.filter { $0.k == from }.map(\.j))
+
+        case .KLN, .POS:
+            // One yield per round, keyed by where the round starts: follow them round by round.
+            // This may promise more than the rules allow; rounds(of:) keeps to the rules.
+            var ends: Set<Int> = [from]
+            var todo = [from]
+            while let start = todo.popLast() {
+                for y in yields[symbol.number] where y.k == start && y.j > start && ends.insert(y.j).inserted {
+                    todo.append(y.j)
+                }
+            }
+            result = ends
+
         case .ALT, .END:
             result = []
         }
@@ -223,19 +280,28 @@ nonisolated extension GrammarNode {
     /// seq/alt links for display in the inspector.
     var production: String {
         guard kind == .N, seq == nil else { return String(name) }
+        return "\(name) = " + alternatesText
+    }
+
+    /// `aS | {b}c | ε` — the alternates of a definition as written, brackets included.
+    var alternatesText: String {
         var alternates = [String]()
         var alt = self.alt
         while let a = alt {
             var body = ""
             var node = a.seq
             while let n = node, n.kind != .END {
-                body.append(n.name)
+                if let closer = n.kind.closer, let inner = n.alt {
+                    body += "\(n.name)\(inner.alternatesText)\(closer)"
+                } else {
+                    body.append(n.name)
+                }
                 node = n.seq
             }
             alternates.append(body.isEmpty ? "ε" : body)
             alt = a.alt
         }
-        return "\(name) = " + alternates.joined(separator: " | ")
+        return alternates.joined(separator: " | ")
     }
 }
 

@@ -1,116 +1,106 @@
 import Base
-import ./SPEC.bend as Spec
-import ./GLL.bend as Gll
+import ./CORE.bend as Core
+import ./PREDICT.bend as Pr
 import ./CHECK.bend as Check
-import ./EXACT.bend as Exact
-import ./FIRST.bend as First
 
-# PREDICTION ON EXAMPLES (scratch). For each grammar and input: the facts of the plain
-# engine and of the predicting one, and whether the predicting checked parser answered
-# with a set between the exact set and the plain one.
+# THE PREDICTING PARSER ON EXAMPLES.
 
-def t(k: Nat) -> Spec.Item:
-  Spec.Sym{Spec.Terminal{k}}
+def t(+k: Nat) -> Core.Sym:
+  Core.Terminal{k}
 
-def n(id: Nat) -> Spec.Item:
-  Spec.Sym{Spec.Nonterminal{id}}
+def n(+x: Nat) -> Core.Sym:
+  Core.Nonterminal{x, Core.Anything{}}
 
-def one(+item: Spec.Item) -> +List<+List<Spec.Item>>:
-  [[item]]
-
-type Facts is Data:
-  Facts{descs: Nat, clusters: Nat, returns: Nat, pops: Nat, steps: Nat}
-
-type Report is Data:
-  Report{plain: Facts, predicted: Facts, exact: Nat, ok: Bool}
-
-def fuel() -> Nat:
-  4000n
-
-def factsOf(r: Gll.GRun) -> Facts:
-  match r:
-    case Gll.GDone{Gll.GState{seen, todo, cs, rs, ps, ys}}:
-      Facts{List.length(&2, Gll.Desc, seen), List.length(&2, Gll.CKey, cs), List.length(&2, Gll.Ret, rs), List.length(&2, Gll.Pop, ps), List.length(&2, Spec.Bsr, ys)}
-    case Gll.OutOfFuel{s}:
-      Facts{0n, 0n, 0n, 0n, 0n}
-
-def tablesOr(m: Maybe<&2, Gll.Tables>) -> Gll.Tables:
+def kept(m: Maybe<&2, +List<Core.Bsr>>, +tr: Core.Tree) -> Bool:
   match m:
-    case Some{t}:
-      t
-    case None{}:
-      Gll.Tables{[], [], []}
-
-def setOr(m: Maybe<&2, +List<Spec.Bsr>>) -> +List<Spec.Bsr>:
-  match m:
-    case Some{s}:
-      s
-    case None{}:
-      []
-
-def isSome(m: Maybe<&2, +List<Spec.Bsr>>) -> Bool:
-  match m:
-    case Some{s}:
-      True{}
+    case Some{+set}:
+      Core.allIn(Core.steps([tr], 0n), set)
     case None{}:
       False{}
 
-def predOf(+g: +List<Spec.Production>) -> Gll.Pred:
-  Gll.Predict{tablesOr(First.tablesOf(Nat.add(Nat.mul(First.ntCount(g), 4n), 4n), g, 0n))}
+def has(m: Maybe<&2, +List<Core.Bsr>>, +x: Core.Bsr) -> Bool:
+  match m:
+    case Some{+set}:
+      Core.member(x, set)
+    case None{}:
+      False{}
 
-def report(+g: +List<Spec.Production>, +input: +List<Nat>) -> Report:
-  +plain = Check.checkedSteps(fuel(), g, 0n, input)
-  +pred = Check.predictedSteps(fuel(), g, 0n, input)
-  +exact = setOr(Exact.exactSteps(fuel(), g, 0n, input))
-  +ok = Bool.and(isSome(pred), Bool.and(Spec.allIn(exact, setOr(pred)), Spec.allIn(setOr(pred), setOr(plain))))
-  Report{factsOf(Gll.parse(fuel(), g, 0n, input)), factsOf(Gll.parseWith(fuel(), predOf(g), g, 0n, input)), List.length(&2, Spec.Bsr, exact), ok}
+# S = X | Y, X = a, Y = b, on a: Y is not started, and the tree is found.
+def choice() -> +List<Core.Production>:
+  [Core.Production{0n, [n(1n)]}, Core.Production{0n, [n(2n)]}, Core.Production{1n, [t(1n)]}, Core.Production{2n, [t(2n)]}]
 
-# X ::= a {b} c
-def loopGrammar() -> +List<Spec.Production>:
-  [Spec.Production{0n, [t(1n), Spec.Brack{Spec.Closure{}, one(t(2n))}, t(3n)]}]
+law choice_kept:
+  {kept(Pr.predictedSteps(20n, choice(), 0n, [1n]), Core.Node{0n, [Core.Node{2n, [Core.Leaf{1n}]}]}) == True{} : Bool}
 
-# X ::= a (a b | a) (b c | c)
-def choiceGrammar() -> +List<Spec.Production>:
-  [Spec.Production{0n, [t(1n), Spec.Brack{Spec.Group{}, [[t(1n), t(2n)], [t(1n)]]}, Spec.Brack{Spec.Group{}, [[t(2n), t(3n)], [t(3n)]]}]}]
+def choice_kept():
+  {==}
 
-# S ::= {A} a,  A ::= b b | ε
-def nullGrammar() -> +List<Spec.Production>:
-  [ Spec.Production{0n, [Spec.Brack{Spec.Closure{}, one(n(1n))}, t(1n)]},
-    Spec.Production{1n, [t(2n), t(2n)]},
-    Spec.Production{1n, []} ]
+# S = A b, A = a | ε, on b: A -> ε is predicted by FOLLOW, so the tree is found.
+def follows() -> +List<Core.Production>:
+  [Core.Production{0n, [n(1n), t(2n)]}, Core.Production{1n, [t(1n)]}, Core.Production{1n, []}]
 
-# S ::= [A] b,  A ::= a | ε
-def optGrammar() -> +List<Spec.Production>:
-  [ Spec.Production{0n, [Spec.Brack{Spec.Optional{}, one(n(1n))}, t(2n)]},
-    Spec.Production{1n, [t(1n)]},
-    Spec.Production{1n, []} ]
+law follow_kept:
+  {kept(Pr.predictedSteps(20n, follows(), 0n, [2n]), Core.Node{0n, [Core.Node{2n, []}, Core.Leaf{2n}]}) == True{} : Bool}
 
-# X ::= {a | a a}
-def splitGrammar() -> +List<Spec.Production>:
-  [Spec.Production{0n, [Spec.Brack{Spec.Closure{}, [[t(1n)], [t(1n), t(1n)]]}]}]
+def follow_kept():
+  {==}
 
-# E ::= E + a | a
-def leftGrammar() -> +List<Spec.Production>:
-  [ Spec.Production{0n, [n(0n), t(5n), t(1n)]},
-    Spec.Production{0n, [t(1n)]} ]
+# On b the production A -> a is never started, so its step is not there.
+law not_started:
+  {has(Pr.predictedSteps(20n, follows(), 0n, [2n]), Core.Bsr{1n, 1n, 0n, 0n, 1n}) == False{} : Bool}
 
-# An LL(1) expression grammar: E ::= T { + T },  T ::= F { * F },  F ::= ( E ) | a.
-# Tokens: a = 1, + = 5, * = 6, ( = 7, ) = 8.
-def exprGrammar() -> +List<Spec.Production>:
-  [ Spec.Production{0n, [n(1n), Spec.Brack{Spec.Closure{}, one(Spec.Brack{Spec.Group{}, [[t(5n), n(1n)]]})}]},
-    Spec.Production{1n, [n(2n), Spec.Brack{Spec.Closure{}, one(Spec.Brack{Spec.Group{}, [[t(6n), n(2n)]]})}]},
-    Spec.Production{2n, [t(7n), n(0n), t(8n)]},
-    Spec.Production{2n, [t(1n)]} ]
+def not_started():
+  {==}
 
-# a * ( a + a ) + a
-def exprInput() -> +List<Nat>:
-  [1n, 6n, 7n, 1n, 5n, 1n, 8n, 5n, 1n]
+# ======== THE LL(1) PARSER ========
 
-def main() -> +List<Report>:
-  [ report(loopGrammar(), [1n, 2n, 2n, 2n, 3n]),
-    report(choiceGrammar(), [1n, 1n, 2n, 3n]),
-    report(nullGrammar(), [2n, 2n, 1n]),
-    report(optGrammar(), [2n]),
-    report(splitGrammar(), [1n, 1n, 1n]),
-    report(leftGrammar(), [1n, 5n, 1n, 5n, 1n]),
-    report(exprGrammar(), exprInput()) ]
+def exact(m: Maybe<&2, +List<Core.Bsr>>, +tr: Core.Tree) -> Bool:
+  match m:
+    case Some{+set}:
+      Bool.and(Core.allIn(Core.steps([tr], 0n), set), Core.allIn(set, Core.steps([tr], 0n)))
+    case None{}:
+      False{}
+
+def isNone(m: Maybe<&2, +List<Core.Bsr>>) -> Bool:
+  match m:
+    case Some{set}:
+      False{}
+    case None{}:
+      True{}
+
+# S = X a | Y b, X = ε, Y = ε, on b. The plain parser also completes X -> ε at 0 (dead
+# wood); the LL(1) parser starts only S -> Y b, and its set is the tree's steps.
+def empties() -> +List<Core.Production>:
+  [Core.Production{0n, [n(1n), t(1n)]}, Core.Production{0n, [n(2n), t(2n)]}, Core.Production{1n, []}, Core.Production{2n, []}]
+
+def emptiesTree() -> Core.Tree:
+  Core.Node{1n, [Core.Node{3n, []}, Core.Leaf{2n}]}
+
+law ll1_exact:
+  {exact(Pr.ll1Steps(30n, empties(), 0n, [2n]), emptiesTree()) == True{} : Bool}
+
+def ll1_exact():
+  {==}
+
+law plain_dead_wood:
+  {has(Check.checkedSteps(30n, empties(), 0n, [2n]), Core.Bsr{2n, 0n, 0n, 0n, 0n}) == True{} : Bool}
+
+def plain_dead_wood():
+  {==}
+
+# On b, the follow example's LL(1) set is exactly its tree's steps too.
+law ll1_follow_exact:
+  {exact(Pr.ll1Steps(30n, follows(), 0n, [2n]), Core.Node{0n, [Core.Node{2n, []}, Core.Leaf{2n}]}) == True{} : Bool}
+
+def ll1_follow_exact():
+  {==}
+
+# S = a | a is not LL(1): the LL(1) parser gives no answer.
+def twice() -> +List<Core.Production>:
+  [Core.Production{0n, [t(1n)]}, Core.Production{0n, [t(1n)]}]
+
+law not_ll1:
+  {isNone(Pr.ll1Steps(30n, twice(), 0n, [1n])) == True{} : Bool}
+
+def not_ll1():
+  {==}
